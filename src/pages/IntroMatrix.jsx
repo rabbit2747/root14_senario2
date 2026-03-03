@@ -9,6 +9,7 @@ import useMatrixData from '../hooks/useMatrixData';
 import useEduProgress from '../hooks/useEduProgress';
 import { SkipForwardFilled, ChevronLeft, ChevronRight, Close, Education, ArrowRight } from '@carbon/icons-react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import HeroIncidentMatrix from '../components/hero/HeroIncidentMatrix';
 // TacticWidgetTemplate 제거됨 — v0.7.3에서 과정 셀렉터 흐름으로 대체
 const CommunitySection = lazy(() => import('../components/community/CommunitySection'));
 // HeroAnnouncementPreview 제거됨 (유저 요청)
@@ -31,6 +32,26 @@ const hasEduContent = (tid, subs) => {
   return false;
 };
 const FALLBACK_URL = 'https://hw8z3v.csb.app/';
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Full Matrix 택틱 색상 (14 택틱 × 라이트/다크)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const MATRIX_TACTIC_COLORS = {
+  t1:  { hex: '#6366f1', darkHex: '#818cf8', name: 'indigo' },    // Reconnaissance
+  t2:  { hex: '#8b5cf6', darkHex: '#a78bfa', name: 'violet' },    // Resource Development
+  t3:  { hex: '#2563eb', darkHex: '#60a5fa', name: 'blue' },      // Initial Access
+  t4:  { hex: '#f97316', darkHex: '#fb923c', name: 'orange' },    // Execution
+  t5:  { hex: '#059669', darkHex: '#34d399', name: 'emerald' },   // Persistence
+  t6:  { hex: '#7c3aed', darkHex: '#a78bfa', name: 'purple' },    // Privilege Escalation
+  t7:  { hex: '#b45309', darkHex: '#fbbf24', name: 'amber' },     // Defense Evasion
+  t8:  { hex: '#0891b2', darkHex: '#22d3ee', name: 'cyan' },      // Credential Access
+  t9:  { hex: '#0284c7', darkHex: '#38bdf8', name: 'sky' },       // Discovery
+  t10: { hex: '#db2777', darkHex: '#f472b6', name: 'pink' },      // Lateral Movement
+  t11: { hex: '#0d9488', darkHex: '#2dd4bf', name: 'teal' },      // Collection
+  t12: { hex: '#9333ea', darkHex: '#c084fc', name: 'fuchsia' },   // Command & Control
+  t13: { hex: '#65a30d', darkHex: '#a3e635', name: 'lime' },      // Exfiltration
+  t14: { hex: '#dc2626', darkHex: '#f87171', name: 'red' },       // Impact
+};
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // langMapping + attackMatrix → useMatrixData() 훅으로 이동 (DB + fallback)
@@ -136,29 +157,7 @@ const GlobeIcon = () => (
   </svg>
 );
 
-// GOTROOT 히어로 로고 (회전 육각형 + 방패 + 체크)
-const GotrootHeroLogo = () => (
-  <svg viewBox="0 0 160 160" width="110" height="110" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="80,6 142,42 142,118 80,154 18,118 18,42"
-      fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="1.2"
-      style={{ animation: 'heroHexSpin 14s linear infinite', transformOrigin: '80px 80px' }} />
-    <polygon points="80,14 134,46 134,114 80,146 26,114 26,46"
-      fill="none" stroke="rgba(0,255,65,0.15)" strokeWidth="0.8"
-      style={{ animation: 'heroHexSpin 9s linear infinite reverse', transformOrigin: '80px 80px' }} />
-    <circle cx="80" cy="80" r="62" fill="none" stroke="rgba(0,255,65,0.2)" strokeWidth="1"
-      strokeDasharray="6 4"
-      style={{ animation: 'heroHexSpin 22s linear infinite', transformOrigin: '80px 80px' }} />
-    <circle cx="80" cy="80" r="52" fill="rgba(0,255,65,0.03)" />
-    <path d="M80 34 L108 46 L108 76 C108 96 95 110 80 120 C65 110 52 96 52 76 L52 46 Z"
-      fill="rgba(0,255,65,0.06)" stroke="#00ff41" strokeWidth="2.2" strokeLinejoin="round" />
-    <polyline points="66,80 76,91 96,68"
-      fill="none" stroke="#00ff41" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-    {[0, 60, 120, 180, 240, 300].map((deg, i) => {
-      const r = (deg * Math.PI) / 180;
-      return <circle key={i} cx={80 + 68 * Math.cos(r)} cy={80 + 68 * Math.sin(r)} r="2.5" fill="rgba(0,255,65,0.45)" />;
-    })}
-  </svg>
-);
+// GotrootHeroLogo 제거됨 — v0.7.5에서 HeroIncidentMatrix로 대체
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 메인 컴포넌트
@@ -176,7 +175,6 @@ export default function UltimateCinematicMatrix() {
   const [heroPhase, setHeroPhase] = useState(() => {
     return localStorage.getItem('gotroot_intro_seen') === 'true' ? 'done' : 'entering';
   });
-  const matrixCanvasRef = useRef(null);
   const matrixGridRef = useRef(null);
 
   // ── 네비게이션 상태 보존 키 ──
@@ -337,32 +335,7 @@ export default function UltimateCinematicMatrix() {
     };
   }, [clickCounts]);
 
-  // ── Canvas 매트릭스 레인 (히어로 배경) ──
-  useEffect(() => {
-    if (heroPhase === 'done') return;
-    const canvas = matrixCanvasRef.current;
-    if (!canvas) return;
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const ctx   = canvas.getContext('2d');
-    const cols  = Math.floor(canvas.width / 18);
-    const drops = Array.from({ length: cols }, () => Math.random() * -50);
-    const chars = 'GOTROOT01アイウ가나다ABCDEF@#%▓░';
-    const draw = () => {
-      ctx.fillStyle = 'rgba(10,10,15,0.04)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      drops.forEach((y, i) => {
-        const char  = chars[Math.floor(Math.random() * chars.length)];
-        const alpha = Math.random() * 0.22 + 0.04;
-        ctx.fillStyle = `rgba(0,255,65,${alpha})`;
-        ctx.font = '13px monospace';
-        ctx.fillText(char, i * 18, y * 16);
-        drops[i] = y > canvas.height / 16 + 8 ? Math.random() * -30 : y + 0.5;
-      });
-    };
-    const interval = setInterval(draw, 48);
-    return () => clearInterval(interval);
-  }, [heroPhase]);
+  // Canvas 매트릭스 레인 제거됨 — v0.7.5에서 HeroIncidentMatrix로 대체
 
   // ── 클릭 카운트 로드 (localStorage + Supabase access_logs) ──
   useEffect(() => {
@@ -565,135 +538,7 @@ export default function UltimateCinematicMatrix() {
       onClick={() => {}}
     >
       <style dangerouslySetInnerHTML={{ __html: `
-        /* ── 히어로 애니메이션 ── */
-        @keyframes heroHexSpin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes heroFadeIn {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes heroSlideUp {
-          from { transform: translateY(0); }
-          to   { transform: translateY(-100%); }
-        }
-        .hero-content-in {
-          animation: heroFadeIn 0.55s ease forwards;
-          opacity: 0;
-        }
-        .hero-content-in.delay-1 { animation-delay: 0.15s; }
-        .hero-content-in.delay-2 { animation-delay: 0.35s; }
-        .hero-content-in.delay-3 { animation-delay: 0.55s; }
-        .hero-content-in.delay-4 { animation-delay: 0.75s; }
-        .hero-content-in.delay-5 { animation-delay: 0.95s; }
-        /* 언어 버튼 */
-        .hero-lang-btn {
-          display: inline-flex; align-items: center; gap: 5px;
-          padding: 6px 12px; border-radius: 8px; cursor: pointer;
-          font-size: 12px; font-family: 'Paperlogy', sans-serif; font-weight: 500; letter-spacing: 0.05em;
-          border: 1px solid rgba(0,255,65,0.15);
-          background: transparent; color: rgba(224,225,221,0.5);
-          transition: all 0.15s ease;
-        }
-        .hero-lang-btn:hover {
-          border-color: rgba(0,255,65,0.5);
-          color: #00ff41;
-          background: rgba(0,255,65,0.05);
-        }
-        .hero-lang-btn.active {
-          border-color: #00ff41;
-          color: #00ff41;
-          background: rgba(0,255,65,0.08);
-          box-shadow: 0 0 10px rgba(0,255,65,0.15);
-        }
-        /* 진입 버튼 */
-        .enter-btn {
-          font-family: var(--font-mono, 'Courier New'), monospace; font-weight: 900;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          padding: clamp(14px, 2vw, 20px) clamp(40px, 6vw, 64px);
-          border-radius: 6px; cursor: pointer;
-          border: 2px solid #00ff41; color: #00ff41;
-          background: transparent;
-          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          font-size: clamp(0.8rem, 1.5vw, 1rem);
-        }
-        .enter-btn:hover {
-          background: #00ff41; color: #0d1b2a;
-          box-shadow: 0 0 24px rgba(0,255,65,0.35), 0 0 60px rgba(0,255,65,0.1);
-          transform: translateY(-1px);
-        }
-        .enter-btn:active { transform: translateY(0); }
-        /* ── 히어로 Paperlogy 타이포그래피 ── */
-        .hero-tagline {
-          font-family: 'Paperlogy', sans-serif;
-          font-weight: 800;
-          font-size: clamp(1.25rem, 3.5vw, 2rem);
-          line-height: 1.4;
-          letter-spacing: -0.01em;
-          color: #e0e1dd;
-          text-shadow: 0 0 40px rgba(0,255,65,0.08);
-        }
-        .hero-brand-sub {
-          font-family: 'Paperlogy', sans-serif;
-          font-weight: 500;
-          font-size: clamp(10px, 1.5vw, 13px);
-          letter-spacing: 0.25em;
-          color: rgba(0,255,65,0.65);
-          text-transform: uppercase;
-        }
-        .hero-slogan {
-          font-family: var(--font-mono, 'Courier New'), monospace;
-          font-size: clamp(8px, 1vw, 10px);
-          letter-spacing: 0.28em;
-          color: rgba(0,255,65,0.35);
-          text-transform: uppercase;
-        }
-        .hero-login-btn {
-          font-family: 'Paperlogy', sans-serif;
-          font-weight: 500;
-          font-size: 11px;
-          letter-spacing: 0.1em;
-          color: rgba(224,225,221,0.5);
-          background: transparent;
-          border: 1px solid rgba(224,225,221,0.15);
-          padding: 8px 22px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.25s ease;
-        }
-        .hero-login-btn:hover {
-          border-color: rgba(0,255,65,0.5);
-          color: #00ff41;
-          background: rgba(0,255,65,0.04);
-        }
-        .hero-link {
-          font-family: var(--font-mono, 'Courier New'), monospace;
-          font-size: 9px;
-          letter-spacing: 0.2em;
-          color: rgba(224,225,221,0.25);
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-        .hero-link:hover { color: rgba(0,255,65,0.6); }
-        .hero-skip-btn {
-          position: absolute; top: clamp(18px, 3vw, 28px); right: clamp(18px, 3vw, 28px);
-          font-family: 'Paperlogy', sans-serif;
-          font-weight: 500;
-          font-size: 10px;
-          letter-spacing: 0.15em;
-          color: rgba(224,225,221,0.35);
-          border: 1px solid rgba(224,225,221,0.12);
-          background: transparent;
-          padding: 6px 14px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .hero-skip-btn:hover {
-          color: #00ff41;
-          border-color: rgba(0,255,65,0.5);
-        }
+        /* 히어로 CSS 제거됨 — HeroIncidentMatrix에서 framer-motion + Tailwind 사용 */
         /* 매트릭스 카드 */
         .matrix-tech-card {
           transition: border-color .12s, box-shadow .12s, transform .12s;
@@ -779,10 +624,9 @@ export default function UltimateCinematicMatrix() {
         .dm-root .dm-header { background: #0d1b2a !important; border-color: #415a77 !important; }
         .dm-tactic { cursor: default !important; user-select: none; pointer-events: none; }
         .dm-tactic h3, .dm-tactic p { cursor: default !important; pointer-events: none; }
-        .dm-root .dm-tactic { background: rgba(65,90,119,0.08) !important; border-color: rgba(65,90,119,0.3) !important; }
         .dm-root .dm-tactic h3 { color: #e0e1dd !important; }
-        .dm-root .dm-tactic p { color: #64748b !important; }
-        .dm-root .matrix-tech-card { background: #0d1b2a !important; border-color: #415a77 !important; }
+        .dm-root .dm-tactic p { color: #94a3b8 !important; }
+        .dm-root .matrix-tech-card { background: #0d1b2a !important; }
         .dm-root .matrix-tech-card:hover { border-color: #00ff41 !important; }
         .dm-root .tech-name-area { background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) !important; border-bottom-color: rgba(71,85,105,0.4) !important; }
         .dm-root .tech-name-critical .tech-name-area { background: linear-gradient(135deg, rgba(220,38,38,0.12), rgba(220,38,38,0.04)) !important; }
@@ -1004,107 +848,19 @@ export default function UltimateCinematicMatrix() {
       `}} />
 
       {/* ══════════════════════════════════════
-          GOTROOT 히어로 (언어 선택 & 진입)
+          MITRE ATT&CK 사고 매트릭스 히어로 (v0.7.5)
       ══════════════════════════════════════ */}
       {heroPhase !== 'done' && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden"
-          style={{
-            background: '#0d1b2a',
-            transform:  heroPhase === 'sliding' ? 'translateY(-100%)' : 'translateY(0)',
-            transition: heroPhase === 'sliding' ? 'transform 0.65s cubic-bezier(0.55, 0, 0.1, 1)' : 'none',
-          }}
-        >
-          {/* 매트릭스 레인 (캔버스 배경) */}
-          <canvas ref={matrixCanvasRef} className="absolute inset-0 pointer-events-none" style={{ opacity: 0.6 }} />
-
-          {/* 히어로 콘텐츠 */}
-          <div className="relative z-10 flex flex-col items-center text-center select-none" style={{ maxWidth: 'clamp(340px, 70vw, 680px)', padding: 'clamp(20px, 4vw, 40px)' }}>
-
-            {/* 로고 이미지 */}
-            <div className="hero-content-in delay-1" style={{ marginBottom: 'clamp(16px, 3vw, 32px)', filter: 'drop-shadow(0 0 24px rgba(0,255,65,0.3))' }}>
-              <img
-                src="/logo/logo-name-white.png"
-                alt="GOTROOT"
-                style={{ width: 'clamp(180px, 35vw, 360px)', height: 'auto', objectFit: 'contain' }}
-                draggable={false}
-              />
-            </div>
-
-            {/* 서브텍스트 */}
-            <div className="hero-content-in delay-2" style={{ marginBottom: 'clamp(20px, 3.5vw, 36px)' }}>
-              <p className="hero-brand-sub">{t.brandSub}</p>
-            </div>
-
-            {/* ── 언어 선택기 ── */}
-            <div className="hero-content-in delay-3" style={{ display: 'flex', gap: 'clamp(6px, 1vw, 10px)', flexWrap: 'wrap', justifyContent: 'center', marginBottom: 'clamp(20px, 3.5vw, 36px)' }}>
-              {langOptions.map(opt => (
-                <button
-                  key={opt.code}
-                  onClick={() => { storeLang(opt.code); setLanguage(opt.code); }}
-                  className={`hero-lang-btn ${language === opt.code ? 'active' : ''}`}
-                >
-                  <span style={{ fontSize: 15, lineHeight: 1 }}>{opt.flag}</span>
-                  <span>{opt.code.toUpperCase()}</span>
-                  {language === opt.code && (
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#00ff41', display: 'inline-block' }} />
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* 구분선 */}
-            <div className="hero-content-in delay-3" style={{ width: '80%', maxWidth: 400, height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.25), transparent)', marginBottom: 'clamp(16px, 2.5vw, 28px)' }} />
-
-            {/* Tagline (언어 변경 시 즉시 업데이트) */}
-            <div className="hero-content-in delay-4" style={{ marginBottom: 'clamp(6px, 1.5vw, 14px)' }}>
-              <p className="hero-tagline">{t.tagline}</p>
-            </div>
-
-            {/* 회사 슬로건 */}
-            <div className="hero-content-in delay-4" style={{ marginBottom: 'clamp(12px, 2vw, 20px)' }}>
-              <p className="hero-slogan">— Free Hacker Culture —</p>
-            </div>
-
-            {/* ENTER MATRIX 버튼 + 로그인 안내 */}
-            <div className="hero-content-in delay-5" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(10px, 2vw, 18px)' }}>
-              <button onClick={enterMatrix} className="enter-btn">
-                {t.enterMatrix} <ArrowRight size={16} className="inline" />
-              </button>
-              {!isLoggedIn && (
-                <button
-                  onClick={() => navigate('/login')}
-                  className="hero-login-btn"
-                >
-                  {language === 'ko' ? '로그인 / 회원가입' : language === 'zh' ? '登录 / 注册' : language === 'hi' ? 'लॉगिन / रजिस्टर' : language === 'ja' ? 'ログイン / 登録' : 'LOGIN / REGISTER'}
-                </button>
-              )}
-              <a
-                href="https://gotroot.co.kr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hero-link"
-              >
-                gotroot.co.kr ↗
-              </a>
-            </div>
-          </div>
-
-          {/* SKIP 버튼 */}
-          <button onClick={skipHero} className="hero-skip-btn">
-            {t.skip} <SkipForwardFilled size={16} className="inline" />
-          </button>
-
-          {/* 코너 장식선 */}
-          {[
-            { top:'clamp(10px, 2vw, 18px)', left:'clamp(10px, 2vw, 18px)',   borderTop:'1px solid rgba(0,255,65,0.2)', borderLeft:'1px solid rgba(0,255,65,0.2)' },
-            { top:'clamp(10px, 2vw, 18px)', right:'clamp(10px, 2vw, 18px)',  borderTop:'1px solid rgba(0,255,65,0.2)', borderRight:'1px solid rgba(0,255,65,0.2)' },
-            { bottom:'clamp(10px, 2vw, 18px)', left:'clamp(10px, 2vw, 18px)',  borderBottom:'1px solid rgba(0,255,65,0.2)', borderLeft:'1px solid rgba(0,255,65,0.2)' },
-            { bottom:'clamp(10px, 2vw, 18px)', right:'clamp(10px, 2vw, 18px)', borderBottom:'1px solid rgba(0,255,65,0.2)', borderRight:'1px solid rgba(0,255,65,0.2)' },
-          ].map((s, i) => (
-            <div key={i} style={{ position:'absolute', width:'clamp(20px, 3.5vw, 34px)', height:'clamp(20px, 3.5vw, 34px)', ...s }} />
-          ))}
-        </div>
+        <HeroIncidentMatrix
+          heroPhase={heroPhase}
+          enterMatrix={enterMatrix}
+          skipHero={skipHero}
+          language={language}
+          setLanguage={setLanguage}
+          langOptions={langOptions}
+          isLoggedIn={isLoggedIn}
+          navigate={navigate}
+        />
       )}
 
       {/* ══════════════════════════════════════
@@ -1131,6 +887,12 @@ export default function UltimateCinematicMatrix() {
             </a>
             {/* 글로벌 내비 아이콘 */}
             <div className="flex items-center gap-1.5">
+              <span
+                onClick={() => { setHeroPhase('entering'); localStorage.removeItem('gotroot_intro_seen'); window.scrollTo({ top: 0 }); }}
+                className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none transition-colors border-violet-300 text-violet-500 bg-violet-50/50 hover:text-violet-700 hover:border-violet-400"
+                title={language === 'ko' ? '인트로 히어로 보기' : 'View Intro'}>
+                🎬 <span className="dm-mobile-hide">INTRO</span>
+              </span>
               <span
                 onClick={() => setViewMode(v => v === 'dashboard' ? 'matrix' : 'dashboard')}
                 className={`px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none transition-colors ${
@@ -1266,7 +1028,7 @@ export default function UltimateCinematicMatrix() {
                   {t.authenticated}
                 </span>
                 <button
-                  onClick={() => { logout(); localStorage.removeItem('gotroot_intro_seen'); navigate('/'); }}
+                  onClick={() => { logout(); localStorage.removeItem('gotroot_intro_seen'); setHeroPhase('entering'); navigate('/'); }}
                   className="text-[10px] border px-2 py-1 rounded hover:border-red-400 hover:text-red-400 transition-colors whitespace-nowrap text-slate-400 border-slate-200"
                   title={t.logout}>
                   <span className="dm-mobile-hide">{t.logout}</span><span className="dm-mobile-only">↩</span>
@@ -1361,23 +1123,38 @@ export default function UltimateCinematicMatrix() {
               style={{ gridTemplateColumns: selectedTactic ? 'repeat(1, 1fr)' : 'repeat(14, 1fr)' }}>
             {(selectedTactic ? attackMatrix.filter(t => t.id === selectedTactic) : attackMatrix).map((tactic, tacticIdx) => (
               <div key={tactic.id} className={`flex flex-col gap-2 ${!selectedTactic && tacticIdx % 2 === 1 ? (dm ? 'bg-white/[0.02] rounded-lg p-1' : 'bg-slate-50/80 rounded-lg p-1') : ''}`}>
-                {/* 전술 헤더 */}
-                <div onClick={() => { setSelectedTactic(prev => { const next = prev === tactic.id ? null : tactic.id; if (next && window.innerWidth > 768) setSidebarOpen(true); if (next && window.innerWidth <= 768) { setTimeout(() => { matrixGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100); } return next; }); }} className={`dm-tactic border-t-4 ${selectedTactic ? 'p-4' : 'p-2.5'} text-center cursor-pointer select-none transition-all duration-200 hover:opacity-90 ${selectedTactic === tactic.id ? (dm ? 'bg-emerald-900/30 border-emerald-500 ring-2 ring-emerald-500/30' : 'bg-emerald-800 border-emerald-500 ring-2 ring-emerald-400/40') : (dm ? 'bg-[rgba(65,90,119,0.08)] border-slate-500' : 'bg-[#0d1b2a] border-[#0d1b2a]')}`}>
-                  <h3 className={`${selectedTactic ? 'text-[18px]' : 'text-[14px]'} font-black uppercase break-words leading-tight cursor-pointer ${dm ? 'text-slate-300' : 'text-white'}`}>
-                    {getTacticTitle(tactic.title)}
-                  </h3>
-                  {language !== 'en' && (
-                    <p className={`${selectedTactic ? 'text-[12px] mt-1' : 'text-[10px] mt-0.5'} break-words leading-tight ${dm ? 'text-slate-500' : 'text-slate-400'}`}>
-                      {tactic.title}
-                    </p>
-                  )}
-                  {/* 모바일: 탭 힌트 (풀매트릭스에서만) */}
-                  {!selectedTactic && (
-                    <p className="dm-mobile-only text-[8px] mt-1 opacity-60" style={{ color: '#94a3b8' }}>
-                      TAP ▸ {tactic.techniques.length} techniques
-                    </p>
-                  )}
-                </div>
+                {/* 전술 헤더 (택틱별 고유 색상) */}
+                {(() => {
+                  const tc = MATRIX_TACTIC_COLORS[tactic.id] || { hex: '#0d1b2a', darkHex: '#475569' };
+                  const isSelected = selectedTactic === tactic.id;
+                  return (
+                    <div
+                      onClick={() => { setSelectedTactic(prev => { const next = prev === tactic.id ? null : tactic.id; if (next && window.innerWidth > 768) setSidebarOpen(true); if (next && window.innerWidth <= 768) { setTimeout(() => { matrixGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100); } return next; }); }}
+                      className={`dm-tactic rounded-t-lg ${selectedTactic ? 'p-4' : 'p-2.5'} text-center cursor-pointer select-none transition-all duration-200 hover:opacity-90 ${isSelected ? 'ring-2 ring-white/30 shadow-lg' : ''}`}
+                      style={{
+                        background: dm
+                          ? isSelected ? tc.darkHex : `${tc.darkHex}22`
+                          : isSelected ? tc.hex : tc.hex,
+                        borderTop: `4px solid ${dm ? tc.darkHex : tc.hex}`,
+                      }}
+                    >
+                      <h3 className={`${selectedTactic ? 'text-[18px]' : 'text-[14px]'} font-black uppercase break-words leading-tight cursor-pointer ${dm ? (isSelected ? 'text-white' : 'text-slate-300') : 'text-white'}`}>
+                        {getTacticTitle(tactic.title)}
+                      </h3>
+                      {language !== 'en' && (
+                        <p className={`${selectedTactic ? 'text-[12px] mt-1' : 'text-[10px] mt-0.5'} break-words leading-tight ${dm ? 'text-slate-400' : 'text-white/70'}`}>
+                          {tactic.title}
+                        </p>
+                      )}
+                      {/* 모바일: 탭 힌트 (풀매트릭스에서만) */}
+                      {!selectedTactic && (
+                        <p className="dm-mobile-only text-[8px] mt-1 text-white/60">
+                          TAP ▸ {tactic.techniques.length} techniques
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
                 {/* 기법 카드 */}
                 <div className={`matrix-tech-cards-wrap flex flex-col ${selectedTactic ? 'gap-3' : 'gap-2'}`}>
                   {tactic.techniques.map((tech, idx) => {
@@ -1408,8 +1185,14 @@ export default function UltimateCinematicMatrix() {
                         onMouseEnter={e => handleMouseEnter(e, tech.name, tech.tid)}
                         onMouseMove={handleMouseMove}
                         onMouseLeave={handleMouseLeave}
-                        className={`matrix-tech-card border rounded overflow-hidden ${selectedTactic ? 'p-4' : 'p-2.5'} cursor-pointer relative ${dm ? 'bg-[#0d1b2a]' : 'bg-white'} ${matched ? 'opacity-100' : 'opacity-20 grayscale'} ${matched && searchTerm ? 'search-matched' : ''} ${isTop5 ? 'matrix-tech-popular' : ''} ${isTop3 ? 'matrix-tech-top3' : ''} ${tech.isCritical ? 'tech-name-critical' : ''} ${isCompleted ? 'matrix-tech-completed' : ''}`}
-                        style={{ borderColor: isCompleted ? undefined : isTop5 ? undefined : dm ? 'rgba(65,90,119,1)' : 'rgba(224,225,221,1)' }}
+                        className={`matrix-tech-card border rounded-lg overflow-hidden ${selectedTactic ? 'p-4' : 'p-2.5'} cursor-pointer relative ${dm ? 'bg-[#0d1b2a]' : 'bg-white'} ${matched ? 'opacity-100' : 'opacity-20 grayscale'} ${matched && searchTerm ? 'search-matched' : ''} ${isTop5 ? 'matrix-tech-popular' : ''} ${isTop3 ? 'matrix-tech-top3' : ''} ${tech.isCritical ? 'tech-name-critical' : ''} ${isCompleted ? 'matrix-tech-completed' : ''}`}
+                        style={{
+                          borderColor: isCompleted ? undefined : isTop5 ? undefined : dm ? 'rgba(65,90,119,0.5)' : 'rgba(224,225,221,1)',
+                          borderLeftWidth: 3,
+                          borderLeftColor: dm
+                            ? (MATRIX_TACTIC_COLORS[tactic.id]?.darkHex || '#475569')
+                            : (MATRIX_TACTIC_COLORS[tactic.id]?.hex || '#0d1b2a'),
+                        }}
                       >
                         {/* 순위 뱃지 (top3) 또는 HOT 뱃지 (top4-5) */}
                         {rankEmoji && (
@@ -1476,8 +1259,9 @@ export default function UltimateCinematicMatrix() {
                                 onMouseMove={handleMouseMove}
                                 onMouseLeave={handleMouseLeave}
                                 className={`matrix-sub-item ${selectedTactic ? 'text-[13px]' : 'text-[9px]'} truncate cursor-pointer`}
+                                style={{ borderLeftColor: dm ? (MATRIX_TACTIC_COLORS[tactic.id]?.darkHex || '#475569') + '60' : (MATRIX_TACTIC_COLORS[tactic.id]?.hex || '#0d1b2a') + '30' }}
                               >
-                                ↳ {sub.name} <span className={`font-mono ${selectedTactic ? 'text-[10px]' : 'text-[7px]'} ${dm ? 'text-cyan-500/50' : 'text-cyan-700/40'}`}>{sub.sid}</span>
+                                <span style={{ color: dm ? MATRIX_TACTIC_COLORS[tactic.id]?.darkHex : MATRIX_TACTIC_COLORS[tactic.id]?.hex, opacity: 0.7 }}>↳</span> {sub.name} <span className={`font-mono ${selectedTactic ? 'text-[10px]' : 'text-[7px]'} ${dm ? 'text-cyan-500/50' : 'text-cyan-700/40'}`}>{sub.sid}</span>
                               </div>
                             ))}
                           </div>

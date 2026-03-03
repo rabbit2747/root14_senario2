@@ -9,7 +9,6 @@ const IntroMatrix    = lazy(() => import('./pages/IntroMatrix'));
 const Login          = lazy(() => import('./pages/Login'));
 const Signup         = lazy(() => import('./pages/Signup'));
 const LabT1078       = lazy(() => import('./pages/lab/LabT1078'));
-const MatrixShowcase = lazy(() => import('./pages/MatrixShowcase'));
 const MyPage         = lazy(() => import('./pages/MyPage'));
 const AdminPage      = lazy(() => import('./pages/admin/AdminPage'));
 const Announcements  = lazy(() => import('./pages/Announcements'));
@@ -82,7 +81,6 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/lab/t1078" element={<LabT1078 />} />
-            <Route path="/showcase" element={<MatrixShowcase />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/announcements" element={<Announcements />} />

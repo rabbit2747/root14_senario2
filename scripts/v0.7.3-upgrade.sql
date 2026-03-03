@@ -6,9 +6,7 @@
 -- ──────────────────────────────────
 -- 1) edu_progress 관리자 RLS 정책
 --    관리자가 전체 교육 진행률을 조회 가능
---    ⚠️ 이미 존재하면 DROP 후 재생성
 -- ──────────────────────────────────
-DROP POLICY IF EXISTS "Admins can view all progress" ON edu_progress;
 CREATE POLICY "Admins can view all progress"
   ON edu_progress FOR SELECT
   USING (

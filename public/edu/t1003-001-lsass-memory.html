@@ -22,7 +22,7 @@
         .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}
         .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
         ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}
-        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
+        .drag-item{cursor:grab;user-select:none;touch-action:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
         .drag-item.dragging{opacity:0.5;transform:scale(0.95);}
         .drop-zone.drag-over{border:2px dashed #9DD9D2;background:rgba(157,217,210,0.1);}
         .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
@@ -600,6 +600,9 @@
         function initOrderGame_1(){
             currentOrder_1=shuffleArray(orderItems_1.slice());
             renderOrderGame_1();
+            addTouchDragSupport(document.getElementById('order-game-1'), function(fromIdx, toIdx){
+                var temp=currentOrder_1[fromIdx]; currentOrder_1[fromIdx]=currentOrder_1[toIdx]; currentOrder_1[toIdx]=temp; renderOrderGame_1();
+            });
             var r=document.getElementById('order-result-1');
             r.classList.add('hidden');
         }
@@ -625,6 +628,60 @@
                     if(fromIdx!==toIdx){var temp=currentOrder_1[fromIdx];currentOrder_1[fromIdx]=currentOrder_1[toIdx];currentOrder_1[toIdx]=temp;renderOrderGame_1();}
                 });
                 container.appendChild(card);
+            });
+        }
+
+        /* ── 모바일 터치 드래그 지원 ── */
+        function addTouchDragSupport(container, swapFn) {
+            if (container._touchDragAttached) return;
+            container._touchDragAttached = true;
+            var dragIdx = -1, dragEl = null, dragClone = null, initRect = null;
+
+            container.addEventListener('touchstart', function(e) {
+                var item = e.target.closest('.drag-item');
+                if (!item) return;
+                e.preventDefault();
+                dragIdx = parseInt(item.getAttribute('data-idx'));
+                dragEl = item;
+                initRect = item.getBoundingClientRect();
+                item.style.opacity = '0.5';
+                item.style.transform = 'scale(0.95)';
+                dragClone = item.cloneNode(true);
+                dragClone.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;opacity:0.9;transform:scale(1.05);box-shadow:0 8px 24px rgba(0,0,0,0.3);width:'+item.offsetWidth+'px;left:'+initRect.left+'px;top:'+initRect.top+'px;';
+                document.body.appendChild(dragClone);
+            }, { passive: false });
+
+            container.addEventListener('touchmove', function(e) {
+                if (dragIdx < 0 || !dragClone) return;
+                e.preventDefault();
+                var touch = e.touches[0];
+                var dx = touch.clientX - (initRect.left + initRect.width / 2);
+                var dy = touch.clientY - (initRect.top + initRect.height / 2);
+                dragClone.style.left = (initRect.left + dx) + 'px';
+                dragClone.style.top = (initRect.top + dy) + 'px';
+                dragClone.style.display = 'none';
+                var el = document.elementFromPoint(touch.clientX, touch.clientY);
+                dragClone.style.display = '';
+                container.querySelectorAll('.drag-item').forEach(function(c){ c.classList.remove('drop-zone','drag-over'); });
+                if (el) { var t = el.closest('.drag-item'); if (t && t !== dragEl) t.classList.add('drop-zone','drag-over'); }
+            }, { passive: false });
+
+            container.addEventListener('touchend', function(e) {
+                if (dragIdx < 0) return;
+                var ct = e.changedTouches[0];
+                if (dragClone) { dragClone.style.display = 'none'; }
+                var el = document.elementFromPoint(ct.clientX, ct.clientY);
+                if (dragClone) { dragClone.remove(); dragClone = null; }
+                if (el) {
+                    var t = el.closest('.drag-item');
+                    if (t && t !== dragEl) {
+                        var toIdx = parseInt(t.getAttribute('data-idx'));
+                        if (dragIdx !== toIdx) swapFn(dragIdx, toIdx);
+                    }
+                }
+                if (dragEl) { dragEl.style.opacity = ''; dragEl.style.transform = ''; }
+                container.querySelectorAll('.drag-item').forEach(function(c){ c.classList.remove('drop-zone','drag-over'); });
+                dragIdx = -1; dragEl = null; initRect = null;
             });
         }
 
