@@ -462,7 +462,7 @@
         },
         "intermediate": {
           "url": "/edu/t1587-001-malware-intermediate.html",
-          "chapters": 11,
+          "chapters": 12,
           "chapterTitles": [
             "프로세스 인젝션",
             "메모리 내 코드 실행",
@@ -474,6 +474,7 @@
             "지속성 확보",
             "AMSI 우회",
             "탐지 로그 분석",
+            "실전 활용 가이드",
             "종합 퀴즈"
           ],
           "estimatedMinutes": 55,
@@ -488,12 +489,13 @@
             "i-ch8",
             "i-ch9",
             "i-ch10",
+            "i-ch11",
             "i-quiz"
           ]
         },
         "advanced": {
           "url": "/edu/t1587-001-malware-advanced.html",
-          "chapters": 11,
+          "chapters": 12,
           "chapterTitles": [
             "커널 vs 유저 모드",
             "API 호출 체인",
@@ -505,6 +507,7 @@
             "커널 방어 우회",
             "PPL 우회",
             "EDR Bypass 종합",
+            "실전 활용과 자기주도 학습 가이드",
             "종합 평가"
           ],
           "estimatedMinutes": 70,
@@ -519,6 +522,7 @@
             "a-ch8",
             "a-ch9",
             "a-ch10",
+            "a-ch11",
             "a-eval"
           ]
         }
