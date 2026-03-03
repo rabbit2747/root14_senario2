@@ -1,0 +1,172 @@
+{
+  "id": "T1587.003",
+  "title": "디지털 인증서 개발 시뮬레이션",
+  "titleEn": "Develop Digital Certificates Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 인증서 생성", "labelEn": "🔍 Certificate Creation", "steps": [0, 1] },
+    { "label": "⚡ 인프라 배포", "labelEn": "⚡ Infrastructure Deployment", "steps": [2, 3] },
+    { "label": "✅ 운영 테스트", "labelEn": "✅ Operations Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "le", "label": "Let's Encrypt", "x": 180, "y": 30 },
+    { "id": "c2", "label": "C2 Server", "x": 320, "y": 30 },
+    { "id": "phish", "label": "Phishing Site", "x": 320, "y": 90 },
+    { "id": "victim", "label": "Victim", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "le", "minStep": 0 },
+    { "from": "le", "to": "c2", "minStep": 1 },
+    { "from": "le", "to": "phish", "minStep": 2 },
+    { "from": "victim", "to": "phish", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "cert_gen.sh", "icon": "📜", "alert": true },
+    { "name": "fullchain.pem", "icon": "🔐" },
+    { "name": "phishing_kit", "icon": "🌐", "alert": true }
+  ],
+  "steps": [
+    {
+      "cmd": "openssl req -x509 -newkey rsa:4096 -sha256 -days 365 -nodes \\\n  -keyout /opt/c2/privkey.pem -out /opt/c2/cert.pem \\\n  -subj \"/CN=cdn-telemetry[.]com/O=CloudMetrics Inc/C=US\" \\\n  -addext \"subjectAltName=DNS:cdn-telemetry[.]com,DNS:*.cdn-telemetry[.]com\" \\\n  -addext \"keyUsage=digitalSignature,keyEncipherment\" \\\n  -addext \"extendedKeyUsage=serverAuth\"",
+      "out": "Generating a RSA private key\n...........++++\n.........................................................................................++++\nwriting new private key to '/opt/c2/privkey.pem'\n-----\n\n[+] Self-signed certificate created:\n  Subject: CN=cdn-telemetry[.]com, O=CloudMetrics Inc, C=US\n  Issuer:  CN=cdn-telemetry[.]com (self-signed)\n  Valid:   2026-03-01 ~ 2027-03-01\n  Key:     RSA 4096-bit\n  Hash:    SHA-256\n  SAN:     *.cdn-telemetry[.]com (wildcard)\n\n$ openssl x509 -in /opt/c2/cert.pem -noout -fingerprint -sha256\nSHA256 Fingerprint=A1:B2:C3:D4:E5:F6:...\n\n[+] Private key: /opt/c2/privkey.pem\n[+] Certificate: /opt/c2/cert.pem\n[!] Self-signed — browser will show warning, but C2 implant doesn't check",
+      "def": "[TLS Inspector] Self-signed certificate detected on internal network — CN mimics legitimate CDN service",
+      "defAction": "Source: Network TLS inspection\nTarget: cdn-telemetry[.]com (self-signed)\nAction: Certificate flagged for review, connection blocked at proxy",
+      "desc": "자체 서명 SSL 인증서를 생성하여 C2 내부 통신을 암호화합니다.",
+      "descEn": "Creating self-signed SSL certificate to encrypt internal C2 communications.",
+      "stepTitle": "자체 서명 인증서 생성",
+      "stepTitleEn": "Self-Signed Certificate Creation",
+      "feynman": "자신만의 도장을 직접 만드는 것입니다. OpenSSL로 CDN 서비스처럼 보이는 인증서를 생성합니다. 이 인증서는 공인 인증을 받지 않아서 브라우저에서는 경고가 나오지만, C2 임플란트는 인증서 검증을 하지 않으므로 문제없이 사용할 수 있습니다.",
+      "feynmanEn": "Like carving your own personal seal. Creating a certificate with OpenSSL that looks like a CDN service. This certificate isn't publicly recognized so browsers show warnings, but C2 implants don't verify certificates, so it works fine.",
+      "expert": "자체 서명 인증서의 O(Organization) 필드를 합법적인 회사명으로 설정하면 TLS 검사 시 정상으로 오인할 수 있습니다. Wildcard SAN(*.cdn-telemetry.com)으로 서브도메인별 인증서 발급 없이 여러 서버에 사용 가능합니다.",
+      "expertEn": "Setting the O (Organization) field to a legitimate company name can deceive TLS inspectors. Wildcard SAN (*.cdn-telemetry.com) allows using one certificate across multiple subdomains without separate issuance.",
+      "defTooltip": "🔗 TLS 검사: CDN으로 위장한 자체 서명 인증서 탐지",
+      "defTooltipEn": "🔗 TLS Inspector: Self-signed certificate mimicking CDN detected",
+      "hackerLog": {
+        "title": "self_signed.log",
+        "lines": [
+          { "log": "CN: cdn-telemetry[.]com", "desc": "💡 CDN 서비스로 위장한 도메인" },
+          { "log": "Key: RSA 4096-bit", "desc": "💡 강력한 암호화 키 사용" },
+          { "log": "SAN: *.cdn-telemetry[.]com (wildcard)", "desc": "💡 와일드카드로 모든 서브도메인 커버" }
+        ]
+      },
+      "terms": [
+        { "name": "Self-signed Certificate", "desc": "CA의 서명 없이 자체적으로 생성한 인증서. 브라우저에서 경고를 표시하지만 암호화는 동일합니다." },
+        { "name": "SAN", "desc": "Subject Alternative Name. 하나의 인증서에 여러 도메인을 포함하는 X.509 확장." }
+      ]
+    },
+    {
+      "cmd": "certbot certonly --standalone -d secure-login-portal[.]com -d mail-secure-login-portal[.]com --non-interactive --agree-tos --email noreply@protonmail.com && cat /etc/letsencrypt/live/secure-login-portal[.]com/fullchain.pem | openssl x509 -noout -subject -issuer -dates",
+      "out": "Saving debug log to /var/log/letsencrypt/letsencrypt.log\nAccount registered.\nRequesting a certificate for secure-login-portal[.]com and mail-secure-login-portal[.]com\n\nSuccessfully received certificate.\nCertificate is saved at: /etc/letsencrypt/live/secure-login-portal[.]com/fullchain.pem\nKey is saved at:         /etc/letsencrypt/live/secure-login-portal[.]com/privkey.pem\nThis certificate expires on 2026-05-30.\n\nsubject=CN = secure-login-portal[.]com\nissuer=C = US, O = Let's Encrypt, CN = R3\nnotBefore=Mar  1 06:00:00 2026 GMT\nnotAfter=May 30 06:00:00 2026 GMT\n\n[+] Legitimate Let's Encrypt certificate issued\n[+] Browser will show lock icon with NO warnings\n[+] CT Log entry: https://crt.sh/?q=secure-login-portal[.]com",
+      "def": "[CT Log Monitor] New Let's Encrypt certificate for secure-login-portal[.]com — potential phishing domain",
+      "defAction": "Source: Certificate Transparency log monitoring\nTarget: secure-login-portal[.]com\nAction: Domain added to phishing watchlist, Safe Browsing submission initiated",
+      "desc": "Let's Encrypt로 피싱 도메인에 합법 SSL 인증서를 발급받습니다.",
+      "descEn": "Obtaining legitimate SSL certificate from Let's Encrypt for phishing domain.",
+      "stepTitle": "피싱 도메인 인증서 발급",
+      "stepTitleEn": "Phishing Domain Certificate Issuance",
+      "feynman": "관공서에서 공인인감을 무료로 발급받는 것입니다. Let's Encrypt는 도메인만 소유하면 누구에게나 무료 인증서를 발급합니다. 피싱 사이트 secure-login-portal[.]com에 이 인증서를 설치하면, 브라우저에 경고 없이 자물쇠 아이콘이 표시됩니다.",
+      "feynmanEn": "Like getting an official seal from the government for free. Let's Encrypt issues free certificates to anyone who owns a domain. Installing this certificate on phishing site secure-login-portal[.]com shows a lock icon with no warnings.",
+      "expert": "Let's Encrypt는 DV(Domain Validation) 인증서만 발급하므로 조직 검증이 없습니다. ACME 프로토콜의 HTTP-01 챌린지는 완전 자동화됩니다. CT 로그에 등록되므로 실시간 모니터링으로 탐지할 수 있습니다.",
+      "expertEn": "Let's Encrypt only issues DV (Domain Validation) certificates with no organization verification. ACME HTTP-01 challenge is fully automated. Registration in CT logs allows detection through real-time monitoring.",
+      "defTooltip": "🔗 CT 로그: 피싱 의심 도메인에 인증서 발급 탐지",
+      "defTooltipEn": "🔗 CT Log: Certificate issued to suspected phishing domain detected",
+      "hackerLog": {
+        "title": "le_cert.log",
+        "lines": [
+          { "log": "Domain: secure-login-portal[.]com", "desc": "💡 로그인 포털로 위장한 피싱 도메인" },
+          { "log": "Issuer: Let's Encrypt R3 (FREE)", "desc": "💡 무료 자동 발급 — 비용 부담 없음" },
+          { "log": "Browser: Lock icon, NO warnings", "desc": "💡 사용자에게 안전하게 보임" }
+        ]
+      },
+      "terms": [
+        { "name": "Let's Encrypt", "desc": "무료 자동화된 CA(Certificate Authority). DV 인증서를 무료로 발급합니다." },
+        { "name": "CT Log", "desc": "Certificate Transparency Log. 발급된 모든 인증서를 공개적으로 기록하는 로그." }
+      ]
+    },
+    {
+      "cmd": "python3 phishing_deploy.py --domain secure-login-portal[.]com --template microsoft365 --cert letsencrypt --evilginx enable",
+      "out": "[*] Deploying phishing infrastructure...\n[*] Domain: secure-login-portal[.]com\n[*] Template: Microsoft 365 login page\n[*] Certificate: Let's Encrypt (valid, lock icon ✓)\n[*] AiTM proxy: EvilGinx2 (MFA bypass)\n\n[+] Phishing site deployed:\n  URL: https://secure-login-portal[.]com/auth/login\n  Template: Microsoft 365 (pixel-perfect clone)\n  SSL: Let's Encrypt (lock icon visible)\n  AiTM: EvilGinx2 → captures session cookies\n  MFA bypass: ✓ (real-time token relay)\n\n[*] EvilGinx2 phishlets configured:\n  ├── microsoft.com → secure-login-portal[.]com\n  ├── login.microsoftonline.com → auth.secure-login-portal[.]com\n  └── outlook.office365.com → mail.secure-login-portal[.]com\n\n[*] Anti-detection features:\n  ├── Bot detection: CloudFlare Turnstile\n  ├── Geo-fencing: Target country only\n  ├── Device fingerprint: Desktop browsers only\n  └── Single-use URLs: One visit per link\n\n[+] Phishing site LIVE and ready for targets",
+      "def": "[Phishing Detection] New Microsoft 365 login clone detected at secure-login-portal[.]com with valid Let's Encrypt certificate",
+      "defAction": "Source: Anti-phishing service + CT log monitoring\nTarget: secure-login-portal[.]com\nAction: Domain submitted to Microsoft DART, Google Safe Browsing, and browser blocklists",
+      "desc": "합법 인증서가 설치된 피싱 사이트를 배포하고 AiTM 프록시를 구성합니다.",
+      "descEn": "Deploying phishing site with legitimate certificate and configuring AiTM proxy.",
+      "stepTitle": "피싱 사이트 배포 (AiTM)",
+      "stepTitleEn": "Phishing Site Deployment (AiTM)",
+      "feynman": "공인인감이 찍힌 가짜 은행 창구를 여는 것입니다. Microsoft 365 로그인 페이지를 정밀하게 복제하고, Let's Encrypt 인증서로 자물쇠 아이콘까지 표시합니다. EvilGinx2는 중간에서 세션 쿠키를 가로채어 MFA까지 우회합니다.",
+      "feynmanEn": "Like opening a fake bank counter with an official seal. Precisely cloning the Microsoft 365 login page with a Let's Encrypt certificate showing a lock icon. EvilGinx2 intercepts session cookies in the middle, bypassing even MFA.",
+      "expert": "EvilGinx2의 AiTM 프록시는 실제 Microsoft 서버와 통신하면서 세션 쿠키를 실시간 탈취합니다. CloudFlare Turnstile과 지오펜싱으로 자동 분석을 방해합니다. 일회용 URL은 포렌식 분석을 어렵게 합니다.",
+      "expertEn": "EvilGinx2 AiTM proxy communicates with real Microsoft servers while stealing session cookies in real-time. CloudFlare Turnstile and geo-fencing hinder automated analysis. Single-use URLs complicate forensic analysis.",
+      "defTooltip": "🔗 피싱 탐지: 유효한 인증서의 Microsoft 365 로그인 복제 사이트",
+      "defTooltipEn": "🔗 Phishing Detection: Microsoft 365 login clone with valid certificate",
+      "hackerLog": {
+        "title": "phishing_deploy.log",
+        "lines": [
+          { "log": "Template: Microsoft 365 (pixel-perfect)", "desc": "💡 정밀 복제 — 진짜와 구별 불가" },
+          { "log": "AiTM: EvilGinx2 (MFA bypass)", "desc": "💡 세션 쿠키 탈취로 MFA 우회" },
+          { "log": "Anti-detect: Geo-fence + 1-use URLs", "desc": "💡 분석 방해 기법 적용" }
+        ]
+      },
+      "terms": [
+        { "name": "AiTM", "desc": "Adversary-in-the-Middle. 피싱 프록시가 사용자와 서버 사이에서 세션을 가로채는 기법." },
+        { "name": "EvilGinx2", "desc": "AiTM 피싱 프레임워크. 세션 쿠키를 탈취하여 MFA를 우회합니다." }
+      ]
+    },
+    {
+      "cmd": "# 대량 C2 인프라 인증서 자동 발급\npython3 mass_cert.py --domains c2_domains.txt --ca letsencrypt --count 20 --auto-renew",
+      "out": "[*] Mass certificate deployment for C2 infrastructure...\n[*] CA: Let's Encrypt (automated via certbot)\n[*] Domains: 20 C2 domains\n\n[+] Certificate issuance results:\n  ┌──────────────────────────────┬──────────┬──────────┐\n  │ Domain                       │ Status   │ Expires  │\n  ├──────────────────────────────┼──────────┼──────────┤\n  │ cdn-analytics-hub[.]com      │ ✓ Issued │ May 30   │\n  │ api-metrics-cloud[.]com      │ ✓ Issued │ May 30   │\n  │ static-content-cdn[.]net     │ ✓ Issued │ May 30   │\n  │ cloud-telemetry-svc[.]com    │ ✓ Issued │ May 30   │\n  │ update-service-cdn[.]com     │ ✓ Issued │ May 30   │\n  │ ... (15 more)                │ ✓ All OK │ May 30   │\n  └──────────────────────────────┴──────────┴──────────┘\n\n[+] 20/20 certificates issued successfully\n[+] Auto-renewal cron configured (every 60 days)\n[+] Nginx configs generated for all domains\n\n[*] C2 rotation pool:\n  Active:  5 domains (primary C2 channels)\n  Reserve: 15 domains (backup, rotate weekly)\n  Total:   20 HTTPS-encrypted C2 channels\n\n[!] Each domain appears as legitimate cloud service",
+      "def": "[CT Log] Burst of 20 certificates issued to cloud-service themed domains in 1 hour — same registrant pattern",
+      "defAction": "Source: CT log analysis + pattern detection\nTarget: 20 newly certified domains\nAction: Domain cluster identified, all added to C2 threat feed, ISP notified",
+      "desc": "20개 C2 도메인에 대한 SSL 인증서를 자동으로 대량 발급합니다.",
+      "descEn": "Mass automated SSL certificate issuance for 20 C2 domains.",
+      "stepTitle": "대량 인증서 발급 (C2 Pool)",
+      "stepTitleEn": "Mass Certificate Issuance (C2 Pool)",
+      "feynman": "가짜 가게 20개에 각각 사업자등록증을 발급받는 것입니다. Let's Encrypt의 자동화된 시스템으로 20개 도메인에 동시에 인증서를 배포합니다. 5개는 실제 C2에 사용하고, 15개는 예비로 보관합니다. 차단되면 즉시 다음 도메인으로 전환합니다.",
+      "feynmanEn": "Like getting business licenses for 20 fake stores. Deploying certificates to 20 domains simultaneously using Let's Encrypt automation. 5 are active C2, 15 are reserves. When blocked, immediately switch to the next domain.",
+      "expert": "같은 시간대에 유사한 이름 패턴의 도메인 20개에 인증서가 발급되면 CT 로그 분석으로 클러스터링이 가능합니다. 그러나 도메인 이름을 다양화하고 시간을 분산하면 탐지가 어려워집니다.",
+      "expertEn": "Issuing certificates to 20 similarly named domains in the same timeframe enables CT log clustering analysis. However, diversifying domain names and spreading timing makes detection harder.",
+      "defTooltip": "🔗 CT 로그: 1시간 내 클라우드 테마 도메인 20개 인증서 대량 발급 탐지",
+      "defTooltipEn": "🔗 CT Log: Burst of 20 cloud-themed domain certificates in 1 hour detected",
+      "hackerLog": {
+        "title": "mass_cert.log",
+        "lines": [
+          { "log": "Certificates: 20/20 issued", "desc": "💡 전체 C2 도메인 인증서 확보" },
+          { "log": "Active: 5 / Reserve: 15", "desc": "💡 주간 순환 전략으로 차단 대응" },
+          { "log": "Auto-renew: Every 60 days", "desc": "💡 인증서 만료 방지 자동화" }
+        ]
+      },
+      "terms": [
+        { "name": "Domain Rotation", "desc": "C2 도메인을 주기적으로 교체하여 차단을 회피하는 전략." },
+        { "name": "ACME", "desc": "Automatic Certificate Management Environment. Let's Encrypt의 자동 인증서 발급 프로토콜." }
+      ]
+    },
+    {
+      "cmd": "python3 cert_infra_test.py --c2-pool c2_domains.txt --phishing secure-login-portal[.]com --full-test",
+      "out": "[*] Full infrastructure test...\n\n═══════════════════════════════════════════════\n  DIGITAL CERTIFICATE INFRASTRUCTURE REPORT\n═══════════════════════════════════════════════\n\n  C2 Infrastructure:\n  ├── Active C2 domains:    5/5 (HTTPS, lock icon)\n  ├── Reserve domains:      15/15 (certificates ready)\n  ├── Self-signed C2:       1 (internal comms only)\n  ├── JA3 fingerprint:      Randomized per session\n  ├── TLS version:          1.3 only\n  └── Domain Fronting:      2 domains via CDN\n\n  Phishing Infrastructure:\n  ├── Active phishing site: https://secure-login-portal[.]com ✓\n  ├── Lock icon:            ✓ (Let's Encrypt)\n  ├── EvilGinx2:            Active (MFA bypass ready)\n  ├── Anti-bot:             CloudFlare Turnstile ✓\n  └── SSL Labs grade:       A+ (legitimate security config)\n\n  Detection evasion:\n  ├── CT Log exposure:      21 domains (monitored risk)\n  ├── Self-signed (no CT):  1 domain (stealth)\n  ├── JA3 randomization:    Active (fingerprint evasion)\n  └── Certificate diversity: 3 CAs (Let's Encrypt, ZeroSSL, Buypass)\n\n  Total certificates: 22 (21 CA-issued + 1 self-signed)\n  Monthly cost: $0 (all free CAs)\n\n[+] All infrastructure operational\n[!] WARNING: This is a simulation for educational purposes only",
+      "def": "[SOC] Correlated alerts — C2 domain cluster + phishing site using same infrastructure pattern, likely single threat actor",
+      "defAction": "Source: SIEM correlation (CT logs + DNS + network)\nTarget: 22 certificate infrastructure\nAction: Full domain blocklist deployed, phishing site reported, C2 domains sinkholed, threat advisory published",
+      "desc": "전체 인증서 기반 공격 인프라의 동작을 테스트하고 최종 확인합니다.",
+      "descEn": "Testing and verifying the full certificate-based attack infrastructure.",
+      "stepTitle": "인프라 최종 테스트",
+      "stepTitleEn": "Infrastructure Final Test",
+      "feynman": "20개 가짜 가게와 피싱 창구가 모두 제대로 운영되는지 최종 점검하는 것입니다. C2 5개, 예비 15개, 피싱 1개, 내부 통신 1개 = 총 22개의 인증서 인프라가 월 $0의 비용으로 운영됩니다. JA3 핑거프린트 랜덤화로 TLS 분석도 회피합니다.",
+      "feynmanEn": "Like doing a final check that all 20 fake stores and the phishing counter are operating properly. 5 C2, 15 reserves, 1 phishing, 1 internal = 22 total certificate infrastructure running at $0/month. JA3 fingerprint randomization evades TLS analysis.",
+      "expert": "SSL Labs A+ 등급은 합법 웹사이트와 동일한 보안 구성을 보여줍니다. JA3 핑거프린트 랜덤화는 Cobalt Strike 등 C2 프레임워크의 고유 TLS 핑거프린트를 숨깁니다. 3개 CA를 혼용하면 단일 CA 기반 탐지를 우회합니다.",
+      "expertEn": "SSL Labs A+ grade shows security configuration identical to legitimate websites. JA3 fingerprint randomization hides unique TLS fingerprints of C2 frameworks like Cobalt Strike. Using 3 CAs evades single-CA-based detection.",
+      "defTooltip": "🔗 SOC: C2 도메인 클러스터 + 피싱 사이트 — 동일 위협 행위자 인프라 상관분석",
+      "defTooltipEn": "🔗 SOC: C2 domain cluster + phishing site correlated — single threat actor infrastructure",
+      "hackerLog": {
+        "title": "infra_final.log",
+        "lines": [
+          { "log": "Total certs: 22 (21 CA + 1 self-signed)", "desc": "💡 전체 인증서 인프라 가동" },
+          { "log": "Monthly cost: $0 (all free CAs)", "desc": "💡 무료 CA만 사용 — 비용 제로" },
+          { "log": "SSL Labs: A+ grade", "desc": "💡 합법 사이트와 동일한 보안 등급" }
+        ]
+      },
+      "terms": [
+        { "name": "JA3 Fingerprint", "desc": "TLS Client Hello 패킷의 고유 해시. C2 도구를 식별하는 데 사용됩니다." },
+        { "name": "Domain Fronting", "desc": "CDN의 TLS SNI와 HTTP Host 헤더 불일치를 악용하여 실제 C2 도메인을 숨기는 기법." }
+      ]
+    }
+  ]
+}

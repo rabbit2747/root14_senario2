@@ -1,0 +1,680 @@
+{
+  "langMapping": {
+    "ko": {
+      "titles": {
+        "Reconnaissance": "정찰",
+        "Resource Development": "자원 개발",
+        "Initial Access": "초기 접근",
+        "Execution": "실행",
+        "Persistence": "지속성",
+        "Privilege Escalation": "권한 상승",
+        "Defense Evasion": "방어 회피",
+        "Credential Access": "자격 증명 접근",
+        "Discovery": "탐색",
+        "Lateral Movement": "측면 이동",
+        "Collection": "수집",
+        "Command and Control (C2)": "명령 및 제어",
+        "Exfiltration": "유출",
+        "Impact": "영향"
+      },
+      "techniques": {
+        "Active Scanning": "능동 스캐닝",
+        "Gather Victim Host Information": "피해자 호스트 정보 수집",
+        "Gather Victim Identity Information": "피해자 신원 정보 수집",
+        "Gather Victim Network Information": "피해자 네트워크 정보 수집",
+        "Gather Victim Org Information": "피해자 조직 정보 수집",
+        "Phishing for Information": "정보 피싱",
+        "Search Closed Sources": "비공개 소스 검색",
+        "Search Open Technical Databases": "공개 기술 DB 검색",
+        "Search Open Websites/Domains": "공개 웹사이트 검색",
+        "Acquire Infrastructure": "인프라 획득",
+        "Compromise Accounts": "계정 침해",
+        "Develop Capabilities": "역량 개발",
+        "Obtain Capabilities": "역량 획득",
+        "Stage Capabilities": "역량 준비",
+        "Phishing": "피싱",
+        "Supply Chain Compromise": "공급망 침해",
+        "Valid Accounts": "유효 계정",
+        "Exploit Public-Facing Application": "공개 앱 취약점 악용",
+        "External Remote Services": "외부 원격 서비스",
+        "Command and Scripting Interpreter": "명령/스크립트 인터프리터",
+        "User Execution": "사용자 실행",
+        "Scheduled Task / Job": "예약 작업",
+        "System Services": "시스템 서비스",
+        "Boot or Logon Autostart Execution": "부팅/로그온 자동 실행",
+        "Create Account": "계정 생성",
+        "Event Triggered Execution": "이벤트 트리거 실행",
+        "Server Software Component": "서버 소프트웨어 컴포넌트",
+        "Abuse Elevation Control Mechanism": "권한 상승 메커니즘 남용",
+        "Access Token Manipulation": "액세스 토큰 조작",
+        "Process Injection": "프로세스 인젝션",
+        "Obfuscated Files or Information": "난독화 파일/정보",
+        "Hide Artifacts": "아티팩트 은닉",
+        "Masquerading": "위장",
+        "Impair Defenses": "방어 약화",
+        "OS Credential Dumping": "OS 자격 증명 덤핑",
+        "Brute Force": "브루트 포스",
+        "Input Capture": "입력 캡처",
+        "Account Discovery": "계정 탐색",
+        "Network Discovery": "네트워크 탐색",
+        "Process Discovery": "프로세스 탐색",
+        "System Information Discovery": "시스템 정보 탐색",
+        "Remote Services": "원격 서비스",
+        "Remote Service Session Hijacking": "원격 세션 하이재킹",
+        "Use Alternate Authentication Material": "대체 인증 자료 사용",
+        "Data from Local System": "로컬 시스템 데이터",
+        "Data from Cloud Storage": "클라우드 저장소 데이터",
+        "Email Collection": "이메일 수집",
+        "Screen Capture": "화면 캡처",
+        "Archive Collected Data": "수집 데이터 압축",
+        "Application Layer Protocol": "앱 계층 프로토콜",
+        "Encrypted Channel": "암호화 채널",
+        "Proxy": "프록시",
+        "Dynamic Resolution": "동적 해석",
+        "Exfiltration Over C2 Channel": "C2 채널 유출",
+        "Exfiltration to Cloud Storage": "클라우드 저장소 유출",
+        "Exfiltration Over Web Service": "웹 서비스 유출",
+        "Exfiltration Over USB": "USB 유출",
+        "Data Encrypted for Impact (랜섬웨어)": "랜섬웨어 암호화",
+        "Disk Wipe": "디스크 삭제",
+        "Defacement": "웹 변조",
+        "Denial of Service": "서비스 거부",
+        "Resource Hijacking (크립토마이닝 등)": "자원 탈취 (크립토마이닝)"
+      }
+    },
+    "zh": {
+      "titles": {
+        "Reconnaissance": "侦察",
+        "Resource Development": "资源开发",
+        "Initial Access": "初始访问",
+        "Execution": "执行",
+        "Persistence": "持久化",
+        "Privilege Escalation": "权限提升",
+        "Defense Evasion": "防御绕过",
+        "Credential Access": "凭证访问",
+        "Discovery": "发现",
+        "Lateral Movement": "横向移动",
+        "Collection": "收集",
+        "Command and Control (C2)": "命令与控制",
+        "Exfiltration": "数据泄露",
+        "Impact": "影响"
+      },
+      "techniques": {
+        "Active Scanning": "主动扫描",
+        "Gather Victim Host Information": "收集受害者主机信息",
+        "Gather Victim Identity Information": "收集受害者身份信息",
+        "Gather Victim Network Information": "收集受害者网络信息",
+        "Gather Victim Org Information": "收集受害者组织信息",
+        "Phishing for Information": "信息钓鱼",
+        "Search Closed Sources": "搜索封闭源",
+        "Search Open Technical Databases": "搜索公开技术数据库",
+        "Search Open Websites/Domains": "搜索公开网站/域名",
+        "Acquire Infrastructure": "获取基础设施",
+        "Compromise Accounts": "入侵账户",
+        "Develop Capabilities": "开发能力",
+        "Obtain Capabilities": "获取能力",
+        "Stage Capabilities": "预置能力",
+        "Phishing": "网络钓鱼",
+        "Supply Chain Compromise": "供应链入侵",
+        "Valid Accounts": "有效账户",
+        "Exploit Public-Facing Application": "利用公开应用漏洞",
+        "External Remote Services": "外部远程服务",
+        "Command and Scripting Interpreter": "命令与脚本解释器",
+        "User Execution": "用户执行",
+        "Scheduled Task / Job": "计划任务",
+        "System Services": "系统服务",
+        "Boot or Logon Autostart Execution": "启动自启动执行",
+        "Create Account": "创建账户",
+        "Event Triggered Execution": "事件触发执行",
+        "Server Software Component": "服务器软件组件",
+        "Abuse Elevation Control Mechanism": "滥用提权机制",
+        "Access Token Manipulation": "访问令牌操纵",
+        "Process Injection": "进程注入",
+        "Obfuscated Files or Information": "混淆文件或信息",
+        "Hide Artifacts": "隐藏痕迹",
+        "Masquerading": "伪装",
+        "Impair Defenses": "削弱防御",
+        "OS Credential Dumping": "OS凭证转储",
+        "Brute Force": "暴力破解",
+        "Input Capture": "输入捕获",
+        "Account Discovery": "账户发现",
+        "Network Discovery": "网络发现",
+        "Process Discovery": "进程发现",
+        "System Information Discovery": "系统信息发现",
+        "Remote Services": "远程服务",
+        "Remote Service Session Hijacking": "远程服务会话劫持",
+        "Use Alternate Authentication Material": "使用替代认证材料",
+        "Data from Local System": "本地系统数据",
+        "Data from Cloud Storage": "云存储数据",
+        "Email Collection": "邮件收集",
+        "Screen Capture": "屏幕截图",
+        "Archive Collected Data": "压缩收集的数据",
+        "Application Layer Protocol": "应用层协议",
+        "Encrypted Channel": "加密通道",
+        "Proxy": "代理",
+        "Dynamic Resolution": "动态解析",
+        "Exfiltration Over C2 Channel": "C2通道数据泄露",
+        "Exfiltration to Cloud Storage": "泄露至云存储",
+        "Exfiltration Over Web Service": "通过Web服务泄露",
+        "Exfiltration Over USB": "通过USB泄露",
+        "Data Encrypted for Impact (랜섬웨어)": "勒索软件加密",
+        "Disk Wipe": "磁盘擦除",
+        "Defacement": "网站篡改",
+        "Denial of Service": "拒绝服务",
+        "Resource Hijacking (크립토마이닝 등)": "资源劫持（挖矿等）"
+      }
+    },
+    "hi": {
+      "titles": {
+        "Reconnaissance": "टोह",
+        "Resource Development": "संसाधन विकास",
+        "Initial Access": "प्रारंभिक पहुँच",
+        "Execution": "निष्पादन",
+        "Persistence": "दृढ़ता",
+        "Privilege Escalation": "विशेषाधिकार वृद्धि",
+        "Defense Evasion": "रक्षा चोरी",
+        "Credential Access": "प्रमाण-पत्र पहुँच",
+        "Discovery": "खोज",
+        "Lateral Movement": "पार्श्व गति",
+        "Collection": "संग्रह",
+        "Command and Control (C2)": "कमांड और नियंत्रण",
+        "Exfiltration": "डेटा निष्कासन",
+        "Impact": "प्रभाव"
+      },
+      "techniques": {
+        "Active Scanning": "सक्रिय स्कैनिंग",
+        "Gather Victim Host Information": "पीड़ित होस्ट जानकारी एकत्र",
+        "Gather Victim Identity Information": "पीड़ित पहचान जानकारी एकत्र",
+        "Gather Victim Network Information": "पीड़ित नेटवर्क जानकारी एकत्र",
+        "Gather Victim Org Information": "पीड़ित संगठन जानकारी एकत्र",
+        "Phishing for Information": "सूचना फ़िशिंग",
+        "Search Closed Sources": "बंद स्रोत खोज",
+        "Search Open Technical Databases": "सार्वजनिक तकनीकी DB खोज",
+        "Search Open Websites/Domains": "सार्वजनिक वेबसाइट खोज",
+        "Acquire Infrastructure": "बुनियादी ढांचा प्राप्त",
+        "Compromise Accounts": "खाता उल्लंघन",
+        "Develop Capabilities": "क्षमता विकास",
+        "Obtain Capabilities": "क्षमता प्राप्त",
+        "Stage Capabilities": "क्षमता तैयार",
+        "Phishing": "फ़िशिंग",
+        "Supply Chain Compromise": "आपूर्ति श्रृंखला उल्लंघन",
+        "Valid Accounts": "वैध खाते",
+        "Exploit Public-Facing Application": "सार्वजनिक ऐप का शोषण",
+        "External Remote Services": "बाहरी दूरस्थ सेवाएं",
+        "Command and Scripting Interpreter": "कमांड/स्क्रिप्ट इंटरप्रेटर",
+        "User Execution": "उपयोगकर्ता निष्पादन",
+        "Scheduled Task / Job": "निर्धारित कार्य",
+        "System Services": "सिस्टम सेवाएं",
+        "Boot or Logon Autostart Execution": "बूट/लॉगऑन स्वतः निष्पादन",
+        "Create Account": "खाता बनाना",
+        "Event Triggered Execution": "इवेंट ट्रिगर निष्पादन",
+        "Server Software Component": "सर्वर सॉफ़्टवेयर घटक",
+        "Abuse Elevation Control Mechanism": "उन्नयन तंत्र का दुरुपयोग",
+        "Access Token Manipulation": "एक्सेस टोकन हेरफेर",
+        "Process Injection": "प्रोसेस इंजेक्शन",
+        "Obfuscated Files or Information": "अस्पष्ट फ़ाइलें/जानकारी",
+        "Hide Artifacts": "आर्टिफैक्ट छुपाना",
+        "Masquerading": "छद्मवेश",
+        "Impair Defenses": "रक्षा को कमजोर करना",
+        "OS Credential Dumping": "OS क्रेडेंशियल डंपिंग",
+        "Brute Force": "ब्रूट फोर्स",
+        "Input Capture": "इनपुट कैप्चर",
+        "Account Discovery": "खाता खोज",
+        "Network Discovery": "नेटवर्क खोज",
+        "Process Discovery": "प्रोसेस खोज",
+        "System Information Discovery": "सिस्टम जानकारी खोज",
+        "Remote Services": "दूरस्थ सेवाएं",
+        "Remote Service Session Hijacking": "दूरस्थ सेवा सत्र अपहरण",
+        "Use Alternate Authentication Material": "वैकल्पिक प्रमाणीकरण सामग्री",
+        "Data from Local System": "स्थानीय सिस्टम डेटा",
+        "Data from Cloud Storage": "क्लाउड स्टोरेज डेटा",
+        "Email Collection": "ईमेल संग्रह",
+        "Screen Capture": "स्क्रीन कैप्चर",
+        "Archive Collected Data": "एकत्र डेटा संग्रह",
+        "Application Layer Protocol": "एप्लीकेशन परत प्रोटोकॉल",
+        "Encrypted Channel": "एन्क्रिप्टेड चैनल",
+        "Proxy": "प्रॉक्सी",
+        "Dynamic Resolution": "गतिशील समाधान",
+        "Exfiltration Over C2 Channel": "C2 चैनल से डेटा चोरी",
+        "Exfiltration to Cloud Storage": "क्लाउड स्टोरेज में डेटा चोरी",
+        "Exfiltration Over Web Service": "वेब सेवा से डेटा चोरी",
+        "Exfiltration Over USB": "USB से डेटा चोरी",
+        "Data Encrypted for Impact (랜섬웨어)": "रैनसमवेयर एन्क्रिप्शन",
+        "Disk Wipe": "डिस्क वाइप",
+        "Defacement": "वेब विरूपण",
+        "Denial of Service": "सेवा इनकार",
+        "Resource Hijacking (크립토마이닝 등)": "संसाधन अपहरण (क्रिप्टोमाइनिंग)"
+      }
+    },
+    "ja": {
+      "titles": {
+        "Reconnaissance": "偵察",
+        "Resource Development": "リソース開発",
+        "Initial Access": "初期アクセス",
+        "Execution": "実行",
+        "Persistence": "永続化",
+        "Privilege Escalation": "権限昇格",
+        "Defense Evasion": "防御回避",
+        "Credential Access": "認証情報アクセス",
+        "Discovery": "探索",
+        "Lateral Movement": "横展開",
+        "Collection": "収集",
+        "Command and Control (C2)": "C2通信",
+        "Exfiltration": "データ持ち出し",
+        "Impact": "インパクト"
+      },
+      "techniques": {
+        "Active Scanning": "アクティブスキャン",
+        "Gather Victim Host Information": "被害者ホスト情報収集",
+        "Gather Victim Identity Information": "被害者身元情報収集",
+        "Gather Victim Network Information": "被害者ネットワーク情報収集",
+        "Gather Victim Org Information": "被害者組織情報収集",
+        "Phishing for Information": "情報フィッシング",
+        "Search Closed Sources": "非公開ソース検索",
+        "Search Open Technical Databases": "公開技術DB検索",
+        "Search Open Websites/Domains": "公開サイト/ドメイン検索",
+        "Acquire Infrastructure": "インフラ取得",
+        "Compromise Accounts": "アカウント侵害",
+        "Develop Capabilities": "能力開発",
+        "Obtain Capabilities": "能力取得",
+        "Stage Capabilities": "能力の準備",
+        "Phishing": "フィッシング",
+        "Supply Chain Compromise": "サプライチェーン侵害",
+        "Valid Accounts": "正規アカウント",
+        "Exploit Public-Facing Application": "公開アプリの脆弱性悪用",
+        "External Remote Services": "外部リモートサービス",
+        "Command and Scripting Interpreter": "コマンド/スクリプトインタープリタ",
+        "User Execution": "ユーザー実行",
+        "Scheduled Task / Job": "スケジュールタスク",
+        "System Services": "システムサービス",
+        "Boot or Logon Autostart Execution": "起動・ログオン時自動実行",
+        "Create Account": "アカウント作成",
+        "Event Triggered Execution": "イベントトリガー実行",
+        "Server Software Component": "サーバーソフトウェアコンポーネント",
+        "Abuse Elevation Control Mechanism": "昇格制御機構の悪用",
+        "Access Token Manipulation": "アクセストークン操作",
+        "Process Injection": "プロセスインジェクション",
+        "Obfuscated Files or Information": "難読化ファイル/情報",
+        "Hide Artifacts": "アーティファクトの隠蔽",
+        "Masquerading": "偽装",
+        "Impair Defenses": "防御機能の妨害",
+        "OS Credential Dumping": "OS認証情報ダンプ",
+        "Brute Force": "ブルートフォース",
+        "Input Capture": "入力キャプチャ",
+        "Account Discovery": "アカウント探索",
+        "Network Discovery": "ネットワーク探索",
+        "Process Discovery": "プロセス探索",
+        "System Information Discovery": "システム情報探索",
+        "Remote Services": "リモートサービス",
+        "Remote Service Session Hijacking": "リモートセッションハイジャック",
+        "Use Alternate Authentication Material": "代替認証情報の使用",
+        "Data from Local System": "ローカルシステムデータ",
+        "Data from Cloud Storage": "クラウドストレージデータ",
+        "Email Collection": "メール収集",
+        "Screen Capture": "スクリーンキャプチャ",
+        "Archive Collected Data": "収集データの圧縮",
+        "Application Layer Protocol": "アプリケーション層プロトコル",
+        "Encrypted Channel": "暗号化チャネル",
+        "Proxy": "プロキシ",
+        "Dynamic Resolution": "動的解決",
+        "Exfiltration Over C2 Channel": "C2チャネルからの持ち出し",
+        "Exfiltration to Cloud Storage": "クラウドストレージへの持ち出し",
+        "Exfiltration Over Web Service": "Webサービス経由の持ち出し",
+        "Exfiltration Over USB": "USB経由の持ち出し",
+        "Data Encrypted for Impact (랜섬웨어)": "ランサムウェア暗号化",
+        "Disk Wipe": "ディスク消去",
+        "Defacement": "ウェブ改ざん",
+        "Denial of Service": "サービス拒否",
+        "Resource Hijacking (크립토마이닝 등)": "リソースハイジャック（仮想通貨採掘等）"
+      }
+    }
+  },
+  "attackMatrix": [
+    {
+      "id": "t1",
+      "title": "Reconnaissance",
+      "techniques": [
+        { "name": "Active Scanning", "tid": "T1595", "subs": [
+          { "name": "Scanning IP Blocks", "sid": "T1595.001" },
+          { "name": "Vulnerability Scanning", "sid": "T1595.002" },
+          { "name": "Wordlist Scanning", "sid": "T1595.003" }
+        ]},
+        { "name": "Gather Victim Host Information", "tid": "T1592", "subs": [
+          { "name": "Hardware", "sid": "T1592.001" },
+          { "name": "Software", "sid": "T1592.002" },
+          { "name": "Firmware", "sid": "T1592.003" },
+          { "name": "Client Configurations", "sid": "T1592.004" }
+        ]},
+        { "name": "Gather Victim Identity Information", "tid": "T1589", "subs": [
+          { "name": "Credentials", "sid": "T1589.001" },
+          { "name": "Email Addresses", "sid": "T1589.002" },
+          { "name": "Employee Names", "sid": "T1589.003" }
+        ]},
+        { "name": "Gather Victim Network Information", "tid": "T1590", "subs": [
+          { "name": "Domain Properties", "sid": "T1590.001" },
+          { "name": "DNS", "sid": "T1590.002" },
+          { "name": "Network Trust Dependencies", "sid": "T1590.003" },
+          { "name": "Network Topology", "sid": "T1590.004" },
+          { "name": "IP Addresses", "sid": "T1590.005" },
+          { "name": "Network Security Appliances", "sid": "T1590.006" }
+        ]},
+        { "name": "Gather Victim Org Information", "tid": "T1591", "subs": [
+          { "name": "Determine Physical Locations", "sid": "T1591.001" },
+          { "name": "Business Relationships", "sid": "T1591.002" },
+          { "name": "Identify Business Tempo", "sid": "T1591.003" },
+          { "name": "Identify Roles", "sid": "T1591.004" }
+        ]},
+        { "name": "Phishing for Information", "tid": "T1598", "subs": [
+          { "name": "Spearphishing Service", "sid": "T1598.001" },
+          { "name": "Spearphishing Attachment", "sid": "T1598.002" },
+          { "name": "Spearphishing Link", "sid": "T1598.003" },
+          { "name": "Spearphishing Voice", "sid": "T1598.004" }
+        ]},
+        { "name": "Search Closed Sources", "tid": "T1597", "subs": [
+          { "name": "Threat Intel Vendors", "sid": "T1597.001" },
+          { "name": "Purchase Technical Data", "sid": "T1597.002" }
+        ]},
+        { "name": "Search Open Technical Databases", "tid": "T1596", "subs": [
+          { "name": "DNS / Passive DNS", "sid": "T1596.001" },
+          { "name": "WHOIS", "sid": "T1596.002" },
+          { "name": "Digital Certificates", "sid": "T1596.003" },
+          { "name": "CDNs", "sid": "T1596.004" },
+          { "name": "Scan Databases", "sid": "T1596.005" }
+        ]},
+        { "name": "Search Open Websites/Domains", "tid": "T1593", "subs": [
+          { "name": "Social Media", "sid": "T1593.001" },
+          { "name": "Search Engines", "sid": "T1593.002" },
+          { "name": "Code Repositories", "sid": "T1593.003" },
+          { "name": "Search Threat Vendor Data", "sid": "T1593.004" },
+          { "name": "Search Victim-Owned Websites", "sid": "T1593.005" }
+        ]}
+      ]
+    },
+    {
+      "id": "t2",
+      "title": "Resource Development",
+      "techniques": [
+        { "name": "Acquire Infrastructure", "tid": "T1583", "subs": [
+          { "name": "Domains", "sid": "T1583.001" },
+          { "name": "DNS Server", "sid": "T1583.002" },
+          { "name": "VPS", "sid": "T1583.003" },
+          { "name": "Botnet", "sid": "T1583.004" },
+          { "name": "Web Services", "sid": "T1583.005" },
+          { "name": "Serverless", "sid": "T1583.006" },
+          { "name": "Malvertising", "sid": "T1583.007" }
+        ]},
+        { "name": "Compromise Accounts", "tid": "T1586", "subs": [
+          { "name": "Social Media", "sid": "T1586.001" },
+          { "name": "Email", "sid": "T1586.002" },
+          { "name": "Cloud Accounts", "sid": "T1586.003" }
+        ]},
+        { "name": "Develop Capabilities", "tid": "T1587", "subs": [
+          { "name": "Malware", "sid": "T1587.001" },
+          { "name": "Exploits", "sid": "T1587.002" },
+          { "name": "Code Signing Certificates", "sid": "T1587.003" }
+        ]},
+        { "name": "Obtain Capabilities", "tid": "T1588", "subs": [
+          { "name": "Malware", "sid": "T1588.001" },
+          { "name": "Tools", "sid": "T1588.002" },
+          { "name": "Exploits", "sid": "T1588.003" },
+          { "name": "Vulnerabilities", "sid": "T1588.004" },
+          { "name": "AI", "sid": "T1588.005" }
+        ]},
+        { "name": "Stage Capabilities", "tid": "T1608", "subs": [
+          { "name": "Upload Malware", "sid": "T1608.001" },
+          { "name": "SEO Poisoning", "sid": "T1608.002" },
+          { "name": "Content Injection", "sid": "T1608.003" },
+          { "name": "Drive-by Compromise", "sid": "T1608.004" }
+        ]}
+      ]
+    },
+    {
+      "id": "t3",
+      "title": "Initial Access",
+      "techniques": [
+        { "name": "Phishing", "tid": "T1566", "subs": [
+          { "name": "Spearphishing Attachment", "sid": "T1566.001" },
+          { "name": "Spearphishing Link", "sid": "T1566.002" },
+          { "name": "Spearphishing via Service", "sid": "T1566.003" },
+          { "name": "Voice", "sid": "T1566.004" }
+        ]},
+        { "name": "Supply Chain Compromise", "tid": "T1195", "subs": [
+          { "name": "Software Supply Chain", "sid": "T1195.001" },
+          { "name": "Software Dependencies", "sid": "T1195.002" },
+          { "name": "Hardware Supply Chain", "sid": "T1195.003" }
+        ]},
+        { "name": "Valid Accounts", "tid": "T1078", "isCritical": true, "subs": [
+          { "name": "Default", "sid": "T1078.001" },
+          { "name": "Domain", "sid": "T1078.002" },
+          { "name": "Local", "sid": "T1078.003" },
+          { "name": "Cloud", "sid": "T1078.004" }
+        ]},
+        { "name": "Exploit Public-Facing Application", "tid": "T1190", "subs": [] },
+        { "name": "External Remote Services", "tid": "T1133", "subs": [] }
+      ]
+    },
+    {
+      "id": "t4",
+      "title": "Execution",
+      "techniques": [
+        { "name": "Command and Scripting Interpreter", "tid": "T1059", "isCritical": true, "subs": [
+          { "name": "PowerShell", "sid": "T1059.001" },
+          { "name": "Windows CMD", "sid": "T1059.003" },
+          { "name": "Unix Shell", "sid": "T1059.004" },
+          { "name": "Python", "sid": "T1059.006" },
+          { "name": "JavaScript", "sid": "T1059.007" },
+          { "name": "Cloud API", "sid": "T1059.009" },
+          { "name": "Container CLI", "sid": "T1059.010" }
+        ]},
+        { "name": "User Execution", "tid": "T1204", "subs": [
+          { "name": "Malicious File", "sid": "T1204.001" },
+          { "name": "Malicious Link", "sid": "T1204.002" },
+          { "name": "Malicious Image", "sid": "T1204.003" }
+        ]},
+        { "name": "Scheduled Task / Job", "tid": "T1053", "subs": [
+          { "name": "Cron", "sid": "T1053.003" },
+          { "name": "At", "sid": "T1053.001" },
+          { "name": "Systemd", "sid": "T1053.006" },
+          { "name": "Scheduled Task", "sid": "T1053.005" }
+        ]},
+        { "name": "System Services", "tid": "T1569", "subs": [
+          { "name": "Launchctl", "sid": "T1569.001" },
+          { "name": "Windows Service", "sid": "T1569.002" },
+          { "name": "Systemctl", "sid": "T1569.003" }
+        ]}
+      ]
+    },
+    {
+      "id": "t5",
+      "title": "Persistence",
+      "techniques": [
+        { "name": "Boot or Logon Autostart Execution", "tid": "T1547", "subs": [
+          { "name": "Registry Run Keys", "sid": "T1547.001" },
+          { "name": "Startup Folder", "sid": "T1547.002" },
+          { "name": "Winlogon Helper DLL", "sid": "T1547.004" },
+          { "name": "Login Items", "sid": "T1547.011" },
+          { "name": "XDG Autostart", "sid": "T1547.013" }
+        ]},
+        { "name": "Create Account", "tid": "T1136", "subs": [
+          { "name": "Local", "sid": "T1136.001" },
+          { "name": "Domain", "sid": "T1136.002" },
+          { "name": "Cloud", "sid": "T1136.003" }
+        ]},
+        { "name": "Event Triggered Execution", "tid": "T1546", "subs": [
+          { "name": "WMI Subscription", "sid": "T1546.003" },
+          { "name": "AppInit DLL", "sid": "T1546.010" },
+          { "name": "Image File Execution Options", "sid": "T1546.012" },
+          { "name": "PowerShell Profile", "sid": "T1546.013" }
+        ]},
+        { "name": "Server Software Component", "tid": "T1505", "subs": [
+          { "name": "Web Shell", "sid": "T1505.003" },
+          { "name": "IIS Components", "sid": "T1505.004" },
+          { "name": "SQL Stored Procedures", "sid": "T1505.001" }
+        ]}
+      ]
+    },
+    {
+      "id": "t6",
+      "title": "Privilege Escalation",
+      "techniques": [
+        { "name": "Abuse Elevation Control Mechanism", "tid": "T1548", "subs": [
+          { "name": "Bypass UAC", "sid": "T1548.002" },
+          { "name": "Sudo", "sid": "T1548.003" },
+          { "name": "Setuid", "sid": "T1548.001" }
+        ]},
+        { "name": "Access Token Manipulation", "tid": "T1134", "subs": [
+          { "name": "Token Impersonation", "sid": "T1134.001" },
+          { "name": "SID History Injection", "sid": "T1134.005" }
+        ]},
+        { "name": "Process Injection", "tid": "T1055", "isCritical": true, "subs": [
+          { "name": "DLL Injection", "sid": "T1055.001" },
+          { "name": "Process Hollowing", "sid": "T1055.012" },
+          { "name": "APC Injection", "sid": "T1055.004" }
+        ]}
+      ]
+    },
+    {
+      "id": "t7",
+      "title": "Defense Evasion",
+      "techniques": [
+        { "name": "Obfuscated Files or Information", "tid": "T1027", "subs": [
+          { "name": "Packing", "sid": "T1027.002" },
+          { "name": "Encryption", "sid": "T1027.013" },
+          { "name": "HTML Smuggling", "sid": "T1027.006" },
+          { "name": "Polymorphic Code", "sid": "T1027.014" }
+        ]},
+        { "name": "Hide Artifacts", "tid": "T1564", "subs": [
+          { "name": "Hidden Files", "sid": "T1564.001" },
+          { "name": "Hidden Users", "sid": "T1564.002" },
+          { "name": "Timestomp", "sid": "T1564.003" }
+        ]},
+        { "name": "Masquerading", "tid": "T1036", "subs": [
+          { "name": "Double Extension", "sid": "T1036.007" },
+          { "name": "Rename Legitimate Utility", "sid": "T1036.003" }
+        ]},
+        { "name": "Impair Defenses", "tid": "T1562", "subs": [
+          { "name": "Disable Security Tools", "sid": "T1562.001" },
+          { "name": "Disable Logging", "sid": "T1562.002" },
+          { "name": "Firewall Modification", "sid": "T1562.004" }
+        ]}
+      ]
+    },
+    {
+      "id": "t8",
+      "title": "Credential Access",
+      "techniques": [
+        { "name": "OS Credential Dumping", "tid": "T1003", "isCritical": true, "subs": [
+          { "name": "LSASS Memory", "sid": "T1003.001" },
+          { "name": "SAM", "sid": "T1003.002" },
+          { "name": "NTDS.dit", "sid": "T1003.003" },
+          { "name": "DCSync", "sid": "T1003.006" }
+        ]},
+        { "name": "Brute Force", "tid": "T1110", "subs": [
+          { "name": "Password Spraying", "sid": "T1110.003" },
+          { "name": "Credential Stuffing", "sid": "T1110.004" }
+        ]},
+        { "name": "Input Capture", "tid": "T1056", "subs": [
+          { "name": "Keylogging", "sid": "T1056.001" },
+          { "name": "GUI Capture", "sid": "T1056.002" }
+        ]}
+      ]
+    },
+    {
+      "id": "t9",
+      "title": "Discovery",
+      "techniques": [
+        { "name": "Account Discovery", "tid": "T1087", "subs": [
+          { "name": "Local", "sid": "T1087.001" },
+          { "name": "Domain", "sid": "T1087.002" },
+          { "name": "Cloud", "sid": "T1087.003" }
+        ]},
+        { "name": "Network Discovery", "tid": "T1046", "subs": [
+          { "name": "Network Sniffing", "sid": "T1046.001" },
+          { "name": "Share Discovery", "sid": "T1046.002" },
+          { "name": "Service Discovery", "sid": "T1046.003" }
+        ]},
+        { "name": "Process Discovery", "tid": "T1057", "subs": [] },
+        { "name": "System Information Discovery", "tid": "T1082", "subs": [] }
+      ]
+    },
+    {
+      "id": "t10",
+      "title": "Lateral Movement",
+      "techniques": [
+        { "name": "Remote Services", "tid": "T1021", "subs": [
+          { "name": "RDP", "sid": "T1021.001" },
+          { "name": "SMB", "sid": "T1021.002" },
+          { "name": "SSH", "sid": "T1021.004" },
+          { "name": "WinRM", "sid": "T1021.006" }
+        ]},
+        { "name": "Remote Service Session Hijacking", "tid": "T1563", "subs": [
+          { "name": "RDP Hijacking", "sid": "T1563.002" },
+          { "name": "SSH Hijacking", "sid": "T1563.001" }
+        ]},
+        { "name": "Use Alternate Authentication Material", "tid": "T1550", "subs": [
+          { "name": "Pass-the-Hash", "sid": "T1550.002" },
+          { "name": "Pass-the-Ticket", "sid": "T1550.003" }
+        ]}
+      ]
+    },
+    {
+      "id": "t11",
+      "title": "Collection",
+      "techniques": [
+        { "name": "Data from Local System", "tid": "T1005", "subs": [] },
+        { "name": "Data from Cloud Storage", "tid": "T1530", "subs": [] },
+        { "name": "Email Collection", "tid": "T1114", "subs": [] },
+        { "name": "Screen Capture", "tid": "T1113", "subs": [] },
+        { "name": "Archive Collected Data", "tid": "T1560", "subs": [] }
+      ]
+    },
+    {
+      "id": "t12",
+      "title": "Command and Control (C2)",
+      "techniques": [
+        { "name": "Application Layer Protocol", "tid": "T1071", "subs": [
+          { "name": "Web (HTTP/HTTPS)", "sid": "T1071.001" },
+          { "name": "DNS", "sid": "T1071.004" },
+          { "name": "Mail", "sid": "T1071.003" }
+        ]},
+        { "name": "Encrypted Channel", "tid": "T1573", "subs": [
+          { "name": "Symmetric", "sid": "T1573.001" },
+          { "name": "Asymmetric", "sid": "T1573.002" }
+        ]},
+        { "name": "Proxy", "tid": "T1090", "subs": [
+          { "name": "Domain Fronting", "sid": "T1090.004" },
+          { "name": "Multi-hop", "sid": "T1090.003" }
+        ]},
+        { "name": "Dynamic Resolution", "tid": "T1568", "subs": [
+          { "name": "DGA", "sid": "T1568.002" },
+          { "name": "Fast Flux", "sid": "T1568.001" }
+        ]}
+      ]
+    },
+    {
+      "id": "t13",
+      "title": "Exfiltration",
+      "techniques": [
+        { "name": "Exfiltration Over C2 Channel", "tid": "T1041", "subs": [] },
+        { "name": "Exfiltration to Cloud Storage", "tid": "T1537", "subs": [] },
+        { "name": "Exfiltration Over Web Service", "tid": "T1567", "subs": [] },
+        { "name": "Exfiltration Over USB", "tid": "T1052", "subs": [] }
+      ]
+    },
+    {
+      "id": "t14",
+      "title": "Impact",
+      "techniques": [
+        { "name": "Data Encrypted for Impact (랜섬웨어)", "tid": "T1486", "isCritical": true, "subs": [
+          { "name": "Ransomware", "sid": "T1486.001" }
+        ]},
+        { "name": "Disk Wipe", "tid": "T1561", "subs": [] },
+        { "name": "Defacement", "tid": "T1491", "subs": [] },
+        { "name": "Denial of Service", "tid": "T1499", "subs": [] },
+        { "name": "Resource Hijacking (크립토마이닝 등)", "tid": "T1496", "subs": [
+          { "name": "Cryptomining", "sid": "T1496.001" }
+        ]}
+      ]
+    }
+  ]
+}

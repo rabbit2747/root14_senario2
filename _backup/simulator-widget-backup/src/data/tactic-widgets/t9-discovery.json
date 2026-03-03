@@ -1,0 +1,102 @@
+{
+  "tacticId": "t9",
+  "tacticName": "Discovery",
+  "tacticNameKo": "탐색",
+  "dictionaryTitle": "Discovery Dictionary",
+  "bgLogo": "/logo/logo-name-dark-nobg.png",
+  "speedStorageKey": "discovery_widget_speed",
+
+  "glossary": {
+    "net_scan": {
+      "term": "Network Scanning",
+      "fullName": "Network Service Discovery (T1046)",
+      "analogy": "🗺️ 건물 내부 지도 그리기",
+      "easyDesc": "침입한 네트워크 내부에서 어떤 서버와 서비스가 동작하고 있는지 스캔하여 다음 공격 대상을 물색하는 것",
+      "techDesc": "nmap, masscan 등으로 내부 네트워크의 활성 호스트, 개방 포트, 서비스 배너를 열거합니다. 내부 방화벽 규칙과 네트워크 세그멘테이션 현황을 파악하는 데 사용됩니다"
+    },
+    "ad_enum": {
+      "term": "AD Enumeration",
+      "fullName": "Account Discovery: Domain Account (T1087.002)",
+      "analogy": "📋 직원 명부 빼돌리기",
+      "easyDesc": "Active Directory에서 모든 사용자, 그룹, 관리자 계정 목록을 조회하여 권한이 높은 타겟을 식별하는 것",
+      "techDesc": "net user /domain, LDAP 쿼리, BloodHound 등으로 도메인 사용자/그룹/OU 구조를 열거합니다. Domain Admins, Enterprise Admins 그룹 멤버를 파악하여 공격 경로를 설계합니다"
+    },
+    "system_info": {
+      "term": "System Info",
+      "fullName": "System Information Discovery (T1082)",
+      "analogy": "🔍 컴퓨터 신상 조사",
+      "easyDesc": "감염된 컴퓨터의 OS 버전, 하드웨어 사양, 네트워크 설정 등 기본 정보를 수집하는 것",
+      "techDesc": "systeminfo, hostname, ipconfig /all, wmic os list brief 등의 명령으로 OS 빌드, 아키텍처, 패치 수준, 네트워크 구성을 수집합니다"
+    },
+    "process_list": {
+      "term": "Process Discovery",
+      "fullName": "Process Discovery (T1057)",
+      "analogy": "👁️ 실행 중인 프로그램 목록 훔쳐보기",
+      "easyDesc": "현재 실행 중인 모든 프로그램 목록을 확인하여 보안 솔루션(AV, EDR)이 설치되어 있는지 파악하는 것",
+      "techDesc": "tasklist, ps aux, Get-Process 등으로 실행 중인 프로세스를 열거합니다. EDR 에이전트(CrowdStrike, Carbon Black), AV 프로세스를 식별하여 회피 전략을 수립합니다"
+    },
+    "file_search": {
+      "term": "File Discovery",
+      "fullName": "File and Directory Discovery (T1083)",
+      "analogy": "🗄️ 서류함 뒤지기",
+      "easyDesc": "감염된 시스템에서 중요한 문서(비밀번호 파일, 설계도, 재무 보고서 등)를 찾아내는 것",
+      "techDesc": "dir /s *.xlsx, find / -name '*.conf', tree 등으로 파일 시스템을 탐색합니다. 비밀번호 파일, SSH 키, 데이터베이스 설정 파일, 중요 문서를 식별합니다"
+    }
+  },
+
+  "attackCases": [
+    {
+      "id": 1,
+      "subTechniqueId": "T1046",
+      "subTechniqueName": "Network Service Discovery",
+      "tactic": "Discovery (탐색)",
+      "technique": "Network Service Discovery",
+      "log": "[IDS-ALRT] Internal host 10.10.5.42 initiated SYN scan across /24 subnets — 3,847 connection attempts to ports 445,3389,22,80,443 in 2 minutes.",
+      "report": "공격자는 장악한 워크스테이션(10.10.5.42)에서 내부 네트워크를 대상으로 대규모 포트 스캔을 수행했습니다. SMB(445), RDP(3389), SSH(22), HTTP(80/443) 포트를 중점적으로 스캔하여 횡적 이동 대상을 물색했습니다.",
+      "mechanismTitle": "내부 네트워크 서비스 맵핑",
+      "mechanismDesc": "공격자는 초기 거점 확보 후 내부 네트워크의 토폴로지를 파악합니다. SYN 스캔으로 활성 호스트와 개방 포트를 열거하고, 서비스 배너 그래빙으로 소프트웨어 버전을 확인합니다. 이 정보로 패치되지 않은 시스템이나 관리 포트가 열린 서버를 식별하여 횡적 이동 경로를 설계합니다.",
+      "animationPreset": "probe",
+      "targets": { "step1": "net_scan", "step2": "system_info", "step3": "process_list" }
+    },
+    {
+      "id": 2,
+      "subTechniqueId": "T1087.002",
+      "subTechniqueName": "Domain Account",
+      "tactic": "Discovery (탐색)",
+      "technique": "Account Discovery",
+      "log": "[DC-AUDIT] LDAP query from WS-DEV-017 enumerated all Domain Admins group members — BloodHound-compatible JSON output detected in memory.",
+      "report": "공격자는 BloodHound 수집기(SharpHound)를 실행하여 Active Directory의 전체 구조를 그래프 데이터로 수집했습니다. 사용자-그룹 관계, 세션 정보, ACL 권한 위임 경로가 모두 매핑되었습니다.",
+      "mechanismTitle": "BloodHound를 이용한 AD 공격 경로 분석",
+      "mechanismDesc": "BloodHound는 Active Directory의 객체 관계를 그래프 데이터베이스로 시각화합니다. 일반 도메인 사용자 권한만으로도 LDAP 쿼리를 통해 전체 AD 구조를 수집할 수 있으며, '현재 계정에서 Domain Admin까지의 최단 경로'를 자동으로 계산하여 공격자에게 명확한 공격 로드맵을 제공합니다.",
+      "animationPreset": "query",
+      "targets": { "step1": "ad_enum", "step2": "net_scan" }
+    },
+    {
+      "id": 3,
+      "subTechniqueId": "T1083",
+      "subTechniqueName": "File and Directory Discovery",
+      "tactic": "Discovery (탐색)",
+      "technique": "File and Directory Discovery",
+      "log": "[EDR-ALRT] Recursive file search for '*.kdbx', '*.pem', '*.pfx', 'password*' executed on file server FS-01 — 2,341 files indexed.",
+      "report": "공격자는 파일 서버에서 비밀번호 관리 파일(.kdbx), SSL 인증서(.pem/.pfx), 비밀번호 관련 문서를 대규모로 검색했습니다. KeePass 데이터베이스와 SSH 키 파일이 발견되어 추가 자격 증명 확보에 활용될 예정입니다.",
+      "mechanismTitle": "파일 서버 대상 민감 파일 탐색",
+      "mechanismDesc": "공격자는 파일 서버에서 확장자 기반 검색(*.kdbx, *.pem, *.key, *.conf)과 파일명 패턴 검색(password, credential, secret)을 병행합니다. 발견된 KeePass 데이터베이스는 마스터 비밀번호 크래킹으로, SSH 키는 그대로 사용하여 추가 시스템 접근이 가능합니다.",
+      "animationPreset": "scan",
+      "targets": { "step1": "file_search", "step2": "system_info", "step3": "ad_enum" }
+    }
+  ],
+
+  "stepTimings": {
+    "alert": 3000,
+    "context": 4000,
+    "mechanism": 5000,
+    "identified": 5500
+  },
+
+  "speedOptions": [
+    { "label": "0.5x", "value": 0.5 },
+    { "label": "1x", "value": 1 },
+    { "label": "1.5x", "value": 1.5 },
+    { "label": "2x", "value": 2 }
+  ]
+}

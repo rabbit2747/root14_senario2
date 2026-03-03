@@ -1,0 +1,181 @@
+{
+  "id": "T1592.001",
+  "title": "하드웨어 정보 수집 시뮬레이션",
+  "titleEn": "Hardware Information Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 SNMP 정찰", "labelEn": "🔍 SNMP Recon", "steps": [0, 1] },
+    { "label": "⚡ 원격 핑거프린팅", "labelEn": "⚡ Remote Fingerprinting", "steps": [2, 3] },
+    { "label": "✅ 정보 종합", "labelEn": "✅ Info Consolidation", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "target", "label": "Target Server", "x": 200, "y": 60 },
+    { "id": "snmp", "label": "SNMP Agent", "x": 350, "y": 30 },
+    { "id": "shodan", "label": "Shodan", "x": 350, "y": 90 },
+    { "id": "report", "label": "HW Report", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "minStep": 0 },
+    { "from": "target", "to": "snmp", "minStep": 0 },
+    { "from": "attacker", "to": "shodan", "minStep": 2 },
+    { "from": "snmp", "to": "report", "minStep": 4 },
+    { "from": "shodan", "to": "report", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Infra", "icon": "📁" },
+    { "name": "hw_inventory.csv", "icon": "📄", "alert": true },
+    { "name": "Shodan Search", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "snmpwalk -v2c -c public 192.168.1.10 1.3.6.1.2.1.25.3.2",
+      "out": "HOST-RESOURCES-MIB::hrDeviceDescr.1 = STRING: GenuineIntel: Intel(R) Xeon(R) E5-2680 v4 @ 2.40GHz\nHOST-RESOURCES-MIB::hrDeviceDescr.2 = STRING: GenuineIntel: Intel(R) Xeon(R) E5-2680 v4 @ 2.40GHz\nHOST-RESOURCES-MIB::hrDeviceDescr.768 = STRING: network interface lo\nHOST-RESOURCES-MIB::hrDeviceDescr.769 = STRING: network interface eth0\nHOST-RESOURCES-MIB::hrDeviceDescr.770 = STRING: network interface eth1\nHOST-RESOURCES-MIB::hrProcessorLoad.1 = INTEGER: 23\nHOST-RESOURCES-MIB::hrProcessorLoad.2 = INTEGER: 45\nHOST-RESOURCES-MIB::hrMemorySize.0 = INTEGER: 65536 KBytes",
+      "def": "[IDS] SNMP community string 'public' used from external IP",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.1.10:161/udp\nAction: SNMP access alert generated, default community string usage flagged",
+      "desc": "SNMP의 기본 커뮤니티 문자열('public')을 사용하여 하드웨어 장치 정보를 열거합니다.",
+      "descEn": "Using SNMP default community string 'public' to enumerate hardware device information.",
+      "stepTitle": "SNMP 하드웨어 장치 열거",
+      "stepTitleEn": "SNMP Hardware Device Enumeration",
+      "feynman": "SNMP는 네트워크 장비의 '건강 검진표'입니다. 기본 비밀번호('public')로 접근하면 CPU가 Intel Xeon인지, 메모리가 얼마인지, 네트워크 카드가 몇 개인지 모두 알 수 있습니다. 마치 병원에서 환자 차트를 열어보는 것과 같습니다.",
+      "feynmanEn": "SNMP is like a network device's health chart. With the default password 'public', you can see if the CPU is Intel Xeon, how much memory there is, and how many network cards exist. Like opening a patient's medical chart at a hospital.",
+      "expert": "SNMPv2c의 HOST-RESOURCES-MIB(OID 1.3.6.1.2.1.25)는 호스트의 하드웨어 리소스를 상세히 노출합니다. hrDeviceTable은 CPU, NIC, 스토리지 디바이스를 열거합니다. 듀얼 NIC(eth0/eth1)은 듀얼홈 호스트를 나타내며 피벗 포인트로 활용 가능합니다.",
+      "expertEn": "SNMPv2c's HOST-RESOURCES-MIB (OID 1.3.6.1.2.1.25) exposes detailed host hardware resources. hrDeviceTable enumerates CPUs, NICs, and storage devices. Dual NICs (eth0/eth1) indicate a dual-homed host usable as a pivot point.",
+      "defTooltip": "🚨 IDS: 외부 IP에서 기본 SNMP 커뮤니티 문자열 'public' 사용 감지",
+      "defTooltipEn": "🚨 IDS: Default SNMP community string 'public' used from external IP",
+      "hackerLog": {
+        "title": "snmp_hw.log",
+        "lines": [
+          { "log": "Intel(R) Xeon(R) E5-2680 v4 @ 2.40GHz", "desc": "서버급 CPU 확인 - 물리 서버로 추정됩니다" },
+          { "log": "network interface eth0, eth1", "desc": "듀얼 NIC - 두 네트워크 세그먼트에 연결된 피벗 포인트 가능성" },
+          { "log": "hrMemorySize.0 = 65536 KBytes", "desc": "64GB RAM - 고성능 서버, 데이터베이스 또는 가상화 호스트 추정" }
+        ]
+      },
+      "terms": [
+        { "name": "SNMP (Simple Network Management Protocol)", "desc": "네트워크 장비를 관리하고 모니터링하는 프로토콜. 기본 커뮤니티 문자열이 변경되지 않으면 정보 유출 위험이 큽니다" },
+        { "name": "OID (Object Identifier)", "desc": "SNMP에서 관리 대상 객체를 식별하는 계층적 번호 체계. 1.3.6.1.2.1은 MIB-2를 나타냅니다" }
+      ]
+    },
+    {
+      "cmd": "snmpwalk -v2c -c public 192.168.1.10 1.3.6.1.2.1.25.6.3.1.2 | head -20",
+      "out": "HOST-RESOURCES-MIB::hrSWInstalledName.1 = STRING: \"linux-image-5.15.0-91-generic 5.15.0-91.101\"\nHOST-RESOURCES-MIB::hrSWInstalledName.2 = STRING: \"openssh-server 1:8.2p1-4ubuntu0.9\"\nHOST-RESOURCES-MIB::hrSWInstalledName.3 = STRING: \"apache2 2.4.41-4ubuntu3.14\"\nHOST-RESOURCES-MIB::hrSWInstalledName.4 = STRING: \"mysql-server-5.7 5.7.38-0ubuntu0.20.04.1\"\nHOST-RESOURCES-MIB::hrSWInstalledName.5 = STRING: \"php8.1 8.1.2-1ubuntu2.14\"\nHOST-RESOURCES-MIB::hrSWInstalledName.6 = STRING: \"docker.io 24.0.5-0ubuntu1\"\nHOST-RESOURCES-MIB::hrSWInstalledName.7 = STRING: \"snmpd 5.9.1+dfsg-5ubuntu1\"",
+      "def": "[SIEM] Extensive SNMP walk on software inventory table detected",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.1.10 (hrSWInstalledTable)\nAction: Complete software inventory exposed, alert escalated",
+      "desc": "SNMP로 설치된 소프트웨어 목록과 정확한 버전 정보까지 추출합니다.",
+      "descEn": "SNMP extracts the installed software list with exact version numbers for vulnerability matching.",
+      "stepTitle": "설치 소프트웨어 인벤토리 추출",
+      "stepTitleEn": "Installed Software Inventory Extraction",
+      "feynman": "하드웨어 정보를 넘어서 어떤 프로그램이 설치되어 있는지까지 알아냅니다. Apache 2.4.41, MySQL 5.7, PHP 8.1 등 정확한 버전을 알면 취약점 데이터베이스에서 맞는 공격 코드를 바로 찾을 수 있습니다.",
+      "feynmanEn": "Beyond hardware info, we discover what programs are installed. Knowing exact versions like Apache 2.4.41, MySQL 5.7, PHP 8.1 lets us immediately find matching exploit code in vulnerability databases.",
+      "expert": "hrSWInstalledTable(OID 1.3.6.1.2.1.25.6.3)은 설치된 모든 패키지를 버전과 함께 노출합니다. 커널 버전(5.15.0-91)은 로컬 권한 상승 취약점 매칭에, Docker 존재는 컨테이너 탈출 공격 가능성을 시사합니다.",
+      "expertEn": "hrSWInstalledTable (OID 1.3.6.1.2.1.25.6.3) exposes all installed packages with versions. Kernel version (5.15.0-91) enables local privilege escalation matching, and Docker presence suggests container escape possibilities.",
+      "defTooltip": "🔍 SIEM: 소프트웨어 인벤토리 테이블에 대한 광범위한 SNMP Walk 감지",
+      "defTooltipEn": "🔍 SIEM: Extensive SNMP walk on software inventory table detected",
+      "hackerLog": {
+        "title": "snmp_software.log",
+        "lines": [
+          { "log": "apache2 2.4.41-4ubuntu3.14", "desc": "Apache 2.4.41 - CVE-2021-41773 경로 순회 취약점 가능" },
+          { "log": "mysql-server-5.7 5.7.38", "desc": "MySQL 5.7은 알려진 권한 상승 취약점이 있습니다" },
+          { "log": "docker.io 24.0.5", "desc": "Docker 설치 확인 - 컨테이너 탈출 공격 벡터" }
+        ]
+      },
+      "terms": [
+        { "name": "Software Inventory", "desc": "시스템에 설치된 모든 소프트웨어 패키지와 버전 목록. 취약점 매칭의 핵심 정보입니다" },
+        { "name": "Container Escape", "desc": "Docker 등 컨테이너 환경에서 호스트 OS로 탈출하는 공격 기법" }
+      ]
+    },
+    {
+      "cmd": "shodan search 'org:\"Target Corp\" country:KR' --fields ip_str,os,product,version,hostnames",
+      "out": "203.0.113.10  Linux     Apache/2.4.41    2.4.41    web.targetcorp.co.kr\n203.0.113.20  Windows   IIS/10.0         10.0      mail.targetcorp.co.kr\n203.0.113.30  Linux     nginx/1.18.0     1.18.0    api.targetcorp.co.kr\n203.0.113.40  Linux     OpenSSH/8.2p1    8.2p1     dev.targetcorp.co.kr\n203.0.113.50  FreeBSD   Fortinet         -         vpn.targetcorp.co.kr\n\nTotal results: 5",
+      "def": "[Threat Intel] Shodan queries for organization's infrastructure detected via API monitoring",
+      "defAction": "Source: Shodan API (third-party)\nTarget: Target Corp public infrastructure\nAction: External reconnaissance activity noted in threat intel feed",
+      "desc": "Shodan 검색 엔진으로 대상 조직의 인터넷 노출 장비와 서비스 정보를 수집합니다.",
+      "descEn": "Using Shodan search engine to gather information about the target organization's internet-exposed devices and services.",
+      "stepTitle": "Shodan 인터넷 장비 검색",
+      "stepTitleEn": "Shodan Internet Device Search",
+      "feynman": "Shodan은 인터넷에 연결된 모든 장비를 검색할 수 있는 '장비 전용 구글'입니다. 회사 이름으로 검색하면 웹 서버, 메일 서버, VPN 게이트웨이 등 인터넷에 노출된 모든 장비와 그 운영체제, 서비스 버전을 볼 수 있습니다.",
+      "feynmanEn": "Shodan is a 'Google for devices' that can search for every device connected to the internet. Searching by company name reveals all exposed devices including web servers, mail servers, VPN gateways, along with their OS and service versions.",
+      "expert": "Shodan은 전 세계 인터넷을 지속적으로 스캔하여 배너 정보를 수집합니다. org 필터는 ASN 기반 조직 검색을 수행합니다. Fortinet VPN 장비 발견은 CVE-2023-27997(FortiOS 힙 오버플로우) 같은 VPN 타겟팅 공격의 시작점입니다.",
+      "expertEn": "Shodan continuously scans the internet to collect banner information. The org filter performs ASN-based organization searches. Discovering Fortinet VPN equipment is a starting point for VPN-targeting attacks like CVE-2023-27997 (FortiOS heap overflow).",
+      "defTooltip": "📡 Threat Intel: Shodan API를 통한 조직 인프라 검색 활동 감지",
+      "defTooltipEn": "📡 Threat Intel: Shodan API queries for organization's infrastructure detected",
+      "hackerLog": {
+        "title": "shodan_results.log",
+        "lines": [
+          { "log": "203.0.113.50 FreeBSD Fortinet vpn.targetcorp.co.kr", "desc": "VPN 장비 노출 - 원격 접근의 핵심 진입점" },
+          { "log": "203.0.113.20 Windows IIS/10.0 mail.targetcorp.co.kr", "desc": "메일 서버 - Exchange 취약점 확인 대상" },
+          { "log": "Total results: 5", "desc": "5대의 인터넷 노출 장비 - 공격 표면이 비교적 작습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Shodan", "desc": "인터넷에 연결된 장비를 검색하는 검색 엔진. 서버, IoT 기기, SCADA 시스템 등을 배너 정보로 검색합니다" },
+        { "name": "Banner Grabbing", "desc": "서비스가 접속 시 보내는 환영 메시지(배너)에서 소프트웨어 이름과 버전을 추출하는 기법" }
+      ]
+    },
+    {
+      "cmd": "nmap -sV -O --osscan-guess 192.168.1.10 -oX nmap_hw_scan.xml",
+      "out": "Starting Nmap 7.94\nNmap scan report for 192.168.1.10\nHost is up (0.0023s latency).\n\nPORT     STATE SERVICE     VERSION\n22/tcp   open  ssh         OpenSSH 8.2p1 Ubuntu 4ubuntu0.9\n80/tcp   open  http        Apache httpd 2.4.41\n3306/tcp open  mysql       MySQL 5.7.38\n\nMAC Address: 00:0C:29:DE:F0:12 (VMware)\nDevice type: general purpose\nRunning: Linux 5.X\nOS CPE: cpe:/o:linux:linux_kernel:5.15\nOS details: Linux 5.15.0 (96% confidence)\nUptime guess: 45.123 days\nNetwork Distance: 1 hop\n\nService Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel",
+      "def": "[IDS] OS fingerprinting attempt detected (TCP/IP stack analysis)",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.1.10\nAction: Nmap OS detection signatures matched, alert generated",
+      "desc": "Nmap의 OS 핑거프린팅으로 운영체제, 커널 버전, 가상머신 여부를 식별합니다.",
+      "descEn": "Nmap OS fingerprinting identifies the operating system, kernel version, and whether the target is a virtual machine.",
+      "stepTitle": "Nmap OS 핑거프린팅",
+      "stepTitleEn": "Nmap OS Fingerprinting",
+      "feynman": "Nmap은 서버에 특수한 패킷을 보내서 '반응'을 분석합니다. 마치 의사가 환자의 무릎을 두드려 반사 반응을 보는 것처럼요. TCP/IP 스택의 미세한 차이로 Linux인지 Windows인지, 커널 버전이 뭔지를 96% 확률로 알아냅니다. VMware MAC 주소는 가상머신임을 확인시켜줍니다.",
+      "feynmanEn": "Nmap sends special packets to analyze the server's 'reactions.' Like a doctor tapping a patient's knee to check reflexes. Subtle differences in the TCP/IP stack reveal whether it's Linux or Windows, with 96% confidence. The VMware MAC address confirms it's a virtual machine.",
+      "expert": "-O 플래그는 TCP/IP 스택 핑거프린팅을 수행합니다. TTL, Window Size, DF 비트, TCP 옵션 순서를 분석하여 OS를 식별합니다. MAC OUI 00:0C:29는 VMware를 나타내며, CPE 표기법은 취약점 데이터베이스 매칭에 사용됩니다. Uptime 정보는 마지막 재부팅(패치) 시점을 추정합니다.",
+      "expertEn": "-O flag performs TCP/IP stack fingerprinting. It analyzes TTL, Window Size, DF bit, and TCP option order to identify the OS. MAC OUI 00:0C:29 indicates VMware, CPE notation enables vulnerability database matching. Uptime info estimates the last reboot (patch) time.",
+      "defTooltip": "🔬 IDS: TCP/IP 스택 분석을 통한 OS 핑거프린팅 시도 감지",
+      "defTooltipEn": "🔬 IDS: OS fingerprinting attempt via TCP/IP stack analysis detected",
+      "hackerLog": {
+        "title": "nmap_os_scan.log",
+        "lines": [
+          { "log": "MAC Address: 00:0C:29:DE:F0:12 (VMware)", "desc": "VMware 가상머신 확인 - ESXi 호스트 타겟팅 가능" },
+          { "log": "Linux 5.15.0 (96% confidence)", "desc": "커널 5.15.0 - 로컬 권한 상승 취약점 매칭 가능" },
+          { "log": "Uptime guess: 45.123 days", "desc": "45일간 재부팅 없음 - 최근 보안 패치 미적용 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "OS Fingerprinting", "desc": "TCP/IP 스택의 구현 차이를 분석하여 대상의 운영체제를 식별하는 기법" },
+        { "name": "CPE (Common Platform Enumeration)", "desc": "소프트웨어, 운영체제, 하드웨어를 표준화된 형식으로 식별하는 명명 규약" }
+      ]
+    },
+    {
+      "cmd": "python3 hw_report.py --snmp snmp_output.txt --shodan shodan_results.json --nmap nmap_hw_scan.xml",
+      "out": "[+] Generating hardware intelligence report...\n\n=== HARDWARE INTEL REPORT ===\nTarget: 192.168.1.10 / 203.0.113.10\n\nHardware:\n  CPU: Intel Xeon E5-2680 v4 (28 cores, x86_64)\n  RAM: 64 GB\n  NIC: 2x Ethernet (eth0: production, eth1: management)\n  Type: VMware Virtual Machine\n  Uptime: 45 days (last reboot: 2026-01-15)\n\nSecurity Hardware:\n  TPM: Not detected\n  HSM: Not detected\n  Disk Encryption: Not detected\n\nImplications:\n  - x86_64 architecture: standard payloads compatible\n  - VMware: ESXi host escalation possible\n  - Dual NIC: pivot point between networks\n  - No TPM/HSM: credential extraction easier\n  - 45-day uptime: likely missing recent patches\n\n[+] Report saved to hw_intel_report.pdf",
+      "def": "[SIEM Correlation] Multi-source hardware reconnaissance campaign completed",
+      "defAction": "Source: SNMP + Shodan + Nmap correlation\nTarget: 192.168.1.10 infrastructure\nAction: Incident created, full reconnaissance campaign documented",
+      "desc": "모든 소스의 하드웨어 정보를 통합하여 공격에 활용할 종합 인텔리전스 보고서를 생성합니다.",
+      "descEn": "All hardware information from multiple sources is consolidated into a comprehensive intelligence report for attack planning.",
+      "stepTitle": "하드웨어 인텔리전스 보고서 생성",
+      "stepTitleEn": "Hardware Intelligence Report Generation",
+      "feynman": "자동차의 모든 정보를 한 장의 보고서로 정리합니다. CPU는 Intel Xeon(서버급), 메모리는 64GB, 가상머신이고, 보안 칩(TPM/HSM)은 없고, 45일 동안 업데이트되지 않았습니다. 이 보고서를 보면 어떤 공격이 가능하고 어떤 방어를 우회해야 하는지 한눈에 파악됩니다.",
+      "feynmanEn": "All vehicle information is compiled into a single report. CPU is Intel Xeon (server-grade), 64GB RAM, running as a VM, no security chips (TPM/HSM), and not updated for 45 days. This report shows at a glance what attacks are possible and what defenses need bypassing.",
+      "expert": "다중 소스(SNMP, Shodan, Nmap) 상관 분석으로 하드웨어 프로파일을 완성합니다. TPM 부재는 BitLocker/LUKS 키 추출을 용이하게 하고, 듀얼홈 NIC은 네트워크 세그먼트 간 피벗에 활용됩니다. VMware 환경은 ESXi 레벨 공격(CVE-2024-37079 등)의 가능성을 시사합니다.",
+      "expertEn": "Multi-source correlation (SNMP, Shodan, Nmap) completes the hardware profile. Absence of TPM facilitates BitLocker/LUKS key extraction, dual-homed NICs enable inter-segment pivoting. VMware environment suggests ESXi-level attacks (CVE-2024-37079 etc.).",
+      "defTooltip": "🗺️ SIEM: SNMP + Shodan + Nmap 다중 소스 하드웨어 정찰 캠페인 완료 감지",
+      "defTooltipEn": "🗺️ SIEM: Multi-source hardware reconnaissance campaign completed",
+      "hackerLog": {
+        "title": "hw_intel_report.log",
+        "lines": [
+          { "log": "Type: VMware Virtual Machine", "desc": "VMware VM - ESXi 호스트로의 탈출 공격 가능" },
+          { "log": "TPM: Not detected, HSM: Not detected", "desc": "하드웨어 보안 모듈 없음 - 자격증명 추출이 용이합니다" },
+          { "log": "Dual NIC: pivot point between networks", "desc": "두 네트워크에 연결 - 내부 네트워크 침투 경로로 활용 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "TPM (Trusted Platform Module)", "desc": "암호화 키를 안전하게 저장하는 하드웨어 보안 칩. 디스크 암호화와 Secure Boot에 사용됩니다" },
+        { "name": "Pivot Point", "desc": "두 개 이상의 네트워크에 연결된 시스템. 공격자가 한 네트워크에서 다른 네트워크로 이동하는 경유지로 활용합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "snmpwalk hw (PID: 4101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "snmpwalk sw (PID: 4145)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "shodan search (PID: 4200)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "nmap -sV -O (PID: 4267)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 hw_report.py (PID: 4310)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

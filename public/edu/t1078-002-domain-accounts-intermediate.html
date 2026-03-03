@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1078.002" data-level="intermediate">
+<head>
+    <!-- ★ 인증 게이트: 로그인 없이 직접 URL 접근 차단 (Supabase 세션 기반) -->
+    <script>
+        (function() {
+            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+            try {
+                var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
+                var session = sessionStorage.getItem(key);
+                if (!session || !JSON.parse(session)) {
+                    var redirect = encodeURIComponent(window.location.href);
+                    window.location.replace('/login?redirect=' + redirect);
+                }
+            } catch(e) {
+                window.location.replace('/login');
+            }
+        })();
+    </script>
+    <!-- ★ 동적 콘텐츠 로더 -->
+    <script>
+        var _eduDynLoaded = false;
+        (async function() {
+            try {
+                var SUPA = 'https://bnwbybawqrnhznirivfg.supabase.co';
+                var KEY  = 'sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';
+                var res = await fetch(
+                    SUPA + '/rest/v1/edu_html_content?page_id=eq.t1078-002-domain-accounts-intermediate&select=content&limit=1',
+                    { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY } }
+                );
+                if (res.ok) {
+                    var data = await res.json();
+                    if (data && data.length > 0 && data[0].content) {
+                        _eduDynLoaded = true;
+                        document.open();
+                        document.write(data[0].content);
+                        document.close();
+                        return;
+                    }
+                }
+            } catch(e) {}
+            document.documentElement.classList.add('edu-ready');
+        })();
+        setTimeout(function() { if (!_eduDynLoaded) document.documentElement.classList.add('edu-ready'); }, 3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1078.002 Domain Accounts 중급: BloodHound 공격 경로 분석">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: blob:;
+        connect-src 'self' https://*.supabase.co;
+        frame-src 'none';
+        object-src 'none';
+        base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1078.002 중급: BloodHound 공격 경로 분석 — (주)갓루트</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        cbg: '#FFF8F0',
+                        cyel: '#F4D06F',
+                        cteal: '#9DD9D2',
+                        cdark: '#1e293b',
+                        cgray: '#475569',
+                        slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            scroll-behavior: smooth;
+            background-color: #FFF8F0;
+            color: #1e293b;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(157, 217, 210, 0.5);
+            box-shadow: 0 8px 32px rgba(30, 41, 59, 0.05);
+        }
+        .dark body { background-color: #0f172a; color: #f8fafc; }
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(244, 208, 111, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .hl-teal { color: #0f766e; font-weight: 700; }
+        .dark .hl-teal { color: #9DD9D2; }
+        .hl-yel { color: #b45309; font-weight: 700; }
+        .dark .hl-yel { color: #F4D06F; }
+        .hl-blue { color: #1d4ed8; font-weight: 700; }
+        .dark .hl-blue { color: #60a5fa; }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%);
+            border-left: 4px solid #3b82f6;
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+        .dark .nav-item.active {
+            background: linear-gradient(90deg, rgba(96, 165, 250, 0.2) 0%, transparent 100%);
+            border-left: 4px solid #60a5fa;
+            color: #60a5fa;
+        }
+        .terminal-bg {
+            background-color: #1e293b;
+            color: #9DD9D2;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .node-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .graph-node {
+            transition: all 0.4s ease;
+            cursor: default;
+        }
+        .graph-node.compromised {
+            background: rgba(239, 68, 68, 0.15) !important;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+        }
+        .graph-edge { transition: stroke 0.6s ease, stroke-width 0.3s; }
+        .graph-edge.active { stroke: #ef4444 !important; stroke-width: 3 !important; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+        .dark ::-webkit-scrollbar-thumb { background: #60a5fa; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-blue-200 selection:text-blue-900 transition-colors duration-300">
+
+    <!-- ★ GOTROOT 브랜드 배너 -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family: 'JetBrains Mono', monospace;">
+        <div class="flex items-center gap-2">
+            <span style="font-size:9px; font-weight:900; color:#bb3e03; letter-spacing:0.25em;">GOTROOT</span>
+            <span style="font-size:8px; color:#94a3b8;">|</span>
+            <span style="font-size:8px; color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span style="font-size:8px; color:#3b82f6; font-weight:700; background:rgba(59,130,246,0.1); padding:2px 8px; border-radius:4px; border:1px solid rgba(59,130,246,0.3);">INTERMEDIATE</span>
+            <button onclick="goToDashboard()" style="font-size:8px; color:#bb3e03; background:transparent; border:1px solid rgba(187,62,3,0.3); padding:3px 10px; border-radius:4px; cursor:pointer; font-family:inherit; transition:all 0.15s;"
+                onmouseover="this.style.background='rgba(187,62,3,0.08)'" onmouseout="this.style.background='transparent'">
+                ← 매트릭스 대시보드
+            </button>
+            <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px; color:rgba(187,62,3,0.5); text-decoration:none;" class="hidden sm:inline"
+                onmouseover="this.style.color='#bb3e03'" onmouseout="this.style.color='rgba(187,62,3,0.5)'">
+                gotroot.co.kr ↗
+            </a>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+
+    <!-- Theme Toggle -->
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-blue-400">
+        <span id="theme-icon" class="text-xl">🌙</span>
+    </button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-blue-400/50 hover:border-blue-400 shadow transition-all">
+        ← 대시보드
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 glass-panel border-r border-blue-400/30 h-full flex flex-col hidden md:flex shrink-0 z-40 relative">
+        <div class="p-6 border-b border-blue-400/30">
+            <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 mb-4 transition-colors group">
+                <span class="group-hover:-translate-x-0.5 transition-transform">←</span>
+                <span>대시보드로 돌아가기</span>
+            </button>
+            <h1 class="text-xl font-bold font-mono hl-blue tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1078.002: Domain Accounts</p>
+            <span class="inline-block mt-2 text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/30 px-2 py-0.5 rounded">🔵 중급 (Intermediate)</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch1">
+                1. AD 공격 경로 이해
+            </button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch2">
+                2. BloodHound 실전 활용
+            </button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch3">
+                3. 탐지와 대응
+            </button>
+            <button onclick="go('ch4')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch4">
+                4. 종합 퀴즈
+            </button>
+        </nav>
+        <div class="p-5 border-t border-blue-400/30 bg-white/50 dark:bg-slate-900/50">
+            <button onclick="goToLab()" class="w-full relative group rounded-lg p-[2px] bg-gradient-to-r from-blue-500 to-indigo-600 transition-all hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                <div class="relative bg-white dark:bg-slate-800 px-4 py-3 rounded-md flex flex-col items-center justify-center gap-1 transition-all group-hover:bg-opacity-80 dark:group-hover:bg-opacity-80">
+                    <span class="text-2xl mb-1">💻</span>
+                    <span class="font-bold text-slate-800 dark:text-white text-sm">실전 시뮬레이터 입장</span>
+                    <span class="text-[10px] text-cgray dark:text-slate-400">BloodHound 해킹 체험</span>
+                </div>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <!-- Title Header -->
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-blue-500/10 border border-blue-400 text-blue-700 dark:text-blue-400 font-mono text-sm mb-4 font-bold">
+                    🔵 Intermediate — Attack Path Analysis
+                </div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">BloodHound 공격 경로 분석</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">Active Directory의 숨겨진 공격 경로를 그래프로 시각화하여 찾아내는 기술</p>
+                <div class="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500">
+                    <span>⏱ 약 30분</span>
+                    <span>·</span>
+                    <span>📚 3챕터 + 퀴즈</span>
+                    <span>·</span>
+                    <span>🧪 3개 미니 랩</span>
+                </div>
+            </header>
+
+            <!-- ═══════════════════ Chapter 1 ═══════════════════ -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white">
+                    <span class="hl-blue">#1.</span> Active Directory 공격 경로 이해
+                </h2>
+                <div class="space-y-6">
+                    <!-- AD 구조 복습 -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🏰</div>
+                        <h3 class="font-bold text-xl mb-4 text-blue-700 dark:text-blue-400">Active Directory는 '왕국의 조직도'</h3>
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">
+                            초급에서 "호텔 마스터키"로 비유한 Domain Admin. 이제 한 단계 깊이 들어갑니다. Active Directory(AD)는 마치 거대한 <strong>왕국의 조직도</strong>와 같습니다.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div class="bg-blue-50 dark:bg-slate-800 p-4 rounded-lg border border-blue-200 dark:border-blue-800 text-center">
+                                <div class="text-3xl mb-2">👑</div>
+                                <div class="font-bold text-sm text-blue-800 dark:text-blue-300">Domain Admin</div>
+                                <div class="text-xs text-slate-500 mt-1">왕 (모든 권한)</div>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-slate-800 p-4 rounded-lg border border-blue-200 dark:border-blue-800 text-center">
+                                <div class="text-3xl mb-2">🛡️</div>
+                                <div class="font-bold text-sm text-blue-800 dark:text-blue-300">Tier 0~2 관리자</div>
+                                <div class="text-xs text-slate-500 mt-1">귀족 (위임 권한)</div>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-slate-800 p-4 rounded-lg border border-blue-200 dark:border-blue-800 text-center">
+                                <div class="text-3xl mb-2">👤</div>
+                                <div class="font-bold text-sm text-blue-800 dark:text-blue-300">Domain User</div>
+                                <div class="text-xs text-slate-500 mt-1">평민 (기본 권한)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 공격 그래프 이론 -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🕸️</div>
+                        <h3 class="font-bold text-xl mb-4 hl-yel">공격 그래프(Attack Graph)란?</h3>
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">
+                            AD의 모든 사용자, 컴퓨터, 그룹, 정책은 서로 <strong>권한 관계</strong>로 연결되어 있습니다. 이 관계들을 <strong>그래프(Graph)</strong>로 그리면, 일반 사용자에서 관리자까지 도달할 수 있는 "숨겨진 길"이 보입니다.
+                        </p>
+                        <div class="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 font-mono text-xs space-y-2 border border-slate-300 dark:border-slate-700">
+                            <div class="text-blue-600 dark:text-blue-400">// 공격 경로 예시</div>
+                            <div class="text-slate-700 dark:text-slate-300">
+                                <span class="text-green-600 dark:text-green-400">Alice (User)</span>
+                                <span class="text-slate-500"> ──[MemberOf]──▶ </span>
+                                <span class="text-yellow-600 dark:text-yellow-400">IT-Support (Group)</span>
+                            </div>
+                            <div class="text-slate-700 dark:text-slate-300">
+                                <span class="text-yellow-600 dark:text-yellow-400">IT-Support</span>
+                                <span class="text-slate-500"> ──[AdminTo]──▶ </span>
+                                <span class="text-orange-600 dark:text-orange-400">FileServer01</span>
+                            </div>
+                            <div class="text-slate-700 dark:text-slate-300">
+                                <span class="text-orange-600 dark:text-orange-400">FileServer01</span>
+                                <span class="text-slate-500"> ──[HasSession]──▶ </span>
+                                <span class="text-red-600 dark:text-red-400">DomainAdmin</span>
+                            </div>
+                            <div class="mt-2 text-red-500 font-bold">→ 3단계만에 Domain Admin 도달 가능!</div>
+                        </div>
+                    </div>
+
+                    <!-- 주요 권한 관계 표 -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-blue">BloodHound가 추적하는 핵심 관계(Edge)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b-2 border-blue-400/30">
+                                        <th class="text-left py-2 px-3 text-blue-700 dark:text-blue-400">관계</th>
+                                        <th class="text-left py-2 px-3 text-blue-700 dark:text-blue-400">의미</th>
+                                        <th class="text-left py-2 px-3 text-blue-700 dark:text-blue-400">위험도</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="py-2 px-3 font-mono text-xs">MemberOf</td>
+                                        <td class="py-2 px-3">그룹 소속 관계</td>
+                                        <td class="py-2 px-3"><span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded text-xs font-bold">보통</span></td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="py-2 px-3 font-mono text-xs">AdminTo</td>
+                                        <td class="py-2 px-3">해당 컴퓨터의 관리자 권한</td>
+                                        <td class="py-2 px-3"><span class="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded text-xs font-bold">높음</span></td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="py-2 px-3 font-mono text-xs">HasSession</td>
+                                        <td class="py-2 px-3">해당 컴퓨터에 로그인 중 (메모리에 인증정보 존재)</td>
+                                        <td class="py-2 px-3"><span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 rounded text-xs font-bold">매우 높음</span></td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="py-2 px-3 font-mono text-xs">GenericAll</td>
+                                        <td class="py-2 px-3">대상 객체의 모든 속성 수정 가능 (비밀번호 변경 포함)</td>
+                                        <td class="py-2 px-3"><span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 rounded text-xs font-bold">치명적</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 px-3 font-mono text-xs">WriteDacl</td>
+                                        <td class="py-2 px-3">대상의 접근 제어 목록(ACL) 변경 가능 → 스스로에게 권한 부여</td>
+                                        <td class="py-2 px-3"><span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 rounded text-xs font-bold">치명적</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mini Lab 1: AD 권한 그래프 시뮬레이션 -->
+                    <div class="bg-white dark:bg-slate-900 border border-blue-400 rounded-xl overflow-hidden mt-8 shadow-sm">
+                        <div class="bg-blue-50 dark:bg-slate-800 px-4 py-3 border-b border-blue-400 flex justify-between items-center font-mono text-sm">
+                            <span class="hl-blue">Mini Lab 1: AD 공격 경로 시각화</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-blue-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-6 text-center">노드를 클릭하여 공격 경로를 따라가 보세요. 일반 사용자에서 Domain Admin까지 도달할 수 있습니까?</p>
+                            <div class="relative bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 min-h-[320px] border border-slate-200 dark:border-slate-700">
+                                <!-- Graph Nodes -->
+                                <svg class="absolute inset-0 w-full h-full" style="z-index:0;">
+                                    <line id="edge-1" class="graph-edge" x1="18%" y1="75%" x2="50%" y2="75%" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6,4" />
+                                    <line id="edge-2" class="graph-edge" x1="50%" y1="75%" x2="82%" y2="75%" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6,4" />
+                                    <line id="edge-3" class="graph-edge" x1="82%" y1="75%" x2="82%" y2="30%" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6,4" />
+                                    <line id="edge-4" class="graph-edge" x1="82%" y1="30%" x2="50%" y2="12%" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6,4" />
+                                    <!-- Edge labels -->
+                                    <text x="34%" y="70%" fill="#94a3b8" font-size="10" font-family="JetBrains Mono" text-anchor="middle">MemberOf</text>
+                                    <text x="66%" y="70%" fill="#94a3b8" font-size="10" font-family="JetBrains Mono" text-anchor="middle">AdminTo</text>
+                                    <text x="90%" y="52%" fill="#94a3b8" font-size="10" font-family="JetBrains Mono" text-anchor="start">HasSession</text>
+                                    <text x="66%" y="17%" fill="#94a3b8" font-size="10" font-family="JetBrains Mono" text-anchor="middle">Credential</text>
+                                </svg>
+
+                                <div id="node-alice" onclick="labGraphStep(1)" class="graph-node absolute bg-green-100 dark:bg-green-900/30 border-2 border-green-500 rounded-lg p-3 text-center cursor-pointer hover:scale-105" style="left:8%;top:62%;z-index:1;">
+                                    <div class="text-2xl">👤</div>
+                                    <div class="text-xs font-bold text-green-700 dark:text-green-400 mt-1">Alice</div>
+                                    <div class="text-[10px] text-slate-500">Domain User</div>
+                                </div>
+                                <div id="node-itgroup" class="graph-node absolute bg-slate-100 dark:bg-slate-800 border-2 border-slate-400 rounded-lg p-3 text-center" style="left:40%;top:62%;z-index:1;">
+                                    <div class="text-2xl">👥</div>
+                                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1">IT-Support</div>
+                                    <div class="text-[10px] text-slate-500">Group</div>
+                                </div>
+                                <div id="node-filesvr" class="graph-node absolute bg-slate-100 dark:bg-slate-800 border-2 border-slate-400 rounded-lg p-3 text-center" style="left:72%;top:62%;z-index:1;">
+                                    <div class="text-2xl">🖥️</div>
+                                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1">FileServer</div>
+                                    <div class="text-[10px] text-slate-500">Computer</div>
+                                </div>
+                                <div id="node-svcadmin" class="graph-node absolute bg-slate-100 dark:bg-slate-800 border-2 border-slate-400 rounded-lg p-3 text-center" style="left:72%;top:17%;z-index:1;">
+                                    <div class="text-2xl">🛡️</div>
+                                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1">SVC-Admin</div>
+                                    <div class="text-[10px] text-slate-500">Tier 1 Admin</div>
+                                </div>
+                                <div id="node-da" class="graph-node absolute bg-slate-100 dark:bg-slate-800 border-2 border-slate-400 rounded-lg p-3 text-center" style="left:40%;top:0%;z-index:1;">
+                                    <div class="text-2xl">👑</div>
+                                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1">Domain Admin</div>
+                                    <div class="text-[10px] text-slate-500">Tier 0</div>
+                                </div>
+                            </div>
+                            <div id="graph-msg" class="mt-4 text-sm font-mono text-center h-12 text-slate-500 dark:text-slate-400 flex items-center justify-center">
+                                👆 <strong class="text-green-600 dark:text-green-400 ml-1">Alice</strong>를 클릭하여 공격을 시작하세요
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════ Chapter 2 ═══════════════════ -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white">
+                    <span class="hl-blue">#2.</span> BloodHound 실전 활용
+                </h2>
+                <div class="space-y-6">
+                    <!-- SharpHound 수집기 -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🐕</div>
+                        <h3 class="font-bold text-xl mb-4 text-red-600 dark:text-red-400">Step 1: SharpHound로 정보 수집</h3>
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">
+                            BloodHound는 크게 두 부분으로 나뉩니다: <strong>SharpHound</strong>(수집기)와 <strong>BloodHound GUI</strong>(분석기). 먼저 SharpHound를 사내 네트워크에서 실행하여 AD의 모든 관계 데이터를 수집합니다.
+                        </p>
+                        <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                            <div class="text-slate-500"># SharpHound 수집 명령 (공격자 관점)</div>
+                            <div class="mt-1">
+                                <span class="text-yellow-400">PS C:\Tools&gt;</span>
+                                <span class="text-white"> .\SharpHound.exe -c All --outputdirectory C:\Loot\</span>
+                            </div>
+                            <div class="mt-2 text-green-400">
+                                [*] Status: 142 name resolutions, 89 computer connections<br>
+                                [*] Enumeration completed in 00:00:34<br>
+                                [*] SharpHound saved: 20260302_BloodHound.zip (2.4 MB)
+                            </div>
+                            <div class="mt-2 text-slate-500"># 수집 항목: 사용자, 그룹, 컴퓨터, 세션, ACL, 트러스트 관계</div>
+                        </div>
+                        <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-3">
+                            <div class="flex items-start gap-2">
+                                <span class="text-amber-500">⚠️</span>
+                                <p class="text-xs text-amber-800 dark:text-amber-300"><strong>방어자 팁:</strong> SharpHound는 대량의 LDAP 쿼리와 SMB 연결을 발생시킵니다. SIEM에서 단시간 내 대량 LDAP 요청(4662 이벤트)을 모니터링하면 탐지할 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Neo4j + BloodHound GUI -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-indigo-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🔍</div>
+                        <h3 class="font-bold text-xl mb-4 text-indigo-600 dark:text-indigo-400">Step 2: BloodHound GUI에서 공격 경로 분석</h3>
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">
+                            수집된 ZIP 파일을 BloodHound(Neo4j 그래프 DB 기반)에 불러오면, AD의 모든 관계가 <strong>그래프</strong>로 시각화됩니다. 내장 쿼리(Pre-built Queries)로 위험한 경로를 즉시 찾을 수 있습니다.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-300 dark:border-indigo-700 rounded-lg p-4">
+                                <h4 class="font-bold text-sm text-indigo-700 dark:text-indigo-300 mb-2">🎯 핵심 쿼리 Top 3</h4>
+                                <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-indigo-500 font-bold">1.</span>
+                                        <span><strong>Find Shortest Path to Domain Admin</strong><br>→ 최단 경로 자동 탐색</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-indigo-500 font-bold">2.</span>
+                                        <span><strong>Find Kerberoastable Users with Admin</strong><br>→ SPN이 설정된 관리자 계정 탐색</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-indigo-500 font-bold">3.</span>
+                                        <span><strong>Find Computers where Domain Users can RDP</strong><br>→ 일반 사용자가 원격 접속 가능한 서버</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="bg-rose-50 dark:bg-rose-900/20 border border-rose-300 dark:border-rose-700 rounded-lg p-4">
+                                <h4 class="font-bold text-sm text-rose-700 dark:text-rose-300 mb-2">🚨 ACL 남용 경로</h4>
+                                <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                                    <li><strong class="text-rose-600 dark:text-rose-400">GenericAll</strong>: 대상의 비밀번호를 강제 리셋</li>
+                                    <li><strong class="text-rose-600 dark:text-rose-400">WriteDacl</strong>: 자신에게 GenericAll 부여 후 공격</li>
+                                    <li><strong class="text-rose-600 dark:text-rose-400">ForceChangePassword</strong>: 비밀번호 변경 강제 (이력 없이)</li>
+                                    <li><strong class="text-rose-600 dark:text-rose-400">AddMember</strong>: 자신을 관리자 그룹에 추가</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Lab 2: BloodHound 쿼리 체험 -->
+                    <div class="bg-white dark:bg-slate-900 border border-blue-400 rounded-xl overflow-hidden mt-8 shadow-sm">
+                        <div class="bg-blue-50 dark:bg-slate-800 px-4 py-3 border-b border-blue-400 flex justify-between items-center font-mono text-sm">
+                            <span class="hl-blue">Mini Lab 2: BloodHound 쿼리 체험</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-blue-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">BloodHound 쿼리를 선택하여 AD 환경의 위험 요소를 분석해 보세요.</p>
+                            <div class="flex flex-col gap-3 max-w-lg mx-auto">
+                                <button onclick="bhQuery(1)" id="bh-q1" class="bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-900/30 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-lg transition flex items-center justify-between px-4 border border-slate-300 dark:border-slate-600 text-sm">
+                                    <span>🎯 Find Shortest Path to Domain Admin</span><span class="text-blue-500">▶</span>
+                                </button>
+                                <button onclick="bhQuery(2)" id="bh-q2" class="bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-900/30 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-lg transition flex items-center justify-between px-4 border border-slate-300 dark:border-slate-600 text-sm">
+                                    <span>🔑 Find Kerberoastable High Value Targets</span><span class="text-blue-500">▶</span>
+                                </button>
+                                <button onclick="bhQuery(3)" id="bh-q3" class="bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-900/30 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-lg transition flex items-center justify-between px-4 border border-slate-300 dark:border-slate-600 text-sm">
+                                    <span>⚡ Find Dangerous ACL Permissions</span><span class="text-blue-500">▶</span>
+                                </button>
+                            </div>
+                            <div id="bh-result" class="hidden mt-6 bg-slate-900 rounded-lg p-4 text-xs font-mono text-green-400 max-h-48 overflow-y-auto border border-slate-700">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════ Chapter 3 ═══════════════════ -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white">
+                    <span class="hl-blue">#3.</span> 방어자의 시선: 탐지와 대응
+                </h2>
+                <div class="space-y-6">
+                    <!-- BloodHound 흔적 분석 -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🔬</div>
+                        <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">SharpHound의 발자국 추적</h3>
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">
+                            공격자가 SharpHound를 실행하면, Windows 이벤트 로그에 <strong>뚜렷한 흔적</strong>이 남습니다. 방어자는 이 패턴을 알면 즉시 탐지할 수 있습니다.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-300 dark:border-emerald-700">
+                                <span class="text-emerald-500 font-mono text-xs font-bold mt-0.5 whitespace-nowrap">4662</span>
+                                <div>
+                                    <div class="text-sm font-bold text-emerald-700 dark:text-emerald-300">대량 LDAP 객체 접근</div>
+                                    <div class="text-xs text-slate-500 mt-1">수 초 내에 수천 건의 AD 객체 조회 → SharpHound 수집 패턴</div>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-300 dark:border-emerald-700">
+                                <span class="text-emerald-500 font-mono text-xs font-bold mt-0.5 whitespace-nowrap">5145</span>
+                                <div>
+                                    <div class="text-sm font-bold text-emerald-700 dark:text-emerald-300">네트워크 공유 접근 열거</div>
+                                    <div class="text-xs text-slate-500 mt-1">모든 컴퓨터의 공유 폴더를 순차적으로 스캔 → 세션 수집</div>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-300 dark:border-emerald-700">
+                                <span class="text-emerald-500 font-mono text-xs font-bold mt-0.5 whitespace-nowrap">4688</span>
+                                <div>
+                                    <div class="text-sm font-bold text-emerald-700 dark:text-emerald-300">프로세스 생성 로그</div>
+                                    <div class="text-xs text-slate-500 mt-1">SharpHound.exe 또는 인메모리 실행 흔적 (부모 프로세스 분석)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 방어 전략 -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <h3 class="font-bold text-xl mb-4 hl-blue">AD 공격 경로 차단 전략</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <h4 class="font-bold text-sm mb-2">🧹 권한 위생 (Privilege Hygiene)</h4>
+                                <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
+                                    <li>• 불필요한 AdminTo, GenericAll 관계 제거</li>
+                                    <li>• 관리자 계정 최소화 (Tiered Admin Model)</li>
+                                    <li>• 서비스 계정 gMSA 전환</li>
+                                </ul>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <h4 class="font-bold text-sm mb-2">🔐 세션 보호</h4>
+                                <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
+                                    <li>• 관리자 계정 일반 워크스테이션 로그인 금지</li>
+                                    <li>• LSA 보호(RunAsPPL) 활성화</li>
+                                    <li>• Credential Guard 적용</li>
+                                </ul>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <h4 class="font-bold text-sm mb-2">📡 모니터링</h4>
+                                <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
+                                    <li>• LDAP 대량 쿼리 임계값 알림</li>
+                                    <li>• ACL 변경 이벤트(5136) 실시간 감시</li>
+                                    <li>• 비정상 그룹 멤버십 변경 감지</li>
+                                </ul>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <h4 class="font-bold text-sm mb-2">🛡️ 선제적 방어</h4>
+                                <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
+                                    <li>• 방어자도 BloodHound를 정기 실행하여 경로 점검</li>
+                                    <li>• PingCastle, Purple Knight로 AD 보안 점수 측정</li>
+                                    <li>• 허니팟 계정으로 공격자 유인</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Lab 3: 이벤트 로그 분석 -->
+                    <div class="bg-white dark:bg-slate-900 border border-blue-400 rounded-xl overflow-hidden mt-8 shadow-sm">
+                        <div class="bg-blue-50 dark:bg-slate-800 px-4 py-3 border-b border-blue-400 flex justify-between items-center font-mono text-sm">
+                            <span class="hl-blue">Mini Lab 3: 이벤트 로그에서 이상 징후 찾기</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-blue-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">아래 이벤트 로그 중 SharpHound 수집 흔적을 모두 찾아 클릭하세요.</p>
+                            <div class="space-y-2 max-w-lg mx-auto" id="log-container">
+                                <div onclick="checkLog(this, true)" class="log-entry cursor-pointer bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs font-mono hover:border-blue-400 transition flex justify-between items-center">
+                                    <span><span class="text-slate-400">[08:31:02]</span> <span class="text-yellow-600">4624</span> User: jkim — Logon Type 10 (RDP)</span>
+                                    <span class="log-badge hidden"></span>
+                                </div>
+                                <div onclick="checkLog(this, true)" class="log-entry cursor-pointer bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs font-mono hover:border-blue-400 transition flex justify-between items-center">
+                                    <span><span class="text-slate-400">[08:32:15]</span> <span class="text-red-600">4662</span> User: alice — <strong>2,847 AD objects accessed in 12 seconds</strong></span>
+                                    <span class="log-badge hidden"></span>
+                                </div>
+                                <div onclick="checkLog(this, false)" class="log-entry cursor-pointer bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs font-mono hover:border-blue-400 transition flex justify-between items-center">
+                                    <span><span class="text-slate-400">[08:33:44]</span> <span class="text-blue-600">4768</span> User: svc_sql — TGT Request (AES256)</span>
+                                    <span class="log-badge hidden"></span>
+                                </div>
+                                <div onclick="checkLog(this, true)" class="log-entry cursor-pointer bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs font-mono hover:border-blue-400 transition flex justify-between items-center">
+                                    <span><span class="text-slate-400">[08:32:18]</span> <span class="text-red-600">5145</span> User: alice — <strong>Sequential share access on 89 computers</strong></span>
+                                    <span class="log-badge hidden"></span>
+                                </div>
+                                <div onclick="checkLog(this, false)" class="log-entry cursor-pointer bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs font-mono hover:border-blue-400 transition flex justify-between items-center">
+                                    <span><span class="text-slate-400">[08:35:02]</span> <span class="text-green-600">4634</span> User: jkim — Logoff</span>
+                                    <span class="log-badge hidden"></span>
+                                </div>
+                                <div onclick="checkLog(this, true)" class="log-entry cursor-pointer bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs font-mono hover:border-blue-400 transition flex justify-between items-center">
+                                    <span><span class="text-slate-400">[08:32:20]</span> <span class="text-red-600">4688</span> Process: <strong>SharpHound.exe</strong> — Parent: powershell.exe</span>
+                                    <span class="log-badge hidden"></span>
+                                </div>
+                            </div>
+                            <div id="log-result" class="hidden mt-4 text-center text-sm font-bold p-3 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════ Chapter 4: Quiz ═══════════════════ -->
+            <section id="ch4" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white">
+                    <span class="hl-blue">#4.</span> 종합 퀴즈
+                </h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="quiz-container" class="space-y-8">
+                        <!-- Q1 -->
+                        <div class="quiz-q" data-correct="2">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. BloodHound에서 "HasSession" 관계가 위험한 이유는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q1" value="1" class="mr-3"> 해당 사용자의 이메일을 읽을 수 있기 때문
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q1" value="2" class="mr-3"> 로그인 중인 사용자의 인증 정보(Hash/Ticket)가 메모리에 남아있어 탈취 가능하기 때문
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q1" value="3" class="mr-3"> 세션이 있으면 자동으로 관리자 권한이 부여되기 때문
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Q2 -->
+                        <div class="quiz-q" data-correct="3">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. 방어자가 SharpHound 실행을 탐지하기 위해 가장 먼저 확인해야 할 이벤트 로그는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q2" value="1" class="mr-3"> 4624 (로그온 성공)
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q2" value="2" class="mr-3"> 4769 (TGS 요청)
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q2" value="3" class="mr-3"> 4662 (대량 LDAP 객체 접근) + 5145 (네트워크 공유 열거)
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Q3 -->
+                        <div class="quiz-q" data-correct="1">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q3. AD 공격 경로를 줄이기 위한 가장 효과적인 방법은?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q3" value="1" class="mr-3"> Tiered Admin Model 적용 + 불필요한 ACL 관계 정리 + 관리자 세션 분리
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q3" value="2" class="mr-3"> 모든 사용자의 비밀번호를 매주 변경하도록 강제
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q3" value="3" class="mr-3"> BloodHound를 완전히 차단하면 공격자가 경로를 찾지 못함
+                                </label>
+                            </div>
+                        </div>
+                        <button onclick="checkQuiz()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-blue-400">
+                            정답 확인
+                        </button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                </div>
+            </section>
+
+            <!-- Final CTA -->
+            <div class="pt-12 pb-8 text-center border-t border-blue-400/30 mt-16">
+                <div class="inline-block bg-blue-500/10 text-blue-700 dark:text-blue-400 px-4 py-1 rounded-full font-bold text-sm mb-4 border border-blue-400">
+                    🎉 Intermediate Course Completed
+                </div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">다음 단계: 고급 과정</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">
+                    BloodHound 공격 경로 분석을 마스터했습니다! 이제 고급 과정에서 <strong>Kerberoasting 공격</strong>의 전 과정을 깊이 파고들어, 서비스 계정 비밀번호를 탈취하는 실전 기술을 배워보세요.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="goToAdvanced()" class="inline-flex items-center gap-3 bg-gradient-to-r from-red-500 to-rose-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl">
+                        <span class="text-2xl">🔴</span>
+                        <span>고급 과정으로 이동하기</span>
+                    </button>
+                    <button onclick="goToLab()" class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl">
+                        <span class="text-2xl">🚀</span>
+                        <span>실전 시뮬레이터 입장</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ── 네비게이션 ──
+        function go(id) {
+            var el = document.getElementById(id);
+            if (el) document.getElementById('main-scroll').scrollTo({ top: el.offsetTop - 40, behavior: 'smooth' });
+        }
+        function goToLab() { window.location.href = '/lab/t1078'; }
+        function goToDashboard() { window.location.href = '/'; }
+        function goToAdvanced() { window.location.href = '/edu/t1078-002-domain-accounts-advanced.html'; }
+
+        // ── IntersectionObserver ──
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    var id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-item').forEach(function(nav) {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-target') === id) nav.classList.add('active');
+                    });
+                }
+            });
+        }, {
+            root: document.getElementById('main-scroll'),
+            rootMargin: '0px 0px -40% 0px',
+            threshold: 0.1
+        });
+        document.querySelectorAll('.section-observe').forEach(function(s) { observer.observe(s); });
+
+        // ── 테마 토글 ──
+        function toggleTheme() {
+            var html = document.documentElement;
+            var icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark'); html.classList.add('light'); icon.textContent = '☀️';
+            } else {
+                html.classList.remove('light'); html.classList.add('dark'); icon.textContent = '🌙';
+            }
+        }
+
+        // ── Mini Lab 1: 그래프 공격 경로 시뮬레이션 ──
+        var graphStep = 0;
+        function labGraphStep(step) {
+            if (graphStep >= 4) return;
+            graphStep++;
+            var msg = document.getElementById('graph-msg');
+
+            if (graphStep === 1) {
+                document.getElementById('node-alice').classList.add('compromised');
+                document.getElementById('edge-1').classList.add('active');
+                setTimeout(function() {
+                    document.getElementById('node-itgroup').classList.add('compromised');
+                    msg.innerHTML = '<span class="text-blue-500">Alice는 IT-Support 그룹의 멤버 → 그룹 권한을 상속받습니다</span>';
+                    document.getElementById('node-itgroup').style.cursor = 'pointer';
+                    document.getElementById('node-itgroup').onclick = function() { labGraphStep(2); };
+                }, 600);
+            } else if (graphStep === 2) {
+                document.getElementById('edge-2').classList.add('active');
+                setTimeout(function() {
+                    document.getElementById('node-filesvr').classList.add('compromised');
+                    msg.innerHTML = '<span class="text-orange-500">IT-Support는 FileServer의 로컬 관리자 → 서버 장악!</span>';
+                    document.getElementById('node-filesvr').style.cursor = 'pointer';
+                    document.getElementById('node-filesvr').onclick = function() { labGraphStep(3); };
+                }, 600);
+            } else if (graphStep === 3) {
+                document.getElementById('edge-3').classList.add('active');
+                setTimeout(function() {
+                    document.getElementById('node-svcadmin').classList.add('compromised');
+                    msg.innerHTML = '<span class="text-red-500">FileServer에 SVC-Admin의 세션 발견 → 인증 정보(Hash) 탈취!</span>';
+                    document.getElementById('node-svcadmin').style.cursor = 'pointer';
+                    document.getElementById('node-svcadmin').onclick = function() { labGraphStep(4); };
+                }, 600);
+            } else if (graphStep === 4) {
+                document.getElementById('edge-4').classList.add('active');
+                setTimeout(function() {
+                    document.getElementById('node-da').classList.add('compromised');
+                    document.getElementById('node-da').classList.add('node-pulse');
+                    msg.innerHTML = '<span class="text-red-600 font-bold">🔓 Domain Admin 탈취 완료! Alice에서 4단계만에 도달.</span>';
+                }, 600);
+            }
+        }
+
+        // ── Mini Lab 2: BloodHound 쿼리 체험 ──
+        function bhQuery(num) {
+            var resultBox = document.getElementById('bh-result');
+            resultBox.classList.remove('hidden');
+            var results = {
+                1: [
+                    '<span class="text-yellow-400">MATCH p=shortestPath((n:User {name:"ALICE@CORP.LOCAL"})-[*1..]->(m:Group {name:"DOMAIN ADMINS@CORP.LOCAL"}))</span>',
+                    '<span class="text-yellow-400">RETURN p</span>',
+                    '',
+                    '<span class="text-green-400">[*] Found 3 paths:</span>',
+                    '',
+                    '<span class="text-white">Path 1 (4 hops):</span>',
+                    '  Alice ──[MemberOf]──▶ IT-Support',
+                    '  IT-Support ──[AdminTo]──▶ FILESERVER01',
+                    '  SVC-Admin ──[HasSession]──▶ FILESERVER01',
+                    '  SVC-Admin ──[MemberOf]──▶ Domain Admins',
+                    '',
+                    '<span class="text-white">Path 2 (5 hops):</span>',
+                    '  Alice ──[MemberOf]──▶ HR-Team',
+                    '  HR-Team ──[GenericAll]──▶ svc_backup',
+                    '  svc_backup ──[AdminTo]──▶ DC01',
+                    '  ...truncated',
+                    '',
+                    '<span class="text-red-400">[!] Critical: 2 paths under 5 hops to Domain Admin</span>'
+                ],
+                2: [
+                    '<span class="text-yellow-400">MATCH (u:User) WHERE u.hasspn=true AND u.admincount=true</span>',
+                    '<span class="text-yellow-400">RETURN u.name, u.serviceprincipalnames</span>',
+                    '',
+                    '<span class="text-green-400">[*] Found 2 Kerberoastable High Value Targets:</span>',
+                    '',
+                    '  <span class="text-red-400">svc_sql@CORP.LOCAL</span>',
+                    '    SPN: MSSQLSvc/SQLSERVER01.corp.local:1433',
+                    '    Groups: Domain Admins, Server Operators',
+                    '    Password Last Set: 2024-06-15 <span class="text-yellow-400">(619 days ago!)</span>',
+                    '',
+                    '  <span class="text-red-400">svc_exchange@CORP.LOCAL</span>',
+                    '    SPN: HTTP/MAIL.corp.local',
+                    '    Groups: Organization Management',
+                    '    Password Last Set: 2023-11-02 <span class="text-yellow-400">(844 days ago!)</span>',
+                    '',
+                    '<span class="text-red-400">[!] HIGH RISK: Service accounts with admin privileges + old passwords = Kerberoastable!</span>'
+                ],
+                3: [
+                    '<span class="text-yellow-400">MATCH p=(u:User)-[:GenericAll|WriteDacl|WriteOwner|ForceChangePassword]->(t)</span>',
+                    '<span class="text-yellow-400">WHERE NOT u.name STARTS WITH "ADMIN"</span>',
+                    '<span class="text-yellow-400">RETURN u.name, type(r), t.name</span>',
+                    '',
+                    '<span class="text-green-400">[*] Found 7 dangerous ACL permissions:</span>',
+                    '',
+                    '  <span class="text-orange-400">helpdesk_svc</span> ──[<span class="text-red-400">GenericAll</span>]──▶ Domain Admins',
+                    '  <span class="text-orange-400">alice</span> ──[<span class="text-red-400">WriteDacl</span>]──▶ svc_backup',
+                    '  <span class="text-orange-400">bob</span> ──[<span class="text-red-400">ForceChangePassword</span>]──▶ admin_tier2',
+                    '  <span class="text-orange-400">IT-Support</span> ──[<span class="text-red-400">GenericAll</span>]──▶ 12 user accounts',
+                    '  ...3 more',
+                    '',
+                    '<span class="text-red-400">[!] CRITICAL: helpdesk_svc has GenericAll on Domain Admins group!</span>',
+                    '<span class="text-red-400">[!] This allows adding any user to Domain Admins</span>'
+                ]
+            };
+
+            resultBox.innerHTML = results[num].join('<br>');
+
+            // Highlight selected button
+            ['bh-q1','bh-q2','bh-q3'].forEach(function(id) {
+                var btn = document.getElementById(id);
+                btn.classList.remove('bg-blue-100','dark:bg-blue-900/40','border-blue-500');
+                btn.classList.add('bg-slate-100','dark:bg-slate-800');
+            });
+            var activeBtn = document.getElementById('bh-q' + num);
+            activeBtn.classList.remove('bg-slate-100','dark:bg-slate-800');
+            activeBtn.classList.add('bg-blue-100','dark:bg-blue-900/40','border-blue-500');
+        }
+
+        // ── Mini Lab 3: 이벤트 로그 분석 ──
+        var logCorrectCount = 0;
+        var logTotalCorrect = 3; // 4662 대량접근, 5145 공유열거, 4688 프로세스
+        var logClicked = 0;
+        function checkLog(el, isCorrect) {
+            if (el.classList.contains('checked')) return;
+            el.classList.add('checked');
+            logClicked++;
+            var badge = el.querySelector('.log-badge');
+            badge.classList.remove('hidden');
+
+            if (isCorrect) {
+                logCorrectCount++;
+                el.classList.remove('border-slate-200','dark:border-slate-700');
+                el.classList.add('border-red-500','bg-red-50','dark:bg-red-900/20');
+                badge.textContent = '🚨 탐지!';
+                badge.className = 'log-badge text-red-600 dark:text-red-400 font-bold text-xs';
+            } else {
+                el.classList.remove('border-slate-200','dark:border-slate-700');
+                el.classList.add('border-green-400','bg-green-50','dark:bg-green-900/20');
+                badge.textContent = '✅ 정상';
+                badge.className = 'log-badge text-green-600 dark:text-green-400 font-bold text-xs';
+            }
+
+            // Check if all correct ones found
+            if (logCorrectCount === logTotalCorrect) {
+                var result = document.getElementById('log-result');
+                result.classList.remove('hidden');
+                result.className = 'mt-4 text-center text-sm font-bold p-3 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-400';
+                result.innerHTML = '🎯 SharpHound 흔적 3개 모두 탐지 성공! (4662 대량 LDAP 접근 + 5145 공유 열거 + 4688 프로세스 실행)';
+            }
+        }
+
+        // ── 퀴즈 ──
+        function checkQuiz() {
+            var total = 3;
+            var correct = 0;
+            for (var i = 1; i <= total; i++) {
+                var selected = document.querySelector('input[name="q' + i + '"]:checked');
+                if (!selected) { alert('모든 문항에 답을 선택해주세요.'); return; }
+                var correctVal = selected.closest('.quiz-q').getAttribute('data-correct');
+                if (selected.value === correctVal) correct++;
+            }
+            var resultBox = document.getElementById('quiz-result');
+            resultBox.classList.remove('hidden','bg-blue-100','text-blue-700','bg-red-100','text-red-700','dark:bg-blue-900/30','dark:text-blue-400','dark:bg-red-900/30','dark:text-red-400');
+            if (correct === total) {
+                resultBox.classList.add('bg-blue-100','border','border-blue-400','text-blue-700','dark:bg-blue-900/30','dark:text-blue-400');
+                resultBox.innerHTML = '🎉 ' + correct + '/' + total + ' 전문 만점! BloodHound 공격 경로 분석을 완벽히 이해하셨습니다.';
+            } else if (correct >= 2) {
+                resultBox.classList.add('bg-blue-100','border','border-blue-400','text-blue-700','dark:bg-blue-900/30','dark:text-blue-400');
+                resultBox.innerHTML = '👍 ' + correct + '/' + total + ' 잘 하셨습니다! 틀린 문항을 다시 복습해 보세요.';
+            } else {
+                resultBox.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/30','dark:text-red-400');
+                resultBox.innerHTML = '📚 ' + correct + '/' + total + ' — 챕터를 다시 읽어보신 후 재도전해 주세요.';
+            }
+        }
+
+        window.onload = function() { setTimeout(function() { go('ch1'); }, 100); };
+    </script>
+
+    </div><!-- /기존 레이아웃 래퍼 -->
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

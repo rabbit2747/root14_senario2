@@ -1,0 +1,199 @@
+{
+  "id": "T1562.001",
+  "title": "Disable or Modify Tools 시뮬레이션",
+  "titleEn": "Disable or Modify Tools Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🛡️ Defender 비활성화", "labelEn": "🛡️ Defender Disable", "steps": [0] },
+    { "label": "🔇 Sysmon 제거", "labelEn": "🔇 Sysmon Removal", "steps": [1] },
+    { "label": "🔥 방화벽 중지", "labelEn": "🔥 Firewall Disable", "steps": [2] },
+    { "label": "⚡ BYOVD 공격", "labelEn": "⚡ BYOVD Attack", "steps": [3] },
+    { "label": "🔍 탐지 분석", "labelEn": "🔍 Detection Analysis", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Admin)", "x": 50, "y": 80 },
+    { "id": "defender", "label": "Windows\nDefender", "x": 200, "y": 30 },
+    { "id": "sysmon", "label": "Sysmon\nService", "x": 200, "y": 130 },
+    { "id": "firewall", "label": "Windows\nFirewall", "x": 350, "y": 30 },
+    { "id": "edr", "label": "EDR\nAgent", "x": 350, "y": 130 },
+    { "id": "blind", "label": "Blind\nSpot", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "defender", "minStep": 0 },
+    { "from": "attacker", "to": "sysmon", "minStep": 1 },
+    { "from": "attacker", "to": "firewall", "minStep": 2 },
+    { "from": "attacker", "to": "edr", "minStep": 3 },
+    { "from": "defender", "to": "blind", "minStep": 0 },
+    { "from": "sysmon", "to": "blind", "minStep": 1 }
+  ],
+  "desktopIcons": [
+    { "name": "PowerShell (Admin)", "icon": "⚡" },
+    { "name": "Windows Security", "icon": "🛡️" },
+    { "name": "Services.msc", "icon": "⚙️" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "Task Manager", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "Set-MpPreference -DisableRealtimeMonitoring $true\nAdd-MpPreference -ExclusionPath 'C:\\Users\\victim\\AppData\\Local\\Temp'\nGet-MpPreference | Select DisableRealtimeMonitoring,ExclusionPath",
+      "out": "DisableRealtimeMonitoring : True\nExclusionPath             : {C:\\Users\\victim\\AppData\\Local\\Temp}\n\n[*] Windows Defender Real-time Protection: DISABLED\n[*] Exclusion added: C:\\Users\\victim\\AppData\\Local\\Temp\n[*] All files in exclusion path will bypass scanning\n\n[이벤트 로그]\nEvent ID 5001: MALWAREPROTECTION_RTP_DISABLED\nEvent ID 5007: MALWAREPROTECTION_CONFIG_CHANGED\n  Old Value: DisableRealtimeMonitoring = 0\n  New Value: DisableRealtimeMonitoring = 1",
+      "def": "[SIEM] Windows Defender real-time protection disabled + exclusion path added",
+      "defAction": "Tool: Set-MpPreference (PowerShell)\nAction 1: DisableRealtimeMonitoring = True\nAction 2: ExclusionPath = %TEMP%\nEvent IDs: 5001 (RTP disabled), 5007 (config changed)\nRisk Level: Critical\nAction: Enable Tamper Protection, restore settings via Intune",
+      "desc": "공격자가 Windows Defender의 실시간 보호를 비활성화하고, Temp 폴더를 제외 경로에 추가합니다. Event ID 5001(실시간 보호 비활성화)과 5007(설정 변경)이 기록됩니다.",
+      "descEn": "The attacker disables Windows Defender real-time protection and adds Temp folder to exclusion paths. Event ID 5001 (RTP disabled) and 5007 (config changed) are logged.",
+      "stepTitle": "Windows Defender 실시간 보호 비활성화 및 제외 경로 추가",
+      "stepTitleEn": "Disable Windows Defender Real-Time Protection and Add Exclusions",
+      "feynman": "집의 보안 시스템(Defender)에서 모니터를 끄고(실시간 보호 비활성화), 특정 방(Temp 폴더)의 CCTV를 아예 제거하는(제외 경로) 것입니다. 이제 그 방에서는 무슨 일이 일어나도 경보가 울리지 않습니다.",
+      "feynmanEn": "Turning off the security monitor (real-time protection) and removing CCTV from a specific room (Temp folder exclusion). Now anything happening in that room triggers no alarms.",
+      "expert": "Set-MpPreference는 WMI의 MSFT_MpPreference 클래스를 통해 Defender 설정을 변경합니다. DisableRealtimeMonitoring=$true는 IOAV(In-Operation Anti-Virus) 스캔을 중지합니다. ExclusionPath는 AMSI, IOAV, 실시간 스캔 모두에서 해당 경로를 무시합니다. Tamper Protection이 활성화되면 이 명령이 차단됩니다.",
+      "expertEn": "Set-MpPreference modifies Defender settings via WMI MSFT_MpPreference class. DisableRealtimeMonitoring=$true stops IOAV scanning. ExclusionPath bypasses AMSI, IOAV, and real-time scanning. Tamper Protection blocks these commands when enabled.",
+      "defTooltip": "🔐 Defender 실시간 보호 비활성화! Temp 폴더 제외!",
+      "defTooltipEn": "🔐 Defender real-time protection disabled! Temp folder excluded!",
+      "hackerLog": {
+        "title": "defender_disable.log",
+        "lines": [
+          "[09:30:00] Set-MpPreference 실행",
+          "[09:30:01] 실시간 보호: True → False",
+          "[09:30:02] 제외 경로 추가: %TEMP%",
+          "[09:30:03] Event ID 5001, 5007 발생"
+        ]
+      },
+      "terms": [
+        { "term": "Tamper Protection", "def": "Windows Defender 설정이 악의적으로 변경되는 것을 차단하는 기능" },
+        { "term": "AMSI", "def": "Anti-Malware Scan Interface, 스크립트 실행 시 악성 여부를 검사하는 인터페이스" }
+      ]
+    },
+    {
+      "cmd": "sysmon -u force\nsc stop Sysmon64\nsc delete Sysmon64\nsc query Sysmon64",
+      "out": "System Monitor v15.0 - System activity monitor\nBy Mark Russinovich and Thomas Garnier\nCopyright (C) 2014-2024 Microsoft Corporation\nSysmon removed.\n\n[SC] ControlService FAILED 1062:\n The service has not been started.\n\n[SC] DeleteService SUCCESS\n\n[SC] QueryService FAILED 1060:\n The specified service does not exist.\n\n[*] Sysmon completely removed\n[*] No more process creation, network, file events logged\n[*] Attacker activity now invisible to SIEM",
+      "def": "[SIEM] Sysmon service stopped and deleted - critical visibility loss",
+      "defAction": "Tool: sysmon -u force + sc delete\nService: Sysmon64\nStatus: Completely removed\nImpact: Loss of process creation, network, file creation events\nRisk Level: Critical\nAction: Redeploy Sysmon immediately, investigate who removed it",
+      "desc": "Sysmon 서비스를 강제 제거합니다. 프로세스 생성(Event ID 1), 네트워크 연결(Event ID 3), 파일 생성(Event ID 11) 등의 모든 모니터링이 중단되어 SIEM이 맹목 상태가 됩니다.",
+      "descEn": "Sysmon service is forcefully removed. All monitoring of process creation (Event ID 1), network connections (Event ID 3), file creation (Event ID 11) stops, leaving SIEM blind.",
+      "stepTitle": "Sysmon 강제 제거로 이벤트 모니터링 무력화",
+      "stepTitleEn": "Forcefully Remove Sysmon to Disable Event Monitoring",
+      "feynman": "건물의 모든 CCTV(Sysmon)를 철거하는 것입니다. 누가 들어오고(프로세스 생성), 전화를 걸고(네트워크 연결), 파일을 만지는지(파일 생성) 아무것도 기록되지 않습니다. 보안 센터(SIEM)는 완전히 눈이 멀어집니다.",
+      "feynmanEn": "Removing all CCTV cameras (Sysmon) from the building. No recording of who enters (process creation), makes calls (network connection), or touches files (file creation). The security center (SIEM) becomes completely blind.",
+      "expert": "sysmon -u force는 Sysmon 필터 드라이버(SysmonDrv)와 서비스를 함께 제거합니다. sc delete는 서비스 레지스트리 항목을 삭제합니다. Sysmon은 커널 모드 드라이버로 동작하므로 제거에 관리자 권한이 필요합니다. 방어를 위해 Sysmon 바이너리 경로를 변경하고, Protected Process Light(PPL)로 보호할 수 있습니다.",
+      "expertEn": "sysmon -u force removes both the Sysmon filter driver (SysmonDrv) and service. sc delete removes service registry entries. Sysmon operates as a kernel-mode driver, requiring admin rights to remove. Defense includes renaming Sysmon binary path and PPL protection.",
+      "defTooltip": "🔐 Sysmon 완전 제거! 모든 이벤트 모니터링 중단!",
+      "defTooltipEn": "🔐 Sysmon completely removed! All event monitoring stopped!",
+      "hackerLog": {
+        "title": "sysmon_remove.log",
+        "lines": [
+          "[09:35:00] sysmon -u force 실행",
+          "[09:35:02] 드라이버 언로드 완료",
+          "[09:35:03] sc delete Sysmon64 성공",
+          "[09:35:05] SIEM 이벤트 수신 중단 확인"
+        ]
+      },
+      "terms": [
+        { "term": "Sysmon", "def": "Windows 시스템 활동(프로세스, 네트워크, 파일)을 상세 기록하는 모니터링 도구" },
+        { "term": "Filter Driver", "def": "커널 레벨에서 I/O 요청을 가로채어 모니터링하는 드라이버" }
+      ]
+    },
+    {
+      "cmd": "netsh advfirewall set allprofiles state off\nnetsh advfirewall show allprofiles state",
+      "out": "Ok.\n\nDomain Profile Settings:\n----------------------------------------------------------------------\nState                                 OFF\n\nPrivate Profile Settings:\n----------------------------------------------------------------------\nState                                 OFF\n\nPublic Profile Settings:\n----------------------------------------------------------------------\nState                                 OFF\n\n[*] All Windows Firewall profiles disabled\n[*] Inbound/Outbound rules no longer enforced\n[*] C2 communication unrestricted\n[*] Lateral movement ports open (445, 3389, 5985)",
+      "def": "[SIEM] Windows Firewall disabled on all profiles - network security compromised",
+      "defAction": "Tool: netsh advfirewall\nFirewall Status: OFF (all profiles)\nImpact: All inbound/outbound rules bypassed\nExposed Ports: 445 (SMB), 3389 (RDP), 5985 (WinRM)\nRisk Level: Critical\nAction: Re-enable firewall, investigate C2 traffic",
+      "desc": "Windows 방화벽을 모든 프로필(Domain, Private, Public)에서 비활성화합니다. 모든 인바운드/아웃바운드 규칙이 무효화되어 C2 통신과 횡적 이동이 제약 없이 가능해집니다.",
+      "descEn": "Windows Firewall is disabled on all profiles (Domain, Private, Public). All inbound/outbound rules are nullified, enabling unrestricted C2 communication and lateral movement.",
+      "stepTitle": "Windows 방화벽 전체 프로필 비활성화",
+      "stepTitleEn": "Disable Windows Firewall on All Profiles",
+      "feynman": "건물의 모든 출입구 잠금장치(방화벽)를 풀어놓는 것입니다. 어떤 문(포트)으로든 자유롭게 드나들 수 있게 되어, 범인은 다른 건물(횡적 이동)로 이동하거나 본부(C2)와 마음대로 연락할 수 있습니다.",
+      "feynmanEn": "Unlocking all entry points (firewall) in the building. Any door (port) can be freely accessed, allowing the criminal to move to other buildings (lateral movement) or communicate with headquarters (C2) freely.",
+      "expert": "netsh advfirewall set allprofiles state off는 WFP(Windows Filtering Platform) 규칙 적용을 중단합니다. 이후 SMB(445), RDP(3389), WinRM(5985) 등 관리 포트가 노출됩니다. GPO 'Windows Defender Firewall: Protect all network connections'로 방화벽 비활성화를 방지할 수 있으며, Intune Endpoint Security에서도 관리됩니다.",
+      "expertEn": "netsh advfirewall stops WFP rule enforcement. Management ports like SMB(445), RDP(3389), WinRM(5985) become exposed. GPO 'Protect all network connections' prevents firewall disable. Also managed via Intune Endpoint Security.",
+      "defTooltip": "🔐 방화벽 전체 비활성화! 모든 포트 노출!",
+      "defTooltipEn": "🔐 All firewall profiles disabled! All ports exposed!",
+      "hackerLog": {
+        "title": "firewall_disable.log",
+        "lines": [
+          "[09:40:00] netsh advfirewall 실행",
+          "[09:40:01] Domain Profile: OFF",
+          "[09:40:01] Private Profile: OFF",
+          "[09:40:01] Public Profile: OFF"
+        ]
+      },
+      "terms": [
+        { "term": "WFP", "def": "Windows Filtering Platform, 네트워크 패킷 필터링을 위한 Windows 프레임워크" },
+        { "term": "Lateral Movement", "def": "침해된 네트워크 내에서 다른 시스템으로 이동하는 공격 행위" }
+      ]
+    },
+    {
+      "cmd": "# BYOVD (Bring Your Own Vulnerable Driver) 공격\nsc create VulnDriver type=kernel binPath=C:\\temp\\vuln_driver.sys\nsc start VulnDriver\n# 취약 드라이버를 통해 EDR 프로세스 강제 종료\nkill_edr.exe --driver VulnDriver --target CrowdStrike",
+      "out": "[SC] CreateService SUCCESS\n[SC] StartService SUCCESS\n\n[*] Vulnerable driver loaded: vuln_driver.sys\n[*] Driver version: Dell dbutil_2_3.sys (CVE-2021-21551)\n[*] Kernel access acquired via vulnerable IOCTL\n\n[*] Terminating EDR processes:\n  [KILL] CsFalconService.exe (PID 2847) → Terminated\n  [KILL] CSFalconContainer.exe (PID 2848) → Terminated\n  [KILL] MsMpEng.exe (PID 1204) → Terminated\n\n[*] EDR and AV processes killed via kernel driver\n[*] System is now unmonitored",
+      "def": "[Kernel] Vulnerable driver loaded - EDR processes terminated via kernel exploitation",
+      "defAction": "Tool: BYOVD (CVE-2021-21551 - Dell dbutil)\nVulnerable Driver: vuln_driver.sys\nProcesses Killed: CsFalconService, CSFalconContainer, MsMpEng\nKernel Exploit: Arbitrary process termination via IOCTL\nRisk Level: Critical\nAction: Deploy WDAC/HVCI to block vulnerable drivers, restore EDR",
+      "desc": "BYOVD(Bring Your Own Vulnerable Driver) 공격으로 Dell의 취약 드라이버(CVE-2021-21551)를 로딩하고, 커널 권한으로 EDR과 AV 프로세스를 강제 종료합니다. 서비스 보호(PPL)도 커널에서 우회됩니다.",
+      "descEn": "BYOVD attack loads Dell's vulnerable driver (CVE-2021-21551) and uses kernel privileges to forcefully terminate EDR and AV processes. Service protection (PPL) is also bypassed from kernel level.",
+      "stepTitle": "BYOVD 공격으로 커널 레벨에서 EDR 강제 종료",
+      "stepTitleEn": "Kill EDR at Kernel Level via BYOVD Attack",
+      "feynman": "경비원(EDR)의 무전기(프로세스)를 빼앗는 것이 불가능하므로, 건물 관리 시스템(커널)의 마스터 키(취약 드라이버)를 가져와서 경비원을 건물 밖으로 쫓아내는(프로세스 강제 종료) 것입니다. 마스터 키는 오래된 취약한 잠금장치(CVE)에서 복사합니다.",
+      "feynmanEn": "Since taking the guard's (EDR) radio (process) directly is impossible, the attacker brings a master key (vulnerable driver) from the building management system (kernel) to evict the guard. The master key is copied from an old vulnerable lock (CVE).",
+      "expert": "BYOVD는 합법적으로 서명된 취약 드라이버를 로딩하여 커널 레벨 접근을 획득합니다. Dell dbutil_2_3.sys(CVE-2021-21551)는 임의 커널 메모리 읽기/쓰기 IOCTL을 제공합니다. 공격자는 EPROCESS 구조체를 조작하여 PPL(Protected Process Light)을 비활성화하고, ZwTerminateProcess로 EDR을 종료합니다. WDAC(Windows Defender Application Control)와 HVCI가 취약 드라이버 로딩을 차단합니다.",
+      "expertEn": "BYOVD loads legitimately signed vulnerable drivers for kernel access. Dell dbutil_2_3.sys (CVE-2021-21551) provides arbitrary kernel read/write IOCTLs. Attackers manipulate EPROCESS to disable PPL and terminate EDR via ZwTerminateProcess. WDAC and HVCI block vulnerable driver loading.",
+      "defTooltip": "🔐 BYOVD 공격! 커널에서 EDR/AV 프로세스 강제 종료!",
+      "defTooltipEn": "🔐 BYOVD attack! EDR/AV processes killed from kernel!",
+      "hackerLog": {
+        "title": "byovd_attack.log",
+        "lines": [
+          "[09:45:00] 취약 드라이버 로딩: vuln_driver.sys",
+          "[09:45:02] 커널 IOCTL 접근 획득",
+          "[09:45:05] CsFalconService.exe 종료",
+          "[09:45:06] MsMpEng.exe 종료 → 시스템 무방비"
+        ]
+      },
+      "terms": [
+        { "term": "BYOVD", "def": "Bring Your Own Vulnerable Driver, 취약한 서명된 드라이버를 악용하는 공격" },
+        { "term": "PPL", "def": "Protected Process Light, 중요 프로세스를 커널 레벨에서 보호하는 Windows 기능" }
+      ]
+    },
+    {
+      "cmd": "Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Windows Defender/Operational';Id=5001,5007,5010,5012} -MaxEvents 20 | Format-List TimeCreated,Id,Message",
+      "out": "TimeCreated : 2026-01-20 09:30:00\nId          : 5001\nMessage     : Microsoft Defender Antivirus real-time protection has been disabled.\n\nTimeCreated : 2026-01-20 09:30:01\nId          : 5007\nMessage     : Configuration changed.\n              Name: DisableRealtimeMonitoring\n              Old: 0x0 | New: 0x1\n\nTimeCreated : 2026-01-20 09:30:02\nId          : 5007\nMessage     : Configuration changed.\n              Name: ExclusionPath\n              New: C:\\Users\\victim\\AppData\\Local\\Temp\n\n[종합 보안 상태]\n✗ Windows Defender: 비활성화 (09:30)\n✗ Sysmon: 제거됨 (09:35)\n✗ Windows Firewall: 비활성화 (09:40)\n✗ CrowdStrike EDR: 프로세스 종료 (09:45)\n⚠️ 4개 보안 도구 모두 무력화! 완전 맹목 상태!",
+      "def": "[SOC] All 4 security tools compromised - complete defensive blindness",
+      "defAction": "Tool: Event Log forensic analysis\nCompromised Tools:\n  1. Defender: Disabled (09:30)\n  2. Sysmon: Removed (09:35)\n  3. Firewall: Disabled (09:40)\n  4. EDR: Killed (09:45)\nTime to Compromise: 15 minutes\nAction: Full IR activation, isolate host, restore all security tools",
+      "desc": "Windows Defender 이벤트 로그에서 보안 도구 변조 타임라인을 재구성합니다. 15분 만에 4개 보안 도구가 모두 무력화되어 완전한 맹목 상태가 된 것을 확인합니다.",
+      "descEn": "Windows Defender event logs reconstruct the security tool tampering timeline. All 4 security tools were compromised in 15 minutes, achieving complete defensive blindness.",
+      "stepTitle": "이벤트 로그로 보안 도구 변조 타임라인 재구성",
+      "stepTitleEn": "Reconstruct Security Tool Tampering Timeline from Event Logs",
+      "feynman": "보안 센터의 기록을 되돌아보면 15분 안에 체계적으로 모든 보안 시스템이 무력화된 것을 알 수 있습니다. 09:30에 모니터가 꺼지고, 09:35에 CCTV가 철거되고, 09:40에 잠금이 풀리고, 09:45에 경비원이 쫓겨났습니다.",
+      "feynmanEn": "Reviewing security center records reveals all security systems were systematically disabled within 15 minutes. Monitor off at 09:30, CCTV removed at 09:35, locks opened at 09:40, guards evicted at 09:45.",
+      "expert": "Event ID 5001(RTP 비활성화), 5007(설정 변경), 5010(스캔 비활성화), 5012(엔진 비활성화)를 시간순으로 상관 분석합니다. 15분 내 4개 보안 도구 비활성화는 자동화된 공격 스크립트를 시사합니다. 방어를 위해 Tamper Protection(Defender), PPL(Sysmon), GPO(Firewall), WDAC/HVCI(드라이버)를 모두 활성화해야 합니다.",
+      "expertEn": "Event IDs 5001, 5007, 5010, 5012 are correlated chronologically. 4 security tools disabled within 15 minutes suggests automated attack scripting. Defense requires enabling Tamper Protection (Defender), PPL (Sysmon), GPO (Firewall), and WDAC/HVCI (drivers).",
+      "defTooltip": "🔐 15분 내 4개 보안 도구 무력화! 완전 맹목 상태!",
+      "defTooltipEn": "🔐 All 4 security tools disabled in 15 minutes! Complete blindness!",
+      "hackerLog": {
+        "title": "timeline_report.log",
+        "lines": [
+          "[10:00:00] 이벤트 로그 포렌식 분석 시작",
+          "[10:00:05] 타임라인: 09:30-09:45 (15분)",
+          "[10:00:10] 4개 보안 도구 무력화 확인",
+          "[10:00:15] 자동화 스크립트 사용 추정"
+        ]
+      },
+      "terms": [
+        { "term": "WDAC", "def": "Windows Defender Application Control, 실행 허용된 코드를 제어하는 정책" },
+        { "term": "HVCI", "def": "Hypervisor-Protected Code Integrity, 하이퍼바이저로 커널 코드 무결성을 보호" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "cmd.exe",
+    "pid": 4500,
+    "children": [
+      { "name": "powershell.exe (Set-MpPreference)", "pid": 4501, "children": [] },
+      { "name": "sysmon.exe -u force", "pid": 4502, "children": [] },
+      { "name": "netsh.exe", "pid": 4503, "children": [] },
+      {
+        "name": "kill_edr.exe",
+        "pid": 4504,
+        "children": [
+          { "name": "vuln_driver.sys (kernel)", "pid": 0, "children": [] }
+        ]
+      }
+    ]
+  }
+}

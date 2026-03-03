@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1003.001">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1003-001-lsass-memory&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1003.001 LSASS 메모리 자격증명 덤프 기초">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1003.001 LSASS 메모리 자격증명 덤프 기초 — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}
+        .glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05);}
+        .dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+        .hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}
+        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}
+        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
+        .drag-item.dragging{opacity:0.5;transform:scale(0.95);}
+        .drop-zone.drag-over{border:2px dashed #9DD9D2;background:rgba(157,217,210,0.1);}
+        .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <!-- Brand Header Bar -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+    <!-- Theme Toggle -->
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 hover:border-[#9DD9D2] shadow transition-all">← 대시보드</button>
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1003.001: OS Credential Dumping: LSASS Memory</p>
+            <span class="inline-block mt-2 text-[10px] font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-400/30 px-2 py-0.5 rounded">🟢 초급 (Beginner)</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch1">1. LSASS란 무엇인가?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch2">2. 공격 원리: 메모리에서 비밀번호 꺼내기</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch3">3. 주요 공격 도구 개요</button>
+            <button onclick="go('ch4')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch4">4. 실제 사이버 공격 사례</button>
+            <button onclick="go('ch5')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch5">5. 기본 방어 전략</button>
+            <button onclick="go('minilab-0')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="minilab-0">6. Mini Lab — LSASS 관련 개념 매칭</button>
+            <button onclick="go('minilab-1')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="minilab-1">7. Mini Lab — LSASS 덤프 공격 순서 배열</button>
+            <button onclick="go('quiz')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="quiz">Q. 종합 퀴즈</button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+
+            <!-- Header -->
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Credential Access</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">LSASS Memory Credential Dumping Basics</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">LSASS 메모리 자격증명 덤프 기초</p>
+                <div class="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500 dark:text-slate-500">
+                    <span>⏱ 약 20분</span><span>·</span><span>📚 5챕터 + 퀴즈</span><span>·</span><span>🧪 2개 미니 랩</span>
+                </div>
+            </header>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Overview Panel -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div class="glass-panel rounded-xl p-8 border-l-4 border-l-[#9DD9D2] relative overflow-hidden">
+                <div class="absolute -top-6 -right-6 text-[120px] opacity-[0.04] select-none pointer-events-none">🔑</div>
+                <h2 class="text-2xl font-bold mb-4 text-teal-700 dark:text-[#9DD9D2]">컴퓨터 메모리 속에 비밀번호가 남아있다면?</h2>
+                <p class="text-cgray dark:text-slate-300 leading-relaxed mb-6">Windows 시스템에서 사용자가 로그인하면, 운영체제는 인증 정보를 LSASS(Local Security Authority Subsystem Service)라는 프로세스 메모리에 보관합니다. 공격자는 이 메모리를 읽어 비밀번호, 해시, Kerberos 티켓 등을 탈취할 수 있습니다. 마치 호텔 프런트에 보관된 객실 마스터키를 훔치는 것과 같습니다.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-teal-50 dark:bg-teal-900/20 p-4 rounded-lg border border-teal-300 dark:border-teal-700 text-center">
+                        <div class="text-2xl mb-2">🧠</div>
+                        <div class="font-bold text-sm text-teal-700 dark:text-[#9DD9D2]">LSASS의 역할 이해</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Windows에서 LSASS가 왜 자격증명을 메모리에 보관하는지 학습합니다</div>
+                    </div>
+                    <div class="bg-teal-50 dark:bg-teal-900/20 p-4 rounded-lg border border-teal-300 dark:border-teal-700 text-center">
+                        <div class="text-2xl mb-2">⚔️</div>
+                        <div class="font-bold text-sm text-teal-700 dark:text-[#9DD9D2]">공격 원리 파악</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">공격자가 어떤 방식으로 메모리에서 자격증명을 추출하는지 알아봅니다</div>
+                    </div>
+                    <div class="bg-teal-50 dark:bg-teal-900/20 p-4 rounded-lg border border-teal-300 dark:border-teal-700 text-center">
+                        <div class="text-2xl mb-2">🛡️</div>
+                        <div class="font-bold text-sm text-teal-700 dark:text-[#9DD9D2]">기본 방어 개념</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Credential Guard, PPL 등 핵심 방어 메커니즘의 개념을 이해합니다</div>
+                    </div>
+                </div>
+                <div class="mt-6 bg-teal-50 dark:bg-teal-900/10 border border-teal-300 dark:border-teal-700 rounded-lg p-4 text-center">
+                    <p class="text-sm text-teal-700 dark:text-[#9DD9D2]">💡 <strong>이 과정을 마치면</strong> → 중급 과정에서 Mimikatz, ProcDump 등 실제 도구의 코드와 탐지 규칙을 분석합니다</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Chapters -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> LSASS란 무엇인가?</h2>
+                <div class="space-y-6">
+                    <!-- Analogy Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">🏨🔑</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">호텔 프런트의 마스터키 금고</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">호텔에 투숙하면 프런트에서 객실 키를 발급받습니다. 하지만 프런트 직원은 모든 객실을 열 수 있는 마스터키를 금고에 보관하고 있죠. LSASS는 이 마스터키 금고와 같습니다. 사용자가 로그인하면 Windows는 인증 정보(비밀번호 해시, Kerberos 티켓 등)를 LSASS 프로세스 메모리에 보관합니다. 이는 SSO(Single Sign-On)나 네트워크 인증에 필요하기 때문입니다.</p>
+                    </div>
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">⚙️</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">LSASS 프로세스의 역할</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">LSASS(Local Security Authority Subsystem Service)는 Windows 보안의 핵심 프로세스입니다. 주요 역할: ① 사용자 로그인 인증 처리, ② 보안 토큰 생성 및 관리, ③ 보안 정책 적용, ④ 보안 감사 로그 기록. lsass.exe는 항상 실행 중이며, 이 프로세스가 중단되면 시스템이 즉시 재시작됩니다.</p>
+                    </div>
+                    <!-- Comparison Table -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-teal">LSASS에 저장되는 자격증명 유형</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-[#9DD9D2]/20 dark:bg-[#9DD9D2]/10">
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">유형</th>
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">설명</th>
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">위험도</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">NTLM 해시</td>
+                                        <td class="p-3 text-center">비밀번호의 해시값 (Pass-the-Hash 공격 가능)</td>
+                                        <td class="p-3 text-center">🔴 높음</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">Kerberos 티켓</td>
+                                        <td class="p-3 text-center">도메인 인증용 티켓 (Golden Ticket 공격 가능)</td>
+                                        <td class="p-3 text-center">🔴 높음</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">평문 비밀번호</td>
+                                        <td class="p-3 text-center">WDigest 활성 시 평문 저장 (구버전)</td>
+                                        <td class="p-3 text-center">🔴 매우 높음</td>
+                                    </tr>
+                                    <tr class="">
+                                        <td class="p-3 font-bold">PIN/생체인증 키</td>
+                                        <td class="p-3 text-center">Windows Hello 인증 키</td>
+                                        <td class="p-3 text-center">🟡 중간</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> 공격 원리: 메모리에서 비밀번호 꺼내기</h2>
+                <div class="space-y-6">
+                    <!-- Analogy Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">👀🔓</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">금고를 열지 않고 엿보는 법</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">마스터키 금고를 직접 열지 못하더라도, 금고의 틈새로 들여다보거나 금고의 사본을 만들 수 있다면? 공격자는 LSASS 프로세스의 메모리를 &#39;읽는&#39; 방식으로 자격증명을 탈취합니다. 이는 금고 자체를 파괴하지 않으면서도 그 안의 내용물을 복사하는 것과 같습니다.</p>
+                    </div>
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">🎯</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">공격의 3단계</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">LSASS 메모리 덤프 공격은 3단계로 진행됩니다: ① 권한 획득 — 관리자 권한이 필요합니다 (SeDebugPrivilege). ② 메모리 접근 — LSASS 프로세스의 메모리를 읽거나 덤프 파일로 저장합니다. ③ 자격증명 추출 — 덤프된 데이터에서 비밀번호 해시, 티켓 등을 파싱합니다.</p>
+                    </div>
+                    <!-- Diagram Panel -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-teal">LSASS 덤프 공격 흐름</h3>
+                        <div class="terminal-bg rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-xs leading-relaxed">  [공격자]                    [대상 시스템]
+     │                           │
+     ├── ① 관리자 권한 획득 ──→ │
+     │                           │
+     ├── ② LSASS PID 확인 ───→  │  lsass.exe (PID: 672)
+     │                           │
+     ├── ③ 메모리 덤프 ────→    │  MiniDumpWriteDump()
+     │                           │      │
+     │                           │      ▼
+     │                     [lsass.dmp 파일 생성]
+     │                           │
+     ├── ④ 파일 전송 ←──────    │
+     │                           │
+     ▼                           │
+ [오프라인 분석]                  │
+  Mimikatz로                     │
+  자격증명 추출                  │</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> 주요 공격 도구 개요</h2>
+                <div class="space-y-6">
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">🛠️</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">대표적인 LSASS 덤프 도구들</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">공격자들이 LSASS 메모리를 덤프하는 데 사용하는 주요 도구: ① Mimikatz — 가장 유명한 자격증명 탈취 도구. sekurlsa::logonpasswords 명령으로 직접 추출. ② ProcDump — Microsoft의 공식 시스템 진단 도구. 합법적 도구이므로 탐지가 어려움. ③ comsvcs.dll — Windows 내장 DLL. rundll32.exe로 호출하여 미니덤프 생성. ④ Task Manager — Windows 작업 관리자에서도 프로세스 덤프 가능.</p>
+                    </div>
+                    <!-- Comparison Table -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-teal">도구별 특성 비교</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-[#9DD9D2]/20 dark:bg-[#9DD9D2]/10">
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">도구</th>
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">유형</th>
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">탐지 난이도</th>
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">사용 빈도</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">Mimikatz</td>
+                                        <td class="p-3 text-center">전용 공격 도구</td>
+                                        <td class="p-3 text-center">🟢 쉬움</td>
+                                        <td class="p-3 text-center">★★★★★</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">ProcDump</td>
+                                        <td class="p-3 text-center">합법적 MS 도구</td>
+                                        <td class="p-3 text-center">🟡 중간</td>
+                                        <td class="p-3 text-center">★★★★☆</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">comsvcs.dll</td>
+                                        <td class="p-3 text-center">Windows 내장</td>
+                                        <td class="p-3 text-center">🔴 어려움</td>
+                                        <td class="p-3 text-center">★★★☆☆</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">Task Manager</td>
+                                        <td class="p-3 text-center">Windows 기본</td>
+                                        <td class="p-3 text-center">🔴 매우 어려움</td>
+                                        <td class="p-3 text-center">★★☆☆☆</td>
+                                    </tr>
+                                    <tr class="">
+                                        <td class="p-3 font-bold">Direct syscall</td>
+                                        <td class="p-3 text-center">커스텀 코드</td>
+                                        <td class="p-3 text-center">🔴 매우 어려움</td>
+                                        <td class="p-3 text-center">★★★☆☆</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Warning Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 bg-red-50/50 dark:bg-red-900/10">
+                        <h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">⚠️ 교육 목적 안내</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">이 강의에서 소개하는 도구와 기법은 보안 전문가가 방어 전략을 수립하기 위해 &#39;공격 원리를 이해하는 것&#39;이 목적입니다. 허가 없이 타인의 시스템에 이러한 기법을 사용하면 법적 처벌을 받을 수 있습니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch4" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#4.</span> 실제 사이버 공격 사례</h2>
+                <div class="space-y-6">
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">🐻</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">APT29 (Cozy Bear) — SolarWinds 공격</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">러시아 정부와 연계된 APT29는 2020년 SolarWinds 공급망 공격에서 LSASS 메모리 덤프를 핵심 기법으로 사용했습니다. 초기 침투 후 Mimikatz 변형을 이용해 도메인 관리자 자격증명을 탈취하고, 이를 Golden Ticket 공격으로 연결하여 Microsoft 365 환경까지 침투했습니다.</p>
+                    </div>
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">💰</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">Lazarus Group — 금융기관 공격</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">북한 정찰총국과 연계된 Lazarus Group은 SWIFT 은행 시스템 공격에서 자격증명 탈취를 적극 활용했습니다. 대상 시스템의 LSASS 메모리에서 추출한 자격증명으로 내부 네트워크를 횡단이동(Lateral Movement)하여 핵심 금융 시스템에 접근했습니다.</p>
+                    </div>
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">🇰🇷</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">한국 사례: 국내 금융기관 침해</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">KISA 침해사고 분석 보고서에 따르면, 국내 금융기관 대상 APT 공격에서도 LSASS 메모리 덤프가 빈번하게 사용되었습니다. 특히 comsvcs.dll을 이용한 Living-off-the-Land(LotL) 기법이 다수 탐지되었으며, 이는 기존 안티바이러스를 우회하기 위한 전략이었습니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch5" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#5.</span> 기본 방어 전략</h2>
+                <div class="space-y-6">
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">🛡️</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">핵심 방어 메커니즘</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">LSASS 메모리 덤프를 방어하는 핵심 기술: ① Credential Guard — 가상화 기반으로 LSASS를 격리. ② PPL (Protected Process Light) — LSASS를 보호 프로세스로 설정하여 일반 프로세스의 메모리 접근 차단. ③ WDigest 비활성화 — 레지스트리 설정으로 평문 비밀번호 저장 방지.</p>
+                    </div>
+                    <!-- Comparison Table -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-teal">방어 수단 비교</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-[#9DD9D2]/20 dark:bg-[#9DD9D2]/10">
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">방어 수단</th>
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">효과</th>
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">적용 조건</th>
+                                        <th class="text-left p-3 font-bold border-b border-[#9DD9D2]/30">우회 가능성</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">Credential Guard</td>
+                                        <td class="p-3 text-center">NTLM 해시 보호</td>
+                                        <td class="p-3 text-center">VBS 지원 하드웨어</td>
+                                        <td class="p-3 text-center">커널 취약점</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">PPL</td>
+                                        <td class="p-3 text-center">메모리 접근 차단</td>
+                                        <td class="p-3 text-center">Win 8.1+</td>
+                                        <td class="p-3 text-center">드라이버 취약점</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">WDigest 비활성화</td>
+                                        <td class="p-3 text-center">평문 저장 방지</td>
+                                        <td class="p-3 text-center">레지스트리 설정</td>
+                                        <td class="p-3 text-center">없음</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">LSA RunAsPPL</td>
+                                        <td class="p-3 text-center">LSASS 보호</td>
+                                        <td class="p-3 text-center">Win 10+</td>
+                                        <td class="p-3 text-center">커널 취약점</td>
+                                    </tr>
+                                    <tr class="">
+                                        <td class="p-3 font-bold">LSASS UEFI Lock</td>
+                                        <td class="p-3 text-center">부팅 시 잠금</td>
+                                        <td class="p-3 text-center">Win 11+</td>
+                                        <td class="p-3 text-center">하드웨어 공격</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">🔍</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">탐지 관점: 어떤 로그를 봐야 할까?</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">LSASS 메모리 접근을 탐지하는 핵심 로그: ① Sysmon Event ID 10 — 프로세스 접근 이벤트 (TargetImage에 lsass.exe 필터). ② Windows Security Event 4656/4663 — 객체 핸들 요청/접근 감사. ③ Windows Defender Alert — LSASS 접근 이상 행위 탐지. 이런 로그를 SIEM에서 모니터링하면 초기 단계에서 공격을 탐지할 수 있습니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Mini Labs -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="minilab-0" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#6.</span> Mini Lab — LSASS 관련 개념 매칭</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-1.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">각 설명에 맞는 올바른 용어를 선택하세요.</p>
+                        <div id="match-game-0" class="space-y-4"></div>
+                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="font-mono text-sm">점수: <span id="match-score-0" class="hl-teal text-lg">0</span> / <span>5</span></div>
+                            <button onclick="initMatchGame_0()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="minilab-1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#7.</span> Mini Lab — LSASS 덤프 공격 순서 배열</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-2.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">공격자가 LSASS 메모리를 덤프하는 올바른 순서로 배열하세요.</p>
+                        <div id="order-game-1" class="space-y-2"></div>
+                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <button onclick="checkOrder_1()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono text-sm transition cursor-pointer">정답 확인</button>
+                            <button onclick="initOrderGame_1()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
+                        </div>
+                        <div id="order-result-1" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Quiz Section -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="quiz" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="final-quiz" class="space-y-8">
+                        <div class="quiz-q" data-correct="2">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. LSASS 프로세스가 자격증명을 메모리에 보관하는 주된 이유는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq1" value="1" class="mr-3"> 디스크 공간 절약을 위해
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq1" value="2" class="mr-3"> SSO 및 네트워크 인증 지원을 위해
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq1" value="3" class="mr-3"> 디버깅 편의를 위해
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq1" value="4" class="mr-3"> 바이러스 탐지를 위해
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 LSASS는 SSO(Single Sign-On)와 네트워크 리소스 접근 시 반복적인 인증을 방지하기 위해 자격증명을 메모리에 캐시합니다. 이 설계가 편의성과 보안의 트레이드오프입니다.</div>
+                        </div>
+                        <div class="quiz-q" data-correct="2">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. 다음 중 합법적인 Microsoft 도구를 악용한 LSASS 덤프 방법은?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq2" value="1" class="mr-3"> Mimikatz sekurlsa::logonpasswords
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq2" value="2" class="mr-3"> ProcDump -ma lsass.exe
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq2" value="3" class="mr-3"> Custom shellcode injection
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq2" value="4" class="mr-3"> Brute force 공격
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 ProcDump는 Microsoft에서 공식 배포하는 시스템 진단 도구입니다. -ma 옵션으로 lsass.exe의 전체 메모리를 덤프할 수 있어, Living-off-the-Land 기법의 대표적 사례입니다.</div>
+                        </div>
+                        <div class="quiz-q" data-correct="3">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q3. Credential Guard의 핵심 보호 원리는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq3" value="1" class="mr-3"> 파일 암호화
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq3" value="2" class="mr-3"> 네트워크 차단
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq3" value="3" class="mr-3"> 가상화 기반 보안(VBS)으로 LSASS 격리
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq3" value="4" class="mr-3"> 안티바이러스 스캔 강화
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 Credential Guard는 하드웨어 가상화(VBS)를 이용하여 LSASS 프로세스를 격리된 컨테이너에서 실행합니다. 이로 인해 관리자 권한이 있더라도 메모리에서 자격증명을 읽을 수 없습니다.</div>
+                        </div>
+                        <div class="quiz-q" data-correct="3">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q4. LSASS 메모리 접근을 탐지하는 가장 효과적인 Sysmon 이벤트 ID는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq4" value="1" class="mr-3"> Event ID 1 (프로세스 생성)
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq4" value="2" class="mr-3"> Event ID 3 (네트워크 연결)
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq4" value="3" class="mr-3"> Event ID 10 (프로세스 접근)
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq4" value="4" class="mr-3"> Event ID 13 (레지스트리 변경)
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 Sysmon Event ID 10은 프로세스 간 메모리 접근을 기록합니다. TargetImage 필드에 lsass.exe를 필터링하면 LSASS에 대한 비정상적 접근 시도를 효과적으로 탐지할 수 있습니다.</div>
+                        </div>
+                        <div class="quiz-q" data-correct="2">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q5. SolarWinds 공급망 공격에서 LSASS 덤프를 활용한 APT 그룹은?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq5" value="1" class="mr-3"> APT28 (Fancy Bear)
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq5" value="2" class="mr-3"> APT29 (Cozy Bear)
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq5" value="3" class="mr-3"> Lazarus Group
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq5" value="4" class="mr-3"> FIN7
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 APT29(Cozy Bear)는 러시아 정부와 연계된 그룹으로, 2020년 SolarWinds 공급망 공격에서 LSASS 메모리 덤프를 통해 도메인 관리자 자격증명을 탈취하고 Golden Ticket 공격으로 Microsoft 365까지 침투했습니다.</div>
+                        </div>
+                        <button onclick="gradeFinalQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-3 px-8 rounded-lg font-mono transition shadow-sm border border-[#7cc2b9] cursor-pointer">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-6 p-4 rounded-lg text-sm font-mono shadow-sm"></div>
+                </div>
+            </section>
+
+            <!-- Final CTA -->
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">🎉 학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">LSASS Memory Credential Dumping Basics 초급 과정을 완료했습니다!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">LSASS 메모리 자격증명 덤프 기초 초급 학습을 마쳤습니다. 중급 과정에서 더 심화된 기법을 배워보세요.</p>
+                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] dark:from-[#9DD9D2] dark:to-[#F4D06F] text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
+                    <span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span>
+                </button>
+            </div>
+
+        </div>
+    </main>
+    </div>
+
+    <script>
+        /* ─── Navigation ─── */
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+
+        /* ─── Theme Toggle ─── */
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+
+        /* ─── Intersection Observer ─── */
+        var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        /* ─── Utility ─── */
+        function shuffleArray(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+        /* ═══════ Matching Game 0 ═══════ */
+        var matchItems_0=[{&#34;desc&#34;:&#34;Windows 인증의 핵심 프로세스로, 자격증명을 메모리에 보관&#34;,&#34;answer&#34;:&#34;LSASS&#34;},{&#34;desc&#34;:&#34;비밀번호의 단방향 해시값으로, Pass-the-Hash 공격에 사용&#34;,&#34;answer&#34;:&#34;NTLM 해시&#34;},{&#34;desc&#34;:&#34;가상화 기반으로 LSASS 메모리를 격리하는 보안 기능&#34;,&#34;answer&#34;:&#34;Credential Guard&#34;},{&#34;desc&#34;:&#34;프로세스를 보호 모드로 설정하여 메모리 접근을 제한&#34;,&#34;answer&#34;:&#34;PPL&#34;},{&#34;desc&#34;:&#34;가장 유명한 자격증명 탈취 도구로, sekurlsa 모듈 포함&#34;,&#34;answer&#34;:&#34;Mimikatz&#34;}];
+        var matchTypes_0=[&#34;Credential Guard&#34;,&#34;LSASS&#34;,&#34;NTLM 해시&#34;,&#34;PPL&#34;,&#34;Mimikatz&#34;];
+        var matchScore_0=0;
+        var matchAnswered_0=[];
+
+        function initMatchGame_0(){
+            matchScore_0=0;matchAnswered_0=[];
+            document.getElementById('match-score-0').textContent='0';
+            var container=document.getElementById('match-game-0');
+            container.innerHTML='';
+            matchItems_0.forEach(function(item,idx){
+                var row=document.createElement('div');
+                row.className='bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700';
+                row.id='match-row-0-'+idx;
+                var descP=document.createElement('p');
+                descP.className='text-sm text-cgray dark:text-slate-300 mb-3';
+                descP.textContent=(idx+1)+'. '+item.desc;
+                row.appendChild(descP);
+                var btnContainer=document.createElement('div');
+                btnContainer.className='flex flex-wrap gap-2';
+                var shuffled=shuffleArray(matchTypes_0);
+                shuffled.forEach(function(type){
+                    var btn=document.createElement('button');
+                    btn.className='match-btn text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-cgray dark:text-slate-300 font-mono cursor-pointer';
+                    btn.textContent=type;
+                    btn.onclick=function(){handleMatch_0(idx,type,btn);};
+                    btnContainer.appendChild(btn);
+                });
+                row.appendChild(btnContainer);
+                var feedback=document.createElement('div');
+                feedback.id='match-fb-0-'+idx;
+                feedback.className='mt-2 text-xs font-mono hidden';
+                row.appendChild(feedback);
+                container.appendChild(row);
+            });
+        }
+
+        function handleMatch_0(idx,selected,btnEl){
+            if(matchAnswered_0.indexOf(idx)!==-1)return;
+            matchAnswered_0.push(idx);
+            var fb=document.getElementById('match-fb-0-'+idx);
+            fb.classList.remove('hidden');
+            var row=document.getElementById('match-row-0-'+idx);
+            var btns=row.querySelectorAll('.match-btn');
+            if(selected===matchItems_0[idx].answer){
+                matchScore_0++;
+                document.getElementById('match-score-0').textContent=matchScore_0;
+                fb.className='mt-2 text-xs font-mono text-green-600 dark:text-green-400';
+                fb.textContent='✅ 정답! '+matchItems_0[idx].answer;
+                btnEl.classList.add('correct');
+            }else{
+                fb.className='mt-2 text-xs font-mono text-red-600 dark:text-red-400';
+                fb.textContent='❌ 오답! 정답은 '+matchItems_0[idx].answer;
+                btnEl.classList.add('wrong');
+                btns.forEach(function(b){if(b.textContent===matchItems_0[idx].answer)b.classList.add('correct');});
+            }
+            btns.forEach(function(b){b.onclick=null;b.style.cursor='default';});
+        }
+
+        /* ═══════ Ordering Game 1 ═══════ */
+        var orderItems_1=[{&#34;id&#34;:1,&#34;label&#34;:&#34;초기 침투 (Initial Access)&#34;,&#34;hint&#34;:&#34;&#34;},{&#34;id&#34;:2,&#34;label&#34;:&#34;권한 상승 (Privilege Escalation)&#34;,&#34;hint&#34;:&#34;&#34;},{&#34;id&#34;:3,&#34;label&#34;:&#34;LSASS 프로세스 PID 확인&#34;,&#34;hint&#34;:&#34;&#34;},{&#34;id&#34;:4,&#34;label&#34;:&#34;메모리 덤프 실행 (MiniDump)&#34;,&#34;hint&#34;:&#34;&#34;},{&#34;id&#34;:5,&#34;label&#34;:&#34;덤프 파일 오프라인 분석&#34;,&#34;hint&#34;:&#34;&#34;},{&#34;id&#34;:6,&#34;label&#34;:&#34;자격증명으로 횡단이동 (Lateral Movement)&#34;,&#34;hint&#34;:&#34;&#34;}];
+        var currentOrder_1=[];
+
+        function initOrderGame_1(){
+            currentOrder_1=shuffleArray(orderItems_1.slice());
+            renderOrderGame_1();
+            var r=document.getElementById('order-result-1');
+            r.classList.add('hidden');
+        }
+
+        function renderOrderGame_1(){
+            var container=document.getElementById('order-game-1');
+            container.innerHTML='';
+            currentOrder_1.forEach(function(stage,idx){
+                var card=document.createElement('div');
+                card.className='drag-item flex items-center gap-3 p-3 rounded-lg bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 hover:border-[#9DD9D2] transition-all';
+                card.draggable=true;
+                card.setAttribute('data-idx',idx);
+                card.setAttribute('data-id',stage.id);
+                card.innerHTML='<span class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-sm text-cgray dark:text-slate-400">'+(idx+1)+'</span><span class="font-bold text-sm text-[#1e293b] dark:text-white">'+stage.label+'</span>';
+                card.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/plain',idx.toString());this.classList.add('dragging');});
+                card.addEventListener('dragend',function(){this.classList.remove('dragging');});
+                card.addEventListener('dragover',function(e){e.preventDefault();this.classList.add('drop-zone','drag-over');});
+                card.addEventListener('dragleave',function(){this.classList.remove('drop-zone','drag-over');});
+                card.addEventListener('drop',function(e){
+                    e.preventDefault();this.classList.remove('drop-zone','drag-over');
+                    var fromIdx=parseInt(e.dataTransfer.getData('text/plain'));
+                    var toIdx=parseInt(this.getAttribute('data-idx'));
+                    if(fromIdx!==toIdx){var temp=currentOrder_1[fromIdx];currentOrder_1[fromIdx]=currentOrder_1[toIdx];currentOrder_1[toIdx]=temp;renderOrderGame_1();}
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function checkOrder_1(){
+            var correct=true;
+            for(var i=0;i<currentOrder_1.length;i++){if(currentOrder_1[i].id!==(i+1)){correct=false;break;}}
+            var r=document.getElementById('order-result-1');
+            r.classList.remove('hidden');
+            if(correct){
+                r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';
+                r.textContent='✅ 정답입니다! 올바른 순서로 배열했습니다.';
+            }else{
+                r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';
+                r.textContent='❌ 순서가 올바르지 않습니다. 다시 시도해 보세요!';
+            }
+        }
+
+        /* ═══════════════════════════════════════════ */
+        /* Final Quiz                                 */
+        /* ═══════════════════════════════════════════ */
+        function gradeFinalQuiz(){
+            var questions=document.querySelectorAll('#final-quiz .quiz-q');
+            var correct=0;var total=questions.length;var details=[];
+            questions.forEach(function(q,i){
+                var ans=q.getAttribute('data-correct');
+                var sel=q.querySelector('input[name="fq'+(i+1)+'"]:checked');
+                var labels=q.querySelectorAll('label');
+                var explanation=q.querySelector('.quiz-explanation');
+                if(explanation)explanation.classList.remove('hidden');
+                if(sel&&sel.value===ans){
+                    correct++;
+                    labels.forEach(function(l){if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});
+                    details.push('<div class="text-green-600 dark:text-green-400">✅ Q'+(i+1)+' 정답</div>');
+                }else{
+                    labels.forEach(function(l){
+                        if(sel&&l.querySelector('input').value===sel.value)l.classList.add('bg-red-50','dark:bg-red-900/20','border-red-400');
+                        if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');
+                    });
+                    details.push('<div class="text-red-500">❌ Q'+(i+1)+' 오답'+(sel?'':' (미선택)')+'</div>');
+                }
+            });
+            var pct=Math.round((correct/total)*100);
+            var grade=pct>=80?'우수':pct>=60?'양호':'재학습 권장';
+            var res=document.getElementById('quiz-result');
+            res.classList.remove('hidden');
+            res.className='mt-6 p-4 rounded-lg text-sm font-mono shadow-sm '+(pct>=80?'bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]':pct>=60?'bg-[#F4D06F]/30 border border-[#F4D06F] text-[#b45309] dark:text-[#F4D06F]':'bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400');
+            res.innerHTML='<div class="flex items-center gap-3 mb-3"><div class="text-3xl font-black '+(pct>=80?'text-green-500':pct>=60?'text-yellow-500':'text-red-500')+'">'+pct+'%</div><div><div class="font-bold text-sm">'+grade+' ('+correct+'/'+total+')</div><div class="text-xs opacity-70">초급 과정 종합 평가</div></div></div><div class="space-y-1">'+details.join('')+'</div>';
+        }
+
+        /* ─── Init on Load ─── */
+        window.onload=function(){
+            initMatchGame_0();
+            initOrderGame_1();
+            setTimeout(function(){go('ch1');},100);
+        };
+    </script>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+    <script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

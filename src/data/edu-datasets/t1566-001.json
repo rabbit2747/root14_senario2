@@ -1,0 +1,1244 @@
+{
+  "techniqueId": "T1566.001",
+  "techniqueName": "Phishing: Spearphishing Attachment",
+  "tacticIds": ["t1"],
+  "tacticName": "Initial Access",
+  "levels": {
+    "beginner": {
+      "title": "스피어피싱 첨부파일 공격 기초",
+      "titleEn": "Spearphishing Attachment Basics",
+      "estimatedMinutes": 20,
+      "overviewPanel": {
+        "emoji": "🎣",
+        "question": "이메일에 첨부된 파일 하나로 조직 전체가 뚫린다면?",
+        "explanation": "스피어피싱 첨부파일 공격은 특정 대상을 겨냥하여 악성 파일이 첨부된 이메일을 보내는 기법입니다. 일반 스팸 메일과 달리, 공격자는 대상의 업무 환경, 거래처, 관심사를 철저히 조사하여 신뢰할 수 있는 메일로 위장합니다. 마치 바다에 그물을 던지는 일반 낚시가 아니라, 특정 물고기만 노리는 작살 낚시와 같습니다.",
+        "learningGoals": [
+          { "emoji": "🧠", "title": "피싱 공격의 유형 이해", "desc": "일반 피싱, 스피어피싱, 웨일링의 차이점을 학습합니다" },
+          { "emoji": "⚔️", "title": "첨부파일 공격 원리 파악", "desc": "악성 매크로, 익스플로잇 문서 등 첨부파일 기반 공격 벡터를 이해합니다" },
+          { "emoji": "🛡️", "title": "기본 방어 개념", "desc": "의심 이메일 식별법과 기본적인 보안 수칙을 익힙니다" }
+        ],
+        "nextLevelTeaser": "중급 과정에서 VBA 매크로 분석, 이메일 헤더 분석, Sigma/YARA 탐지 규칙을 직접 작성합니다"
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "피싱이란 무엇인가?",
+          "panels": [
+            {
+              "type": "analogy",
+              "heading": "바다 낚시 vs 작살 낚시",
+              "emojis": "🎣🐟",
+              "content": "일반 피싱(Phishing)은 바다에 그물을 던져 아무 물고기나 잡으려는 것과 같습니다. 수천 명에게 동일한 스팸 메일을 보내 누구든 걸려들기를 바라죠. 반면 스피어피싱(Spearphishing)은 작살 낚시입니다. 특정 물고기의 서식지, 습성, 먹이를 미리 조사한 후 정확히 그 물고기만 겨냥합니다. 공격자는 대상의 이름, 직책, 거래처, 최근 프로젝트까지 파악하여 완벽하게 맞춤화된 이메일을 작성합니다."
+            },
+            {
+              "type": "concept",
+              "heading": "피싱 공격의 핵심 원리",
+              "emojis": "📧",
+              "content": "피싱 공격은 인간의 심리적 취약점을 이용합니다. ① 신뢰 악용 — 신뢰할 수 있는 발신자로 위장합니다 (상사, 거래처, 정부기관). ② 긴급성 유발 — '즉시 확인 필요', '계정이 정지됩니다' 등 시간 압박을 줍니다. ③ 호기심 자극 — '연봉 인상 명단', '인사 발령 공지' 등 관심을 끄는 제목을 사용합니다. ④ 권위 활용 — CEO, IT 부서 등 권위 있는 발신자를 사칭합니다."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "피싱 유형 비교",
+              "headers": ["유형", "대상", "맞춤화 수준", "성공률"],
+              "rows": [
+                ["일반 피싱 (Phishing)", "불특정 다수", "🔴 낮음 (동일 메일 대량 발송)", "1~3%"],
+                ["스피어피싱 (Spearphishing)", "특정 조직/개인", "🟡 높음 (대상 맞춤 작성)", "30~50%"],
+                ["웨일링 (Whaling)", "CEO/임원급", "🟢 매우 높음 (고도로 정교)", "50~70%"],
+                ["BEC (Business Email Compromise)", "재무/회계 담당자", "🟢 매우 높음 (실제 거래 위장)", "60~80%"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "첨부파일 기반 공격 원리",
+          "panels": [
+            {
+              "type": "analogy",
+              "heading": "트로이 목마와 같은 첨부파일",
+              "emojis": "🐴📎",
+              "content": "트로이 전쟁에서 그리스군은 거대한 목마 안에 병사를 숨겨 트로이 성 안으로 들여보냈습니다. 스피어피싱 첨부파일도 마찬가지입니다. 겉보기에는 정상적인 문서(계약서, 이력서, 청구서)이지만, 그 안에 악성 코드가 숨어 있습니다. 사용자가 파일을 열면 숨겨진 코드가 실행되어 공격자에게 시스템 접근 권한을 넘겨줍니다."
+            },
+            {
+              "type": "concept",
+              "heading": "악성 첨부파일의 작동 방식",
+              "emojis": "⚙️",
+              "content": "악성 첨부파일은 크게 두 가지 방식으로 동작합니다: ① 매크로 기반 — Office 문서(Word, Excel)에 VBA 매크로를 삽입합니다. 사용자가 '콘텐츠 사용' 버튼을 클릭하면 매크로가 실행되어 악성코드를 다운로드합니다. ② 익스플로잇 기반 — 문서 뷰어의 취약점을 이용합니다. 파일을 열기만 해도 취약점이 트리거되어 코드가 실행됩니다 (예: CVE-2017-11882 Equation Editor 취약점)."
+            },
+            {
+              "type": "diagram",
+              "heading": "스피어피싱 첨부파일 공격 체인",
+              "ascii": "  [공격자]                        [피해자]\n     │                               │\n     ├── ① 대상 정보 수집 ────→     │  (SNS, LinkedIn, 회사 웹사이트)\n     │      (정찰 단계)               │\n     │                               │\n     ├── ② 악성 문서 제작 ────→     │  (매크로 삽입 or 익스플로잇)\n     │                               │\n     ├── ③ 위장 이메일 발송 ──→     │  📧 \"거래처 청구서 확인 부탁\"\n     │                               │\n     │                               ├── ④ 첨부파일 열기\n     │                               │      │\n     │                               │      ▼\n     │                               │  [매크로 실행 / 익스플로잇 트리거]\n     │                               │      │\n     │                               │      ▼\n     │   ⑤ C2 연결 ←──────────     │  [악성코드 다운로드 & 실행]\n     │                               │\n     ▼                               │\n  [원격 제어 확보]                    │"
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "주요 공격 벡터",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "첨부파일 공격에 사용되는 파일 유형",
+              "emojis": "📂",
+              "content": "공격자는 다양한 파일 형식을 악용합니다: ① Office 매크로 문서 (.docm, .xlsm) — 가장 전통적인 방법. VBA 매크로로 PowerShell 실행. ② ISO/IMG 디스크 이미지 — Windows가 자동 마운트하며, Mark-of-the-Web(MotW) 태그가 내부 파일에 전파되지 않아 보안 경고를 우회. ③ LNK 바로가기 파일 — 아이콘을 문서로 위장하고, 명령어를 실행. ④ OneNote (.one) 파일 — 2023년 매크로 차단 이후 대안으로 급부상. 내장 스크립트 실행 가능."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "파일 유형별 공격 벡터 비교",
+              "headers": ["파일 유형", "공격 방식", "MotW 우회", "탐지 난이도"],
+              "rows": [
+                ["Office 매크로 (.docm)", "VBA → PowerShell 실행", "❌ 불가", "🟢 쉬움"],
+                ["ISO/IMG 디스크 이미지", "마운트 후 내부 파일 실행", "✅ 가능", "🟡 중간"],
+                ["LNK 바로가기", "cmd/powershell 명령어 실행", "❌ 불가", "🟡 중간"],
+                ["OneNote (.one)", "내장 HTA/VBS 스크립트 실행", "⚠️ 부분", "🔴 어려움"],
+                ["HTML Smuggling (.html)", "JavaScript로 페이로드 디코딩", "✅ 가능", "🔴 어려움"],
+                ["PDF 익스플로잇", "뷰어 취약점 트리거", "❌ 불가", "🔴 어려움"]
+              ]
+            },
+            {
+              "type": "info",
+              "heading": "최근 트렌드: 매크로 차단 이후의 변화",
+              "emojis": "📈",
+              "content": "Microsoft가 2022년부터 인터넷에서 다운로드한 Office 파일의 매크로를 기본 차단하면서, 공격자들은 새로운 방법으로 전환했습니다. ISO/IMG 파일, OneNote 첨부, HTML Smuggling, LNK 파일 등이 대안으로 급증했습니다. 이는 '풍선 효과' — 하나를 막으면 다른 곳으로 이동하는 현상의 대표적 사례입니다."
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "실제 APT 사례",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "APT28 (Fancy Bear) — 정부기관 타겟 스피어피싱",
+              "emojis": "🐻",
+              "content": "러시아 GRU 소속 APT28은 정부기관과 군사조직을 대상으로 정교한 스피어피싱을 수행합니다. 대표 사례: NATO 관련 콘퍼런스 초대장으로 위장한 Word 문서에 매크로를 삽입하여 배포. 문서를 열면 Sofacy/X-Agent 백도어가 설치되어 장기간 은밀하게 정보를 수집했습니다."
+            },
+            {
+              "type": "concept",
+              "heading": "Emotet — 대규모 스피어피싱 인프라",
+              "emojis": "🦠",
+              "content": "Emotet은 2014년부터 활동한 악성코드로, 탈취한 실제 이메일 대화에 악성 첨부파일을 끼워 넣는 '대화 하이재킹' 기법을 사용했습니다. 기존 이메일 스레드에 답장 형태로 악성 문서를 보내므로, 수신자는 정상적인 업무 메일로 착각합니다. 2021년 국제 공조로 테이크다운되었으나 이후 변종이 재출현했습니다."
+            },
+            {
+              "type": "concept",
+              "heading": "QakBot — 금융기관 대상 스피어피싱",
+              "emojis": "💰",
+              "content": "QakBot(QBot)은 금융 정보 탈취를 목적으로 하는 트로이목마로, 주로 업무 관련 문서(청구서, 배송 확인서)로 위장한 Excel/OneNote 첨부파일을 통해 유포되었습니다. 감염 후 네트워크를 횡단이동하며 랜섬웨어(Black Basta, REvil) 배포의 초기 침투 경로로 활용되었습니다."
+            },
+            {
+              "type": "info",
+              "heading": "한국 사례: 북한 연계 스피어피싱",
+              "emojis": "🇰🇷",
+              "content": "북한 연계 위협 그룹(Kimsuky, Lazarus)은 한국의 정부기관, 연구소, 언론사를 대상으로 지속적인 스피어피싱 공격을 수행합니다. '통일 관련 세미나 자료', '대북 정책 보고서' 등 대상 맞춤형 HWP(한글) 문서를 첨부하며, 한글 워드프로세서의 EPS 취약점을 악용하는 사례가 다수 보고되었습니다."
+            },
+            {
+              "type": "warning",
+              "heading": "교육 목적 안내",
+              "content": "이 강의에서 소개하는 공격 기법과 사례는 보안 전문가가 방어 전략을 수립하기 위해 '공격 원리를 이해하는 것'이 목적입니다. 이러한 기법을 허가 없이 타인에게 사용하면 정보통신망법 등에 의해 법적 처벌을 받을 수 있습니다."
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "첨부파일 유형과 위험도 매칭",
+          "description": "각 첨부파일 유형에 맞는 위험 수준을 선택하세요.",
+          "pairs": [
+            { "left": "매크로가 포함된 Word 문서 (.docm)", "right": "높음 — 매크로 실행 시 악성코드 다운로드" },
+            { "left": "ISO 디스크 이미지 내 LNK 파일", "right": "매우 높음 — MotW 우회 + 명령어 실행" },
+            { "left": "일반 텍스트 파일 (.txt)", "right": "낮음 — 코드 실행 불가" },
+            { "left": "PDF 파일 (정상)", "right": "낮음 — 익스플로잇 없으면 안전" },
+            { "left": "HTML Smuggling 파일 (.html)", "right": "높음 — JavaScript로 페이로드 디코딩" }
+          ]
+        },
+        {
+          "type": "ordering_game",
+          "title": "스피어피싱 공격 단계 순서 배열",
+          "description": "공격자가 스피어피싱 첨부파일 공격을 수행하는 올바른 순서로 배열하세요.",
+          "items": [
+            { "label": "대상 정보 수집 (정찰)" },
+            { "label": "악성 문서 제작 (무기화)" },
+            { "label": "위장 이메일 발송 (배달)" },
+            { "label": "피해자가 첨부파일 열기 (익스플로잇)" },
+            { "label": "악성코드 설치 (설치)" },
+            { "label": "C2 서버 연결 (명령 및 제어)" }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "일반 피싱(Phishing)과 스피어피싱(Spearphishing)의 가장 큰 차이점은?",
+            "options": [
+              "사용하는 이메일 서비스가 다르다",
+              "특정 대상을 겨냥하여 맞춤형 메일을 작성하는지 여부",
+              "첨부파일 포함 여부",
+              "공격에 사용하는 프로그래밍 언어"
+            ],
+            "correct": 1,
+            "explanation": "일반 피싱은 불특정 다수에게 동일한 메일을 발송하지만, 스피어피싱은 특정 개인/조직을 대상으로 맞춤화된 메일을 작성합니다. 이 차이가 스피어피싱의 높은 성공률(30~50%)의 핵심 요인입니다."
+          },
+          {
+            "question": "2022년 이후 Office 매크로 차단으로 공격자들이 대안으로 가장 많이 활용하게 된 파일 유형은?",
+            "options": [
+              "일반 텍스트 파일 (.txt)",
+              "ISO/IMG 디스크 이미지, OneNote, LNK 파일",
+              "MP3 오디오 파일",
+              "PNG 이미지 파일"
+            ],
+            "correct": 1,
+            "explanation": "Microsoft의 인터넷 다운로드 Office 매크로 기본 차단 이후, 공격자들은 ISO/IMG(MotW 우회), OneNote(내장 스크립트), LNK(명령어 실행) 등 대안적 파일 형식으로 전환했습니다."
+          },
+          {
+            "question": "Emotet 악성코드가 사용한 '대화 하이재킹' 기법의 특징은?",
+            "options": [
+              "새로운 이메일 주소를 생성하여 발송",
+              "탈취한 실제 이메일 대화에 악성 파일을 끼워 넣어 답장 형태로 발송",
+              "이메일 대신 SMS를 사용",
+              "암호화된 이메일만 발송"
+            ],
+            "correct": 1,
+            "explanation": "Emotet은 감염된 시스템에서 이메일 대화 내용을 탈취한 뒤, 기존 대화 스레드에 답장하는 형태로 악성 첨부파일을 보냅니다. 수신자 입장에서는 이전에 주고받던 정상적인 업무 메일의 연장으로 보이므로 의심하기 어렵습니다."
+          },
+          {
+            "question": "ISO/IMG 파일이 보안 경고를 우회할 수 있는 이유는?",
+            "options": [
+              "파일 크기가 작아서 스캔을 통과함",
+              "Windows가 자동 마운트하며 내부 파일에 Mark-of-the-Web 태그가 전파되지 않아서",
+              "암호화되어 있어서 분석 불가",
+              "Microsoft가 안전한 파일 형식으로 분류해서"
+            ],
+            "correct": 1,
+            "explanation": "ISO/IMG 파일을 더블클릭하면 Windows가 가상 드라이브로 자동 마운트합니다. 이때 ISO 파일 자체에는 MotW 태그가 있지만, 마운트된 가상 드라이브 내부 파일에는 MotW가 전파되지 않아 SmartScreen 경고 없이 실행될 수 있습니다."
+          },
+          {
+            "question": "스피어피싱 이메일에서 공격자가 '긴급성'을 유발하는 이유는?",
+            "options": [
+              "이메일 서버의 처리 속도를 높이기 위해",
+              "피해자가 신중하게 판단할 시간을 주지 않기 위해",
+              "첨부파일의 크기를 줄이기 위해",
+              "이메일 필터를 우회하기 위해"
+            ],
+            "correct": 1,
+            "explanation": "공격자는 '즉시 처리 필요', '오늘까지 회신 바랍니다' 등 시간 압박을 주어 피해자가 의심하거나 동료에게 확인할 여유를 없앱니다. 이는 사회공학(Social Engineering)의 핵심 심리 조작 기법입니다."
+          }
+        ]
+      }
+    },
+    "intermediate": {
+      "title": "스피어피싱 첨부파일 분석과 탐지",
+      "titleEn": "Spearphishing Attachment Analysis & Detection",
+      "estimatedMinutes": 30,
+      "overviewPanel": {
+        "emoji": "🔬",
+        "question": "악성 첨부파일의 코드를 분석하고 탐지 규칙을 작성할 수 있나요?",
+        "explanation": "이 중급 과정에서는 Office VBA 매크로 분석, 이메일 헤더의 SPF/DKIM/DMARC 검증, 샌드박스 기반 동적 분석, OLE 구조 분석 등 실제 분석 기법을 학습합니다. 또한 Sigma와 YARA 규칙을 작성하여 악성 첨부파일을 탐지하고, 이메일 보안 게이트웨이를 구축하는 방법을 다룹니다.",
+        "learningGoals": [
+          { "emoji": "💻", "title": "VBA 매크로 코드 분석", "desc": "악성 매크로의 AutoOpen, Document_Open 등 핵심 로직을 분석합니다" },
+          { "emoji": "📝", "title": "이메일 인증 프로토콜 이해", "desc": "SPF, DKIM, DMARC의 원리와 헤더 분석 방법을 학습합니다" },
+          { "emoji": "🔄", "title": "탐지 규칙 작성", "desc": "Sigma, YARA 규칙으로 악성 Office 문서를 탐지합니다" }
+        ],
+        "nextLevelTeaser": "고급 과정에서 VBA 난독화 해제, HTML Smuggling, RTF 익스플로잇 분석, 메모리 포렌식을 수행합니다"
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "Office 매크로 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "VBA 매크로와 자동 실행 메커니즘",
+              "emojis": "🔧",
+              "content": "VBA(Visual Basic for Applications) 매크로는 Office 문서에 내장된 프로그래밍 코드입니다. 악성 매크로는 자동 실행 함수를 이용합니다: ① AutoOpen() — Word 문서가 열릴 때 자동 실행. ② Document_Open() — 문서 열기 이벤트 핸들러. ③ Workbook_Open() — Excel 통합 문서 열기 시 실행. ④ Auto_Open() — Excel 호환성 매크로. 이러한 함수 안에 악성 코드를 넣으면 사용자가 '콘텐츠 사용'을 클릭하는 순간 실행됩니다."
+            },
+            {
+              "type": "code",
+              "heading": "악성 VBA 매크로 예시 (간소화)",
+              "filename": "malicious_macro.vba",
+              "language": "vba",
+              "warning": "교육 목적 의사 코드 — 실제 악성코드와 다릅니다",
+              "lines": [
+                { "text": "' 악성 VBA 매크로 핵심 로직 (교육용 의사 코드)", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "Sub AutoOpen()  ' Word 문서 열릴 때 자동 실행", "color": "cyan" },
+                { "text": "    ' 1단계: 난독화된 PowerShell 명령어 조합", "color": "slate" },
+                { "text": "    Dim cmd As String", "color": "green" },
+                { "text": "    cmd = Chr(112) & Chr(111) & Chr(119) & Chr(101) & Chr(114)  ' \"power\"", "color": "yellow" },
+                { "text": "    cmd = cmd & \"shell -ep bypass -w hidden -enc \"", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "    ' 2단계: Base64 인코딩된 페이로드", "color": "slate" },
+                { "text": "    Dim payload As String", "color": "green" },
+                { "text": "    payload = \"SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQ...\"  ' 다운로더", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "    ' 3단계: WMI로 프로세스 생성 (탐지 우회)", "color": "slate" },
+                { "text": "    Set objWMI = GetObject(\"winmgmts:\\\\\" & \".\" & \"\\root\\cimv2:Win32_Process\")", "color": "red" },
+                { "text": "    objWMI.Create cmd & payload, Null, Null, pid", "color": "red" },
+                { "text": "End Sub", "color": "cyan" }
+              ]
+            },
+            {
+              "type": "info",
+              "heading": "매크로 분석 시 확인할 핵심 패턴",
+              "emojis": "🔍",
+              "content": "악성 매크로에서 주의깊게 볼 패턴: ① Chr() 함수 남용 — 문자열을 문자 코드로 조합하여 난독화. ② Shell/WScript.Shell — 외부 명령어 실행. ③ URLDownloadToFile — 파일 다운로드 API. ④ WMI Process Create — 프로세스 생성 (부모-자식 관계 변경). ⑤ Base64 인코딩 문자열 — 페이로드 은닉."
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "이메일 헤더 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "이메일 인증의 3요소: SPF, DKIM, DMARC",
+              "emojis": "📧🔐",
+              "content": "이메일 위변조를 탐지하는 세 가지 인증 프로토콜: ① SPF (Sender Policy Framework) — 발신 서버 IP가 해당 도메인에서 허가한 IP인지 확인. DNS TXT 레코드에 허가된 IP 목록을 등록. ② DKIM (DomainKeys Identified Mail) — 발신 서버가 이메일에 디지털 서명. 수신 서버가 DNS의 공개키로 서명 검증. ③ DMARC (Domain-based Message Authentication) — SPF와 DKIM 결과를 종합하여 정책 적용 (none/quarantine/reject)."
+            },
+            {
+              "type": "code",
+              "heading": "이메일 헤더 분석 예시",
+              "filename": "email_header.txt",
+              "language": "plaintext",
+              "lines": [
+                { "text": "--- 정상 이메일 헤더 ---", "color": "slate" },
+                { "text": "Authentication-Results: mx.google.com;", "color": "cyan" },
+                { "text": "  spf=pass (sender IP is 209.85.220.41)", "color": "green" },
+                { "text": "  smtp.mailfrom=partner@company.com;", "color": "green" },
+                { "text": "  dkim=pass header.d=company.com header.s=gm1;", "color": "green" },
+                { "text": "  dmarc=pass (p=REJECT) header.from=company.com", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "--- 스피어피싱 이메일 헤더 (의심) ---", "color": "slate" },
+                { "text": "Authentication-Results: mx.google.com;", "color": "cyan" },
+                { "text": "  spf=fail (sender IP is 185.234.72.15)", "color": "red" },
+                { "text": "  smtp.mailfrom=partner@company.com;", "color": "orange" },
+                { "text": "  dkim=none;", "color": "red" },
+                { "text": "  dmarc=fail (p=NONE) header.from=company.com", "color": "red" },
+                { "text": "Received: from mail-server.evil-domain.ru (185.234.72.15)", "color": "red" },
+                { "text": "  by mx.google.com with SMTP id abc123", "color": "yellow" },
+                { "text": "X-Originating-IP: [185.234.72.15]  ← 러시아 IP", "color": "red" }
+              ]
+            },
+            {
+              "type": "comparison_table",
+              "heading": "이메일 헤더 핵심 필드",
+              "headers": ["필드", "역할", "위조 가능성"],
+              "rows": [
+                ["From:", "표시되는 발신자 주소", "🔴 쉽게 위조 가능"],
+                ["Return-Path:", "실제 반송 주소", "🟡 SPF 검증 대상"],
+                ["Received:", "경유 서버 기록 (역순)", "🟢 위조 어려움 (체인 검증)"],
+                ["Authentication-Results:", "SPF/DKIM/DMARC 결과", "🟢 수신 서버가 생성"],
+                ["X-Originating-IP:", "원본 발신 IP", "🟡 일부 서버만 추가"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "첨부파일 동적 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "샌드박스 기반 동적 분석",
+              "emojis": "🏖️",
+              "content": "동적 분석은 악성 의심 파일을 격리된 가상 환경(샌드박스)에서 실행하여 행위를 관찰하는 방법입니다. 주요 샌드박스 도구: ① ANY.RUN — 인터랙티브 샌드박스. 실시간 행위 관찰. ② Joe Sandbox — 자동화 분석. 상세 보고서 생성. ③ Hybrid Analysis — CrowdStrike 무료 샌드박스. ④ Cuckoo Sandbox — 오픈소스. 로컬 구축 가능."
+            },
+            {
+              "type": "concept",
+              "heading": "프로세스 트리 분석",
+              "emojis": "🌳",
+              "content": "악성 매크로가 실행되면 특징적인 프로세스 트리가 생성됩니다: WINWORD.EXE → cmd.exe → powershell.exe → malware.exe. 정상적으로 Word가 cmd.exe나 powershell.exe를 실행하는 경우는 거의 없습니다. 이러한 비정상적 부모-자식 프로세스 관계가 핵심 탐지 지표입니다."
+            },
+            {
+              "type": "diagram",
+              "heading": "악성 매크로 실행 프로세스 트리",
+              "ascii": "  [프로세스 트리 — 악성 매크로 실행 시]\n\n  WINWORD.EXE (PID: 1234)       ← Word 문서 열기\n    │\n    ├── cmd.exe (PID: 2345)      ← 매크로가 cmd 실행\n    │     │\n    │     └── powershell.exe      ← 인코딩된 명령 실행\n    │           (PID: 3456)\n    │           │\n    │           └── rundll32.exe  ← DLL 로드/실행\n    │                 (PID: 4567)\n    │\n    └── wmiprvse.exe (PID: 5678) ← WMI로 프로세스 생성\n          │\n          └── regsvr32.exe       ← 스크립트 실행 (LoLBin)\n                (PID: 6789)\n\n  ⚠️ 정상: WINWORD.EXE는 cmd.exe/powershell.exe를\n     자식 프로세스로 생성하지 않음!"
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "OLE 구조 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "OLE 파일 포맷과 oletools",
+              "emojis": "📦",
+              "content": "Office 문서는 OLE(Object Linking and Embedding) 컨테이너 형식을 사용합니다. 이 구조 안에 VBA 매크로, 임베디드 객체, 메타데이터가 저장됩니다. oletools는 OLE 구조를 분석하는 Python 도구 모음입니다: ① olevba — VBA 매크로 추출 및 분석. ② oleid — 파일 특성 식별 (매크로 유무, 암호화 등). ③ rtfobj — RTF 파일 내 임베디드 객체 추출. ④ mraptor — 매크로 위험도 자동 평가."
+            },
+            {
+              "type": "code",
+              "heading": "olevba를 이용한 매크로 추출",
+              "filename": "olevba_analysis.sh",
+              "language": "bash",
+              "warning": "분석 도구 명령어 — 격리된 환경에서 실행",
+              "lines": [
+                { "text": "# olevba: VBA 매크로 추출 및 분석", "color": "slate" },
+                { "text": "# 설치: pip install oletools", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "# 1단계: 매크로 존재 여부 확인", "color": "green" },
+                { "text": "oleid suspicious_invoice.docm", "color": "cyan" },
+                { "text": "# 출력: VBA Macros: Yes, suspicious", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "# 2단계: VBA 소스코드 추출", "color": "green" },
+                { "text": "olevba suspicious_invoice.docm", "color": "cyan" },
+                { "text": "# AutoOpen/Document_Open 함수 확인", "color": "yellow" },
+                { "text": "# Shell, WScript, PowerShell 키워드 확인", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "# 3단계: 위험도 자동 평가", "color": "green" },
+                { "text": "mraptor suspicious_invoice.docm", "color": "cyan" },
+                { "text": "# 출력: [SUSPICIOUS] Auto-execution + Shell + Download", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 4단계: 디코딩된 문자열 추출", "color": "green" },
+                { "text": "olevba --deobf suspicious_invoice.docm", "color": "cyan" },
+                { "text": "# Chr() 난독화를 자동 해제하여 원본 URL/명령어 노출", "color": "orange" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "Sigma 탐지 규칙",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Office 자식 프로세스 탐지",
+              "emojis": "📋",
+              "content": "악성 매크로가 실행되면 Office 프로세스에서 비정상적인 자식 프로세스가 생성됩니다. Sigma 규칙으로 이 패턴을 탐지할 수 있습니다. 핵심: WINWORD.EXE, EXCEL.EXE, POWERPNT.EXE가 cmd.exe, powershell.exe, mshta.exe, wscript.exe 등을 실행하면 높은 확률로 악성 매크로입니다."
+            },
+            {
+              "type": "code",
+              "heading": "Office 의심 자식 프로세스 Sigma 규칙",
+              "filename": "office_child_process.yml",
+              "language": "yaml",
+              "lines": [
+                { "text": "title: Suspicious Office Child Process", "color": "green" },
+                { "text": "id: a1b2c3d4-e5f6-7890-abcd-ef1234567890", "color": "slate" },
+                { "text": "status: production", "color": "cyan" },
+                { "text": "level: high", "color": "red" },
+                { "text": "description: >", "color": "green" },
+                { "text": "  Detects Office applications spawning suspicious", "color": "green" },
+                { "text": "  child processes indicative of macro execution", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "logsource:", "color": "yellow" },
+                { "text": "  category: process_creation", "color": "cyan" },
+                { "text": "  product: windows", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "detection:", "color": "yellow" },
+                { "text": "  selection_parent:", "color": "orange" },
+                { "text": "    ParentImage|endswith:", "color": "cyan" },
+                { "text": "      - '\\WINWORD.EXE'", "color": "purple" },
+                { "text": "      - '\\EXCEL.EXE'", "color": "purple" },
+                { "text": "      - '\\POWERPNT.EXE'", "color": "purple" },
+                { "text": "      - '\\ONENOTE.EXE'", "color": "purple" },
+                { "text": "  selection_child:", "color": "orange" },
+                { "text": "    Image|endswith:", "color": "cyan" },
+                { "text": "      - '\\cmd.exe'", "color": "red" },
+                { "text": "      - '\\powershell.exe'", "color": "red" },
+                { "text": "      - '\\pwsh.exe'", "color": "red" },
+                { "text": "      - '\\mshta.exe'", "color": "red" },
+                { "text": "      - '\\wscript.exe'", "color": "red" },
+                { "text": "      - '\\cscript.exe'", "color": "red" },
+                { "text": "      - '\\regsvr32.exe'", "color": "red" },
+                { "text": "      - '\\rundll32.exe'", "color": "red" },
+                { "text": "  condition: selection_parent and selection_child", "color": "yellow" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch6",
+          "title": "YARA 규칙 기초",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "악성 Office 문서 탐지 YARA",
+              "emojis": "🎯",
+              "content": "YARA 규칙으로 악성 Office 문서의 특징적 패턴을 탐지할 수 있습니다. 핵심 탐지 포인트: ① OLE 매직 바이트 (D0 CF 11 E0) — Office 97-2003 형식 식별. ② VBA 프로젝트 스트림 — 매크로 존재 여부. ③ 의심 문자열 — Shell, PowerShell, WScript, URLDownloadToFile 등. ④ Base64 인코딩 패턴 — 페이로드 은닉."
+            },
+            {
+              "type": "code",
+              "heading": "악성 Office 매크로 탐지 YARA 규칙",
+              "filename": "detect_macro_phish.yar",
+              "language": "yara",
+              "lines": [
+                { "text": "rule Malicious_Office_Macro {", "color": "cyan" },
+                { "text": "    meta:", "color": "green" },
+                { "text": "        author = \"GOTROOT EDU\"", "color": "green" },
+                { "text": "        description = \"Detects Office docs with suspicious macros\"", "color": "green" },
+                { "text": "        severity = \"high\"", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "    strings:", "color": "yellow" },
+                { "text": "        // OLE 파일 시그니처", "color": "slate" },
+                { "text": "        $ole = { D0 CF 11 E0 A1 B1 1A E1 }", "color": "orange" },
+                { "text": "        // VBA 프로젝트 스트림", "color": "slate" },
+                { "text": "        $vba = \"VBA\" ascii", "color": "orange" },
+                { "text": "        // 의심 키워드", "color": "slate" },
+                { "text": "        $s1 = \"AutoOpen\" ascii nocase", "color": "purple" },
+                { "text": "        $s2 = \"Document_Open\" ascii nocase", "color": "purple" },
+                { "text": "        $s3 = \"Shell\" ascii", "color": "purple" },
+                { "text": "        $s4 = \"WScript\" ascii", "color": "purple" },
+                { "text": "        $s5 = \"powershell\" ascii nocase", "color": "purple" },
+                { "text": "        $s6 = \"cmd.exe\" ascii nocase", "color": "purple" },
+                { "text": "        $s7 = \"URLDownloadToFile\" ascii", "color": "purple" },
+                { "text": "", "color": "white" },
+                { "text": "    condition:", "color": "yellow" },
+                { "text": "        $ole at 0 and $vba and", "color": "red" },
+                { "text": "        (1 of ($s1, $s2)) and (2 of ($s3, $s4, $s5, $s6, $s7))", "color": "red" },
+                { "text": "}", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch7",
+          "title": "이메일 보안 게이트웨이 구축",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "SPF/DKIM/DMARC 구현",
+              "emojis": "🏗️",
+              "content": "조직의 이메일 보안을 강화하는 3단계: ① SPF 레코드 설정 — DNS에 허가된 발신 서버 IP를 등록합니다. ② DKIM 서명 활성화 — 발신 이메일에 디지털 서명을 추가합니다. ③ DMARC 정책 적용 — SPF/DKIM 실패 시 처리 방침을 설정합니다 (none → quarantine → reject 단계적 적용 권장)."
+            },
+            {
+              "type": "code",
+              "heading": "DNS 레코드 설정 예시",
+              "filename": "dns_records.txt",
+              "language": "plaintext",
+              "lines": [
+                { "text": "# SPF 레코드 (TXT)", "color": "slate" },
+                { "text": "company.com  TXT  \"v=spf1 include:_spf.google.com", "color": "green" },
+                { "text": "                    include:mail.company.com -all\"", "color": "green" },
+                { "text": "# -all: 목록 외 서버는 모두 차단 (강력)", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "# DKIM 레코드 (TXT)", "color": "slate" },
+                { "text": "gm1._domainkey.company.com  TXT  \"v=DKIM1; k=rsa;", "color": "green" },
+                { "text": "  p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMI...\"", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "# DMARC 레코드 (TXT)", "color": "slate" },
+                { "text": "_dmarc.company.com  TXT  \"v=DMARC1; p=reject;", "color": "green" },
+                { "text": "  rua=mailto:dmarc-reports@company.com;", "color": "green" },
+                { "text": "  ruf=mailto:dmarc-forensic@company.com;", "color": "green" },
+                { "text": "  fo=1; adkim=s; aspf=s\"", "color": "green" },
+                { "text": "# p=reject: 인증 실패 시 거부", "color": "yellow" },
+                { "text": "# fo=1: 모든 실패에 포렌식 리포트 생성", "color": "yellow" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch8",
+          "title": "사용자 교육 프로그램",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "피싱 시뮬레이션과 인식 교육",
+              "emojis": "🎓",
+              "content": "기술적 방어만으로는 스피어피싱을 완전히 차단할 수 없습니다. 최종 방어선은 사용자입니다. 효과적인 교육 프로그램: ① 피싱 시뮬레이션 — 실제와 유사한 피싱 메일을 발송하여 클릭률 측정. ② 즉시 교육 — 시뮬레이션에 걸린 사용자에게 즉각적인 학습 콘텐츠 제공. ③ 리포팅 문화 — '의심 이메일 신고' 버튼을 이메일 클라이언트에 추가. ④ 정기 평가 — 분기별 클릭률 추이 분석 및 부서별 비교."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "피싱 교육 효과 측정 지표",
+              "headers": ["지표", "설명", "목표 수준"],
+              "rows": [
+                ["클릭률 (Click Rate)", "시뮬레이션 피싱 메일 클릭 비율", "5% 이하"],
+                ["신고율 (Report Rate)", "의심 이메일 신고 비율", "70% 이상"],
+                ["인지 시간 (Recognition Time)", "피싱 인지까지 평균 소요 시간", "30초 이내"],
+                ["재클릭률 (Repeat Click Rate)", "교육 후 재시뮬레이션 클릭률", "2% 이하"],
+                ["부서별 취약도", "부서별 클릭률 비교", "최고 부서 10% 이하"]
+              ]
+            },
+            {
+              "type": "info",
+              "heading": "효과적인 피싱 교육의 핵심",
+              "emojis": "💡",
+              "content": "연구에 따르면 가장 효과적인 피싱 교육은: ① 실패 직후 즉시 교육 (Just-in-Time Training) — 피싱 링크를 클릭한 순간 '이것은 시뮬레이션이었습니다' 안내와 함께 학습 제공. ② 비난하지 않는 문화 — 피싱에 당한 직원을 처벌하면 신고를 꺼리게 됨. ③ 실제 사례 기반 — 추상적 위협이 아닌 조직에 실제 도착한 피싱 메일 사례로 교육. ④ 반복 시뮬레이션 — 1회성이 아닌 월 1~2회 정기 시뮬레이션."
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "이메일 헤더 필드와 보안 역할 매칭",
+          "description": "각 이메일 헤더 필드에 맞는 보안 목적을 선택하세요.",
+          "pairs": [
+            { "left": "발신 서버 IP가 도메인 소유자가 허가한 서버인지 확인", "right": "SPF" },
+            { "left": "이메일 내용이 전송 중 변조되지 않았는지 디지털 서명으로 검증", "right": "DKIM" },
+            { "left": "SPF/DKIM 실패 시 이메일을 어떻게 처리할지 정책 결정", "right": "DMARC" },
+            { "left": "이메일이 경유한 서버 경로를 역순으로 기록", "right": "Received 헤더" },
+            { "left": "수신 서버가 직접 생성한 SPF/DKIM/DMARC 검증 결과", "right": "Authentication-Results" }
+          ]
+        },
+        {
+          "type": "step_click",
+          "title": "악성 첨부파일 분석 절차",
+          "description": "의심 첨부파일을 안전하게 분석하는 올바른 절차를 단계별로 따라가 보세요.",
+          "steps": [
+            { "emoji": "1️⃣", "label": "격리 환경 준비", "detail": "분석 전용 가상머신(VM)을 사용합니다. 네트워크를 호스트 전용(Host-Only)으로 설정하고, 스냅샷을 생성해 둡니다." },
+            { "emoji": "2️⃣", "label": "파일 기본 정보 확인", "detail": "file 명령어로 실제 파일 형식을 확인하고, sha256sum으로 해시값을 계산합니다. VirusTotal에 해시를 검색하여 기존 탐지 이력을 확인합니다." },
+            { "emoji": "3️⃣", "label": "정적 분석 수행", "detail": "olevba로 VBA 매크로를 추출하고, oleid로 파일 특성을 식별합니다. 매크로 코드에서 AutoOpen, Shell, Download 등 위험 패턴을 분석합니다." },
+            { "emoji": "4️⃣", "label": "동적 분석 실행", "detail": "샌드박스(ANY.RUN, Cuckoo)에서 파일을 실행하여 프로세스 트리, 네트워크 연결, 파일 생성/수정 행위를 관찰합니다." },
+            { "emoji": "5️⃣", "label": "IOC 추출", "detail": "분석 결과에서 IOC(Indicators of Compromise)를 추출합니다: C2 서버 IP/도메인, 드롭된 파일 해시, 레지스트리 변경 사항 등." },
+            { "emoji": "6️⃣", "label": "탐지 규칙 작성 및 공유", "detail": "추출된 IOC를 기반으로 YARA/Sigma 규칙을 작성하고, SIEM에 등록하여 동일 공격의 추가 탐지를 활성화합니다." }
+          ]
+        },
+        {
+          "type": "code_fill",
+          "title": "SPF 레코드 빈칸 채우기",
+          "description": "올바른 SPF DNS 레코드의 빈칸을 채우세요.",
+          "code": {
+            "filename": "spf_record.txt",
+            "lines": [
+              { "text": "# SPF 레코드 형식", "color": "slate" },
+              { "text": "company.com  TXT  \"___blank1___ include:_spf.google.com", "color": "cyan" },
+              { "text": "                    ip4:203.0.113.0/24 ___blank2___\"", "color": "cyan" },
+              { "text": "", "color": "white" },
+              { "text": "# blank1: SPF 버전 선언 (v=spf1)", "color": "yellow" },
+              { "text": "# blank2: 목록 외 서버 처리 (-all = 거부)", "color": "yellow" }
+            ]
+          },
+          "blanks": [
+            { "id": "blank1", "answer": "v=spf1", "hint": "SPF 버전?", "alternatives": ["V=spf1"] },
+            { "id": "blank2", "answer": "-all", "hint": "모두 거부?", "alternatives": ["~all", "-ALL"] }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "악성 VBA 매크로에서 AutoOpen() 함수의 역할은?",
+            "options": [
+              "문서를 암호화하는 함수",
+              "Word 문서가 열릴 때 자동으로 실행되는 이벤트 핸들러",
+              "매크로를 삭제하는 함수",
+              "문서의 페이지를 자동으로 넘기는 함수"
+            ],
+            "correct": 1,
+            "explanation": "AutoOpen()은 Word 문서가 열릴 때 자동으로 호출되는 이벤트 핸들러입니다. 공격자는 이 함수 안에 악성 코드를 넣어 사용자가 '콘텐츠 사용'을 클릭하면 자동 실행되게 합니다. 유사 함수로 Document_Open()이 있습니다."
+          },
+          {
+            "question": "이메일 헤더에서 SPF 검증이 'fail'이라면 의미하는 것은?",
+            "options": [
+              "이메일 내용이 암호화되지 않았다",
+              "발신 서버 IP가 해당 도메인에서 허가하지 않은 서버이다",
+              "이메일 용량이 너무 크다",
+              "수신자 주소가 잘못되었다"
+            ],
+            "correct": 1,
+            "explanation": "SPF(Sender Policy Framework)는 발신 서버 IP가 도메인 소유자가 DNS에 등록한 허가 목록에 있는지 확인합니다. fail은 발신 IP가 허가되지 않았음을 의미하며, 이메일 위조(spoofing)의 강력한 지표입니다."
+          },
+          {
+            "question": "악성 매크로 실행 시 의심해야 할 프로세스 트리 패턴은?",
+            "options": [
+              "WINWORD.EXE → svchost.exe",
+              "WINWORD.EXE → cmd.exe → powershell.exe",
+              "explorer.exe → WINWORD.EXE",
+              "WINWORD.EXE → WINWORD.EXE"
+            ],
+            "correct": 1,
+            "explanation": "정상적으로 WINWORD.EXE(Word)가 cmd.exe나 powershell.exe를 자식 프로세스로 생성하는 경우는 거의 없습니다. 이 패턴은 매크로가 외부 명령을 실행하고 있음을 나타내며, 악성 매크로의 대표적 IOC입니다."
+          },
+          {
+            "question": "oletools의 olevba 도구로 할 수 있는 작업은?",
+            "options": [
+              "Office 문서의 레이아웃 편집",
+              "OLE 문서에서 VBA 매크로 소스코드를 추출하고 위험 패턴 분석",
+              "이메일 서버의 로그 분석",
+              "네트워크 패킷 캡처"
+            ],
+            "correct": 1,
+            "explanation": "olevba는 OLE 형식의 Office 문서에서 VBA 매크로 소스코드를 추출하고, AutoOpen/Shell/Download 등 위험 패턴을 자동으로 식별합니다. --deobf 옵션으로 Chr() 난독화를 자동 해제할 수도 있습니다."
+          },
+          {
+            "question": "DMARC 정책에서 p=reject의 의미는?",
+            "options": [
+              "모든 이메일을 수신한다",
+              "SPF/DKIM 인증에 실패한 이메일을 스팸함으로 이동",
+              "SPF/DKIM 인증에 실패한 이메일을 수신 거부한다",
+              "발신자에게 경고 메시지를 보낸다"
+            ],
+            "correct": 2,
+            "explanation": "DMARC의 p=reject 정책은 SPF와 DKIM 인증에 모두 실패한 이메일을 수신 서버가 완전히 거부하도록 합니다. 이는 가장 강력한 DMARC 정책이며, none → quarantine → reject 순서로 단계적 적용을 권장합니다."
+          },
+          {
+            "question": "YARA 규칙에서 OLE 파일을 식별하는 매직 바이트는?",
+            "options": [
+              "50 4B 03 04 (PK ZIP)",
+              "D0 CF 11 E0 A1 B1 1A E1",
+              "25 50 44 46 (%PDF)",
+              "89 50 4E 47 (PNG)"
+            ],
+            "correct": 1,
+            "explanation": "D0 CF 11 E0 A1 B1 1A E1은 OLE(Object Linking and Embedding) 파일의 매직 바이트입니다. Office 97-2003 형식(.doc, .xls, .ppt)은 이 시그니처로 시작합니다. YARA에서 $ole at 0 조건으로 파일 시작점에서 확인합니다."
+          },
+          {
+            "question": "피싱 시뮬레이션에서 가장 효과적인 교육 시점은?",
+            "options": [
+              "분기별 정기 교육 시간",
+              "연초 전사 공지",
+              "피싱 링크를 클릭한 직후 즉각적인 학습 제공 (Just-in-Time)",
+              "보안 감사 직전"
+            ],
+            "correct": 2,
+            "explanation": "Just-in-Time Training은 피싱 시뮬레이션에서 사용자가 링크를 클릭한 바로 그 순간 교육을 제공합니다. 실수를 인지한 직후이므로 학습 효과가 가장 높으며, 연구에 따르면 재클릭률을 60% 이상 감소시킵니다."
+          },
+          {
+            "question": "샌드박스 동적 분석에서 가장 중요하게 관찰해야 할 행위는?",
+            "options": [
+              "문서의 글꼴과 레이아웃",
+              "프로세스 생성, 네트워크 연결, 파일 시스템 변경",
+              "문서 작성 날짜",
+              "문서의 총 페이지 수"
+            ],
+            "correct": 1,
+            "explanation": "동적 분석에서는 프로세스 트리(비정상적 자식 프로세스 생성), 네트워크 연결(C2 서버 통신), 파일 시스템 변경(드로퍼 파일 생성, 레지스트리 수정) 등 실행 시 행위를 관찰합니다. 이를 통해 IOC를 추출하고 탐지 규칙을 작성합니다."
+          }
+        ]
+      }
+    },
+    "advanced": {
+      "title": "스피어피싱 첨부파일 심화: 고급 분석과 위협 인텔리전스",
+      "titleEn": "Advanced Spearphishing Attachment: Deep Analysis & Threat Intelligence",
+      "estimatedMinutes": 40,
+      "overviewPanel": {
+        "emoji": "⚡",
+        "question": "난독화된 매크로를 해제하고, RTF 익스플로잇을 분석하며, 위협 인텔리전스를 통합할 수 있나요?",
+        "explanation": "고급 과정에서는 VBA 난독화 해제(P-code 분석, VBA Stomping), HTML Smuggling, ISO/IMG 기반 MotW 우회, RTF 익스플로잇, 메모리 포렌식 등 최신 고급 기법을 심층 분석합니다. 또한 YARA 고급 규칙 작성, VirusTotal/MISP 기반 위협 인텔리전스 통합, 제로트러스트 이메일 아키텍처를 학습합니다.",
+        "learningGoals": [
+          { "emoji": "🔬", "title": "고급 난독화 해제", "desc": "VBA Stomping, P-code 분석으로 숨겨진 악성 코드를 추출합니다" },
+          { "emoji": "🛡️", "title": "고급 익스플로잇 분석", "desc": "RTF, MHT, ISO 기반 공격의 내부 구조를 심층 분석합니다" },
+          { "emoji": "📊", "title": "위협 인텔리전스 통합", "desc": "VirusTotal, MISP 등을 연동한 자동화 분석 파이프라인을 구축합니다" }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "VBA 난독화 해제",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "VBA Stomping과 P-code 분석",
+              "emojis": "🔩",
+              "content": "VBA Stomping은 고급 회피 기법으로, VBA 소스코드와 P-code(컴파일된 바이트코드)를 불일치시킵니다. Office는 VBA 소스코드보다 P-code를 우선 실행합니다. 공격자는 무해한 VBA 소스를 남겨두고 P-code만 악성으로 변조하여, olevba 같은 소스 기반 분석 도구를 우회합니다. 이를 탐지하려면 pcodedmp 도구로 P-code를 직접 디스어셈블해야 합니다."
+            },
+            {
+              "type": "code",
+              "heading": "P-code 디스어셈블 분석",
+              "filename": "pcode_analysis.sh",
+              "language": "bash",
+              "warning": "고급 분석 명령어 — 격리 환경에서 실행",
+              "lines": [
+                { "text": "# pcodedmp: VBA P-code 디스어셈블러", "color": "slate" },
+                { "text": "# 설치: pip install pcodedmp", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "# 1단계: VBA 소스코드 확인 (olevba)", "color": "green" },
+                { "text": "olevba stomped_doc.docm", "color": "cyan" },
+                { "text": "# 출력: Sub AutoOpen() ... MsgBox \"Hello\" ... End Sub", "color": "yellow" },
+                { "text": "# ↑ 무해해 보이는 소스코드 (함정!)", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 2단계: P-code 디스어셈블 (실제 실행 코드)", "color": "green" },
+                { "text": "pcodedmp stomped_doc.docm", "color": "cyan" },
+                { "text": "# 출력:", "color": "yellow" },
+                { "text": "#   FuncDefn (Sub AutoOpen)", "color": "yellow" },
+                { "text": "#   LitStr \"powershell -ep bypass -enc SQBFAH...\"", "color": "red" },
+                { "text": "#   ArgsCall Shell, 0x0001", "color": "red" },
+                { "text": "# ↑ P-code에는 악성 Shell 호출이 숨겨져 있음!", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 3단계: 소스 vs P-code 불일치 탐지", "color": "green" },
+                { "text": "# VBA 소스와 P-code가 다르면 → VBA Stomping 확정", "color": "orange" }
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "olevba만으로는 부족하다",
+              "content": "VBA Stomping된 문서는 olevba로 소스코드를 추출해도 무해한 코드만 보입니다. 반드시 pcodedmp로 P-code를 디스어셈블하여 실제 실행되는 바이트코드를 확인해야 합니다. 소스코드와 P-code가 불일치하면 VBA Stomping 공격을 의심해야 합니다."
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "MHT/HTML Smuggling 기법",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "HTML Smuggling의 원리",
+              "emojis": "🚢",
+              "content": "HTML Smuggling은 악성 페이로드를 HTML 파일 안에 Base64로 인코딩하여 숨기고, 브라우저의 JavaScript로 디코딩하여 파일로 저장하는 기법입니다. 이메일 보안 게이트웨이는 HTML 파일 자체를 악성으로 판단하기 어렵습니다. Nobelium(SolarWinds 공격자), QakBot 등이 이 기법을 적극 활용했습니다."
+            },
+            {
+              "type": "code",
+              "heading": "HTML Smuggling 페이로드 구조 (간소화)",
+              "filename": "html_smuggling.html",
+              "language": "html",
+              "warning": "교육 목적 의사 코드 — 실제 악성코드가 아닙니다",
+              "lines": [
+                { "text": "<!-- HTML Smuggling 기법 구조 (교육용) -->", "color": "slate" },
+                { "text": "<html>", "color": "cyan" },
+                { "text": "<body>", "color": "cyan" },
+                { "text": "  <p>문서를 확인하려면 잠시 기다려 주세요...</p>", "color": "green" },
+                { "text": "  <script>", "color": "yellow" },
+                { "text": "    // 1단계: Base64 인코딩된 악성 페이로드", "color": "slate" },
+                { "text": "    var encoded = 'UEsDBBQAAAAIAGFi...';  // ZIP/ISO 바이너리", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "    // 2단계: JavaScript로 디코딩", "color": "slate" },
+                { "text": "    var decoded = atob(encoded);", "color": "red" },
+                { "text": "    var bytes = new Uint8Array(decoded.length);", "color": "red" },
+                { "text": "    for (var i = 0; i < decoded.length; i++)", "color": "red" },
+                { "text": "      bytes[i] = decoded.charCodeAt(i);", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "    // 3단계: Blob으로 파일 다운로드 트리거", "color": "slate" },
+                { "text": "    var blob = new Blob([bytes], {type: 'application/zip'});", "color": "red" },
+                { "text": "    var link = document.createElement('a');", "color": "red" },
+                { "text": "    link.href = URL.createObjectURL(blob);", "color": "red" },
+                { "text": "    link.download = 'Invoice_2026.zip';", "color": "orange" },
+                { "text": "    link.click();  // 자동 다운로드!", "color": "red" },
+                { "text": "  </script>", "color": "yellow" },
+                { "text": "</body></html>", "color": "cyan" }
+              ]
+            },
+            {
+              "type": "info",
+              "heading": "MHT 파일과 HTML Smuggling의 관계",
+              "emojis": "📄",
+              "content": "MHT(MHTML)는 웹페이지를 단일 파일로 저장하는 형식으로, HTML, CSS, 이미지를 MIME 인코딩으로 번들링합니다. 공격자는 MHT 파일 안에 ActiveX 컨트롤이나 JavaScript를 삽입하여 IE/Edge Legacy에서 코드를 실행합니다. 또한 MHT 파일은 Word에서도 열 수 있어 Office 보안 기능을 우회하는 데 악용됩니다."
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "ISO/IMG 첨부 공격 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Mark-of-the-Web 우회 메커니즘",
+              "emojis": "💿",
+              "content": "ISO/IMG 파일 기반 공격의 핵심은 Mark-of-the-Web(MotW) 우회입니다. Windows는 인터넷에서 다운로드한 파일에 NTFS 대체 데이터 스트림(Zone.Identifier)을 추가하여 위험 파일을 표시합니다. 그러나 ISO/IMG 파일을 마운트하면 내부 파일에는 MotW가 전파되지 않습니다. 이로 인해 SmartScreen 경고 없이 내부의 LNK, EXE, DLL 파일이 실행됩니다."
+            },
+            {
+              "type": "code",
+              "heading": "ISO 내부 공격 구조 분석",
+              "filename": "iso_analysis.sh",
+              "language": "bash",
+              "warning": "분석 명령어 — 격리 환경에서 실행",
+              "lines": [
+                { "text": "# ISO 파일 내부 구조 분석", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "# 1단계: ISO 마운트 및 파일 목록 확인", "color": "green" },
+                { "text": "7z l malicious_invoice.iso", "color": "cyan" },
+                { "text": "# 출력:", "color": "yellow" },
+                { "text": "#   Invoice.lnk          (3 KB)  ← 바로가기 (위장)", "color": "orange" },
+                { "text": "#   document.dll          (450 KB) ← 악성 DLL (숨김)", "color": "red" },
+                { "text": "#   readme.txt            (1 KB)  ← 미끼 파일", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "# 2단계: LNK 파일 분석", "color": "green" },
+                { "text": "exiftool Invoice.lnk", "color": "cyan" },
+                { "text": "# Target: C:\\Windows\\System32\\rundll32.exe", "color": "red" },
+                { "text": "# Arguments: document.dll,DllMain", "color": "red" },
+                { "text": "# Icon: %SystemRoot%\\system32\\shell32.dll,1", "color": "orange" },
+                { "text": "# ↑ PDF 아이콘으로 위장!", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 3단계: MotW 확인", "color": "green" },
+                { "text": "# ISO 자체에는 Zone.Identifier 존재", "color": "yellow" },
+                { "text": "cat malicious_invoice.iso:Zone.Identifier", "color": "cyan" },
+                { "text": "# [ZoneTransfer] ZoneId=3", "color": "yellow" },
+                { "text": "# 마운트 후 내부 파일에는 Zone.Identifier 없음!", "color": "red" }
+              ]
+            },
+            {
+              "type": "diagram",
+              "heading": "ISO 기반 공격 체인",
+              "ascii": "  [이메일 수신]          [ISO 마운트]          [실행]\n       │                     │                   │\n  📧 이메일               💿 ISO 마운트        ⚡ 실행\n  \"청구서.iso\"            (자동 드라이브)       \n       │                     │                   │\n       ▼                     ▼                   ▼\n  MotW 태그 있음 →    내부 파일에         LNK 클릭 →\n  (Zone.Identifier)   MotW 없음! ←       rundll32.exe →\n                      SmartScreen 우회    document.dll 로드\n                                              │\n                                              ▼\n                                         C2 서버 연결"
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "RTF 익스플로잇 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "CVE-2017-11882: Equation Editor 취약점",
+              "emojis": "🧮",
+              "content": "CVE-2017-11882는 Microsoft Office의 수식 편집기(Equation Editor, EQNEDT32.EXE)에 존재하는 스택 버퍼 오버플로우 취약점입니다. 2000년에 컴파일된 이 구성 요소는 ASLR이나 DEP 같은 최신 보안 기능이 없어 익스플로잇이 매우 안정적입니다. RTF 문서에 특수 제작된 OLE 객체를 삽입하면 문서를 열기만 해도 임의 코드가 실행됩니다. 패치 후에도 여전히 많은 시스템이 미패치 상태로 남아있어 APT 그룹이 지속적으로 악용합니다."
+            },
+            {
+              "type": "code",
+              "heading": "RTF OLE 객체 분석",
+              "filename": "rtf_analysis.py",
+              "language": "python",
+              "warning": "분석 스크립트 — 교육 목적",
+              "lines": [
+                { "text": "# rtfobj를 이용한 RTF 파일 OLE 객체 분석", "color": "slate" },
+                { "text": "# oletools 패키지에 포함", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "from oletools import rtfobj", "color": "cyan" },
+                { "text": "import hashlib", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "# RTF 파일에서 OLE 객체 추출", "color": "green" },
+                { "text": "rtf = rtfobj.RtfObjParser('exploit.rtf')", "color": "cyan" },
+                { "text": "rtf.parse()", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "for i, obj in enumerate(rtf.objects):", "color": "purple" },
+                { "text": "    print(f'Object {i}: class={obj.class_name}')", "color": "yellow" },
+                { "text": "    print(f'  Size: {len(obj.rawdata)} bytes')", "color": "yellow" },
+                { "text": "    sha256 = hashlib.sha256(obj.rawdata).hexdigest()", "color": "cyan" },
+                { "text": "    print(f'  SHA256: {sha256}')", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "    # Equation Editor 객체 식별", "color": "green" },
+                { "text": "    if obj.class_name == 'Equation.3':", "color": "red" },
+                { "text": "        print('  [!] Equation Editor OLE 객체 발견!')", "color": "red" },
+                { "text": "        print('  [!] CVE-2017-11882 익스플로잇 가능성!')", "color": "red" },
+                { "text": "        # 쉘코드 추출을 위해 객체 덤프", "color": "orange" },
+                { "text": "        with open(f'ole_obj_{i}.bin', 'wb') as f:", "color": "orange" },
+                { "text": "            f.write(obj.rawdata)", "color": "orange" }
+              ]
+            },
+            {
+              "type": "comparison_table",
+              "heading": "주요 RTF/Office 익스플로잇 CVE",
+              "headers": ["CVE", "영향 구성요소", "유형", "악용 APT"],
+              "rows": [
+                ["CVE-2017-11882", "Equation Editor", "스택 버퍼 오버플로우", "APT28, Kimsuky, Lazarus"],
+                ["CVE-2017-0199", "OLE2Link", "원격 HTA 실행", "APT34, Cobalt Group"],
+                ["CVE-2018-0802", "Equation Editor", "메모리 손상", "Sidewinder, APT-C-35"],
+                ["CVE-2021-40444", "MSHTML", "원격 코드 실행", "Wizard Spider, DEV-0365"],
+                ["CVE-2022-30190", "ms-msdt (Follina)", "진단 도구 악용", "TA413, APT28"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "메모리 포렌식",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Volatility를 이용한 매크로 실행 분석",
+              "emojis": "🧪",
+              "content": "악성 매크로가 실행된 시스템의 메모리 덤프를 Volatility로 분석하면 중요한 포렌식 증거를 확보할 수 있습니다. 주요 분석 포인트: ① pslist/pstree — 프로세스 트리에서 Office 자식 프로세스 확인. ② cmdline — 각 프로세스의 명령줄 인자 확인 (인코딩된 PowerShell 명령). ③ netscan — 네트워크 연결에서 C2 통신 증거. ④ malfind — 프로세스 인젝션 탐지 (VirtualAlloc + RWX 권한)."
+            },
+            {
+              "type": "code",
+              "heading": "Volatility 메모리 포렌식 명령어",
+              "filename": "volatility_analysis.sh",
+              "language": "bash",
+              "warning": "포렌식 분석 도구 — 방어 목적",
+              "lines": [
+                { "text": "# Volatility 3 기반 메모리 포렌식", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "# 1단계: 프로세스 트리 확인", "color": "green" },
+                { "text": "vol -f memory.dmp windows.pstree", "color": "cyan" },
+                { "text": "# WINWORD.EXE (3456)", "color": "yellow" },
+                { "text": "#   └── cmd.exe (4567)            ← 의심!", "color": "red" },
+                { "text": "#       └── powershell.exe (5678)  ← 의심!", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 2단계: 명령줄 인자 확인", "color": "green" },
+                { "text": "vol -f memory.dmp windows.cmdline --pid 5678", "color": "cyan" },
+                { "text": "# powershell.exe -ep bypass -w hidden -enc SQBFAH...", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 3단계: 네트워크 연결 확인", "color": "green" },
+                { "text": "vol -f memory.dmp windows.netscan", "color": "cyan" },
+                { "text": "# 185.234.72.15:443  ESTABLISHED  powershell.exe", "color": "red" },
+                { "text": "# ↑ C2 서버 연결 증거!", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 4단계: 프로세스 인젝션 탐지", "color": "green" },
+                { "text": "vol -f memory.dmp windows.malfind --pid 5678", "color": "cyan" },
+                { "text": "# VAD Tag: VadS  Protection: PAGE_EXECUTE_READWRITE", "color": "orange" },
+                { "text": "# ↑ RWX 권한 = 쉘코드 인젝션 의심!", "color": "red" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch6",
+          "title": "YARA 규칙 고급 작성",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "VBA Stomping 탐지와 고급 패턴 매칭",
+              "emojis": "🎯",
+              "content": "고급 YARA 규칙은 단순 문자열 매칭을 넘어, OLE 구조 내부의 바이너리 패턴, VBA P-code 시그니처, 엔트로피(무작위성) 측정 등을 활용합니다. VBA Stomping 탐지: _VBA_PROJECT 스트림과 VBA 소스 스트림의 크기/해시 불일치를 확인합니다."
+            },
+            {
+              "type": "code",
+              "heading": "VBA Stomping 탐지 YARA 규칙",
+              "filename": "detect_vba_stomping.yar",
+              "language": "yara",
+              "lines": [
+                { "text": "import \"math\"", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "rule VBA_Stomping_Indicator {", "color": "cyan" },
+                { "text": "    meta:", "color": "green" },
+                { "text": "        author = \"GOTROOT EDU\"", "color": "green" },
+                { "text": "        description = \"Detects potential VBA Stomping\"", "color": "green" },
+                { "text": "        severity = \"critical\"", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "    strings:", "color": "yellow" },
+                { "text": "        // OLE 파일 시그니처", "color": "slate" },
+                { "text": "        $ole = { D0 CF 11 E0 A1 B1 1A E1 }", "color": "orange" },
+                { "text": "        // VBA 프로젝트 스트림 존재", "color": "slate" },
+                { "text": "        $vba_proj = \"_VBA_PROJECT\" wide ascii", "color": "orange" },
+                { "text": "        // P-code 시그니처 (PerformanceCache)", "color": "slate" },
+                { "text": "        $pcode = { CC 61 FF FF 00 00 00 }", "color": "purple" },
+                { "text": "        // 소스 코드에서 무해한 키워드만 존재", "color": "slate" },
+                { "text": "        $benign1 = \"MsgBox\" ascii", "color": "green" },
+                { "text": "        $benign2 = \"Hello\" ascii", "color": "green" },
+                { "text": "        // P-code에 악성 키워드 존재", "color": "slate" },
+                { "text": "        $mal_pcode1 = \"Shell\" ascii", "color": "red" },
+                { "text": "        $mal_pcode2 = \"WScript\" ascii", "color": "red" },
+                { "text": "        $mal_pcode3 = \"powershell\" ascii nocase", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "    condition:", "color": "yellow" },
+                { "text": "        $ole at 0 and $vba_proj and $pcode and", "color": "red" },
+                { "text": "        (1 of ($benign*)) and (1 of ($mal_pcode*)) and", "color": "red" },
+                { "text": "        math.entropy(0, filesize) > 5.0", "color": "orange" },
+                { "text": "}", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch7",
+          "title": "위협 인텔리전스 통합",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "VirusTotal, AbuseIPDB, MISP 연동",
+              "emojis": "🌐",
+              "content": "위협 인텔리전스(Threat Intelligence)는 개별 분석을 넘어 전 세계 보안 커뮤니티의 지식을 활용합니다. 핵심 플랫폼: ① VirusTotal — 파일/URL/IP의 악성 여부를 60+ 엔진으로 검사. API로 자동화 가능. ② AbuseIPDB — 악성 IP 주소 데이터베이스. C2 서버 IP 조회. ③ MISP (Malware Information Sharing Platform) — IOC를 조직 간 공유하는 오픈소스 플랫폼. STIX/TAXII 표준 지원."
+            },
+            {
+              "type": "code",
+              "heading": "VirusTotal API 자동 분석 스크립트",
+              "filename": "vt_analysis.py",
+              "language": "python",
+              "warning": "API 키 필요 — VirusTotal 계정에서 발급",
+              "lines": [
+                { "text": "import requests", "color": "cyan" },
+                { "text": "import hashlib", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "VT_API_KEY = 'YOUR_API_KEY'", "color": "orange" },
+                { "text": "VT_BASE = 'https://www.virustotal.com/api/v3'", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "def check_file_hash(file_path):", "color": "cyan" },
+                { "text": "    \"\"\"파일 해시로 VirusTotal 조회\"\"\"", "color": "slate" },
+                { "text": "    with open(file_path, 'rb') as f:", "color": "purple" },
+                { "text": "        sha256 = hashlib.sha256(f.read()).hexdigest()", "color": "purple" },
+                { "text": "", "color": "white" },
+                { "text": "    headers = {'x-apikey': VT_API_KEY}", "color": "yellow" },
+                { "text": "    resp = requests.get(", "color": "cyan" },
+                { "text": "        f'{VT_BASE}/files/{sha256}',", "color": "cyan" },
+                { "text": "        headers=headers", "color": "cyan" },
+                { "text": "    )", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "    if resp.status_code == 200:", "color": "purple" },
+                { "text": "        data = resp.json()['data']['attributes']", "color": "green" },
+                { "text": "        stats = data['last_analysis_stats']", "color": "green" },
+                { "text": "        print(f'Detection: {stats[\"malicious\"]}/{sum(stats.values())}')", "color": "red" },
+                { "text": "        print(f'Tags: {data.get(\"tags\", [])}')", "color": "yellow" },
+                { "text": "    else:", "color": "purple" },
+                { "text": "        print('Not found — upload for analysis')", "color": "orange" }
+              ]
+            },
+            {
+              "type": "info",
+              "heading": "MISP를 이용한 IOC 자동 공유",
+              "emojis": "🤝",
+              "content": "MISP는 조직 간 위협 인텔리전스를 공유하는 오픈소스 플랫폼입니다. 스피어피싱 분석에서 추출한 IOC(C2 IP, 악성 파일 해시, 발신 이메일 주소 등)를 MISP 이벤트로 생성하면, 연동된 다른 조직의 SIEM/방화벽에 자동으로 차단 규칙이 배포됩니다. STIX 2.1 형식으로 표준화하여 국제적으로 공유할 수 있습니다."
+            }
+          ]
+        },
+        {
+          "id": "ch8",
+          "title": "제로트러스트 이메일 아키텍처",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "이메일 격리와 CDR 기술",
+              "emojis": "🏰",
+              "content": "제로트러스트 이메일 아키텍처는 '모든 첨부파일은 악성일 수 있다'는 전제에서 시작합니다. 핵심 기술: ① Email Isolation — 첨부파일을 클라우드 샌드박스에서 먼저 실행하고, 안전한 렌더링만 사용자에게 전달. ② CDR (Content Disarm and Reconstruction) — 첨부파일에서 매크로, 스크립트, 임베디드 객체 등 활성 콘텐츠를 제거하고 안전한 문서로 재구성. ③ Sandboxing Pipeline — 모든 첨부파일을 자동으로 샌드박스에서 실행하여 행위 분석 후 통과/차단 결정."
+            },
+            {
+              "type": "diagram",
+              "heading": "제로트러스트 이메일 파이프라인",
+              "ascii": "  [외부 이메일]                     [내부 수신자]\n       │                                 │\n       ▼                                 │\n  ┌─────────────────┐                    │\n  │ 1. 이메일 게이트웨이  │                    │\n  │ SPF/DKIM/DMARC  │                    │\n  │ 발신자 평판 확인  │                    │\n  └────────┬────────┘                    │\n           ▼                             │\n  ┌─────────────────┐                    │\n  │ 2. 첨부파일 샌드박스  │                    │\n  │ 동적 분석 (5분)  │                    │\n  │ 프로세스 트리 확인│                    │\n  └────────┬────────┘                    │\n           ▼                             │\n  ┌─────────────────┐                    │\n  │ 3. CDR 처리      │                    │\n  │ 매크로 제거      │                    │\n  │ 스크립트 제거    │                    │\n  │ 안전 문서 재구성  │                    │\n  └────────┬────────┘                    │\n           ▼                             ▼\n      [안전한 이메일 + 클린 첨부파일] ──→ 📧 수신"
+            },
+            {
+              "type": "comparison_table",
+              "heading": "이메일 보안 계층별 방어 효과",
+              "headers": ["보안 계층", "방어 대상", "우회 가능성"],
+              "rows": [
+                ["SPF/DKIM/DMARC", "발신자 위조 (Spoofing)", "🟡 정상 도메인 탈취 시 우회"],
+                ["안티바이러스 스캔", "알려진 악성 파일", "🔴 신규 변종 우회"],
+                ["샌드박스 분석", "동적 행위 기반 탐지", "🟡 환경 인식(Sandbox Evasion)"],
+                ["CDR", "활성 콘텐츠 완전 제거", "🟢 우회 매우 어려움"],
+                ["이메일 격리", "사용자 직접 실행 차단", "🟢 우회 매우 어려움"],
+                ["사용자 교육", "사회공학 공격 인지", "🟡 고도화된 공격에 취약"]
+              ]
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "포렌식 도구와 용도 매칭",
+          "description": "각 포렌식/분석 도구에 맞는 올바른 용도를 선택하세요.",
+          "pairs": [
+            { "left": "OLE 문서에서 VBA P-code를 디스어셈블하여 실제 실행 코드 분석", "right": "pcodedmp" },
+            { "left": "메모리 덤프에서 프로세스 트리, 네트워크 연결, 인젝션 탐지", "right": "Volatility" },
+            { "left": "RTF 파일에서 OLE 객체를 추출하여 익스플로잇 분석", "right": "rtfobj" },
+            { "left": "파일 해시를 60+ 안티바이러스 엔진으로 동시 검사", "right": "VirusTotal" },
+            { "left": "조직 간 IOC를 STIX/TAXII 표준으로 자동 공유", "right": "MISP" }
+          ]
+        },
+        {
+          "type": "code_fill",
+          "title": "악성 매크로 탐지 YARA 규칙 빈칸 채우기",
+          "description": "악성 Office 매크로를 탐지하는 YARA 규칙의 빈칸을 올바른 값으로 채우세요.",
+          "code": {
+            "filename": "yara_macro_fill.yar",
+            "lines": [
+              { "text": "rule Detect_Malicious_Macro {", "color": "cyan" },
+              { "text": "    strings:", "color": "yellow" },
+              { "text": "        $ole = { ___blank1___ }", "color": "orange" },
+              { "text": "        $auto = \"___blank2___\" ascii nocase", "color": "purple" },
+              { "text": "        $shell = \"___blank3___\" ascii nocase", "color": "purple" },
+              { "text": "", "color": "white" },
+              { "text": "    condition:", "color": "yellow" },
+              { "text": "        $ole at 0 and $auto and $shell", "color": "red" },
+              { "text": "}", "color": "cyan" }
+            ]
+          },
+          "blanks": [
+            { "id": "blank1", "answer": "D0 CF 11 E0 A1 B1 1A E1", "hint": "OLE 매직 바이트?", "alternatives": ["D0CF11E0A1B11AE1"] },
+            { "id": "blank2", "answer": "AutoOpen", "hint": "자동 실행 함수?", "alternatives": ["Document_Open", "autoopen"] },
+            { "id": "blank3", "answer": "powershell", "hint": "실행 대상?", "alternatives": ["Shell", "WScript", "cmd.exe"] }
+          ]
+        },
+        {
+          "type": "step_click",
+          "title": "스피어피싱 첨부파일 사고 대응 절차",
+          "description": "스피어피싱 첨부파일 실행이 탐지되었을 때 올바른 대응 순서를 따라가 보세요.",
+          "steps": [
+            { "emoji": "🚨", "label": "SIEM 알림 확인 및 초기 분류", "detail": "Sigma 규칙이 Office 프로세스의 비정상적 자식 프로세스 생성을 탐지했습니다. 알림의 심각도, 대상 시스템, 사용자를 확인하고 사고 티켓을 생성합니다." },
+            { "emoji": "🔌", "label": "감염 시스템 네트워크 격리", "detail": "C2 통신을 즉시 차단하기 위해 해당 시스템을 네트워크에서 격리합니다. EDR 콘솔에서 원격 격리를 수행하거나, 네트워크 팀에 해당 IP의 방화벽 차단을 요청합니다." },
+            { "emoji": "📧", "label": "원본 이메일 수집 및 분석", "detail": "이메일 게이트웨이에서 원본 메일을 확보합니다. 헤더 분석(SPF/DKIM/DMARC), 발신자 IP 조회, 첨부파일 해시 추출을 수행합니다." },
+            { "emoji": "🔍", "label": "첨부파일 정적/동적 분석", "detail": "격리된 환경에서 첨부파일을 olevba, pcodedmp, 샌드박스로 분석합니다. IOC(C2 IP/도메인, 드롭파일 해시, 레지스트리 키)를 추출합니다." },
+            { "emoji": "🧪", "label": "메모리 포렌식 및 영향 범위 확인", "detail": "감염 시스템의 메모리 덤프를 Volatility로 분석합니다. 프로세스 인젝션, 자격증명 탈취, 횡단이동 증거를 확인하여 영향 범위를 파악합니다." },
+            { "emoji": "🌐", "label": "동일 이메일 수신자 전수 조사", "detail": "이메일 로그에서 동일 발신자/첨부파일 해시로 메일을 받은 모든 사용자를 식별합니다. 해당 사용자에게 즉시 경고하고, 첨부파일을 열었는지 확인합니다." },
+            { "emoji": "🛡️", "label": "IOC 기반 차단 규칙 배포 및 보고서 작성", "detail": "추출된 IOC를 방화벽, SIEM, 이메일 게이트웨이에 차단 규칙으로 등록합니다. MISP에 공유하고, 사고 대응 보고서를 작성합니다." }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "VBA Stomping 기법이 olevba 분석을 우회할 수 있는 이유는?",
+            "options": [
+              "VBA 소스코드를 암호화하기 때문",
+              "Office가 VBA 소스보다 P-code(컴파일된 바이트코드)를 우선 실행하므로, 무해한 소스를 남기고 P-code만 악성으로 변조",
+              "OLE 파일 형식을 OOXML로 변환하기 때문",
+              "매크로를 완전히 제거하기 때문"
+            ],
+            "correct": 1,
+            "explanation": "Office는 VBA 소스코드와 P-code가 동시에 존재할 때 P-code를 우선 실행합니다. VBA Stomping은 소스코드는 무해하게 유지하면서 P-code만 악성으로 변조하여, 소스 기반 분석 도구(olevba)를 우회합니다. pcodedmp로 P-code를 직접 확인해야 합니다."
+          },
+          {
+            "question": "HTML Smuggling이 이메일 보안 게이트웨이를 우회할 수 있는 핵심 원리는?",
+            "options": [
+              "이메일을 암호화하기 때문",
+              "악성 페이로드가 HTML/JavaScript 안에 Base64로 인코딩되어 있어 정적 분석에서 악성 바이너리로 탐지되지 않음",
+              "이메일 헤더를 위조하기 때문",
+              "첨부파일을 사용하지 않기 때문"
+            ],
+            "correct": 1,
+            "explanation": "HTML Smuggling은 악성 바이너리를 Base64로 인코딩하여 HTML 파일 안에 숨깁니다. 이메일 게이트웨이는 HTML 파일 자체를 악성으로 판단하기 어렵고, 실제 악성 바이너리는 브라우저의 JavaScript에 의해 사용자 PC에서 디코딩됩니다."
+          },
+          {
+            "question": "CVE-2017-11882 (Equation Editor) 익스플로잇이 매우 안정적으로 작동하는 이유는?",
+            "options": [
+              "최신 보안 기능이 적용된 최신 컴포넌트이기 때문",
+              "2000년에 컴파일된 구성요소로 ASLR, DEP 등 최신 메모리 보호 기능이 없기 때문",
+              "관리자 권한이 필요하지 않기 때문",
+              "네트워크 접근이 불필요하기 때문"
+            ],
+            "correct": 1,
+            "explanation": "EQNEDT32.EXE는 2000년에 컴파일되어 ASLR(주소 공간 배치 무작위화)이나 DEP(데이터 실행 방지) 같은 최신 메모리 보호 기능이 적용되지 않았습니다. 이로 인해 스택 버퍼 오버플로우 공격이 매우 안정적으로 작동하며, 다양한 APT 그룹이 지속적으로 악용합니다."
+          },
+          {
+            "question": "ISO 파일이 Mark-of-the-Web(MotW)를 우회하는 메커니즘은?",
+            "options": [
+              "ISO 파일이 MotW 태그를 자동으로 삭제하기 때문",
+              "Windows가 ISO를 마운트할 때 내부 파일에 MotW Zone.Identifier 대체 데이터 스트림이 전파되지 않기 때문",
+              "ISO 파일이 암호화되어 있기 때문",
+              "ISO 파일은 인터넷에서 다운로드한 것으로 인식되지 않기 때문"
+            ],
+            "correct": 1,
+            "explanation": "ISO 파일 자체에는 MotW(Zone.Identifier ADS)가 붙지만, Windows가 가상 드라이브로 마운트할 때 내부 파일에는 이 태그가 전파되지 않습니다. 따라서 ISO 내부의 LNK, EXE, DLL 파일은 SmartScreen 경고 없이 실행될 수 있습니다."
+          },
+          {
+            "question": "Volatility 메모리 포렌식에서 악성 매크로 실행의 증거를 확인하는 가장 효과적인 플러그인 조합은?",
+            "options": [
+              "filescan + dumpfiles",
+              "pstree + cmdline + netscan + malfind",
+              "hivelist + printkey",
+              "modules + modscan"
+            ],
+            "correct": 1,
+            "explanation": "pstree로 Office 자식 프로세스를 확인하고, cmdline으로 인코딩된 명령어를 추출하며, netscan으로 C2 통신을 식별하고, malfind로 프로세스 인젝션(RWX 메모리)을 탐지합니다. 이 조합으로 매크로 실행의 전체 공격 체인을 추적할 수 있습니다."
+          },
+          {
+            "question": "CDR(Content Disarm and Reconstruction) 기술의 핵심 원리는?",
+            "options": [
+              "악성 파일을 격리 저장소에 보관",
+              "파일의 모든 활성 콘텐츠(매크로, 스크립트, OLE 객체)를 제거하고 안전한 문서로 재구성",
+              "파일을 암호화하여 실행 불가능하게 만듦",
+              "파일의 해시를 변경하여 추적 불가능하게 만듦"
+            ],
+            "correct": 1,
+            "explanation": "CDR은 첨부파일에서 매크로, 스크립트, 임베디드 OLE 객체, ActiveX 컨트롤 등 모든 활성 콘텐츠를 제거하고, 텍스트와 이미지 등 안전한 요소만으로 문서를 재구성합니다. 원본 파일의 레이아웃은 유지하면서 실행 가능한 코드를 완전히 제거하므로, 우회가 매우 어렵습니다."
+          },
+          {
+            "question": "MISP를 통한 IOC 공유가 스피어피싱 대응에 효과적인 이유는?",
+            "options": [
+              "무료 도구이기 때문",
+              "한 조직에서 탐지한 공격의 IOC를 다른 조직이 즉시 차단 규칙으로 활용할 수 있어 선제적 방어가 가능하기 때문",
+              "사용하기 쉽기 때문",
+              "정부에서 의무화했기 때문"
+            ],
+            "correct": 1,
+            "explanation": "스피어피싱 공격은 하나의 조직을 타깃으로 시작하지만, 동일 공격 캠페인이 다른 조직으로 확대되는 경우가 많습니다. MISP로 IOC(C2 IP, 악성 해시, 발신 주소)를 실시간 공유하면, 연동된 조직의 보안 장비에 자동으로 차단 규칙이 배포되어 선제적 방어가 가능합니다."
+          },
+          {
+            "question": "YARA에서 math.entropy를 사용하여 악성 문서를 탐지하는 원리는?",
+            "options": [
+              "파일 크기를 측정하기 위해",
+              "파일의 무작위성(엔트로피)이 높으면 인코딩/암호화/압축된 페이로드가 포함되어 있을 가능성이 높음",
+              "파일의 생성 날짜를 확인하기 위해",
+              "파일의 디지털 서명을 검증하기 위해"
+            ],
+            "correct": 1,
+            "explanation": "엔트로피는 데이터의 무작위성을 측정합니다. 정상 Office 문서의 엔트로피는 보통 3~5 수준이지만, Base64 인코딩된 페이로드나 암호화된 쉘코드가 포함되면 엔트로피가 5.0 이상으로 증가합니다. YARA의 math.entropy 함수로 이 수치를 조건에 활용하여 의심 파일을 탐지합니다."
+          }
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "ctiSources": [
+      { "name": "MITRE ATT&CK", "url": "https://attack.mitre.org/techniques/T1566/001/", "description": "T1566.001 기법 정의 및 Procedure Examples" },
+      { "name": "MITRE CTI GitHub", "url": "https://github.com/mitre/cti", "description": "STIX 2.1 JSON 데이터 — 탐지 방법 및 완화 전략" },
+      { "name": "CISA Phishing Guidance", "url": "https://www.cisa.gov/topics/cyber-threats-and-advisories", "description": "피싱 방어 가이드라인 및 보안 권고" },
+      { "name": "Microsoft Security Blog", "url": "https://www.microsoft.com/security/blog/", "description": "Office 매크로 차단 정책 및 최신 위협 분석" },
+      { "name": "KISA 침해사고 분석", "url": "https://www.krcert.or.kr/", "description": "국내 스피어피싱 사례 분석 및 대응 가이드" }
+    ],
+    "aptGroups": ["APT28", "APT29", "Kimsuky", "Lazarus Group", "Emotet", "QakBot", "TA413", "Cobalt Group"],
+    "relatedTechniques": ["T1566.002", "T1566.003", "T1204.002", "T1059.001", "T1059.005", "T1547.001"],
+    "tags": ["phishing", "spearphishing", "attachment", "macro", "vba", "ole", "email-security", "spf", "dkim", "dmarc", "yara", "sigma", "html-smuggling", "iso", "rtf-exploit", "cdr"],
+    "lastUpdated": "2026-03-02",
+    "author": "(주)갓루트",
+    "version": "1.0.0"
+  }
+}

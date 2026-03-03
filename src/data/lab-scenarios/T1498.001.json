@@ -1,0 +1,277 @@
+{
+  "id": "T1498.001",
+  "title": "직접 네트워크 플러드 (DDoS) 시뮬레이션",
+  "titleEn": "Direct Network Flood (DDoS) Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚔️" },
+    { "label": "침투", "labelEn": "Breach", "icon": "💀" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker / Botnet", "icon": "💻" },
+    { "id": "target", "label": "Web Server (Target)", "icon": "🌐" },
+    { "id": "dns", "label": "Open DNS Resolvers", "icon": "📡" },
+    { "id": "waf", "label": "WAF / CDN", "icon": "🛡️" },
+    { "id": "siem", "label": "NDR / SIEM", "icon": "📊" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "SYN/UDP Flood", "activeStep": [1, 2] },
+    { "from": "attacker", "to": "dns", "label": "Spoofed Query", "activeStep": [3] },
+    { "from": "dns", "to": "target", "label": "Amplified Response", "activeStep": [3] },
+    { "from": "attacker", "to": "waf", "label": "HTTP/Slowloris", "activeStep": [4, 5] },
+    { "from": "target", "to": "siem", "label": "Alert", "activeStep": [1, 2, 3, 4, 5, 6] }
+  ],
+  "desktopIcons": [
+    { "name": "hping3", "icon": "📡", "alertOnStep": 1 },
+    { "name": "udp_flood.py", "icon": "🌊", "alertOnStep": 2 },
+    { "name": "dns_amp.py", "icon": "📢", "alertOnStep": 3 },
+    { "name": "slowloris.py", "icon": "🐢", "alertOnStep": 5 }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Reconnaissance: identify target infrastructure\n$target = 'www.{companyName}.com';\n$dns = Resolve-DnsName $target -Type A;\nWrite-Host 'Target Reconnaissance:';\nWrite-Host \\\"  Domain : $target\\\";\nWrite-Host \\\"  IP     : $($dns.IPAddress -join ', ')\\\";\n$whois = \\\"ASN: AS12345 | ISP: {companyName} Hosting | Region: KR\\\";\nWrite-Host \\\"  $whois\\\";\nWrite-Host '';\n# Check for CDN/WAF\nTest-NetConnection $target -Port 80 | Select-Object ComputerName, RemotePort, TcpTestSucceeded | Format-Table -AutoSize;\nTest-NetConnection $target -Port 443 | Select-Object ComputerName, RemotePort, TcpTestSucceeded | Format-Table -AutoSize;\nWrite-Host 'CDN/WAF Detection: None (direct to origin)';\nWrite-Host '[!] Target is vulnerable to direct flood attacks'\"",
+      "out": "Target Reconnaissance:\n  Domain : www.{companyName}.com\n  IP     : 203.0.113.100\n  ASN: AS12345 | ISP: {companyName} Hosting | Region: KR\n\nComputerName          RemotePort TcpTestSucceeded\n------------          ---------- ----------------\nwww.{companyName}.com         80             True\n\nComputerName          RemotePort TcpTestSucceeded\n------------          ---------- ----------------\nwww.{companyName}.com        443             True\n\nCDN/WAF Detection: None (direct to origin)\n[!] Target is vulnerable to direct flood attacks",
+      "def": "[NDR] DDoS target reconnaissance detected - infrastructure enumeration",
+      "defAction": "Source: 10.10.15.22 (WS-PC0142)\nTarget: www.{companyName}.com (203.0.113.100)\nActions: DNS resolve, port scan (80, 443)\nCDN/WAF: Not detected\nRisk: MEDIUM",
+      "desc": "공격 대상의 인프라를 정찰합니다. CDN/WAF가 없는 직접 연결 대상으로 DDoS에 취약한 것을 확인합니다.",
+      "descEn": "Reconnoiters the target infrastructure. Confirms the target has no CDN/WAF and is vulnerable to direct DDoS attacks.",
+      "stepTitle": "타겟 인프라 정찰",
+      "stepTitleEn": "Target Infra Recon",
+      "feynman": "가게를 털기 전에 경비원이 있는지, CCTV가 있는지 살펴보는 것과 같아요. CDN/WAF(보안 방패)가 없는 것을 확인했으니, 직접 공격해도 차단될 가능성이 낮습니다.",
+      "feynmanEn": "It's like casing a store before robbing it - checking for security guards and cameras. No CDN/WAF (security shield) detected, so direct attacks are less likely to be blocked.",
+      "expert": "Resolve-DnsName과 Test-NetConnection으로 대상의 IP, ASN, ISP를 식별하고 CDN/WAF 존재를 확인합니다. MITRE T1590 (Gather Victim Network Information)에 해당합니다. CDN/WAF가 없는 origin 직접 노출은 DDoS에 가장 취약한 구성입니다. Cloudflare, AWS Shield 등 CDN 뒤에 숨겨야 합니다.",
+      "expertEn": "Resolve-DnsName and Test-NetConnection identify target IP, ASN, ISP and check CDN/WAF presence. Maps to MITRE T1590 (Gather Victim Network Information). Direct origin exposure without CDN/WAF is the most DDoS-vulnerable configuration. Should be hidden behind Cloudflare, AWS Shield, etc.",
+      "defTooltip": "origin 서버 IP가 직접 노출되지 않도록 CDN/리버스 프록시 뒤에 배치하세요. DNS 레코드에서 origin IP가 직접 조회되면 DDoS 공격 대상이 됩니다.",
+      "defTooltipEn": "Place origin servers behind CDN/reverse proxy to prevent direct IP exposure. If origin IP is directly queryable via DNS records, it becomes a DDoS target.",
+      "hackerLog": {
+        "title": "DDoS 타겟 정찰",
+        "lines": [
+          { "text": "Resolve-DnsName www.{companyName}.com", "desc": "대상 IP 주소(203.0.113.100) 확인" },
+          { "text": "CDN/WAF Detection: None (direct to origin)", "desc": "CDN/WAF 없음 - 직접 공격 가능" },
+          { "text": "ASN: AS12345 | ISP: {companyName} Hosting", "desc": "ISP 및 대역폭 용량 파악" }
+        ]
+      },
+      "terms": [
+        { "term": "DDoS (Distributed Denial of Service)", "desc": "다수의 소스에서 대량의 트래픽을 보내 서비스를 마비시키는 공격입니다." },
+        { "term": "CDN (Content Delivery Network)", "desc": "전 세계 분산 서버로 콘텐츠를 제공하며 DDoS 방어 기능도 합니다." },
+        { "term": "WAF (Web Application Firewall)", "desc": "웹 애플리케이션에 대한 악성 트래픽을 필터링하는 보안 장비입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# SYN Flood attack simulation\n$target = '203.0.113.100';\n$port = 80;\nWrite-Host '=== SYN Flood Attack ===';\nWrite-Host \\\"Target: $target`:$port\\\";\nWrite-Host \\\"Method: TCP SYN packets (half-open connections)\\\";\nWrite-Host \\\"Rate  : 50,000 packets/second\\\";\nWrite-Host '';\nfor($i=1; $i -le 6; $i++) {\n  $srcIP = \\\"$(Get-Random -Min 1 -Max 254).$(Get-Random -Min 1 -Max 254).$(Get-Random -Min 1 -Max 254).$(Get-Random -Min 1 -Max 254)\\\";\n  $srcPort = Get-Random -Min 1024 -Max 65535;\n  Write-Host \\\"  [SYN] $srcIP`:$srcPort → $target`:$port | TTL=64 | Window=65535 | Seq=$(Get-Random)\\\";\n}\nWrite-Host '  ... (49,994 more SYN packets per second)';\nWrite-Host '';\nWrite-Host 'SYN Flood effect:';\nWrite-Host '  - Target TCP connection table exhausted';\nWrite-Host '  - Legitimate connections cannot be established';\nWrite-Host '  - Half-open connections timeout slowly (SYN_RECV state)'\"",
+      "out": "=== SYN Flood Attack ===\nTarget: 203.0.113.100:80\nMethod: TCP SYN packets (half-open connections)\nRate  : 50,000 packets/second\n\n  [SYN] 142.87.203.15:34521 → 203.0.113.100:80 | TTL=64 | Window=65535 | Seq=1847293650\n  [SYN] 78.234.12.198:52109 → 203.0.113.100:80 | TTL=64 | Window=65535 | Seq=927461038\n  [SYN] 201.45.167.83:19847 → 203.0.113.100:80 | TTL=64 | Window=65535 | Seq=384729156\n  [SYN] 93.156.78.241:47832 → 203.0.113.100:80 | TTL=64 | Window=65535 | Seq=1562890347\n  [SYN] 167.89.234.56:61205 → 203.0.113.100:80 | TTL=64 | Window=65535 | Seq=749283016\n  [SYN] 45.123.201.178:8943 → 203.0.113.100:80 | TTL=64 | Window=65535 | Seq=2038471529\n  ... (49,994 more SYN packets per second)\n\nSYN Flood effect:\n  - Target TCP connection table exhausted\n  - Legitimate connections cannot be established\n  - Half-open connections timeout slowly (SYN_RECV state)",
+      "def": "[NDR] SYN Flood detected - 50,000 SYN packets/sec with spoofed sources",
+      "defAction": "Target: 203.0.113.100:80\nAttack Type: TCP SYN Flood\nPacket Rate: 50,000/sec\nSource IPs: Spoofed (randomized)\nBandwidth: ~30 Mbps\nRisk: CRITICAL\nAction: SYN cookies enabled, rate limiting applied",
+      "desc": "초당 50,000개의 SYN 패킷을 위조된 출발지 IP로 전송합니다. 대상의 TCP 연결 테이블이 소진됩니다.",
+      "descEn": "Sends 50,000 SYN packets per second with spoofed source IPs. Exhausts the target's TCP connection table.",
+      "stepTitle": "SYN 플러드 공격",
+      "stepTitleEn": "SYN Flood Attack",
+      "feynman": "가게 전화번호로 초당 50,000통의 가짜 전화를 거는 것과 같아요. 가게는 모든 전화를 받으려 하지만 전화기가 꽉 차서 진짜 손님의 전화를 받을 수 없게 됩니다.",
+      "feynmanEn": "It's like making 50,000 fake phone calls per second to a store. The store tries to answer every call, but the phone lines are full and real customers can't get through.",
+      "expert": "TCP SYN Flood는 3-way handshake의 SYN 단계만 반복하여 SYN_RECV 상태의 half-open 연결을 대량 생성합니다. MITRE T1498.001 (Direct Network Flood)의 대표적 Layer 4 공격입니다. 위조된 소스 IP(IP Spoofing)로 역추적을 방지합니다. SYN cookies(RFC 4987)가 가장 효과적인 방어이며, 커널 레벨에서 half-open 연결을 관리합니다.",
+      "expertEn": "TCP SYN Flood repeatedly sends only the SYN step of the 3-way handshake, creating massive half-open connections in SYN_RECV state. Representative Layer 4 attack of MITRE T1498.001. Spoofed source IPs (IP Spoofing) prevent traceback. SYN cookies (RFC 4987) are the most effective defense.",
+      "defTooltip": "서버에서 SYN cookies를 활성화하세요 (Linux: net.ipv4.tcp_syncookies=1). NDR에서 SYN 패킷 비율이 비정상적으로 높은 트래픽을 탐지하고 ISP 레벨에서 rate limiting을 요청하세요.",
+      "defTooltipEn": "Enable SYN cookies on servers (Linux: net.ipv4.tcp_syncookies=1). Detect abnormally high SYN packet ratios via NDR and request ISP-level rate limiting.",
+      "hackerLog": {
+        "title": "TCP SYN Flood 공격",
+        "lines": [
+          { "text": "[SYN] 142.87.203.15:34521 → 203.0.113.100:80", "desc": "위조된 소스 IP로 SYN 패킷 전송" },
+          { "text": "Rate: 50,000 packets/second", "desc": "초당 50,000개 SYN 패킷 - 연결 테이블 소진" },
+          { "text": "Half-open connections timeout slowly (SYN_RECV)", "desc": "TCP 연결이 SYN_RECV 상태에서 대기하며 자원 점유" }
+        ]
+      },
+      "terms": [
+        { "term": "SYN Flood", "desc": "TCP 3-way handshake의 SYN 단계를 악용하여 서버 자원을 소진시키는 공격입니다." },
+        { "term": "IP Spoofing", "desc": "패킷의 출발지 IP 주소를 위조하는 기법입니다." },
+        { "term": "SYN Cookies", "desc": "SYN Flood 방어 기법으로, SYN 큐를 사용하지 않고 연결 정보를 인코딩합니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# UDP Flood attack simulation\n$target = '203.0.113.100';\nWrite-Host '=== UDP Flood Attack ===';\nWrite-Host \\\"Target: $target (random ports)\\\";\nWrite-Host \\\"Method: UDP packets with random payloads\\\";\nWrite-Host \\\"Rate  : 100,000 packets/second\\\";\nWrite-Host \\\"Payload: 1400 bytes per packet (max MTU)\\\";\nWrite-Host \\\"Bandwidth: ~1.12 Gbps\\\";\nWrite-Host '';\nfor($i=1; $i -le 6; $i++) {\n  $srcIP = \\\"$(Get-Random -Min 1 -Max 254).$(Get-Random -Min 1 -Max 254).$(Get-Random -Min 1 -Max 254).$(Get-Random -Min 1 -Max 254)\\\";\n  $dstPort = Get-Random -Min 1 -Max 65535;\n  Write-Host \\\"  [UDP] $srcIP → $target`:$dstPort | Size=1400B | Payload=0x$('{0:X8}' -f (Get-Random))...\\\";\n}\nWrite-Host '  ... (99,994 more UDP packets per second)';\nWrite-Host '';\nWrite-Host 'UDP Flood effect:';\nWrite-Host '  - Network bandwidth saturation (1.12 Gbps)';\nWrite-Host '  - ICMP Destination Unreachable floods back';\nWrite-Host '  - Firewall state table exhaustion'\"",
+      "out": "=== UDP Flood Attack ===\nTarget: 203.0.113.100 (random ports)\nMethod: UDP packets with random payloads\nRate  : 100,000 packets/second\nPayload: 1400 bytes per packet (max MTU)\nBandwidth: ~1.12 Gbps\n\n  [UDP] 89.145.67.203 → 203.0.113.100:47821 | Size=1400B | Payload=0x3A7F9C2D...\n  [UDP] 156.78.234.91 → 203.0.113.100:12045 | Size=1400B | Payload=0x8E1B4F6A...\n  [UDP] 203.45.178.12 → 203.0.113.100:55901 | Size=1400B | Payload=0xC5D2A7E3...\n  [UDP] 34.201.89.167 → 203.0.113.100:8090  | Size=1400B | Payload=0x2F8B4C1D...\n  [UDP] 178.92.156.43 → 203.0.113.100:33567 | Size=1400B | Payload=0x7A3E9D5B...\n  [UDP] 67.234.12.198 → 203.0.113.100:61234 | Size=1400B | Payload=0xE4F1C8A2...\n  ... (99,994 more UDP packets per second)\n\nUDP Flood effect:\n  - Network bandwidth saturation (1.12 Gbps)\n  - ICMP Destination Unreachable floods back\n  - Firewall state table exhaustion",
+      "def": "[NDR] UDP Flood detected - 1.12 Gbps volumetric attack",
+      "defAction": "Target: 203.0.113.100\nAttack Type: UDP Flood (volumetric)\nPacket Rate: 100,000/sec\nBandwidth: 1.12 Gbps\nSource IPs: Spoofed\nRisk: CRITICAL\nAction: Upstream blackhole routing requested",
+      "desc": "초당 100,000개의 UDP 패킷(1.12Gbps)으로 대역폭을 포화시킵니다. 모든 정상 트래픽이 차단됩니다.",
+      "descEn": "Saturates bandwidth with 100,000 UDP packets per second (1.12Gbps). All legitimate traffic is blocked.",
+      "stepTitle": "UDP 플러드 공격",
+      "stepTitleEn": "UDP Flood Attack",
+      "feynman": "고속도로에 초당 100,000대의 가짜 차량을 보내 도로를 완전히 막아버리는 것과 같아요. 1.12Gbps의 트래픽이 네트워크 파이프를 꽉 채워 진짜 손님의 차가 다닐 수 없습니다.",
+      "feynmanEn": "It's like sending 100,000 fake cars per second onto a highway, creating a complete gridlock. 1.12Gbps of traffic fills the network pipe completely, blocking real customers.",
+      "expert": "UDP Flood는 비연결형(connectionless) 프로토콜 특성을 악용하는 volumetric 공격입니다. 1400바이트(MTU 한계) 페이로드로 대역폭 소진을 극대화합니다. 서버는 닫힌 포트에 ICMP Destination Unreachable를 응답하여 추가 자원을 소모합니다. ISP 레벨의 blackhole routing 또는 scrubbing center를 통한 대응이 필요합니다.",
+      "expertEn": "UDP Flood exploits connectionless protocol characteristics for volumetric attacks. 1400-byte payloads (MTU limit) maximize bandwidth exhaustion. Servers respond with ICMP Destination Unreachable for closed ports, consuming additional resources. Requires ISP-level blackhole routing or scrubbing center.",
+      "defTooltip": "ISP에 blackhole routing(RTBH)을 사전 합의하세요. NDR에서 UDP 트래픽의 급격한 증가(baseline 대비 10배 이상)를 탐지하고 자동으로 scrubbing 서비스로 트래픽을 전환하세요.",
+      "defTooltipEn": "Pre-arrange blackhole routing (RTBH) with your ISP. Detect rapid UDP traffic increases (10x+ above baseline) via NDR and automatically divert traffic to scrubbing services.",
+      "hackerLog": {
+        "title": "UDP Volumetric Flood",
+        "lines": [
+          { "text": "[UDP] 89.145.67.203 → 203.0.113.100:47821 | 1400B", "desc": "최대 크기(1400B) UDP 패킷으로 대역폭 포화" },
+          { "text": "Rate: 100,000 packets/second | 1.12 Gbps", "desc": "초당 10만 패킷으로 1.12Gbps 트래픽 생성" },
+          { "text": "Firewall state table exhaustion", "desc": "방화벽 상태 테이블까지 소진시키는 효과" }
+        ]
+      },
+      "terms": [
+        { "term": "UDP Flood", "desc": "UDP 프로토콜의 비연결형 특성을 악용하여 대량의 패킷을 전송하는 DDoS 공격입니다." },
+        { "term": "Volumetric Attack", "desc": "대역폭 자체를 포화시키는 유형의 DDoS 공격입니다." },
+        { "term": "Blackhole Routing (RTBH)", "desc": "공격 대상 IP의 트래픽을 ISP 레벨에서 모두 폐기하는 긴급 대응 기법입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# DNS Amplification attack simulation\nWrite-Host '=== DNS Amplification Attack ===';\nWrite-Host 'Method: Spoofed DNS queries to open resolvers';\nWrite-Host 'Amplification factor: ~50x';\nWrite-Host '';\nWrite-Host 'Attack chain:';\nWrite-Host '  1. Attacker sends small DNS query (60 bytes)';\nWrite-Host '  2. Source IP spoofed as victim (203.0.113.100)';\nWrite-Host '  3. Open resolver sends large response (~3000 bytes) to victim';\nWrite-Host '  4. Amplification: 60B → 3000B (50x amplification)';\nWrite-Host '';\n$resolvers = @('8.8.8.8','1.1.1.1','208.67.222.222','9.9.9.9','64.6.64.6');\nforeach($r in $resolvers) {\n  Write-Host \\\"  [DNS-AMP] Query: ANY isc.org → Resolver: $r → Response(3KB) → Victim: 203.0.113.100\\\";\n}\nWrite-Host '';\nWrite-Host 'Amplified traffic hitting victim:';\nWrite-Host '  Query rate    : 20,000 queries/sec (1.2 MB/sec sent)';\nWrite-Host '  Response rate : 20,000 responses/sec (60 MB/sec received by victim)';\nWrite-Host '  Amplified BW  : ~480 Mbps hitting victim from legitimate DNS servers'\"",
+      "out": "=== DNS Amplification Attack ===\nMethod: Spoofed DNS queries to open resolvers\nAmplification factor: ~50x\n\nAttack chain:\n  1. Attacker sends small DNS query (60 bytes)\n  2. Source IP spoofed as victim (203.0.113.100)\n  3. Open resolver sends large response (~3000 bytes) to victim\n  4. Amplification: 60B → 3000B (50x amplification)\n\n  [DNS-AMP] Query: ANY isc.org → Resolver: 8.8.8.8 → Response(3KB) → Victim: 203.0.113.100\n  [DNS-AMP] Query: ANY isc.org → Resolver: 1.1.1.1 → Response(3KB) → Victim: 203.0.113.100\n  [DNS-AMP] Query: ANY isc.org → Resolver: 208.67.222.222 → Response(3KB) → Victim: 203.0.113.100\n  [DNS-AMP] Query: ANY isc.org → Resolver: 9.9.9.9 → Response(3KB) → Victim: 203.0.113.100\n  [DNS-AMP] Query: ANY isc.org → Resolver: 64.6.64.6 → Response(3KB) → Victim: 203.0.113.100\n\nAmplified traffic hitting victim:\n  Query rate    : 20,000 queries/sec (1.2 MB/sec sent)\n  Response rate : 20,000 responses/sec (60 MB/sec received by victim)\n  Amplified BW  : ~480 Mbps hitting victim from legitimate DNS servers",
+      "def": "[NDR] DNS Amplification attack detected - reflected traffic from open resolvers",
+      "defAction": "Target: 203.0.113.100\nAttack Type: DNS Amplification (reflected)\nAmplification: 50x\nReflectors: 5+ open DNS resolvers\nIncoming BW: 480 Mbps (from DNS responses)\nRisk: CRITICAL\nAction: DNS response rate limiting at border",
+      "desc": "DNS 증폭 공격으로 소량의 쿼리(1.2MB/s)가 50배 증폭되어 480Mbps의 트래픽이 피해자에게 집중됩니다.",
+      "descEn": "DNS amplification attack amplifies small queries (1.2MB/s) 50x, focusing 480Mbps of traffic on the victim.",
+      "stepTitle": "DNS 증폭 공격",
+      "stepTitleEn": "DNS Amplification",
+      "feynman": "엽서 한 장(60바이트)으로 주문하면 백과사전(3000바이트)이 배달되는 것과 같아요. 그런데 배달 주소를 피해자로 적어놓으면, 피해자에게 백과사전이 쏟아집니다. 60바이트가 3000바이트로 50배 증폭됩니다.",
+      "feynmanEn": "It's like ordering with a postcard (60 bytes) and getting an encyclopedia (3000 bytes) delivered. But the delivery address is the victim's, so encyclopedias pour onto them. 60 bytes amplifies to 3000 bytes - a 50x increase.",
+      "expert": "DNS Amplification은 반사형(reflected) DDoS의 대표 기법입니다. ANY 쿼리로 DNS 응답을 최대화하고(isc.org ANY = ~3KB), 출발지 IP를 피해자로 위조합니다. MITRE T1498.002 (Reflection Amplification)에 해당합니다. BCP38 (ingress filtering, RFC 2827)을 ISP가 적용하면 IP Spoofing을 차단하여 증폭 공격을 원천 방지할 수 있습니다.",
+      "expertEn": "DNS Amplification is the quintessential reflected DDoS technique. ANY queries maximize DNS responses (isc.org ANY ~3KB), with source IP spoofed as victim. Maps to MITRE T1498.002. BCP38 (ingress filtering, RFC 2827) at ISP level blocks IP spoofing, preventing amplification attacks at source.",
+      "defTooltip": "ISP에 BCP38(ingress filtering)을 요청하여 IP Spoofing을 차단하세요. 서버에서 사용하지 않는 DNS 응답 트래픽을 방화벽에서 차단하고, DNS response rate limiting을 적용하세요.",
+      "defTooltipEn": "Request BCP38 (ingress filtering) from ISP to block IP spoofing. Block unused DNS response traffic at firewall and apply DNS response rate limiting.",
+      "hackerLog": {
+        "title": "DNS 반사/증폭 공격",
+        "lines": [
+          { "text": "Query: ANY isc.org → Resolver: 8.8.8.8 → Victim", "desc": "위조된 소스 IP로 DNS 쿼리 → 응답이 피해자에게 전달" },
+          { "text": "Amplification: 60B → 3000B (50x)", "desc": "50배 증폭 - 적은 대역폭으로 대규모 공격 가능" },
+          { "text": "Amplified BW: ~480 Mbps", "desc": "1.2MB/s 송신으로 480Mbps 공격 트래픽 생성" }
+        ]
+      },
+      "terms": [
+        { "term": "DNS Amplification", "desc": "DNS 응답이 쿼리보다 크다는 점을 악용하여 트래픽을 증폭하는 DDoS 기법입니다." },
+        { "term": "BCP38 (RFC 2827)", "desc": "ISP가 위조된 소스 IP를 가진 패킷을 차단하는 인그레스 필터링 표준입니다." },
+        { "term": "Reflection Attack", "desc": "제3의 서버(반사기)를 경유하여 피해자에게 트래픽을 집중시키는 공격입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# HTTP Flood (Layer 7) attack simulation\nWrite-Host '=== HTTP Flood (Layer 7 DDoS) ===';\nWrite-Host \\\"Target: https://www.{companyName}.com\\\";\nWrite-Host 'Method: Distributed HTTP GET/POST requests';\nWrite-Host 'Botnet nodes: 15,000 compromised hosts';\nWrite-Host '';\n$endpoints = @(\n  'GET / HTTP/1.1',\n  'GET /search?q='+[guid]::NewGuid().ToString(),\n  'POST /api/login (random credentials)',\n  'GET /products?page='+(Get-Random -Min 1 -Max 99999),\n  'POST /api/contact (large form data)',\n  'GET /images/catalog.pdf (large file request)'\n);\nforeach($ep in $endpoints) {\n  $rps = Get-Random -Min 100 -Max 500;\n  Write-Host \\\"  $ep | $rps req/sec per bot\\\";\n}\nWrite-Host '';\nWrite-Host 'Combined attack rate:';\nWrite-Host '  15,000 bots x 300 req/sec avg = 4,500,000 HTTP requests/sec';\nWrite-Host '  Web server: Apache/nginx max_connections exhausted';\nWrite-Host '  Application: Database connection pool drained';\nWrite-Host '  Effect: HTTP 503 Service Unavailable for all users'\"",
+      "out": "=== HTTP Flood (Layer 7 DDoS) ===\nTarget: https://www.{companyName}.com\nMethod: Distributed HTTP GET/POST requests\nBotnet nodes: 15,000 compromised hosts\n\n  GET / HTTP/1.1 | 342 req/sec per bot\n  GET /search?q=a3f8c2d1-e5f6-4a7b-8c9d-0e1f2a3b4c5d | 187 req/sec per bot\n  POST /api/login (random credentials) | 423 req/sec per bot\n  GET /products?page=47283 | 256 req/sec per bot\n  POST /api/contact (large form data) | 389 req/sec per bot\n  GET /images/catalog.pdf (large file request) | 145 req/sec per bot\n\nCombined attack rate:\n  15,000 bots x 300 req/sec avg = 4,500,000 HTTP requests/sec\n  Web server: Apache/nginx max_connections exhausted\n  Application: Database connection pool drained\n  Effect: HTTP 503 Service Unavailable for all users",
+      "def": "[WAF] Layer 7 HTTP Flood detected - 4.5M requests/sec from distributed sources",
+      "defAction": "Target: www.{companyName}.com\nAttack Type: HTTP Flood (Application Layer)\nSources: 15,000 botnet nodes\nRate: 4,500,000 req/sec\nEndpoints: /, /search, /api/login, /products, /api/contact\nRisk: CRITICAL\nAction: CAPTCHA challenge + rate limiting enabled",
+      "desc": "15,000개 봇넷에서 초당 450만 HTTP 요청을 전송합니다. 웹 서버와 데이터베이스가 완전히 마비됩니다.",
+      "descEn": "Sends 4.5 million HTTP requests per second from 15,000 botnet nodes. Web server and database are completely overwhelmed.",
+      "stepTitle": "HTTP 플러드 (L7)",
+      "stepTitleEn": "HTTP Flood (L7)",
+      "feynman": "15,000명의 사기꾼이 동시에 가게에 들어가 쉴 새 없이 주문하고, 질문하고, 환불 요청하는 것과 같아요. 진짜 손님은 줄을 서도 차례가 오지 않으며, 점원(서버)도 과로로 쓰러집니다.",
+      "feynmanEn": "It's like 15,000 scammers entering a store simultaneously, constantly ordering, asking questions, and requesting refunds. Real customers can't get served, and the staff (server) collapses from overwork.",
+      "expert": "HTTP Flood는 Layer 7(Application Layer) DDoS로, 정상 HTTP 요청과 구분이 어렵습니다. MITRE T1499 (Endpoint Denial of Service)에 해당합니다. /search 등 DB 쿼리를 유발하는 엔드포인트를 타겟하여 백엔드 자원 소진을 극대화합니다. WAF의 rate limiting, CAPTCHA, JavaScript challenge가 주요 방어 수단입니다.",
+      "expertEn": "HTTP Flood is a Layer 7 (Application Layer) DDoS, difficult to distinguish from legitimate HTTP requests. Maps to MITRE T1499. Targets endpoints like /search that trigger DB queries to maximize backend resource exhaustion. WAF rate limiting, CAPTCHA, and JavaScript challenges are primary defenses.",
+      "defTooltip": "WAF에서 IP당/세션당 요청 속도를 제한하세요. /search, /api/login 등 자원 집약적 엔드포인트에 CAPTCHA를 적용하고, JavaScript challenge로 봇과 실제 브라우저를 구분하세요.",
+      "defTooltipEn": "Apply per-IP/per-session request rate limiting at WAF. Add CAPTCHA to resource-intensive endpoints (/search, /api/login) and use JavaScript challenges to distinguish bots from real browsers.",
+      "hackerLog": {
+        "title": "Layer 7 HTTP Flood",
+        "lines": [
+          { "text": "15,000 bots x 300 req/sec = 4,500,000 req/sec", "desc": "15,000개 봇넷에서 초당 450만 HTTP 요청" },
+          { "text": "GET /search?q=... | POST /api/login", "desc": "DB 쿼리를 유발하는 자원 집약적 엔드포인트 타겟" },
+          { "text": "HTTP 503 Service Unavailable for all users", "desc": "웹 서버 연결 풀 소진 → 전체 서비스 다운" }
+        ]
+      },
+      "terms": [
+        { "term": "HTTP Flood", "desc": "대량의 HTTP 요청으로 웹 서버/애플리케이션을 마비시키는 Layer 7 DDoS입니다." },
+        { "term": "Botnet", "desc": "공격자가 원격 제어하는 감염된 컴퓨터들의 네트워크입니다." },
+        { "term": "CAPTCHA", "desc": "사람과 봇을 구분하는 인증 기법으로, DDoS 방어에 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Slowloris attack simulation (connection exhaustion)\nWrite-Host '=== Slowloris Attack (Slow HTTP) ===';\nWrite-Host \\\"Target: www.{companyName}.com:443\\\";\nWrite-Host 'Method: Slow, incomplete HTTP headers';\nWrite-Host '';\nWrite-Host 'Attack mechanism:';\nWrite-Host '  1. Open TCP connection to target';\nWrite-Host '  2. Send partial HTTP request header';\nWrite-Host '  3. Send additional header bytes every 10 seconds';\nWrite-Host '  4. Never complete the request';\nWrite-Host '  5. Server keeps connection open waiting for complete header';\nWrite-Host '';\nfor($i=1; $i -le 5; $i++) {\n  Write-Host \\\"  Connection $i`: GET / HTTP/1.1`r`nHost: www.{companyName}.com`r`nX-Header-$i`: $(Get-Random)...[INCOMPLETE]\\\";\n}\nWrite-Host '';\nWrite-Host 'Active slow connections: 1,000';\nWrite-Host 'Apache MaxClients (default): 256';\nWrite-Host 'nginx worker_connections: 1024';\nWrite-Host '';\nWrite-Host 'Result: All connection slots consumed by slow requests';\nWrite-Host '        Legitimate users get Connection Refused'\"",
+      "out": "=== Slowloris Attack (Slow HTTP) ===\nTarget: www.{companyName}.com:443\nMethod: Slow, incomplete HTTP headers\n\nAttack mechanism:\n  1. Open TCP connection to target\n  2. Send partial HTTP request header\n  3. Send additional header bytes every 10 seconds\n  4. Never complete the request\n  5. Server keeps connection open waiting for complete header\n\n  Connection 1: GET / HTTP/1.1\r\nHost: www.{companyName}.com\r\nX-Header-1: 1847293650...[INCOMPLETE]\n  Connection 2: GET / HTTP/1.1\r\nHost: www.{companyName}.com\r\nX-Header-2: 927461038...[INCOMPLETE]\n  Connection 3: GET / HTTP/1.1\r\nHost: www.{companyName}.com\r\nX-Header-3: 384729156...[INCOMPLETE]\n  Connection 4: GET / HTTP/1.1\r\nHost: www.{companyName}.com\r\nX-Header-4: 1562890347...[INCOMPLETE]\n  Connection 5: GET / HTTP/1.1\r\nHost: www.{companyName}.com\r\nX-Header-5: 749283016...[INCOMPLETE]\n\nActive slow connections: 1,000\nApache MaxClients (default): 256\nnginx worker_connections: 1024\n\nResult: All connection slots consumed by slow requests\n        Legitimate users get Connection Refused",
+      "def": "[WAF] Slowloris attack detected - slow incomplete HTTP connections",
+      "defAction": "Target: www.{companyName}.com:443\nAttack Type: Slowloris (Slow HTTP)\nActive Connections: 1,000 (incomplete)\nServer Capacity: 256-1024 connections\nCapacity Used: 100% (by attack traffic)\nRisk: HIGH\nAction: Connection timeout reduced to 5s",
+      "desc": "Slowloris 공격으로 불완전한 HTTP 연결 1,000개를 유지합니다. 서버의 연결 슬롯이 모두 소진되어 정상 접속이 불가능합니다.",
+      "descEn": "Slowloris attack maintains 1,000 incomplete HTTP connections. All server connection slots are exhausted, blocking legitimate access.",
+      "stepTitle": "Slowloris 공격",
+      "stepTitleEn": "Slowloris Attack",
+      "feynman": "전화를 걸어놓고 '잠깐만요...'를 반복하면서 절대 끊지 않는 것과 같아요. 1,000개의 전화가 이렇게 잡혀있으면, 가게의 전화선(256~1024개) 이 모두 점유되어 진짜 손님이 전화할 수 없습니다.",
+      "feynmanEn": "It's like calling and repeatedly saying 'hold on...' without ever hanging up. With 1,000 lines tied up this way, all phone lines (256-1024) are occupied, and real customers can't call.",
+      "expert": "Slowloris는 Robert 'RSnake' Hansen이 2009년 발표한 slow-rate DDoS입니다. 불완전한 HTTP 헤더를 10초 간격으로 전송하여 연결을 유지합니다. Apache의 MaxClients(기본 256)를 초과하면 서비스가 마비됩니다. nginx는 이벤트 기반이라 상대적으로 내성이 있지만, worker_connections 한계가 있습니다. mod_reqtimeout(Apache), limit_req(nginx)로 방어합니다.",
+      "expertEn": "Slowloris, published by Robert 'RSnake' Hansen in 2009, is a slow-rate DDoS. Sends incomplete HTTP headers every 10 seconds to keep connections alive. Exceeding Apache's MaxClients (default 256) causes service outage. nginx is relatively resilient (event-driven) but has worker_connections limits. Defend with mod_reqtimeout (Apache), limit_req (nginx).",
+      "defTooltip": "웹 서버의 연결 타임아웃을 5초 이하로 설정하세요. Apache에서 mod_reqtimeout, nginx에서 client_header_timeout을 설정하고, 리버스 프록시로 slow 연결을 필터링하세요.",
+      "defTooltipEn": "Set web server connection timeout to 5 seconds or less. Configure mod_reqtimeout (Apache), client_header_timeout (nginx), and filter slow connections via reverse proxy.",
+      "hackerLog": {
+        "title": "Slowloris Slow HTTP 공격",
+        "lines": [
+          { "text": "GET / HTTP/1.1\\r\\nX-Header: ...[INCOMPLETE]", "desc": "불완전한 HTTP 헤더로 연결을 영구 유지" },
+          { "text": "Active slow connections: 1,000", "desc": "1,000개의 느린 연결이 서버 자원 점유" },
+          { "text": "Apache MaxClients (256) exhausted", "desc": "서버 최대 연결 수 초과 → 서비스 거부" }
+        ]
+      },
+      "terms": [
+        { "term": "Slowloris", "desc": "느린 속도로 불완전한 HTTP 요청을 보내 서버 연결을 소진시키는 DDoS 기법입니다." },
+        { "term": "MaxClients", "desc": "Apache 웹 서버가 동시에 처리할 수 있는 최대 연결 수입니다." },
+        { "term": "Slow-rate DDoS", "desc": "적은 대역폭으로 서버 자원을 소진시키는 저속 DDoS 공격 유형입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Monitor target status during attack\nWrite-Host '=== Target Status Monitoring ===';\nWrite-Host '';\n$attacks = @(\n  @{Time='10:00:00';Type='Normal';RPS=150;Status='200 OK';Latency='45ms'},\n  @{Time='10:05:00';Type='SYN Flood Start';RPS=50150;Status='200 OK';Latency='850ms'},\n  @{Time='10:10:00';Type='+UDP Flood';RPS=100150;Status='200/503';Latency='3200ms'},\n  @{Time='10:15:00';Type='+DNS Amplification';RPS=150150;Status='503';Latency='timeout'},\n  @{Time='10:20:00';Type='+HTTP Flood';RPS=4650150;Status='503/RST';Latency='timeout'},\n  @{Time='10:25:00';Type='+Slowloris';RPS=4650150;Status='Connection Refused';Latency='N/A'},\n  @{Time='10:30:00';Type='All vectors active';RPS=4650150;Status='UNREACHABLE';Latency='N/A'}\n);\nWrite-Host 'Time     | Attack Vector        | Req/sec   | HTTP Status        | Latency';\nWrite-Host '---------|---------------------|-----------|--------------------|---------';\nforeach($a in $attacks) {\n  Write-Host \\\"$($a.Time) | $($a.Type.PadRight(19)) | $($a.RPS.ToString('N0').PadLeft(9)) | $($a.Status.PadRight(18)) | $($a.Latency)\\\";\n}\nWrite-Host '';\nWrite-Host 'Total attack bandwidth: ~2.1 Gbps';\nWrite-Host 'Target status: COMPLETELY OFFLINE';\nWrite-Host 'Estimated business impact: $45,000/hour downtime cost'\"",
+      "out": "=== Target Status Monitoring ===\n\nTime     | Attack Vector        | Req/sec   | HTTP Status        | Latency\n---------|---------------------|-----------|--------------------|---------\n10:00:00 | Normal              |       150 | 200 OK             | 45ms\n10:05:00 | SYN Flood Start     |    50,150 | 200 OK             | 850ms\n10:10:00 | +UDP Flood          |   100,150 | 200/503            | 3200ms\n10:15:00 | +DNS Amplification  |   150,150 | 503                | timeout\n10:20:00 | +HTTP Flood         | 4,650,150 | 503/RST            | timeout\n10:25:00 | +Slowloris          | 4,650,150 | Connection Refused | N/A\n10:30:00 | All vectors active  | 4,650,150 | UNREACHABLE        | N/A\n\nTotal attack bandwidth: ~2.1 Gbps\nTarget status: COMPLETELY OFFLINE\nEstimated business impact: $45,000/hour downtime cost",
+      "def": "[SIEM] Multi-vector DDoS attack - target www.{companyName}.com is OFFLINE",
+      "defAction": "Attack Summary:\n  Vectors: SYN Flood + UDP Flood + DNS Amp + HTTP Flood + Slowloris\n  Total Bandwidth: 2.1 Gbps\n  Peak Request Rate: 4,650,150/sec\n  Target Status: UNREACHABLE\n  Duration: 30+ minutes\nRisk: CRITICAL\nResponse: ISP upstream mitigation + CDN failover activated",
+      "desc": "5개 공격 벡터를 순차적으로 추가하여 대상을 완전히 마비시킵니다. 2.1Gbps, 465만 요청/초의 다중 벡터 DDoS입니다.",
+      "descEn": "Sequentially adds 5 attack vectors to completely bring down the target. Multi-vector DDoS at 2.1Gbps and 4.65M requests/second.",
+      "stepTitle": "타겟 상태 모니터링",
+      "stepTitleEn": "Target Status Monitor",
+      "feynman": "공격이 점점 심해지는 과정을 보여주는 타임라인이에요. 처음엔 응답이 느려지고(850ms), 점점 오류가 나다가(503), 결국 완전히 연결이 안 되는 상태(UNREACHABLE)가 됩니다. 시간당 약 5,400만원의 비즈니스 손실이 발생합니다.",
+      "feynmanEn": "A timeline showing escalating attacks. Response slows (850ms), then errors appear (503), until completely unreachable. Each hour of downtime costs approximately $45,000 in business losses.",
+      "expert": "다중 벡터 DDoS는 Layer 3/4(SYN, UDP, DNS Amplification)와 Layer 7(HTTP Flood, Slowloris)을 결합합니다. 각 벡터가 다른 방어 메커니즘을 우회하므로 다층 방어가 필수입니다. 2.1Gbps는 중규모 공격이지만, ISP 대역폭(일반적으로 1-10Gbps)을 초과할 수 있습니다. AWS Shield Advanced, Cloudflare Magic Transit 등 클라우드 DDoS 보호가 필요합니다.",
+      "expertEn": "Multi-vector DDoS combines Layer 3/4 (SYN, UDP, DNS Amplification) with Layer 7 (HTTP Flood, Slowloris). Each vector bypasses different defense mechanisms, requiring multi-layer protection. 2.1Gbps is mid-scale but can exceed typical ISP bandwidth (1-10Gbps). Cloud DDoS protection (AWS Shield Advanced, Cloudflare Magic Transit) is needed.",
+      "defTooltip": "다중 벡터 DDoS에 대비하여 네트워크(SYN cookies, rate limiting), 애플리케이션(WAF, CAPTCHA), ISP(blackhole routing)의 3계층 방어를 구축하세요. 사전에 DDoS 대응 플레이북을 작성하고 ISP 긴급 연락처를 확보하세요.",
+      "defTooltipEn": "Build 3-tier defense against multi-vector DDoS: network (SYN cookies, rate limiting), application (WAF, CAPTCHA), ISP (blackhole routing). Prepare DDoS response playbook and ISP emergency contacts in advance.",
+      "hackerLog": {
+        "title": "다중 벡터 DDoS 타임라인",
+        "lines": [
+          { "text": "10:05 SYN Flood → 200 OK (850ms)", "desc": "SYN Flood 시작 - 응답 지연 발생" },
+          { "text": "10:15 +DNS Amp → 503 (timeout)", "desc": "DNS 증폭 추가 - 서비스 오류 시작" },
+          { "text": "10:30 All vectors → UNREACHABLE", "desc": "5개 벡터 동시 → 완전 서비스 마비" }
+        ]
+      },
+      "terms": [
+        { "term": "Multi-vector DDoS", "desc": "여러 종류의 DDoS 공격을 동시에 수행하여 방어를 복잡하게 만드는 기법입니다." },
+        { "term": "HTTP 503", "desc": "서버 과부하로 요청을 처리할 수 없을 때 반환하는 HTTP 상태 코드입니다." },
+        { "term": "DDoS Mitigation", "desc": "DDoS 공격을 탐지하고 완화하는 보안 서비스 및 기술입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\nWrite-Host '=== DDoS Attack Complete Summary ===';\nWrite-Host '';\nWrite-Host 'Attack Vectors Used:';\nWrite-Host '  Layer 3/4 (Network):';\nWrite-Host '    [1] SYN Flood      : 50K pps  | TCP connection exhaustion';\nWrite-Host '    [2] UDP Flood      : 100K pps | 1.12 Gbps bandwidth saturation';\nWrite-Host '    [3] DNS Amplify    : 20K qps  | 480 Mbps reflected traffic';\nWrite-Host '  Layer 7 (Application):';\nWrite-Host '    [4] HTTP Flood     : 4.5M rps | Web/DB resource exhaustion';\nWrite-Host '    [5] Slowloris      : 1K conn  | Connection slot exhaustion';\nWrite-Host '';\nWrite-Host 'Defense Recommendations:';\nWrite-Host '  [1] CDN/DDoS mitigation service (Cloudflare, AWS Shield)';\nWrite-Host '  [2] Rate limiting + SYN cookies at edge';\nWrite-Host '  [3] BCP38 (ingress filtering) at ISP level';\nWrite-Host '  [4] WAF with bot detection + CAPTCHA';\nWrite-Host '  [5] Connection timeout tuning + keepalive limits';\nWrite-Host '  [6] Anycast DNS + geo-distributed infrastructure';\nWrite-Host '  [7] Incident response plan + ISP emergency contacts'\"",
+      "out": "=== DDoS Attack Complete Summary ===\n\nAttack Vectors Used:\n  Layer 3/4 (Network):\n    [1] SYN Flood      : 50K pps  | TCP connection exhaustion\n    [2] UDP Flood      : 100K pps | 1.12 Gbps bandwidth saturation\n    [3] DNS Amplify    : 20K qps  | 480 Mbps reflected traffic\n  Layer 7 (Application):\n    [4] HTTP Flood     : 4.5M rps | Web/DB resource exhaustion\n    [5] Slowloris      : 1K conn  | Connection slot exhaustion\n\nDefense Recommendations:\n  [1] CDN/DDoS mitigation service (Cloudflare, AWS Shield)\n  [2] Rate limiting + SYN cookies at edge\n  [3] BCP38 (ingress filtering) at ISP level\n  [4] WAF with bot detection + CAPTCHA\n  [5] Connection timeout tuning + keepalive limits\n  [6] Anycast DNS + geo-distributed infrastructure\n  [7] Incident response plan + ISP emergency contacts",
+      "def": "[SIEM] DDoS attack analysis complete - defense recommendations generated",
+      "defAction": "Attack Duration: 30+ minutes\nVectors: 5 (multi-layer)\nPeak Traffic: 2.1 Gbps / 4.65M rps\nTarget Impact: Complete service outage\nRecommendations: CDN, rate limiting, WAF, BCP38\nRisk: Post-incident analysis",
+      "desc": "DDoS 공격을 요약하고 방어 권장사항을 제시합니다. CDN, WAF, ISP 레벨 필터링 등 다층 방어가 필요합니다.",
+      "descEn": "Summarizes the DDoS attack and presents defense recommendations. Multi-layer defense with CDN, WAF, and ISP-level filtering is required.",
+      "stepTitle": "공격 요약 및 방어",
+      "stepTitleEn": "Summary & Defense",
+      "feynman": "전투 보고서와 방어 계획서를 동시에 작성하는 것과 같아요. 5가지 공격 방법과 7가지 방어 방법을 정리합니다. 핵심은 '한 가지 방어로는 충분하지 않다'는 것이며, CDN + WAF + ISP 협력의 다층 방어가 필요합니다.",
+      "feynmanEn": "It's like writing both a battle report and defense plan. 5 attack methods and 7 defense measures are summarized. The key takeaway: 'no single defense is enough' - multi-layer protection with CDN + WAF + ISP cooperation is essential.",
+      "expert": "7가지 방어 권장사항은 NIST DDoS Mitigation Framework와 KISA DDoS 대응 가이드에 기반합니다. Anycast DNS는 트래픽을 지리적으로 분산하고, BCP38은 IP Spoofing을 원천 차단합니다. 사전 DDoS 대응 계획(runbook)과 ISP 핫라인이 실제 공격 시 대응 시간을 크게 단축합니다. 클라우드 기반 scrubbing은 10Tbps 이상의 공격도 흡수할 수 있습니다.",
+      "expertEn": "Seven defense recommendations are based on NIST DDoS Mitigation Framework and KISA DDoS Response Guide. Anycast DNS distributes traffic geographically, BCP38 blocks IP spoofing at source. Pre-prepared DDoS runbooks and ISP hotlines significantly reduce response times. Cloud-based scrubbing can absorb 10+ Tbps attacks.",
+      "defTooltip": "DDoS 대응 플레이북을 사전에 작성하고, ISP/CDN 업체와 긴급 연락 체계를 구축하세요. 분기별 DDoS 모의훈련을 실시하여 대응 절차를 검증하세요.",
+      "defTooltipEn": "Prepare DDoS response playbook in advance and establish emergency contact channels with ISP/CDN providers. Conduct quarterly DDoS drills to validate response procedures.",
+      "hackerLog": {
+        "title": "DDoS 공격 최종 요약",
+        "lines": [
+          { "text": "Layer 3/4: SYN(50K) + UDP(100K) + DNS(20K)", "desc": "네트워크 레이어 공격 3종 - 대역폭/연결 소진" },
+          { "text": "Layer 7: HTTP(4.5M) + Slowloris(1K)", "desc": "애플리케이션 레이어 공격 2종 - 서버 자원 소진" },
+          { "text": "Defense: CDN + WAF + BCP38 + Anycast", "desc": "다층 방어 권장 - 단일 방어로는 불충분" }
+        ]
+      },
+      "terms": [
+        { "term": "Anycast DNS", "desc": "동일 IP를 여러 위치에서 서비스하여 트래픽을 분산하는 DNS 기술입니다." },
+        { "term": "Scrubbing Center", "desc": "DDoS 트래픽을 필터링하고 정상 트래픽만 전달하는 클라우드 서비스입니다." },
+        { "term": "DDoS Runbook", "desc": "DDoS 공격 발생 시 단계별 대응 절차를 기록한 문서입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (recon)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "Resolve-DnsName / Test-NetConnection", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "SYN Flood Generator (50K pps)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "UDP Flood Generator (100K pps)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "DNS Amplification (20K qps)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "HTTP Flood Botnet (4.5M rps)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "Slowloris (1K slow connections)", "depth": 1, "alert": true, "minStep": 5 },
+    { "name": "Target Monitor (status check)", "depth": 1, "alert": false, "minStep": 6 }
+  ]
+}

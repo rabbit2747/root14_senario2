@@ -1,0 +1,177 @@
+{
+  "id": "T1596.002",
+  "title": "WHOIS 정보 수집 시뮬레이션",
+  "titleEn": "WHOIS Information Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 WHOIS 조회", "labelEn": "🔍 WHOIS Lookup", "steps": [0, 1] },
+    { "label": "⚡ 역방향 검색", "labelEn": "⚡ Reverse Search", "steps": [2] },
+    { "label": "🔓 이력 분석", "labelEn": "🔓 Historical Analysis", "steps": [3] },
+    { "label": "✅ 공격 표면 확장", "labelEn": "✅ Attack Surface Expansion", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "whois", "label": "WHOIS DB", "x": 200, "y": 30 },
+    { "id": "registrar", "label": "Registrar", "x": 200, "y": 90 },
+    { "id": "domains", "label": "Related Domains", "x": 350, "y": 60 },
+    { "id": "surface", "label": "Attack Surface", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "whois", "minStep": 0 },
+    { "from": "ext", "to": "registrar", "minStep": 1 },
+    { "from": "whois", "to": "domains", "minStep": 2 },
+    { "from": "domains", "to": "surface", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} WHOIS", "icon": "📁" },
+    { "name": "all_domains.txt", "icon": "📄", "alert": true },
+    { "name": "whois_timeline.csv", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "whois {companyName}.com",
+      "out": "Domain Name: {companyName}.com\nRegistrar: Gabia Inc.\nRegistrant Organization: {companyName} Corporation\nRegistrant Email: admin@{companyName}.com\nAdmin Email: it-admin@{companyName}.com\nTech Email: devops@{companyName}.com\nName Server: ns1.cloudflare.com\nName Server: ns2.cloudflare.com\nCreation Date: 2020-03-15T09:00:00Z\nExpiry Date: 2027-03-15T09:00:00Z\nUpdated Date: 2025-11-20T14:30:00Z\nDNSSEC: unsigned",
+      "def": "[DNS Monitor] WHOIS query detected for primary domain",
+      "defAction": "Source: 198.51.100.23\nTarget: {companyName}.com WHOIS record\nAction: Standard query logged",
+      "desc": "whois 명령으로 대상 도메인의 등록자 정보, 관리자 이메일, 네임서버, 등록/만료일을 조회합니다.",
+      "descEn": "The attacker queries WHOIS to obtain registrant info, admin emails, name servers, and registration dates.",
+      "stepTitle": "기본 WHOIS 조회",
+      "stepTitleEn": "Basic WHOIS Lookup",
+      "feynman": "WHOIS는 도메인의 '등기부등본'입니다. 누가 등록했는지, 관리자 이메일이 무엇인지, 언제 만료되는지 모두 나옵니다. 여기서 관리자 이메일(it-admin@)을 알면 피싱 공격의 표적으로 삼을 수 있습니다.",
+      "feynmanEn": "WHOIS is like a property registry for domains. It shows who registered it, admin email, and expiry date. Knowing the admin email (it-admin@) makes it a target for phishing attacks.",
+      "expert": "WHOIS 레코드에서 3개의 개별 이메일(admin, it-admin, devops)이 노출되어 조직 구조를 추론할 수 있습니다. DNSSEC unsigned는 DNS 스푸핑 취약성을 의미하며, Cloudflare NS는 CDN/WAF 존재를 시사합니다.",
+      "expertEn": "Three distinct emails (admin, it-admin, devops) exposed in WHOIS reveal organizational structure. DNSSEC unsigned indicates DNS spoofing vulnerability, Cloudflare NS suggests CDN/WAF presence.",
+      "defTooltip": "🔍 DNS 모니터: 기본 도메인에 대한 WHOIS 쿼리 감지",
+      "defTooltipEn": "🔍 DNS Monitor: WHOIS query detected for primary domain",
+      "hackerLog": {
+        "title": "whois_basic.log",
+        "lines": [
+          { "log": "Admin Email: it-admin@{companyName}.com", "desc": "IT 관리자 이메일 노출 - 스피어피싱 대상" },
+          { "log": "Tech Email: devops@{companyName}.com", "desc": "DevOps 팀 이메일 - 소프트웨어 공급망 공격 벡터" },
+          { "log": "DNSSEC: unsigned", "desc": "DNSSEC 미설정 - DNS 스푸핑/캐시 포이즈닝 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "WHOIS", "desc": "도메인 등록 정보를 조회하는 인터넷 프로토콜(RFC 3912). 도메인 소유자, 등록 기관, 연락처 정보를 제공합니다" },
+        { "name": "DNSSEC", "desc": "DNS 응답의 진위를 검증하는 보안 확장. 미설정 시 DNS 위조(스푸핑) 공격에 취약합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 whois_enum.py --domain {companyName}.com --registrar-search --output registrar_info.json",
+      "out": "[*] Querying registrar details for {companyName}.com...\n[+] Registrar: Gabia Inc. (IANA ID: 244)\n[+] Registrar abuse contact: abuse@gabia.com\n[+] Registration lock: clientTransferProhibited\n\n[*] Checking domain age and reputation...\n[+] Domain age: 6 years, 0 months\n[+] Google Safe Browsing: Clean\n[+] PhishTank: Not listed\n\n[*] Checking associated IP ranges...\n[+] NetRange: 203.0.113.0/24\n[+] OrgName: {companyName} Corporation\n[+] CIDR: 203.0.113.0/24\n[+] NetHandle: NET-203-0-113-0-1",
+      "def": "[WHOIS Monitor] Extended registrar and IP range query for domain",
+      "defAction": "Source: 198.51.100.23\nTarget: {companyName}.com registrar details\nAction: IP range discovery logged",
+      "desc": "등록 기관 상세 정보와 연관된 IP 대역(CIDR)을 조회하여 인프라 범위를 파악합니다.",
+      "descEn": "The attacker queries registrar details and associated IP ranges (CIDR) to map infrastructure scope.",
+      "stepTitle": "등록 기관 및 IP 대역 조회",
+      "stepTitleEn": "Registrar and IP Range Lookup",
+      "feynman": "등록 기관 정보에서 회사가 소유한 IP 주소 범위(203.0.113.0/24)를 알 수 있습니다. 이것은 회사가 가진 '디지털 토지'의 범위를 아는 것과 같습니다. 256개 IP 주소를 모두 스캔하면 숨겨진 서버를 찾을 수 있습니다.",
+      "feynmanEn": "Registrar information reveals the company's owned IP range (203.0.113.0/24). This is like knowing the extent of their 'digital property.' Scanning all 256 IP addresses can uncover hidden servers.",
+      "expert": "ARIN/RIPE 데이터베이스에서 조직명으로 할당된 NetRange를 조회합니다. /24 CIDR 블록(256개 IP)은 전체 포트 스캔 대상이 되며, clientTransferProhibited 상태는 도메인 탈취 공격이 어려움을 시사합니다.",
+      "expertEn": "Querying ARIN/RIPE databases for NetRange assigned to the organization. The /24 CIDR block (256 IPs) becomes a full port scan target, while clientTransferProhibited indicates domain hijacking attacks would be difficult.",
+      "defTooltip": "📋 WHOIS 모니터: 도메인의 확장 등록 기관 및 IP 대역 조회",
+      "defTooltipEn": "📋 WHOIS Monitor: Extended registrar and IP range query for domain",
+      "hackerLog": {
+        "title": "registrar_info.log",
+        "lines": [
+          { "log": "CIDR: 203.0.113.0/24", "desc": "256개 IP 대역 확인 - 전체 범위 포트 스캔 대상" },
+          { "log": "OrgName: {companyName} Corporation", "desc": "조직이 직접 IP 블록을 소유 - 자체 인프라 운영 확인" }
+        ]
+      },
+      "terms": [
+        { "name": "CIDR (Classless Inter-Domain Routing)", "desc": "IP 주소 범위를 표기하는 방법. /24는 256개, /16은 65,536개 IP를 포함합니다" },
+        { "name": "ARIN/RIPE", "desc": "인터넷 IP 주소를 관리하는 지역 레지스트리. 북미(ARIN), 유럽(RIPE), 아시아(APNIC) 등으로 구분됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 reverse_whois.py --org \"{companyName}\" --email \"admin@{companyName}.com\" --output related_domains.json",
+      "out": "[*] Performing reverse WHOIS for {companyName}...\n[+] Search by organization name: 8 domains found\n[+] Search by admin email: 12 domains found (4 overlap)\n\nUnique domains: 16\n  {companyName}.com (Active, expires 2027-03-15)\n  {companyName}.co.kr (Active, expires 2026-08-01)\n  {companyName}-dev.com (Active, expires 2026-12-15)\n  {companyName}-staging.net (Active, expires 2026-06-01)\n  {companyName}-old.com (Expired! 2025-09-30)\n  {companyName}-test.kr (Active, expires 2026-04-15)\n  {companyName}-api.com (Active, expires 2027-01-01)\n  {companyName}-portal.com (Active, expires 2026-11-20)\n  shop.{companyName}.com (CNAME → Shopify)\n  blog.{companyName}.com (CNAME → WordPress.com)\n  ...\n\n[!] WARNING: {companyName}-old.com expired 5 months ago - TAKEOVER POSSIBLE",
+      "def": "[Domain Monitor] Reverse WHOIS enumeration across multiple registrars detected",
+      "defAction": "Source: DomainTools API query\nTarget: {companyName} organization\nAction: All related domains cataloged, expired domain alert issued",
+      "desc": "역방향 WHOIS로 동일 조직이 등록한 모든 도메인을 찾고, 만료된 도메인을 식별합니다.",
+      "descEn": "Reverse WHOIS discovers all domains registered by the same organization and identifies expired domains for takeover.",
+      "stepTitle": "역방향 WHOIS로 관련 도메인 발견",
+      "stepTitleEn": "Reverse WHOIS Domain Discovery",
+      "feynman": "역방향 WHOIS는 '같은 사람이 등록한 다른 도메인도 모두 찾아주세요'라고 요청하는 것입니다. 16개의 관련 도메인을 발견했고, 그 중 하나는 만료되었습니다! 만료된 도메인을 등록하면 회사로 위장한 피싱 사이트를 만들 수 있습니다.",
+      "feynmanEn": "Reverse WHOIS asks 'find all other domains registered by the same person.' 16 related domains were found, one of which is expired! Registering the expired domain enables creating phishing sites impersonating the company.",
+      "expert": "역방향 WHOIS는 등록자 조직명과 이메일을 키로 DomainTools/SecurityTrails에서 검색합니다. {companyName}-old.com의 만료는 dangling DNS와 서브도메인 탈취 가능성을 의미하며, Shopify/WordPress CNAME은 서드파티 공급망 공격 벡터입니다.",
+      "expertEn": "Reverse WHOIS searches DomainTools/SecurityTrails using registrant organization and email as keys. The expired {companyName}-old.com indicates dangling DNS and subdomain takeover potential, while Shopify/WordPress CNAMEs are third-party supply chain attack vectors.",
+      "defTooltip": "🔄 도메인 모니터: 다수 레지스트라에 걸친 역방향 WHOIS 열거 감지",
+      "defTooltipEn": "🔄 Domain Monitor: Reverse WHOIS enumeration across multiple registrars detected",
+      "hackerLog": {
+        "title": "reverse_whois.log",
+        "lines": [
+          { "log": "{companyName}-old.com (Expired! 2025-09-30)", "desc": "만료 도메인 발견! 즉시 등록하여 피싱/C2에 활용 가능" },
+          { "log": "{companyName}-dev.com, {companyName}-staging.net", "desc": "개발/스테이징 도메인 - 보안이 느슨한 환경" }
+        ]
+      },
+      "terms": [
+        { "name": "Reverse WHOIS", "desc": "등록자 이름이나 이메일로 검색하여 같은 소유자의 모든 도메인을 찾는 기법" },
+        { "name": "Domain Takeover", "desc": "만료된 도메인을 재등록하여 이전 소유자로 위장하는 공격. 기존 신뢰관계를 악용합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 whois_history.py --domain {companyName}.com --timeline --output whois_timeline.csv",
+      "out": "[*] Fetching WHOIS history for {companyName}.com...\n[+] 12 historical records found\n\nTimeline:\n  2020-03-15: Domain created (Registrant: Park Minhyuk, Email: park@{companyName}.com)\n  2020-06-01: NS changed: ns1.cafe24.com → ns1.aws-dns.com\n  2021-01-15: Registrant updated: Park Minhyuk → {companyName} Corp\n  2021-07-01: NS changed: ns1.aws-dns.com → ns1.cloudflare.com\n  2022-03-01: Admin email changed: park@ → admin@\n  2023-01-01: Privacy protection enabled (GDPR)\n  2023-06-15: New subdomain cert: *.{companyName}.com (Let's Encrypt)\n  2024-03-15: Domain renewed for 3 years\n  2025-11-20: Tech contact updated: devops@{companyName}.com\n\n[!] Pre-privacy data available:\n  - Personal name: Park Minhyuk\n  - Personal email: park@{companyName}.com\n  - Phone: +82-2-XXX-XXXX",
+      "def": "[OSINT Alert] Historical WHOIS data mining detected for domain",
+      "defAction": "Source: WHOIS history services\nTarget: {companyName}.com historical records\nAction: Pre-privacy personal data exposure noted",
+      "desc": "WHOIS 이력을 분석하여 개인정보 보호 설정 이전의 실제 등록자 정보와 인프라 변경 이력을 파악합니다.",
+      "descEn": "WHOIS history analysis reveals pre-privacy registrant information and infrastructure change timeline.",
+      "stepTitle": "WHOIS 이력 분석",
+      "stepTitleEn": "WHOIS History Analysis",
+      "feynman": "WHOIS 이력은 '도메인의 일기장'입니다. 2023년에 개인정보 보호를 설정했지만, 그 전 기록에는 실제 담당자 이름(Park Minhyuk)과 전화번호가 남아 있습니다. 또한 서버를 Cafe24에서 AWS로, 다시 Cloudflare로 옮긴 이력도 알 수 있어 인프라 진화를 추적할 수 있습니다.",
+      "feynmanEn": "WHOIS history is a 'domain diary.' Privacy was enabled in 2023, but earlier records contain the actual contact's name (Park Minhyuk) and phone number. The hosting migration from Cafe24 to AWS to Cloudflare also reveals infrastructure evolution.",
+      "expert": "WHOIS 히스토리에서 GDPR 이전 개인정보(실명, 전화번호)가 노출됩니다. NS 변경 이력(Cafe24→AWS→Cloudflare)은 인프라 마이그레이션을 추적하며, Cafe24 시절의 구 서버가 아직 존재할 가능성을 확인합니다.",
+      "expertEn": "Pre-GDPR personal information (real name, phone) exposed in WHOIS history. NS change history (Cafe24→AWS→Cloudflare) tracks infrastructure migration, and legacy servers from the Cafe24 era may still exist.",
+      "defTooltip": "📜 OSINT 알림: 도메인의 과거 WHOIS 데이터 마이닝 감지",
+      "defTooltipEn": "📜 OSINT Alert: Historical WHOIS data mining detected for domain",
+      "hackerLog": {
+        "title": "whois_history.log",
+        "lines": [
+          { "log": "Pre-privacy: Park Minhyuk, park@{companyName}.com", "desc": "실제 담당자 이름과 이메일 노출 - 소셜 엔지니어링 활용" },
+          { "log": "NS: Cafe24 → AWS → Cloudflare", "desc": "인프라 마이그레이션 이력 - 구 서버가 남아있을 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "WHOIS History", "desc": "도메인 등록 정보의 변경 이력을 기록한 데이터. DomainTools, SecurityTrails 등에서 제공합니다" },
+        { "name": "GDPR (General Data Protection Regulation)", "desc": "EU의 개인정보보호 규정. 이후 많은 WHOIS 기록에서 개인정보가 마스킹되었습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 attack_surface_mapper.py --domains related_domains.json --whois whois_timeline.csv --output attack_surface.json",
+      "out": "[*] Building attack surface map from WHOIS intelligence...\n\n[+] Attack Surface Summary:\n  Total domains: 16\n  Active: 15 | Expired: 1 (TAKEOVER TARGET)\n  Hosting providers: 3 (Cloudflare, AWS, Shopify)\n  Email systems: 2 (Google Workspace, internal SMTP)\n  \n[+] High-value attack vectors:\n  1. {companyName}-old.com → Expired domain takeover\n     Risk: Phishing, brand impersonation\n  2. {companyName}-dev.com → Development environment\n     Risk: Weaker security, test credentials\n  3. Park Minhyuk (pre-privacy) → Social engineering target\n     Risk: Spearphishing, vishing\n  4. DNSSEC unsigned → DNS cache poisoning\n     Risk: Traffic redirection\n\n[+] Attack surface map saved to attack_surface.json",
+      "def": "[SIEM] Comprehensive WHOIS intelligence campaign correlated across domains",
+      "defAction": "Source: Correlation engine\nTarget: {companyName} domain portfolio\nAction: Incident created, expired domain re-registration recommended",
+      "desc": "WHOIS 정보를 종합하여 공격 표면 맵을 구축하고 최우선 공격 벡터를 식별합니다.",
+      "descEn": "Consolidating WHOIS intelligence into an attack surface map and identifying priority attack vectors.",
+      "stepTitle": "공격 표면 맵 구축",
+      "stepTitleEn": "Attack Surface Map Construction",
+      "feynman": "모든 WHOIS 정보를 하나로 합치면 회사의 '디지털 약점 지도'가 완성됩니다. 만료된 도메인으로 피싱, 개발 서버의 약한 보안, 노출된 담당자에 대한 소셜 엔지니어링, DNSSEC 미설정을 이용한 DNS 위조 등 4가지 주요 공격 경로가 식별되었습니다.",
+      "feynmanEn": "Combining all WHOIS information creates a 'digital weakness map.' Four major attack paths identified: expired domain phishing, weak dev server security, social engineering via exposed contacts, and DNS spoofing through unsigned DNSSEC.",
+      "expert": "WHOIS 인텔리전스를 통합하여 다층 공격 표면을 매핑합니다. 만료 도메인 탈취(T1584.001), 개발 환경 공격(약한 인증), 사전 GDPR 개인정보를 이용한 소셜 엔지니어링, DNSSEC 미설정 악용이 주요 벡터입니다.",
+      "expertEn": "Integrating WHOIS intelligence to map multi-layer attack surface. Primary vectors: expired domain takeover (T1584.001), dev environment attack (weak auth), social engineering via pre-GDPR personal data, and DNSSEC unsigned exploitation.",
+      "defTooltip": "🗺️ SIEM: 도메인 전체에 걸친 포괄적 WHOIS 인텔리전스 캠페인 상관 분석",
+      "defTooltipEn": "🗺️ SIEM: Comprehensive WHOIS intelligence campaign correlated across domains",
+      "hackerLog": {
+        "title": "attack_surface.log",
+        "lines": [
+          { "log": "{companyName}-old.com → Expired domain takeover", "desc": "최우선 공격 벡터 - 즉시 실행 가능한 도메인 탈취" },
+          { "log": "Park Minhyuk → Social engineering target", "desc": "노출된 개인정보로 표적 피싱 공격 계획" }
+        ]
+      },
+      "terms": [
+        { "name": "Attack Surface", "desc": "외부에서 접근 가능한 모든 시스템과 서비스의 총합. 넓을수록 공격에 취약합니다" },
+        { "name": "DNS Cache Poisoning", "desc": "DNS 캐시에 위조된 레코드를 삽입하여 사용자를 가짜 사이트로 유도하는 공격" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "whois (PID: 5101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 whois_enum.py (PID: 5156)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "python3 reverse_whois.py (PID: 5201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 whois_history.py (PID: 5289)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "python3 attack_surface_mapper.py (PID: 5345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

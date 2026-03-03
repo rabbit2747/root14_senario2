@@ -1,0 +1,233 @@
+{
+  "id": "T1046",
+  "title": "네트워크 서비스 탐색 시뮬레이션",
+  "titleEn": "Network Service Discovery Simulation",
+  "duration": 9,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "network", "label": "Internal Net", "x": 250, "y": 50, "type": "server" },
+    { "id": "servers", "label": "Servers", "x": 350, "y": 150, "type": "server" },
+    { "id": "siem", "label": "IDS/SIEM", "x": 500, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "network", "label": "Ping Sweep", "activeStep": 2 },
+    { "from": "attacker", "to": "servers", "label": "Port Scan", "activeStep": 3 },
+    { "from": "servers", "to": "siem", "label": "Alert", "activeStep": 3 },
+    { "from": "attacker", "to": "servers", "label": "Vuln Scan", "activeStep": 5 }
+  ],
+  "desktopIcons": [
+    { "label": "Terminal", "icon": "💻", "alertOnStep": 0 },
+    { "label": "Nmap", "icon": "🗂️", "alertOnStep": 2 },
+    { "label": "Vuln Report", "icon": "🔓", "alertOnStep": 5 },
+    { "label": "Network Map", "icon": "🗺️", "alertOnStep": 4 }
+  ],
+  "steps": [
+    {
+      "cmd": "ipconfig /all | findstr /i \"IPv4 Subnet Default DNS\"",
+      "out": "   IPv4 Address. . . . . . . . . . . : 192.168.1.105\n   Subnet Mask . . . . . . . . . . . : 255.255.255.0\n   Default Gateway . . . . . . . . . : 192.168.1.1\n   DNS Servers . . . . . . . . . . . : 192.168.1.10",
+      "def": "[EDR] Network configuration enumeration by {userName}",
+      "defAction": "Process: ipconfig.exe\nUser: {companyName}\\{userName}\nNetwork: 192.168.1.0/24\nGateway: 192.168.1.1\nDNS: 192.168.1.10 (likely DC)\nRisk Level: Low\nAction: Log",
+      "desc": "현재 네트워크 설정을 확인합니다. 서브넷, 게이트웨이, DNS 서버 정보를 파악하여 내부 네트워크 구조를 이해합니다.",
+      "descEn": "Checks current network configuration. Identifies subnet, gateway, and DNS server information to understand the internal network structure.",
+      "stepTitle": "네트워크 설정 확인",
+      "stepTitleEn": "Network Config Check",
+      "feynman": "새 동네에 이사 와서 '우리 동네가 어디서 시작하고 어디서 끝나는지' 확인하는 것입니다. 192.168.1.0/24는 255개의 주소가 있는 동네이고, DNS(192.168.1.10)는 동네 안내소입니다.",
+      "feynmanEn": "Like moving to a new neighborhood and checking where it starts and ends. 192.168.1.0/24 is a neighborhood with 255 addresses, and DNS (192.168.1.10) is the neighborhood information center.",
+      "expert": "DNS 서버(192.168.1.10)가 DC일 가능성이 높습니다. AD 환경에서 DNS는 보통 DC에서 운영됩니다. 서브넷 마스크 /24는 254개의 호스트 주소를 의미하며, 소규모 기업 네트워크의 일반적인 구성입니다.",
+      "expertEn": "DNS server (192.168.1.10) is likely the DC. In AD environments, DNS usually runs on DC. /24 subnet mask means 254 host addresses, typical for small enterprise networks.",
+      "defTooltip": "ipconfig 실행은 정상 활동이지만, 이후 nmap이나 arp 명령이 따라오면 정찰 시퀀스의 시작점입니다. Sysmon Event ID 1에서 프로세스 체인을 추적하세요.",
+      "defTooltipEn": "ipconfig execution is normal activity, but if followed by nmap or arp commands, it marks the start of a recon sequence. Track process chains via Sysmon Event ID 1.",
+      "hackerLog": {
+        "title": "net_config.log",
+        "lines": [
+          { "log": "ipconfig /all | findstr \"IPv4 Subnet Default DNS\"", "desc": "💡 IP 주소, 서브넷, 게이트웨이, DNS 정보를 한눈에 확인합니다" },
+          { "log": "DNS Servers: 192.168.1.10", "desc": "💡 DNS 서버 = 도메인 컨트롤러일 가능성이 높습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Subnet Mask", "desc": "네트워크 주소와 호스트 주소를 구분하는 비트 마스크입니다" },
+        { "term": "Default Gateway", "desc": "외부 네트워크로 나가기 위한 기본 경로(라우터)입니다" }
+      ]
+    },
+    {
+      "cmd": "arp -a",
+      "out": "Interface: 192.168.1.105 --- 0xa\n  Internet Address      Physical Address      Type\n  192.168.1.1           00-1a-2b-3c-4d-5e     dynamic\n  192.168.1.10          00-50-56-a1-b2-c3     dynamic\n  192.168.1.20          00-50-56-d4-e5-f6     dynamic\n  192.168.1.30          00-50-56-a7-b8-c9     dynamic\n  192.168.1.50          00-0c-29-1a-2b-3c     dynamic\n  192.168.1.100         00-0c-29-4d-5e-6f     dynamic\n  192.168.1.200         00-15-5d-a1-b2-c3     dynamic\n  192.168.1.255         ff-ff-ff-ff-ff-ff     static",
+      "def": "[SIEM] ARP table enumeration - mapping active hosts",
+      "defAction": "Process: arp.exe\nInterface: 192.168.1.105\nActive Hosts Found: 7\nVMware MACs detected: 00-50-56-*, 00-0c-29-*\nRisk Level: Low\nAction: Log - initial network reconnaissance",
+      "desc": "ARP 테이블을 확인하여 현재 통신 중인 호스트를 파악합니다. MAC 주소 패턴으로 가상머신 환경도 식별할 수 있습니다.",
+      "descEn": "Checks the ARP table to identify currently communicating hosts. VM environments can also be identified through MAC address patterns.",
+      "stepTitle": "ARP 테이블 확인",
+      "stepTitleEn": "ARP Table Check",
+      "feynman": "동네 주민 명단을 확인하는 것입니다. ARP 테이블에는 최근에 통신한 이웃의 주소(IP)와 신분증(MAC)이 기록됩니다. MAC 주소 00-50-56은 VMware 가상머신이라는 뜻입니다.",
+      "feynmanEn": "Like checking the neighborhood resident list. The ARP table records recently communicated neighbors' addresses (IP) and IDs (MAC). MAC 00-50-56 means VMware virtual machines.",
+      "expert": "OUI(Organizationally Unique Identifier) 00-50-56과 00-0c-29는 VMware, 00-15-5d는 Hyper-V를 나타냅니다. ARP 캐시는 네트워크 스캔 없이 활성 호스트를 식별하는 패시브 정찰 기법입니다. 이 단계는 IDS에 탐지되지 않습니다.",
+      "expertEn": "OUI 00-50-56 and 00-0c-29 indicate VMware, 00-15-5d indicates Hyper-V. ARP cache is a passive recon technique identifying active hosts without network scanning. This step is undetectable by IDS.",
+      "defTooltip": "ARP 명령 자체는 로깅이 어렵지만, Sysmon Event ID 1에서 arp.exe 실행을 추적하세요. ipconfig → arp → nmap 시퀀스는 네트워크 정찰 패턴입니다.",
+      "defTooltipEn": "ARP commands are hard to log directly, but track arp.exe execution via Sysmon Event ID 1. ipconfig → arp → nmap sequence is a network recon pattern.",
+      "hackerLog": {
+        "title": "arp_table.log",
+        "lines": [
+          { "log": "arp -a", "desc": "💡 ARP 캐시에 저장된 최근 통신한 호스트의 IP-MAC 매핑을 표시합니다" },
+          { "log": "00-50-56-a1-b2-c3 (VMware MAC)", "desc": "💡 MAC 주소 패턴으로 VMware 가상머신 환경임을 식별합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "ARP", "desc": "Address Resolution Protocol - IP 주소를 MAC 주소로 변환하는 네트워크 프로토콜입니다" },
+        { "term": "OUI", "desc": "MAC 주소의 앞 3바이트로, 네트워크 장비 제조사를 식별합니다" }
+      ]
+    },
+    {
+      "cmd": "nmap -sn 192.168.1.0/24",
+      "out": "Starting Nmap 7.94 ( https://nmap.org ) at 2026-03-01 10:45 KST\nNmap scan report for gateway.{companyName}.local (192.168.1.1)\nHost is up (0.001s latency).\nNmap scan report for DC01.{companyName}.local (192.168.1.10)\nHost is up (0.002s latency).\nNmap scan report for SQL01.{companyName}.local (192.168.1.20)\nHost is up (0.003s latency).\nNmap scan report for WEB01.{companyName}.local (192.168.1.30)\nHost is up (0.002s latency).\nNmap scan report for BACKUP01.{companyName}.local (192.168.1.50)\nHost is up (0.004s latency).\nNmap scan report for PC-{userName} (192.168.1.105)\nHost is up (0.000s latency).\nNmap scan report for PC-HR01 (192.168.1.100)\nHost is up (0.003s latency).\nNmap scan report for PRINTER01 (192.168.1.200)\nHost is up (0.005s latency).\nNmap done: 256 IP addresses (8 hosts up) scanned in 2.45 seconds",
+      "def": "[SIEM] ALERT: Nmap ping sweep detected from 192.168.1.105",
+      "defAction": "Process: nmap.exe (PID: 4600)\nScan Type: Ping sweep (-sn)\nTarget: 192.168.1.0/24\nHosts Discovered: 8\nUser: {companyName}\\{userName}\nRisk Level: High\nAction: Alert SOC - network reconnaissance in progress",
+      "desc": "Nmap 핑 스위프로 서브넷 내 활성 호스트를 스캔합니다. 8개의 활성 호스트가 발견되며 호스트명으로 역할을 추론할 수 있습니다.",
+      "descEn": "Scans for active hosts in the subnet using Nmap ping sweep. 8 active hosts are discovered, and their roles can be inferred from hostnames.",
+      "stepTitle": "핑 스위프 스캔",
+      "stepTitleEn": "Ping Sweep Scan",
+      "feynman": "동네 모든 집의 초인종을 눌러보고 누가 있는지 확인하는 것입니다. 256개 주소를 2.45초 만에 확인했고, 8개의 '사람이 있는 집'을 찾았습니다. 집 이름(호스트명)으로 역할도 알 수 있습니다.",
+      "feynmanEn": "Like ringing every doorbell in the neighborhood to see who's home. Checked 256 addresses in 2.45 seconds and found 8 'occupied houses'. House names (hostnames) reveal their roles.",
+      "expert": "Nmap -sn은 ICMP Echo, TCP SYN(443), TCP ACK(80), ICMP Timestamp를 조합합니다. 권한이 있으면 ARP 스캔도 병행합니다. Snort/Suricata Rule: alert icmp any any -> $HOME_NET any (msg:\"ICMP Sweep\"; threshold: type both, track by_src, count 30, seconds 5)로 탐지 가능합니다.",
+      "expertEn": "Nmap -sn combines ICMP Echo, TCP SYN(443), TCP ACK(80), and ICMP Timestamp. With privileges, ARP scanning is also used. Detectable via Snort rule with threshold of 30 ICMP packets in 5 seconds from a single source.",
+      "defTooltip": "IDS에서 단일 소스의 ICMP Echo Request가 5초 내 30개 이상 발생하면 핑 스위프 경고를 발생시키세요. Nmap 프로세스 실행은 Sysmon Event ID 1에서도 탐지 가능합니다.",
+      "defTooltipEn": "Alert for ping sweep when IDS detects 30+ ICMP Echo Requests from a single source within 5 seconds. Nmap process execution is also detectable via Sysmon Event ID 1.",
+      "hackerLog": {
+        "title": "ping_sweep.log",
+        "lines": [
+          { "log": "nmap -sn 192.168.1.0/24", "desc": "💡 서브넷 전체에 핑을 보내 활성 호스트를 발견합니다" },
+          { "log": "8 hosts up / 256 IP addresses scanned in 2.45s", "desc": "💡 2.45초 만에 8개 활성 호스트를 식별했습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Ping Sweep", "desc": "네트워크 범위의 모든 IP에 핑을 보내 활성 호스트를 찾는 기법입니다" },
+        { "term": "Nmap", "desc": "네트워크 탐색 및 보안 감사를 위한 오픈소스 포트 스캐너입니다" }
+      ]
+    },
+    {
+      "cmd": "nmap -sV -sC -p 21,22,80,135,139,443,445,1433,3306,3389,5985,8080 192.168.1.10,20,30,50",
+      "out": "Nmap scan report for DC01.{companyName}.local (192.168.1.10)\nPORT     STATE  SERVICE        VERSION\n53/tcp   open   domain         Microsoft DNS\n88/tcp   open   kerberos-sec   Microsoft Windows Kerberos\n135/tcp  open   msrpc          Microsoft Windows RPC\n139/tcp  open   netbios-ssn    Microsoft Windows netbios-ssn\n389/tcp  open   ldap           Microsoft Windows AD LDAP\n445/tcp  open   microsoft-ds   Windows Server 2019 SMB\n3389/tcp open   ms-wbt-server  Microsoft Terminal Services\n5985/tcp open   http           Microsoft HTTPAPI httpd 2.0 (WinRM)\n\nNmap scan report for SQL01.{companyName}.local (192.168.1.20)\nPORT     STATE  SERVICE        VERSION\n135/tcp  open   msrpc          Microsoft Windows RPC\n445/tcp  open   microsoft-ds   Windows Server 2019 SMB\n1433/tcp open   ms-sql-s       Microsoft SQL Server 2019\n3389/tcp open   ms-wbt-server  Microsoft Terminal Services\n\nNmap scan report for WEB01.{companyName}.local (192.168.1.30)\nPORT     STATE  SERVICE        VERSION\n80/tcp   open   http           Microsoft IIS httpd 10.0\n443/tcp  open   ssl/http       Microsoft IIS httpd 10.0\n445/tcp  open   microsoft-ds   Windows Server 2022 SMB\n8080/tcp open   http-proxy     Apache Tomcat 9.0.85\n\nNmap scan report for BACKUP01.{companyName}.local (192.168.1.50)\nPORT     STATE  SERVICE        VERSION\n22/tcp   open   ssh            OpenSSH 8.9\n445/tcp  open   microsoft-ds   Windows Server 2016 SMB\n3389/tcp open   ms-wbt-server  Microsoft Terminal Services\n5985/tcp open   http           Microsoft HTTPAPI (WinRM)",
+      "def": "[EDR] CRITICAL: Full port scan with service detection on critical infrastructure",
+      "defAction": "Process: nmap.exe (PID: 4600)\nScan Type: Service version + script scan\nTargets: DC01, SQL01, WEB01, BACKUP01\nOpen Ports: 20+ across 4 servers\nRisk Level: Critical\nAction: Block scanner IP, full incident investigation",
+      "desc": "주요 서버에 대해 서비스 버전 탐지 스캔을 수행합니다. 각 서버의 열린 포트와 실행 중인 서비스, 버전 정보를 상세히 파악합니다.",
+      "descEn": "Performs service version detection scan on critical servers. Identifies open ports, running services, and version information in detail for each server.",
+      "stepTitle": "서비스 버전 탐지 스캔",
+      "stepTitleEn": "Service Version Detection Scan",
+      "feynman": "각 집의 문과 창문을 하나하나 확인하고, 자물쇠 종류(브랜드와 모델)까지 기록하는 것입니다. '이 집은 오래된 자물쇠(Windows 2016)를 쓰고 있네' 하며 약점을 찾습니다.",
+      "feynmanEn": "Like checking each house's doors and windows, recording the lock brand and model. 'This house uses old locks (Windows 2016)' - finding weaknesses.",
+      "expert": "-sV는 서비스 배너 그래빙으로 정확한 버전을 식별하고, -sC는 기본 NSE 스크립트를 실행합니다. Tomcat 9.0.85는 CVE-2024-21733 등 알려진 취약점이 있을 수 있습니다. BACKUP01의 Windows 2016은 EoL(End of Life) 가까워 패치가 부족할 수 있습니다.",
+      "expertEn": "-sV identifies exact versions via service banner grabbing, -sC runs default NSE scripts. Tomcat 9.0.85 may have known vulnerabilities like CVE-2024-21733. BACKUP01's Windows 2016 is near EoL, potentially lacking patches.",
+      "defTooltip": "IDS/NDR에서 단일 소스의 다중 포트 SYN 패킷을 감시하세요. 12개 이상의 다른 포트에 대한 연결 시도는 포트 스캔의 확실한 지표입니다. Snort rule: threshold count 12, seconds 10.",
+      "defTooltipEn": "Monitor IDS/NDR for multi-port SYN packets from a single source. Connection attempts to 12+ different ports is a definitive port scan indicator.",
+      "hackerLog": {
+        "title": "service_scan.log",
+        "lines": [
+          { "log": "nmap -sV -sC -p 21,22,80,...,8080 192.168.1.10,20,30,50", "desc": "💡 4개 주요 서버에 대해 서비스 버전 탐지와 스크립트 스캔을 수행합니다" },
+          { "log": "8080/tcp  open  http-proxy  Apache Tomcat 9.0.85", "desc": "💡 Tomcat 9.0.85 버전이 발견 - 알려진 취약점을 확인해야 합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Service Detection (-sV)", "desc": "열린 포트에서 실행 중인 서비스의 이름과 버전을 식별하는 스캔입니다" },
+        { "term": "NSE Scripts (-sC)", "desc": "Nmap Scripting Engine - 서비스에 대한 추가 정보를 수집하는 자동화 스크립트입니다" }
+      ]
+    },
+    {
+      "cmd": "nmap --script smb-enum-shares,smb-enum-users 192.168.1.10",
+      "out": "Nmap scan report for DC01.{companyName}.local (192.168.1.10)\nHOST SCRIPT RESULTS:\n| smb-enum-shares:\n|   account_used: {userName}\n|   \\\\192.168.1.10\\ADMIN$:\n|     Type: STYPE_DISKTREE_HIDDEN\n|     Comment: Remote Admin\n|     Anonymous access: <none>\n|   \\\\192.168.1.10\\C$:\n|     Type: STYPE_DISKTREE_HIDDEN\n|     Comment: Default share\n|   \\\\192.168.1.10\\HR_Data:\n|     Type: STYPE_DISKTREE\n|     Comment: HR Department\n|     Current user access: READ\n|   \\\\192.168.1.10\\IT_Shared:\n|     Type: STYPE_DISKTREE\n|     Comment: IT Team Share\n|     Current user access: READ/WRITE\n| smb-enum-users:\n|   {companyName}\\Administrator (RID: 500)\n|   {companyName}\\admin.jkim (RID: 1105)\n|   {companyName}\\{userName} (RID: 1013)",
+      "def": "[SIEM] ALERT: SMB share and user enumeration via NSE scripts",
+      "defAction": "Process: nmap.exe\nScripts: smb-enum-shares, smb-enum-users\nTarget: DC01 (192.168.1.10)\nShares Found: 4 (including ADMIN$, C$)\nUsers Enumerated: 3\nRisk Level: High\nAction: Restrict SMB access, review share permissions",
+      "desc": "Nmap NSE 스크립트로 SMB 공유와 사용자를 열거합니다. IT_Shared에 READ/WRITE 접근이 가능하며, 관리자 계정 정보도 수집됩니다.",
+      "descEn": "Enumerates SMB shares and users with Nmap NSE scripts. READ/WRITE access to IT_Shared is available, and administrator account information is also collected.",
+      "stepTitle": "SMB 공유/사용자 열거",
+      "stepTitleEn": "SMB Share/User Enumeration",
+      "feynman": "건물의 모든 공유 사무실과 열쇠를 가진 사람 목록을 만드는 것입니다. IT_Shared에 쓰기 권한이 있다는 것은 '이 사무실에 물건을 넣을 수 있다'는 뜻입니다 - 악성 파일을 심을 수 있습니다.",
+      "feynmanEn": "Like listing all shared offices and people with keys. Having WRITE access to IT_Shared means 'you can put things in this office' - malicious files can be planted.",
+      "expert": "smb-enum-shares는 NetShareEnumAll RPC를 호출하며, smb-enum-users는 SAMR EnumDomainUsers를 사용합니다. IT_Shared의 READ/WRITE 권한은 DLL 사이드로딩이나 SCF 파일 공격에 악용될 수 있습니다. RID 500(Administrator)의 노출은 Pass-the-Hash 공격 대상을 제공합니다.",
+      "expertEn": "smb-enum-shares calls NetShareEnumAll RPC, smb-enum-users uses SAMR EnumDomainUsers. READ/WRITE access to IT_Shared can be exploited for DLL sideloading or SCF file attacks. RID 500 (Administrator) exposure provides Pass-the-Hash targets.",
+      "defTooltip": "Event ID 5145에서 비인가 사용자의 SMB 공유 접근을 감시하세요. 특히 ADMIN$, C$ 같은 관리 공유에 대한 접근 시도는 즉시 경고해야 합니다.",
+      "defTooltipEn": "Monitor Event ID 5145 for unauthorized SMB share access. Access attempts to admin shares like ADMIN$ and C$ should trigger immediate alerts.",
+      "hackerLog": {
+        "title": "smb_enum.log",
+        "lines": [
+          { "log": "nmap --script smb-enum-shares,smb-enum-users 192.168.1.10", "desc": "💡 NSE 스크립트로 DC01의 SMB 공유와 사용자를 자동 열거합니다" },
+          { "log": "IT_Shared: READ/WRITE", "desc": "💡 IT 공유 폴더에 쓰기 권한 - 악성 파일 배포 가능" }
+        ]
+      },
+      "terms": [
+        { "term": "SMB Share", "desc": "Server Message Block - Windows 네트워크에서 파일과 프린터를 공유하는 프로토콜입니다" },
+        { "term": "RID", "desc": "Relative Identifier - Windows 계정의 고유 식별자로, 500은 항상 관리자입니다" }
+      ]
+    },
+    {
+      "cmd": "nmap --script vuln -p 445 192.168.1.50",
+      "out": "Nmap scan report for BACKUP01.{companyName}.local (192.168.1.50)\nPORT    STATE SERVICE\n445/tcp open  microsoft-ds\n\nHost script results:\n| smb-vuln-ms17-010:\n|   VULNERABLE:\n|   Remote Code Execution vulnerability in Microsoft SMBv1 servers (ms17-010)\n|     State: VULNERABLE\n|     IDs:  CVE:CVE-2017-0143\n|     Risk factor: HIGH\n|     References:\n|       https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0143\n|_      https://technet.microsoft.com/en-us/library/security/ms17-010.aspx\n|\n| smb-vuln-ms08-067:\n|   Check results:\n|_  Not vulnerable",
+      "def": "[EDR] CRITICAL: EternalBlue vulnerability (MS17-010) confirmed on BACKUP01",
+      "defAction": "Target: BACKUP01 (192.168.1.50)\nVulnerability: MS17-010 (EternalBlue/WannaCry)\nCVE: CVE-2017-0143\nOS: Windows Server 2016 (unpatched)\nRisk Level: Critical\nAction: EMERGENCY PATCHING - isolate BACKUP01, apply KB4013389",
+      "desc": "취약점 스캔으로 BACKUP01에서 EternalBlue(MS17-010) 취약점을 발견합니다. 이 취약점은 WannaCry 랜섬웨어에 사용된 것과 같은 취약점입니다.",
+      "descEn": "Vulnerability scan discovers EternalBlue (MS17-010) on BACKUP01. This is the same vulnerability used by the WannaCry ransomware.",
+      "stepTitle": "EternalBlue 취약점 발견",
+      "stepTitleEn": "EternalBlue Vulnerability Found",
+      "feynman": "집의 뒷문에 '이 문은 잠기지 않습니다'라는 표시를 발견한 것입니다. EternalBlue는 2017년에 WannaCry 랜섬웨어가 전 세계를 마비시킨 그 취약점입니다. 패치가 적용되지 않은 서버는 원격에서 완전히 장악할 수 있습니다.",
+      "feynmanEn": "Like finding a sign on the back door saying 'this door doesn't lock'. EternalBlue is the same vulnerability that WannaCry ransomware used to cripple the world in 2017. Unpatched servers can be fully compromised remotely.",
+      "expert": "CVE-2017-0143(EternalBlue)은 SMBv1의 버퍼 오버플로우 취약점으로, NSA의 EternalBlue 익스플로잇이 Shadow Brokers에 의해 유출되었습니다. Metasploit의 exploit/windows/smb/ms17_010_eternalblue 모듈로 SYSTEM 권한 쉘을 획득할 수 있습니다. KB4013389 패치와 SMBv1 비활성화가 필수입니다.",
+      "expertEn": "CVE-2017-0143 (EternalBlue) is an SMBv1 buffer overflow vulnerability. NSA's EternalBlue exploit was leaked by Shadow Brokers. Metasploit's ms17_010_eternalblue module can obtain SYSTEM shell. KB4013389 patch and SMBv1 disabling are essential.",
+      "defTooltip": "취약점 관리 시스템에서 MS17-010(KB4013389) 패치 상태를 정기적으로 확인하세요. SIEM에서 SMBv1 프로토콜 사용을 감지하고, Nmap --script vuln 스캔 시도도 IDS에서 탐지해야 합니다.",
+      "defTooltipEn": "Regularly verify MS17-010 (KB4013389) patch status in vulnerability management systems. Detect SMBv1 protocol usage in SIEM, and IDS should detect Nmap --script vuln scan attempts.",
+      "hackerLog": {
+        "title": "vuln_scan.log",
+        "lines": [
+          { "log": "nmap --script vuln -p 445 192.168.1.50", "desc": "💡 BACKUP01의 SMB 포트에 대해 알려진 취약점을 스캔합니다" },
+          { "log": "smb-vuln-ms17-010: VULNERABLE (CVE-2017-0143)", "desc": "💡 EternalBlue 취약점 발견 - 원격 코드 실행이 가능한 치명적 취약점입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "EternalBlue (MS17-010)", "desc": "SMBv1의 원격 코드 실행 취약점으로, WannaCry 랜섬웨어에 사용되었습니다" },
+        { "term": "CVE", "desc": "Common Vulnerabilities and Exposures - 공개된 보안 취약점의 표준 식별 번호입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"Test-NetConnection -ComputerName WEB01.{companyName}.local -Port 8080 -InformationLevel Detailed\"",
+      "out": "ComputerName            : WEB01.{companyName}.local\nRemoteAddress           : 192.168.1.30\nRemotePort              : 8080\nNameResolutionResults   : 192.168.1.30\nMatchingIPsecRules      :\nNetworkIsolationContext : Internet\nIsAdmin                 : False\nInterfaceAlias          : Ethernet0\nSourceAddress           : 192.168.1.105\nNetRoute (NextHop)      : 192.168.1.1\nTcpTestSucceeded        : True\nPingSucceeded           : True\nPingReplyDetails        : TTL 128, RT 2ms",
+      "def": "[SIEM] Network connectivity test to web application port 8080",
+      "defAction": "Source: PC-{userName} (192.168.1.105)\nTarget: WEB01:8080 (Apache Tomcat)\nResult: Port open, connection successful\nRisk Level: Medium\nAction: Verify Tomcat is patched and properly configured",
+      "desc": "PowerShell의 Test-NetConnection으로 특정 서비스 포트의 접근 가능 여부를 확인합니다. Tomcat 8080 포트가 접근 가능하여 웹 공격의 진입점이 될 수 있습니다.",
+      "descEn": "Checks accessibility of specific service ports using PowerShell's Test-NetConnection. Tomcat port 8080 is accessible and could be an entry point for web attacks.",
+      "stepTitle": "Tomcat 포트 접근 확인",
+      "stepTitleEn": "Tomcat Port Access Check",
+      "feynman": "특정 집의 뒷문(포트 8080)이 열려 있는지 직접 가서 확인하는 것입니다. Tomcat이 8080에서 실행 중이라면, 이것은 웹 애플리케이션의 관리자 페이지로 통하는 문일 수 있습니다.",
+      "feynmanEn": "Like going to check if a specific house's back door (port 8080) is open. If Tomcat is running on 8080, this could be a door to the web application's admin page.",
+      "expert": "Test-NetConnection은 PowerShell 기본 cmdlet으로, nmap 없이도 포트 스캔이 가능합니다. Tomcat 8080의 /manager/html 엔드포인트가 기본 자격증명(tomcat:tomcat)으로 접근 가능한지 확인해야 합니다. MITRE ATT&CK T1190 (Exploit Public-Facing Application)의 진입점이 될 수 있습니다.",
+      "expertEn": "Test-NetConnection is a built-in PowerShell cmdlet enabling port scanning without nmap. Verify if Tomcat 8080's /manager/html endpoint is accessible with default credentials (tomcat:tomcat). This can be an entry point for MITRE T1190.",
+      "defTooltip": "Sysmon Event ID 3 (네트워크 연결)에서 비정상적인 내부 포트 스캔을 감시하세요. 특히 8080 같은 관리 포트에 대한 접근은 웹 애플리케이션 공격의 전조입니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 3 (network connection) for unusual internal port scans. Access to management ports like 8080 is a precursor to web application attacks.",
+      "hackerLog": {
+        "title": "port_test.log",
+        "lines": [
+          { "log": "Test-NetConnection -ComputerName WEB01 -Port 8080", "desc": "💡 PowerShell로 Tomcat 웹 서버의 8080 포트 접근 가능 여부를 확인합니다" },
+          { "log": "TcpTestSucceeded: True", "desc": "💡 포트가 열려 있어 웹 애플리케이션에 접근 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Test-NetConnection", "desc": "PowerShell에서 네트워크 연결과 포트 상태를 테스트하는 cmdlet입니다" },
+        { "term": "Apache Tomcat", "desc": "Java 웹 애플리케이션 서버로, 관리 콘솔이 기본 포트 8080에서 실행됩니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 2600)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "ipconfig.exe", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "arp.exe", "depth": 2, "alert": false, "minStep": 1 },
+    { "name": "nmap.exe (PID: 4600)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "nmap -sn (ping sweep)", "depth": 3, "alert": true, "minStep": 2 },
+    { "name": "nmap -sV (service scan)", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "nmap --script (NSE)", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "nmap --script vuln", "depth": 3, "alert": true, "minStep": 5 },
+    { "name": "powershell.exe (port test)", "depth": 2, "alert": false, "minStep": 6 }
+  ]
+}

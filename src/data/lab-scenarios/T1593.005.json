@@ -1,0 +1,182 @@
+{
+  "id": "T1593.005",
+  "title": "피해자 소유 웹사이트 검색 시뮬레이션",
+  "titleEn": "Search Victim-Owned Websites Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 웹사이트 핑거프린팅", "labelEn": "🔍 Website Fingerprinting", "steps": [0, 1] },
+    { "label": "🎯 콘텐츠 & 메타데이터 분석", "labelEn": "🎯 Content & Metadata Analysis", "steps": [2, 3] },
+    { "label": "✅ 웹사이트 정찰 보고서", "labelEn": "✅ Website Recon Report", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "main", "label": "Main Website", "x": 200, "y": 20 },
+    { "id": "careers", "label": "Careers Page", "x": 200, "y": 60 },
+    { "id": "blog", "label": "Tech Blog", "x": 200, "y": 100 },
+    { "id": "intel", "label": "Gathered Intel", "x": 400, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "main", "minStep": 0 },
+    { "from": "ext", "to": "careers", "minStep": 1 },
+    { "from": "ext", "to": "blog", "minStep": 2 },
+    { "from": "main", "to": "intel", "minStep": 3 },
+    { "from": "careers", "to": "intel", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "web_recon/", "icon": "📁" },
+    { "name": "tech_stack.json", "icon": "📄", "alert": true },
+    { "name": "website_intel.pdf", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "wappalyzer https://target-corp.com --pretty && whatweb -v https://target-corp.com",
+      "out": "[Wappalyzer] https://target-corp.com\n\n  CMS:              WordPress 6.4.2\n  JavaScript:       React 18.2, jQuery 3.7.1\n  Framework:        Next.js 14.0\n  Web Server:       nginx/1.18.0\n  Programming:      PHP 8.2, Node.js\n  CDN:              Cloudflare\n  Analytics:        Google Analytics GA4, Hotjar\n  Tag Manager:      Google Tag Manager\n  Security:         reCAPTCHA v3, HSTS\n  Font:             Google Fonts (Inter, Noto Sans KR)\n  Marketing:        HubSpot, Mailchimp\n\n[WhatWeb] https://target-corp.com\n  HTTP Headers:\n    Server: nginx/1.18.0\n    X-Powered-By: Express\n    X-Frame-Options: SAMEORIGIN\n    Content-Security-Policy: default-src 'self'\n    Set-Cookie: _ga=...; _gid=...; hubspot_utk=...\n    Strict-Transport-Security: max-age=31536000",
+      "def": "[WAF] Automated website fingerprinting tool detected (Wappalyzer user-agent)",
+      "defAction": "Source: Web Application Firewall\nTarget: Automated scanning from external IP\nAction: Request logged, rate limiting applied",
+      "desc": "Wappalyzer와 WhatWeb을 사용하여 대상 웹사이트의 전체 기술 스택을 자동 탐지합니다. CMS, 프레임워크, 서버, 분석 도구, 보안 설정이 파악됩니다.",
+      "descEn": "Using Wappalyzer and WhatWeb to automatically detect the target website's complete tech stack. CMS, frameworks, server, analytics, and security settings are identified.",
+      "stepTitle": "웹사이트 기술 스택 핑거프린팅",
+      "stepTitleEn": "Website Tech Stack Fingerprinting",
+      "feynman": "이것은 '건물의 건축 양식 분석'입니다. 건물 외관(웹사이트)을 보면 어떤 자재(기술)로 지었는지, 어떤 보안 시스템(WAF, HSTS)을 쓰는지, 어떤 감시 카메라(Analytics)가 있는지 파악할 수 있습니다.",
+      "feynmanEn": "This is analyzing a building's architectural style. Looking at the exterior (website) reveals what materials (technologies) were used, what security systems (WAF, HSTS) are installed, and what surveillance cameras (Analytics) are present.",
+      "expert": "Wappalyzer의 JavaScript 패턴 매칭과 WhatWeb의 HTTP 헤더 분석을 병행하여 포괄적 기술 프로파일을 구축합니다. WordPress 6.4.2의 알려진 CVE, nginx 1.18.0의 취약점, jQuery 3.7.1의 XSS 벡터를 각각 매핑할 수 있습니다.",
+      "expertEn": "Combining Wappalyzer's JS pattern matching with WhatWeb's HTTP header analysis builds comprehensive tech profiles. Known CVEs for WordPress 6.4.2, nginx 1.18.0 vulnerabilities, and jQuery 3.7.1 XSS vectors can each be mapped.",
+      "defTooltip": "🔍 WAF: 자동화된 웹사이트 핑거프린팅 도구 탐지 (Wappalyzer UA)",
+      "defTooltipEn": "🔍 WAF: Automated website fingerprinting tool detected (Wappalyzer UA)",
+      "hackerLog": {
+        "title": "tech_fingerprint.log",
+        "lines": [
+          { "log": "WordPress 6.4.2 + PHP 8.2 + nginx 1.18.0", "desc": "💡 서버 기술 스택 전체 파악 완료" },
+          { "log": "Analytics: GA4 + Hotjar + HubSpot", "desc": "💡 마케팅/분석 도구 — 소셜 엔지니어링 컨텍스트" },
+          { "log": "Security: reCAPTCHA v3, HSTS, CSP", "desc": "💡 보안 설정 수준 파악 — 우회 전략 수립 필요" }
+        ]
+      },
+      "terms": [
+        { "name": "Wappalyzer", "desc": "웹사이트의 기술 스택을 자동 탐지하는 브라우저 확장/CLI 도구" },
+        { "name": "Tech Stack Fingerprinting", "desc": "웹사이트가 사용하는 기술(CMS, 서버, 프레임워크 등)을 식별하는 정찰 기법" }
+      ]
+    },
+    {
+      "cmd": "python3 career_scraper.py --url 'https://careers.target-corp.com' --extract tech_requirements,security_tools",
+      "out": "[*] Scraping careers.target-corp.com...\n[*] 15 open positions found\n\n=== Security-Related Job Posts ===\n\n[Position] Senior Security Engineer\n  Requirements:\n  - Experience with Splunk Enterprise SIEM (3+ years)\n  - CrowdStrike Falcon EDR administration\n  - AWS Security (GuardDuty, SecurityHub, WAF)\n  - Okta SSO/MFA management\n  - ISO 27001 / SOC 2 Type II audit experience\n\n[Position] Cloud Security Architect\n  Requirements:\n  - Kubernetes security (EKS, Falco, OPA)\n  - Terraform IaC security scanning\n  - HashiCorp Vault secret management\n  - Prisma Cloud / Aqua Security CSPM\n\n[Position] SOC Analyst (Tier 2)\n  Requirements:\n  - Splunk SPL query writing\n  - CrowdStrike Falcon console operations\n  - Carbon Black Response (legacy system)\n  - SOAR: Palo Alto XSOAR\n\n=== Extracted Technology Map ===\n  SIEM:     Splunk Enterprise\n  EDR:      CrowdStrike Falcon + Carbon Black (legacy)\n  Cloud:    AWS (EKS, GuardDuty, SecurityHub)\n  SSO/MFA:  Okta\n  Secrets:  HashiCorp Vault\n  CSPM:     Prisma Cloud\n  SOAR:     Palo Alto XSOAR\n  IaC:      Terraform",
+      "def": "[HR Security] Automated scraping of careers page detected — job listings reveal internal security stack",
+      "defAction": "Source: HR / Security Review\nTarget: careers.target-corp.com listings\nAction: Job descriptions reviewed for excessive technical detail, generic terms adopted",
+      "desc": "채용 공고를 스크래핑하여 보안 도구, 클라우드 환경, 컴플라이언스 프레임워크 정보를 추출합니다. SIEM, EDR, SSO, SOAR 등 전체 보안 스택이 노출됩니다.",
+      "descEn": "Scraping job listings to extract security tools, cloud environment, and compliance framework info. Complete security stack including SIEM, EDR, SSO, SOAR is exposed.",
+      "stepTitle": "채용 공고 기반 보안 스택 분석",
+      "stepTitleEn": "Job Listing Security Stack Analysis",
+      "feynman": "채용 공고는 '회사 보안 시스템의 설명서'와 같습니다. 'Splunk 경험 3년' 필요라고 쓰면, 공격자는 이 회사가 Splunk SIEM을 쓴다는 것을 알 수 있습니다. 어떤 방어 도구를 쓰는지 알면, 그 도구가 탐지하지 못하는 공격을 설계할 수 있습니다.",
+      "feynmanEn": "Job listings are like a 'company security system manual'. Requiring '3 years Splunk experience' tells attackers the company uses Splunk SIEM. Knowing defense tools allows designing attacks that bypass them.",
+      "expert": "채용 공고에서 보안 도구 벤더명을 추출하면 조직의 전체 보안 아키텍처를 재구성할 수 있습니다. Splunk SIEM의 탐지 규칙 우회, CrowdStrike Falcon의 AMSI 우회, Okta SSO의 MFA 피로 공격 등 각 도구별 맞춤형 우회 전략을 수립합니다.",
+      "expertEn": "Extracting security vendor names from job listings reconstructs the entire security architecture. Splunk SIEM rule bypass, CrowdStrike Falcon AMSI evasion, Okta SSO MFA fatigue attacks — tailored bypass strategies for each tool.",
+      "defTooltip": "🔍 HR 보안: 채용 페이지 자동 스크래핑 감지 — 내부 보안 스택 노출",
+      "defTooltipEn": "🔍 HR Security: Careers page scraping detected — internal security stack exposed",
+      "hackerLog": {
+        "title": "career_scrape.log",
+        "lines": [
+          { "log": "SIEM: Splunk Enterprise (3+ years required)", "desc": "💡 SIEM 플랫폼 확인 — Splunk SPL 탐지 우회 준비" },
+          { "log": "EDR: CrowdStrike Falcon + Carbon Black (legacy)", "desc": "💡 레거시 EDR(Carbon Black) — 우회 가능성 높음" },
+          { "log": "SSO: Okta → MFA fatigue attack vector", "desc": "💡 Okta MFA 피로 공격 벡터 식별" }
+        ]
+      },
+      "terms": [
+        { "name": "Security Stack Enumeration", "desc": "대상 조직이 사용하는 보안 도구와 솔루션의 전체 목록을 파악하는 정찰 활동" },
+        { "name": "MFA Fatigue Attack", "desc": "MFA 인증 요청을 반복 전송하여 사용자가 실수로 승인하게 만드는 공격" }
+      ]
+    },
+    {
+      "cmd": "python3 web_content_miner.py --url target-corp.com --extract robots,sitemap,documents,comments",
+      "out": "[*] Mining web content from target-corp.com...\n\n=== robots.txt Analysis ===\n  Disallow: /admin/\n  Disallow: /internal/\n  Disallow: /api/v1/debug/\n  Disallow: /wp-admin/\n  Disallow: /staging/\n  → 5 sensitive paths revealed!\n\n=== Sitemap Analysis (437 URLs) ===\n  Blog posts: 156\n  Product pages: 89\n  Team members: 23\n  Case studies: 15\n  Press releases: 34\n\n=== Downloadable Documents (12 found) ===\n  company-brochure-2026.pdf\n    → Creator: Kim Seongjin (IT Director)\n    → Software: Adobe Acrobat Pro DC 2024\n    → Company: Target Corporation\n  \n  security-whitepaper-2025.pdf\n    → Creator: SOC Team\n    → Software: Microsoft Word 16.0\n    → File path: C:\\Users\\security-team\\Documents\\\n\n=== HTML Comments (Developer Notes) ===\n  <!-- TODO: Fix staging API endpoint before Q2 launch -->\n  <!-- API v2 base: https://api-internal.target-corp.com -->\n  <!-- Legacy auth: basic_auth still enabled on /api/v1/ -->",
+      "def": "[Web Scanner] Content mining and document metadata extraction detected from target website",
+      "defAction": "Source: Web Application Security\nTarget: Public website content, documents, comments\nAction: Metadata stripped from documents, HTML comments removed, robots.txt reviewed",
+      "desc": "웹사이트의 robots.txt, 사이트맵, 다운로드 가능 문서, HTML 주석을 분석합니다. 민감한 경로, 문서 메타데이터의 내부 정보, 개발자 주석의 API 엔드포인트가 발견됩니다.",
+      "descEn": "Analyzing robots.txt, sitemap, downloadable documents, and HTML comments. Sensitive paths, document metadata with internal info, and developer comments with API endpoints are discovered.",
+      "stepTitle": "웹 콘텐츠 & 메타데이터 마이닝",
+      "stepTitleEn": "Web Content & Metadata Mining",
+      "feynman": "이것은 '건물의 쓰레기통 뒤지기'입니다. robots.txt는 '여기 들어오지 마세요' 표지판인데, 오히려 '여기에 뭔가 중요한 게 있다'고 알려줍니다. PDF 파일에는 보이지 않는 '도장'(메타데이터)이 있어서 누가 만들었는지, 어떤 컴퓨터에서 만들었는지 알 수 있습니다.",
+      "feynmanEn": "This is like dumpster diving at a building. robots.txt is a 'do not enter' sign that actually says 'there's something important here'. PDF files have invisible 'stamps' (metadata) revealing who created them and on which computer.",
+      "expert": "robots.txt의 Disallow 경로는 민감한 디렉토리의 로드맵을 제공합니다. PDF 메타데이터(ExifTool)에서 Creator, Producer, 파일 경로를 추출하고, HTML 소스의 주석에서 개발 중인 API 엔드포인트와 레거시 인증 설정을 발견합니다.",
+      "expertEn": "robots.txt Disallow paths provide a roadmap of sensitive directories. PDF metadata (ExifTool) reveals Creator, Producer, file paths, while HTML source comments expose in-development API endpoints and legacy auth configurations.",
+      "defTooltip": "🔍 웹 보안: 콘텐츠 마이닝 및 문서 메타데이터 추출 감지",
+      "defTooltipEn": "🔍 Web Security: Content mining and document metadata extraction detected",
+      "hackerLog": {
+        "title": "content_mine.log",
+        "lines": [
+          { "log": "robots.txt: /admin/, /internal/, /api/v1/debug/", "desc": "💡 민감 경로 5개 — 공격 대상 디렉토리 매핑" },
+          { "log": "PDF metadata: Creator=Kim Seongjin (IT Director)", "desc": "💡 IT Director 실명 노출 — 소셜 엔지니어링 타겟" },
+          { "log": "HTML comment: Legacy basic_auth on /api/v1/", "desc": "💡 레거시 기본 인증 — 크레덴셜 공격 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "robots.txt", "desc": "검색 엔진 크롤러에게 접근 금지 경로를 알려주는 파일 — 보안 도구가 아님" },
+        { "name": "Document Metadata", "desc": "문서 파일에 포함된 작성자, 소프트웨어, 파일 경로 등의 숨겨진 정보" }
+      ]
+    },
+    {
+      "cmd": "python3 blog_tech_analyzer.py --url 'https://blog.target-corp.com' --extract architecture,internal_names,endpoints",
+      "out": "[*] Analyzing tech blog at blog.target-corp.com...\n[*] 156 blog posts analyzed\n\n=== Architecture Insights ===\n\n[Post] \"Our Journey to Kubernetes\" (2025-08-15)\n  Author: Park Seonwoo (Senior DevOps)\n  Reveals:\n  - EKS cluster: prod-eks-apne2-01 (ap-northeast-2)\n  - Node pools: m5.xlarge (6 nodes), r5.2xlarge (3 nodes)\n  - Ingress: AWS ALB + nginx-ingress\n  - Service mesh: Istio 1.19\n\n[Post] \"Implementing Zero Trust\" (2025-11-20)\n  Author: Lee Eunji (Security Architect)\n  Reveals:\n  - Network segments: 10.0.0.0/8 internal\n  - Zero Trust vendor: Zscaler ZPA\n  - IdP: Okta + Azure AD federation\n  - PAM: CyberArk Privileged Access\n\n[Post] \"Database Migration to Aurora\" (2026-01-10)\n  Author: Choi Minsu (DBA Team Lead)\n  Reveals:\n  - Migration from MySQL 5.7 → Aurora PostgreSQL\n  - Database endpoint: prod-aurora.cluster-xxx.ap-northeast-2.rds.amazonaws.com\n  - Read replica: prod-aurora-reader.cluster-xxx...\n  - Backup schedule: Daily 03:00 KST to S3\n\n[+] 23 team member names extracted from blog posts",
+      "def": "[Content Security] Tech blog posts reveal detailed infrastructure architecture",
+      "defAction": "Source: Content Security Review\nTarget: blog.target-corp.com\nAction: Blog post review policy implemented, sensitive architecture details removed",
+      "desc": "기술 블로그를 분석하여 내부 아키텍처 정보를 추출합니다. Kubernetes 클러스터 이름, 네트워크 세그먼트, 데이터베이스 엔드포인트, 보안 아키텍처가 블로그 포스트에서 노출됩니다.",
+      "descEn": "Analyzing tech blog to extract internal architecture info. Kubernetes cluster names, network segments, database endpoints, and security architecture are exposed in blog posts.",
+      "stepTitle": "기술 블로그 인프라 정보 추출",
+      "stepTitleEn": "Tech Blog Infrastructure Intelligence Extraction",
+      "feynman": "기술 블로그는 '건축사가 자랑하는 건물 설계도'와 같습니다. '우리가 Kubernetes를 도입한 이야기'라는 글에 클러스터 이름, 서버 크기, 네트워크 구조가 그대로 적혀 있습니다. 공격자에게는 설계도를 무료로 나눠주는 것과 같습니다.",
+      "feynmanEn": "Tech blogs are like architects showing off building blueprints. A post titled 'Our Journey to Kubernetes' lists cluster names, server sizes, and network structure. For attackers, it's like receiving free blueprints.",
+      "expert": "기술 블로그는 가장 상세한 인프라 정보 소스입니다. EKS 클러스터명, Aurora 엔드포인트, Istio 서비스 메시 버전, CyberArk PAM 구성은 각각 독립적인 공격 벡터를 제공합니다. 23명의 팀원 이름은 소셜 엔지니어링 타겟 리스트가 됩니다.",
+      "expertEn": "Tech blogs are the most detailed infrastructure info source. EKS cluster names, Aurora endpoints, Istio service mesh versions, and CyberArk PAM config each provide independent attack vectors. 23 team member names become social engineering target lists.",
+      "defTooltip": "🔍 콘텐츠 보안: 기술 블로그에서 상세 인프라 아키텍처 노출",
+      "defTooltipEn": "🔍 Content Security: Tech blog posts reveal detailed infrastructure architecture",
+      "hackerLog": {
+        "title": "blog_analysis.log",
+        "lines": [
+          { "log": "EKS cluster: prod-eks-apne2-01 (Seoul region)", "desc": "💡 프로덕션 K8s 클러스터명과 리전 확인" },
+          { "log": "Aurora endpoint: prod-aurora.cluster-xxx.rds...", "desc": "💡 데이터베이스 엔드포인트 직접 노출" },
+          { "log": "23 team members identified from blog authors", "desc": "💡 블로그 작성자에서 직원 23명 식별" }
+        ]
+      },
+      "terms": [
+        { "name": "Infrastructure Disclosure", "desc": "기술 블로그, 발표, 문서를 통해 내부 인프라 정보가 의도치 않게 공개되는 것" },
+        { "name": "Attack Surface Expansion", "desc": "정보 노출로 인해 공격자가 접근할 수 있는 공격 표면이 확대되는 현상" }
+      ]
+    },
+    {
+      "cmd": "python3 website_recon_report.py --tech tech_stack.json --careers careers_intel.json --content content_mine.json --blog blog_analysis.json --output final_web_report.json",
+      "out": "╔══════════════════════════════════════════════════════════╗\n║   T1593.005 Victim-Owned Website Intelligence Report     ║\n╠══════════════════════════════════════════════════════════╣\n\n📊 Website Recon Summary:\n  Websites Analyzed: 4 (main, careers, blog, docs)\n  Technologies Found: 28\n  People Identified: 23 team members + 3 executives\n  Sensitive Paths: 5 (from robots.txt)\n\n🏗️ Infrastructure Map (from public website data):\n  ├─ Cloud: AWS ap-northeast-2 (Seoul)\n  │  ├─ Compute: EKS (prod-eks-apne2-01)\n  │  ├─ Database: Aurora PostgreSQL\n  │  ├─ CDN: Cloudflare\n  │  └─ Storage: S3 (backups daily 03:00)\n  ├─ Security Stack:\n  │  ├─ SIEM: Splunk Enterprise\n  │  ├─ EDR: CrowdStrike Falcon + Carbon Black\n  │  ├─ SSO: Okta + Azure AD\n  │  ├─ PAM: CyberArk\n  │  ├─ SOAR: Palo Alto XSOAR\n  │  └─ ZT: Zscaler ZPA\n  └─ Web: WordPress 6.4, nginx 1.18.0, React 18\n\n⚠️ OPSEC Gaps:\n  1. Tech blog reveals production infrastructure details\n  2. Job listings expose complete security tool inventory\n  3. PDF metadata contains internal usernames and paths\n  4. HTML comments reveal legacy auth and internal APIs\n  5. robots.txt maps sensitive directory structure\n\n╚══════════════════════════════════════════════════════════╝",
+      "def": "[CISO] Comprehensive website reconnaissance reveals extensive OPSEC gaps across all public web properties",
+      "defAction": "Source: CISO / Security Operations\nTarget: All public-facing websites\nAction: Content review policy, metadata stripping, blog review process, HR listing guidelines implemented",
+      "desc": "모든 웹사이트 정찰 결과를 종합하여 최종 보고서를 생성합니다. 기술 스택, 인프라 맵, 보안 스택, 인력 정보, OPSEC 갭을 정리합니다.",
+      "descEn": "Consolidating all website reconnaissance results into final report. Tech stack, infrastructure map, security stack, personnel info, and OPSEC gaps are documented.",
+      "stepTitle": "웹사이트 정찰 종합 보고서",
+      "stepTitleEn": "Website Recon Final Report",
+      "feynman": "이 보고서는 '공개 정보만으로 그린 회사 설계도'입니다. 해킹 한 번 없이, 웹사이트만 꼼꼼히 읽어도 클라우드 인프라, 보안 도구, 직원 이름, 데이터베이스 주소까지 모두 파악할 수 있었습니다. 이것이 OPSEC의 중요성입니다.",
+      "feynmanEn": "This report is a 'company blueprint drawn from public info only'. Without a single hack, just reading websites carefully revealed cloud infrastructure, security tools, employee names, and database addresses. This shows why OPSEC matters.",
+      "expert": "피해자 소유 웹사이트 정찰은 zero-interaction 정찰의 정점입니다. 4개 웹 프로퍼티 분석만으로 AWS 인프라 맵, 보안 스택 전체 목록, 23명의 타겟 인력, 레거시 인증 취약점을 확보했습니다. 콘텐츠 보안 정책과 OPSEC 교육이 필수적입니다.",
+      "expertEn": "Victim-owned website recon represents the pinnacle of zero-interaction reconnaissance. Analyzing just 4 web properties yielded AWS infrastructure map, complete security stack inventory, 23 target personnel, and legacy auth vulnerabilities. Content security policies and OPSEC training are essential.",
+      "defTooltip": "🔍 CISO: 모든 공개 웹 자산에서 광범위한 OPSEC 갭 발견",
+      "defTooltipEn": "🔍 CISO: Extensive OPSEC gaps across all public web properties",
+      "hackerLog": {
+        "title": "web_recon.log",
+        "lines": [
+          { "log": "28 technologies, 23 people, 5 sensitive paths", "desc": "💡 기술 28개, 인력 23명, 민감 경로 5개 식별 완료" },
+          { "log": "Complete security stack mapped from job listings", "desc": "💡 채용 공고에서 전체 보안 스택 역공학 성공" },
+          { "log": "Zero-interaction recon: no alerts triggered", "desc": "💡 능동적 스캐닝 없이 정찰 완료 — 탐지 불가" }
+        ]
+      },
+      "terms": [
+        { "name": "Zero-Interaction Recon", "desc": "대상 시스템에 직접 접촉하지 않고 공개 정보만으로 수행하는 정찰 — 탐지가 불가능" },
+        { "name": "Content Security Policy", "desc": "기술 블로그, 채용 공고 등에서 민감 정보 노출을 방지하기 위한 조직 정책" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "wappalyzer + whatweb", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "career_scraper.py", "depth": 0, "alert": false, "minStep": 1 },
+    { "name": "web_content_miner.py", "depth": 0, "alert": false, "minStep": 2 },
+    { "name": "  └─ metadata_extractor", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "blog_tech_analyzer.py", "depth": 0, "alert": true, "minStep": 3 },
+    { "name": "  └─ infra_disclosure_scanner", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "website_recon_report.py", "depth": 0, "alert": false, "minStep": 4 }
+  ]
+}

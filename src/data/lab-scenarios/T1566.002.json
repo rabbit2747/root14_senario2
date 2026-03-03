@@ -1,0 +1,152 @@
+{
+  "id": "T1566.002",
+  "title": "Spearphishing Link 시뮬레이션",
+  "titleEn": "Spearphishing Link Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 정찰 & 준비", "labelEn": "🔍 Recon & Prep", "steps": [0] },
+    { "label": "📧 이메일 전송", "labelEn": "📧 Email Delivery", "steps": [1] },
+    { "label": "🎣 자격증명 탈취", "labelEn": "🎣 Credential Harvest", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(GoPhish)", "x": 50, "y": 80 },
+    { "id": "email", "label": "Phishing\nEmail", "x": 180, "y": 30 },
+    { "id": "gateway", "label": "Email\nGateway", "x": 180, "y": 130 },
+    { "id": "victim", "label": "Victim\nBrowser", "x": 330, "y": 80 },
+    { "id": "harvest", "label": "Credential\nHarvest", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "email", "minStep": 1 },
+    { "from": "email", "to": "gateway", "minStep": 1 },
+    { "from": "gateway", "to": "victim", "minStep": 1 },
+    { "from": "victim", "to": "harvest", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "Email Client", "icon": "📧" },
+    { "name": "Web Browser", "icon": "🌐" },
+    { "name": "GoPhish", "icon": "🎣" },
+    { "name": "Evilginx2", "icon": "😈" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# OSINT 정찰: 표적 정보 수집\n# LinkedIn, 회사 웹사이트, 소셜 미디어 분석\ntheHarvester -d corp.local -b linkedin,google -l 200\n\n# 유사 도메인 등록\nwhois c0rp-security.com\n# → 등록일: 2일 전, Registrar: NameCheap\n# → SSL: Let's Encrypt 자동 발급\n\n# GoPhish 피싱 인프라 구축\ngophish --admin_listen 0.0.0.0:3333 --phish_listen 0.0.0.0:443",
+      "out": "[OSINT 결과]\n표적: 김지수 과장 (jsmith@corp.local)\n- 직위: IT 보안팀 과장\n- LinkedIn: 최근 CISSP 취득 게시물\n- 업무: 보안 정책 관리, 패치 배포\n- 상사: 이영호 부장 (ylee@corp.local)\n\n[유사 도메인]\nc0rp-security.com (o→0)\ncorp-securlty.com (i→l)\ncorp-security.co (TLD 변경)\n→ c0rp-security.com 등록 완료\n→ Let's Encrypt SSL 발급 (HTTPS 표시)\n\n[GoPhish 준비]\n- Landing Page: corp 로그인 페이지 클론\n- Email Template: IT 보안팀 비밀번호 변경 안내\n- Tracking: 이메일 열람, 링크 클릭, 자격증명 입력 추적\n- Campaign: 1명 표적 (김지수 과장)",
+      "def": "[Threat Intel] New domain c0rp-security.com registered — typosquatting of corp-security.com",
+      "defAction": "Tool: theHarvester + GoPhish\nTarget: jsmith@corp.local (IT Security Manager)\nOSINT: LinkedIn, Google (CISSP, job title, manager)\nDomain: c0rp-security.com (registered 2 days ago)\nSSL: Let's Encrypt (free, auto-issued)\nInfra: GoPhish landing page + email template\nRisk Level: Pre-attack reconnaissance phase\nAction: Monitor typosquat domains, brand protection alerts",
+      "desc": "OSINT으로 표적의 이름, 직위, 업무 정보를 수집하고, 유사 도메인(c0rp)을 등록하여 피싱 인프라를 구축합니다. GoPhish로 자격증명 탈취 페이지와 이메일 템플릿을 준비합니다.",
+      "descEn": "Collect target's name, title, and job info via OSINT, register a typosquat domain (c0rp), and build phishing infrastructure. GoPhish prepares credential harvesting pages and email templates.",
+      "stepTitle": "OSINT 정찰 + 유사 도메인 + GoPhish 인프라 구축",
+      "stepTitleEn": "OSINT Recon + Typosquat Domain + GoPhish Infrastructure",
+      "feynman": "낚시꾼(공격자)이 특정 물고기(표적)의 취향을 조사합니다: 무슨 먹이를 좋아하는지(업무), 어디에 사는지(회사). 그리고 진짜와 거의 같은 낚시터 간판(유사 도메인)을 만들어 미끼를 준비합니다.",
+      "feynmanEn": "The angler (attacker) researches a specific fish's (target's) preferences: what bait they like (job role), where they live (company). Then creates a fishing spot sign (typosquat domain) nearly identical to the real one.",
+      "expert": "theHarvester는 검색엔진과 API를 사용하여 조직의 이메일, 호스트, 직원 정보를 수집합니다. 유사 도메인(typosquatting)은 IDN 호모그래프(unicode punycode), 비트스쿼팅(bit-squatting), 레벨스쿼팅(sub.corp-security.evil.com) 등을 포함합니다. Let's Encrypt는 DV(Domain Validation) 인증서를 무료로 자동 발급하므로 피싱 사이트도 HTTPS 잠금 아이콘을 표시할 수 있습니다. 방어를 위해 DNSTwist 같은 도구로 유사 도메인을 사전에 모니터링합니다.",
+      "expertEn": "theHarvester uses search engines and APIs to collect organizational emails and employee info. Typosquatting includes IDN homographs, bitsquatting, and levelsquatting. Let's Encrypt auto-issues free DV certificates, so phishing sites display HTTPS padlock. Defense: DNSTwist monitors typosquat domains proactively.",
+      "defTooltip": "🔐 유사 도메인 등록! OSINT 표적 정찰 완료!",
+      "defTooltipEn": "🔐 Typosquat domain registered! OSINT target recon complete!",
+      "hackerLog": { "title": "recon.log", "lines": ["[08:00:00] theHarvester OSINT 수집", "[08:05:00] 표적: jsmith@corp.local", "[08:10:00] c0rp-security.com 도메인 등록", "[08:15:00] GoPhish 인프라 구축 완료"] },
+      "terms": [
+        { "term": "OSINT", "def": "Open Source Intelligence, 공개 출처 정보 수집 활동" },
+        { "term": "Typosquatting", "def": "원본과 유사한 도메인을 등록하여 사용자를 속이는 기법" }
+      ]
+    },
+    {
+      "cmd": "# GoPhish 이메일 전송\n# SMTP: smtp.evil-mail.com\n\nFrom: it-support@c0rp-security.com\nTo: jsmith@corp.local\nSubject: [긴급] 비밀번호 만료 안내 - 24시간 내 변경 필수\nX-Mailer: Microsoft Outlook 16.0\nReply-To: support@c0rp-security.com\n\n안녕하세요 김지수 과장님,\n\n최근 보안 정책 업데이트에 따라 귀하의 비밀번호가\n24시간 내에 만료됩니다.\n\n아래 링크를 클릭하여 비밀번호를 재설정해 주세요:\nhttps://corp-security-update.c0rp-security.com/reset?uid=jsmith\n\n※ 이 링크는 24시간 동안만 유효합니다.\n\n감사합니다.\nIT 보안팀 이영호 부장",
+      "out": "[이메일 전송 성공]\nStatus: Delivered\nTimestamp: 2026-03-01 09:30:00\nTracking Pixel: 로드됨 (이메일 열람 확인)\n\n[GoPhish 추적]\n09:30:00 — 이메일 전송\n09:32:15 — 이메일 열람 (추적 픽셀 로드)\n09:33:02 — 링크 클릭! (/reset?uid=jsmith)\n\n[사회공학 요소]\n1. 긴급성: '24시간 내 만료' → 즉각 행동 유도\n2. 권위: '이영호 부장' (상사 이름 사용)\n3. 개인화: '김지수 과장님' (이름+직위)\n4. 합리성: '보안 정책 업데이트' (IT 업무 관련)\n5. 신뢰: HTTPS + 유사 도메인 + X-Mailer",
+      "def": "[Email Gateway] Suspicious email from c0rp-security.com — SPF FAIL, new domain (2 days old)",
+      "defAction": "Tool: GoPhish SMTP delivery\nFrom: c0rp-security.com (typosquat)\nTarget: jsmith@corp.local\nSocial Engineering: Urgency, authority, personalization\nTracking: Email opened (09:32), Link clicked (09:33)\nSPF: FAIL (c0rp-security.com not authorized)\nDomain Age: 2 days\nRisk Level: Critical\nAction: Block domain, warn user, investigate click",
+      "desc": "표적의 이름, 직위, 상사 이름을 포함한 맞춤형 이메일을 전송합니다. 긴급성(24시간), 권위(부장), 개인화(과장님)로 클릭을 유도하며, GoPhish가 열람과 클릭을 추적합니다.",
+      "descEn": "Send a customized email including target's name, title, and manager's name. Urgency (24 hours), authority (manager), and personalization (name+title) drive clicks, with GoPhish tracking opens and clicks.",
+      "stepTitle": "맞춤형 피싱 이메일 전송 + 사회공학 요소",
+      "stepTitleEn": "Send Customized Phishing Email with Social Engineering",
+      "feynman": "미끼 편지를 보냅니다. 편지에는 표적의 이름('김 과장님'), 상사 이름('이 부장'), 업무 관련 내용('보안 정책')을 넣어 '진짜 회사 편지'처럼 만듭니다. '24시간 내 만료!'라는 급한 내용으로 생각할 시간을 주지 않습니다.",
+      "feynmanEn": "Send a bait letter with the target's name ('Manager Kim'), boss's name ('Director Lee'), and work-related content ('security policy'). '24-hour expiry!' creates urgency, leaving no time to think.",
+      "expert": "GoPhish는 오픈소스 피싱 시뮬레이션 프레임워크로, SMTP 릴레이, 추적 픽셀(1x1 투명 이미지), URL 추적을 지원합니다. X-Mailer 헤더를 Microsoft Outlook으로 위장합니다. SPF(Sender Policy Framework)가 FAIL이면 수신측 메일 서버가 거부할 수 있지만, 많은 조직이 soft fail(-all 대신 ~all)을 사용하여 통과시킵니다. DKIM(DomainKeys Identified Mail) 서명이 없으면 이메일 위조 가능성이 높습니다.",
+      "expertEn": "GoPhish is an open-source phishing simulation framework supporting SMTP relay, tracking pixels, and URL tracking. X-Mailer spoofs Microsoft Outlook. SPF FAIL may be rejected, but many organizations use soft fail (~all). Missing DKIM signatures indicate high email forgery probability.",
+      "defTooltip": "🔐 맞춤형 피싱 이메일 전송! 3분 내 링크 클릭!",
+      "defTooltipEn": "🔐 Customized phishing email sent! Link clicked within 3 minutes!",
+      "hackerLog": { "title": "phishing_send.log", "lines": ["[09:30:00] 피싱 이메일 전송", "[09:32:15] 이메일 열람 확인", "[09:33:02] 링크 클릭!", "[09:33:05] GoPhish 추적 기록"] },
+      "terms": [
+        { "term": "GoPhish", "def": "오픈소스 피싱 시뮬레이션 프레임워크, 캠페인 추적 기능 포함" },
+        { "term": "SPF", "def": "Sender Policy Framework, 이메일 발신 서버의 정당성을 검증하는 DNS 기반 프로토콜" }
+      ]
+    },
+    {
+      "cmd": "# 피해자가 링크를 클릭 → 가짜 로그인 페이지\n# GoPhish Landing Page: corp 로그인 페이지 클론\n\n# 피해자 입력:\n# Username: jsmith\n# Password: Summer2026!\n\n# GoPhish 대시보드 확인\ncurl -s https://gophish-admin:3333/api/campaigns/1/results -H 'Authorization: bearer TOKEN'",
+      "out": "{\n  \"id\": 1,\n  \"name\": \"Corp Password Reset Campaign\",\n  \"results\": [\n    {\n      \"email\": \"jsmith@corp.local\",\n      \"status\": \"Submitted Data\",\n      \"ip\": \"10.0.15.42\",\n      \"latitude\": 37.5665,\n      \"longitude\": 126.9780,\n      \"send_date\": \"2026-03-01T09:30:00Z\",\n      \"open_date\": \"2026-03-01T09:32:15Z\",\n      \"click_date\": \"2026-03-01T09:33:02Z\",\n      \"submit_date\": \"2026-03-01T09:34:18Z\",\n      \"reported\": false,\n      \"submitted_data\": {\n        \"username\": \"jsmith\",\n        \"password\": \"[CAPTURED]\"\n      }\n    }\n  ]\n}\n\n[공격 결과]\n- 자격증명 탈취 성공\n- 이메일 열람 → 클릭 → 입력: 4분 18초\n- 리다이렉트: 실제 corp 로그인 페이지로 이동\n- 피해자: 정상 로그인으로 착각",
+      "def": "[SIEM] User jsmith submitted credentials to external domain c0rp-security.com — credential phishing confirmed",
+      "defAction": "Tool: GoPhish credential harvesting\nVictim: jsmith@corp.local\nCredentials: username + password captured\nTime to Submit: 4 minutes 18 seconds\nPost-Submit: Redirected to legitimate login page\nVictim Awareness: None (thought it was normal)\nRisk Level: Critical\nAction: Reset jsmith password immediately, revoke sessions, check for unauthorized access",
+      "desc": "피해자가 가짜 로그인 페이지에 자격증명을 입력하면 GoPhish가 수집합니다. 입력 후 실제 로그인 페이지로 리다이렉트하여 피해자가 정상 프로세스로 인식합니다.",
+      "descEn": "When the victim enters credentials on the fake login page, GoPhish captures them. After submission, redirect to the real login page so the victim perceives a normal process.",
+      "stepTitle": "자격증명 탈취 및 투명한 리다이렉트",
+      "stepTitleEn": "Credential Harvesting with Transparent Redirect",
+      "feynman": "가짜 낚시터 입구(로그인 페이지)에서 물고기(피해자)가 출입증(비밀번호)을 보여줍니다. 낚시꾼은 출입증을 복사하고, 물고기를 진짜 낚시터 입구로 안내합니다. 물고기는 자기 출입증이 복사된 줄 모르고 정상적으로 들어갑니다.",
+      "feynmanEn": "At the fake fishing spot entrance (login page), the fish (victim) shows their pass (password). The angler copies the pass and guides the fish to the real entrance. The fish enters normally, unaware their pass was copied.",
+      "expert": "GoPhish의 Landing Page는 원본 사이트의 HTML/CSS를 클론하여 시각적으로 동일하게 만듭니다. 자격증명 제출 후 302 리다이렉트로 실제 사이트로 보내면, 피해자는 '세션 만료로 재로그인'으로 인식합니다. 고급 공격인 Evilginx2는 리버스 프록시로 실시간 MFA 토큰까지 탈취합니다(AitM - Adversary-in-the-Middle). FIDO2/WebAuthn 기반 MFA만이 AitM 공격에 저항력을 가집니다.",
+      "expertEn": "GoPhish Landing Pages clone original HTML/CSS for visual identity. 302 redirect after credential submission makes victims think it's a 'session expired' re-login. Advanced Evilginx2 uses reverse proxy to capture real-time MFA tokens (AitM). Only FIDO2/WebAuthn MFA resists AitM attacks.",
+      "defTooltip": "🔐 자격증명 탈취 완료! 4분 18초 소요!",
+      "defTooltipEn": "🔐 Credentials harvested! 4 minutes 18 seconds!",
+      "hackerLog": { "title": "credential_harvest.log", "lines": ["[09:33:02] 피해자 링크 클릭", "[09:33:05] 가짜 로그인 페이지 로드", "[09:34:18] 자격증명 입력 (4분 18초)", "[09:34:20] 실제 사이트로 리다이렉트"] },
+      "terms": [
+        { "term": "AitM", "def": "Adversary-in-the-Middle, 리버스 프록시로 실시간 인증 토큰을 탈취하는 공격" },
+        { "term": "FIDO2/WebAuthn", "def": "피싱 저항성이 있는 하드웨어 기반 인증 표준 (출처 바인딩)" }
+      ]
+    },
+    {
+      "cmd": "# 이메일 헤더 분석으로 피싱 탐지\n# SPF/DKIM/DMARC 검증\nGet-MessageTrackingLog -Sender 'it-support@c0rp-security.com' -Start '2026-03-01' |\nSelect-Object Timestamp, Sender, Recipients, MessageSubject, Source, EventId\n\n# URL 분석\ncurl -sI https://corp-security-update.c0rp-security.com/reset | head -10\nwhois c0rp-security.com | grep -E 'Creation|Registrar|Name Server'",
+      "out": "[이메일 추적]\nTimestamp    : 2026-03-01 09:30:00\nSender      : it-support@c0rp-security.com\nRecipients  : jsmith@corp.local\nSubject     : [긴급] 비밀번호 만료 안내\nSPF Result  : FAIL ⚠️\nDKIM Result : NONE ⚠️\nDMARC Result: FAIL ⚠️\nSCL (Spam)  : 5 (Medium risk)\n\n[URL/도메인 분석]\nDomain: c0rp-security.com\nCreation Date: 2026-02-27 (3일 전) ⚠️\nRegistrar: NameCheap Inc.\nName Server: ns1.evil-hosting.com ⚠️\nSSL: Let's Encrypt (자동 발급, DV only)\nIP: 198.51.100.77 (AS12345 - 의심 호스팅)\n\n[탐지 지표 (IoC)]\n- 유사 도메인: c0rp ≠ corp\n- SPF/DKIM/DMARC: 모두 실패\n- 도메인 나이: 3일 (신규)\n- Reply-To 불일치\n- 긴급성 키워드: '24시간', '긴급', '만료'",
+      "def": "[SIEM] Phishing IoCs confirmed — typosquat domain, SPF/DKIM/DMARC FAIL, domain age 3 days",
+      "defAction": "Tool: Email header analysis + WHOIS + URL analysis\nSPF: FAIL (unauthorized sender)\nDKIM: NONE (no signature)\nDMARC: FAIL (no policy enforcement)\nDomain Age: 3 days (brand new)\nRegistrar: NameCheap (commonly abused)\nSSL: Let's Encrypt DV (no organization validation)\nIP: Suspicious hosting provider\nIoCs: Typosquat, urgency keywords, Reply-To mismatch\nRisk Level: Critical\nAction: Block domain, reset credentials, phishing awareness alert",
+      "desc": "이메일 헤더의 SPF/DKIM/DMARC 결과를 분석하고, WHOIS로 도메인 나이와 등록 정보를 확인합니다. 도메인 3일 전 등록, SPF/DKIM/DMARC 모두 실패로 피싱을 확정합니다.",
+      "descEn": "Analyze email header SPF/DKIM/DMARC results, check domain age and registration via WHOIS. Domain registered 3 days ago with SPF/DKIM/DMARC all failing confirms phishing.",
+      "stepTitle": "이메일 헤더 + WHOIS + URL 분석으로 피싱 확정",
+      "stepTitleEn": "Confirm Phishing via Email Header + WHOIS + URL Analysis",
+      "feynman": "편지(이메일)의 우표(SPF), 봉인(DKIM), 인증서(DMARC)를 확인합니다. 모두 가짜입니다! 발신 주소의 사무실(도메인)을 방문하니 3일 전에 문을 연 임시 사무실이었습니다. 진짜 회사와 이름이 비슷하지만 글자가 다릅니다(o→0).",
+      "feynmanEn": "Check the letter's stamp (SPF), seal (DKIM), and certificate (DMARC). All fake! Visiting the sender's office (domain) reveals a temporary office opened 3 days ago. The name looks similar to the real company but a letter is different (o→0).",
+      "expert": "SPF(Sender Policy Framework)는 DNS TXT 레코드에 정의된 IP만 메일 발송을 허용합니다. DKIM(DomainKeys Identified Mail)은 이메일 헤더와 본문의 암호화 서명을 검증합니다. DMARC(Domain-based Message Authentication, Reporting and Conformance)는 SPF와 DKIM 결과를 조합하여 정책(none/quarantine/reject)을 적용합니다. p=reject 정책을 설정하면 SPF/DKIM 실패 시 이메일을 거부합니다. 도메인 나이가 30일 미만인 신규 도메인에서 온 이메일은 높은 위험으로 분류합니다.",
+      "expertEn": "SPF allows email only from IPs defined in DNS TXT records. DKIM verifies cryptographic signatures on headers and body. DMARC combines SPF/DKIM results to apply policies (none/quarantine/reject). Setting p=reject blocks emails failing SPF/DKIM. Emails from domains less than 30 days old are classified as high risk.",
+      "defTooltip": "🔐 SPF/DKIM/DMARC 모두 FAIL! 3일 된 신규 도메인!",
+      "defTooltipEn": "🔐 SPF/DKIM/DMARC all FAIL! 3-day old new domain!",
+      "hackerLog": { "title": "phishing_analysis.log", "lines": ["[09:40:00] 이메일 헤더 분석 시작", "[09:40:02] SPF FAIL, DKIM NONE, DMARC FAIL", "[09:40:04] WHOIS: 3일 전 등록", "[09:40:06] 피싱 IoC 확정"] },
+      "terms": [
+        { "term": "DMARC", "def": "SPF+DKIM 기반 이메일 인증 정책, p=reject로 위조 이메일 거부" },
+        { "term": "IoC", "def": "Indicator of Compromise, 침해 지표 (IP, 도메인, 해시 등)" }
+      ]
+    },
+    {
+      "cmd": "# 종합 피싱 방어 체계\n# 1. DMARC p=reject 정책 적용\n# 2. Safe Links (URL 실시간 검사)\n# 3. 피싱 시뮬레이션 프로그램\n# 4. MFA (FIDO2 권장)\n\n# DMARC DNS 레코드\n# _dmarc.corp.local TXT \"v=DMARC1; p=reject; rua=mailto:dmarc@corp.local; pct=100\"\n\n# 이메일 게이트웨이 정책\nSet-TransportRule -Name 'Block New Domains' -FromAddressMatchesPatterns '\\.' -SenderDomainIs $null -SetSCL 9\n\n# MFA 강제 적용\nSet-MsolUser -UserPrincipalName jsmith@corp.local -StrongAuthenticationRequirements $mfa",
+      "out": "[DMARC 정책]\n✅ p=reject: SPF/DKIM 실패 이메일 거부\n✅ rua: DMARC 리포트 수신 (공격 모니터링)\n✅ pct=100: 100% 이메일에 적용\n\n[이메일 게이트웨이]\n✅ 신규 도메인 (< 30일) 차단\n✅ Safe Links: URL 클릭 시 실시간 검사\n✅ 긴급성 키워드 + 외부 링크 = 경고 배너\n✅ 이메일 인증 실패 시 [EXTERNAL] 태그\n\n[MFA]\n✅ 전사 MFA 적용\n✅ FIDO2 보안 키 배포 (피싱 저항)\n✅ 레거시 인증 차단 (IMAP/POP/SMTP Basic)\n\n[피싱 시뮬레이션]\n✅ 분기별 피싱 테스트 (GoPhish)\n✅ 클릭률 목표: < 5%\n✅ 신고 버튼: Outlook 피싱 리포트 애드인\n\n[종합 효과]\n- DMARC: 이메일 스푸핑 99% 차단\n- MFA: 자격증명 탈취 후에도 접근 차단\n- FIDO2: AitM 공격에도 저항\n- 교육: 사용자 인식 향상",
+      "def": "[SIEM] Anti-phishing defense complete — DMARC reject, Safe Links, FIDO2 MFA, quarterly simulation",
+      "defAction": "Tool: DMARC + Safe Links + FIDO2 + GoPhish\nDMARC: p=reject (block spoofed emails)\nSafe Links: Real-time URL scanning on click\nMFA: FIDO2 hardware keys (phishing resistant)\nLegacy Auth: Blocked (IMAP/POP/SMTP)\nSimulation: Quarterly phishing tests\nClick Rate Target: < 5%\nReport Button: Outlook phishing add-in\nRisk Level: Low (with full implementation)\nAction: Maintain DMARC monitoring, continue quarterly testing",
+      "desc": "DMARC p=reject로 이메일 스푸핑을 차단하고, FIDO2 기반 MFA로 자격증명 탈취 후에도 접근을 방지합니다. 분기별 피싱 시뮬레이션으로 직원 보안 인식을 향상시킵니다.",
+      "descEn": "DMARC p=reject blocks email spoofing, FIDO2-based MFA prevents access even after credential theft. Quarterly phishing simulations improve employee security awareness.",
+      "stepTitle": "DMARC + FIDO2 MFA + 피싱 시뮬레이션 종합 방어",
+      "stepTitleEn": "Comprehensive Defense: DMARC + FIDO2 MFA + Phishing Simulation",
+      "feynman": "4겹 그물을 칩니다: 1) 가짜 우체부(스푸핑) 차단(DMARC), 2) 편지의 링크를 클릭할 때 실시간 검사(Safe Links), 3) 출입증이 도난당해도 열쇠(MFA)가 따로 있어 안전, 특히 FIDO2 열쇠는 가짜 문(피싱 사이트)에서 작동하지 않음, 4) 정기적으로 가짜 미끼를 보내 직원들의 반응을 훈련.",
+      "feynmanEn": "Cast a 4-layer net: 1) Block fake mailmen (DMARC), 2) Real-time inspection when clicking links (Safe Links), 3) Even if the pass is stolen, a separate key (MFA) keeps things safe — FIDO2 keys don't work at fake doors (phishing sites), 4) Regularly send fake bait to train employees.",
+      "expert": "FIDO2/WebAuthn은 'origin binding'을 수행합니다: 인증 시 브라우저가 현재 URL의 도메인을 cryptographic challenge에 포함합니다. 피싱 사이트(c0rp-security.com)에서 인증하면 origin이 다르므로 서버(corp.local)가 검증에 실패합니다. Evilginx2 같은 AitM 프록시도 FIDO2를 우회할 수 없습니다. Conditional Access Policy로 레거시 인증(IMAP/POP3/SMTP Basic Auth)을 차단하고, FIDO2만 허용하면 피싱에 의한 계정 탈취를 거의 완벽하게 방어할 수 있습니다.",
+      "expertEn": "FIDO2/WebAuthn performs 'origin binding': the browser includes the current URL domain in the cryptographic challenge. Authentication from a phishing site (c0rp-security.com) fails server verification due to different origin. Even Evilginx2 AitM proxies cannot bypass FIDO2. Blocking legacy auth and requiring FIDO2 via Conditional Access nearly perfectly defends against phishing account takeover.",
+      "defTooltip": "🔐 DMARC+FIDO2+Safe Links 피싱 방어 완성!",
+      "defTooltipEn": "🔐 DMARC+FIDO2+Safe Links anti-phishing complete!",
+      "hackerLog": { "title": "defense_deploy.log", "lines": ["[10:00:00] DMARC p=reject 적용", "[10:00:02] Safe Links 활성화", "[10:00:04] FIDO2 보안 키 배포", "[10:00:06] 피싱 시뮬레이션 프로그램 시작"] },
+      "terms": [
+        { "term": "Origin Binding", "def": "FIDO2 인증 시 도메인을 검증하여 피싱 사이트에서의 인증을 자동 거부" },
+        { "term": "Conditional Access", "def": "Azure AD의 조건부 접근 정책, 특정 조건에 따라 인증 방법을 제한" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "outlook.exe",
+    "pid": 3000,
+    "children": [
+      {
+        "name": "msedge.exe (phishing link)",
+        "pid": 3100,
+        "children": [
+          { "name": "msedge.exe (renderer)", "pid": 3110, "children": [] }
+        ]
+      }
+    ]
+  }
+}

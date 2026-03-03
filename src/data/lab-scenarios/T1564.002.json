@@ -1,0 +1,158 @@
+{
+  "id": "T1564.002",
+  "title": "Hidden Users 시뮬레이션",
+  "titleEn": "Hidden Users Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "👤 숨겨진 계정 생성", "labelEn": "👤 Create Hidden Account", "steps": [0] },
+    { "label": "🔑 권한 부여 & 숨기기", "labelEn": "🔑 Grant Privileges & Hide", "steps": [1] },
+    { "label": "🍎 macOS/Linux", "labelEn": "🍎 macOS/Linux", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Admin)", "x": 50, "y": 80 },
+    { "id": "sam", "label": "SAM\nDatabase", "x": 200, "y": 30 },
+    { "id": "registry", "label": "Registry\nSpecialAccounts", "x": 200, "y": 130 },
+    { "id": "hidden", "label": "Hidden\nUser ($)", "x": 350, "y": 80 },
+    { "id": "access", "label": "Persistent\nAccess", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "sam", "minStep": 0 },
+    { "from": "attacker", "to": "registry", "minStep": 1 },
+    { "from": "sam", "to": "hidden", "minStep": 0 },
+    { "from": "registry", "to": "hidden", "minStep": 1 },
+    { "from": "hidden", "to": "access", "minStep": 1 }
+  ],
+  "desktopIcons": [
+    { "name": "cmd (Admin)", "icon": "💻" },
+    { "name": "Registry Editor", "icon": "📋" },
+    { "name": "User Manager", "icon": "👥" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "PowerShell", "icon": "⚡" }
+  ],
+  "steps": [
+    {
+      "cmd": "# $ 접미사 숨겨진 관리자 계정 생성\nnet user admin$ P@ssw0rd123! /add /comment:\"System Service Account\"\nnet user admin$",
+      "out": "The command completed successfully.\n\nUser name                    admin$\nFull Name\nComment                      System Service Account\nUser's comment\nCountry/region code          000 (System Default)\nAccount active               Yes\nAccount expires              Never\n\nPassword last set            3/1/2026 10:00:00 AM\nPassword expires             Never\nPassword changeable          3/1/2026 10:00:00 AM\nPassword required            Yes\nUser may change password     Yes\n\nWorkstations allowed         All\nLogon script\nUser profile\nHome directory\nLast logon                   Never\n\nLogon hours allowed          All\n\nLocal Group Memberships      *Users\nGlobal Group memberships     *None\n\n[분석]\n- admin$ 계정 생성 성공\n- $ 접미사: net user 목록에서 숨겨짐\n- Comment: 'System Service Account'로 위장\n- Event ID 4720 (계정 생성)이 보안 로그에 기록됨",
+      "def": "[SIEM] Event ID 4720: User account 'admin$' created — dollar sign suffix detected",
+      "defAction": "Tool: net user /add\nAccount: admin$ ($ suffix = hidden from net user list)\nPassword: Set (complex)\nComment: System Service Account (disguise)\nStatus: Active, Never expires\nEvent ID: 4720 (User Account Created)\nRisk Level: High\nAction: Investigate account creation, check for unauthorized admin access",
+      "desc": "$ 접미사를 가진 계정(admin$)은 net user 명령으로 조회할 때 목록에 표시되지 않습니다. SAM 데이터베이스에서 $ 접미사 계정을 특별하게 처리하기 때문입니다.",
+      "descEn": "Accounts with $ suffix (admin$) are hidden from net user command listings. The SAM database treats $ suffix accounts specially, excluding them from standard enumeration.",
+      "stepTitle": "$ 접미사로 숨겨진 사용자 계정 생성",
+      "stepTitleEn": "Create Hidden User Account with $ Suffix",
+      "feynman": "건물(시스템)에 출입증을 만들되, 이름 끝에 특수 표시($)를 붙입니다. 안내 데스크(net user)에서 명부를 보여줄 때 이 표시가 있는 사람은 건너뜁니다. 출입증은 유효하지만 명부에 이름이 없는 '투명 인간'이 됩니다.",
+      "feynmanEn": "Create a building pass with a special mark ($) at the end of the name. The front desk (net user) skips people with this mark when showing the directory. The pass is valid but the person becomes 'invisible' in the directory.",
+      "expert": "Windows SAM(Security Account Manager)은 $ 접미사를 가진 계정을 머신 계정(컴퓨터 계정)과 유사하게 처리합니다. net user 명령은 내부적으로 NetUserEnum API(FILTER_NORMAL_ACCOUNT)를 호출하는데, $ 접미사 계정은 기본 필터에서 제외됩니다. 그러나 WMIC useraccount list brief나 Get-LocalUser PowerShell cmdlet은 모든 계정을 표시합니다. Event ID 4720(A user account was created)은 $ 접미사와 무관하게 항상 기록됩니다.",
+      "expertEn": "Windows SAM treats $ suffix accounts similarly to machine accounts. net user calls NetUserEnum API (FILTER_NORMAL_ACCOUNT), which excludes $ accounts from default filtering. However, WMIC and Get-LocalUser show all accounts. Event ID 4720 is always logged regardless of $ suffix.",
+      "defTooltip": "🔐 admin$ 계정 생성! net user에서 숨겨짐!",
+      "defTooltipEn": "🔐 admin$ account created! Hidden from net user!",
+      "hackerLog": { "title": "hidden_user.log", "lines": ["[10:00:00] admin$ 계정 생성", "[10:00:01] Comment: System Service Account", "[10:00:02] Event ID 4720 기록", "[10:00:03] net user 목록에서 숨겨짐"] },
+      "terms": [
+        { "term": "SAM", "def": "Security Account Manager, Windows 로컬 계정 정보를 저장하는 데이터베이스" },
+        { "term": "$ 접미사", "def": "SAM에서 특별하게 처리되어 기본 열거에서 제외되는 계정 이름 패턴" }
+      ]
+    },
+    {
+      "cmd": "# 관리자 그룹에 추가 + 로그인 화면에서 숨기기\nnet localgroup administrators admin$ /add\n\n# 레지스트리로 로그인 화면에서 완전히 숨기기\nreg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\UserList\" /v admin$ /t REG_DWORD /d 0 /f\n\n# RDP 허용 (Remote Desktop Users)\nnet localgroup \"Remote Desktop Users\" admin$ /add\n\n# 확인\nnet localgroup administrators\nreg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\UserList\"",
+      "out": "The command completed successfully.\nThe command completed successfully.\nThe command completed successfully.\n\nAlias name     administrators\nMembers\n-------------------------------\nadmin$\nAdministrator\njsmith\nThe command completed successfully.\n\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\UserList\n    admin$    REG_DWORD    0x0\n\n[분석]\n- admin$: Administrators + Remote Desktop Users 그룹 소속\n- SpecialAccounts\\UserList: admin$ = 0 (로그인 화면 숨김)\n- 로그인 화면, 설정 > 사용자, net user에서 모두 숨겨짐\n- 그러나 net localgroup administrators에서는 표시됨!\n- Event ID 4732 (멤버 추가) 기록됨",
+      "def": "[SIEM] Event ID 4732: admin$ added to Administrators group + Registry SpecialAccounts modified",
+      "defAction": "Tool: net localgroup + reg add\nGroup Added: Administrators, Remote Desktop Users\nRegistry: SpecialAccounts\\UserList\\admin$ = 0 (hidden)\nVisibility: Hidden from login screen, Settings, net user\nStill Visible: net localgroup, WMIC, Get-LocalUser\nEvent ID: 4732 (member added to local group)\nRisk Level: Critical\nAction: Remove account, restore registry, audit admin group membership",
+      "desc": "숨겨진 계정을 관리자 그룹과 RDP 그룹에 추가하고, SpecialAccounts 레지스트리로 로그인 화면에서 완전히 숨깁니다. 원격으로 관리자 권한 접근이 가능해집니다.",
+      "descEn": "Add the hidden account to Administrators and RDP groups, then fully hide from login screen via SpecialAccounts registry. This enables remote admin access while remaining invisible.",
+      "stepTitle": "관리자 권한 부여 + 로그인 화면 숨김",
+      "stepTitleEn": "Grant Admin Privileges + Hide from Login Screen",
+      "feynman": "투명 인간에게 마스터키(관리자 권한)와 원격 출입키(RDP)를 줍니다. 그리고 로비의 전광판(로그인 화면)에서 이름을 지웁니다. 건물 어디든 들어갈 수 있지만, 누구도 이 사람의 존재를 모릅니다.",
+      "feynmanEn": "Give the invisible person a master key (admin rights) and remote access key (RDP). Then erase their name from the lobby display (login screen). They can enter anywhere in the building, but nobody knows they exist.",
+      "expert": "SpecialAccounts\\UserList 레지스트리 키(HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon)는 Windows 로그인 화면(winlogon)에 표시할 계정을 제어합니다. REG_DWORD 값 0은 해당 계정을 숨기고, 1은 표시합니다. 이 키가 없으면 기본적으로 모든 계정이 표시됩니다. Sysmon Event ID 13(RegistryValueSet)으로 이 키의 변경을 모니터링해야 합니다. 중요: net localgroup administrators 명령은 여전히 숨겨진 계정을 표시하므로, 정기적인 관리자 그룹 감사가 핵심 탐지 방법입니다.",
+      "expertEn": "SpecialAccounts\\UserList registry key controls account visibility on the Windows login screen. REG_DWORD value 0 hides the account. Sysmon Event ID 13 (RegistryValueSet) monitors changes. Critically, net localgroup administrators still shows hidden accounts, making regular admin group audits the key detection method.",
+      "defTooltip": "🔐 admin$에 관리자 권한 + RDP 접근 + 로그인 숨김!",
+      "defTooltipEn": "🔐 admin$ given admin rights + RDP access + login hidden!",
+      "hackerLog": { "title": "privilege_hide.log", "lines": ["[10:05:00] admin$ → Administrators 그룹 추가", "[10:05:02] admin$ → Remote Desktop Users 추가", "[10:05:04] SpecialAccounts: admin$ = 0 (숨김)", "[10:05:06] Event ID 4732, 13 기록"] },
+      "terms": [
+        { "term": "SpecialAccounts", "def": "Windows 로그인 화면에 표시할 계정을 제어하는 레지스트리 키" },
+        { "term": "Event ID 4732", "def": "보안 로컬 그룹에 멤버가 추가되었음을 기록하는 이벤트" }
+      ]
+    },
+    {
+      "cmd": "# macOS: 숨겨진 사용자 생성\nsudo dscl . -create /Users/sysupdate\nsudo dscl . -create /Users/sysupdate UserShell /bin/bash\nsudo dscl . -create /Users/sysupdate RealName \"System Update\"\nsudo dscl . -create /Users/sysupdate UniqueID 499\nsudo dscl . -create /Users/sysupdate PrimaryGroupID 20\nsudo dscl . -create /Users/sysupdate IsHidden 1\nsudo dscl . -create /Users/sysupdate NFSHomeDirectory /var/empty\nsudo dscl . -passwd /Users/sysupdate 'Hid3nP@ss!'\n\n# Linux: 시스템 계정 범위로 숨김\nuseradd -r -s /bin/bash -d /opt/.cache -M -c \"system helper\" syshelper",
+      "out": "[macOS]\n- 사용자 생성: sysupdate\n- IsHidden: 1 (시스템 환경설정에서 숨김)\n- UniqueID: 499 (시스템 계정 범위 < 500)\n- RealName: System Update (위장)\n- 로그인 화면에서 보이지 않음\n- dscl . -list /Users에서는 표시됨!\n\n[Linux]\n- 사용자 생성: syshelper\n- -r: 시스템 계정 (UID < 1000)\n- UID: 997 (자동 할당)\n- /bin/bash: 로그인 가능\n- /opt/.cache: 숨겨진 홈 디렉토리\n- /etc/login.defs의 UID_MIN(1000) 미만 → 로그인 화면 숨김\n- 그러나 getent passwd에서 표시됨!",
+      "def": "[auditd/BSM] New user account created with system UID range — potential hidden user",
+      "defAction": "Tool: dscl (macOS), useradd (Linux)\nmacOS: IsHidden=1, UID=499 (below 500 threshold)\nLinux: -r flag, UID=997 (below 1000 threshold)\nDisguise: System Update (macOS), system helper (Linux)\nDetection: dscl -list /Users, getent passwd\nRisk Level: High\nAction: Audit all accounts with login shell, check UID ranges",
+      "desc": "macOS에서는 dscl로 IsHidden=1 속성을 설정하고 시스템 UID 범위(<500)를 사용합니다. Linux에서는 -r 플래그로 시스템 계정을 만들어 로그인 화면에서 숨깁니다.",
+      "descEn": "macOS uses dscl with IsHidden=1 and system UID range (<500). Linux uses -r flag to create system accounts hidden from login screens.",
+      "stepTitle": "macOS/Linux 숨겨진 사용자 생성",
+      "stepTitleEn": "Create Hidden Users on macOS/Linux",
+      "feynman": "macOS에서는 투명 망토(IsHidden=1)를 씌우고, 직원 번호를 서비스 구역 번호(499)로 지정합니다. Linux에서는 '청소 직원'(-r 시스템 계정)처럼 등록하여 로비 명부에 안 올립니다. 둘 다 '전체 명부(dscl/getent)'로 찾을 수 있습니다.",
+      "feynmanEn": "On macOS, an invisibility cloak (IsHidden=1) is applied with a service area ID (499). On Linux, register as 'cleaning staff' (-r system account) to stay off the lobby directory. Both can be found via 'full directory' (dscl/getent).",
+      "expert": "macOS의 dscl(Directory Service command line)은 Open Directory에 사용자를 생성합니다. IsHidden=1은 시스템 환경설정 > 사용자 & 그룹에서 계정을 숨기며, UniqueID < 500은 로그인 화면 표시 기본 임계값입니다. Linux의 useradd -r은 /etc/login.defs의 SYS_UID_MIN~SYS_UID_MAX 범위에서 UID를 할당합니다. 탐지를 위해 macOS에서는 dscl . -list /Users, Linux에서는 awk -F: '$3>=500 && $3<65534 {print}' /etc/passwd로 비정상 계정을 열거합니다.",
+      "expertEn": "macOS dscl creates users in Open Directory. IsHidden=1 hides from System Preferences, UID < 500 is the login screen threshold. Linux useradd -r assigns UIDs in SYS_UID range from login.defs. For detection, use dscl -list /Users on macOS and awk to enumerate non-standard accounts on Linux.",
+      "defTooltip": "🔐 macOS IsHidden=1, Linux 시스템 UID로 계정 숨김!",
+      "defTooltipEn": "🔐 macOS IsHidden=1, Linux system UID hides accounts!",
+      "hackerLog": { "title": "cross_platform.log", "lines": ["[10:10:00] macOS: sysupdate 생성 (IsHidden=1)", "[10:10:02] macOS: UID 499 (시스템 범위)", "[10:10:04] Linux: syshelper 생성 (-r, UID 997)", "[10:10:06] 두 플랫폼 모두 숨겨진 계정 활성화"] },
+      "terms": [
+        { "term": "dscl", "def": "macOS Directory Service 명령줄 도구, 사용자/그룹 관리에 사용" },
+        { "term": "UID_MIN", "def": "Linux의 일반 사용자 UID 시작 범위 (보통 1000), 이 미만은 시스템 계정" }
+      ]
+    },
+    {
+      "cmd": "# 전체 사용자 열거로 숨겨진 계정 탐지\n# Windows\nGet-LocalUser | Select-Object Name, Enabled, LastLogon, SID | Format-Table\nGet-WinEvent -FilterHashtable @{LogName='Security';ID=4720} -MaxEvents 10 | Select TimeCreated, Message",
+      "out": "[Get-LocalUser 전체 조회]\nName           Enabled  LastLogon              SID\n----           -------  ---------              ---\nAdministrator  True     2026-02-28 08:30:00    S-1-5-21-...-500\njsmith         True     2026-03-01 09:00:00    S-1-5-21-...-1001\nklee           True     2026-02-27 14:20:00    S-1-5-21-...-1002\nadmin$         True     Never                  S-1-5-21-...-1003 ⚠️\nsvc$           True     2026-03-01 03:00:00    S-1-5-21-...-1004 ⚠️\nGuest          False    Never                  S-1-5-21-...-501\n\n[Event ID 4720 — 계정 생성 이력]\nTimeCreated             Message\n-----------             -------\n2026-03-01 10:00:00     A user account was created: admin$\n2026-03-01 09:55:00     A user account was created: svc$\n\n[분석]\n- admin$: 생성 직후 미로그인 → 대기 상태\n- svc$: 새벽 3시 로그인 → 비인가 원격 접근 의심\n- 두 계정 모두 최근 생성 (오늘)",
+      "def": "[SIEM] 2 hidden accounts detected ($ suffix) — svc$ logged in at 3AM — investigate unauthorized access",
+      "defAction": "Tool: Get-LocalUser + Event ID 4720\nHidden Accounts: admin$ (never logged in), svc$ (3AM login)\nCreation Time: Both created today (2026-03-01)\nSuspicious: svc$ 3AM login (off-hours access)\nDetection Method: Get-LocalUser shows all accounts including $ suffix\nEvent Correlation: 4720 (creation) + 4624 (logon) + 4732 (group add)\nRisk Level: Critical\nAction: Disable both accounts, forensic investigation, check RDP logs",
+      "desc": "Get-LocalUser(PowerShell)은 $ 접미사 계정을 포함한 모든 로컬 사용자를 표시합니다. Event ID 4720과 결합하여 최근 생성된 숨겨진 계정을 탐지합니다.",
+      "descEn": "Get-LocalUser (PowerShell) shows all local users including $ suffix accounts. Combined with Event ID 4720, recently created hidden accounts are detected.",
+      "stepTitle": "PowerShell + Event Log로 숨겨진 계정 전수 조사",
+      "stepTitleEn": "Full Account Audit via PowerShell + Event Logs",
+      "feynman": "안내 데스크(net user) 대신 건물 관리 시스템(Get-LocalUser)을 직접 조회합니다. 관리 시스템은 투명 인간 포함 모든 출입증을 보여줍니다. 생성 기록(Event 4720)과 출입 기록(Event 4624)을 대조하면, 누가 언제 투명 인간을 만들었는지 알 수 있습니다.",
+      "feynmanEn": "Instead of the front desk (net user), query the building management system (Get-LocalUser) directly. It shows all passes including invisible ones. Cross-referencing creation records (Event 4720) with access records (Event 4624) reveals who created the invisible person and when.",
+      "expert": "Get-LocalUser cmdlet은 SAM 데이터베이스를 직접 쿼리하여 $ 접미사를 포함한 모든 로컬 계정을 반환합니다. 탐지 쿼리: Get-LocalUser | Where-Object { $_.Name -like '*$' -and $_.Enabled }. Event ID 상관분석: 4720(생성) → 4722(활성화) → 4732(그룹 추가) → 4624(로그인) 체인을 추적합니다. RDP 로그(Event ID 4624, LogonType=10)에서 $ 접미사 계정의 원격 접근을 확인합니다. AD 환경에서는 컴퓨터 계정도 $ 접미사를 사용하므로, SID의 RID(500~1000)를 확인하여 구분합니다.",
+      "expertEn": "Get-LocalUser queries SAM directly, returning all accounts including $ suffix. Detection query: Get-LocalUser | Where-Object { $_.Name -like '*$' -and $_.Enabled }. Event correlation chain: 4720→4722→4732→4624. Check RDP logs (Event ID 4624, LogonType=10) for $ account remote access. In AD, computer accounts also use $, so check SID RID (500-1000) to distinguish.",
+      "defTooltip": "🔐 2개 $ 접미사 계정 탐지! svc$ 새벽 접근!",
+      "defTooltipEn": "🔐 2 $ suffix accounts detected! svc$ 3AM access!",
+      "hackerLog": { "title": "hidden_detect.log", "lines": ["[10:20:00] Get-LocalUser 전체 조회", "[10:20:02] admin$ 탐지 (미로그인)", "[10:20:03] svc$ 탐지 (새벽 3시 로그인)", "[10:20:05] Event ID 4720 상관분석 완료"] },
+      "terms": [
+        { "term": "Get-LocalUser", "def": "PowerShell cmdlet, $ 접미사를 포함한 모든 로컬 사용자를 열거" },
+        { "term": "RID", "def": "Relative Identifier, SID의 마지막 부분으로 계정 유형을 식별" }
+      ]
+    },
+    {
+      "cmd": "# 숨겨진 계정 자동 탐지 스크립트 배포\n# + SpecialAccounts 레지스트리 모니터링\n# + 정기 감사 자동화\n\n# 1. Sysmon SpecialAccounts 레지스트리 모니터링\n# <RegistryEvent onmatch=\"include\">\n#   <TargetObject condition=\"contains\">SpecialAccounts\\UserList</TargetObject>\n# </RegistryEvent>\n\n# 2. 자동 감사 스크립트\n$hidden = Get-LocalUser | Where-Object { $_.Name -like '*$' -and $_.Enabled }\nif ($hidden) {\n    Write-Warning \"Hidden accounts detected: $($hidden.Name -join ', ')\"\n}\n\n# 3. SpecialAccounts 레지스트리 정리\nGet-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\UserList' -ErrorAction SilentlyContinue",
+      "out": "[Sysmon Config]\n- RegistryEvent (EID 12/13): SpecialAccounts\\UserList 변경 모니터링 ✅\n- 레지스트리 키 생성/수정/삭제 시 즉시 알림\n\n[자동 감사 결과]\nWARNING: Hidden accounts detected: admin$, svc$\n\n[SpecialAccounts 레지스트리]\nadmin$    REG_DWORD    0x0 (숨김) ⚠️\nsvc$      REG_DWORD    0x0 (숨김) ⚠️\n\n[방어 조치]\n1. ✅ 숨겨진 계정 비활성화: net user admin$ /active:no\n2. ✅ SpecialAccounts 레지스트리 키 삭제\n3. ✅ 정기 감사 스케줄 (매일 1회)\n4. ✅ SIEM 알림 규칙: $ 접미사 계정 생성 시 즉시 알림\n5. ✅ GPO: 로컬 계정 생성 제한 정책",
+      "def": "[SIEM] Hidden account defense complete — automated detection, registry monitoring, and GPO restrictions deployed",
+      "defAction": "Tool: Sysmon + Scheduled Audit + GPO\nSysmon: RegistryEvent for SpecialAccounts (EID 12/13)\nAudit Script: Daily Get-LocalUser scan for $ accounts\nSIEM Rule: Alert on Event ID 4720 with $ in AccountName\nGPO: Restrict local account creation to authorized admins\nRegistry Cleanup: Remove SpecialAccounts entries\nRisk Level: Mitigated\nAction: Continuous monitoring, periodic full account audit",
+      "desc": "Sysmon으로 SpecialAccounts 레지스트리 변경을 실시간 모니터링하고, 자동 감사 스크립트로 $ 접미사 계정을 정기적으로 탐지합니다. GPO로 로컬 계정 생성을 제한합니다.",
+      "descEn": "Monitor SpecialAccounts registry changes in real-time with Sysmon, periodically detect $ suffix accounts with automated audit scripts, and restrict local account creation via GPO.",
+      "stepTitle": "레지스트리 모니터링 + 자동 감사 + GPO 방어",
+      "stepTitleEn": "Registry Monitoring + Automated Audit + GPO Defense",
+      "feynman": "건물에 3가지 보안을 설치합니다: 1) 전광판 관리실(레지스트리)에 CCTV(Sysmon)를 달아 누군가 이름을 지우면 즉시 알림, 2) 매일 전체 명부를 점검하는 감사관(자동 스크립트), 3) 출입증 발급을 허가된 관리자만 할 수 있도록 규정(GPO). 투명 인간을 만들 수 없게 됩니다.",
+      "feynmanEn": "Install 3 security measures: 1) CCTV (Sysmon) in the display room (registry) that alerts when names are erased, 2) A daily inspector (automated script) checking the full directory, 3) Regulations (GPO) allowing only authorized managers to issue passes. No more invisible people.",
+      "expert": "Sysmon Event ID 12(RegistryObjectAddedOrDeleted)와 13(RegistryValueSet)으로 SpecialAccounts\\UserList 키의 변경을 실시간 탐지합니다. SIGMA 규칙으로 SIEM에서 자동 알림을 구성합니다. GPO의 'Accounts: Limit local account use of blank passwords to console logon only'와 LAPS(Local Administrator Password Solution)를 조합하면 로컬 관리자 계정 악용을 방지합니다. AD 환경에서는 Privileged Access Workstation(PAW)과 JIT(Just-In-Time) 접근으로 관리자 권한을 제한합니다.",
+      "expertEn": "Sysmon Event ID 12/13 detects SpecialAccounts\\UserList changes in real-time. SIGMA rules enable automated SIEM alerting. GPO password policies combined with LAPS prevent local admin abuse. AD environments use PAW and JIT access to restrict admin privileges.",
+      "defTooltip": "🔐 자동 탐지 + 레지스트리 모니터링 + GPO 방어 완성!",
+      "defTooltipEn": "🔐 Auto-detection + registry monitoring + GPO defense complete!",
+      "hackerLog": { "title": "defense_deploy.log", "lines": ["[10:30:00] Sysmon SpecialAccounts 모니터링 활성화", "[10:30:02] 자동 감사 스크립트 배포", "[10:30:04] SIEM $ 접미사 알림 규칙 배포", "[10:30:06] GPO 로컬 계정 제한 적용"] },
+      "terms": [
+        { "term": "LAPS", "def": "Local Administrator Password Solution, 로컬 관리자 비밀번호 자동 관리 솔루션" },
+        { "term": "PAW", "def": "Privileged Access Workstation, 관리자 작업 전용 보안 워크스테이션" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "cmd.exe (admin)",
+    "pid": 4000,
+    "children": [
+      {
+        "name": "net.exe",
+        "pid": 4010,
+        "children": [
+          { "name": "net1.exe", "pid": 4015, "children": [] }
+        ]
+      },
+      {
+        "name": "reg.exe",
+        "pid": 4020,
+        "children": []
+      }
+    ]
+  }
+}

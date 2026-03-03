@@ -1,0 +1,181 @@
+{
+  "id": "T1598.001",
+  "title": "서비스 기반 스피어피싱 시뮬레이션",
+  "titleEn": "Spearphishing Service Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 타겟 프로파일링", "labelEn": "🔍 Target Profiling", "steps": [0, 1] },
+    { "label": "🎣 서비스 사칭 공격", "labelEn": "🎣 Service Impersonation", "steps": [2, 3] },
+    { "label": "✅ 정보 수확", "labelEn": "✅ Information Harvesting", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "service", "label": "Fake Service", "x": 200, "y": 30 },
+    { "id": "social", "label": "Social Platform", "x": 200, "y": 90 },
+    { "id": "target", "label": "Target User", "x": 350, "y": 60 },
+    { "id": "data", "label": "Harvested Data", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "service", "minStep": 0 },
+    { "from": "ext", "to": "social", "minStep": 1 },
+    { "from": "service", "to": "target", "minStep": 2 },
+    { "from": "social", "to": "target", "minStep": 3 },
+    { "from": "target", "to": "data", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "target_profiles/", "icon": "📁" },
+    { "name": "fake_service.conf", "icon": "📄", "alert": true },
+    { "name": "harvested_info.json", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "curl -s 'https://api.hunter.io/v2/domain-search?domain=target-corp.com&api_key=KEY' | jq '.data.emails[] | {email:.value,position:.position}'",
+      "out": "{\n  \"email\": \"j.kim@target-corp.com\",\n  \"position\": \"IT Manager\"\n}\n{\n  \"email\": \"s.park@target-corp.com\",\n  \"position\": \"Security Engineer\"\n}\n{\n  \"email\": \"m.lee@target-corp.com\",\n  \"position\": \"HR Director\"\n}\n{\n  \"email\": \"d.choi@target-corp.com\",\n  \"position\": \"Finance Manager\"\n}",
+      "def": "[Email Gateway] Unusual external API query targeting corporate domain detected",
+      "defAction": "Source: Email Security Gateway\nTarget: api.hunter.io queries for target-corp.com\nAction: Domain query logged and threat intel notified",
+      "desc": "Hunter.io API를 사용하여 대상 조직의 이메일 주소와 직위 정보를 수집합니다. 소셜 엔지니어링을 위한 타겟 프로파일링 단계입니다.",
+      "descEn": "Using Hunter.io API to collect target organization's email addresses and positions. This is the target profiling phase for social engineering.",
+      "stepTitle": "타겟 이메일/직위 정보 수집",
+      "stepTitleEn": "Target Email & Position Collection",
+      "feynman": "Hunter.io는 '전화번호부'와 같습니다. 회사 이름을 넣으면 그 회사에서 일하는 사람들의 이메일과 직위가 나옵니다. 공격자는 이 정보로 누구에게 어떤 사기 메시지를 보낼지 계획합니다.",
+      "feynmanEn": "Hunter.io is like a phone directory. Enter a company name and it reveals employee emails and positions. Attackers use this to plan who to target with which scam messages.",
+      "expert": "Hunter.io의 Domain Search API는 공개된 웹 소스에서 수집된 이메일 패턴과 직위 정보를 제공합니다. 공격자는 이를 통해 고가치 타겟(IT관리자, 보안엔지니어 등)을 식별하고 맞춤형 소셜 엔지니어링 시나리오를 설계합니다.",
+      "expertEn": "Hunter.io Domain Search API provides email patterns and position info from public web sources. Attackers use this to identify high-value targets (IT managers, security engineers) and design tailored social engineering scenarios.",
+      "defTooltip": "🔍 이메일 게이트웨이: 기업 도메인 대상 외부 API 조회 감지",
+      "defTooltipEn": "🔍 Email Gateway: External API query targeting corporate domain detected",
+      "hackerLog": {
+        "title": "target_profiling.log",
+        "lines": [
+          { "log": "Hunter.io query: target-corp.com → 4 emails found", "desc": "💡 IT/보안/HR/재무 담당자 이메일 확보" },
+          { "log": "High-value targets identified: IT Manager, Security Engineer", "desc": "💡 기술 직군 우선 타겟팅" }
+        ]
+      },
+      "terms": [
+        { "name": "Hunter.io", "desc": "도메인 기반 이메일 검색 OSINT 서비스" },
+        { "name": "Target Profiling", "desc": "공격 대상의 직위, 역할, 연락처를 조사하는 정찰 활동" }
+      ]
+    },
+    {
+      "cmd": "python3 linkedin_scraper.py --company 'Target Corp' --depth 2 --output target_employees.json",
+      "out": "[*] LinkedIn Company ID: 12345678\n[*] Scraping employee profiles...\n[+] Found 47 profiles\n[+] IT Department: 12 employees\n[+] Security Team: 5 employees\n[+] Executives: 8 employees\n\n=== High-Value Targets ===\nName: Kim Jihun     | Role: IT Infrastructure Manager\n  - Posts about: Microsoft 365 migration, Azure AD\n  - Recent activity: Shared article about SSO deployment\n\nName: Park Seonwoo  | Role: Senior Security Engineer\n  - Posts about: SIEM alerts, SOC operations\n  - Recent activity: Attended SANS conference\n\n[+] Saved to target_employees.json",
+      "def": "[OSINT Monitoring] Automated LinkedIn scraping activity detected targeting organization",
+      "defAction": "Source: OSINT Monitoring Service\nTarget: Corporate LinkedIn profiles\nAction: Security awareness alert sent to employees",
+      "desc": "LinkedIn에서 대상 조직의 직원 프로필을 수집하여 직위, 관심사, 최근 활동을 분석합니다. 이 정보로 맞춤형 피싱 시나리오를 설계합니다.",
+      "descEn": "Scraping LinkedIn profiles of target organization employees to analyze positions, interests, and recent activity. This information is used to design tailored phishing scenarios.",
+      "stepTitle": "LinkedIn 직원 프로파일링",
+      "stepTitleEn": "LinkedIn Employee Profiling",
+      "feynman": "LinkedIn 스크래핑은 '회사 주소록 + 일기장'을 훔쳐보는 것과 같습니다. 누가 어떤 일을 하는지뿐만 아니라, 최근 무엇에 관심이 있는지까지 파악하면 훨씬 설득력 있는 사기 메시지를 만들 수 있습니다.",
+      "feynmanEn": "LinkedIn scraping is like peeking at someone's company directory plus diary. Knowing not just their role but also their current interests allows creating much more convincing scam messages.",
+      "expert": "자동화된 LinkedIn 스크래핑으로 OPSEC 약점을 파악합니다. 직원의 기술 스택 공유(예: 'Microsoft 365 마이그레이션 중')는 공격자에게 어떤 서비스를 사칭할지 직접적 단서를 제공합니다.",
+      "expertEn": "Automated LinkedIn scraping identifies OPSEC weaknesses. Employee tech stack sharing (e.g., 'migrating to Microsoft 365') provides attackers direct clues on which services to impersonate.",
+      "defTooltip": "🔍 OSINT 모니터링: 조직 대상 LinkedIn 스크래핑 활동 감지",
+      "defTooltipEn": "🔍 OSINT Monitoring: Automated LinkedIn scraping detected targeting organization",
+      "hackerLog": {
+        "title": "linkedin_recon.log",
+        "lines": [
+          { "log": "47 profiles scraped from Target Corp", "desc": "💡 직원 47명 프로필 수집 완료" },
+          { "log": "Kim Jihun → M365 migration context identified", "desc": "💡 Microsoft 365 사칭 시나리오에 최적 타겟" },
+          { "log": "Park Seonwoo → SANS attendee, SOC operator", "desc": "💡 보안 도구 벤더 사칭에 적합" }
+        ]
+      },
+      "terms": [
+        { "name": "LinkedIn Scraping", "desc": "직원 프로필을 자동 수집하여 조직 구조와 개인 정보를 파악하는 기법" },
+        { "name": "OPSEC", "desc": "작전 보안 — 적에게 유용한 정보 노출을 최소화하는 보안 관행" }
+      ]
+    },
+    {
+      "cmd": "gophish --launch-campaign 'M365-Support' --template 'Microsoft 365 Password Expiry' --target-group 'IT-Team'",
+      "out": "[GoPhish] Campaign: M365-Support\n[GoPhish] Template: Microsoft 365 Password Expiry Notice\n[GoPhish] SMTP: smtp-relay.attacker-infra.com:587\n[GoPhish] Sending Profile: Microsoft 365 Support <no-reply@microsft365-support.com>\n[GoPhish] Landing Page: https://login.microsft365-support.com/auth\n\n[+] Sending to IT-Team group (12 targets):\n  → j.kim@target-corp.com ... sent ✓\n  → s.park@target-corp.com ... sent ✓\n  → h.jung@target-corp.com ... sent ✓\n  ... (9 more sent)\n\n[GoPhish] Campaign launched successfully\n[GoPhish] Tracking URL: https://microsft365-support.com/track?rid={RID}",
+      "def": "[Email Security] Suspicious domain microsft365-support.com flagged as typosquat of microsoft365",
+      "defAction": "Source: Email Security Gateway (DMARC/SPF check)\nTarget: Inbound emails from microsft365-support.com\nAction: Emails quarantined, SOC alert generated",
+      "desc": "GoPhish를 사용하여 Microsoft 365 지원팀을 사칭하는 스피어피싱 캠페인을 실행합니다. 타이포스쿼팅 도메인과 실제와 유사한 이메일 템플릿을 활용합니다.",
+      "descEn": "Launching a spearphishing campaign impersonating Microsoft 365 support using GoPhish. Utilizes typosquatted domain and realistic email templates.",
+      "stepTitle": "GoPhish 피싱 캠페인 발사",
+      "stepTitleEn": "GoPhish Phishing Campaign Launch",
+      "feynman": "GoPhish는 '가짜 우체부' 프로그램입니다. 마이크로소프트 지원팀처럼 보이는 이메일을 만들어 보내고, 누가 열었는지, 누가 링크를 클릭했는지 추적합니다. 'microsft365'처럼 'o'를 빼서 진짜와 거의 같은 가짜 주소를 만듭니다.",
+      "feynmanEn": "GoPhish is a 'fake mailman' program. It creates emails that look like Microsoft support, sends them out, and tracks who opened them and clicked the links. It uses domains like 'microsft365' (missing 'o') to look almost real.",
+      "expert": "GoPhish 프레임워크로 정교한 서비스 사칭 피싱 캠페인을 배포합니다. 타이포스쿼팅 도메인(microsft365), 유효한 TLS 인증서, 정교한 HTML 이메일 템플릿을 조합하여 이메일 게이트웨이 필터를 우회합니다.",
+      "expertEn": "GoPhish framework deploys sophisticated service impersonation phishing. Combining typosquatted domains (microsft365), valid TLS certificates, and crafted HTML templates to bypass email gateway filters.",
+      "defTooltip": "🔍 이메일 보안: microsft365-support.com 타이포스쿼팅 도메인 감지",
+      "defTooltipEn": "🔍 Email Security: microsft365-support.com typosquat domain flagged",
+      "hackerLog": {
+        "title": "campaign_launch.log",
+        "lines": [
+          { "log": "Template: M365 Password Expiry → 12 targets", "desc": "💡 IT팀 12명에게 비밀번호 만료 위장 메일 발송" },
+          { "log": "Typosquat: microsft365-support.com (o missing)", "desc": "💡 실제 도메인과 1글자만 다른 사칭 도메인" },
+          { "log": "Tracking enabled: open/click/submit events", "desc": "💡 이메일 열람, 링크 클릭, 폼 제출 추적 활성화" }
+        ]
+      },
+      "terms": [
+        { "name": "GoPhish", "desc": "오픈소스 피싱 시뮬레이션 프레임워크로, 보안 인식 교육과 실제 공격에 모두 사용됨" },
+        { "name": "Typosquatting", "desc": "합법적 도메인과 유사한 오타 도메인을 등록하여 사용자를 속이는 기법" }
+      ]
+    },
+    {
+      "cmd": "python3 service_clone.py --service 'slack' --target 'target-corp' --method 'workspace-invite'",
+      "out": "[*] Cloning Slack workspace invitation flow...\n[*] Template: 'You have been invited to Target Corp workspace'\n[*] Clone URL: https://target-corp-slack.attacker.com/accept-invite\n\n[+] Multi-service phishing panel ready:\n  Service        | Method               | Status\n  ───────────────┼──────────────────────┼────────\n  Microsoft 365  | Password Expiry      | Active ✓\n  Slack          | Workspace Invite     | Active ✓\n  Google Drive   | File Sharing Notice  | Standby\n  Zoom           | Meeting Invitation   | Standby\n\n[+] Landing pages deployed with credential capture forms\n[+] All forms redirect to legitimate service after capture",
+      "def": "[Web Filter] Suspicious Slack-like domain target-corp-slack.attacker.com blocked",
+      "defAction": "Source: Web Content Filter / DNS Sinkhole\nTarget: target-corp-slack.attacker.com\nAction: Domain blocked, DNS sinkholed to 127.0.0.1",
+      "desc": "Slack 워크스페이스 초대를 사칭하는 추가 피싱 벡터를 준비합니다. 다중 서비스 사칭으로 성공 확률을 높이고, 크레덴셜 캡처 후 실제 서비스로 리다이렉트하여 탐지를 회피합니다.",
+      "descEn": "Preparing additional phishing vectors impersonating Slack workspace invitations. Multi-service impersonation increases success rate, and redirecting to real services after credential capture evades detection.",
+      "stepTitle": "다중 서비스 사칭 피싱 배포",
+      "stepTitleEn": "Multi-Service Impersonation Deployment",
+      "feynman": "이것은 '여러 미끼를 동시에 던지는 낚시'와 같습니다. 마이크로소프트 이메일에 안 속는 사람도 Slack 초대에는 속을 수 있습니다. 그리고 가짜 로그인 후 진짜 사이트로 보내주면, 피해자는 자기가 속았는지도 모릅니다.",
+      "feynmanEn": "This is like fishing with multiple lures at once. Someone who doesn't fall for a Microsoft email might click a Slack invite. And by redirecting to the real site after fake login, victims don't even know they were tricked.",
+      "expert": "다중 서비스 사칭 전략은 개별 서비스의 보안 인식 교육 효과를 우회합니다. 크레덴셜 캡처 후 302 리다이렉트로 정상 서비스로 전환하면 사용자는 인증 실패로 인식하고 재로그인합니다.",
+      "expertEn": "Multi-service impersonation bypasses per-service security awareness training. After credential capture, 302 redirect to legitimate service makes users think they had a login error and re-authenticate normally.",
+      "defTooltip": "🔍 웹 필터: Slack 사칭 도메인 차단됨",
+      "defTooltipEn": "🔍 Web Filter: Suspicious Slack-like domain blocked",
+      "hackerLog": {
+        "title": "multi_service.log",
+        "lines": [
+          { "log": "Slack workspace invite clone deployed", "desc": "💡 Slack 초대 메일 사칭 랜딩 페이지 배포 완료" },
+          { "log": "4 service templates ready, 2 active", "desc": "💡 M365 + Slack 활성, Google Drive + Zoom 대기" },
+          { "log": "Post-capture redirect → legitimate service URLs", "desc": "💡 크레덴셜 탈취 후 실제 서비스로 리다이렉트" }
+        ]
+      },
+      "terms": [
+        { "name": "Multi-Service Impersonation", "desc": "여러 SaaS 서비스를 동시에 사칭하여 피싱 성공률을 높이는 전략" },
+        { "name": "302 Redirect", "desc": "HTTP 임시 리다이렉트로, 크레덴셜 탈취 후 정상 서비스로 전환 시 사용" }
+      ]
+    },
+    {
+      "cmd": "gophish --results 'M365-Support' --format detailed",
+      "out": "[GoPhish] Campaign Results: M365-Support\n══════════════════════════════════════════\n\n📊 Overall Statistics:\n  Emails Sent:    12\n  Emails Opened:   8 (66.7%)\n  Links Clicked:   5 (41.7%)\n  Data Submitted:  3 (25.0%)\n\n🎯 Submitted Credentials:\n  ┌─────────────────────────┬──────────────────────┐\n  │ Email                   │ Submitted Data       │\n  ├─────────────────────────┼──────────────────────┤\n  │ j.kim@target-corp.com   │ Password + MFA code  │\n  │ h.jung@target-corp.com  │ Password only        │\n  │ y.song@target-corp.com  │ Password + SSO token │\n  └─────────────────────────┴──────────────────────┘\n\n📈 Timeline:\n  First open:   2 min after send\n  First click:  7 min after send\n  First submit: 12 min after send\n\n⚠️ Reported as phishing: 1/12 (s.park@target-corp.com)",
+      "def": "[SOC Alert] Phishing report received from s.park — campaign infrastructure identified and blocked",
+      "defAction": "Source: SOC Incident Response\nTarget: microsft365-support.com infrastructure\nAction: Domain blocked org-wide, password reset forced for 3 compromised accounts",
+      "desc": "피싱 캠페인 결과를 분석합니다. 12명 중 3명이 자격증명을 제출했으며, 1명만 피싱으로 신고했습니다. 이 데이터는 보안 인식 교육의 효과를 평가하는 데 사용됩니다.",
+      "descEn": "Analyzing phishing campaign results. 3 out of 12 submitted credentials, while only 1 reported it as phishing. This data evaluates the effectiveness of security awareness training.",
+      "stepTitle": "피싱 캠페인 결과 분석",
+      "stepTitleEn": "Phishing Campaign Results Analysis",
+      "feynman": "이 단계는 '시험 채점'과 같습니다. 누가 가짜 이메일에 속았는지, 누가 의심을 품고 신고했는지 결과를 봅니다. 12명 중 3명이 속았다면 25%의 성공률 — 이는 실제 공격에서도 충분히 효과적인 수치입니다.",
+      "feynmanEn": "This step is like grading a test. We see who fell for the fake email and who was suspicious enough to report it. If 3 out of 12 were tricked (25%), that's effective enough for a real attack.",
+      "expert": "GoPhish의 상세 결과 분석은 각 단계별 전환율(열람→클릭→제출)을 추적합니다. 25% 크레덴셜 제출율은 업계 평균(20-30%)에 부합하며, 신고율 8.3%(1/12)는 보안 인식 교육의 개선 필요성을 시사합니다.",
+      "expertEn": "GoPhish detailed analysis tracks conversion rates at each stage (open→click→submit). 25% credential submission rate aligns with industry average (20-30%), while 8.3% report rate (1/12) suggests room for security awareness improvement.",
+      "defTooltip": "🔍 SOC: 피싱 신고 접수 — 캠페인 인프라 식별 및 차단",
+      "defTooltipEn": "🔍 SOC: Phishing report received — campaign infrastructure identified and blocked",
+      "hackerLog": {
+        "title": "campaign_results.log",
+        "lines": [
+          { "log": "3/12 credentials captured (25% success)", "desc": "💡 IT매니저 포함 3명 크레덴셜 탈취 성공" },
+          { "log": "j.kim submitted Password + MFA code", "desc": "💡 IT매니저 MFA 코드까지 탈취 — 최고가치 타겟" },
+          { "log": "Only 1/12 reported as phishing", "desc": "💡 보안인식 교육 부족 — 8.3% 신고율" }
+        ]
+      },
+      "terms": [
+        { "name": "Credential Harvesting", "desc": "가짜 로그인 페이지를 통해 사용자의 자격증명을 수집하는 공격 기법" },
+        { "name": "Phishing Report Rate", "desc": "피싱 이메일을 받은 사용자 중 보안팀에 신고한 비율 — 보안 인식 수준 지표" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "hunter.io", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "linkedin_scraper.py", "depth": 0, "alert": false, "minStep": 1 },
+    { "name": "gophish", "depth": 0, "alert": true, "minStep": 2 },
+    { "name": "  └─ campaign: M365-Support", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "service_clone.py", "depth": 0, "alert": true, "minStep": 3 },
+    { "name": "  └─ slack_workspace_invite", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "results_analyzer", "depth": 0, "alert": false, "minStep": 4 }
+  ]
+}

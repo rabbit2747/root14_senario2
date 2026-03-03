@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1587.002">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1587-002-code-signing-certificates&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1587.002 코드서명 인증서 개발">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1587.002 코드서명 인증서 개발 — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}.glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05);}.dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);}.hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}.terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div><div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1587.002: 코드서명 인증서 개발</p></div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch1">1. 코드서명 인증서 개요</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch2">2. 자체 인증서 생성</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch3">3. 탐지와 방어</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Resource Development</div>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">T1587.002<br><span class="hl-teal">코드서명 인증서 개발</span></h2>
+                <p class="text-lg text-cgray dark:text-slate-400 max-w-2xl mx-auto">공격자가 셸 컴퍼니를 통해 합법적인 코드서명 인증서를 직접 취득하거나, 자체 서명 인증서를 생성하여 악성코드에 서명하는 기법을 학습합니다.</p>
+            </header>
+
+            <section id="ch1" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">🔏 Chapter 1 — 코드서명 인증서 개요</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <p>코드서명 인증서는 소프트웨어의 <span class="hl-teal">무결성과 출처를 보증</span>하는 디지털 서명입니다. 공격자는 탈취(T1588.003) 대신 <span class="hl-yel">직접 인증서를 개발</span>하여 악성코드에 서명할 수 있습니다. 이를 통해 Windows SmartScreen, 안티바이러스, 애플리케이션 제어 정책을 우회합니다.</p>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">자체 서명 (Self-signed)</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">OpenSSL로 직접 생성. 신뢰 체인 없음. SmartScreen 우회 불가. 내부 네트워크 공격에 활용.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">셸 컴퍼니 (Shell Company)</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">가짜 회사 설립 후 CA에서 합법 인증서 구매. OV/EV 인증서 취득 가능. SmartScreen 우회.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">리셀러 악용</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">검증이 느슨한 인증서 리셀러를 통해 최소한의 서류로 인증서 구매. 저렴하고 빠른 발급.</p>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># 코드서명 인증서 유형별 비교</p>
+                        <p class="text-cyel">┌──────────────┬───────────┬──────────────┬───────────────┐</p>
+                        <p class="text-cyel">│ Type         │ Cost      │ SmartScreen  │ Trust Level   │</p>
+                        <p class="text-cyel">├──────────────┼───────────┼──────────────┼───────────────┤</p>
+                        <p>│ Self-signed  │ Free      │ ✗ Blocked    │ None          │</p>
+                        <p>│ OV (Org)     │ $200-500  │ ✓ Reputation │ Medium        │</p>
+                        <p>│ EV (Extended)│ $300-600  │ ✓ Immediate  │ High          │</p>
+                        <p class="text-cyel">└──────────────┴───────────┴──────────────┴───────────────┘</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch2" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">⚡ Chapter 2 — 자체 인증서 생성 기법</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="space-y-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">셸 컴퍼니를 통한 EV 인증서 취득</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">공격자는 가짜 사업자등록증, 위조된 사무실 주소, 가상 전화번호로 셸 컴퍼니를 설립합니다. 일부 국가에서는 온라인으로 몇 시간 안에 법인을 등록할 수 있으며, 이를 기반으로 CA에 EV 코드서명 인증서를 신청합니다.</p>
+                        </div>
+                        <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                            <p class="text-slate-500"># 셸 컴퍼니를 통한 코드서명 인증서 취득 과정</p>
+                            <p class="text-cyel">$ # Step 1: 법인 등록 (UK Companies House — 온라인)</p>
+                            <p>Company: TechFlow Solutions Ltd</p>
+                            <p>Registration: 24 hours, £12 filing fee</p>
+                            <p>Registered Office: Virtual office (London, £50/month)</p>
+                            <p class="mt-2 text-cyel">$ # Step 2: EV 코드서명 인증서 신청</p>
+                            <p>CA: Sectigo (via reseller)</p>
+                            <p>Submitted: Business registration, Dun & Bradstreet number</p>
+                            <p>Verification call: Virtual phone number (+44 xxx)</p>
+                            <p>Price: $349/year</p>
+                            <p class="mt-2 text-cyel">$ # Step 3: HSM 토큰 수령 (7일 후)</p>
+                            <p>[+] EV Code Signing Certificate issued to "TechFlow Solutions Ltd"</p>
+                            <p>[+] Validity: 2026-03-01 ~ 2027-03-01</p>
+                            <p>[+] HSM: SafeNet eToken 5110</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold hl-yel mb-2">자체 서명 인증서 (내부 공격용)</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">Active Directory 환경에서는 조직 내부 CA가 발급한 인증서를 신뢰합니다. 공격자가 AD CS(Active Directory Certificate Services)를 악용하면, 내부적으로 신뢰되는 코드서명 인증서를 발급받을 수 있습니다.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">다크웹 인증서 서비스</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">다크웹에서는 "Code Signing as a Service"를 제공하는 판매자가 있습니다. $500~$3,000에 EV 인증서를 구매하거나, 파일당 $50에 서명 서비스를 이용할 수 있습니다. 이 인증서들은 실제 CA에서 합법적으로 발급받은 것입니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch3" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">🛡️ Chapter 3 — 탐지와 방어</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">인증서 분석</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- 서명자의 사업 기간/이력 확인</li>
+                                <li>- 인증서 발급일과 파일 생성일 비교</li>
+                                <li>- 서명된 파일의 VT 평판 조회</li>
+                                <li>- 같은 인증서로 서명된 다른 파일 검색</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">정책 기반 방어</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- WDAC로 신뢰할 인증서 목록 관리</li>
+                                <li>- AppLocker Publisher Rules 적용</li>
+                                <li>- EV 인증서만 허용 정책</li>
+                                <li>- CA 허용 목록 (특정 CA만 신뢰)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                        <h5 class="font-bold text-sm hl-teal mb-2">CA 업계 대응</h5>
+                        <p class="text-sm text-cgray dark:text-slate-400">CA/Browser Forum은 2024년부터 코드서명 인증서의 개인 키를 HSM에 저장하도록 의무화했습니다. 이는 키 탈취를 방지하지만, 셸 컴퍼니를 통한 합법적 취득은 여전히 가능합니다. Microsoft는 SmartScreen의 평판 시스템을 강화하여 새로운 인증서의 신뢰를 점진적으로 부여합니다.</p>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># sigcheck — 의심스러운 서명 분석</p>
+                        <p class="text-cyel">$ sigcheck64.exe -nobanner suspicious.exe</p>
+                        <p>Verified:        Signed</p>
+                        <p>Signing date:    2:15 AM 3/1/2026</p>
+                        <p>Publisher:       TechFlow Solutions Ltd</p>
+                        <p>Company:         TechFlow Solutions Ltd</p>
+                        <p>Description:     System Update Utility</p>
+                        <p>Product:         SysUpdater</p>
+                        <p>Prod version:    1.0.0</p>
+                        <p>File version:    1.0.0</p>
+                        <p class="text-red-400">[!] Company registered 30 days ago — no prior software history</p>
+                        <p class="text-red-400">[!] Certificate issued 7 days ago — first signed binary</p>
+                        <p class="text-red-400">[!] VT: 5/72 detections — Malware.GenericKD</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+    <script>
+    function toggleTheme(){document.documentElement.classList.toggle('dark');var ic=document.getElementById('theme-icon');ic.textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙';}
+    function go(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});}
+    var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var id=e.target.id;document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),threshold:0.3});
+    document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
+    </script>
+</body>
+</html>

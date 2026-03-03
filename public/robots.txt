@@ -1,0 +1,12 @@
+# (주)갓루트 GOTROOT — 크롤러 접근 제어
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /edu/
+Disallow: /assets/
+Disallow: /login
+Disallow: /signup
+Disallow: /mypage
+
+# 사이트맵 (필요 시 추가)
+# Sitemap: https://yourdomain.com/sitemap.xml

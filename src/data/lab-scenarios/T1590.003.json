@@ -1,0 +1,182 @@
+{
+  "id": "T1590.003",
+  "title": "네트워크 신뢰 관계 수집 시뮬레이션",
+  "titleEn": "Network Trust Dependencies Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 신뢰 관계 탐색", "labelEn": "🔍 Trust Discovery", "steps": [0, 1] },
+    { "label": "🔗 VPN/SSO 분석", "labelEn": "🔗 VPN/SSO Analysis", "steps": [2, 3] },
+    { "label": "🎯 공급망 매핑", "labelEn": "🎯 Supply Chain Mapping", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "target", "label": "Target Org", "x": 200, "y": 60 },
+    { "id": "partner", "label": "Partner Corp", "x": 350, "y": 30 },
+    { "id": "mssp", "label": "MSSP Provider", "x": 350, "y": 90 },
+    { "id": "cloud", "label": "Cloud SaaS", "x": 500, "y": 30 },
+    { "id": "vpn", "label": "VPN Tunnel", "x": 500, "y": 90 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "minStep": 0 },
+    { "from": "target", "to": "partner", "minStep": 1 },
+    { "from": "target", "to": "mssp", "minStep": 2 },
+    { "from": "target", "to": "cloud", "minStep": 3 },
+    { "from": "partner", "to": "vpn", "minStep": 1 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "trust_map.pdf", "icon": "🔗", "alert": true },
+    { "name": "{companyName} Recon", "icon": "📁" },
+    { "name": "supply_chain.xlsx", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "nltest /domain_trusts /all_trusts /v /server:{companyName}-dc01",
+      "out": "List of domain trusts:\n    0: {companyName}.LOCAL (NT 5) (Forest Tree Root) (Primary Domain) (Native)\n       Dom Guid: a1b2c3d4-e5f6-7890-abcd-ef1234567890\n       Dom Sid: S-1-5-21-1234567890-987654321-1122334455\n\n    1: PARTNER-CORP.LOCAL (NT 5) (Forest) (Direct Outbound) (Direct Inbound)\n       Dom Guid: f1e2d3c4-b5a6-9870-dcba-543210fedcba\n       Trust type: External trust\n       Trust attributes: FOREST_TRANSITIVE\n       Direction: Bi-directional\n       Selective Auth: NO\n\n    2: SUPPLIER-INC.LOCAL (NT 5) (Forest) (Direct Outbound)\n       Trust type: External trust\n       Trust attributes: NON_TRANSITIVE\n       Direction: One-way outbound\n\n    3: MSSP-PROVIDER.LOCAL (NT 5) (Direct Inbound)\n       Trust type: Realm trust\n       Direction: One-way inbound\n       Selective Auth: YES\n\nThe command completed successfully",
+      "def": "[AD Monitoring] Domain trust enumeration detected via nltest",
+      "defAction": "Source: Workstation 10.0.1.45\nTarget: {companyName}-dc01 DC\nAction: Suspicious AD reconnaissance logged, account activity reviewed",
+      "desc": "nltest 명령으로 Active Directory 도메인 트러스트 관계를 열거합니다.",
+      "descEn": "Enumerate Active Directory domain trust relationships using the nltest command.",
+      "stepTitle": "AD 도메인 트러스트 열거",
+      "stepTitleEn": "AD Domain Trust Enumeration",
+      "feynman": "nltest는 Active Directory의 '동맹 관계'를 보여주는 도구입니다. 이 회사는 PARTNER-CORP과 양방향 신뢰, SUPPLIER-INC에 단방향 신뢰, MSSP-PROVIDER로부터 접근을 허용하고 있습니다. 특히 양방향+Transitive+Selective Auth 없음은 파트너사를 통한 무제한 접근이 가능하다는 뜻입니다.",
+      "feynmanEn": "nltest shows AD 'alliance relationships.' This company has bi-directional trust with PARTNER-CORP, one-way trust to SUPPLIER-INC, and allows access from MSSP-PROVIDER. Bi-directional + Transitive + No Selective Auth means unlimited access through the partner.",
+      "expert": "nltest /domain_trusts는 AD 도메인/포리스트 트러스트를 열거합니다. PARTNER-CORP과의 양방향 포리스트 트러스트에 FOREST_TRANSITIVE 속성과 Selective Auth 미적용은 심각한 보안 리스크입니다. 공격자가 파트너 도메인을 장악하면 SID Filtering 우회를 통해 대상 포리스트의 모든 리소스에 접근 가능합니다.",
+      "expertEn": "nltest /domain_trusts enumerates AD domain/forest trusts. The bi-directional forest trust with PARTNER-CORP having FOREST_TRANSITIVE and no Selective Auth is a severe security risk. Compromising the partner domain enables access to all target forest resources via SID Filtering bypass.",
+      "defTooltip": "🔐 AD 모니터링: nltest를 통한 도메인 트러스트 열거 감지",
+      "defTooltipEn": "🔐 AD Monitoring: Domain trust enumeration detected via nltest",
+      "hackerLog": {
+        "title": "nltest_trusts.log",
+        "lines": [
+          { "log": "PARTNER-CORP.LOCAL | Bi-directional | FOREST_TRANSITIVE", "desc": "💡 양방향 포리스트 트러스트 - 파트너사를 통한 횡적 이동이 가능합니다" },
+          { "log": "Selective Auth: NO", "desc": "💡 선택적 인증 미적용 - 파트너 도메인의 모든 사용자가 리소스에 접근 가능" },
+          { "log": "MSSP-PROVIDER.LOCAL | One-way inbound", "desc": "💡 MSSP의 인바운드 접근 - 관리 서비스 제공자의 접근 경로 파악" }
+        ]
+      },
+      "terms": [
+        { "name": "Domain Trust", "desc": "Active Directory에서 서로 다른 도메인 간 인증 관계를 설정하는 것. 양방향 트러스트는 양쪽 모두 상대의 사용자를 인증합니다" },
+        { "name": "Selective Authentication", "desc": "트러스트에서 특정 사용자만 리소스에 접근할 수 있도록 제한하는 설정. 미적용 시 모든 인증된 사용자가 접근 가능합니다" }
+      ]
+    },
+    {
+      "cmd": "bloodhound-python -c Trusts,ACL -d {companyName}.local -u recon_user -p 'P@ss123' -ns 10.0.1.10 --zip",
+      "out": "INFO: Found AD domain: {companyName}.local\nINFO: Connecting to 10.0.1.10 (DC01.{companyName}.local)\nINFO: Enumerating trusts...\nINFO: Found trust: {companyName}.local -> PARTNER-CORP.local (Bidirectional)\nINFO: Found trust: {companyName}.local -> SUPPLIER-INC.local (Outbound)\nINFO: Found trust: MSSP-PROVIDER.local -> {companyName}.local (Inbound)\nINFO: Enumerating ACLs...\n\nTrust Attack Paths Found:\n  Path 1: PARTNER-CORP\\Domain Users → GenericAll → {companyName}\\FileServers (OU)\n  Path 2: MSSP-PROVIDER\\svc_monitoring → WriteDACL → {companyName}\\Domain Controllers\n  Path 3: {companyName}\\svc_partner_sync → DCSync rights on {companyName}.local\n\nINFO: Compressing output to 20250115_bloodhound.zip\nINFO: Done. 3 trust attack paths identified",
+      "def": "[EDR] BloodHound collection agent detected - AD reconnaissance in progress",
+      "defAction": "Source: recon_user@10.0.1.45\nTarget: {companyName}.local DC\nAction: Account suspended, LDAP query auditing enabled, IR team notified",
+      "desc": "BloodHound로 AD 트러스트 관계와 ACL을 분석하여 트러스트를 통한 공격 경로를 발견합니다.",
+      "descEn": "Analyze AD trust relationships and ACLs with BloodHound to discover trust-based attack paths.",
+      "stepTitle": "BloodHound 트러스트 공격 경로 분석",
+      "stepTitleEn": "BloodHound Trust Attack Path Analysis",
+      "feynman": "BloodHound는 AD의 '관계도'를 시각적으로 보여주는 도구입니다. 단순히 누가 누구를 신뢰하는지가 아니라, '이 경로를 통해 관리자 권한을 얻을 수 있다'는 공격 경로를 자동으로 찾아줍니다. 파트너사의 일반 사용자가 파일 서버를 완전히 제어할 수 있고, MSSP의 서비스 계정이 도메인 컨트롤러의 보안 설정을 바꿀 수 있다는 위험 경로가 발견됐습니다.",
+      "feynmanEn": "BloodHound visually maps AD relationships. It automatically finds attack paths like 'through this route, you can gain admin privileges.' It discovered that partner users can fully control file servers, and MSSP service accounts can modify DC security settings.",
+      "expert": "BloodHound의 트러스트 분석에서 3개의 치명적 공격 경로가 발견됐습니다. Path 2의 WriteDACL 권한으로 DC의 DACL을 수정하면 DCSync 권한을 자체 부여할 수 있고, Path 3의 기존 DCSync 권한은 도메인의 모든 계정 해시를 추출하여 Golden Ticket 공격이 가능합니다.",
+      "expertEn": "BloodHound trust analysis found 3 critical attack paths. Path 2's WriteDACL on DC allows self-granting DCSync rights, and Path 3's existing DCSync rights enable extracting all account hashes for Golden Ticket attacks.",
+      "defTooltip": "🛡️ EDR: BloodHound 수집 에이전트 감지 - AD 정찰 진행 중",
+      "defTooltipEn": "🛡️ EDR: BloodHound collection agent detected - AD reconnaissance in progress",
+      "hackerLog": {
+        "title": "bloodhound_trusts.log",
+        "lines": [
+          { "log": "Path 2: MSSP-PROVIDER\\svc_monitoring → WriteDACL → DC", "desc": "💡 MSSP 서비스 계정이 DC의 보안 설정을 변경할 수 있습니다 - 매우 위험!" },
+          { "log": "Path 3: svc_partner_sync → DCSync rights", "desc": "💡 파트너 동기화 계정에 DCSync 권한 - 모든 사용자의 비밀번호 해시를 추출 가능" },
+          { "log": "3 trust attack paths identified", "desc": "💡 3개의 트러스트 공격 경로 - 파트너/MSSP를 통한 도메인 장악이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "BloodHound", "desc": "Active Directory의 관계를 그래프로 시각화하고 공격 경로를 자동으로 찾아주는 도구. 공격자와 방어자 모두 사용합니다" },
+        { "name": "DCSync", "desc": "도메인 컨트롤러를 흉내내어 AD에서 모든 사용자의 비밀번호 해시를 복제하는 공격. Golden Ticket 생성의 전 단계입니다" }
+      ]
+    },
+    {
+      "cmd": "nmap -sV -p 443,500,4500,1194,10443 --script ssl-cert,ike-version partner-vpn.{companyName}.com mssp-vpn.{companyName}.com",
+      "out": "Nmap scan report for partner-vpn.{companyName}.com (10.0.2.5)\nPORT      STATE SERVICE        VERSION\n443/tcp   open  ssl/https      Cisco AnyConnect VPN\n| ssl-cert: Subject: CN=partner-vpn.{companyName}.com/O={companyName} Inc.\n|   Not valid after: 2025-06-15\n500/udp   open  isakmp         Cisco IKEv2\n| ike-version: IKEv2 with 3DES-CBC (WEAK)\n4500/udp  open  nat-t-ike      Cisco NAT-T\n\nNmap scan report for mssp-vpn.{companyName}.com (10.0.2.10)\nPORT      STATE SERVICE        VERSION\n443/tcp   open  ssl/https      Fortinet SSL-VPN\n| ssl-cert: Subject: CN=mssp-vpn.{companyName}.com/O={companyName} Inc.\n|   Not valid after: 2026-12-01\n10443/tcp open  ssl/https      Fortinet FortiGate Admin\n| ssl-cert: Subject: CN=FGT-{companyName}/O=Fortinet\n|   Issuer: CN=FGT-{companyName}",
+      "def": "[Firewall] VPN endpoint scanning detected - IKE and SSL probing",
+      "defAction": "Source: 10.0.1.45\nTarget: partner-vpn, mssp-vpn endpoints\nAction: VPN endpoint hardening review, certificate rotation scheduled",
+      "desc": "VPN 엔드포인트를 스캔하여 장비 유형, 프로토콜 버전, SSL 인증서 정보를 수집합니다.",
+      "descEn": "Scan VPN endpoints to gather device type, protocol version, and SSL certificate information.",
+      "stepTitle": "VPN 엔드포인트 스캔 및 인증서 분석",
+      "stepTitleEn": "VPN Endpoint Scan & Certificate Analysis",
+      "feynman": "조직이 파트너와 연결하는 VPN '문'을 검사합니다. Cisco AnyConnect와 Fortinet SSL-VPN이 발견됐고, IKEv2에 약한 암호화(3DES)를 사용하는 것이 발견됐습니다. 또한 Fortinet의 관리자 페이지(10443)가 외부에 노출되어 있어 장비 설정 변경이 가능할 수 있습니다.",
+      "feynmanEn": "Inspecting the VPN 'doors' connecting the org to partners. Cisco AnyConnect and Fortinet SSL-VPN were found, with IKEv2 using weak 3DES encryption. The Fortinet admin page (10443) is externally exposed, potentially allowing device configuration changes.",
+      "expert": "파트너 VPN의 IKEv2가 3DES-CBC를 사용하는 것은 약한 암호화입니다. Fortinet SSL-VPN은 CVE-2023-27997(Heap overflow)과 CVE-2024-21762(Out-of-bounds write)의 대상일 수 있습니다. FortiGate 관리 인터페이스(10443)의 외부 노출은 장비 자체의 침해로 이어질 수 있습니다.",
+      "expertEn": "Partner VPN's IKEv2 using 3DES-CBC is weak encryption. Fortinet SSL-VPN may be vulnerable to CVE-2023-27997 (Heap overflow) and CVE-2024-21762 (Out-of-bounds write). The exposed FortiGate admin interface (10443) could lead to device compromise.",
+      "defTooltip": "🔒 방화벽: VPN 엔드포인트 스캐닝 감지 - IKE/SSL 프로빙",
+      "defTooltipEn": "🔒 Firewall: VPN endpoint scanning detected - IKE and SSL probing",
+      "hackerLog": {
+        "title": "vpn_scan.log",
+        "lines": [
+          { "log": "IKEv2 with 3DES-CBC (WEAK)", "desc": "💡 약한 암호화 - 3DES는 현대 공격에 취약한 레거시 알고리즘입니다" },
+          { "log": "10443/tcp open Fortinet FortiGate Admin", "desc": "💡 관리 인터페이스 외부 노출 - 장비 설정 변경/백도어 설치 가능" },
+          { "log": "Not valid after: 2025-06-15", "desc": "💡 인증서 곧 만료 - 만료 시 VPN 장애 발생 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "IKE (Internet Key Exchange)", "desc": "IPSec VPN에서 보안 연결을 설정하기 위한 키 교환 프로토콜. IKEv2가 IKEv1보다 안전합니다" },
+        { "name": "3DES (Triple DES)", "desc": "오래된 대칭 암호화 알고리즘. 현대 보안 기준에 부합하지 않으며 AES로 교체해야 합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 sso_recon.py --domain {companyName}.com --check-saml --check-oauth --check-oidc --output sso_results.json",
+      "out": "[*] SSO/Federation Reconnaissance for {companyName}.com\n\n=== SAML Configuration ===\nIdP Entity ID: https://login.{companyName}.com/saml/metadata\nIdP Provider: Okta (okta.com)\nSAML Endpoints:\n  SSO URL: https://login.{companyName}.com/app/saml/sso\n  SLO URL: https://login.{companyName}.com/app/saml/slo\nConnected Service Providers: 12\n  - Salesforce\n  - Slack\n  - AWS Console\n  - Jira Cloud\n  - Confluence Cloud\n  - GitHub Enterprise\n\n=== OAuth2/OIDC ===\nAuthorization Server: https://login.{companyName}.com/oauth2/default\nClient Applications Discovered: 8\n  - Internal Dashboard (public client)\n  - Mobile App (native client)\n  - Partner Portal (confidential client)\n\n=== Federation Risks ===\n⚠️ SAML metadata publicly accessible\n⚠️ No MFA enforcement on IdP detected\n⚠️ Public OAuth client (no client secret)\n\n[+] Results saved to sso_results.json",
+      "def": "[IdP Security] SSO/SAML metadata enumeration detected",
+      "defAction": "Source: External reconnaissance\nTarget: {companyName} Okta IdP\nAction: SAML metadata access restricted, MFA enforcement reviewed",
+      "desc": "SAML/OAuth/OIDC 설정을 분석하여 SSO 인프라와 연동된 서비스를 파악합니다.",
+      "descEn": "Analyze SAML/OAuth/OIDC configurations to map SSO infrastructure and connected services.",
+      "stepTitle": "SSO/페더레이션 인프라 분석",
+      "stepTitleEn": "SSO/Federation Infrastructure Analysis",
+      "feynman": "SSO는 한 번 로그인하면 여러 서비스를 사용할 수 있게 해주는 '마스터 키'입니다. Okta가 이 마스터 키를 관리하고 있고, Salesforce, Slack, AWS 등 12개 서비스와 연결되어 있습니다. 만약 Okta가 해킹당하면? 12개 서비스 모두가 위험해집니다. 실제로 2022년 Okta/LAPSUS$ 사건에서 이런 일이 발생했습니다.",
+      "feynmanEn": "SSO is a 'master key' that lets you log into multiple services with one login. Okta manages this master key, connected to 12 services including Salesforce, Slack, AWS. If Okta is hacked, all 12 services are compromised. This actually happened in the 2022 Okta/LAPSUS$ incident.",
+      "expert": "SAML 메타데이터의 공개 접근은 공격자에게 IdP 구성, 서명 인증서, 엔드포인트 URL을 노출합니다. MFA 미적용 IdP는 자격증명 스터핑 공격에 취약하며, Public OAuth 클라이언트(client_secret 없음)는 토큰 탈취 공격의 대상입니다. IdP 침해 시 모든 연동 SP에 대한 액세스가 가능합니다.",
+      "expertEn": "Publicly accessible SAML metadata exposes IdP configuration, signing certificates, and endpoint URLs. IdP without MFA is vulnerable to credential stuffing, and public OAuth clients (no client_secret) are targets for token theft. IdP compromise grants access to all connected SPs.",
+      "defTooltip": "🔑 IdP 보안: SSO/SAML 메타데이터 열거 감지",
+      "defTooltipEn": "🔑 IdP Security: SSO/SAML metadata enumeration detected",
+      "hackerLog": {
+        "title": "sso_recon.log",
+        "lines": [
+          { "log": "IdP Provider: Okta (okta.com)", "desc": "💡 Okta가 ID 제공자 - Okta 침해 시 12개 서비스 모두 위험합니다" },
+          { "log": "No MFA enforcement on IdP detected", "desc": "💡 MFA 미적용 - 유출된 비밀번호만으로 SSO 로그인이 가능합니다" },
+          { "log": "AWS Console (connected SP)", "desc": "💡 AWS 콘솔이 SSO 연동 - IdP 침해로 클라우드 인프라까지 장악 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "SAML (Security Assertion Markup Language)", "desc": "SSO를 위한 XML 기반 인증 프로토콜. IdP(Identity Provider)가 사용자를 인증하고 SP(Service Provider)에 인증 정보를 전달합니다" },
+        { "name": "IdP (Identity Provider)", "desc": "사용자 인증을 담당하는 중앙 서비스(예: Okta, Azure AD). SSO의 핵심으로, 침해 시 모든 연동 서비스가 위험해집니다" }
+      ]
+    },
+    {
+      "cmd": "python3 trust_intel_report.py --trusts nltest_output.txt --bloodhound bloodhound.zip --vpn vpn_scan.txt --sso sso_results.json --output trust_map.pdf",
+      "out": "[+] Building trust dependency map...\n\n=== NETWORK TRUST INTELLIGENCE REPORT ===\n\nTarget: {companyName}.com\n\nTrust Relationships Summary:\n  AD Trusts: 3 (1 bidirectional, 1 outbound, 1 inbound)\n  VPN Tunnels: 2 (Cisco AnyConnect, Fortinet SSL-VPN)\n  SSO Federation: 12 service providers via Okta\n  API Integrations: 8 OAuth clients\n\nCritical Attack Paths:\n  1. PARTNER-CORP → Bidirectional trust → DCSync → Domain Admin\n     Difficulty: Medium | Impact: CRITICAL\n  2. MSSP svc_monitoring → WriteDACL → DC → Domain Admin\n     Difficulty: Medium | Impact: CRITICAL\n  3. Okta IdP → No MFA → All 12 SPs including AWS\n     Difficulty: Low | Impact: CRITICAL\n  4. Fortinet VPN → CVE-2023-27997 → Internal network\n     Difficulty: Low | Impact: HIGH\n\nRecommended Attack Strategy:\n  Primary: Compromise Okta IdP (lowest difficulty, highest impact)\n  Secondary: Exploit Fortinet VPN vulnerability\n  Tertiary: Lateral movement via partner trust\n\n[+] Report saved to trust_map.pdf",
+      "def": "[SIEM] Complete trust dependency reconnaissance campaign detected",
+      "defAction": "Source: Correlation of trust reconnaissance activities\nTarget: {companyName} trust infrastructure\nAction: Incident #2024-1225 created, Zero Trust review initiated",
+      "desc": "모든 신뢰 관계 데이터를 통합하여 공격 우선순위 매트릭스와 공급망 공격 경로를 생성합니다.",
+      "descEn": "Consolidate all trust relationship data into an attack priority matrix and supply chain attack paths.",
+      "stepTitle": "신뢰 관계 통합 공격 보고서",
+      "stepTitleEn": "Trust Dependency Attack Report",
+      "feynman": "모든 신뢰 관계를 하나의 지도로 합치는 마지막 단계입니다. AD 트러스트 3개, VPN 2개, SSO 12개, API 8개를 종합하면 '어디를 공격하면 가장 효과적인지'가 보입니다. Okta IdP 공격이 가장 쉬우면서 가장 큰 피해를 줄 수 있어 1순위이고, Fortinet VPN 취약점이 2순위입니다.",
+      "feynmanEn": "The final step combines all trust relationships into one map. Aggregating 3 AD trusts, 2 VPNs, 12 SSO, and 8 APIs reveals the most effective attack targets. Okta IdP attack is easiest with highest impact (priority 1), followed by Fortinet VPN vulnerability (priority 2).",
+      "expert": "다중 신뢰 벡터를 통합 분석한 결과, Okta IdP 침해가 최소 노력으로 최대 영향(12개 SP + AWS)을 달성하는 최적 공격 경로입니다. Zero Trust 모델로의 전환, 모든 트러스트에 MFA 강제 적용, Selective Authentication 활성화, VPN 장비 패치 적용이 시급합니다.",
+      "expertEn": "Multi-vector trust analysis shows Okta IdP compromise achieves maximum impact (12 SPs + AWS) with minimum effort. Urgent recommendations: Zero Trust transition, MFA enforcement on all trusts, Selective Authentication activation, and VPN device patching.",
+      "defTooltip": "🗺️ SIEM: 완전한 신뢰 관계 정찰 캠페인 감지",
+      "defTooltipEn": "🗺️ SIEM: Complete trust dependency reconnaissance campaign detected",
+      "hackerLog": {
+        "title": "trust_intel_report.log",
+        "lines": [
+          { "log": "Primary: Compromise Okta IdP (lowest difficulty, highest impact)", "desc": "💡 Okta 침해가 1순위 - MFA 없이 12개 서비스 + AWS 동시 접근 가능" },
+          { "log": "Fortinet VPN → CVE-2023-27997 → Internal network", "desc": "💡 Fortinet 취약점으로 내부 네트워크에 직접 침투 가능" },
+          { "log": "PARTNER-CORP → Bidirectional trust → DCSync", "desc": "💡 파트너사 침해 시 AD 전체 장악까지 이어질 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Zero Trust Architecture", "desc": "'아무것도 신뢰하지 않고, 항상 검증한다'는 보안 모델. 내부 네트워크도 외부와 동일한 수준의 인증과 접근 제어를 적용합니다" },
+        { "name": "Supply Chain Attack", "desc": "타겟 조직의 공급업체나 파트너를 먼저 침해하여 신뢰 관계를 통해 타겟에 접근하는 공격. SolarWinds 사건이 대표적입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "nltest (PID: 7101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "bloodhound-python (PID: 7178)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "nmap (PID: 7245)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 sso_recon.py (PID: 7312)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 trust_intel_report.py (PID: 7389)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

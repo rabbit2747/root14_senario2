@@ -1,0 +1,102 @@
+{
+  "tacticId": "t1",
+  "tacticName": "Reconnaissance",
+  "tacticNameKo": "정찰",
+  "dictionaryTitle": "Recon Dictionary",
+  "bgLogo": "/logo/logo-name-dark-nobg.png",
+  "speedStorageKey": "recon_widget_speed",
+
+  "glossary": {
+    "osint": {
+      "term": "OSINT",
+      "fullName": "Open-Source Intelligence",
+      "analogy": "\ud83d\udd0d 합법적인 뒷조사",
+      "easyDesc": "구글 검색, 뉴스, 블로그 등 누구나 볼 수 있게 공개된 정보를 긁어모아 타겟의 약점을 찾아내는 정보 수집 기법입니다.",
+      "techDesc": "타겟 시스템에 직접 접근하지 않고, 공개적으로 접근 가능한 출처에서 대상 조직 및 인프라의 위협 인텔리전스를 수집하는 방법론입니다."
+    },
+    "socialeng": {
+      "term": "Identity Gathering",
+      "fullName": "Gather Victim Identity Information",
+      "analogy": "\ud83d\udc64 사원증 훔쳐보기",
+      "easyDesc": "회사 직원들의 이름, 이메일 주소, 직급 등을 미리 알아내어 나중에 '가짜 메일(피싱)'을 보낼 때 진짜처럼 보이게 만듭니다.",
+      "techDesc": "LinkedIn 등의 소셜 미디어를 통해 임직원 정보를 크롤링하여, 사회공학적(Social Engineering) 공격에 사용할 표적 목록(Target List)을 구축합니다."
+    },
+    "shodan": {
+      "term": "Shodan",
+      "fullName": "Open Technical Databases",
+      "analogy": "\ud83d\udce1 해커들의 구글 검색기",
+      "easyDesc": "우리가 구글에서 문서를 찾듯, 해커들은 '쇼단'이라는 특수 사이트에서 전 세계에 열려있는 서버와 방화벽의 IP 주소를 검색합니다.",
+      "techDesc": "공격자는 타겟 네트워크를 직접 스캔하는 대신, Shodan, Censys, Passive DNS 등 이미 구축된 기술 데이터베이스를 조회하여 공격 표면(Attack Surface)을 식별합니다."
+    },
+    "passive_recon": {
+      "term": "Passive Recon",
+      "fullName": "Passive Reconnaissance",
+      "analogy": "\ud83d\udd2d 멀리서 망원경으로 관찰",
+      "easyDesc": "도둑이 타겟 집을 직접 만지지 않고, 산 위에서 망원경으로 CCTV 위치와 경비원 교대 시간만 몰래 관찰하는 단계입니다.",
+      "techDesc": "대상 시스템의 로그 장비나 IDS/IPS에 탐지되지 않도록, 타겟과 직접적인 패킷 교환 없이 간접적인 방식으로 정보를 수집하는 전술입니다."
+    },
+    "active_scan": {
+      "term": "Active Scan",
+      "fullName": "Active Scanning: Vulnerability",
+      "analogy": "\ud83d\udeaa 집집마다 문고리 돌려보기",
+      "easyDesc": "도둑이 직접 타겟 건물로 다가가서, 열려있는 문이나 고장 난 창문(취약점)이 있는지 하나하나 질러보는 적극적인 행동입니다.",
+      "techDesc": "Nmap, Nessus 등의 도구를 이용해 타겟 IP 대역에 직접 프로브(Probe) 패킷을 전송하여, 활성화된 포트 및 패치되지 않은 CVE 취약점을 탐지합니다."
+    }
+  },
+
+  "attackCases": [
+    {
+      "id": 1,
+      "subTechniqueId": "T1589.003",
+      "subTechniqueName": "Employee Names",
+      "tactic": "Reconnaissance (정찰)",
+      "technique": "Gather Victim Identity Information",
+      "log": "[THREAT-INTEL] Massive profile scraping detected on LinkedIn for 'GotRoot Corp' employees.",
+      "report": "공격자는 LinkedIn과 Facebook을 크롤링하여 회사 IT 부서 및 재무 부서 직원들의 이름, 사내 이메일 형식(이름.성@gotroot.com), 직급 정보를 대량으로 수집했습니다.",
+      "mechanismTitle": "소셜 미디어를 활용한 표적 식별 (Passive)",
+      "mechanismDesc": "공격자는 타겟 회사의 네트워크를 전혀 건드리지 않습니다. 임직원들이 자발적으로 올린 소셜 미디어 프로필을 수집하여 향후 스피어피싱 공격을 위한 정교한 '표적 연락처 목록'을 완성합니다.",
+      "animationPreset": "scan",
+      "targets": { "step1": "osint", "step2": "socialeng", "step3": "passive_recon" }
+    },
+    {
+      "id": 2,
+      "subTechniqueId": "T1596.001",
+      "subTechniqueName": "DNS / Passive DNS",
+      "tactic": "Reconnaissance (정찰)",
+      "technique": "Search Open Technical Databases",
+      "log": "[THREAT-INTEL] Abnormal spike in Passive DNS & WHOIS queries for 'gotroot.com' domains.",
+      "report": "공격자는 Shodan 및 Passive DNS 데이터베이스를 검색하여 'gotroot.com'의 서브 도메인(vpn.gotroot.com 등)과 연결된 공인 IP 주소 및 시스템 목록을 은밀하게 파악했습니다.",
+      "mechanismTitle": "공개 기술 데이터베이스 조회 (Passive)",
+      "mechanismDesc": "회사 인프라와 직접 통신하면 방화벽에 로그가 남습니다. 따라서 해커는 전 세계 인터넷을 미리 스캔해둔 검색 엔진(Shodan)을 조회하여, 탐지될 위험 없이 회사의 외부 접점(Attack Surface) 지도를 그립니다.",
+      "animationPreset": "query",
+      "targets": { "step1": "shodan", "step2": "passive_recon" }
+    },
+    {
+      "id": 3,
+      "subTechniqueId": "T1595.002",
+      "subTechniqueName": "Vulnerability Scanning",
+      "tactic": "Reconnaissance (정찰)",
+      "technique": "Active Scanning",
+      "log": "[IDS-ALRT] External IP triggered Nessus/OpenVAS vulnerability scanner signature against VPN Gateway.",
+      "report": "앞선 정찰로 수집한 회사의 VPN 게이트웨이 IP를 대상으로, 공격자가 자동화된 취약점 스캐너를 가동하여 패치되지 않은 구버전 소프트웨어(CVE 취약점)가 있는지 능동적으로 점검했습니다.",
+      "mechanismTitle": "취약점 자동화 탐색 (Active)",
+      "mechanismDesc": "수동적 정찰(Passive)이 끝나면, 공격자는 파악된 타겟 시스템에 특수한 네트워크 패킷을 직접 전송합니다. 방화벽에 탐지될 위험을 감수하더라도, 확실하게 뚫고 들어갈 수 있는 '고장난 문'을 찾는 적극적인 행위입니다.",
+      "animationPreset": "probe",
+      "targets": { "step1": "active_scan", "step2": "osint" }
+    }
+  ],
+
+  "stepTimings": {
+    "alert": 3000,
+    "context": 4000,
+    "mechanism": 5000,
+    "identified": 5500
+  },
+
+  "speedOptions": [
+    { "label": "0.5x", "value": 0.5 },
+    { "label": "1x", "value": 1 },
+    { "label": "1.5x", "value": 1.5 },
+    { "label": "2x", "value": 2 }
+  ]
+}

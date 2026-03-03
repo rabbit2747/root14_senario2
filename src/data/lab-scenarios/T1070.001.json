@@ -1,0 +1,233 @@
+{
+  "id": "T1070.001",
+  "title": "Windows 이벤트 로그 삭제 시뮬레이션",
+  "titleEn": "Clear Windows Event Logs Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon" },
+    { "label": "공격", "labelEn": "Attack" },
+    { "label": "침투", "labelEn": "Breach" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "target", "label": "Target PC", "type": "victim" },
+    { "id": "eventlog", "label": "Event Log Service", "type": "server" },
+    { "id": "siem", "label": "SIEM / Syslog", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "Elevated Shell", "activeStep": 0 },
+    { "from": "target", "to": "eventlog", "label": "wevtutil cl", "activeStep": 2 },
+    { "from": "eventlog", "to": "siem", "label": "Event 1102", "activeStep": 6 },
+    { "from": "siem", "to": "target", "label": "Alert", "activeStep": 6 }
+  ],
+  "desktopIcons": [
+    { "label": "CMD (Admin)", "icon": "💻" },
+    { "label": "Event Viewer", "icon": "📋" },
+    { "label": "SIEM Dashboard", "icon": "🛡️" }
+  ],
+  "steps": [
+    {
+      "cmd": "wevtutil el | find /c /v \"\"",
+      "out": "387",
+      "def": "[SIEM] Event log channel enumeration by {userName}",
+      "defAction": "Process: wevtutil.exe\nUser: {companyName}\\{userName}\nOperation: List event log channels\nResult: 387 channels found\nRisk Level: Low\nAction: Log activity",
+      "desc": "시스템에 존재하는 이벤트 로그 채널 수를 확인합니다. Windows는 보안, 시스템, 애플리케이션 등 수백 개의 로그 채널을 유지합니다.",
+      "descEn": "Checks the number of event log channels on the system. Windows maintains hundreds of log channels including Security, System, and Application.",
+      "stepTitle": "로그 채널 열거",
+      "stepTitleEn": "Enumerate Channels",
+      "feynman": "건물의 CCTV 모니터링룸에 들어가서 카메라가 총 몇 대 있는지 세는 것과 같습니다. 387대의 카메라가 건물 곳곳을 녹화하고 있습니다.",
+      "feynmanEn": "It's like walking into a building's CCTV monitoring room and counting how many cameras exist. 387 cameras are recording across the entire building.",
+      "expert": "wevtutil el은 Windows Event Log 서비스의 모든 등록 채널을 나열합니다. 기본 Windows 설치에도 300개 이상의 채널이 존재하며, Sysmon Event ID 1로 wevtutil.exe 실행을 탐지할 수 있습니다.",
+      "expertEn": "wevtutil el lists all registered channels of the Windows Event Log service. Even a default Windows installation has 300+ channels. Sysmon Event ID 1 can detect wevtutil.exe execution.",
+      "defTooltip": "Sysmon Event ID 1에서 wevtutil.exe의 'el' 인자를 모니터링하세요. 정상 관리자도 사용하지만, 후속 'cl' 명령과 연계 탐지가 중요합니다.",
+      "defTooltipEn": "Monitor wevtutil.exe with 'el' argument in Sysmon Event ID 1. Normal admins may use it, but correlation with subsequent 'cl' commands is key.",
+      "hackerLog": {
+        "title": "로그 채널 열거 결과",
+        "lines": [
+          { "text": "wevtutil el | find /c /v \"\"", "desc": "전체 이벤트 로그 채널 수 확인" },
+          { "text": "387", "desc": "387개의 감시 채널이 활성 상태" }
+        ]
+      },
+      "terms": [
+        { "term": "Event Log Channel", "desc": "Windows 이벤트 로그의 개별 기록 채널 (Security, System, Application 등)" },
+        { "term": "wevtutil", "desc": "Windows Event Utility - 이벤트 로그 관리 명령줄 도구" }
+      ]
+    },
+    {
+      "cmd": "wevtutil qe Security /c:5 /rd:true /f:text",
+      "out": "Event[0]:\n  Log Name: Security\n  Source: Microsoft-Windows-Security-Auditing\n  Event ID: 4624\n  Level: Information\n  Description: An account was successfully logged on.\n  Subject: {companyName}\\{userName}\n  Logon Type: 10 (RemoteInteractive)\n  Source Network: 192.168.1.50\n\nEvent[1]:\n  Event ID: 4672\n  Description: Special privileges assigned to new logon.\n  Account: {companyName}\\{userName}\n  Privileges: SeDebugPrivilege, SeImpersonatePrivilege",
+      "def": "[SIEM] Security log query detected - attacker reviewing own activity traces",
+      "defAction": "Process: wevtutil.exe\nLog: Security\nQuery: Last 5 events (reverse order)\nUser: {companyName}\\{userName}\nRisk Level: Medium\nAction: Attacker likely preparing log tampering",
+      "desc": "보안 이벤트 로그의 최근 5개 항목을 확인합니다. 공격자는 자신의 활동(로그온, 권한 할당)이 기록되어 있음을 확인합니다.",
+      "descEn": "Checks the last 5 entries in the Security event log. The attacker confirms that their activities (logon, privilege assignment) are recorded.",
+      "stepTitle": "보안 로그 확인",
+      "stepTitleEn": "Query Security Log",
+      "feynman": "CCTV 녹화영상을 되감기로 보면서 자기가 찍힌 장면이 있는지 확인하는 것과 같습니다. '아, 내가 들어온 시간이 다 기록되어 있구나'라고 인지합니다.",
+      "feynmanEn": "It's like rewinding CCTV footage to check if you were caught on camera. The attacker realizes 'My entry time and activities are all recorded here.'",
+      "expert": "Event ID 4624 (Logon Type 10 RemoteInteractive)는 RDP 접근을 나타내며, 4672는 관리자 권한 할당을 기록합니다. 공격자의 흔적 확인 행위 자체가 이후 로그 삭제 의도를 시사합니다.",
+      "expertEn": "Event ID 4624 (Logon Type 10 RemoteInteractive) indicates RDP access, and 4672 records privilege assignment. The act of reviewing traces itself suggests intent to delete logs.",
+      "defTooltip": "wevtutil qe 명령으로 보안 로그를 조회하는 행위 자체를 모니터링하세요. 특히 /rd:true (역순 조회)는 최근 활동 확인 의도를 나타냅니다.",
+      "defTooltipEn": "Monitor wevtutil qe commands querying security logs. The /rd:true flag (reverse order) indicates intent to review recent activity.",
+      "hackerLog": {
+        "title": "보안 로그 흔적 확인",
+        "lines": [
+          { "text": "Event ID: 4624 ... Logon Type: 10 (RemoteInteractive)", "desc": "RDP 로그인 기록이 남아있음" },
+          { "text": "Event ID: 4672 ... Privileges: SeDebugPrivilege", "desc": "관리자 권한 할당 흔적 발견" }
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 4624", "desc": "계정 로그온 성공 이벤트 - Logon Type으로 접근 방식 식별 가능" },
+        { "term": "Event ID 4672", "desc": "특수 권한 할당 이벤트 - 관리자급 로그온 시 기록" },
+        { "term": "SeDebugPrivilege", "desc": "다른 프로세스 메모리에 접근할 수 있는 디버그 권한" }
+      ]
+    },
+    {
+      "cmd": "wevtutil cl Security",
+      "out": "",
+      "def": "[EDR] CRITICAL: Security event log cleared by {userName}",
+      "defAction": "Process: wevtutil.exe (PID: 6700)\nLog Cleared: Security\nPrevious Size: 24,576 events\nUser: {companyName}\\{userName}\nEvent ID 1102: Log cleared (this event auto-generated)\nRisk Level: Critical\nAction: Alert IR team - anti-forensics in progress",
+      "desc": "보안 이벤트 로그를 완전히 삭제합니다. 24,576개의 이벤트가 삭제되지만, Windows는 삭제 행위 자체를 Event ID 1102로 기록합니다.",
+      "descEn": "Completely clears the Security event log. 24,576 events are deleted, but Windows records the clearing action itself as Event ID 1102.",
+      "stepTitle": "보안 로그 삭제",
+      "stepTitleEn": "Clear Security Log",
+      "feynman": "건물의 메인 CCTV 녹화기의 녹화 영상을 전부 삭제하는 것과 같습니다. 하지만 녹화기 자체가 '누군가가 영상을 삭제했다'는 기록을 자동으로 남깁니다.",
+      "feynmanEn": "It's like deleting all footage from the building's main CCTV recorder. However, the recorder itself automatically logs 'Someone deleted the footage.'",
+      "expert": "wevtutil cl Security 실행 시 Windows는 Event ID 1102를 자동 생성합니다. 이 이벤트는 삭제 행위 자체를 기록하며 공격자가 억제할 수 없습니다. MITRE ATT&CK T1070.001 대응의 핵심 지표입니다.",
+      "expertEn": "When wevtutil cl Security runs, Windows auto-generates Event ID 1102. This event records the clearing action itself and cannot be suppressed by the attacker. It's a key indicator for MITRE ATT&CK T1070.001 defense.",
+      "defTooltip": "Event ID 1102 (보안 로그 삭제됨)는 가장 확실한 안티포렌식 지표입니다. 이 이벤트 발생 시 즉시 IR 팀에 통보하세요. SIEM에서 실시간 알림을 설정하세요.",
+      "defTooltipEn": "Event ID 1102 (Security log cleared) is the most reliable anti-forensics indicator. Immediately notify IR team on detection. Set up real-time SIEM alerts.",
+      "hackerLog": {
+        "title": "보안 로그 삭제 실행",
+        "lines": [
+          { "text": "wevtutil cl Security", "desc": "보안 이벤트 로그 24,576건 삭제" },
+          { "text": "Event ID 1102: Log cleared", "desc": "삭제 행위 자체가 자동으로 기록됨" }
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 1102", "desc": "감사 로그가 삭제되었음을 기록하는 Windows 보안 이벤트" },
+        { "term": "Anti-Forensics", "desc": "포렌식 분석을 방해하기 위한 증거 인멸 기법" }
+      ]
+    },
+    {
+      "cmd": "wevtutil cl System",
+      "out": "",
+      "def": "[EDR] CRITICAL: System event log cleared",
+      "defAction": "Process: wevtutil.exe (PID: 6700)\nLog Cleared: System\nPrevious Size: 18,432 events\nRisk Level: Critical\nCorrelation: Second log cleared within 10 seconds",
+      "desc": "시스템 이벤트 로그를 삭제합니다. 드라이버 로드, 서비스 시작/중지 등의 기록이 사라집니다.",
+      "descEn": "Clears the System event log. Records of driver loads, service starts/stops, etc. are removed.",
+      "stepTitle": "시스템 로그 삭제",
+      "stepTitleEn": "Clear System Log",
+      "feynman": "건물의 출입문 로그 기록을 삭제하는 것과 같습니다. 누가 언제 문을 열었는지, 어떤 장비가 들어왔는지에 대한 기록이 사라집니다.",
+      "feynmanEn": "It's like deleting the building's door access logs. Records of who opened doors and what equipment entered are gone.",
+      "expert": "System 로그에는 드라이버 로드(Event ID 7045), 서비스 변경, 시스템 시작/종료 등이 기록됩니다. 보안 로그 삭제 후 10초 이내에 시스템 로그도 삭제되는 패턴은 계획적 증거 인멸을 시사합니다.",
+      "expertEn": "System log records driver loads (Event ID 7045), service changes, and system start/stop events. Clearing System log within 10 seconds of Security log suggests planned evidence destruction.",
+      "defTooltip": "보안 로그와 시스템 로그가 연속으로 삭제되는 상관관계를 SIEM 규칙으로 탐지하세요. Event ID 104 (System 로그 삭제 기록)를 모니터링하세요.",
+      "defTooltipEn": "Create SIEM correlation rules to detect sequential clearing of Security and System logs. Monitor Event ID 104 (System log clearing record).",
+      "hackerLog": {
+        "title": "시스템 로그 삭제",
+        "lines": [
+          { "text": "wevtutil cl System", "desc": "시스템 이벤트 로그 18,432건 삭제" },
+          { "text": "Correlation: Second log cleared within 10 seconds", "desc": "10초 내 연속 삭제 - 계획적 증거 인멸" }
+        ]
+      },
+      "terms": [
+        { "term": "System Event Log", "desc": "드라이버, 서비스, 하드웨어 이벤트를 기록하는 Windows 핵심 로그" },
+        { "term": "Event ID 104", "desc": "시스템 로그가 삭제되었음을 기록하는 이벤트" }
+      ]
+    },
+    {
+      "cmd": "wevtutil cl Application && wevtutil cl \"Windows PowerShell\" && wevtutil cl \"Microsoft-Windows-PowerShell/Operational\"",
+      "out": "",
+      "def": "[EDR] CRITICAL: Multiple event logs cleared in rapid succession",
+      "defAction": "Logs Cleared:\n  - Application (12,800 events)\n  - Windows PowerShell (3,200 events)\n  - PowerShell/Operational (5,100 events)\nTotal Events Destroyed: ~64,108\nRisk Level: Critical\nAction: Full incident response - all local evidence destroyed",
+      "desc": "애플리케이션, PowerShell 로그를 연속으로 삭제합니다. PowerShell 로그 삭제로 스크립트 실행 기록이 모두 사라집니다.",
+      "descEn": "Clears Application and PowerShell logs in succession. Clearing PowerShell logs removes all script execution records.",
+      "stepTitle": "PS 로그 삭제",
+      "stepTitleEn": "Clear PS Logs",
+      "feynman": "회사의 업무일지, 전화 통화 기록, 이메일 발송 기록을 한꺼번에 파쇄기에 넣는 것과 같습니다. 특히 PowerShell 로그는 공격자가 실행한 스크립트의 모든 기록입니다.",
+      "feynmanEn": "It's like shredding the company's work logs, phone records, and email records all at once. PowerShell logs in particular contain records of every script the attacker executed.",
+      "expert": "PowerShell Operational 로그(Event ID 4103, 4104)는 스크립트 블록 로깅을 포함합니다. 이 로그가 삭제되면 공격자의 PowerShell 명령 재구성이 불가능해집니다. 총 64,108개 이벤트가 파괴됩니다.",
+      "expertEn": "PowerShell Operational logs (Event ID 4103, 4104) include Script Block Logging. Clearing these makes it impossible to reconstruct attacker PowerShell commands. 64,108 total events are destroyed.",
+      "defTooltip": "PowerShell 스크립트 블록 로깅(Event ID 4104)을 SIEM으로 실시간 전송하세요. 로컬 삭제 후에도 SIEM에 원본이 보존됩니다.",
+      "defTooltipEn": "Forward PowerShell Script Block Logging (Event ID 4104) to SIEM in real-time. Even after local deletion, originals are preserved in SIEM.",
+      "hackerLog": {
+        "title": "복수 로그 연속 삭제",
+        "lines": [
+          { "text": "wevtutil cl Application", "desc": "애플리케이션 로그 12,800건 삭제" },
+          { "text": "wevtutil cl \"Microsoft-Windows-PowerShell/Operational\"", "desc": "PowerShell 스크립트 실행 기록 5,100건 삭제" }
+        ]
+      },
+      "terms": [
+        { "term": "Script Block Logging", "desc": "PowerShell 스크립트의 전체 내용을 이벤트 로그에 기록하는 보안 기능" },
+        { "term": "Event ID 4104", "desc": "PowerShell 스크립트 블록이 실행될 때 생성되는 로그 이벤트" }
+      ]
+    },
+    {
+      "cmd": "for /F \"tokens=*\" %1 in ('wevtutil el') DO wevtutil cl \"%1\" 2>nul",
+      "out": "[Clearing 387 event log channels...]\n[...]\n[All event logs cleared]",
+      "def": "[EDR] CRITICAL: ALL event logs being cleared systematically - total evidence destruction",
+      "defAction": "Process: cmd.exe -> wevtutil.exe (loop)\nOperation: Clear ALL 387 log channels\nRisk Level: Critical\nAction: EMERGENCY - Network isolate endpoint, preserve SIEM copies",
+      "desc": "모든 이벤트 로그 채널을 반복문으로 일괄 삭제합니다. 로컬 시스템의 모든 감사 추적이 파괴됩니다.",
+      "descEn": "Systematically clears all event log channels using a loop. All audit trails on the local system are destroyed.",
+      "stepTitle": "전체 로그 일괄삭제",
+      "stepTitleEn": "Batch Clear All",
+      "feynman": "건물의 모든 CCTV, 출입 기록, 통화 기록, 방문자 명부를 한꺼번에 소각하는 것과 같습니다. 건물에서 무슨 일이 있었는지 알 수 있는 모든 증거가 사라집니다.",
+      "feynmanEn": "It's like burning every CCTV recording, access log, phone record, and visitor register in the building at once. All evidence of what happened is destroyed.",
+      "expert": "for 루프를 이용한 387개 전체 채널 삭제는 가장 극단적인 안티포렌식 기법입니다. EDR은 wevtutil.exe의 반복 실행을 탐지할 수 있으며, 네트워크 격리가 즉시 필요합니다. Windows Event Forwarding(WEF)이나 SIEM 원격 수집이 유일한 복구 수단입니다.",
+      "expertEn": "Clearing all 387 channels via for loop is the most extreme anti-forensics technique. EDR can detect repeated wevtutil.exe execution. Network isolation is immediately needed. WEF or SIEM remote collection is the only recovery method.",
+      "defTooltip": "wevtutil.exe가 짧은 시간 내에 다수 실행되면 전체 로그 삭제 시도입니다. Sysmon Event ID 1에서 wevtutil cl의 반복 패턴을 탐지하세요. 즉시 네트워크 격리 조치하세요.",
+      "defTooltipEn": "Multiple wevtutil.exe executions in a short time indicate bulk log clearing. Detect repeated wevtutil cl patterns in Sysmon Event ID 1. Immediately isolate the endpoint.",
+      "hackerLog": {
+        "title": "전체 로그 일괄 삭제",
+        "lines": [
+          { "text": "for /F \"tokens=*\" %1 in ('wevtutil el') DO wevtutil cl \"%1\"", "desc": "387개 전체 채널 반복 삭제 실행" },
+          { "text": "[All event logs cleared]", "desc": "로컬 시스템의 모든 감사 추적 파괴 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Windows Event Forwarding (WEF)", "desc": "Windows 이벤트 로그를 중앙 서버로 실시간 전송하는 기능" },
+        { "term": "Anti-Forensics", "desc": "디지털 포렌식 분석을 방해하거나 무력화하는 모든 기법" },
+        { "term": "Network Isolation", "desc": "침해 의심 호스트를 네트워크에서 격리하는 초기 대응 조치" }
+      ]
+    },
+    {
+      "cmd": "wevtutil qe Security /c:3 /rd:true /f:text",
+      "out": "Event[0]:\n  Log Name: Security\n  Source: Microsoft-Windows-Eventlog\n  Event ID: 1102\n  Level: Information\n  Description: The audit log was cleared.\n  Subject:\n    Account Name: {userName}\n    Account Domain: {companyName}\n    Logon ID: 0x3E7\n\nNo more events.",
+      "def": "[SIEM] Event ID 1102 detected - confirms log clearing activity",
+      "defAction": "Event ID 1102: Audit log cleared\nCleared By: {companyName}\\{userName}\nTimestamp: 2026-03-01 10:23:45 UTC\nForensic Note: This event cannot be suppressed\nRisk Level: Critical\nAction: Cross-reference with SIEM/syslog backups",
+      "desc": "삭제 후 보안 로그에는 Event ID 1102(로그 삭제 기록)만 남아있습니다. 이 이벤트는 삭제할 수 없으며, SIEM에 실시간 전송되었다면 원본 로그 복구가 가능합니다.",
+      "descEn": "After clearing, only Event ID 1102 (log clearing record) remains in the Security log. This event cannot be deleted, and if logs were forwarded to SIEM in real-time, original log recovery is possible.",
+      "stepTitle": "삭제 흔적 확인",
+      "stepTitleEn": "Verify Clearing Trace",
+      "feynman": "모든 CCTV 영상을 지웠지만, 보안 시스템이 자동으로 '누군가가 영상을 삭제했다'는 마지막 기록 한 줄을 남겨둔 것과 같습니다. 이 기록은 공격자도 지울 수 없습니다.",
+      "feynmanEn": "After deleting all CCTV footage, the security system automatically keeps one final record: 'Someone deleted the footage.' The attacker cannot erase this record.",
+      "expert": "Event ID 1102는 Windows 보안 아키텍처의 핵심 무결성 메커니즘입니다. 이 이벤트는 로그 삭제 API 호출 시 커널 레벨에서 자동 생성되며, 사용자 공간에서 억제할 수 없습니다. SIEM/WEF로 원본 로그를 사전 수집했다면 전체 타임라인 복구가 가능합니다.",
+      "expertEn": "Event ID 1102 is a core integrity mechanism of Windows security architecture. Auto-generated at kernel level during log clearing API calls, it cannot be suppressed from user space. If original logs were pre-collected via SIEM/WEF, full timeline recovery is possible.",
+      "defTooltip": "Event ID 1102를 SIEM에서 최고 우선순위 알림으로 설정하세요. 이 이벤트가 발생하면 SIEM에 저장된 원본 로그와 대조하여 삭제 전 공격 타임라인을 재구성하세요.",
+      "defTooltipEn": "Set Event ID 1102 as highest priority alert in SIEM. When triggered, cross-reference with SIEM-stored original logs to reconstruct the pre-deletion attack timeline.",
+      "hackerLog": {
+        "title": "삭제 불가능한 증거",
+        "lines": [
+          { "text": "Event ID: 1102 - The audit log was cleared", "desc": "로그 삭제 사실이 자동 기록됨 (삭제 불가)" },
+          { "text": "Account Name: {userName}", "desc": "삭제를 수행한 계정이 명확히 기록됨" }
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 1102", "desc": "보안 감사 로그가 삭제되었음을 Windows가 자동으로 기록하는 이벤트" },
+        { "term": "SIEM (Security Information and Event Management)", "desc": "보안 이벤트를 중앙에서 수집, 분석, 상관관계를 파악하는 플랫폼" },
+        { "term": "Forensic Timeline", "desc": "침해 사고의 시간순 활동 재구성 - 로그 기반 분석의 핵심" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (Elevated, PID: 3300)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "wevtutil.exe el (enumerate)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "wevtutil.exe qe (query)", "depth": 2, "alert": false, "minStep": 1 },
+    { "name": "wevtutil.exe cl Security", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "wevtutil.exe cl System", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "wevtutil.exe cl (batch loop)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "[Event ID 1102 Generated]", "depth": 1, "alert": true, "minStep": 6 }
+  ]
+}

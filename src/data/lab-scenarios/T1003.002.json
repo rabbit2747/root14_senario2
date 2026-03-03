@@ -1,0 +1,182 @@
+{
+  "id": "T1003.002",
+  "title": "SAM 데이터베이스 덤프 시뮬레이션",
+  "titleEn": "SAM Database Dump Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 권한 확인", "labelEn": "🔍 Privilege Check", "steps": [0] },
+    { "label": "⚡ SAM 추출", "labelEn": "⚡ SAM Extraction", "steps": [1, 2] },
+    { "label": "🔓 해시 크래킹", "labelEn": "🔓 Hash Cracking", "steps": [3] },
+    { "label": "🧹 흔적 제거", "labelEn": "🧹 Cleanup", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Local Admin)", "x": 50, "y": 80 },
+    { "id": "registry", "label": "HKLM\\SAM\n+ SYSTEM", "x": 220, "y": 30 },
+    { "id": "dump", "label": "SAM Dump\n(reg save)", "x": 220, "y": 130 },
+    { "id": "hashes", "label": "NTLM Hashes\n(secretsdump)", "x": 400, "y": 80 },
+    { "id": "pth", "label": "Pass-the-Hash\n(Lateral Move)", "x": 480, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "registry", "minStep": 1 },
+    { "from": "registry", "to": "dump", "minStep": 1 },
+    { "from": "dump", "to": "hashes", "minStep": 3 },
+    { "from": "hashes", "to": "pth", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Command Prompt", "icon": "🖥️" },
+    { "name": "Registry Editor", "icon": "📋" },
+    { "name": "Windows Defender", "icon": "🛡️" },
+    { "name": "{companyName} Tools", "icon": "🔧" },
+    { "name": "File Explorer", "icon": "📁" }
+  ],
+  "steps": [
+    {
+      "cmd": "whoami /priv | findstr SeBackupPrivilege",
+      "out": "SeBackupPrivilege             Backup files and directories  Enabled",
+      "def": "[SIEM] Privilege check - SeBackupPrivilege queried",
+      "defAction": "Process: cmd.exe -> whoami.exe\nPrivilege: SeBackupPrivilege\nRisk Level: Medium\nAction: Log & Monitor",
+      "desc": "공격자가 SeBackupPrivilege 권한을 확인합니다. 이 권한이 있으면 SAM과 SYSTEM 레지스트리를 백업할 수 있습니다.",
+      "descEn": "The attacker checks for SeBackupPrivilege. With this privilege, SAM and SYSTEM registries can be backed up.",
+      "stepTitle": "SeBackupPrivilege 권한 확인",
+      "stepTitleEn": "SeBackupPrivilege Check",
+      "feynman": "금고를 열기 전에 '백업용 마스터키(SeBackupPrivilege)'를 가지고 있는지 확인하는 것입니다. 이 권한이 있으면 모든 파일과 레지스트리를 백업 목적으로 읽을 수 있어, 잠겨있는 SAM 파일도 복사할 수 있습니다.",
+      "feynmanEn": "Checking if you have the 'backup master key (SeBackupPrivilege)' before opening the safe. This privilege allows reading all files and registries for backup purposes, enabling copying of the locked SAM file.",
+      "expert": "SeBackupPrivilege는 파일 시스템 ACL을 우회하여 모든 파일을 읽을 수 있는 권한입니다. 관리자 그룹의 기본 권한이며, reg save 명령이 HKLM\\SAM을 저장할 때 이 권한을 사용합니다. Backup Operators 그룹도 이 권한을 가지므로 주의가 필요합니다.",
+      "expertEn": "SeBackupPrivilege allows reading all files by bypassing file system ACLs. It's a default privilege of the Administrators group, used by reg save to save HKLM\\SAM.",
+      "defTooltip": "🔐 SeBackupPrivilege 확인 감지! SAM 덤프 정찰의 시작일 수 있습니다.",
+      "defTooltipEn": "🔐 SeBackupPrivilege check detected! Could be the start of SAM dump reconnaissance.",
+      "hackerLog": {
+        "title": "priv_check.txt",
+        "lines": [
+          { "log": "SeBackupPrivilege  Enabled", "desc": "💡 백업 권한 활성화 - SAM/SYSTEM 레지스트리 추출 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "SeBackupPrivilege", "desc": "모든 파일과 레지스트리를 ACL에 관계없이 읽을 수 있는 권한. 관리자 그룹의 기본 권한입니다." },
+        { "name": "SAM (Security Account Manager)", "desc": "Windows 로컬 계정의 비밀번호 해시를 저장하는 레지스트리 하이브입니다." },
+        { "name": "SYSKEY", "desc": "SYSTEM 레지스트리에 저장된 키로, SAM의 해시를 추가로 암호화하는 데 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "reg save HKLM\\SAM C:\\temp\\sam.hiv && reg save HKLM\\SYSTEM C:\\temp\\system.hiv",
+      "out": "The operation completed successfully.\nThe operation completed successfully.",
+      "def": "[EDR] CRITICAL: SAM and SYSTEM registry hives exported via reg save",
+      "defAction": "Process: reg.exe\nRegistry: HKLM\\SAM -> C:\\temp\\sam.hiv\nRegistry: HKLM\\SYSTEM -> C:\\temp\\system.hiv\nRisk Level: Critical\nAction: Delete exported files, alert IR team",
+      "desc": "reg save 명령으로 SAM과 SYSTEM 레지스트리 하이브를 파일로 내보냅니다. 이 두 파일이 있으면 오프라인에서 해시를 추출할 수 있습니다.",
+      "descEn": "Exporting SAM and SYSTEM registry hives to files using reg save. With these two files, hashes can be extracted offline.",
+      "stepTitle": "SAM + SYSTEM 레지스트리 하이브 내보내기",
+      "stepTitleEn": "SAM + SYSTEM Registry Hive Export",
+      "feynman": "금고(SAM)와 금고 열쇠(SYSTEM/SYSKEY)를 복사하는 것입니다. 금고만 복사하면 열 수 없고, 열쇠도 함께 복사해야 나중에 금고를 열어볼 수 있습니다. 두 파일을 USB나 네트워크로 가져가면 오프라인에서 비밀번호를 크래킹할 수 있습니다.",
+      "feynmanEn": "Copying the safe (SAM) and the safe key (SYSTEM/SYSKEY). Copying just the safe won't work - you also need the key to open it later. Taking both files via USB or network allows offline password cracking.",
+      "expert": "reg save HKLM\\SAM은 SAM 레지스트리를 하이브 파일로 내보냅니다. SAM 내부의 해시는 SYSTEM 하이브의 JD, Skew1, GBG, Data 키에서 파생된 SYSKEY(또는 boot key)로 암호화되어 있으므로, SYSTEM 하이브도 함께 추출해야 합니다. 이후 impacket-secretsdump, mimikatz, samdump2 등으로 해시를 추출합니다.",
+      "expertEn": "reg save HKLM\\SAM exports the SAM registry as a hive file. Hashes inside SAM are encrypted with the SYSKEY (boot key) derived from the JD, Skew1, GBG, Data keys in the SYSTEM hive, so the SYSTEM hive must also be extracted.",
+      "defTooltip": "🔐 SAM과 SYSTEM 레지스트리가 파일로 내보내졌습니다! 자격증명 탈취 시도!",
+      "defTooltipEn": "🔐 SAM and SYSTEM registries exported to files! Credential theft attempt!",
+      "hackerLog": {
+        "title": "reg_save.txt",
+        "lines": [
+          { "log": "SAM -> C:\\temp\\sam.hiv", "desc": "💡 로컬 계정 해시가 포함된 SAM 하이브 추출됨" },
+          { "log": "SYSTEM -> C:\\temp\\system.hiv", "desc": "💡 SYSKEY가 포함된 SYSTEM 하이브 추출됨 - SAM 복호화에 필수" }
+        ]
+      },
+      "terms": [
+        { "name": "reg save", "desc": "레지스트리 하이브를 파일로 저장하는 Windows 명령. 관리자 권한이 필요합니다." },
+        { "name": "레지스트리 하이브", "desc": "Windows 레지스트리의 물리적 파일 단위. SAM, SYSTEM, SOFTWARE, SECURITY 등이 있습니다." },
+        { "name": "Boot Key (SYSKEY)", "desc": "SYSTEM 하이브에서 파생되는 암호화 키. SAM 데이터베이스의 해시를 보호합니다." }
+      ]
+    },
+    {
+      "cmd": "vssadmin create shadow /for=C:",
+      "out": "vssadmin 1.1 - Volume Shadow Copy Service\nSuccessfully created shadow copy for 'C:\\'\n    Shadow Copy ID: {b5946137-09b8-44c5-bf90-fd42a3e41f28}\n    Shadow Copy Volume Name: \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy3",
+      "def": "[EDR] ALERT: Volume Shadow Copy created - potential SAM extraction via VSS",
+      "defAction": "Process: vssadmin.exe\nAction: Shadow copy created\nShadow ID: {b5946137-...}\nRisk Level: High\nAction: Monitor for config file access from shadow copy",
+      "desc": "대안적 방법으로 볼륨 섀도 복사를 생성합니다. 섀도 복사본에서는 SAM 파일이 잠겨있지 않아 직접 복사할 수 있습니다.",
+      "descEn": "Creating a Volume Shadow Copy as an alternative method. In the shadow copy, the SAM file is not locked and can be directly copied.",
+      "stepTitle": "VSS(Volume Shadow Copy)를 이용한 SAM 접근",
+      "stepTitleEn": "SAM Access via VSS (Volume Shadow Copy)",
+      "feynman": "금고가 잠겨있어 직접 열 수 없다면, 금고의 복사본(섀도 카피)을 만들어 그 복사본을 열어보는 것입니다. 원본 SAM은 OS가 잠그고 있지만, 섀도 복사본의 SAM은 잠겨있지 않아 자유롭게 복사할 수 있습니다.",
+      "feynmanEn": "If the safe is locked and can't be opened directly, make a copy of the safe (shadow copy) and open that copy. The original SAM is locked by the OS, but the shadow copy's SAM is unlocked and can be freely copied.",
+      "expert": "VSS(Volume Shadow Copy Service)는 파일 시스템의 스냅샷을 생성합니다. SAM 파일은 lsass.exe에 의해 exclusive lock이 걸려있지만, VSS 스냅샷에서는 이 잠금이 적용되지 않습니다. \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy[N]\\Windows\\System32\\config\\SAM 경로로 복사할 수 있습니다.",
+      "expertEn": "VSS creates filesystem snapshots. While the SAM file has an exclusive lock by lsass.exe, this lock doesn't apply in VSS snapshots.",
+      "defTooltip": "🔐 볼륨 섀도 복사본이 생성되었습니다! SAM/NTDS 추출 시도의 지표입니다.",
+      "defTooltipEn": "🔐 Volume Shadow Copy created! Indicator of SAM/NTDS extraction attempt.",
+      "hackerLog": {
+        "title": "vss_create.txt",
+        "lines": [
+          { "log": "Shadow Copy ID: {b5946137-...}", "desc": "💡 섀도 복사본 생성됨 - 잠겨진 SAM 파일을 이 복사본에서 추출 가능" },
+          { "log": "HarddiskVolumeShadowCopy3", "desc": "💡 섀도 볼륨 이름 - 이 경로에서 SAM, SYSTEM 파일에 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "VSS (Volume Shadow Copy)", "desc": "Windows의 볼륨 스냅샷 서비스. 파일 시스템의 특정 시점 복사본을 생성합니다." },
+        { "name": "Exclusive Lock", "desc": "파일에 대한 배타적 잠금. 다른 프로세스가 파일을 열거나 복사하는 것을 차단합니다." },
+        { "name": "vssadmin", "desc": "Volume Shadow Copy Service를 관리하는 명령줄 도구. 섀도 복사본 생성, 삭제, 조회가 가능합니다." }
+      ]
+    },
+    {
+      "cmd": "secretsdump.py -sam sam.hiv -system system.hiv LOCAL",
+      "out": "Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation\n\n[*] Target system bootKey: 0xd4e2b8c5a1f3e6d9...\n[*] Dumping local SAM hashes (uid:rid:lmhash:nthash)\nAdministrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::\nGuest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::\n{userName}:1001:aad3b435b51404eeaad3b435b51404ee:a87f3b256c4a7823b6d8c5702f389d44:::\nbackup_svc:1002:aad3b435b51404eeaad3b435b51404ee:e52cac67419a9a224a3b108f3fa6cb6d:::\n[*] Cleaning up...",
+      "def": "[EDR] Impacket secretsdump executed - SAM hashes extracted offline",
+      "defAction": "Tool: secretsdump.py\nSource: sam.hiv + system.hiv\nHashes extracted: 4 accounts\nRisk Level: Critical\nAction: Reset all local account passwords",
+      "desc": "Impacket의 secretsdump.py로 SAM과 SYSTEM 파일에서 NTLM 해시를 추출합니다. 이 해시로 Pass-the-Hash 공격이 가능합니다.",
+      "descEn": "Extracting NTLM hashes from SAM and SYSTEM files using Impacket's secretsdump.py. These hashes enable Pass-the-Hash attacks.",
+      "stepTitle": "NTLM 해시 추출 (secretsdump.py)",
+      "stepTitleEn": "NTLM Hash Extraction (secretsdump.py)",
+      "feynman": "복사한 금고(SAM)를 열쇠(SYSTEM)로 열어, 안에 있는 모든 비밀번호의 '지문(해시)'을 확인하는 것입니다. 이 지문은 원래 비밀번호는 아니지만, Pass-the-Hash 공격으로 비밀번호 대신 사용하여 다른 컴퓨터에 로그인할 수 있습니다.",
+      "feynmanEn": "Opening the copied safe (SAM) with the key (SYSTEM) to check the 'fingerprints (hashes)' of all passwords inside. These fingerprints aren't the original passwords, but can be used instead via Pass-the-Hash attacks to log into other computers.",
+      "expert": "secretsdump.py는 먼저 SYSTEM 하이브에서 boot key를 추출하고, 이를 사용해 SAM 하이브의 NL$KM, F, V 값을 복호화합니다. 출력 형식은 username:RID:LM_hash:NT_hash:::이며, NT hash(NTLM)가 Pass-the-Hash 공격에 사용됩니다. LM hash가 aad3b435...인 것은 LM 해시가 비활성화된 것을 나타냅니다.",
+      "expertEn": "secretsdump.py first extracts the boot key from the SYSTEM hive, then uses it to decrypt the SAM hive's NL$KM, F, V values. Output format is username:RID:LM_hash:NT_hash:::, where NT hash (NTLM) is used for Pass-the-Hash attacks.",
+      "defTooltip": "🔐 SAM에서 NTLM 해시가 추출되었습니다! 모든 로컬 계정 비밀번호를 즉시 변경하세요.",
+      "defTooltipEn": "🔐 NTLM hashes extracted from SAM! Change all local account passwords immediately.",
+      "hackerLog": {
+        "title": "sam_hashes.txt",
+        "lines": [
+          { "log": "Administrator:500:...:31d6cfe0...", "desc": "💡 빈 비밀번호의 NTLM 해시 - Administrator 계정이 비밀번호 없이 설정됨" },
+          { "log": "backup_svc:1002:...:e52cac67...", "desc": "💡 서비스 계정 해시 - 네트워크 전체에서 동일 비밀번호 사용 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "NTLM Hash", "desc": "NT LAN Manager 해시. Windows 인증에 사용되는 비밀번호의 MD4 해시값입니다." },
+        { "name": "Pass-the-Hash", "desc": "비밀번호 해시를 직접 사용하여 인증하는 공격 기법. 평문 비밀번호 없이도 로그인 가능합니다." },
+        { "name": "secretsdump.py", "desc": "Impacket 도구 모음의 자격증명 추출 도구. SAM, NTDS.dit, LSA secrets 등에서 해시를 추출합니다." }
+      ]
+    },
+    {
+      "cmd": "del C:\\temp\\sam.hiv C:\\temp\\system.hiv && vssadmin delete shadows /quiet",
+      "out": "(files deleted)\n(shadow copies deleted)",
+      "def": "[EDR] Anti-forensics: SAM dump files and shadow copies deleted",
+      "defAction": "Files Deleted: sam.hiv, system.hiv\nVSS: All shadow copies deleted\nRisk Level: High\nAction: Forensic evidence already preserved in EDR",
+      "desc": "추출한 SAM/SYSTEM 파일과 볼륨 섀도 복사본을 삭제하여 흔적을 제거합니다.",
+      "descEn": "Deleting extracted SAM/SYSTEM files and volume shadow copies to remove traces.",
+      "stepTitle": "덤프 파일 및 섀도 복사본 삭제 (안티포렌식)",
+      "stepTitleEn": "Dump File and Shadow Copy Deletion (Anti-Forensics)",
+      "feynman": "금고 복사본과 열쇠 복사본을 폐기하고, CCTV 녹화(섀도 카피)도 삭제하여 증거를 인멸하는 것입니다. 하지만 EDR이 이미 파일 생성/삭제 이벤트를 기록했다면 흔적이 남습니다.",
+      "feynmanEn": "Destroying the safe copy and key copy, and deleting CCTV recordings (shadow copies) to destroy evidence. But if EDR already recorded file creation/deletion events, traces remain.",
+      "expert": "del은 파일을 삭제하고, vssadmin delete shadows /quiet는 모든 섀도 복사본을 경고 없이 삭제합니다. /quiet 플래그는 확인 프롬프트를 건너뜁니다. 그러나 MFT의 $FILE_NAME 엔트리, USN 저널, Prefetch 파일(reg.exe, vssadmin.exe), 그리고 EDR 로그에 모든 활동이 기록됩니다.",
+      "expertEn": "del deletes files and vssadmin delete shadows /quiet deletes all shadow copies without prompts. The /quiet flag skips confirmation. However, MFT $FILE_NAME entries, USN journal, Prefetch files, and EDR logs record all activity.",
+      "defTooltip": "🔐 SAM 덤프 파일과 섀도 복사본이 삭제되었습니다! EDR 로그를 보존하세요.",
+      "defTooltipEn": "🔐 SAM dump files and shadow copies deleted! Preserve EDR logs.",
+      "hackerLog": {
+        "title": "cleanup.txt",
+        "lines": [
+          { "log": "sam.hiv, system.hiv deleted", "desc": "💡 덤프 파일 삭제 - 하지만 해시는 이미 공격자에게 전송됨" },
+          { "log": "All shadow copies deleted", "desc": "💡 VSS 섀도 삭제 - 랜섬웨어에서도 자주 사용하는 안티포렌식 기법" }
+        ]
+      },
+      "terms": [
+        { "name": "vssadmin delete shadows", "desc": "볼륨 섀도 복사본을 삭제하는 명령. /quiet 옵션은 확인 없이 즉시 삭제합니다." },
+        { "name": "USN 저널", "desc": "NTFS의 변경 저널. 파일 생성, 삭제, 수정 이벤트가 기록되며, 포렌식 분석에 활용됩니다." },
+        { "name": "Prefetch", "desc": "Windows의 프로그램 실행 기록. 실행된 프로그램의 경로, 시간, 로드된 DLL 정보를 저장합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "cmd.exe (Admin, PID: 3000)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "whoami.exe /priv", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "reg.exe save HKLM\\SAM", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "reg.exe save HKLM\\SYSTEM", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "vssadmin.exe create shadow", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python secretsdump.py", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "vssadmin.exe delete shadows", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

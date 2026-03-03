@@ -1,0 +1,154 @@
+{
+  "id": "T1195.001",
+  "title": "소프트웨어 공급망 공격 시뮬레이션",
+  "titleEn": "Software Supply Chain Compromise Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 빌드 시스템 침투", "labelEn": "🔍 Build System Compromise", "steps": [0] },
+    { "label": "💉 백도어 삽입", "labelEn": "💉 Backdoor Injection", "steps": [1] },
+    { "label": "📦 악성 업데이트 배포", "labelEn": "📦 Malicious Update Distribution", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "APT\nAttacker", "x": 50, "y": 80 },
+    { "id": "build", "label": "Build\nServer", "x": 180, "y": 30 },
+    { "id": "update", "label": "Update\nServer", "x": 180, "y": 130 },
+    { "id": "customers", "label": "18,000+\nCustomers", "x": 330, "y": 80 },
+    { "id": "c2", "label": "C2\nServer", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "build", "minStep": 0 },
+    { "from": "build", "to": "update", "minStep": 1 },
+    { "from": "update", "to": "customers", "minStep": 2 },
+    { "from": "customers", "to": "c2", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "Jenkins", "icon": "🔧" },
+    { "name": "Git Repo", "icon": "📁" },
+    { "name": "Code Signing", "icon": "🔏" },
+    { "name": "Update Portal", "icon": "📦" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# 벤더 빌드 서버 침투 (SolarWinds 시나리오)\n# Jenkins CI/CD 파이프라인 타격\n\n# 1단계: 벤더 VPN 자격증명 탈취 (이전 피싱으로 획득)\nsshpass -p 'VendorAdmin2025!' ssh admin@build.vendor.com\n\n# 2단계: 빌드 스크립트 수정\ncd /opt/jenkins/workspace/SolarMonitor/\ncat Jenkinsfile\n\n# 3단계: 소스코드 저장소 접근\ngit log --oneline -5\ngit diff HEAD~1",
+      "out": "[빌드 서버 접근 성공]\nHost: build.vendor.com\nUser: admin (빌드 관리자)\nOS: Ubuntu 20.04 LTS\nJenkins: v2.361.4\n\n[빌드 파이프라인 분석]\nJenkinsfile:\n  Stage 1: Checkout (Git pull)\n  Stage 2: Build (MSBuild)\n  Stage 3: Test (Unit tests)\n  Stage 4: Sign (Code signing)\n  Stage 5: Deploy (Update server push)\n\n[소스코드 저장소]\nRepo: SolarMonitor-Orion\nBranch: release/v2.1.0\nLast Commit: \"Fix memory leak in polling service\"\nBuild Schedule: Nightly at 02:00 UTC\n\n[코드 서명]\nCertificate: SolarMonitor Inc.\nIssuer: DigiCert SHA2 Extended Validation\nValid: 2024-01-01 ~ 2027-01-01\nHSM: 빌드 서버에서 자동 서명",
+      "def": "[Threat Intel] Unauthorized VPN access to vendor build server — credential compromise suspected",
+      "defAction": "Tool: SSH + Jenkins access\nTarget: Vendor build server (build.vendor.com)\nAccess: Admin credentials (from prior phishing)\nPipeline: 5-stage CI/CD (checkout → build → test → sign → deploy)\nCode Signing: DigiCert EV certificate (auto-sign from HSM)\nRisk Level: Critical — build infrastructure compromised\nAction: Audit VPN access, rotate credentials, review build logs",
+      "desc": "피싱으로 탈취한 자격증명으로 벤더의 빌드 서버에 접근합니다. Jenkins CI/CD 파이프라인과 코드 서명 프로세스를 분석하여 백도어 삽입 지점을 파악합니다.",
+      "descEn": "Access vendor build server using credentials stolen via phishing. Analyze Jenkins CI/CD pipeline and code signing process to identify backdoor injection points.",
+      "stepTitle": "빌드 서버 침투 + CI/CD 파이프라인 분석",
+      "stepTitleEn": "Build Server Infiltration + CI/CD Pipeline Analysis",
+      "feynman": "공격자가 식품 공장(벤더)에 잠입합니다. 공장의 생산 라인(빌드 파이프라인)을 관찰하여 어디에 독(백도어)을 넣으면 되는지 파악합니다. 공장은 자동으로 품질 인증 마크(코드 서명)를 찍어주므로, 독이 든 제품에도 인증 마크가 붙습니다.",
+      "feynmanEn": "The attacker infiltrates a food factory (vendor). Observes the production line (build pipeline) to find where to inject poison (backdoor). The factory auto-stamps quality marks (code signing), so even poisoned products get certified.",
+      "expert": "SolarWinds 공격(SUNBURST)에서 공격자는 빌드 프로세스의 MSBuild 단계에 백도어 소스코드를 삽입했습니다. 코드 서명은 HSM(Hardware Security Module)에서 자동으로 수행되므로, 빌드 파이프라인에 접근하면 정상 서명된 악성 바이너리를 생성할 수 있습니다. Reproducible builds(재현 가능한 빌드)는 동일한 소스에서 동일한 바이너리가 생성됨을 검증하여 이런 공격을 탐지할 수 있습니다.",
+      "expertEn": "In SUNBURST, attackers inserted backdoor source code into the MSBuild stage. Code signing auto-executed from HSM means pipeline access enables creating legitimately-signed malicious binaries. Reproducible builds verify identical source produces identical binaries, detecting such attacks.",
+      "defTooltip": "🔐 빌드 서버 침투! CI/CD 파이프라인 장악!",
+      "defTooltipEn": "🔐 Build server compromised! CI/CD pipeline controlled!",
+      "hackerLog": { "title": "build_access.log", "lines": ["[02:00:00] VPN 연결 (탈취 자격증명)", "[02:01:00] 빌드 서버 SSH 접근", "[02:05:00] Jenkins 파이프라인 분석", "[02:10:00] 코드 서명 프로세스 확인"] },
+      "terms": [
+        { "term": "CI/CD", "def": "Continuous Integration/Continuous Delivery, 자동화된 빌드-테스트-배포 파이프라인" },
+        { "term": "HSM", "def": "Hardware Security Module, 암호 키를 안전하게 보관하는 전용 하드웨어" }
+      ]
+    },
+    {
+      "cmd": "# 소스코드에 백도어 삽입\n# SolarMonitor.Orion.Core.BusinessLayer.cs\n\n# 백도어 코드 특징:\n# 1. 2주 휴면 후 활성화 (탐지 회피)\n# 2. 프로세스 이름 체크 (분석 도구 실행 시 비활성)\n# 3. DGA (Domain Generation Algorithm) 기반 C2\n# 4. 정상 Orion API 트래픽으로 위장\n\ngit checkout -b feature/telemetry-improvement\nvim src/Core/BusinessLayer/OrionImprovementManager.cs\n\n# 삽입 코드 (간략화)\n# if (DateTime.Now > installDate.AddDays(14)) {\n#   if (!IsAnalysisEnvironment()) {\n#     var c2 = GenerateDGA(\"avsvmcloud.com\");\n#     BeaconToC2(c2);\n#   }\n# }",
+      "out": "[백도어 삽입]\nFile: OrionImprovementManager.cs\nMethod: RefreshInternal()\nInserted: 32 lines of C# code\nCommit: \"Improve telemetry data collection\"\n\n[백도어 기능]\n✅ 휴면 기간: 14일 (탐지 회피)\n✅ 분석 도구 회피:\n   - 프로세스 블랙리스트 (wireshark, fiddler, dnSpy)\n   - VM/Sandbox 탐지 (MAC prefix, CPU cores)\n✅ C2 통신:\n   - DGA: avsvmcloud.com 서브도메인 생성\n   - DNS A 레코드로 명령 수신\n   - HTTP 응답을 Orion API 형식으로 위장\n✅ 기능:\n   - 파일 다운로드/실행\n   - 레지스트리 조작\n   - 서비스 제어\n   - 추가 페이로드 배포\n\n[코드 리뷰 회피]\n- 정상 텔레메트리 코드처럼 위장\n- 변수명: OrionImprovementBusinessLayer\n- 기존 코딩 스타일과 일치",
+      "def": "[Code Review] Suspicious commit to OrionImprovementManager.cs — new external DNS communication code",
+      "defAction": "Tool: Git commit + Source code modification\nFile: OrionImprovementManager.cs\nBackdoor: 32 lines of C# (DGA + C2 beacon)\nDormancy: 14 days post-install\nAnti-Analysis: Process blacklist, VM detection\nC2: avsvmcloud.com (DGA subdomains)\nDisguise: Legitimate telemetry improvement\nRisk Level: Critical\nAction: Code review, binary diff, SBOM validation",
+      "desc": "텔레메트리 개선으로 위장하여 C2 통신 백도어를 소스코드에 삽입합니다. 14일 휴면, 분석 도구 회피, DGA 기반 C2로 탐지를 어렵게 만듭니다.",
+      "descEn": "Insert C2 backdoor disguised as telemetry improvement. 14-day dormancy, analysis tool evasion, and DGA-based C2 make detection extremely difficult.",
+      "stepTitle": "백도어 소스코드 삽입 + 탐지 회피 기법",
+      "stepTitleEn": "Backdoor Source Code Injection + Evasion Techniques",
+      "feynman": "공장의 레시피(소스코드)에 아주 작은 독(백도어)을 추가합니다. 이 독은 2주 후에야 효과가 나타나고, 검사관(분석 도구)이 맛보면 스스로 숨깁니다. 레시피 변경은 '맛 개선'으로 기록하여 의심받지 않습니다.",
+      "feynmanEn": "Add tiny poison (backdoor) to the factory recipe (source code). The poison activates only after 2 weeks and hides when inspectors (analysis tools) taste it. Recipe changes are logged as 'flavor improvement' to avoid suspicion.",
+      "expert": "SUNBURST의 DGA는 피해 조직의 도메인명을 Base32 인코딩하여 avsvmcloud.com의 서브도메인으로 생성합니다. DNS A 레코드의 IP 범위로 명령을 전달합니다(예: 특정 IP 범위 = '추가 페이로드 다운로드'). 분석 회피를 위해 프로세스 블랙리스트(wireshark.exe, dnspy.exe 등)를 확인하고, VM 환경(VMware MAC prefix, CPU cores < 4)을 탐지합니다. 코드는 기존 Orion의 코딩 컨벤션을 완벽히 따라 코드 리뷰에서도 발견이 어려웠습니다.",
+      "expertEn": "SUNBURST's DGA Base32-encodes victim domain names into avsvmcloud.com subdomains. DNS A record IP ranges deliver commands. Anti-analysis checks process blacklists and VM environments. Code perfectly follows Orion's coding conventions, evading code review.",
+      "defTooltip": "🔐 백도어 삽입! 14일 휴면 + DGA C2!",
+      "defTooltipEn": "🔐 Backdoor inserted! 14-day dormancy + DGA C2!",
+      "hackerLog": { "title": "backdoor_insert.log", "lines": ["[02:15:00] 소스코드 수정 시작", "[02:20:00] 백도어 32줄 삽입", "[02:22:00] 텔레메트리 개선으로 커밋", "[02:23:00] 코드 리뷰 통과"] },
+      "terms": [
+        { "term": "DGA", "def": "Domain Generation Algorithm, 알고리즘으로 C2 도메인을 동적 생성하여 차단 회피" },
+        { "term": "SUNBURST", "def": "SolarWinds 공급망 공격에 사용된 백도어 악성코드 (UNC2452/APT29)" }
+      ]
+    },
+    {
+      "cmd": "# 빌드 + 코드 서명 + 업데이트 배포\n# Jenkins 나이틀리 빌드가 자동 실행\n\n# 빌드 프로세스 (자동)\njenkinsctl trigger-build SolarMonitor-Release-v2.1.0\n\n# 빌드 완료 후 자동 서명\nsigntool sign /f SolarMonitor.pfx /tr http://timestamp.digicert.com \\\n  /td sha256 SolarMonitor.Orion.Core.dll\n\n# 업데이트 서버 배포\naws s3 cp SolarMonitor-v2.1.0.msi s3://updates.solarmonitor.com/\n\n# 고객 자동 업데이트 (18,000+ 조직)",
+      "out": "[빌드 완료]\nBuild: SolarMonitor-v2.1.0\nStatus: SUCCESS (all tests passed)\nUnit Tests: 1,247/1,247 passed ✅\nIntegration Tests: 89/89 passed ✅\n\n[코드 서명]\nSigner: SolarMonitor Inc.\nCertificate: DigiCert SHA2 EV Code Signing\nTimestamp: 2026-03-01 02:45:00 UTC\nHash: SHA256\nValid: ✅ 정상 서명\n\n[업데이트 배포]\nUpdate Server: updates.solarmonitor.com\nFile: SolarMonitor-v2.1.0.msi (48.2MB)\nDistribution: 18,427 organizations\nAuto-update: 14,892 (80.8%)\nManual update: 3,535 (19.2%)\n\n[감염 현황] (14일 후)\nBeacon Active: 4,720 organizations\nData Exfil: 정부 기관 12개, 대기업 45개\nLateral Movement: 200+ 네트워크에서 확인",
+      "def": "[Update Alert] SolarMonitor v2.1.0 deployed to 18,427 customers — signed with valid certificate",
+      "defAction": "Tool: Jenkins + SignTool + S3 distribution\nBuild: All tests passed (no backdoor test coverage)\nSignature: Valid DigiCert EV certificate\nDistribution: 18,427 organizations (auto-update 80.8%)\nBeacon Activation: 4,720 orgs after 14-day dormancy\nData Exfil: 12 government agencies, 45 enterprises\nRisk Level: Critical — mass compromise\nAction: Emergency patch, notify all customers, revoke certificate",
+      "desc": "백도어가 포함된 코드가 정상 빌드 프로세스를 통과하여 DigiCert 인증서로 서명됩니다. 18,427개 조직에 자동 업데이트로 배포되고, 14일 후 4,720개에서 C2 비컨이 활성화됩니다.",
+      "descEn": "Backdoored code passes normal build process and gets signed with DigiCert certificate. Auto-updated to 18,427 organizations; C2 beacons activate in 4,720 after 14-day dormancy.",
+      "stepTitle": "정상 빌드 + 코드 서명 + 대규모 배포",
+      "stepTitleEn": "Legitimate Build + Code Signing + Mass Distribution",
+      "feynman": "독이 든 레시피로 만든 제품이 공장의 모든 검사(테스트)를 통과합니다. 품질 인증 마크(코드 서명)가 찍히고, 18,000개 매장(고객)에 정상 배송됩니다. 2주 후, 독이 서서히 효과를 발휘하기 시작합니다.",
+      "feynmanEn": "Products made with the poisoned recipe pass all factory inspections (tests). Quality marks (code signing) are stamped, and the product ships to 18,000 stores (customers). After 2 weeks, the poison slowly takes effect.",
+      "expert": "SolarWinds의 빌드 프로세스는 정상 MSBuild + 단위 테스트를 통과했습니다. 백도어 코드는 기존 테스트 커버리지에 포함되지 않았습니다. DigiCert EV(Extended Validation) 인증서는 가장 높은 신뢰 수준의 코드 서명입니다. 자동 업데이트는 대부분의 조직에서 기본 활성화되어 있습니다. SUNBURST의 C2 활성화율은 약 25-30%였으며, 실제 심층 침투는 약 100개 조직(고가치 표적)에 집중되었습니다.",
+      "expertEn": "SolarWinds build process passed normal MSBuild + unit tests. Backdoor code was outside existing test coverage. DigiCert EV certificates represent the highest trust level. Auto-update is default in most organizations. SUNBURST C2 activation was ~25-30%, with deep infiltration focused on ~100 high-value targets.",
+      "defTooltip": "🔐 18,427개 조직에 백도어 업데이트 배포!",
+      "defTooltipEn": "🔐 Backdoor update deployed to 18,427 organizations!",
+      "hackerLog": { "title": "distribution.log", "lines": ["[02:45:00] 빌드 + 코드 서명 완료", "[02:50:00] 업데이트 서버 배포", "[03:00:00] 자동 업데이트 시작 (18,427)", "[(+14일)] 4,720개 조직 비컨 활성화"] },
+      "terms": [
+        { "term": "EV 인증서", "def": "Extended Validation Certificate, 조직 실체를 엄격히 검증하는 최고 수준 코드 서명" },
+        { "term": "Nightly Build", "def": "매일 자동으로 실행되는 빌드 프로세스, 최신 코드를 컴파일하여 배포" }
+      ]
+    },
+    {
+      "cmd": "# 공급망 공격 탐지\n# 1. 이상 DNS 트래픽 분석\n# 2. 바이너리 diff\n# 3. SBOM 검증\n\n# DNS 로그 분석 (avsvmcloud.com)\ngrep 'avsvmcloud.com' /var/log/dns/query.log |\nawk '{print $1, $5}' | sort | uniq -c | sort -rn\n\n# 바이너리 비교 (v2.0.9 vs v2.1.0)\nbindiff SolarMonitor.Orion.Core.v2.0.9.dll \\\n       SolarMonitor.Orion.Core.v2.1.0.dll\n\n# SBOM 생성 및 비교\nsyft SolarMonitor-v2.1.0.msi -o spdx-json > sbom_v2.1.0.json\ndiff sbom_v2.0.9.json sbom_v2.1.0.json",
+      "out": "[DNS 이상 탐지]\navsvmcloud.com 서브도메인 쿼리:\n  7olr3v2...avsvmcloud.com → 쿼리 4,720건 ⚠️\n  Base32 인코딩된 조직명 포함 ⚠️\n  응답 IP: CNAME → 다양한 C2 도메인\n\n[바이너리 diff 결과]\nSolarMonitor.Orion.Core.dll:\n  v2.0.9: 1,847 functions\n  v2.1.0: 1,879 functions (+32 new)\n  New class: OrionImprovementBusinessLayer ⚠️\n  New method: RefreshInternal() ⚠️\n  New method: ExecuteEngine() ⚠️\n  Strings: \"avsvmcloud.com\" embedded ⚠️\n\n[SBOM 비교]\nNew dependencies:\n  + Steganography.Core v1.0 ⚠️\n  + DnsClient.Extended v2.3 ⚠️\nModified files: 3 (Core.dll, Config.xml, Schema.sql)\n변경 사유 미문서화 ⚠️",
+      "def": "[SIEM] Supply chain compromise detected — anomalous DNS to avsvmcloud.com, new undocumented DLL functions",
+      "defAction": "Tool: DNS analysis + BinDiff + SBOM comparison\nDNS: 4,720 queries to avsvmcloud.com subdomains\nBinary: 32 new functions in Core.dll (undocumented)\nNew Class: OrionImprovementBusinessLayer (suspicious)\nSBOM: 2 new undocumented dependencies\nStrings: C2 domain embedded in binary\nRisk Level: Critical\nAction: Isolate affected systems, rollback to v2.0.9, notify customers",
+      "desc": "DNS 로그에서 avsvmcloud.com 쿼리를 발견하고, 바이너리 diff로 문서화되지 않은 32개의 새 함수를 확인합니다. SBOM 비교로 미문서화된 의존성 2개를 탐지합니다.",
+      "descEn": "Discover avsvmcloud.com queries in DNS logs. Binary diff reveals 32 undocumented new functions. SBOM comparison detects 2 undocumented dependencies.",
+      "stepTitle": "DNS 이상 탐지 + 바이너리 diff + SBOM 검증",
+      "stepTitleEn": "DNS Anomaly + Binary Diff + SBOM Verification",
+      "feynman": "독이 든 제품을 찾는 3가지 방법: 1) 제품이 이상한 곳(avsvmcloud.com)에 전화하는 것을 발견(DNS 분석), 2) 이전 제품과 현재 제품의 성분을 비교하여 새로 추가된 성분 32개 발견(바이너리 diff), 3) 성분표(SBOM)에 없는 재료 2개 발견.",
+      "feynmanEn": "3 ways to find poisoned products: 1) Discover products calling a strange place (DNS analysis), 2) Compare ingredients with previous version — 32 new ingredients found (binary diff), 3) Find 2 ingredients not listed on the label (SBOM).",
+      "expert": "BinDiff는 Google의 바이너리 비교 도구로, IDA Pro/Ghidra와 함께 사용하여 함수 레벨의 변경사항을 분석합니다. SBOM(Software Bill of Materials)은 SPDX/CycloneDX 형식으로 소프트웨어의 모든 구성요소를 기록합니다. Syft(Anchore)는 컨테이너와 파일시스템에서 SBOM을 생성합니다. 패시브 DNS 모니터링으로 DGA 패턴을 탐지할 수 있으며, Shannon 엔트로피 분석으로 Base32/Base64 인코딩된 서브도메인을 식별합니다.",
+      "expertEn": "BinDiff (Google) compares binaries at function level with IDA Pro/Ghidra. SBOM in SPDX/CycloneDX format records all software components. Syft (Anchore) generates SBOM from containers and filesystems. Passive DNS monitoring detects DGA patterns via Shannon entropy analysis of subdomains.",
+      "defTooltip": "🔐 DNS 이상 + 미문서 함수 32개 + SBOM 불일치!",
+      "defTooltipEn": "🔐 DNS anomaly + 32 undocumented functions + SBOM mismatch!",
+      "hackerLog": { "title": "detection.log", "lines": ["[Day 15] DNS 이상 쿼리 발견", "[Day 15] 바이너리 diff 분석", "[Day 15] 미문서 함수 32개 확인", "[Day 15] SBOM 불일치 탐지"] },
+      "terms": [
+        { "term": "SBOM", "def": "Software Bill of Materials, 소프트웨어 구성요소 목록 (의존성, 라이선스, 버전)" },
+        { "term": "BinDiff", "def": "Google의 바이너리 비교 도구, 두 바이너리의 함수 레벨 차이점 분석" }
+      ]
+    },
+    {
+      "cmd": "# 종합 공급망 방어\n# 1. SBOM 관리\n# 2. 빌드 무결성\n# 3. 제로 트러스트\n# 4. 모니터링\n\n# SLSA Level 3 빌드 요구사항\n# - 소스: 버전 관리 + 2인 이상 코드 리뷰\n# - 빌드: 격리된 빌드 환경 (Hermetic build)\n# - 출처: 빌드 프로빈언스 자동 생성\n\n# Sigstore/Cosign으로 컨테이너 이미지 서명\ncosign sign --key cosign.key ghcr.io/vendor/app:v2.1.0\ncosign verify --key cosign.pub ghcr.io/vendor/app:v2.1.0",
+      "out": "[SBOM 관리]\n✅ SPDX/CycloneDX 형식 SBOM 필수 제출\n✅ 모든 의존성 해시 검증 (SHA256)\n✅ 새 의존성 추가 시 보안 리뷰 필수\n✅ Dependabot/Renovate로 취약 의존성 알림\n\n[빌드 무결성 (SLSA Level 3)]\n✅ Hermetic Build: 외부 네트워크 차단된 빌드 환경\n✅ 2인 코드 리뷰 필수 (4-eyes principle)\n✅ Build Provenance: in-toto 형식 자동 생성\n✅ Reproducible Build: 동일 소스 → 동일 바이너리 검증\n\n[코드 서명 강화]\n✅ HSM 접근 제어 (듀얼 키)\n✅ Sigstore/Cosign: keyless 서명 (OIDC 연동)\n✅ 서명 검증 자동화 (CI/CD 게이트)\n\n[제로 트러스트 모니터링]\n✅ 벤더 소프트웨어 네트워크 활동 모니터링\n✅ DNS 이상 탐지 (DGA 패턴, 새 도메인)\n✅ 바이너리 diff 자동화 (버전 업데이트 시)\n✅ SBOM 변경 알림\n\n[인시던트 대응]\n✅ 공급망 공격 전용 IR 플레이북\n✅ 벤더 보안 평가 분기별 실시\n✅ 고객 알림 절차 (24시간 이내)",
+      "def": "[SIEM] Supply chain defense deployed — SLSA L3, SBOM, Sigstore, zero-trust monitoring",
+      "defAction": "Tool: SLSA + SBOM + Sigstore + Zero Trust\nSLSA: Level 3 (hermetic build, provenance)\nSBOM: SPDX/CycloneDX mandatory\nCode Signing: Sigstore keyless + HSM dual-key\nBuild: Reproducible, 2-person code review\nMonitoring: DNS anomaly, binary diff, SBOM changes\nVendor Assessment: Quarterly security review\nRisk Level: Low (with full implementation)\nAction: Maintain SLSA compliance, automate SBOM validation",
+      "desc": "SLSA Level 3으로 빌드 무결성을 보장하고, SBOM으로 모든 구성요소를 추적합니다. Sigstore 서명과 제로 트러스트 모니터링으로 공급망 공격을 방어합니다.",
+      "descEn": "SLSA Level 3 ensures build integrity, SBOM tracks all components. Sigstore signing and zero-trust monitoring defend against supply chain attacks.",
+      "stepTitle": "SLSA + SBOM + Sigstore + 제로 트러스트 공급망 방어",
+      "stepTitleEn": "SLSA + SBOM + Sigstore + Zero Trust Supply Chain Defense",
+      "feynman": "공장 보안 강화: 1) 레시피 변경은 2명이 함께 확인(코드 리뷰), 2) 외부와 차단된 깨끗한 주방에서만 요리(Hermetic Build), 3) 모든 재료의 출처를 기록(SBOM), 4) 완성품의 지문을 찍어 위조 방지(Sigstore), 5) 출하 후에도 제품의 행동을 감시(모니터링).",
+      "feynmanEn": "Factory security upgrade: 1) Recipe changes need 2 verifiers (code review), 2) Cook only in clean, isolated kitchens (Hermetic Build), 3) Record all ingredient origins (SBOM), 4) Fingerprint products to prevent forgery (Sigstore), 5) Monitor product behavior after shipping (monitoring).",
+      "expert": "SLSA(Supply-chain Levels for Software Artifacts)는 Google이 제안한 공급망 보안 프레임워크로, Level 1(문서화)부터 Level 4(재현 가능한 빌드 + 2인 리뷰)까지 4단계입니다. in-toto는 빌드 프로빈언스(provenance)를 attestation 형식으로 기록합니다. Sigstore는 Linux Foundation의 keyless 코드 서명 인프라로, Fulcio(CA) + Rekor(투명성 로그) + Cosign(서명 도구)으로 구성됩니다. Hermetic Build는 빌드 시 외부 네트워크 접근을 차단하여 빌드 시점의 의존성 변조를 방지합니다.",
+      "expertEn": "SLSA (Google) is a supply chain security framework from Level 1 (documentation) to Level 4 (reproducible builds + 2-person review). in-toto records build provenance as attestations. Sigstore (Linux Foundation) provides keyless signing with Fulcio (CA) + Rekor (transparency log) + Cosign. Hermetic builds block external network access during build to prevent dependency tampering.",
+      "defTooltip": "🔐 SLSA L3+SBOM+Sigstore 공급망 방어 완성!",
+      "defTooltipEn": "🔐 SLSA L3+SBOM+Sigstore supply chain defense complete!",
+      "hackerLog": { "title": "defense_deploy.log", "lines": ["[Day 16] SLSA Level 3 적용", "[Day 16] SBOM 관리 체계 수립", "[Day 16] Sigstore 서명 도입", "[Day 16] 제로 트러스트 모니터링 시작"] },
+      "terms": [
+        { "term": "SLSA", "def": "Supply-chain Levels for Software Artifacts, Google 제안 공급망 보안 프레임워크" },
+        { "term": "Sigstore", "def": "Linux Foundation의 keyless 코드 서명 인프라 (Fulcio + Rekor + Cosign)" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "svchost.exe",
+    "pid": 800,
+    "children": [
+      {
+        "name": "SolarMonitor.Orion.exe",
+        "pid": 1500,
+        "children": [
+          { "name": "OrionImprovementBusinessLayer (backdoor)", "pid": 1510, "children": [
+            { "name": "dns.exe (DGA query)", "pid": 1520, "children": [] }
+          ] }
+        ]
+      }
+    ]
+  }
+}

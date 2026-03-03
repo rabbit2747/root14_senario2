@@ -1,0 +1,243 @@
+{
+  "id": "T1548.002",
+  "title": "UAC 우회 시뮬레이션",
+  "titleEn": "UAC Bypass Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 권한 확인", "labelEn": "🔍 Privilege Check", "steps": [0, 1] },
+    { "label": "⚡ 레지스트리 하이재킹", "labelEn": "⚡ Registry Hijacking", "steps": [2, 3] },
+    { "label": "🔓 권한 상승", "labelEn": "🔓 Privilege Escalation", "steps": [4, 5] },
+    { "label": "🧹 흔적 제거", "labelEn": "🧹 Cleanup", "steps": [6] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Standard User)", "x": 50, "y": 80 },
+    { "id": "registry", "label": "HKCU\\Classes\nms-settings", "x": 230, "y": 30 },
+    { "id": "fodhelper", "label": "fodhelper.exe\n(Auto-Elevate)", "x": 230, "y": 130 },
+    { "id": "elevated", "label": "Elevated Shell\n(High Integrity)", "x": 430, "y": 80 },
+    { "id": "uac", "label": "UAC\n(Bypassed)", "x": 330, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "registry", "minStep": 2 },
+    { "from": "registry", "to": "fodhelper", "minStep": 4 },
+    { "from": "fodhelper", "to": "uac", "minStep": 4 },
+    { "from": "uac", "to": "elevated", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "Command Prompt", "icon": "🖥️" },
+    { "name": "Windows Settings", "icon": "⚙️" },
+    { "name": "{companyName} Tools", "icon": "🔧" },
+    { "name": "User Account Control", "icon": "🛡️" }
+  ],
+  "steps": [
+    {
+      "cmd": "whoami /priv",
+      "out": "User: {companyName}\\{userName}\n\nPrivileges Information\n---------------------\nSeShutdownPrivilege           Enabled\nSeChangeNotifyPrivilege       Enabled\nSeUndockPrivilege             Enabled\nSeTimeZonePrivilege           Enabled",
+      "def": "[EDR] Privilege enumeration detected on PC-{userName}",
+      "defAction": "Process: cmd.exe -> whoami.exe (PID: 3412)\nRisk Level: Low\nAction: Log & Monitor",
+      "desc": "공격자가 현재 계정의 권한 수준을 확인합니다. 관리자 권한이 없는 일반 사용자임을 확인합니다.",
+      "descEn": "The attacker checks the current account's privilege level and confirms it is a standard user without admin privileges.",
+      "stepTitle": "현재 사용자 권한 수준 확인",
+      "stepTitleEn": "Current User Privilege Level Check",
+      "feynman": "자기 열쇠로 어떤 방의 문을 열 수 있는지 확인하는 것과 같습니다. SeShutdownPrivilege(컴퓨터 종료)나 SeChangeNotifyPrivilege(폴더 접근 알림) 같은 기본 권한만 있다면, 시스템 핵심 영역에 접근할 수 있는 '마스터 키'(SeDebugPrivilege)가 없다는 뜻입니다.",
+      "feynmanEn": "It's like checking which room doors your key can open. If you only have basic privileges like SeShutdownPrivilege (shut down the computer) and SeChangeNotifyPrivilege (folder access notification), it means you lack the 'master key' (SeDebugPrivilege) to access core system areas.",
+      "expert": "whoami /priv의 출력에서 SeDebugPrivilege, SeTakeOwnershipPrivilege, SeImpersonatePrivilege가 없다는 것은 Medium Integrity Level(일반 사용자)임을 나타냅니다. UAC가 활성화된 환경에서 관리자 그룹에 속한 사용자도 기본적으로 필터된 토큰으로 실행됩니다.",
+      "expertEn": "The absence of SeDebugPrivilege, SeTakeOwnershipPrivilege, and SeImpersonatePrivilege in whoami /priv output indicates Medium Integrity Level (standard user). Even users in the administrator group run with filtered tokens by default when UAC is enabled.",
+      "defTooltip": "🔐 권한 열거 감지! whoami /priv 실행은 권한 상승 시도의 첫 단계일 수 있습니다.",
+      "defTooltipEn": "🔐 Privilege enumeration detected! Running whoami /priv could be the first step of a privilege escalation attempt.",
+      "hackerLog": {
+        "title": "whoami_priv_check.txt",
+        "lines": [
+          { "log": "SeShutdownPrivilege           Enabled", "desc": "💡 기본 사용자 권한 - 시스템 종료만 가능한 제한된 권한" },
+          { "log": "SeChangeNotifyPrivilege       Enabled", "desc": "💡 폴더 접근 알림 우회 권한 - 모든 사용자에게 기본 부여" },
+          { "log": "(SeDebugPrivilege 없음)", "desc": "💡 디버그 권한 부재 = 다른 프로세스의 메모리 접근 불가 → 권한 상승 필요" }
+        ]
+      },
+      "terms": [
+        { "name": "whoami /priv", "desc": "현재 사용자의 보안 권한(Privileges) 목록을 표시하는 Windows 명령입니다." },
+        { "name": "SeDebugPrivilege", "desc": "다른 프로세스의 메모리에 접근할 수 있는 강력한 권한. 관리자에게만 부여되며, Mimikatz 등이 이 권한을 필요로 합니다." },
+        { "name": "Integrity Level", "desc": "Windows의 필수 무결성 제어(MIC) 수준. Low/Medium/High/System 4단계로 프로세스 권한을 분류합니다." }
+      ]
+    },
+    {
+      "cmd": "reg query HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command /ve",
+      "out": "ERROR: The system was unable to find the specified registry key or value.\n\nHKEY_CURRENT_USER\\Software\\Classes\\ms-settings\\shell\\open\\command",
+      "def": "[SIEM] Registry query on ms-settings handler detected - User: {userName}",
+      "defAction": "Process: cmd.exe -> reg.exe\nRegistry: HKCU\\Software\\Classes\\ms-settings\nRisk Level: Medium\nAction: Alert SOC Analyst",
+      "desc": "공격자가 ms-settings URI 핸들러의 레지스트리 키 존재 여부를 확인합니다. UAC 우회의 사전 정찰 단계입니다.",
+      "descEn": "The attacker checks whether the ms-settings URI handler registry key exists. This is the reconnaissance phase of UAC bypass.",
+      "stepTitle": "ms-settings URI 핸들러 레지스트리 정찰",
+      "stepTitleEn": "ms-settings URI Handler Registry Reconnaissance",
+      "feynman": "자동문의 센서가 어떤 신호에 반응하는지 먼저 확인하는 것과 같습니다. ms-settings는 Windows 설정 앱을 여는 '리모컨 신호'인데, 이 신호를 가로채서 다른 프로그램을 실행하도록 바꿀 수 있는지 확인합니다. 레지스트리 키가 없다면 '아직 아무도 이 신호를 바꾸지 않았다'는 뜻입니다.",
+      "feynmanEn": "It's like first checking what signal an automatic door sensor responds to. ms-settings is a 'remote control signal' that opens Windows Settings, and the attacker checks if this signal can be intercepted to run a different program. If the registry key doesn't exist, it means 'nobody has changed this signal yet.'",
+      "expert": "HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command는 ms-settings URI 프로토콜 핸들러의 사용자 수준 오버라이드입니다. HKCU의 Classes가 HKLM의 Classes보다 우선하므로, 여기에 값을 설정하면 시스템 기본 핸들러를 재정의할 수 있습니다. fodhelper.exe는 이 URI를 사용하여 설정을 실행합니다.",
+      "expertEn": "HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command is the user-level override for the ms-settings URI protocol handler. Since HKCU Classes takes precedence over HKLM Classes, setting values here can override the system default handler. fodhelper.exe uses this URI to launch settings.",
+      "defTooltip": "🔐 ms-settings URI 핸들러에 대한 레지스트리 쿼리 감지! UAC 우회(fodhelper 기법) 정찰의 지표입니다.",
+      "defTooltipEn": "🔐 Registry query on ms-settings URI handler detected! This is an indicator of UAC bypass (fodhelper technique) reconnaissance.",
+      "hackerLog": {
+        "title": "reg_query_ms_settings.txt",
+        "lines": [
+          { "log": "ERROR: The system was unable to find the specified registry key or value.", "desc": "💡 키가 존재하지 않음 = 아직 조작되지 않은 깨끗한 상태 → 공격자가 새로 생성 가능" },
+          { "log": "HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command", "desc": "💡 이 경로가 UAC 우회의 핵심 - HKCU는 일반 사용자가 수정 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "URI 핸들러 (URI Handler)", "desc": "특정 URI 스킴(ms-settings:, http: 등)을 처리하는 프로그램을 정의하는 레지스트리 설정입니다." },
+        { "name": "ms-settings", "desc": "Windows 설정 앱을 여는 URI 프로토콜. ms-settings:about, ms-settings:display 등으로 특정 설정 페이지에 접근합니다." },
+        { "name": "HKCU\\Software\\Classes", "desc": "사용자별 파일 연결과 프로토콜 핸들러를 저장하는 레지스트리 위치. HKCR(HKLM+HKCU)에서 HKCU가 우선합니다." }
+      ]
+    },
+    {
+      "cmd": "reg add HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command /ve /d \"cmd.exe /c powershell.exe -ep bypass -file C:\\Users\\{userName}\\payload.ps1\" /f",
+      "out": "The operation completed successfully.",
+      "def": "[EDR] CRITICAL: Registry modification detected - ms-settings handler hijacked",
+      "defAction": "Process: reg.exe (PID: 5820)\nRegistry: HKCU\\...\\ms-settings\\shell\\open\\command -> cmd.exe /c powershell.exe\nRisk Level: Critical\nAction: Isolate endpoint, notify IR team",
+      "desc": "공격자가 ms-settings URI 핸들러를 악성 명령으로 덮어씁니다. fodhelper.exe가 이 레지스트리를 참조하여 UAC 없이 명령을 실행합니다.",
+      "descEn": "The attacker overwrites the ms-settings URI handler with a malicious command. fodhelper.exe references this registry to execute commands without UAC.",
+      "stepTitle": "ms-settings 핸들러 하이재킹 (악성 명령 등록)",
+      "stepTitleEn": "ms-settings Handler Hijacking (Malicious Command Registration)",
+      "feynman": "비상구 표지판을 바꿔서 사람들이 비상구로 가면 원래 목적지가 아닌 다른 방으로 가게 만드는 것과 같습니다. ms-settings를 열 때 원래는 Windows 설정이 열려야 하지만, 레지스트리를 조작하면 대신 공격자의 PowerShell 스크립트가 실행됩니다.",
+      "feynmanEn": "It's like changing the exit sign so that when people follow it, they end up in a different room instead of the actual exit. When ms-settings is opened, Windows Settings should launch, but with the registry manipulated, the attacker's PowerShell script runs instead.",
+      "expert": "이 레지스트리 하이재킹은 fodhelper UAC 우회의 핵심 단계입니다. HKCU\\Software\\Classes는 일반 사용자 권한으로 수정 가능하며, 여기에 설정된 shell\\open\\command의 기본값(/ve)이 ms-settings URI가 호출될 때 실행됩니다. 공격자는 cmd.exe를 통해 PowerShell을 체이닝하여 실행 정책 우회(-ep bypass)를 적용합니다.",
+      "expertEn": "This registry hijacking is the core step of the fodhelper UAC bypass. HKCU\\Software\\Classes is modifiable with standard user privileges, and the default value (/ve) of shell\\open\\command set here executes when the ms-settings URI is invoked. The attacker chains PowerShell through cmd.exe with execution policy bypass (-ep bypass).",
+      "defTooltip": "🔐 ms-settings URI 핸들러가 악성 명령으로 하이재킹되었습니다! fodhelper UAC 우회의 핵심 단계 - 즉시 격리 필요.",
+      "defTooltipEn": "🔐 ms-settings URI handler hijacked with malicious command! Core step of fodhelper UAC bypass - immediate isolation required.",
+      "hackerLog": {
+        "title": "reg_hijack.txt",
+        "lines": [
+          { "log": "The operation completed successfully.", "desc": "💡 일반 사용자 권한으로 레지스트리 수정 성공 - UAC 프롬프트 없이 완료" },
+          { "log": "cmd.exe /c powershell.exe -ep bypass -file ...\\payload.ps1", "desc": "💡 cmd→PowerShell 체이닝으로 실행 정책 우회 - 스크립트 실행 제한 무력화" }
+        ]
+      },
+      "terms": [
+        { "name": "레지스트리 하이재킹 (Registry Hijacking)", "desc": "정상적인 레지스트리 값을 악성 명령으로 덮어써서 프로그램의 동작을 가로채는 기법입니다." },
+        { "name": "-ep bypass", "desc": "PowerShell 실행 정책(Execution Policy)을 우회하는 플래그. 스크립트 실행을 차단하는 정책을 무시합니다." },
+        { "name": "shell\\open\\command", "desc": "파일 또는 URI 핸들러가 실행할 프로그램을 정의하는 레지스트리 키입니다." }
+      ]
+    },
+    {
+      "cmd": "reg add HKCU\\Software\\Classes\\ms-settings\\shell\\open\\command /v DelegateExecute /t REG_SZ /d \"\" /f",
+      "out": "The operation completed successfully.",
+      "def": "[EDR] DelegateExecute value set to empty - UAC bypass indicator",
+      "defAction": "Process: reg.exe (PID: 5820)\nRegistry: DelegateExecute = \"\"\nRisk Level: Critical\nCorrelation: Matches known fodhelper UAC bypass pattern",
+      "desc": "DelegateExecute 값을 빈 문자열로 설정합니다. 이 값이 비어있으면 Windows가 COM 핸들러 대신 shell\\open\\command를 실행합니다.",
+      "descEn": "Sets the DelegateExecute value to an empty string. When this value is empty, Windows executes shell\\open\\command instead of the COM handler.",
+      "stepTitle": "DelegateExecute 값 설정 (COM 핸들러 우회)",
+      "stepTitleEn": "DelegateExecute Value Setting (COM Handler Bypass)",
+      "feynman": "두 개의 도로가 있는 교차로에서 경비원에게 '오른쪽 도로(COM 핸들러)는 공사 중이니 왼쪽 도로(shell\\open\\command)로 가세요'라고 속이는 것과 같습니다. DelegateExecute가 비어있으면 Windows는 정상적인 COM 경로 대신 공격자가 조작한 command 경로를 사용합니다.",
+      "feynmanEn": "It's like telling the guard at an intersection with two roads: 'the right road (COM handler) is under construction, so take the left road (shell\\open\\command) instead.' When DelegateExecute is empty, Windows uses the attacker-manipulated command path instead of the normal COM path.",
+      "expert": "DelegateExecute는 프로그래밍적 접근(COM)과 명령줄 접근 중 어떤 것을 사용할지 결정하는 레지스트리 값입니다. 이 값이 존재하지만 비어있으면, Windows Shell은 COM 클래스를 건너뛰고 shell\\open\\command의 값을 직접 실행합니다. 이것이 fodhelper UAC 우회의 두 번째 핵심 조건입니다.",
+      "expertEn": "DelegateExecute is a registry value that determines whether to use programmatic (COM) or command-line access. When this value exists but is empty, Windows Shell skips the COM class and directly executes the shell\\open\\command value. This is the second critical condition of the fodhelper UAC bypass.",
+      "defTooltip": "🔐 DelegateExecute가 빈 문자열로 설정됨! 이것은 fodhelper UAC 우회의 알려진 패턴과 정확히 일치합니다.",
+      "defTooltipEn": "🔐 DelegateExecute set to empty string! This exactly matches the known fodhelper UAC bypass pattern.",
+      "hackerLog": {
+        "title": "delegate_execute.txt",
+        "lines": [
+          { "log": "DelegateExecute = \"\"", "desc": "💡 빈 문자열 = COM 핸들러 비활성화 신호 → shell\\open\\command가 대신 실행됨" },
+          { "log": "Matches known fodhelper UAC bypass pattern", "desc": "💡 ms-settings 하이재킹 + DelegateExecute 빈 값 = fodhelper 우회의 2가지 필수 조건 충족" }
+        ]
+      },
+      "terms": [
+        { "name": "DelegateExecute", "desc": "Windows Shell에서 COM 핸들러 사용 여부를 결정하는 레지스트리 값. 빈 값은 COM을 우회하고 command를 직접 실행하게 합니다." },
+        { "name": "COM (Component Object Model)", "desc": "Windows의 소프트웨어 컴포넌트 통신 프레임워크. 프로그래밍적 접근 방식으로 파일/URI를 처리합니다." },
+        { "name": "UAC 우회 조건", "desc": "fodhelper 기법의 필수 조건: (1) ms-settings handler 하이재킹, (2) DelegateExecute 빈 값, (3) 자동 상승 바이너리 실행." }
+      ]
+    },
+    {
+      "cmd": "C:\\Windows\\System32\\fodhelper.exe",
+      "out": "[fodhelper.exe launched]\n[UAC prompt NOT displayed]\n[Elevated PowerShell session spawned]\n\nPS C:\\Windows\\System32> whoami /groups\n\n{companyName}\\{userName}\nMandatory Label\\High Mandatory Level    S-1-16-12288",
+      "def": "[EDR] ALERT: fodhelper.exe spawned elevated cmd.exe without UAC prompt",
+      "defAction": "Process Chain: explorer.exe -> fodhelper.exe -> cmd.exe -> powershell.exe\nIntegrity Level: High (Elevated)\nRisk Level: Critical\nAction: KILL PROCESS TREE, quarantine endpoint",
+      "desc": "fodhelper.exe를 실행하면 자동 권한 상승 바이너리이므로 UAC 프롬프트 없이 레지스트리에 등록된 악성 명령이 관리자 권한으로 실행됩니다.",
+      "descEn": "When fodhelper.exe runs, as an auto-elevate binary, the malicious command registered in the registry executes with admin privileges without a UAC prompt.",
+      "stepTitle": "fodhelper.exe 실행 - UAC 우회 트리거",
+      "stepTitleEn": "fodhelper.exe Execution - UAC Bypass Trigger",
+      "feynman": "VIP 통행증을 가진 사람(fodhelper.exe)이 보안 검문소(UAC)를 자동으로 통과하는데, 이 사람이 들고 있는 서류 가방(ms-settings 핸들러)에 공격자의 도구를 넣어둔 것과 같습니다. fodhelper.exe는 Windows가 '이 프로그램은 안전하다'고 미리 승인한 프로그램이므로, UAC 경고 없이 관리자 권한으로 실행됩니다.",
+      "feynmanEn": "It's like a person with a VIP pass (fodhelper.exe) who automatically passes through the security checkpoint (UAC), but the attacker's tools have been placed in their briefcase (ms-settings handler). Since Windows has pre-approved fodhelper.exe as 'safe,' it runs with admin privileges without a UAC warning.",
+      "expert": "fodhelper.exe는 Windows의 autoElevate 매니페스트를 가진 바이너리로, 실행 시 UAC 동의 프롬프트를 자동으로 건너뜁니다. 내부적으로 ms-settings URI를 호출할 때 하이재킹된 HKCU 레지스트리를 참조하여, 공격자의 명령이 High Integrity Level(S-1-16-12288)에서 실행됩니다.",
+      "expertEn": "fodhelper.exe is a binary with Windows' autoElevate manifest, automatically skipping the UAC consent prompt at execution. Internally, when calling the ms-settings URI, it references the hijacked HKCU registry, causing the attacker's command to execute at High Integrity Level (S-1-16-12288).",
+      "defTooltip": "🔐 fodhelper.exe가 UAC 프롬프트 없이 관리자 권한 cmd.exe를 생성했습니다! 프로세스 트리를 즉시 종료하세요.",
+      "defTooltipEn": "🔐 fodhelper.exe spawned elevated cmd.exe without UAC prompt! Kill the process tree immediately.",
+      "hackerLog": {
+        "title": "fodhelper_execution.txt",
+        "lines": [
+          { "log": "[UAC prompt NOT displayed]", "desc": "💡 UAC 보호가 완전히 우회됨 - 사용자는 권한 상승 사실을 인지하지 못함" },
+          { "log": "[Elevated PowerShell session spawned]", "desc": "💡 High Integrity Level의 PowerShell 세션 획득 - 관리자 수준 명령 실행 가능" },
+          { "log": "Mandatory Label\\High Mandatory Level    S-1-16-12288", "desc": "💡 무결성 수준이 Medium→High로 상승 = 관리자 권한 획득 성공" }
+        ]
+      },
+      "terms": [
+        { "name": "fodhelper.exe", "desc": "Windows의 '선택적 기능' 관리 도구. autoElevate 매니페스트로 인해 UAC 없이 자동 권한 상승됩니다." },
+        { "name": "autoElevate", "desc": "Windows 실행 파일의 매니페스트 속성. true로 설정된 시스템 바이너리는 UAC 프롬프트 없이 자동으로 상승된 권한으로 실행됩니다." },
+        { "name": "High Mandatory Level (S-1-16-12288)", "desc": "Windows Mandatory Integrity Control의 높은 수준. 관리자 권한으로 실행 중임을 나타내는 보안 식별자(SID)입니다." }
+      ]
+    },
+    {
+      "cmd": "whoami /priv",
+      "out": "User: {companyName}\\{userName}\n\nPrivileges Information\n---------------------\nSeDebugPrivilege              Enabled\nSeTakeOwnershipPrivilege      Enabled\nSeBackupPrivilege             Enabled\nSeRestorePrivilege            Enabled\nSeImpersonatePrivilege        Enabled\nSeLoadDriverPrivilege         Enabled",
+      "def": "[EDR] Elevated privilege enumeration - SeDebugPrivilege confirmed active",
+      "defAction": "Process: powershell.exe -> whoami.exe (Elevated)\nIntegrity Level: High\nRisk Level: Critical\nAction: Confirmed UAC bypass successful",
+      "desc": "권한 상승 후 관리자 수준의 권한(SeDebugPrivilege 등)이 활성화되었음을 확인합니다.",
+      "descEn": "After privilege escalation, confirms that admin-level privileges such as SeDebugPrivilege are now enabled.",
+      "stepTitle": "상승된 권한 확인 (SeDebugPrivilege 활성)",
+      "stepTitleEn": "Elevated Privilege Verification (SeDebugPrivilege Active)",
+      "feynman": "Step 0에서 기본 열쇠 4개밖에 없었는데, 이제 마스터 키(SeDebugPrivilege), 금고 열쇠(SeTakeOwnershipPrivilege), 백업 열쇠(SeBackupPrivilege)까지 한 번에 얻은 상황입니다. 이 마스터 키들로 다른 프로그램의 메모리를 읽고, 모든 파일의 소유권을 가져오고, 드라이버를 설치할 수 있습니다.",
+      "feynmanEn": "In Step 0, you only had 4 basic keys, but now you've obtained the master key (SeDebugPrivilege), safe key (SeTakeOwnershipPrivilege), and backup key (SeBackupPrivilege) all at once. With these master keys, you can read other programs' memory, take ownership of any file, and install drivers.",
+      "expert": "Step 0과 비교하면 권한이 극적으로 변화했습니다. SeDebugPrivilege는 LSASS 메모리 덤프(Mimikatz)의 필수 조건이고, SeTakeOwnershipPrivilege는 보호된 파일/레지스트리의 소유권 변경을, SeImpersonatePrivilege는 토큰 가장을 통한 SYSTEM 권한 획득(Potato 계열 익스플로잇)을 가능하게 합니다.",
+      "expertEn": "Compared to Step 0, privileges have changed dramatically. SeDebugPrivilege is a prerequisite for LSASS memory dumps (Mimikatz), SeTakeOwnershipPrivilege enables ownership changes on protected files/registry, and SeImpersonatePrivilege enables SYSTEM privilege acquisition through token impersonation (Potato-family exploits).",
+      "defTooltip": "🔐 상승된 프로세스에서 SeDebugPrivilege 활성 확인! UAC 우회가 성공적으로 완료되었습니다.",
+      "defTooltipEn": "🔐 SeDebugPrivilege confirmed active in elevated process! UAC bypass completed successfully.",
+      "hackerLog": {
+        "title": "elevated_privileges.txt",
+        "lines": [
+          { "log": "SeDebugPrivilege              Enabled", "desc": "💡 모든 프로세스 메모리 접근 가능 - Mimikatz로 LSASS에서 자격증명 추출 가능" },
+          { "log": "SeTakeOwnershipPrivilege      Enabled", "desc": "💡 모든 파일/레지스트리의 소유권 변경 가능 - ACL 보호 무력화" },
+          { "log": "SeImpersonatePrivilege        Enabled", "desc": "💡 다른 사용자/서비스 토큰 가장 가능 - SYSTEM 권한 획득의 발판" }
+        ]
+      },
+      "terms": [
+        { "name": "SeDebugPrivilege", "desc": "다른 프로세스의 메모리에 접근하고 조작할 수 있는 권한. Mimikatz의 LSASS 메모리 덤프에 필수적입니다." },
+        { "name": "SeTakeOwnershipPrivilege", "desc": "모든 파일, 폴더, 레지스트리 키의 소유권을 강제로 가져올 수 있는 권한입니다." },
+        { "name": "SeImpersonatePrivilege", "desc": "다른 사용자의 보안 토큰을 가장(impersonate)할 수 있는 권한. JuicyPotato 같은 권한 상승 공격에 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "reg delete HKCU\\Software\\Classes\\ms-settings /f",
+      "out": "The operation completed successfully.",
+      "def": "[EDR] Anti-forensics: UAC bypass registry artifacts removed",
+      "defAction": "Process: reg.exe (PID: 7102)\nRegistry: HKCU\\...\\ms-settings DELETED\nRisk Level: High\nAction: Registry snapshot preserved in forensic log",
+      "desc": "공격자가 흔적을 지우기 위해 생성했던 레지스트리 키를 삭제합니다. 포렌식 분석을 어렵게 만드는 안티포렌식 기법입니다.",
+      "descEn": "The attacker deletes the registry keys they created to cover their tracks. This is an anti-forensics technique to hinder forensic analysis.",
+      "stepTitle": "레지스트리 흔적 삭제 (안티포렌식)",
+      "stepTitleEn": "Registry Artifact Cleanup (Anti-Forensics)",
+      "feynman": "범인이 범행 현장에서 지문을 닦고 나가는 것과 같습니다. UAC 우회에 사용한 ms-settings 레지스트리 키를 삭제하면, 나중에 포렌식 분석가가 '어떻게 관리자 권한을 얻었는지' 증거를 찾기 어렵습니다. 하지만 EDR이 이미 스냅샷을 저장했다면 소용없습니다.",
+      "feynmanEn": "It's like a criminal wiping fingerprints from the crime scene before leaving. By deleting the ms-settings registry key used for UAC bypass, forensic analysts will find it harder to discover evidence of 'how admin privileges were obtained.' But if EDR already saved a snapshot, it's futile.",
+      "expert": "레지스트리 키 삭제는 포렌식 타임라인에서 공격 증거를 제거하지만, 여러 방어 계층이 이를 기록합니다: (1) Sysmon Event ID 12(Registry Delete), (2) EDR의 실시간 레지스트리 스냅샷, (3) 메모리 포렌식에서 하이브 파일 분석, (4) Windows 이벤트 로그의 프로세스 체인. 효과적인 안티포렌식이지만 완벽하지는 않습니다.",
+      "expertEn": "Registry key deletion removes attack evidence from the forensic timeline, but multiple defense layers record it: (1) Sysmon Event ID 12 (Registry Delete), (2) EDR real-time registry snapshots, (3) hive file analysis in memory forensics, (4) process chain in Windows event logs. Effective anti-forensics, but not perfect.",
+      "defTooltip": "🔐 UAC 우회 레지스트리 아티팩트가 삭제되었습니다! 포렌식 로그에서 ms-settings 레지스트리 스냅샷을 보존하세요.",
+      "defTooltipEn": "🔐 UAC bypass registry artifacts deleted! Preserve ms-settings registry snapshot from forensic logs.",
+      "hackerLog": {
+        "title": "cleanup.txt",
+        "lines": [
+          { "log": "HKCU\\...\\ms-settings DELETED", "desc": "💡 UAC 우회에 사용된 모든 레지스트리 키 삭제 - 포렌식 증거 인멸 시도" },
+          { "log": "The operation completed successfully.", "desc": "💡 관리자 권한(이미 획득)으로 삭제 성공 - 공격 흔적 최소화" }
+        ]
+      },
+      "terms": [
+        { "name": "안티포렌식 (Anti-Forensics)", "desc": "공격 흔적을 은닉, 삭제, 변조하여 포렌식 분석을 방해하는 기법의 총칭입니다." },
+        { "name": "Sysmon Event ID 12", "desc": "레지스트리 키/값의 생성 및 삭제를 기록하는 이벤트. 공격자의 레지스트리 조작 추적에 핵심적입니다." },
+        { "name": "포렌식 타임라인 (Forensic Timeline)", "desc": "시스템 이벤트를 시간순으로 재구성한 분석 자료. 공격의 순서와 범위를 파악하는 데 사용됩니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 3412)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "whoami.exe", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "reg.exe (PID: 5820)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "fodhelper.exe (Auto-Elevate)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "cmd.exe (Elevated, PID: 6440)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "powershell.exe (High Integrity)", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "whoami.exe (Elevated)", "depth": 4, "alert": false, "minStep": 5 }
+  ]
+}

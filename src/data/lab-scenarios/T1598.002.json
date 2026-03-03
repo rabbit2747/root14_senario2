@@ -1,0 +1,182 @@
+{
+  "id": "T1598.002",
+  "title": "첨부파일 기반 스피어피싱 시뮬레이션",
+  "titleEn": "Spearphishing Attachment Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔧 악성 문서 제작", "labelEn": "🔧 Malicious Document Crafting", "steps": [0, 1] },
+    { "label": "🎣 첨부파일 전송", "labelEn": "🎣 Attachment Delivery", "steps": [2, 3] },
+    { "label": "✅ 정보 수집 확인", "labelEn": "✅ Information Gathering Confirmation", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "macro", "label": "Macro Doc", "x": 200, "y": 30 },
+    { "id": "email", "label": "Email Server", "x": 200, "y": 90 },
+    { "id": "target", "label": "Target PC", "x": 350, "y": 60 },
+    { "id": "c2", "label": "C2 Callback", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "macro", "minStep": 0 },
+    { "from": "macro", "to": "email", "minStep": 1 },
+    { "from": "email", "to": "target", "minStep": 2 },
+    { "from": "target", "to": "c2", "minStep": 3 },
+    { "from": "c2", "to": "ext", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "payloads/", "icon": "📁" },
+    { "name": "Invoice_2026.docm", "icon": "📄", "alert": true },
+    { "name": "exfil_data.enc", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 macro_builder.py --template 'invoice' --payload 'env_collector' --obfuscate --output Invoice_2026.docm",
+      "out": "[*] Building malicious macro document...\n[*] Template: Invoice (Korean business format)\n[*] Payload: Environment data collector\n[*] Obfuscation: VBA string splitting + Chr() encoding\n\n[+] Macro analysis:\n  AutoOpen() → DecodePayload() → CollectInfo()\n  ├─ Hostname, Username, Domain\n  ├─ IP configuration (ipconfig /all)\n  ├─ Installed software list\n  ├─ Active Directory membership\n  └─ Exfil via HTTPS POST to callback.attacker.com\n\n[+] AV Detection: 2/64 (VirusTotal)\n[+] File size: 847 KB\n[+] Output: Invoice_2026.docm",
+      "def": "[Sandbox] Suspicious macro detected in document submission — VBA with obfuscated strings",
+      "defAction": "Source: Email Sandbox (Detonation)\nTarget: Invoice_2026.docm\nAction: Document quarantined, macro signature added to block list",
+      "desc": "환경 정보를 수집하는 매크로가 포함된 악성 문서를 생성합니다. VBA 난독화를 적용하여 안티바이러스 탐지를 회피합니다.",
+      "descEn": "Creating a malicious document with embedded macros that collect environment information. VBA obfuscation is applied to evade antivirus detection.",
+      "stepTitle": "악성 매크로 문서 생성",
+      "stepTitleEn": "Malicious Macro Document Creation",
+      "feynman": "매크로 문서는 '자동 실행 버튼이 숨겨진 편지'와 같습니다. 문서를 열면 숨겨진 프로그램이 자동으로 실행되어 컴퓨터 정보를 수집합니다. 글자를 쪼개고 암호화해서 보안 프로그램이 읽지 못하게 합니다.",
+      "feynmanEn": "A macro document is like a letter with a hidden auto-run button. When opened, a hidden program automatically runs and collects computer information. Characters are split and encoded so security programs can't read them.",
+      "expert": "VBA 매크로 빌더로 AutoOpen 트리거와 환경 수집 페이로드를 생성합니다. 문자열 분할(Chr() 연결), 변수명 랜덤화, 제어 흐름 난독화를 적용하여 정적 AV 시그니처를 우회합니다. 수집 데이터는 HTTPS POST로 외부 콜백 서버에 전송됩니다.",
+      "expertEn": "VBA macro builder creates AutoOpen trigger with environment collection payload. String splitting (Chr() concatenation), variable randomization, and control flow obfuscation bypass static AV signatures. Collected data is sent via HTTPS POST to external callback.",
+      "defTooltip": "🔍 샌드박스: 난독화된 VBA 문자열 포함 악성 매크로 감지",
+      "defTooltipEn": "🔍 Sandbox: Suspicious macro with obfuscated VBA strings detected",
+      "hackerLog": {
+        "title": "macro_build.log",
+        "lines": [
+          { "log": "AutoOpen → DecodePayload → CollectInfo chain built", "desc": "💡 문서 열기 시 자동 실행 매크로 체인 구성" },
+          { "log": "Obfuscation: Chr() + string split applied", "desc": "💡 AV 우회를 위한 VBA 난독화 적용" },
+          { "log": "AV detection: 2/64 — low detection rate", "desc": "💡 대부분의 안티바이러스 우회 성공" }
+        ]
+      },
+      "terms": [
+        { "name": "VBA Macro", "desc": "Visual Basic for Applications — Office 문서에서 실행되는 자동화 스크립트" },
+        { "name": "Obfuscation", "desc": "코드를 읽기 어렵게 변환하여 보안 도구의 탐지를 회피하는 기법" }
+      ]
+    },
+    {
+      "cmd": "python3 email_spoof.py --from 'accounting@partner-company.co.kr' --to 'finance-team@target-corp.com' --subject '2026년 3월 정산 내역서' --attach Invoice_2026.docm --spf-bypass relay",
+      "out": "[*] Spoofing email header...\n[*] From: accounting@partner-company.co.kr\n[*] Reply-To: acc0unting@partner-c0mpany.co.kr (attacker-controlled)\n[*] Subject: 2026년 3월 정산 내역서\n[*] Attachment: Invoice_2026.docm (847 KB)\n\n[+] SPF Check: Using open relay to bypass SPF validation\n[+] DKIM: Not enforced on partner-company.co.kr\n[+] Email headers crafted:\n    X-Mailer: Microsoft Outlook 16.0\n    Content-Type: multipart/mixed\n    X-Originating-IP: [obfuscated]\n\n[+] Email sent via relay-smtp.proxy-service.com\n[+] Delivery confirmed to finance-team@target-corp.com",
+      "def": "[Email Gateway] SPF soft-fail detected for partner-company.co.kr — relay origin mismatch",
+      "defAction": "Source: Email Authentication (SPF/DKIM/DMARC)\nTarget: Inbound email from partner-company.co.kr\nAction: Email tagged [EXTERNAL-SUSPICIOUS], warning banner added",
+      "desc": "실제 거래처를 사칭하는 이메일을 작성합니다. Reply-To 헤더를 공격자 제어 주소로 설정하고, 오픈 릴레이를 통해 SPF 검증을 우회합니다.",
+      "descEn": "Crafting an email impersonating a real business partner. Reply-To header is set to attacker-controlled address, using open relay to bypass SPF validation.",
+      "stepTitle": "거래처 사칭 이메일 발송",
+      "stepTitleEn": "Business Partner Spoofed Email",
+      "feynman": "이것은 '거래처 직원의 편지지를 훔쳐서 가짜 청구서를 보내는 것'과 같습니다. 편지지(이메일 주소)는 진짜처럼 보이지만, 답장 주소는 공격자의 우체통으로 설정되어 있습니다.",
+      "feynmanEn": "This is like stealing a business partner's letterhead to send fake invoices. The letterhead (email address) looks real, but the reply address goes to the attacker's mailbox.",
+      "expert": "이메일 헤더 스푸핑으로 From 필드에 거래처 주소를, Reply-To에 공격자 제어 도메인(타이포스쿼팅)을 설정합니다. 오픈 SMTP 릴레이를 경유하여 SPF soft-fail을 유도하고, DKIM 미적용 도메인을 타겟팅합니다.",
+      "expertEn": "Email header spoofing sets partner address in From field and attacker-controlled typosquat in Reply-To. Open SMTP relay induces SPF soft-fail, targeting domains without DKIM enforcement.",
+      "defTooltip": "🔍 이메일 게이트웨이: SPF soft-fail 감지 — 릴레이 출처 불일치",
+      "defTooltipEn": "🔍 Email Gateway: SPF soft-fail — relay origin mismatch detected",
+      "hackerLog": {
+        "title": "email_spoof.log",
+        "lines": [
+          { "log": "From: accounting@partner-company.co.kr (spoofed)", "desc": "💡 실제 거래처 이메일 주소 사칭" },
+          { "log": "Reply-To: acc0unting@partner-c0mpany.co.kr (attacker)", "desc": "💡 답장 주소는 공격자 제어 도메인 (o→0)" },
+          { "log": "SPF bypass via open relay successful", "desc": "💡 오픈 릴레이 경유로 SPF 검증 우회" }
+        ]
+      },
+      "terms": [
+        { "name": "Email Spoofing", "desc": "이메일 발신자 주소를 위조하여 신뢰할 수 있는 출처로 보이게 하는 기법" },
+        { "name": "SPF (Sender Policy Framework)", "desc": "이메일 발신 서버의 정당성을 검증하는 DNS 기반 인증 프로토콜" }
+      ]
+    },
+    {
+      "cmd": "python3 callback_listener.py --port 443 --protocol https --log detailed",
+      "out": "[*] HTTPS Callback Listener started on 0.0.0.0:443\n[*] Waiting for macro execution callbacks...\n\n[+] === CALLBACK RECEIVED ===\n  Time: 2026-03-01 14:32:17 KST\n  Source: 203.0.113.50 (target-corp.com network)\n  User-Agent: Microsoft Office/16.0\n\n  Collected Data:\n  ├─ Hostname: FIN-PC-003\n  ├─ Username: d.choi (Finance Manager)\n  ├─ Domain: TARGETCORP.LOCAL\n  ├─ OS: Windows 11 Pro 23H2\n  ├─ Internal IP: 10.10.20.45\n  ├─ DNS Server: 10.10.1.10 (DC01.targetcorp.local)\n  ├─ Installed: SAP ERP, MS Office 365, Chrome 122\n  └─ AD Groups: Finance-Users, VPN-Access, SharePoint-Admin\n\n[+] Data saved to exfil/d.choi_FIN-PC-003.json",
+      "def": "[EDR] Suspicious Office macro executing system commands (ipconfig, net group) detected",
+      "defAction": "Source: Endpoint Detection & Response\nTarget: FIN-PC-003 (d.choi)\nAction: Process terminated, macro execution blocked, alert escalated to SOC",
+      "desc": "악성 매크로가 실행되면 콜백 서버가 수집된 환경 정보를 수신합니다. 호스트명, 사용자, AD 그룹 등 내부 인프라 정보가 유출됩니다.",
+      "descEn": "When the malicious macro executes, the callback server receives collected environment data. Internal infrastructure details including hostname, user, AD groups are exfiltrated.",
+      "stepTitle": "매크로 실행 콜백 수신",
+      "stepTitleEn": "Macro Execution Callback Reception",
+      "feynman": "콜백 리스너는 '대기 중인 전화기'입니다. 피해자가 악성 문서를 열면, 문서 속 프로그램이 자동으로 공격자에게 전화를 걸어 컴퓨터 정보를 모두 알려줍니다.",
+      "feynmanEn": "The callback listener is like a phone waiting for a call. When the victim opens the malicious document, the embedded program automatically calls the attacker and reveals all computer information.",
+      "expert": "HTTPS 콜백 서버가 매크로 페이로드의 POST 요청을 수신합니다. 수집된 데이터에는 AD 도메인 구조, 내부 IP 범위, DNS 서버(DC 위치), 설치된 소프트웨어, AD 그룹 멤버십이 포함되어 후속 공격을 위한 핵심 정보를 제공합니다.",
+      "expertEn": "HTTPS callback server receives POST requests from macro payload. Collected data includes AD domain structure, internal IP ranges, DNS servers (DC locations), installed software, and AD group membership for follow-up attacks.",
+      "defTooltip": "🔍 EDR: Office 매크로의 시스템 명령 실행 감지 (ipconfig, net group)",
+      "defTooltipEn": "🔍 EDR: Office macro executing system commands detected (ipconfig, net group)",
+      "hackerLog": {
+        "title": "callback_recv.log",
+        "lines": [
+          { "log": "Callback from 203.0.113.50 → FIN-PC-003", "desc": "💡 재무팀 PC에서 콜백 수신" },
+          { "log": "User: d.choi, Domain: TARGETCORP.LOCAL", "desc": "💡 AD 도메인 정보 및 사용자 식별 완료" },
+          { "log": "AD Groups: Finance-Users, VPN-Access", "desc": "💡 VPN 접근 권한 보유 — 원격 침투 가능 타겟" }
+        ]
+      },
+      "terms": [
+        { "name": "Callback Server", "desc": "악성코드가 수집한 정보를 전송하는 공격자 제어 서버 (C2 서버)" },
+        { "name": "AD Group Membership", "desc": "Active Directory 그룹 소속 정보 — 사용자의 권한 범위를 나타냄" }
+      ]
+    },
+    {
+      "cmd": "python3 form_phish.py --method 'survey' --pretext 'IT Security Assessment 2026' --fields 'vpn_password,mfa_seed,recovery_email' --target d.choi@target-corp.com",
+      "out": "[*] Generating IT Security Survey form...\n[*] Pretext: Annual Security Assessment - Action Required\n[*] From: IT-Security@target-corp.com (internal spoof)\n[*] Form URL: https://forms.target-corp-survey.com/security-review\n\n[+] Form Fields:\n  1. Employee ID (auto-filled from callback data)\n  2. Current VPN password (verify account)\n  3. MFA backup codes or seed\n  4. Personal recovery email\n  5. Remote access software used\n\n[+] Survey link embedded in follow-up email\n[+] Form responses forwarded to attacker C2\n\n[+] Email sent to d.choi@target-corp.com\n  Subject: [필수] 2026년 정보보안 점검 설문 - IT보안팀",
+      "def": "[DLP] Internal email spoofing detected — IT-Security@ sender not from authorized mail server",
+      "defAction": "Source: Data Loss Prevention / Internal Email Auth\nTarget: Spoofed internal email IT-Security@target-corp.com\nAction: Email blocked, internal phishing alert broadcast",
+      "desc": "수집된 정보를 활용하여 2차 피싱을 수행합니다. IT 보안팀을 사칭한 설문 형태로 VPN 비밀번호, MFA 시드, 복구 이메일 등 추가 자격증명을 요구합니다.",
+      "descEn": "Leveraging collected info for secondary phishing. Impersonating IT security team via survey format to request VPN passwords, MFA seeds, and recovery emails.",
+      "stepTitle": "2차 설문 기반 자격증명 피싱",
+      "stepTitleEn": "Secondary Survey-Based Credential Phishing",
+      "feynman": "1차 공격으로 알아낸 정보를 이용해 더 정교한 2차 공격을 합니다. 마치 도둑이 집 구조를 파악한 후 '관리소에서 보안 점검 왔습니다'라며 나머지 비밀번호까지 알아내는 것과 같습니다.",
+      "feynmanEn": "Using info from the first attack to launch a more refined second attack. Like a thief who learned the house layout, then returns pretending to be building security asking for remaining passwords.",
+      "expert": "1차 콜백에서 확보한 조직 컨텍스트(사원번호, 부서, AD 그룹)를 활용하여 내부 IT 보안팀 사칭 2차 피싱을 수행합니다. 설문 형태는 자격증명 요구의 정당성을 높이며, 자동 채워진 필드로 신뢰도를 강화합니다.",
+      "expertEn": "Leveraging organizational context from first callback (employee ID, department, AD groups), secondary phishing impersonates internal IT security. Survey format legitimizes credential requests, auto-filled fields enhance trust.",
+      "defTooltip": "🔍 DLP: 내부 이메일 스푸핑 감지 — 인증되지 않은 발신 서버",
+      "defTooltipEn": "🔍 DLP: Internal email spoofing — unauthorized sender server detected",
+      "hackerLog": {
+        "title": "secondary_phish.log",
+        "lines": [
+          { "log": "IT Security Survey sent to d.choi@target-corp.com", "desc": "💡 재무팀 d.choi에게 보안 점검 사칭 설문 발송" },
+          { "log": "Fields: VPN password, MFA seed, recovery email", "desc": "💡 VPN, MFA, 복구 이메일 정보 요구" },
+          { "log": "Auto-filled: Employee ID, Department from callback", "desc": "💡 1차 수집 데이터로 자동 채움 → 신뢰도 향상" }
+        ]
+      },
+      "terms": [
+        { "name": "Pretexting", "desc": "그럴듯한 구실(예: 보안 점검)을 만들어 피해자가 정보를 자발적으로 제공하게 하는 소셜 엔지니어링 기법" },
+        { "name": "MFA Seed", "desc": "TOTP 기반 다중 인증의 비밀 시드 값 — 이를 알면 MFA 코드를 생성할 수 있음" }
+      ]
+    },
+    {
+      "cmd": "python3 recon_report.py --campaign 'T1598.002-attachment' --output final_report.json",
+      "out": "╔══════════════════════════════════════════════════════════╗\n║    T1598.002 Spearphishing Attachment - Recon Report     ║\n╠══════════════════════════════════════════════════════════╣\n\n📊 Campaign Summary:\n  Phase 1 (Macro Document):\n    Delivered: 5 | Opened: 3 | Macro Enabled: 1\n    Data Collected: Host info, AD structure, software inventory\n\n  Phase 2 (Survey Phishing):\n    Delivered: 1 | Submitted: 1\n    Data Collected: VPN credentials, MFA backup codes\n\n🎯 Intelligence Gathered:\n  ├─ Domain: TARGETCORP.LOCAL\n  ├─ DC: DC01.targetcorp.local (10.10.1.10)\n  ├─ Internal subnet: 10.10.20.0/24 (Finance)\n  ├─ VPN access confirmed for d.choi\n  ├─ SAP ERP deployed (financial data access)\n  ├─ MFA backup codes captured (TOTP bypass)\n  └─ Recovery email: d.choi.personal@gmail.com\n\n⚠️ Risk Assessment: CRITICAL\n  VPN + MFA bypass = full remote access capability\n\n╚══════════════════════════════════════════════════════════╝",
+      "def": "[SIEM] Correlation alert — phishing + macro execution + data exfiltration chain detected",
+      "defAction": "Source: SIEM Correlation Engine\nTarget: Full attack chain (email → macro → callback → survey)\nAction: Incident Response initiated, affected accounts locked, forensic investigation started",
+      "desc": "첨부파일 피싱 캠페인의 최종 보고서를 생성합니다. 매크로 문서와 후속 설문 피싱으로 수집된 모든 정찰 정보를 종합합니다.",
+      "descEn": "Generating final report for the attachment phishing campaign. Consolidates all reconnaissance information gathered through macro documents and follow-up survey phishing.",
+      "stepTitle": "첨부파일 피싱 정찰 보고서",
+      "stepTitleEn": "Attachment Phishing Recon Report",
+      "feynman": "이 보고서는 '도둑의 작전 요약'입니다. 첫 번째 공격(악성 문서)으로 건물 구조를 파악하고, 두 번째 공격(가짜 설문)으로 열쇠까지 확보했습니다. 이제 VPN으로 원격 침투할 준비가 완료된 상태입니다.",
+      "feynmanEn": "This report is a 'thief's operation summary'. The first attack (malicious document) revealed the building layout, and the second (fake survey) obtained the keys. Now remote infiltration via VPN is ready.",
+      "expert": "2단계 피싱 체인의 종합 정찰 결과: 1단계 매크로 콜백으로 AD 인프라 맵핑 완료, 2단계 설문으로 VPN 자격증명 + MFA 백업 코드 확보. 이는 초기 접근(TA0001)으로의 직접적 전환이 가능한 수준의 정보 수집입니다.",
+      "expertEn": "Comprehensive recon from 2-stage phishing chain: Stage 1 macro callback completed AD infrastructure mapping, Stage 2 survey captured VPN credentials + MFA backup codes. This level of intelligence enables direct transition to Initial Access (TA0001).",
+      "defTooltip": "🔍 SIEM: 피싱→매크로→유출→설문 공격 체인 상관관계 탐지",
+      "defTooltipEn": "🔍 SIEM: Phishing → macro → exfiltration → survey attack chain correlation detected",
+      "hackerLog": {
+        "title": "final_report.log",
+        "lines": [
+          { "log": "2-stage phishing chain completed successfully", "desc": "💡 2단계 피싱 체인 완료 — 인프라 + 자격증명 확보" },
+          { "log": "VPN + MFA bypass → remote access ready", "desc": "💡 VPN 크레덴셜 + MFA 우회 가능 → 원격 접근 준비 완료" },
+          { "log": "Risk: CRITICAL — Initial Access transition possible", "desc": "💡 초기 접근 단계로 직접 전환 가능한 수준" }
+        ]
+      },
+      "terms": [
+        { "name": "Attack Chain", "desc": "여러 공격 기법을 순차적으로 연결하여 목표를 달성하는 공격 시퀀스" },
+        { "name": "SIEM Correlation", "desc": "개별 이벤트를 연결하여 전체 공격 패턴을 식별하는 보안 분석 기법" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "macro_builder.py", "depth": 0, "alert": true, "minStep": 0 },
+    { "name": "  └─ Invoice_2026.docm", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "email_spoof.py", "depth": 0, "alert": true, "minStep": 1 },
+    { "name": "callback_listener.py", "depth": 0, "alert": true, "minStep": 2 },
+    { "name": "  └─ exfil/d.choi_FIN-PC-003.json", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "form_phish.py", "depth": 0, "alert": true, "minStep": 3 },
+    { "name": "recon_report.py", "depth": 0, "alert": false, "minStep": 4 }
+  ]
+}

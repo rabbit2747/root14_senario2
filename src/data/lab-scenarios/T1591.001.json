@@ -1,0 +1,181 @@
+{
+  "id": "T1591.001",
+  "title": "물리적 위치 파악 시뮬레이션",
+  "titleEn": "Determine Physical Locations Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 공개 정보 수집", "labelEn": "🔍 OSINT Collection", "steps": [0, 1] },
+    { "label": "📍 위치 특정", "labelEn": "📍 Location Pinpointing", "steps": [2, 3] },
+    { "label": "✅ 물리적 정찰", "labelEn": "✅ Physical Recon", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "osint", "label": "OSINT Sources", "x": 200, "y": 30 },
+    { "id": "geo", "label": "GeoIP DB", "x": 200, "y": 90 },
+    { "id": "location", "label": "Physical Location", "x": 350, "y": 60 },
+    { "id": "target", "label": "Target Facility", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "osint", "minStep": 0 },
+    { "from": "ext", "to": "geo", "minStep": 2 },
+    { "from": "osint", "to": "location", "minStep": 1 },
+    { "from": "geo", "to": "location", "minStep": 2 },
+    { "from": "location", "to": "target", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Intel", "icon": "📁" },
+    { "name": "locations.json", "icon": "📄", "alert": true },
+    { "name": "satellite_imgs/", "icon": "📁" }
+  ],
+  "steps": [
+    {
+      "cmd": "curl -s \"https://www.linkedin.com/company/{companyName}/about\" | grep -oP 'location.*?\\\"'",
+      "out": "Headquarters: Seoul, South Korea\nOffice Locations:\n  - Seoul HQ: Teheran-ro 123, Gangnam-gu, Seoul 06236\n  - Busan Branch: Haeundae-gu, Busan 48099\n  - US Office: 500 Technology Dr, San Jose, CA 95110\n\nEmployees: 250-500\nIndustry: Cybersecurity",
+      "def": "[Web Monitor] LinkedIn company page scraping detected",
+      "defAction": "Source: 198.51.100.23\nTarget: linkedin.com/company/{companyName}\nAction: Scraping activity logged",
+      "desc": "LinkedIn 기업 페이지에서 본사와 지사의 물리적 위치를 수집합니다.",
+      "descEn": "The attacker scrapes the company's LinkedIn page to collect headquarters and branch office locations.",
+      "stepTitle": "LinkedIn에서 사무실 위치 수집",
+      "stepTitleEn": "Collect Office Locations from LinkedIn",
+      "feynman": "LinkedIn의 회사 페이지에는 본사 위치, 지사 정보, 직원 수가 공개되어 있습니다. 이 정보는 누구나 볼 수 있으며, 공격자에게는 물리적 침투의 첫 단서가 됩니다.",
+      "feynmanEn": "LinkedIn company pages publicly display headquarters location, branch offices, and employee count. This freely available information gives attackers the first clues for physical reconnaissance.",
+      "expert": "LinkedIn의 /about 엔드포인트에서 구조화된 위치 데이터를 추출합니다. 지오코딩과 결합하면 정확한 GPS 좌표를 얻을 수 있습니다.",
+      "expertEn": "Structured location data is extracted from LinkedIn's /about endpoint. Combined with geocoding, exact GPS coordinates can be derived.",
+      "defTooltip": "🌐 웹 모니터: LinkedIn 기업 페이지 스크래핑 감지",
+      "defTooltipEn": "🌐 Web Monitor: LinkedIn company page scraping detected",
+      "hackerLog": {
+        "title": "linkedin_locations.txt",
+        "lines": [
+          { "log": "Seoul HQ: Teheran-ro 123, Gangnam-gu", "desc": "💡 본사 정확한 주소 노출 - 건물 정보 조회 가능" },
+          { "log": "US Office: 500 Technology Dr, San Jose", "desc": "💡 해외 지사 위치 확인 - 다국적 공격 계획 수립 가능" },
+          { "log": "Employees: 250-500", "desc": "💡 직원 규모로 보안팀 크기 추정 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "OSINT (Open Source Intelligence)", "desc": "공개적으로 접근 가능한 정보를 수집하여 분석하는 정보 수집 방법. 소셜 미디어, 뉴스, 공공 기록 등이 포함됩니다" },
+        { "name": "Physical Reconnaissance", "desc": "대상의 물리적 시설을 직접 또는 간접적으로 조사하여 보안 취약점을 파악하는 정찰 활동" }
+      ]
+    },
+    {
+      "cmd": "python3 job_scraper.py --company \"{companyName}\" --fields location,office",
+      "out": "[+] Scanning job postings for {companyName}...\n[+] Found 12 active job postings\n\nOffice Locations from Job Postings:\n  - Seoul Gangnam Office, 15F GotRoot Tower (5 positions)\n  - Busan R&D Center, Marine City (3 positions)\n  - Remote/Hybrid (4 positions)\n\nAdditional Intel:\n  - Building: GotRoot Tower, 15th Floor\n  - Working Hours: 09:00-18:00 KST\n  - Security Clearance Required: 2 positions",
+      "def": "[HR System] Unusual bulk job posting access from single IP",
+      "defAction": "Source: 198.51.100.23\nTarget: careers.{companyName}.com\nAction: Rate limiting applied, monitoring continued",
+      "desc": "채용 공고에서 사무실 위치, 건물명, 층수 등 상세 정보를 추출합니다.",
+      "descEn": "The attacker extracts detailed office information including building name and floor number from job postings.",
+      "stepTitle": "채용 공고에서 상세 위치 추출",
+      "stepTitleEn": "Extract Detailed Location from Job Postings",
+      "feynman": "채용 공고에는 '서울 강남 OO타워 15층'처럼 정확한 근무지 정보가 포함됩니다. 이는 회사가 의도치 않게 공개하는 물리적 보안 정보입니다. 건물명과 층수를 알면 건물 도면을 구할 수도 있습니다.",
+      "feynmanEn": "Job postings contain precise workplace information like '15th Floor, GotRoot Tower, Gangnam.' This is physical security information companies unintentionally disclose. Knowing the building name and floor number, attackers could even obtain building plans.",
+      "expert": "채용 플랫폼 API를 통한 자동화된 정보 수집. 근무지 필드에서 건물명, 층수, 근무 시간을 추출하여 물리적 보안 프로파일을 구축합니다.",
+      "expertEn": "Automated information gathering via job platform APIs. Building name, floor number, and working hours extracted from location fields to build a physical security profile.",
+      "defTooltip": "🏢 HR 시스템: 단일 IP에서 대량 채용 공고 접근 감지",
+      "defTooltipEn": "🏢 HR System: Bulk job posting access from single IP detected",
+      "hackerLog": {
+        "title": "job_intel.txt",
+        "lines": [
+          { "log": "Building: GotRoot Tower, 15th Floor", "desc": "💡 정확한 건물명과 층수 노출 - 물리적 침투 계획에 활용" },
+          { "log": "Working Hours: 09:00-18:00 KST", "desc": "💡 근무 시간 확인 - 야간 침입 시간대 파악" },
+          { "log": "Security Clearance Required: 2 positions", "desc": "💡 보안 등급 필요 직책 존재 - 민감한 업무 영역 확인" }
+        ]
+      },
+      "terms": [
+        { "name": "Job Scraping", "desc": "채용 플랫폼에서 자동으로 채용 공고 정보를 수집하는 기법. 공격자는 이를 통해 조직의 기술 스택, 위치 정보 등을 파악합니다" },
+        { "name": "Physical Security Profile", "desc": "건물 위치, 보안 장비, 출입 통제 방식 등 물리적 보안 현황을 정리한 문서" }
+      ]
+    },
+    {
+      "cmd": "geoiplookup 203.0.113.50 && whois 203.0.113.50 | grep -i 'address\\|city\\|country'",
+      "out": "GeoIP Lookup: 203.0.113.50\n  Country: KR (South Korea)\n  City: Seoul\n  Region: Seoul-teukbyeolsi\n  Latitude: 37.5665\n  Longitude: 126.9780\n  ISP: Korea Telecom\n  Organization: {companyName} Inc.\n\nWHOIS:\n  Address: 123 Teheran-ro, Gangnam-gu\n  City: Seoul\n  Country: KR\n  NetRange: 203.0.113.0 - 203.0.113.255",
+      "def": "[Network Monitor] IP geolocation and WHOIS lookup for company IP range",
+      "defAction": "Source: External\nTarget: 203.0.113.0/24\nAction: WHOIS query logged",
+      "desc": "서버 IP의 GeoIP 조회와 WHOIS를 통해 데이터센터 위치를 특정합니다.",
+      "descEn": "GeoIP lookup and WHOIS queries on the server IP to pinpoint data center location.",
+      "stepTitle": "IP 기반 데이터센터 위치 특정",
+      "stepTitleEn": "IP-based Data Center Location",
+      "feynman": "모든 서버에는 IP 주소가 있고, IP 주소에는 대략적인 위치 정보가 포함되어 있습니다. GeoIP 데이터베이스를 조회하면 서버가 어느 도시, 어느 ISP에 있는지 알 수 있습니다. WHOIS에서는 더 정확한 등록 주소를 확인할 수 있습니다.",
+      "feynmanEn": "Every server has an IP address with approximate location data. GeoIP databases reveal which city and ISP a server belongs to. WHOIS records provide even more precise registered addresses.",
+      "expert": "GeoIP는 BGP 라우팅 정보와 ISP 할당 데이터를 기반으로 IP의 물리적 위치를 추정합니다. MaxMind, IP2Location 등의 상용 DB는 도시 수준까지 정확합니다.",
+      "expertEn": "GeoIP estimates physical IP location based on BGP routing and ISP allocation data. Commercial databases like MaxMind provide city-level accuracy.",
+      "defTooltip": "🌍 네트워크: IP 지오로케이션 및 WHOIS 조회 감지",
+      "defTooltipEn": "🌍 Network: IP geolocation and WHOIS lookup detected",
+      "hackerLog": {
+        "title": "geoip_results.txt",
+        "lines": [
+          { "log": "City: Seoul, Latitude: 37.5665", "desc": "💡 서버 위치가 서울로 확인 - 데이터센터 위치 추정" },
+          { "log": "ISP: Korea Telecom", "desc": "💡 ISP 정보로 네트워크 인프라 파악 가능" },
+          { "log": "NetRange: 203.0.113.0 - 203.0.113.255", "desc": "💡 /24 대역 할당 확인 - 256개 IP에 대한 추가 스캔 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "GeoIP", "desc": "IP 주소를 기반으로 물리적 위치(국가, 도시, 좌표)를 추정하는 기술. 100% 정확하지는 않지만 도시 수준까지는 비교적 정확합니다" },
+        { "name": "WHOIS", "desc": "도메인이나 IP 주소의 등록 정보(소유자, 주소, 연락처)를 조회하는 프로토콜" }
+      ]
+    },
+    {
+      "cmd": "python3 satellite_recon.py --address \"Teheran-ro 123, Gangnam-gu, Seoul\" --zoom 18",
+      "out": "[+] Fetching satellite imagery...\n[+] Address geocoded: 37.5012, 127.0396\n[+] Zoom level: 18 (building detail)\n\nBuilding Analysis:\n  - Type: Commercial Office Tower (20+ floors)\n  - Parking: Underground (entrance south side)\n  - Main Entrance: East facing, street level\n  - Security Cameras: 4 visible (entrance, parking, loading dock, roof)\n  - Loading Dock: West side, restricted access\n  - Nearby: Coffee shop (100m), subway station (200m)\n\n[+] Images saved to satellite_imgs/",
+      "def": "[Facility Security] No detection - passive satellite imagery analysis",
+      "defAction": "Source: Google Maps/Earth\nTarget: Company building\nAction: Not detectable by target",
+      "desc": "위성 이미지와 스트리트뷰로 건물 구조, CCTV 위치, 출입구를 분석합니다.",
+      "descEn": "Satellite imagery and street view analysis of building structure, CCTV positions, and entry points.",
+      "stepTitle": "위성 이미지 분석으로 건물 구조 파악",
+      "stepTitleEn": "Building Structure Analysis via Satellite",
+      "feynman": "Google Earth와 같은 서비스로 건물을 위에서 내려다보면 주차장 위치, 출입구, 보안 카메라까지 확인할 수 있습니다. 이 모든 정보는 물리적으로 접근할 필요 없이 원격으로 수집 가능합니다.",
+      "feynmanEn": "Services like Google Earth let you look down at buildings to identify parking lots, entrances, and security cameras. All this information can be collected remotely without physical access.",
+      "expert": "고해상도 위성 이미지(Zoom 18+)에서 보안 카메라 위치, 울타리 종류, 차량 출입 통제 방식 등을 식별할 수 있습니다. 스트리트뷰와 교차 분석하면 3D 보안 프로파일을 구축합니다.",
+      "expertEn": "High-resolution satellite imagery (Zoom 18+) can identify security camera positions, fence types, and vehicle access controls. Cross-referencing with Street View builds a 3D security profile.",
+      "defTooltip": "🛰️ 시설 보안: 패시브 위성 이미지 분석 - 탐지 불가",
+      "defTooltipEn": "🛰️ Facility: Passive satellite analysis - undetectable",
+      "hackerLog": {
+        "title": "building_analysis.txt",
+        "lines": [
+          { "log": "Security Cameras: 4 visible", "desc": "💡 CCTV 4대 위치 파악 - 사각지대 분석 가능" },
+          { "log": "Parking: Underground (entrance south side)", "desc": "💡 지하주차장 남측 출입구 - 차량 위장 침투 경로" },
+          { "log": "Loading Dock: West side, restricted access", "desc": "💡 화물 반입구 서측 - 사회공학 침투 가능 지점" }
+        ]
+      },
+      "terms": [
+        { "name": "Satellite Reconnaissance", "desc": "위성 이미지나 항공 사진을 이용한 원격 정찰. 대상에게 들키지 않고 시설의 물리적 구조를 파악할 수 있습니다" },
+        { "name": "Physical Security Assessment", "desc": "건물의 보안 카메라, 출입 통제, 울타리 등 물리적 보안 요소를 평가하는 과정" }
+      ]
+    },
+    {
+      "cmd": "python3 location_mapper.py --compile-all --output locations.json",
+      "out": "[+] Compiling all location intelligence...\n\nPhysical Location Map:\n═══════════════════════\n1. Seoul HQ (Primary Target)\n   - Address: Teheran-ro 123, Gangnam-gu\n   - Building: GotRoot Tower, 15F\n   - Timezone: UTC+9\n   - Working Hours: 09:00-18:00\n   - Security: 4 CCTV, underground parking\n\n2. Busan R&D Center\n   - Address: Marine City, Haeundae-gu\n   - Timezone: UTC+9\n   - Likely smaller security footprint\n\n3. US Office\n   - Address: 500 Technology Dr, San Jose\n   - Timezone: UTC-8 (PST)\n   - 17-hour time difference from Seoul\n\n[+] Attack window: 02:00-06:00 KST (Seoul night + US business hours)\n[+] Report saved to locations.json",
+      "def": "[SIEM] Complete physical reconnaissance campaign correlated",
+      "defAction": "Source: Correlation engine\nTarget: {companyName} facilities\nAction: Physical security review recommended",
+      "desc": "수집된 모든 위치 정보를 종합하여 물리적 공격 계획을 수립합니다.",
+      "descEn": "Consolidating all location intelligence to develop a physical attack plan.",
+      "stepTitle": "물리적 공격 계획 수립",
+      "stepTitleEn": "Physical Attack Plan Development",
+      "feynman": "지금까지 수집한 사무실 위치, 건물 구조, 보안 시스템, 근무 시간을 하나의 보고서로 정리하는 마지막 단계입니다. 서울 본사가 야간(02:00-06:00)이면서 미국 지사는 업무 시간인 '공백 시간대'를 찾아 최적의 공격 시점을 결정합니다.",
+      "feynmanEn": "This final step compiles office locations, building structure, security systems, and working hours into one report. Finding the 'gap window' when Seoul HQ is at night (02:00-06:00) while the US office is in business hours determines the optimal attack timing.",
+      "expert": "다중 사이트 조직의 타임존 차이를 악용한 공격 윈도우 분석. Seoul(UTC+9)과 San Jose(UTC-8)의 17시간 차이는 모든 사이트의 보안팀이 동시에 활성화되지 않는 시간대를 만듭니다.",
+      "expertEn": "Attack window analysis exploiting timezone differences across multi-site organizations. The 17-hour gap between Seoul (UTC+9) and San Jose (UTC-8) creates periods when not all security teams are active simultaneously.",
+      "defTooltip": "🗺️ SIEM: 완전한 물리적 정찰 캠페인이 식별되었습니다",
+      "defTooltipEn": "🗺️ SIEM: Complete physical reconnaissance campaign identified",
+      "hackerLog": {
+        "title": "attack_plan.log",
+        "lines": [
+          { "log": "Attack window: 02:00-06:00 KST", "desc": "💡 서울 야간 + 미국 업무 시간 = 보안 공백 시간대" },
+          { "log": "Building: GotRoot Tower, 15F", "desc": "💡 정확한 사무실 위치 특정 완료 - 물리적 침투 준비 가능" },
+          { "log": "Busan R&D: smaller security footprint", "desc": "💡 부산 R&D 센터가 보안이 약할 것으로 추정 - 대안 침투 경로" }
+        ]
+      },
+      "terms": [
+        { "name": "Attack Window", "desc": "공격이 탐지될 확률이 가장 낮은 시간대. 보안팀의 근무 시간, 타임존 차이 등을 분석하여 결정합니다" },
+        { "name": "Multi-site Security Gap", "desc": "여러 지역에 분산된 조직에서 타임존 차이로 인해 모든 사이트가 동시에 보안 인력을 운영하지 못하는 취약점" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "curl → LinkedIn (PID: 3101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 job_scraper.py (PID: 3134)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "geoiplookup (PID: 3201)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "python3 satellite_recon.py (PID: 3289)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "python3 location_mapper.py (PID: 3345)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

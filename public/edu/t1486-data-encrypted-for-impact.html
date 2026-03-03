@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1486">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1486-data-encrypted-for-impact&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT 사이버보안 교육 — T1486 랜섬웨어 (Data Encrypted for Impact)">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1486 Ransomware — 랜섬웨어</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s}
+        .glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}
+        .dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+        .hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}
+        .hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F}
+        .terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}
+        @keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}
+        .shake-anim{animation:shake 0.6s}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px}.dark ::-webkit-scrollbar-thumb{background:#F4D06F}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="goToDashboard()" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(187,62,3,.08)'" onmouseout="this.style.background='transparent'">← 매트릭스 대시보드</button><a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:rgba(187,62,3,.5);text-decoration:none;" class="hidden sm:inline">gotroot.co.kr ↗</a></div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2] mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1486: Data Encrypted for Impact</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch1">1. 랜섬웨어란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch2">2. 이중 암호화와 RaaS</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch3">3. 감염 시뮬레이션</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Impact</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Ransomware</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">집 안의 모든 물건에 자물쇠를 채우고 열쇠값 요구 — 랜섬웨어</p>
+            </header>
+
+            <!-- Ch1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> 랜섬웨어란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">🔐 ➜ 📁 ➜ 💰 ➜ 😱</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"집 안의 모든 물건에 자물쇠를 채우고 열쇠값 요구"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">어느 날 집에 돌아왔더니 모든 서랍, 냉장고, 옷장에 <strong>자물쇠</strong>가 채워져 있습니다. 벽에는 "열쇠를 원하면 비트코인을 보내라"는 쪽지가 붙어 있습니다. 이것이 <strong>랜섬웨어(Ransomware)</strong>입니다. 파일을 암호화하고 <strong>복호화 대가(몸값, Ransom)</strong>를 요구합니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">현대 랜섬웨어의 진화</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">최근 랜섬웨어는 단순 암호화를 넘어 <strong>이중 협박(Double Extortion)</strong>을 합니다. 먼저 데이터를 유출한 뒤 암호화합니다. 몸값을 지불하지 않으면 유출된 데이터를 공개하겠다고 협박합니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> AES+RSA 이중 암호화, RaaS</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h3 class="font-bold text-lg mb-3 hl-yel text-center">AES + RSA 이중 암호화</h3>
+                            <div class="space-y-2 text-sm text-cgray dark:text-slate-300">
+                                <div class="flex items-start gap-2"><span class="text-[#F4D06F] font-bold">1</span> 각 파일을 랜덤 AES 키로 고속 암호화</div>
+                                <div class="flex items-start gap-2"><span class="text-[#F4D06F] font-bold">2</span> AES 키를 공격자의 RSA 공개키로 암호화</div>
+                                <div class="flex items-start gap-2"><span class="text-[#F4D06F] font-bold">3</span> RSA 개인키 없이는 복호화 불가능</div>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#9DD9D2]">
+                            <h3 class="font-bold text-lg mb-3 hl-teal text-center">RaaS (Ransomware as a Service)</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed">프로그래밍 능력이 없어도 랜섬웨어를 사용할 수 있는 <strong>구독형 서비스</strong>입니다. 개발자는 랜섬웨어를 만들고, "가맹점(Affiliate)"은 이를 배포합니다. 수익은 분배합니다. LockBit, BlackCat 등이 대표적입니다.</p>
+                        </div>
+                    </div>
+                    <div class="terminal-bg p-4 rounded-xl text-xs">
+                        <div class="text-slate-500"># 랜섬웨어 암호화 프로세스 의사코드</div>
+                        <div class="text-[#F4D06F]">for each file in target_directories:</div>
+                        <div class="text-[#9DD9D2]">    aes_key = random_bytes(32)   # 파일별 고유 AES-256 키</div>
+                        <div class="text-[#9DD9D2]">    encrypted_file = AES_encrypt(file, aes_key)</div>
+                        <div class="text-[#9DD9D2]">    encrypted_key = RSA_encrypt(aes_key, attacker_pubkey)</div>
+                        <div class="text-slate-400">    save(encrypted_file + encrypted_key)</div>
+                        <div class="text-slate-400">    rename(file, file + ".locked")</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> Mini Lab — 랜섬웨어 감염 시뮬레이션</h2>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm">
+                            <span class="hl-teal">Mini Lab: 파일 암호화 과정 시각화</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div>
+                        </div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">시뮬레이션 버튼을 눌러 랜섬웨어가 파일을 암호화하는 과정을 관찰하세요.</p>
+                            <div class="flex justify-center mb-6">
+                                <button onclick="startRansomware()" id="btn-ransom" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded shadow-sm transition">🔐 감염 시뮬레이션 시작</button>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-lg mx-auto" id="file-grid">
+                                <div class="file-item p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition-all duration-500" data-idx="0">
+                                    <div class="text-2xl mb-1">📄</div>
+                                    <div class="text-[10px] font-mono text-cgray dark:text-slate-400">report.docx</div>
+                                </div>
+                                <div class="file-item p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition-all duration-500" data-idx="1">
+                                    <div class="text-2xl mb-1">📊</div>
+                                    <div class="text-[10px] font-mono text-cgray dark:text-slate-400">budget.xlsx</div>
+                                </div>
+                                <div class="file-item p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition-all duration-500" data-idx="2">
+                                    <div class="text-2xl mb-1">🖼️</div>
+                                    <div class="text-[10px] font-mono text-cgray dark:text-slate-400">photo.jpg</div>
+                                </div>
+                                <div class="file-item p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition-all duration-500" data-idx="3">
+                                    <div class="text-2xl mb-1">🗃️</div>
+                                    <div class="text-[10px] font-mono text-cgray dark:text-slate-400">backup.sql</div>
+                                </div>
+                                <div class="file-item p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition-all duration-500" data-idx="4">
+                                    <div class="text-2xl mb-1">📁</div>
+                                    <div class="text-[10px] font-mono text-cgray dark:text-slate-400">project.zip</div>
+                                </div>
+                                <div class="file-item p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition-all duration-500" data-idx="5">
+                                    <div class="text-2xl mb-1">📝</div>
+                                    <div class="text-[10px] font-mono text-cgray dark:text-slate-400">contract.pdf</div>
+                                </div>
+                                <div class="file-item p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition-all duration-500" data-idx="6">
+                                    <div class="text-2xl mb-1">💾</div>
+                                    <div class="text-[10px] font-mono text-cgray dark:text-slate-400">database.db</div>
+                                </div>
+                                <div class="file-item p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition-all duration-500" data-idx="7">
+                                    <div class="text-2xl mb-1">🎬</div>
+                                    <div class="text-[10px] font-mono text-cgray dark:text-slate-400">meeting.mp4</div>
+                                </div>
+                            </div>
+                            <div id="ransom-progress" class="hidden mt-4 text-center text-xs font-mono text-red-500"></div>
+                            <div id="ransom-note" class="hidden mt-4 p-6 rounded-lg bg-red-950 border-2 border-red-500 text-center">
+                                <div class="text-4xl mb-3">🔒</div>
+                                <div class="text-red-400 font-bold text-lg mb-2">YOUR FILES HAVE BEEN ENCRYPTED</div>
+                                <div class="text-red-300 text-sm">모든 파일이 AES-256으로 암호화되었습니다.</div>
+                                <div class="text-red-300 text-sm mt-1">복호화 키: 2.5 BTC를 bc1q...로 전송하세요.</div>
+                                <div class="text-red-500 text-xs mt-3 font-mono">Time remaining: 71:59:59</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl mt-8">
+                        <h3 class="text-xl font-bold mb-4 text-[#1e293b] dark:text-white">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. 랜섬웨어 대응에서 가장 중요한 것은?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> 몸값을 빠르게 지불하여 복호화 키를 받는 것</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> 오프라인 백업 + 네트워크 분리 + 패치 관리를 통한 예방</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> 감염된 PC의 전원을 즉시 끄는 것</label>
+                                </div>
+                            </div>
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. 이중 협박(Double Extortion)이란?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="1" class="mr-3"> 랜섬웨어를 두 번 설치하는 것</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="2" class="mr-3"> 파일 암호화 + 데이터 유출 협박을 동시에 수행하는 것</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="3" class="mr-3"> 몸값을 두 배로 요구하는 것</label>
+                                </div>
+                            </div>
+                            <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                        </div>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">랜섬웨어 학습 완료!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">랜섬웨어의 암호화 원리와 RaaS 모델, 대응 방법을 학습했습니다.</p>
+                <button onclick="goToDashboard()" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 hover:shadow-2xl transition">← 매트릭스 대시보드로 돌아가기</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function goToDashboard(){window.location.href='/';}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        var fileNames=['report.docx','budget.xlsx','photo.jpg','backup.sql','project.zip','contract.pdf','database.db','meeting.mp4'];
+        function startRansomware(){
+            var btn=document.getElementById('btn-ransom');btn.disabled=true;btn.classList.add('opacity-50');
+            var prog=document.getElementById('ransom-progress');prog.classList.remove('hidden');
+            var items=document.querySelectorAll('.file-item');
+            var idx=0;
+            var interval=setInterval(function(){
+                if(idx>=items.length){
+                    clearInterval(interval);
+                    prog.textContent='[COMPLETE] 모든 파일 암호화 완료.';
+                    document.getElementById('ransom-note').classList.remove('hidden');
+                    document.getElementById('ransom-note').classList.add('shake-anim');
+                    return;
+                }
+                var item=items[idx];
+                item.classList.add('shake-anim');
+                item.style.borderColor='#ef4444';item.style.background='rgba(239,68,68,0.1)';
+                item.querySelector('div:first-child').textContent='🔒';
+                item.querySelector('div:last-child').textContent=fileNames[idx]+'.locked';
+                item.querySelector('div:last-child').style.color='#ef4444';
+                prog.textContent='[ENCRYPTING] '+fileNames[idx]+' → AES-256 암호화 중... ('+(idx+1)+'/'+items.length+')';
+                idx++;
+            },600);
+        }
+
+        function checkQuiz(){
+            var q1=document.querySelector('input[name="q1"]:checked');
+            var q2=document.querySelector('input[name="q2"]:checked');
+            if(!q1||!q2){alert('모든 문제에 답을 선택해주세요.');return;}
+            var score=0;if(q1.value==='2')score++;if(q2.value==='2')score++;
+            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
+            if(score===2){res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';res.textContent='모두 정답! 백업과 예방이 최선이며, 이중 협박은 암호화+유출 협박입니다.';}
+            else{res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';res.textContent=score+'/2 정답입니다. 틀린 문제를 다시 확인해 보세요.';}
+        }
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+    </div>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

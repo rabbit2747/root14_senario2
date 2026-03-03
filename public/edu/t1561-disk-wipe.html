@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1561">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1561-disk-wipe&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT 사이버보안 교육 — T1561 디스크 와이프 (Disk Wipe)">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1561 — 디스크 와이프</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s}
+        .glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}
+        .dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+        .hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}
+        .hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F}
+        .terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}
+        @keyframes wipe{0%{width:0%}100%{width:100%}}
+        .wipe-bar{animation:wipe 2s linear forwards}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px}.dark ::-webkit-scrollbar-thumb{background:#F4D06F}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="goToDashboard()" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(187,62,3,.08)'" onmouseout="this.style.background='transparent'">← 매트릭스 대시보드</button><a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:rgba(187,62,3,.5);text-decoration:none;" class="hidden sm:inline">gotroot.co.kr ↗</a></div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2] mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1561: Disk Wipe</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch1">1. 디스크 와이프란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch2">2. 공격 유형 분석</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch3">3. 탐지 · 방어 + 퀴즈</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Impact</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Disk Wipe</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">디스크를 완전히 지워 시스템을 사용 불능으로 만드는 파괴 공격</p>
+            </header>
+
+            <!-- Ch1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> 디스크 와이프란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">💽 ➜ 🗑️ ➜ 💀 ➜ 🚫</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"하드디스크를 백지로 만들어 부팅조차 불가능하게"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">디스크 와이프(Disk Wipe)는 저장 장치의 데이터를 의도적으로 파괴하여 시스템을 <strong>완전히 사용 불능</strong>으로 만드는 공격입니다. 랜섬웨어와 달리 <strong>복구 대가를 요구하지 않으며</strong>, 순수하게 파괴만을 목적으로 합니다. 국가 지원 해커 그룹이 주로 사용하는 사이버 무기입니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">랜섬웨어 vs 디스크 와이프</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm mt-2">
+                                <thead><tr class="border-b border-slate-300 dark:border-slate-600"><th class="text-left py-2 px-3 font-bold">구분</th><th class="text-left py-2 px-3 font-bold">랜섬웨어</th><th class="text-left py-2 px-3 font-bold">디스크 와이프</th></tr></thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-2 px-3 font-bold">목적</td><td class="py-2 px-3">금전 요구</td><td class="py-2 px-3">순수 파괴</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-2 px-3 font-bold">복구</td><td class="py-2 px-3">키 지불 시 가능</td><td class="py-2 px-3">불가능</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-2 px-3 font-bold">주요 행위자</td><td class="py-2 px-3">사이버 범죄 조직</td><td class="py-2 px-3">국가 지원 APT 그룹</td></tr>
+                                    <tr><td class="py-2 px-3 font-bold">대표 사례</td><td class="py-2 px-3">LockBit, BlackCat</td><td class="py-2 px-3">Shamoon, NotPetya</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> 공격 유형 분석</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h3 class="font-bold text-lg mb-3 hl-yel text-center">MBR/GPT 파괴</h3>
+                            <div class="space-y-2 text-sm text-cgray dark:text-slate-300">
+                                <div class="flex items-start gap-2"><span class="text-[#F4D06F] font-bold">1</span> 마스터 부트 레코드(MBR)에 0x00 덮어쓰기</div>
+                                <div class="flex items-start gap-2"><span class="text-[#F4D06F] font-bold">2</span> 시스템이 부팅 불가 상태가 됨</div>
+                                <div class="flex items-start gap-2"><span class="text-[#F4D06F] font-bold">3</span> 데이터는 남아있으나 접근 불가</div>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#9DD9D2]">
+                            <h3 class="font-bold text-lg mb-3 hl-teal text-center">전체 디스크 제로필</h3>
+                            <div class="space-y-2 text-sm text-cgray dark:text-slate-300">
+                                <div class="flex items-start gap-2"><span class="text-[#9DD9D2] font-bold">1</span> 디스크 전체를 0x00으로 덮어쓰기</div>
+                                <div class="flex items-start gap-2"><span class="text-[#9DD9D2] font-bold">2</span> 파일시스템, 파티션 테이블 모두 파괴</div>
+                                <div class="flex items-start gap-2"><span class="text-[#9DD9D2] font-bold">3</span> 데이터 복구가 사실상 불가능</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="terminal-bg p-4 rounded-xl text-xs">
+                        <div class="text-slate-500"># 디스크 와이프 의사코드 (MBR 파괴)</div>
+                        <div class="text-[#F4D06F]">$disk = "\\\\.\PhysicalDrive0"</div>
+                        <div class="text-[#9DD9D2]">$handle = [IO.File]::Open($disk, 'Open', 'ReadWrite')</div>
+                        <div class="text-[#9DD9D2]">$zeros = New-Object byte[] 512  # MBR = 512 bytes</div>
+                        <div class="text-slate-400">$handle.Write($zeros, 0, 512)   # MBR 영역 제로필</div>
+                        <div class="text-slate-400"># 재부팅 시 "Operating System Not Found"</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> 탐지 · 방어 + 퀴즈</h2>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm">
+                            <span class="hl-teal">디스크 와이프 시뮬레이션</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div>
+                        </div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">디스크 와이프가 MBR을 파괴하는 과정을 관찰하세요.</p>
+                            <div class="flex justify-center mb-6">
+                                <button onclick="startWipeSim()" id="btn-wipe" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow-sm transition">💽 와이프 시뮬레이션</button>
+                            </div>
+                            <div class="max-w-md mx-auto">
+                                <div id="mbr-visual" class="grid grid-cols-16 gap-[2px] mb-4">
+                                </div>
+                                <div id="wipe-status" class="text-center text-xs font-mono text-cgray dark:text-slate-400"></div>
+                            </div>
+                            <div id="wipe-result" class="hidden mt-4 p-4 rounded-lg bg-red-950 border-2 border-red-500 text-center">
+                                <div class="text-3xl mb-2">💀</div>
+                                <div class="text-red-400 font-bold text-lg">OPERATING SYSTEM NOT FOUND</div>
+                                <div class="text-red-300 text-sm mt-1">MBR이 파괴되어 부팅이 불가능합니다.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                            <h4 class="font-bold hl-teal mb-2">탐지 방법</h4>
+                            <ul class="text-sm text-cgray dark:text-slate-300 space-y-1">
+                                <li>- 원시 디스크 접근(\\.\PhysicalDrive) 모니터링</li>
+                                <li>- Sysmon으로 비정상 프로세스의 디스크 쓰기 감지</li>
+                                <li>- EDR에서 MBR/GPT 수정 시도 차단</li>
+                            </ul>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-[#F4D06F]">
+                            <h4 class="font-bold hl-yel mb-2">방어 전략</h4>
+                            <ul class="text-sm text-cgray dark:text-slate-300 space-y-1">
+                                <li>- Secure Boot + UEFI 부팅 보호 활성화</li>
+                                <li>- 오프라인 백업 (air-gapped) 운영</li>
+                                <li>- 네트워크 세그멘테이션으로 확산 차단</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl mt-8">
+                        <h3 class="text-xl font-bold mb-4 text-[#1e293b] dark:text-white">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. 디스크 와이프와 랜섬웨어의 가장 큰 차이점은?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> 디스크 와이프는 암호화를 사용하지 않는다</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> 디스크 와이프는 복구 불가능한 순수 파괴가 목적이다</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> 디스크 와이프는 네트워크를 통해 전파되지 않는다</label>
+                                </div>
+                            </div>
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. MBR 파괴 시 발생하는 현상은?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="1" class="mr-3"> 파일이 모두 삭제된다</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="2" class="mr-3"> 시스템이 부팅 불가능 상태가 된다</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="3" class="mr-3"> 바이러스 백신이 자동으로 치료한다</label>
+                                </div>
+                            </div>
+                            <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                        </div>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">디스크 와이프 학습 완료!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">디스크 와이프의 파괴 메커니즘과 오프라인 백업의 중요성을 학습했습니다.</p>
+                <button onclick="goToDashboard()" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 hover:shadow-2xl transition">← 매트릭스 대시보드로 돌아가기</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function goToDashboard(){window.location.href='/';}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        // Build MBR grid
+        (function(){var g=document.getElementById('mbr-visual');for(var i=0;i<128;i++){var d=document.createElement('div');d.className='w-3 h-3 rounded-sm bg-teal-400 dark:bg-teal-500 transition-all duration-300';d.dataset.idx=i;g.appendChild(d);}})();
+
+        function startWipeSim(){
+            var btn=document.getElementById('btn-wipe');btn.disabled=true;btn.classList.add('opacity-50');
+            var cells=document.querySelectorAll('#mbr-visual div');
+            var status=document.getElementById('wipe-status');
+            var idx=0;
+            status.textContent='[WIPING] MBR 섹터 덮어쓰기 중...';
+            var interval=setInterval(function(){
+                if(idx>=cells.length){
+                    clearInterval(interval);
+                    status.textContent='[COMPLETE] MBR 512 bytes → 0x00 덮어쓰기 완료';
+                    document.getElementById('wipe-result').classList.remove('hidden');
+                    return;
+                }
+                var batch=Math.min(8,cells.length-idx);
+                for(var i=0;i<batch;i++){
+                    cells[idx+i].className='w-3 h-3 rounded-sm bg-red-500 dark:bg-red-600 transition-all duration-300';
+                }
+                idx+=batch;
+                status.textContent='[WIPING] 0x'+('00000'+(idx*4).toString(16)).slice(-6)+' — '+Math.round(idx/cells.length*100)+'%';
+            },80);
+        }
+
+        function checkQuiz(){
+            var q1=document.querySelector('input[name="q1"]:checked');
+            var q2=document.querySelector('input[name="q2"]:checked');
+            if(!q1||!q2){alert('모든 문제에 답을 선택해주세요.');return;}
+            var score=0;if(q1.value==='2')score++;if(q2.value==='2')score++;
+            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
+            if(score===2){res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';res.textContent='모두 정답! 디스크 와이프는 복구 불가능한 파괴가 목적이며, MBR 파괴 시 부팅이 불가합니다.';}
+            else{res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';res.textContent=score+'/2 정답입니다. 틀린 문제를 다시 확인해 보세요.';}
+        }
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+    </div>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

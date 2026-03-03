@@ -1,0 +1,178 @@
+{
+  "id": "T1593.001",
+  "title": "소셜 미디어 검색 시뮬레이션",
+  "titleEn": "Social Media Search Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 프로필 수집", "labelEn": "🔍 Profile Collection", "steps": [0, 1] },
+    { "label": "⚡ OSINT 분석", "labelEn": "⚡ OSINT Analysis", "steps": [2] },
+    { "label": "🔓 관계 매핑", "labelEn": "🔓 Relationship Mapping", "steps": [3] },
+    { "label": "✅ 인텔리전스 종합", "labelEn": "✅ Intelligence Summary", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "linkedin", "label": "LinkedIn", "x": 180, "y": 20 },
+    { "id": "twitter", "label": "Twitter/X", "x": 180, "y": 60 },
+    { "id": "github", "label": "GitHub", "x": 180, "y": 100 },
+    { "id": "intel", "label": "OSINT Report", "x": 400, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "linkedin", "minStep": 0 },
+    { "from": "ext", "to": "twitter", "minStep": 1 },
+    { "from": "ext", "to": "github", "minStep": 2 },
+    { "from": "linkedin", "to": "intel", "minStep": 4 },
+    { "from": "twitter", "to": "intel", "minStep": 4 },
+    { "from": "github", "to": "intel", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} OSINT", "icon": "📁" },
+    { "name": "employee_profiles.csv", "icon": "📄", "alert": true },
+    { "name": "social_graph.json", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 sherlock.py --username \"kim-minhyuk-{companyName}\" --output sherlock_results.json",
+      "out": "[*] Checking username kim-minhyuk-{companyName} on:\n[+] LinkedIn: https://linkedin.com/in/kim-minhyuk-{companyName}\n[+] GitHub: https://github.com/kimminhyuk-dev\n[+] Twitter: https://twitter.com/kim_mh_dev\n[+] Instagram: https://instagram.com/minhyuk.kim\n[+] Medium: https://medium.com/@kimminhyuk\n[-] Facebook: Not Found\n[-] Reddit: Not Found\n\n[*] Cross-referencing profiles...\n[+] Confirmed identity: Kim Minhyuk\n  Company: {companyName} (IT Manager)\n  Location: Seoul, South Korea\n  Interests: Cloud Security, AWS, Kubernetes\n  Recent activity: AWS re:Invent talk submission\n\n[+] 5 social media profiles identified",
+      "def": "[OSINT Monitor] Multi-platform username enumeration for employee",
+      "defAction": "Source: Social media scraping\nTarget: kim-minhyuk employee profiles\nAction: OPSEC training recommended for employee",
+      "desc": "Sherlock 도구로 특정 직원의 사용자 이름을 여러 소셜 미디어 플랫폼에서 검색합니다.",
+      "descEn": "The attacker uses Sherlock to search for an employee's username across multiple social media platforms.",
+      "stepTitle": "Sherlock으로 다중 플랫폼 검색",
+      "stepTitleEn": "Multi-Platform Search with Sherlock",
+      "feynman": "Sherlock은 사용자 이름 하나로 수백 개 웹사이트에서 해당 계정을 찾아주는 도구입니다. 'kim-minhyuk'이라는 이름으로 LinkedIn, GitHub, Twitter, Instagram, Medium까지 5개 플랫폼에서 같은 사람의 계정을 발견했습니다. 각 플랫폼의 정보를 합치면 그 사람에 대해 매우 상세히 알 수 있습니다.",
+      "feynmanEn": "Sherlock finds accounts on hundreds of websites from a single username. Searching 'kim-minhyuk' discovered the same person on 5 platforms: LinkedIn, GitHub, Twitter, Instagram, Medium. Combining info from each platform reveals detailed personal information.",
+      "expert": "Sherlock은 오픈소스 사용자명 열거 도구로 350+ 사이트를 스캔합니다. 교차 검증된 5개 프로필에서 직무(IT Manager), 기술 스택(AWS, K8s), 개인 관심사를 추출하여 타겟 프로파일링의 기초 자료를 구축합니다.",
+      "expertEn": "Sherlock is an open-source username enumeration tool scanning 350+ sites. Cross-verified 5 profiles provide role (IT Manager), tech stack (AWS, K8s), and personal interests for target profiling foundation.",
+      "defTooltip": "🔍 OSINT 모니터: 직원에 대한 다중 플랫폼 사용자명 열거",
+      "defTooltipEn": "🔍 OSINT Monitor: Multi-platform username enumeration for employee",
+      "hackerLog": {
+        "title": "sherlock_results.log",
+        "lines": [
+          { "log": "5 social media profiles identified", "desc": "5개 플랫폼에서 동일 인물 확인 - 교차 분석 가능" },
+          { "log": "GitHub: kimminhyuk-dev", "desc": "GitHub에서 코드와 기술 스택 분석 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Sherlock", "desc": "사용자명으로 350+ 소셜 미디어에서 계정을 검색하는 오픈소스 OSINT 도구" },
+        { "name": "Username Enumeration", "desc": "특정 사용자명이 다양한 플랫폼에 존재하는지 확인하는 정보 수집 기법" }
+      ]
+    },
+    {
+      "cmd": "python3 maltego_transform.py --domain {companyName}.com --transform \"linkedin_employees\" --depth 2 --output employee_graph.json",
+      "out": "[*] Running Maltego transforms for {companyName}.com...\n[+] LinkedIn employee enumeration (depth 2)...\n\n[+] Employees found: 127\n  C-Suite: 4\n  Directors: 8\n  Managers: 15\n  Senior Engineers: 23\n  Engineers: 34\n  Others: 43\n\n[+] Department breakdown:\n  Engineering: 45 (35%)\n  Sales/Marketing: 28 (22%)\n  Finance/Admin: 20 (16%)\n  IT/Security: 18 (14%)\n  HR: 9 (7%)\n  Other: 7 (6%)\n\n[+] Technology tags (from employee profiles):\n  AWS (67), Python (45), React (38), Kubernetes (32),\n  Java (28), PostgreSQL (25), Docker (23), Terraform (18)\n\n[+] Employee graph saved to employee_graph.json",
+      "def": "[Social Media Monitor] Maltego-style LinkedIn employee enumeration detected",
+      "defAction": "Source: LinkedIn API abuse\nTarget: {companyName} employee directory\nAction: 127 employee profiles exposed, OPSEC review initiated",
+      "desc": "Maltego 변환을 통해 대상 조직의 전체 직원 목록과 기술 스택을 수집합니다.",
+      "descEn": "The attacker uses Maltego transforms to collect the complete employee directory and technology stack.",
+      "stepTitle": "Maltego로 직원 네트워크 수집",
+      "stepTitleEn": "Employee Network Collection via Maltego",
+      "feynman": "Maltego는 '관계 탐정' 도구입니다. 회사 도메인을 입력하면 LinkedIn에서 직원 127명의 목록을 자동으로 수집합니다. 부서별 인원(개발 45명, 영업 28명), 사용 기술(AWS 67명, Python 45명)까지 한눈에 파악됩니다. 이것만으로도 회사의 기술 인프라를 추정할 수 있습니다.",
+      "feynmanEn": "Maltego is a 'relationship detective' tool. Entering a company domain automatically collects 127 employees from LinkedIn, showing department sizes (45 engineering, 28 sales) and technologies (67 AWS, 45 Python). This alone reveals the company's technical infrastructure.",
+      "expert": "Maltego의 LinkedIn 변환으로 127명 직원을 수집하고 직무/기술 태그를 분석합니다. AWS 67명은 클라우드 인프라의 규모를, K8s 32명은 컨테이너 오케스트레이션 사용을 시사합니다. IT/Security 18명(14%)은 업계 평균(10-15%)에 부합합니다.",
+      "expertEn": "Maltego LinkedIn transforms collect 127 employees with role/technology tag analysis. 67 AWS users indicate cloud infrastructure scale, 32 K8s users suggest container orchestration. IT/Security at 18 (14%) aligns with industry average (10-15%).",
+      "defTooltip": "📊 소셜 미디어 모니터: Maltego 스타일 LinkedIn 직원 열거 감지",
+      "defTooltipEn": "📊 Social Media Monitor: Maltego-style LinkedIn employee enumeration detected",
+      "hackerLog": {
+        "title": "employee_graph.log",
+        "lines": [
+          { "log": "Employees found: 127", "desc": "전체 직원 목록 확보 - 조직 규모와 구조 파악" },
+          { "log": "Tech: AWS (67), Python (45), Kubernetes (32)", "desc": "기술 스택 분석 - 공격 벡터 선정에 활용" }
+        ]
+      },
+      "terms": [
+        { "name": "Maltego", "desc": "OSINT 정보를 시각적 그래프로 분석하는 도구. 사람, 도메인, IP 간의 관계를 매핑합니다" },
+        { "name": "Transform", "desc": "Maltego에서 하나의 엔터티를 다른 엔터티로 변환하는 자동화된 데이터 수집 작업" }
+      ]
+    },
+    {
+      "cmd": "python3 spiderfoot.py --target {companyName}.com --modules \"social,email,darkweb\" --output spiderfoot_report.json",
+      "out": "[*] SpiderFoot OSINT scan for {companyName}.com...\n\n[+] Social Media Intelligence:\n  Corporate accounts: 5 (LinkedIn, Twitter, YouTube, Instagram, Blog)\n  Employee mentions: 342\n  Technology discussions: 89 posts\n  Complaint/feedback: 23 posts\n\n[+] Email Intelligence:\n  Email pattern: firstname.lastname@{companyName}.com\n  Valid emails verified: 87/127 (68.5%)\n  Email format confidence: HIGH\n\n[+] Dark Web Intelligence:\n  Breach mentions: 3 (LinkedIn 2021, Collection #1, Adobe)\n  Paste sites: 7 entries with {companyName}.com\n  Dark web forums: 2 mentions (employee credential sale)\n\n[+] Sensitive Information Found:\n  - AWS Access Key in GitHub commit (revoked)\n  - Internal API endpoint in Stack Overflow answer\n  - Employee phone numbers on company website\n  - Job posting reveals Splunk SIEM, CrowdStrike EDR\n\n[+] Full report saved to spiderfoot_report.json",
+      "def": "[OSINT Platform] Automated OSINT scan detected across multiple intelligence sources",
+      "defAction": "Source: SpiderFoot scan correlation\nTarget: {companyName}.com digital footprint\nAction: Comprehensive information exposure review initiated",
+      "desc": "SpiderFoot로 소셜 미디어, 이메일, 다크웹 등 모든 OSINT 소스를 자동 스캔합니다.",
+      "descEn": "The attacker uses SpiderFoot to automatically scan all OSINT sources including social media, email, and dark web.",
+      "stepTitle": "SpiderFoot 자동 OSINT 스캔",
+      "stepTitleEn": "SpiderFoot Automated OSINT Scan",
+      "feynman": "SpiderFoot는 '자동 탐정'입니다. 회사 도메인 하나만 입력하면 소셜 미디어, 이메일, 다크웹을 자동으로 스캔합니다. GitHub에서 유출된 AWS 키, Stack Overflow에서 노출된 내부 API, 다크웹에서 판매되는 직원 비밀번호까지 모든 것을 찾아냅니다.",
+      "feynmanEn": "SpiderFoot is an 'automated detective.' Enter one company domain and it automatically scans social media, email, and dark web. It finds leaked AWS keys on GitHub, exposed internal APIs on Stack Overflow, and employee passwords for sale on the dark web.",
+      "expert": "SpiderFoot의 소셜/이메일/다크웹 모듈을 실행합니다. GitHub 커밋의 AWS Access Key(폐기됨)는 과거 보안 사고를, Stack Overflow의 내부 API 엔드포인트는 개발자의 OPSEC 인식 부족을 시사합니다. 3개 Breach DB 매칭은 크레덴셜 스터핑 공격의 기초입니다.",
+      "expertEn": "Running SpiderFoot social/email/darkweb modules. AWS Access Key in GitHub (revoked) indicates past security incident, internal API endpoint on Stack Overflow suggests developer OPSEC deficiency. 3 breach DB matches enable credential stuffing attacks.",
+      "defTooltip": "🕷️ OSINT 플랫폼: 다중 인텔리전스 소스에 걸친 자동 OSINT 스캔 감지",
+      "defTooltipEn": "🕷️ OSINT Platform: Automated OSINT scan detected across multiple intelligence sources",
+      "hackerLog": {
+        "title": "spiderfoot_report.log",
+        "lines": [
+          { "log": "AWS Access Key in GitHub commit (revoked)", "desc": "과거 시크릿 유출 이력 - 다른 시크릿도 유출 가능성" },
+          { "log": "Internal API endpoint in Stack Overflow", "desc": "개발자가 내부 API를 공개 사이트에 노출" }
+        ]
+      },
+      "terms": [
+        { "name": "SpiderFoot", "desc": "자동화된 OSINT 수집 도구. 100+ 모듈로 다양한 데이터 소스에서 정보를 수집합니다" },
+        { "name": "OPSEC Failure", "desc": "운영 보안 실패. 민감한 정보를 의도치 않게 공개 채널에 노출하는 것" }
+      ]
+    },
+    {
+      "cmd": "python3 social_graph_builder.py --employees employee_graph.json --social sherlock_results.json --output social_graph.json",
+      "out": "[*] Building social relationship graph for {companyName}...\n\n[+] Internal relationships mapped:\n  Reporting lines: 45 confirmed\n  Cross-department connections: 78\n  Project teams identified: 8\n    - Cloud Migration Team (12 members)\n    - Mobile App Team (8 members)\n    - Security Operations (8 members)\n    - ...\n\n[+] External relationships:\n  Partner companies: 5 (identified from LinkedIn connections)\n  Vendor contacts: 12\n  Former employees at competitors: 7\n\n[+] Influence mapping:\n  Top 5 internal influencers:\n    1. Kim Junghyun (CEO) - 89 internal connections\n    2. Lee Dongwook (CTO) - 76 internal connections\n    3. Kang Hyejin (VP Eng) - 65 internal connections\n    4. Kim Minhyuk (IT Manager) - 54 internal connections\n    5. Choi Minji (CISO) - 48 internal connections\n\n[+] Social graph saved (127 nodes, 423 edges)",
+      "def": "[Intelligence Platform] Social graph construction from multi-source OSINT data",
+      "defAction": "Source: Graph analysis\nTarget: {companyName} employee relationship network\nAction: Internal influence mapping created for defense planning",
+      "desc": "수집된 모든 정보로 조직 내부의 관계 그래프와 영향력 맵을 구축합니다.",
+      "descEn": "Building an internal relationship graph and influence map from all collected intelligence.",
+      "stepTitle": "소셜 관계 그래프 구축",
+      "stepTitleEn": "Social Relationship Graph Construction",
+      "feynman": "모든 직원의 관계를 그래프로 그리면 누가 누구와 자주 소통하고, 누가 가장 영향력 있는지 알 수 있습니다. CEO가 89개 내부 연결로 가장 영향력이 크고, IT Manager가 54개로 4위입니다. 영향력이 큰 사람의 계정을 탈취하면 피싱의 파급력이 극대화됩니다.",
+      "feynmanEn": "Graphing all employee relationships reveals who communicates frequently and who has the most influence. CEO has 89 internal connections (#1), IT Manager has 54 (#4). Compromising high-influence accounts maximizes phishing impact.",
+      "expert": "소셜 그래프 분석(127 노드, 423 엣지)으로 조직의 정보 흐름과 권력 구조를 매핑합니다. Betweenness centrality가 높은 노드(Kang Hyejin, VP Eng)는 정보 전달의 병목점으로, 이 노드의 탈취는 최대 65명에게 영향을 미칩니다.",
+      "expertEn": "Social graph analysis (127 nodes, 423 edges) maps organizational information flow and power structure. High betweenness centrality nodes (Kang Hyejin, VP Eng) are information bottlenecks - compromising this node affects up to 65 people.",
+      "defTooltip": "🕸️ 인텔리전스 플랫폼: 다중 소스 OSINT에서 소셜 그래프 구축",
+      "defTooltipEn": "🕸️ Intelligence Platform: Social graph construction from multi-source OSINT data",
+      "hackerLog": {
+        "title": "social_graph.log",
+        "lines": [
+          { "log": "127 nodes, 423 edges", "desc": "전체 조직의 관계 네트워크 시각화 완료" },
+          { "log": "Top influencer: CEO (89 internal connections)", "desc": "CEO 사칭 시 최대 파급력" }
+        ]
+      },
+      "terms": [
+        { "name": "Social Graph", "desc": "사람들 간의 관계를 노드(점)와 엣지(선)로 표현한 네트워크 그래프" },
+        { "name": "Betweenness Centrality", "desc": "그래프에서 한 노드가 다른 노드들 사이의 정보 전달 경로에 얼마나 많이 위치하는지의 지표" }
+      ]
+    },
+    {
+      "cmd": "python3 osint_reporter.py --all-sources --company \"{companyName}\" --output final_osint_report.json",
+      "out": "[*] Generating comprehensive OSINT intelligence report for {companyName}...\n\n[+] FINAL OSINT REPORT SUMMARY:\n\n  Organization: {companyName} Corporation\n  Employees identified: 127\n  Departments mapped: 6\n  Technologies: AWS, Python, React, K8s, PostgreSQL\n  Security stack: CrowdStrike EDR, Splunk SIEM\n  \n  Attack Surface:\n  ├─ Social engineering targets: 75 (non-IT employees)\n  ├─ Leaked credentials: 68 (41 plaintext)\n  ├─ Exposed secrets: 1 (AWS key, revoked)\n  ├─ Internal APIs exposed: 1 (Stack Overflow)\n  └─ Dark web mentions: 5\n  \n  Recommended attack vectors:\n  1. BEC: CEO → CFO ($48.5K urgent transfer)\n  2. Spearphishing: IT Manager LinkedIn → 75 employees\n  3. Credential stuffing: 68 leaked creds → VPN/O365\n  4. Supply chain: Partner company compromise\n  \n  Confidence level: HIGH (multi-source verification)\n\n[+] Report saved to final_osint_report.json",
+      "def": "[SIEM] Complete multi-platform OSINT campaign detected for organization",
+      "defAction": "Source: All intelligence sources\nTarget: {companyName} comprehensive profile\nAction: Executive briefing scheduled, comprehensive security posture review initiated",
+      "desc": "모든 소셜 미디어 OSINT를 종합하여 최종 보고서를 생성하고 공격 벡터를 추천합니다.",
+      "descEn": "Consolidating all social media OSINT into a final report with recommended attack vectors.",
+      "stepTitle": "최종 OSINT 보고서 생성",
+      "stepTitleEn": "Final OSINT Report Generation",
+      "feynman": "모든 소셜 미디어 조사를 하나의 보고서로 정리합니다. 직원 127명, 유출 비밀번호 68개, BEC 최적 시나리오, 스피어피싱 대상 75명 등 회사의 '디지털 약점 백과사전'이 완성됩니다. 공격자는 이 보고서로 가장 성공 확률 높은 공격을 선택합니다.",
+      "feynmanEn": "All social media research consolidated into one report. 127 employees, 68 leaked passwords, optimal BEC scenario, 75 spearphishing targets - a complete 'digital weakness encyclopedia.' Attackers use this to choose the highest-probability attack.",
+      "expert": "다중 플랫폼 OSINT를 통합하여 공격 우선순위를 결정합니다. BEC(CFO 대상 $48.5K), 탈취 계정 스피어피싱(75명), 크레덴셜 스터핑(68개), 공급망 공격의 4가지 벡터를 제안하며, 각각의 성공 확률과 예상 피해를 산출합니다.",
+      "expertEn": "Integrating multi-platform OSINT to determine attack priorities. Four vectors proposed: BEC (CFO target $48.5K), compromised account spearphishing (75 targets), credential stuffing (68 creds), supply chain attack - each with success probability and estimated damage.",
+      "defTooltip": "🗺️ SIEM: 조직에 대한 완전한 다중 플랫폼 OSINT 캠페인 감지",
+      "defTooltipEn": "🗺️ SIEM: Complete multi-platform OSINT campaign detected for organization",
+      "hackerLog": {
+        "title": "final_report.log",
+        "lines": [
+          { "log": "Attack Surface: 75 social engineering targets", "desc": "비기술직 75명 - 소셜 엔지니어링 최적 대상" },
+          { "log": "Leaked credentials: 68 (41 plaintext)", "desc": "즉시 사용 가능한 41개 평문 비밀번호" }
+        ]
+      },
+      "terms": [
+        { "name": "OSINT Report", "desc": "공개 출처 정보를 종합하여 대상에 대한 상세 분석 결과를 정리한 보고서" },
+        { "name": "Attack Vector", "desc": "공격이 가능한 경로나 방법. 피싱, 취약점 익스플로잇, 소셜 엔지니어링 등이 포함됩니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "python3 sherlock.py (PID: 11101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 maltego_transform.py (PID: 11156)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "python3 spiderfoot.py (PID: 11201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 social_graph_builder.py (PID: 11289)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "python3 osint_reporter.py (PID: 11345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "id": "T1136.003",
+  "title": "클라우드 백도어 계정 생성 시뮬레이션",
+  "titleEn": "Cloud Backdoor Account Creation Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 계정 생성", "labelEn": "⚡ Account Creation", "steps": [1] },
+    { "label": "🔓 권한 부여", "labelEn": "🔓 Privilege Grant", "steps": [2, 3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "awsconsole", "label": "AWS Console\n(Compromised)", "x": 250, "y": 80 },
+    { "id": "iam", "label": "IAM\nUser/Role", "x": 400, "y": 30 },
+    { "id": "s3", "label": "S3 Buckets\n(Data)", "x": 400, "y": 130 },
+    { "id": "ec2", "label": "EC2 Instances", "x": 250, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "awsconsole", "minStep": 0 },
+    { "from": "awsconsole", "to": "iam", "minStep": 1 },
+    { "from": "iam", "to": "s3", "minStep": 4 },
+    { "from": "iam", "to": "ec2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "AWS CLI", "icon": "☁️" },
+    { "name": "Terminal", "icon": "💻" },
+    { "name": "Browser", "icon": "🌐" },
+    { "name": "CloudWatch", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "aws iam list-users --query 'Users[].UserName' --output table && aws iam list-attached-user-policies --user-name admin-ops --query 'AttachedPolicies[].PolicyName'",
+      "out": "----------------------------\n|       ListUsers          |\n+------------------------+\n|  admin-ops             |\n|  admin-deploy          |\n|  svc-lambda-exec       |\n|  svc-cloudwatch        |\n|  ci-cd-pipeline        |\n+------------------------+\n\n[\n    \"AdministratorAccess\",\n    \"IAMFullAccess\"\n]\n\n[*] IAM Users enumerated:\n    admin-ops (AdministratorAccess) ← compromised\n    admin-deploy, svc-lambda-exec, svc-cloudwatch, ci-cd-pipeline\n[*] Naming convention: role-function format\n[*] Service accounts use svc- prefix",
+      "def": "[CloudTrail] ListUsers and ListAttachedUserPolicies API calls from unusual source IP",
+      "defAction": "Source: CloudTrail Event History\nTarget: IAM ListUsers API\nAction: API calls logged, source IP flagged for investigation",
+      "desc": "AWS IAM 사용자 목록과 권한을 열거하여 명명 규칙과 권한 구조를 파악합니다.",
+      "descEn": "The attacker enumerates AWS IAM users and their permissions to understand naming conventions and privilege structure.",
+      "stepTitle": "AWS IAM 사용자 정찰",
+      "stepTitleEn": "AWS IAM User Reconnaissance",
+      "feynman": "회사 조직도를 보면서 어떤 부서에 어떤 직원이 있는지, 누가 어떤 권한을 가지고 있는지 파악하는 것과 같습니다. svc-로 시작하는 서비스 계정 이름 패턴을 파악하면 비슷한 이름의 백도어를 만들 수 있습니다.",
+      "feynmanEn": "It's like looking at the company org chart to understand which departments have which employees and who has what permissions. Identifying the svc- naming pattern for service accounts enables creating similarly named backdoors.",
+      "expert": "aws iam list-users는 CloudTrail에 ListUsers 이벤트를 생성합니다. 공격자는 기존 사용자의 명명 규칙(svc-, admin-, ci-cd-)을 분석하여 자연스러운 백도어 이름을 선택합니다. IAMFullAccess 정책이 연결된 계정은 새 사용자 생성이 가능합니다.",
+      "expertEn": "aws iam list-users generates a ListUsers event in CloudTrail. Attackers analyze existing user naming conventions (svc-, admin-, ci-cd-) to choose natural backdoor names. Accounts with IAMFullAccess policy can create new users.",
+      "defTooltip": "🔐 비정상 소스 IP에서 IAM 사용자 열거 API 호출 감지!",
+      "defTooltipEn": "🔐 IAM user enumeration API calls from unusual source IP detected!",
+      "hackerLog": {
+        "title": "iam_recon.txt",
+        "lines": [
+          { "log": "Naming convention: role-function format", "desc": "💡 계정 명명 패턴 파악 - svc-, admin-, ci-cd- 프리픽스 사용" },
+          { "log": "admin-ops (AdministratorAccess) ← compromised", "desc": "💡 탈취된 계정이 AdministratorAccess 보유 - IAM 조작 가능" },
+          { "log": "Service accounts use svc- prefix", "desc": "💡 서비스 계정 패턴 확인 - svc-monitoring 같은 이름으로 위장 계획" }
+        ]
+      },
+      "terms": [
+        { "name": "AWS IAM", "desc": "Identity and Access Management. AWS 리소스에 대한 접근을 안전하게 관리하는 서비스입니다." },
+        { "name": "CloudTrail", "desc": "AWS API 호출을 기록하는 감사 로그 서비스. IAM 변경 사항 모니터링의 핵심 소스입니다." },
+        { "name": "AdministratorAccess", "desc": "AWS의 모든 서비스와 리소스에 대한 완전한 접근 권한을 부여하는 관리형 정책입니다." }
+      ]
+    },
+    {
+      "cmd": "aws iam create-user --user-name svc-monitoring && aws iam create-login-profile --user-name svc-monitoring --password 'Cl0ud#B@ckd00r!' --no-password-reset-required",
+      "out": "{\n    \"User\": {\n        \"UserName\": \"svc-monitoring\",\n        \"UserId\": \"AIDA3EXAMPLE7MONITORING\",\n        \"Arn\": \"arn:aws:iam::123456789012:user/svc-monitoring\",\n        \"CreateDate\": \"2026-03-01T10:30:00Z\"\n    }\n}\n\n{\n    \"LoginProfile\": {\n        \"UserName\": \"svc-monitoring\",\n        \"CreateDate\": \"2026-03-01T10:30:01Z\",\n        \"PasswordResetRequired\": false\n    }\n}\n\n[*] Backdoor IAM user created: svc-monitoring\n[*] Console login enabled with fixed password\n[*] No password reset required on first login",
+      "def": "[CloudTrail] CreateUser + CreateLoginProfile API calls - new IAM user with console access",
+      "defAction": "Source: CloudTrail\nTarget: svc-monitoring user creation\nAction: New user flagged, creation request source investigated",
+      "desc": "서비스 계정으로 위장한 백도어 IAM 사용자를 생성하고 콘솔 로그인을 활성화합니다.",
+      "descEn": "The attacker creates a backdoor IAM user disguised as a service account with console login enabled.",
+      "stepTitle": "백도어 IAM 사용자 생성",
+      "stepTitleEn": "Backdoor IAM User Creation",
+      "feynman": "회사 건물의 출입 카드를 새로 발급받는 것과 같습니다. svc-monitoring이라는 이름은 '모니터링 서비스용'이라고 생각하게 만들지만, 실제로는 공격자가 AWS 콘솔에 로그인할 수 있는 백도어입니다.",
+      "feynmanEn": "It's like getting a new building access card issued. The name svc-monitoring makes people think 'it's for the monitoring service,' but it's actually a backdoor for the attacker to log into the AWS console.",
+      "expert": "CreateUser API 호출은 CloudTrail에 기록됩니다. CreateLoginProfile은 콘솔 로그인을 활성화하며, --no-password-reset-required 플래그는 첫 로그인 시 비밀번호 변경을 요구하지 않습니다. 서비스 계정에 콘솔 로그인이 활성화되어 있으면 의심스러운 징후입니다.",
+      "expertEn": "The CreateUser API call is recorded in CloudTrail. CreateLoginProfile enables console login, and --no-password-reset-required prevents password change at first login. Console login enabled on a service account is a suspicious indicator.",
+      "defTooltip": "🔐 새 IAM 사용자 생성 + 콘솔 로그인 활성화! CloudTrail CreateUser 이벤트 확인.",
+      "defTooltipEn": "🔐 New IAM user created + console login enabled! Check CloudTrail CreateUser event.",
+      "hackerLog": {
+        "title": "iam_create.txt",
+        "lines": [
+          { "log": "UserName: svc-monitoring", "desc": "💡 서비스 계정 명명 규칙을 따른 백도어 이름" },
+          { "log": "PasswordResetRequired: false", "desc": "💡 첫 로그인 시 비밀번호 변경 불필요 - 즉시 사용 가능" },
+          { "log": "Console login enabled", "desc": "💡 서비스 계정에 콘솔 로그인 활성화 - 의심 징후" }
+        ]
+      },
+      "terms": [
+        { "name": "IAM User", "desc": "AWS에서 사용자를 나타내는 엔티티. 콘솔 로그인과 API 접근에 사용됩니다." },
+        { "name": "Login Profile", "desc": "IAM 사용자의 콘솔 로그인 설정. 비밀번호와 비밀번호 재설정 요구 여부를 포함합니다." },
+        { "name": "ARN (Amazon Resource Name)", "desc": "AWS 리소스를 고유하게 식별하는 이름 형식입니다." }
+      ]
+    },
+    {
+      "cmd": "aws iam attach-user-policy --user-name svc-monitoring --policy-arn arn:aws:iam::aws:policy/AdministratorAccess",
+      "out": "[*] Policy attached successfully:\n    User: svc-monitoring\n    Policy: AdministratorAccess\n    PolicyArn: arn:aws:iam::aws:policy/AdministratorAccess\n\n[*] svc-monitoring now has:\n    - Full AWS account access\n    - All services and resources\n    - IAM management capability\n    - Billing information access\n\n[*] CloudTrail event: AttachUserPolicy generated",
+      "def": "[CloudTrail] CRITICAL - AdministratorAccess policy attached to new user svc-monitoring",
+      "defAction": "Source: CloudTrail + GuardDuty\nTarget: svc-monitoring policy attachment\nAction: Policy immediately detached, user disabled, SOC alerted",
+      "desc": "백도어 계정에 AdministratorAccess 정책을 연결하여 전체 AWS 계정을 제어할 수 있게 합니다.",
+      "descEn": "The attacker attaches AdministratorAccess policy to the backdoor account for full AWS control.",
+      "stepTitle": "AdministratorAccess 정책 연결",
+      "stepTitleEn": "AdministratorAccess Policy Attachment",
+      "feynman": "가짜 사원에게 회사의 마스터키를 주는 것과 같습니다. AdministratorAccess 정책이 연결되면 AWS 계정의 모든 것을 할 수 있습니다 - EC2 인스턴스 생성/삭제, S3 데이터 열람, 심지어 다른 사용자를 만들거나 삭제하는 것까지 가능합니다.",
+      "feynmanEn": "It's like giving the fake employee the company's master key. With AdministratorAccess attached, they can do everything in the AWS account - create/delete EC2 instances, view S3 data, even create or delete other users.",
+      "expert": "AttachUserPolicy API 호출은 CloudTrail에 기록됩니다. AdministratorAccess는 AWS에서 가장 강력한 관리형 정책입니다. GuardDuty의 UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration 등의 finding이 트리거될 수 있습니다. SCPs(Service Control Policies)로 IAM 변경을 제한하는 것이 중요합니다.",
+      "expertEn": "The AttachUserPolicy API call is recorded in CloudTrail. AdministratorAccess is the most powerful managed policy in AWS. GuardDuty findings like UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration may trigger. Restricting IAM changes via SCPs is important.",
+      "defTooltip": "🔐 새 사용자에 AdministratorAccess 연결! 즉시 정책 분리 및 계정 비활성화 필요.",
+      "defTooltipEn": "🔐 AdministratorAccess attached to new user! Immediate policy detachment and account disable required.",
+      "hackerLog": {
+        "title": "policy_attach.txt",
+        "lines": [
+          { "log": "Policy: AdministratorAccess", "desc": "💡 AWS 최고 권한 정책 - 모든 서비스와 리소스에 접근 가능" },
+          { "log": "IAM management capability", "desc": "💡 다른 사용자 생성/삭제 가능 - 추가 백도어 생성 가능" },
+          { "log": "CloudTrail event: AttachUserPolicy", "desc": "💡 CloudTrail에 기록됨 - 모니터링으로 탐지 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "IAM Policy", "desc": "AWS 리소스에 대한 권한을 정의하는 JSON 문서. 사용자, 그룹, 역할에 연결할 수 있습니다." },
+        { "name": "GuardDuty", "desc": "AWS의 위협 탐지 서비스. 악의적 활동과 비인가 행동을 자동으로 탐지합니다." },
+        { "name": "SCP (Service Control Policy)", "desc": "AWS Organizations에서 계정 수준의 권한 경계를 설정하는 정책입니다." }
+      ]
+    },
+    {
+      "cmd": "aws iam create-access-key --user-name svc-monitoring",
+      "out": "{\n    \"AccessKey\": {\n        \"UserName\": \"svc-monitoring\",\n        \"AccessKeyId\": \"AKIA3EXAMPLEBACKDOOR\",\n        \"Status\": \"Active\",\n        \"SecretAccessKey\": \"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\",\n        \"CreateDate\": \"2026-03-01T10:31:00Z\"\n    }\n}\n\n[*] Access Key created:\n    AccessKeyId: AKIA3EXAMPLEBACKDOOR\n    SecretAccessKey: wJalrXUtn... (stored securely)\n\n[*] API access established:\n    - No console login needed\n    - Programmatic access from anywhere\n    - Can be used with AWS CLI/SDK\n    - No MFA required for API calls",
+      "def": "[CloudTrail] CreateAccessKey for new user - programmatic backdoor access established",
+      "defAction": "Source: CloudTrail\nTarget: Access key creation for svc-monitoring\nAction: Access key immediately deactivated, all API calls from this key audited",
+      "desc": "Access Key를 생성하여 콘솔 없이 API로 AWS 리소스를 제어할 수 있는 프로그래밍 방식 접근을 확보합니다.",
+      "descEn": "The attacker creates Access Keys for programmatic API access to AWS resources without console.",
+      "stepTitle": "Access Key 생성 (프로그래밍 방식 접근)",
+      "stepTitleEn": "Access Key Creation (Programmatic Access)",
+      "feynman": "건물 출입 카드 외에 지하 주차장 리모컨 키도 받는 것과 같습니다. Access Key가 있으면 웹 콘솔에 로그인하지 않고도 명령줄이나 스크립트로 AWS의 모든 것을 제어할 수 있습니다. 더 은밀하고 자동화하기 쉽습니다.",
+      "feynmanEn": "It's like getting a parking garage remote key in addition to the building access card. With Access Keys, you can control everything in AWS via CLI or scripts without logging into the web console. More covert and easier to automate.",
+      "expert": "Access Key는 AWS API 호출에 사용되는 자격 증명입니다. SecretAccessKey는 생성 시에만 표시되므로 공격자가 즉시 저장합니다. API 호출에는 기본적으로 MFA가 필요하지 않으므로, Access Key만으로 모든 작업이 가능합니다. CloudTrail에서 이 키의 모든 활동을 추적할 수 있습니다.",
+      "expertEn": "Access Keys are credentials used for AWS API calls. SecretAccessKey is only shown at creation time, so attackers save it immediately. API calls don't require MFA by default, so the Access Key alone enables all operations. CloudTrail can track all activity from this key.",
+      "defTooltip": "🔐 새 사용자의 Access Key 생성! 프로그래밍 방식 백도어 접근 확립.",
+      "defTooltipEn": "🔐 Access Key created for new user! Programmatic backdoor access established.",
+      "hackerLog": {
+        "title": "access_key.txt",
+        "lines": [
+          { "log": "AccessKeyId: AKIA3EXAMPLEBACKDOOR", "desc": "💡 프로그래밍 방식 접근용 키 - 콘솔 로그인 불필요" },
+          { "log": "No MFA required for API calls", "desc": "💡 API 호출에 MFA 불필요 - Access Key만으로 전체 제어" },
+          { "log": "Can be used with AWS CLI/SDK", "desc": "💡 어디서든 AWS CLI로 명령 실행 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Access Key", "desc": "AWS API를 인증하는 자격 증명. AccessKeyId와 SecretAccessKey로 구성됩니다." },
+        { "name": "프로그래밍 방식 접근", "desc": "콘솔(웹 UI) 대신 CLI, SDK, API를 통해 서비스에 접근하는 방식입니다." },
+        { "name": "MFA (Multi-Factor Authentication)", "desc": "비밀번호 외에 추가 인증 요소를 요구하는 보안 메커니즘입니다." }
+      ]
+    },
+    {
+      "cmd": "AWS_ACCESS_KEY_ID=AKIA3EXAMPLEBACKDOOR AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI... aws sts get-caller-identity && aws s3 ls",
+      "out": "{\n    \"UserId\": \"AIDA3EXAMPLE7MONITORING\",\n    \"Account\": \"123456789012\",\n    \"Arn\": \"arn:aws:iam::123456789012:user/svc-monitoring\"\n}\n\n2026-02-15 08:00:00 company-prod-data\n2026-02-20 12:00:00 company-backups\n2026-01-10 09:00:00 company-logs\n2026-03-01 06:00:00 company-deployments\n\n[+] Backdoor account verified: FULL ACCESS\n[+] Can list/access all S3 buckets\n[+] Can manage EC2, RDS, Lambda, etc.\n[+] Access independent of original compromise\n[+] Works from any IP worldwide",
+      "def": "[GuardDuty] UnauthorizedAccess - API calls from new IAM user with AdministratorAccess from external IP",
+      "defAction": "Source: GuardDuty + CloudTrail correlation\nTarget: svc-monitoring API activity\nAction: Access keys deactivated, user deleted, full CloudTrail audit of all actions",
+      "desc": "백도어 Access Key로 AWS 리소스에 접근하여 전체 권한이 동작하는지 검증합니다.",
+      "descEn": "The attacker verifies full access using the backdoor Access Key to reach AWS resources.",
+      "stepTitle": "백도어 계정으로 AWS 리소스 접근 검증",
+      "stepTitleEn": "Backdoor Account AWS Resource Access Verification",
+      "feynman": "발급받은 가짜 출입 카드와 주차장 리모컨으로 실제로 건물에 들어가 보는 것과 같습니다. svc-monitoring의 Access Key로 S3 버킷 목록을 조회하고 EC2 인스턴스를 관리할 수 있는지 확인합니다. 전 세계 어디에서든 작동합니다.",
+      "feynmanEn": "It's like actually entering the building with the fake access card and garage remote to test them. Verify that svc-monitoring's Access Key can list S3 buckets and manage EC2 instances. It works from anywhere in the world.",
+      "expert": "sts get-caller-identity는 현재 자격 증명의 소유자를 확인하는 API입니다. 백도어 Access Key로 성공적으로 호출되면 키가 유효함을 의미합니다. GuardDuty는 새 IAM 사용자가 외부 IP에서 관리자 권한으로 API를 호출하면 UnauthorizedAccess finding을 생성할 수 있습니다.",
+      "expertEn": "sts get-caller-identity verifies the owner of current credentials. Successful invocation with the backdoor Access Key confirms key validity. GuardDuty can generate UnauthorizedAccess findings when a new IAM user calls APIs with admin privileges from external IPs.",
+      "defTooltip": "🔐 외부 IP에서 새 IAM 사용자의 관리자 API 호출! GuardDuty 알림 발생.",
+      "defTooltipEn": "🔐 Admin API calls from new IAM user at external IP! GuardDuty alert triggered.",
+      "hackerLog": {
+        "title": "access_verify.txt",
+        "lines": [
+          { "log": "Arn: arn:aws:iam::123456789012:user/svc-monitoring", "desc": "💡 백도어 계정으로 성공적 인증 확인" },
+          { "log": "Can list/access all S3 buckets", "desc": "💡 모든 S3 버킷 접근 가능 - 데이터 유출 위험" },
+          { "log": "Works from any IP worldwide", "desc": "💡 인터넷만 있으면 전 세계 어디서든 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "STS (Security Token Service)", "desc": "AWS에서 임시 자격 증명을 발급하고 현재 자격 증명을 검증하는 서비스입니다." },
+        { "name": "S3 (Simple Storage Service)", "desc": "AWS의 객체 스토리지 서비스. 기업 데이터, 백업, 로그 등이 저장됩니다." },
+        { "name": "GuardDuty Finding", "desc": "GuardDuty가 탐지한 잠재적 보안 문제. 심각도에 따라 Low, Medium, High로 분류됩니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "aws-cli (compromised admin)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "aws iam list-users", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "aws iam create-user svc-monitoring", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "aws iam attach-user-policy (AdminAccess)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "aws iam create-access-key", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "[Backdoor Access]", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "aws sts get-caller-identity (svc-monitoring)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "aws s3 ls (data enumeration)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

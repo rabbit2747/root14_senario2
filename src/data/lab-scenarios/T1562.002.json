@@ -1,0 +1,194 @@
+{
+  "id": "T1562.002",
+  "title": "Disable Windows Event Logging 시뮬레이션",
+  "titleEn": "Disable Windows Event Logging Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "🔇 로그 삭제", "labelEn": "🔇 Log Deletion", "steps": [0] },
+    { "label": "📝 감사 정책 변경", "labelEn": "📝 Audit Policy Change", "steps": [1] },
+    { "label": "⚡ EventLog 서비스", "labelEn": "⚡ EventLog Service", "steps": [2] },
+    { "label": "🔍 탐지 분석", "labelEn": "🔍 Detection", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Admin)", "x": 50, "y": 80 },
+    { "id": "eventlog", "label": "Event Log\nService", "x": 200, "y": 30 },
+    { "id": "audit", "label": "Audit\nPolicy", "x": 200, "y": 130 },
+    { "id": "siem", "label": "SIEM\n(Blind)", "x": 380, "y": 80 },
+    { "id": "forensic", "label": "Forensic\nEvidence", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "eventlog", "minStep": 0 },
+    { "from": "attacker", "to": "audit", "minStep": 1 },
+    { "from": "eventlog", "to": "siem", "minStep": 0 },
+    { "from": "siem", "to": "forensic", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "PowerShell (Admin)", "icon": "⚡" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "Services.msc", "icon": "⚙️" },
+    { "name": "wevtutil", "icon": "🔧" },
+    { "name": "auditpol", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "wevtutil cl Security\nwevtutil cl System\nwevtutil cl Application\nwevtutil cl \"Microsoft-Windows-Sysmon/Operational\"",
+      "out": "[*] Security log cleared: 47,832 events deleted\n[*] System log cleared: 12,456 events deleted\n[*] Application log cleared: 8,923 events deleted\n[*] Sysmon Operational log cleared: 156,789 events deleted\n\n[결과]\nTotal events deleted: 226,000\nRemaining evidence: Event ID 1102 (Security log cleared)\n                    Event ID 104  (System log cleared)",
+      "def": "[SIEM] Event ID 1102 - Security audit log was cleared by CORP\\attacker",
+      "defAction": "Tool: wevtutil cl (clear log)\nLogs Cleared: Security, System, Application, Sysmon\nEvents Deleted: 226,000\nRemaining: Event ID 1102, 104\nRisk Level: Critical\nAction: Alert SOC, investigate clearing source, recover from SIEM backup",
+      "desc": "wevtutil cl 명령으로 Security, System, Application, Sysmon 로그를 모두 삭제합니다. 226,000개의 이벤트가 삭제되지만, Event ID 1102(보안 로그 삭제)는 항상 생성됩니다.",
+      "descEn": "wevtutil cl clears Security, System, Application, and Sysmon logs. 226,000 events are deleted, but Event ID 1102 (security log cleared) is always generated.",
+      "stepTitle": "wevtutil로 모든 이벤트 로그 삭제",
+      "stepTitleEn": "Clear All Event Logs with wevtutil",
+      "feynman": "범인이 CCTV 녹화 테이프 226,000개를 모두 파기하는 것입니다. 하지만 '테이프 파기 기록장'(Event ID 1102)은 자동으로 작성되어 누가 언제 테이프를 파기했는지 알 수 있습니다. 이것만은 삭제할 수 없습니다.",
+      "feynmanEn": "The criminal destroying all 226,000 CCTV tapes. But the 'tape destruction log' (Event ID 1102) is automatically created, recording who destroyed the tapes and when. This cannot be deleted.",
+      "expert": "wevtutil cl은 EventLog 서비스를 통해 .evtx 파일을 비웁니다. Security 로그 삭제 시 Event ID 1102가 새 Security 로그에 자동 기록되며, System 로그 삭제는 Event ID 104를 생성합니다. SIEM에 실시간 전달된 이벤트는 로컬 삭제 영향을 받지 않으므로, 중앙 로그 수집이 핵심 방어입니다.",
+      "expertEn": "wevtutil cl empties .evtx files through the EventLog service. Security log clearing auto-generates Event ID 1102, System clearing generates Event ID 104. Events already forwarded to SIEM are unaffected by local deletion.",
+      "defTooltip": "🔐 226,000개 이벤트 삭제! Event ID 1102 자동 생성!",
+      "defTooltipEn": "🔐 226,000 events deleted! Event ID 1102 auto-generated!",
+      "hackerLog": {
+        "title": "log_clear.log",
+        "lines": [
+          "[09:30:00] wevtutil cl Security 실행",
+          "[09:30:02] 47,832 이벤트 삭제",
+          "[09:30:05] wevtutil cl System/Application/Sysmon",
+          "[09:30:10] 총 226,000 이벤트 삭제 완료"
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 1102", "def": "보안 감사 로그가 삭제되었음을 기록하는 Windows 이벤트" },
+        { "term": "wevtutil", "def": "Windows 이벤트 로그를 관리하는 명령줄 유틸리티" }
+      ]
+    },
+    {
+      "cmd": "auditpol /set /category:* /success:disable /failure:disable\nauditpol /get /category:*",
+      "out": "The command was successfully executed.\n\nSystem audit policy\n  Category/Subcategory                      Setting\n  Account Logon\n    Credential Validation                   No Auditing\n    Kerberos Authentication Service         No Auditing\n  Logon/Logoff\n    Logon                                   No Auditing\n    Logoff                                  No Auditing\n    Special Logon                            No Auditing\n  Object Access\n    File System                             No Auditing\n    Registry                                No Auditing\n  Privilege Use\n    Sensitive Privilege Use                 No Auditing\n  ...\n\n[결과] 모든 감사 카테고리가 No Auditing으로 설정\n[영향] 로그인, 프로세스 생성, 파일 접근 등 기록 중단",
+      "def": "[SIEM] All audit policies set to No Auditing - complete audit trail loss",
+      "defAction": "Tool: auditpol /set\nAll Categories: No Auditing\nImpact: No logon events (4624/4625), no process events (4688), no file access\nEvent ID 4719: System audit policy was changed\nRisk Level: Critical\nAction: Restore audit policy via GPO, Event ID 4719 alert",
+      "desc": "auditpol /set으로 모든 감사 카테고리를 비활성화합니다. 로그인, 프로세스 생성, 파일 접근 등의 이벤트가 더 이상 기록되지 않습니다. Event ID 4719(감사 정책 변경)가 마지막으로 기록됩니다.",
+      "descEn": "auditpol /set disables all audit categories. Logon, process creation, file access events are no longer recorded. Event ID 4719 (audit policy change) is the last event recorded.",
+      "stepTitle": "auditpol로 모든 감사 정책 비활성화",
+      "stepTitleEn": "Disable All Audit Policies with auditpol",
+      "feynman": "모든 CCTV의 녹화 버튼을 끄는 것입니다. 카메라는 설치되어 있지만, 아무것도 기록하지 않습니다. 누가 출입하든(로그인), 무엇을 하든(프로세스), 무엇을 만지든(파일) 기록이 남지 않습니다.",
+      "feynmanEn": "Turning off the record button on all CCTVs. Cameras remain installed but record nothing. No record of who enters (logon), what they do (process), or what they touch (files).",
+      "expert": "auditpol /set /category:*는 LSASS의 감사 정책을 일괄 변경합니다. Security 로그에 Event ID 4719(System audit policy was changed)가 기록되며, 이 이벤트의 'Changes' 필드에서 변경 전후 값을 확인할 수 있습니다. GPO의 'Audit Policy' 설정으로 로컬 변경을 덮어쓸 수 있으며, 이를 통해 자동 복구가 가능합니다.",
+      "expertEn": "auditpol /set /category:* bulk-changes LSASS audit policies. Event ID 4719 records the change with before/after values. GPO Audit Policy can overwrite local changes, enabling automatic restoration.",
+      "defTooltip": "🔐 모든 감사 정책 비활성화! 이벤트 기록 중단!",
+      "defTooltipEn": "🔐 All audit policies disabled! Event recording stopped!",
+      "hackerLog": {
+        "title": "audit_disable.log",
+        "lines": [
+          "[09:32:00] auditpol /set /category:* 실행",
+          "[09:32:01] 모든 카테고리: No Auditing",
+          "[09:32:02] Event ID 4719 기록 (마지막 이벤트)",
+          "[09:32:03] 이후 이벤트 기록 중단"
+        ]
+      },
+      "terms": [
+        { "term": "auditpol", "def": "Windows 감사 정책을 관리하는 명령줄 도구" },
+        { "term": "Event ID 4719", "def": "시스템 감사 정책이 변경되었음을 기록하는 이벤트" }
+      ]
+    },
+    {
+      "cmd": "# EventLog 서비스의 ETW 세션 패치 (Invoke-Phant0m)\nGet-Process -Name svchost | ForEach-Object {\n  $threads = $_.Threads | Where-Object { $_.StartAddress -match 'wevtsvc' }\n  foreach ($t in $threads) { Stop-Thread -Id $t.Id }\n}",
+      "out": "[*] Scanning svchost processes for EventLog service threads...\n[*] Found EventLog service in svchost.exe (PID 1048)\n[*] Identified 4 EventLog threads:\n    Thread 3201: wevtsvc!ServiceMain → Suspended\n    Thread 3202: wevtsvc!LogEventWrite → Killed\n    Thread 3203: wevtsvc!ChannelManager → Killed\n    Thread 3204: wevtsvc!Consumer → Killed\n\n[결과]\n- EventLog 서비스: Running (상태 정상으로 표시)\n- 실제 로깅: 중단됨 (스레드 모두 종료)\n- sc query EventLog: STATE = RUNNING\n- 이벤트 기록: 0건 (서비스는 살아있지만 일하지 않음)",
+      "def": "[EDR] EventLog service threads terminated while service appears running - phantom technique",
+      "defAction": "Tool: Invoke-Phant0m (EventLog thread killing)\nService Status: Running (deceptive)\nActual Logging: Stopped (all threads killed)\nThreads Killed: 4 (ServiceMain, LogEventWrite, ChannelManager, Consumer)\nRisk Level: Critical\nAction: Restart EventLog service, investigate thread termination",
+      "desc": "Invoke-Phant0m 기법으로 EventLog 서비스의 작업 스레드만 종료합니다. 서비스 자체는 Running 상태로 표시되지만, 실제 로깅은 중단됩니다. sc query로는 정상으로 보입니다.",
+      "descEn": "Invoke-Phant0m technique kills only EventLog service worker threads. The service itself appears Running, but actual logging stops. sc query shows normal status.",
+      "stepTitle": "Phant0m 기법: EventLog 서비스 스레드 무력화 (서비스 유지)",
+      "stepTitleEn": "Phant0m Technique: Kill EventLog Threads (Service Stays Running)",
+      "feynman": "CCTV 관리실(EventLog 서비스)의 불은 켜져 있지만(Running), 안의 직원(스레드)이 모두 쫓겨난 상태입니다. 외부에서 보면 정상 근무 중으로 보이지만, 실제로는 아무도 일하지 않아 녹화가 되지 않습니다.",
+      "feynmanEn": "The CCTV control room (EventLog service) lights are on (Running), but all staff (threads) have been removed. From outside it looks operational, but nobody is working so nothing gets recorded.",
+      "expert": "Invoke-Phant0m은 svchost.exe 프로세스 내의 wevtsvc.dll 모듈을 호스팅하는 스레드만 선택적으로 종료합니다. NtQuerySystemInformation으로 스레드를 열거하고, 스택 분석으로 wevtsvc 관련 스레드를 식별합니다. 서비스 제어 관리자(SCM)는 프로세스 자체가 살아있으므로 중지를 감지하지 못합니다.",
+      "expertEn": "Invoke-Phant0m selectively kills only threads hosting wevtsvc.dll within svchost.exe. NtQuerySystemInformation enumerates threads, stack analysis identifies wevtsvc-related ones. SCM doesn't detect the stop since the process is alive.",
+      "defTooltip": "🔐 Phant0m! 서비스는 Running이지만 로깅 중단!",
+      "defTooltipEn": "🔐 Phant0m! Service Running but logging stopped!",
+      "hackerLog": {
+        "title": "phant0m.log",
+        "lines": [
+          "[09:35:00] svchost 프로세스 스캔",
+          "[09:35:02] EventLog 서비스 PID 1048 식별",
+          "[09:35:05] 4개 스레드 종료 완료",
+          "[09:35:06] 서비스 상태: Running (위장)"
+        ]
+      },
+      "terms": [
+        { "term": "Invoke-Phant0m", "def": "EventLog 서비스 스레드를 종료하여 로깅을 무력화하는 기법" },
+        { "term": "ETW", "def": "Event Tracing for Windows, 이벤트 추적 프레임워크" }
+      ]
+    },
+    {
+      "cmd": "# Event ID 1102/104로 로그 삭제 탐지\nGet-WinEvent -FilterHashtable @{LogName='Security';Id=1102} -ErrorAction SilentlyContinue | Format-List TimeCreated,Message",
+      "out": "TimeCreated : 2026-01-20 09:30:00\nMessage     : The audit log was cleared.\n              Subject:\n                Security ID: S-1-5-21-...-1001\n                Account Name: attacker\n                Domain: CORP\n                Logon ID: 0x3E7\n\n[SIEM 백업에서 복구 가능한 이벤트]\n- 로그 삭제 전 마지막 이벤트: 09:29:59 (47,832건)\n- SIEM 수신 확인: 47,830건 (99.99% 복구 가능)\n- 로컬 삭제는 원격 SIEM 데이터에 영향 없음",
+      "def": "[SIEM] Event ID 1102 detected - audit log cleared by CORP\\attacker at 09:30",
+      "defAction": "Tool: Event log forensic analysis\nEvent ID 1102: Security log cleared\nCleared By: CORP\\attacker (SID: S-1-5-21-...-1001)\nTime: 2026-01-20 09:30:00\nSIEM Recovery: 99.99% of events available from central SIEM\nAction: Restore events from SIEM, investigate attacker account",
+      "desc": "Event ID 1102를 통해 누가 언제 보안 로그를 삭제했는지 확인합니다. SIEM에 실시간 전달된 이벤트는 로컬 삭제의 영향을 받지 않아 99.99%의 데이터를 복구할 수 있습니다.",
+      "descEn": "Event ID 1102 reveals who cleared the security log and when. Events forwarded to SIEM in real-time are unaffected by local deletion, enabling 99.99% data recovery.",
+      "stepTitle": "Event ID 1102로 로그 삭제 탐지 및 SIEM 복구",
+      "stepTitleEn": "Detect Log Clearing via Event ID 1102 and SIEM Recovery",
+      "feynman": "테이프 파기 기록장(Event ID 1102)을 확인하면 범인의 이름, 시간이 적혀 있습니다. 또한 녹화 내용이 이미 본사(SIEM)에 실시간 전송되어 있어, 현장의 테이프를 파기해도 본사에서 99.99%를 복구할 수 있습니다.",
+      "feynmanEn": "Checking the tape destruction log (Event ID 1102) reveals the criminal's name and time. Since recordings were already transmitted to headquarters (SIEM) in real-time, 99.99% can be recovered despite local destruction.",
+      "expert": "Event ID 1102는 삭제할 수 없는 메타 이벤트로, Subject 필드에 삭제를 수행한 사용자의 SID, Account Name, Logon ID가 기록됩니다. 중앙 SIEM(Splunk, Elastic, QRadar)에 Windows Event Forwarding(WEF)으로 전달된 이벤트는 로컬 삭제와 독립적입니다. Phant0m 탐지는 ETW 이벤트 간격 분석(이벤트가 갑자기 중단되면 의심)으로 가능합니다.",
+      "expertEn": "Event ID 1102 is an undeletable meta-event recording the SID, Account Name, and Logon ID of who cleared logs. Events forwarded to SIEM via WEF are independent of local deletion. Phant0m detection uses ETW event gap analysis.",
+      "defTooltip": "🔐 Event ID 1102로 삭제자 식별! SIEM에서 99.99% 복구!",
+      "defTooltipEn": "🔐 Log clearer identified via Event ID 1102! 99.99% recovered from SIEM!",
+      "hackerLog": {
+        "title": "detection.log",
+        "lines": [
+          "[10:00:00] Event ID 1102 분석",
+          "[10:00:02] 삭제자: CORP\\attacker",
+          "[10:00:05] SIEM 백업 확인: 47,830/47,832건",
+          "[10:00:08] 로컬 삭제는 SIEM에 영향 없음"
+        ]
+      },
+      "terms": [
+        { "term": "WEF", "def": "Windows Event Forwarding, 이벤트를 원격 수집기로 전달하는 Windows 기능" },
+        { "term": "SIEM", "def": "Security Information and Event Management, 보안 이벤트 통합 관리 시스템" }
+      ]
+    },
+    {
+      "cmd": "# 방어 강화: GPO로 감사 정책 강제 적용\nGPO: Computer Configuration > Policies > Windows Settings > Security Settings > Advanced Audit Policy\n# 로그 크기 및 보존 정책\nwevtutil sl Security /ms:1073741824 /rt:true\n# EventLog 서비스 복구\nRestart-Service EventLog -Force",
+      "out": "[GPO 적용]\n✓ Audit Logon Events: Success, Failure\n✓ Audit Process Creation: Success\n✓ Audit Object Access: Success, Failure\n✓ Audit Policy Change: Success, Failure\n✓ Audit Privilege Use: Success, Failure\n\n[로그 설정]\n✓ Security 로그 크기: 1GB (기본 20MB에서 확대)\n✓ 보존 정책: 덮어쓰지 않음 (아카이브 후 새 로그)\n\n[서비스 복구]\n✓ EventLog 서비스: Restarted → Running\n✓ 모든 스레드 정상 동작 확인\n\n[추가 방어]\n✓ SIEM 실시간 전달 확인\n✓ Event ID 1102, 104, 4719 알림 규칙 생성",
+      "def": "[GPO] Audit policies restored and hardened - SIEM forwarding verified",
+      "defAction": "Defense Actions:\n  1. GPO: Force audit policies (cannot be locally overridden)\n  2. Log Size: 1GB (50x default)\n  3. Retention: Archive, don't overwrite\n  4. EventLog service: Restarted\n  5. SIEM alerts: 1102, 104, 4719\nRisk Level: Critical → Low",
+      "desc": "GPO로 감사 정책을 강제 적용하여 로컬 변경을 방지합니다. 로그 크기를 1GB로 확대하고, SIEM 실시간 전달을 확인합니다. Event ID 1102/104/4719에 대한 알림 규칙을 생성합니다.",
+      "descEn": "GPO forces audit policies preventing local changes. Log size expanded to 1GB, SIEM real-time forwarding verified. Alert rules created for Event IDs 1102/104/4719.",
+      "stepTitle": "GPO 강제 감사 정책 + SIEM 알림 규칙 배포",
+      "stepTitleEn": "Deploy Forced Audit Policy via GPO + SIEM Alert Rules",
+      "feynman": "본사(GPO)에서 '모든 CCTV는 반드시 녹화해야 한다'는 명령을 내리면, 현장 관리자가 녹화를 끌 수 없습니다. 녹화 용량도 50배로 늘리고, 테이프가 파기되면 즉시 알림이 오도록 합니다. 이제 범인이 증거를 없앨 수 없습니다.",
+      "feynmanEn": "When headquarters (GPO) orders 'all CCTVs must record,' local managers cannot turn off recording. Recording capacity is increased 50x, and immediate alerts fire if tapes are destroyed. Now criminals cannot eliminate evidence.",
+      "expert": "GPO의 Advanced Audit Policy Configuration은 로컬 auditpol 설정을 강제로 덮어씁니다. wevtutil sl /ms:1073741824는 로그 최대 크기를 1GB로 설정합니다. /rt:true는 'Do not overwrite events (Archive the log when full)' 정책입니다. SIEM에서 Event ID 1102/104/4719에 대한 상관 규칙을 생성하여, 로그 삭제/감사 정책 변경 시 즉시 SOC에 알립니다.",
+      "expertEn": "GPO Advanced Audit Policy Configuration forcefully overrides local auditpol. wevtutil sl /ms:1073741824 sets max log size to 1GB. /rt:true enables 'Archive log when full.' SIEM correlation rules for Event IDs 1102/104/4719 provide immediate SOC alerts.",
+      "defTooltip": "🔐 GPO 감사 정책 강제 적용! SIEM 알림 활성화!",
+      "defTooltipEn": "🔐 Forced audit policy via GPO! SIEM alerts enabled!",
+      "hackerLog": {
+        "title": "defense_hardening.log",
+        "lines": [
+          "[10:15:00] GPO 감사 정책 강제 적용",
+          "[10:15:05] 로그 크기: 20MB → 1GB",
+          "[10:15:10] EventLog 서비스 재시작",
+          "[10:15:15] SIEM 알림 규칙 생성 완료"
+        ]
+      },
+      "terms": [
+        { "term": "Advanced Audit Policy", "def": "세분화된 감사 정책을 GPO로 관리하는 Windows 보안 설정" },
+        { "term": "Log Retention", "def": "이벤트 로그 보존 기간 및 덮어쓰기 정책" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "cmd.exe",
+    "pid": 4600,
+    "children": [
+      { "name": "wevtutil.exe (cl Security)", "pid": 4601, "children": [] },
+      { "name": "auditpol.exe (/set)", "pid": 4602, "children": [] },
+      {
+        "name": "powershell.exe (Phant0m)",
+        "pid": 4603,
+        "children": [
+          { "name": "NtQuerySystemInformation", "pid": 0, "children": [] }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "id": "T1583.003",
+  "title": "VPS 인프라 확보 시뮬레이션",
+  "titleEn": "VPS Infrastructure Acquisition Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 VPS 구매", "labelEn": "🔍 VPS Purchase", "steps": [0, 1] },
+    { "label": "⚡ C2 구축", "labelEn": "⚡ C2 Setup", "steps": [2, 3] },
+    { "label": "✅ 운영 테스트", "labelEn": "✅ Operations Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "vps", "label": "Bulletproof VPS", "x": 200, "y": 30 },
+    { "id": "proxy", "label": "Proxy Chain", "x": 200, "y": 90 },
+    { "id": "c2", "label": "C2 Server", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim Network", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "vps", "minStep": 0 },
+    { "from": "vps", "to": "c2", "minStep": 2 },
+    { "from": "ext", "to": "proxy", "minStep": 1 },
+    { "from": "c2", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "vps_config.yml", "icon": "📄", "alert": true },
+    { "name": "c2_setup.sh", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "torsocks curl -s 'https://bulletproof-hosting.onion/api/order' -d '{\"plan\":\"premium\",\"location\":\"offshore\",\"payment\":\"XMR\",\"duration\":\"1month\"}'",
+      "out": "{\n  \"order_id\": \"BP-2026-0301-4521\",\n  \"status\": \"active\",\n  \"server\": {\n    \"ip\": \"45.154.xxx.xxx\",\n    \"location\": \"Moldova\",\n    \"specs\": \"4 vCPU, 8GB RAM, 100GB SSD\",\n    \"os\": \"Ubuntu 22.04\"\n  },\n  \"payment\": {\n    \"method\": \"Monero (XMR)\",\n    \"amount\": \"0.85 XMR (~$145)\",\n    \"tx_id\": \"7a8b9c...\"\n  },\n  \"policy\": \"No logs, abuse complaints ignored\"\n}",
+      "def": "[Threat Intel] New VPS provisioned at known bulletproof hosting provider",
+      "defAction": "Source: Tor network\nTarget: Bulletproof hosting provider\nAction: IP 45.154.xxx.xxx added to threat intelligence feed",
+      "desc": "모네로(XMR)로 결제하여 방탄 호스팅에서 익명 VPS를 구매합니다.",
+      "descEn": "Purchasing an anonymous VPS from bulletproof hosting with Monero (XMR) payment.",
+      "stepTitle": "방탄 호스팅 VPS 구매",
+      "stepTitleEn": "Bulletproof Hosting VPS Purchase",
+      "feynman": "'방탄 호스팅'은 불법 활동에 대한 신고를 무시하는 호스팅 업체입니다. 공격자는 추적이 불가능한 암호화폐(모네로)로 결제하고, 법 집행이 어려운 국가(몰도바)에 위치한 서버를 임대합니다. 이 서버는 경찰의 압수수색에도 로그를 제공하지 않습니다.",
+      "feynmanEn": "'Bulletproof hosting' providers ignore abuse complaints about illegal activities. Attackers pay with untraceable cryptocurrency (Monero) and rent servers in countries with weak law enforcement (Moldova). These servers don't provide logs even to police investigations.",
+      "expert": "Bulletproof Hosting은 abuse complaint을 무시하는 서비스로, DMCA/법적 요청에 비협조적입니다. XMR(Monero) 결제는 비공개 블록체인으로 추적이 불가능합니다. 몰도바는 EU/미국 법 집행과의 공조가 제한적입니다.",
+      "expertEn": "Bulletproof Hosting ignores abuse complaints and is non-cooperative with DMCA/legal requests. XMR (Monero) payment uses a private blockchain making it untraceable. Moldova has limited cooperation with EU/US law enforcement.",
+      "defTooltip": "🔒 위협 인텔: 알려진 방탄 호스팅에서 새 VPS 프로비저닝 감지",
+      "defTooltipEn": "🔒 Threat Intel: New VPS provisioned at known bulletproof hosting provider",
+      "hackerLog": {
+        "title": "vps_order.log",
+        "lines": [
+          { "log": "Location: Moldova", "desc": "💡 법 집행 공조가 어려운 국가 — 서버 압수 극히 어려움" },
+          { "log": "Payment: 0.85 XMR ($145)", "desc": "💡 모네로 결제 — 결제 추적 완전 불가" },
+          { "log": "Policy: No logs, abuse ignored", "desc": "💡 로그 미보관 + 신고 무시 — 포렌식 증거 없음" }
+        ]
+      },
+      "terms": [
+        { "name": "Bulletproof Hosting", "desc": "불법 활동 신고를 무시하고 고객 정보를 보호하는 호스팅 서비스. 주로 법 집행이 어려운 국가에 위치합니다" },
+        { "name": "Monero (XMR)", "desc": "프라이버시 중심 암호화폐. 발신자, 수신자, 금액이 모두 비공개되어 거래 추적이 불가능합니다" }
+      ]
+    },
+    {
+      "cmd": "ssh root@45.154.xxx.xxx 'apt update && apt install -y proxychains4 tor openvpn && systemctl enable tor'",
+      "out": "Connected to 45.154.xxx.xxx\n\nHit:1 http://archive.ubuntu.com/ubuntu jammy InRelease\nGet:2 http://archive.ubuntu.com/ubuntu jammy-security InRelease\n\nInstalling:\n  proxychains4 (4.16) ... done\n  tor (0.4.7.13) ... done\n  openvpn (2.5.9) ... done\n\nEnabling services:\n  tor.service enabled\n  Created symlink /etc/systemd/system/multi-user.target.wants/tor.service\n\n[+] Anonymization layer ready\n[+] Proxy chain: Attacker → Tor → VPS → Target",
+      "def": "[Network Monitor] VPS configured with Tor and proxy chain tools",
+      "defAction": "Source: 45.154.xxx.xxx\nTarget: Package repositories\nAction: Anonymization tool installation logged",
+      "desc": "VPS에 Tor, ProxyChains, OpenVPN을 설치하여 다중 익명화 레이어를 구축합니다.",
+      "descEn": "Installing Tor, ProxyChains, and OpenVPN on the VPS to build multi-layer anonymization.",
+      "stepTitle": "익명화 레이어 구축",
+      "stepTitleEn": "Anonymization Layer Setup",
+      "feynman": "VPS에 여러 겹의 '가면'을 씌우는 과정입니다. 공격자 → Tor(양파 라우팅) → VPS → 대상으로 연결하면, 대상은 VPS의 IP만 보고 공격자의 실제 위치를 알 수 없습니다. VPS가 차단되면 새 VPS를 구매하면 됩니다.",
+      "feynmanEn": "This is like putting multiple 'masks' on the VPS. When connecting through Attacker → Tor → VPS → Target, the target only sees the VPS IP and cannot determine the attacker's real location. If the VPS is blocked, simply buy a new one.",
+      "expert": "다중 홉 프록시 체인(Tor → VPS)은 공격 원점 추적을 극히 어렵게 합니다. Tor는 3개의 릴레이를 통해 트래픽을 암호화하고, VPS는 추가적인 익명화 레이어를 제공합니다.",
+      "expertEn": "Multi-hop proxy chains (Tor → VPS) make attack origin tracing extremely difficult. Tor encrypts traffic through 3 relays, and the VPS provides an additional anonymization layer.",
+      "defTooltip": "🔗 네트워크 모니터: VPS에 Tor 및 프록시 체인 도구 설치 감지",
+      "defTooltipEn": "🔗 Network Monitor: VPS configured with Tor and proxy chain tools detected",
+      "hackerLog": {
+        "title": "anon_setup.log",
+        "lines": [
+          { "log": "Proxy chain: Attacker → Tor → VPS → Target", "desc": "💡 3중 익명화 — 공격 원점 추적 사실상 불가능" },
+          { "log": "tor.service enabled", "desc": "💡 Tor 상시 운영 — 모든 트래픽이 양파 라우팅을 통과" },
+          { "log": "openvpn installed", "desc": "💡 VPN 백업 채널 — Tor 장애 시 대체 익명화 수단" }
+        ]
+      },
+      "terms": [
+        { "name": "Proxy Chain", "desc": "여러 프록시를 연결하여 트래픽을 전달하는 기법. 각 노드는 이전/다음 노드만 알므로 전체 경로를 추적하기 어렵습니다" },
+        { "name": "Tor (The Onion Router)", "desc": "익명 통신을 위한 네트워크. 트래픽을 3개의 릴레이를 통해 암호화하며, 각 릴레이는 이전/다음 홉만 알 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "cd /opt && git clone https://github.com/cobbr/Covenant.git && cd Covenant && docker-compose up -d",
+      "out": "Cloning into 'Covenant'...\nremote: Enumerating objects: 4,521, done.\nremote: Total 4,521 (delta 0), reused 0 (delta 0)\nReceiving objects: 100% (4,521/4,521), 12.3 MB | 8.45 MB/s, done.\n\nCreating covenant_covenant_1 ... done\n\n[+] Covenant C2 Framework started\n[+] Web interface: https://45.154.xxx.xxx:7443\n[+] API endpoint: https://45.154.xxx.xxx:7443/api\n[+] Listeners available: HTTP, HTTPS, SMB, Bridge\n[+] Default admin created",
+      "def": "[Threat Intel] Covenant C2 framework deployed on bulletproof hosting IP",
+      "defAction": "Source: 45.154.xxx.xxx\nTarget: C2 framework deployment\nAction: IP added to C2 threat intelligence blocklist",
+      "desc": "VPS에 Covenant C2 프레임워크를 설치하여 본격적인 명령 제어 서버를 구축합니다.",
+      "descEn": "Installing the Covenant C2 framework on the VPS to build a full command and control server.",
+      "stepTitle": "C2 프레임워크 배포",
+      "stepTitleEn": "C2 Framework Deployment",
+      "feynman": "VPS에 '작전 본부'를 설치합니다. Covenant는 감염된 컴퓨터를 원격으로 제어할 수 있는 프레임워크입니다. 웹 인터페이스로 편리하게 관리하며, HTTP/HTTPS/SMB 등 다양한 통신 방법을 지원합니다.",
+      "feynmanEn": "Installing the 'operations center' on the VPS. Covenant is a framework for remotely controlling infected computers. It provides a web interface for convenient management and supports various communication methods like HTTP/HTTPS/SMB.",
+      "expert": "Covenant는 .NET 기반 C2 프레임워크로, Grunt 에이전트를 통해 감염 호스트를 제어합니다. HTTPS 리스너는 합법적 트래픽과 구별이 어렵고, SMB 리스너는 내부 네트워크 측면 이동에 사용됩니다.",
+      "expertEn": "Covenant is a .NET-based C2 framework that controls infected hosts through Grunt agents. HTTPS listeners are hard to distinguish from legitimate traffic, and SMB listeners are used for lateral movement within internal networks.",
+      "defTooltip": "⚔️ 위협 인텔: 방탄 호스팅 IP에 Covenant C2 프레임워크 배포 감지",
+      "defTooltipEn": "⚔️ Threat Intel: Covenant C2 framework deployed on bulletproof hosting IP",
+      "hackerLog": {
+        "title": "c2_deploy.log",
+        "lines": [
+          { "log": "Covenant C2 Framework started", "desc": "💡 전문 C2 프레임워크 가동 — 원격 제어 준비 완료" },
+          { "log": "Listeners: HTTP, HTTPS, SMB, Bridge", "desc": "💡 다중 통신 프로토콜 지원 — 환경에 따라 적응 가능" },
+          { "log": "Web interface: :7443", "desc": "💡 웹 기반 관리 — 브라우저로 감염 호스트 제어" }
+        ]
+      },
+      "terms": [
+        { "name": "C2 Framework", "desc": "Command and Control 프레임워크. 감염된 시스템을 원격으로 관리하는 도구로, Covenant, Cobalt Strike, Sliver 등이 대표적입니다" },
+        { "name": "Listener", "desc": "C2 서버에서 감염 호스트의 연결을 기다리는 컴포넌트. HTTP, HTTPS, DNS, SMB 등 다양한 프로토콜을 지원합니다" }
+      ]
+    },
+    {
+      "cmd": "covenant-cli create-listener --name HTTPS-KR --type HTTPS --port 443 --ssl-cert letsencrypt.pem --profile jquery --jitter 30",
+      "out": "[+] Creating HTTPS listener...\n\nListener Configuration:\n  Name: HTTPS-KR\n  Type: HTTPS (TLS 1.3)\n  Port: 443\n  SSL Certificate: Let's Encrypt (valid)\n  Profile: jQuery CDN Malleable\n  Jitter: 30% (beacon interval randomization)\n  URLs:\n    /jquery-3.6.0.min.js (beacon)\n    /jquery-3.6.0.min.map (task)\n    /jquery.validate.min.js (response)\n\n[+] Listener HTTPS-KR started on 0.0.0.0:443\n[+] Traffic profile mimics jQuery CDN requests",
+      "def": "[Network Monitor] HTTPS listener on port 443 with jQuery CDN traffic profile",
+      "defAction": "Source: 45.154.xxx.xxx:443\nTarget: Incoming connections\nAction: TLS certificate and traffic pattern analysis required",
+      "desc": "Malleable C2 프로파일을 적용하여 C2 트래픽을 jQuery CDN 요청으로 위장합니다.",
+      "descEn": "Applying Malleable C2 profile to disguise C2 traffic as jQuery CDN requests.",
+      "stepTitle": "C2 트래픽 위장 — Malleable 프로파일",
+      "stepTitleEn": "C2 Traffic Disguise — Malleable Profile",
+      "feynman": "C2 통신을 '일반적인 웹 트래픽'처럼 보이게 위장합니다. 감염된 컴퓨터가 jQuery 라이브러리를 다운로드하는 것처럼 보이지만, 실제로는 C2 서버와 명령을 주고받고 있습니다. 30% 지터(시간 변동)를 적용하여 규칙적인 패턴 탐지를 피합니다.",
+      "feynmanEn": "Disguising C2 communication to look like 'normal web traffic.' The infected computer appears to download jQuery libraries, but is actually exchanging commands with the C2 server. 30% jitter (timing variation) avoids regular pattern detection.",
+      "expert": "Malleable C2 프로파일은 C2 트래픽의 HTTP 요청/응답 구조를 jQuery CDN 트래픽으로 위장합니다. Let's Encrypt 인증서로 유효한 TLS 연결을 제공하며, 30% 지터로 비콘 간격을 무작위화하여 시계열 분석을 회피합니다.",
+      "expertEn": "Malleable C2 profiles disguise C2 traffic HTTP request/response structures as jQuery CDN traffic. Let's Encrypt certificate provides valid TLS connections, and 30% jitter randomizes beacon intervals to evade time-series analysis.",
+      "defTooltip": "🎭 네트워크 모니터: jQuery CDN 트래픽 프로파일의 HTTPS 리스너 감지",
+      "defTooltipEn": "🎭 Network Monitor: HTTPS listener with jQuery CDN traffic profile detected",
+      "hackerLog": {
+        "title": "listener_config.log",
+        "lines": [
+          { "log": "Profile: jQuery CDN Malleable", "desc": "💡 C2 트래픽이 jQuery 다운로드로 위장됨 — 육안 구별 불가" },
+          { "log": "SSL: Let's Encrypt (valid)", "desc": "💡 유효한 SSL 인증서 — 브라우저 경고 없음" },
+          { "log": "Jitter: 30%", "desc": "💡 비콘 간격 무작위화 — 규칙적 패턴 탐지 회피" }
+        ]
+      },
+      "terms": [
+        { "name": "Malleable C2 Profile", "desc": "C2 트래픽의 네트워크 시그니처를 변경하여 정상 트래픽으로 위장하는 설정. jQuery, Amazon, Google 등의 트래픽 패턴을 모방합니다" },
+        { "name": "Jitter", "desc": "비콘 전송 간격에 무작위 변동을 주는 것. 일정한 주기의 통신을 탐지하는 보안 시스템을 우회합니다" }
+      ]
+    },
+    {
+      "cmd": "covenant-cli test-beacon --listener HTTPS-KR --target internal-test && covenant-cli status",
+      "out": "[+] Sending test beacon to HTTPS-KR listener...\n[+] Beacon received successfully!\n\n=== C2 INFRASTRUCTURE STATUS ===\n\nServer: 45.154.xxx.xxx (Moldova, Bulletproof)\nPayment: XMR (untraceable)\nAnonymization: Tor → VPS (3+ hops)\nC2 Framework: Covenant v0.6\nListener: HTTPS on 443 (jQuery profile)\nSSL: Let's Encrypt (auto-renew)\nJitter: 30%\n\nOperational Security:\n  ✓ No KYC verification\n  ✓ No logs retained\n  ✓ Abuse complaints ignored\n  ✓ XMR payment (untraceable)\n  ✓ Tor access only\n\n[+] Infrastructure ready for operations",
+      "def": "[SIEM] Complete C2 infrastructure on bulletproof hosting — operational status confirmed",
+      "defAction": "Source: Threat intelligence correlation\nTarget: 45.154.xxx.xxx\nAction: IP blocklisted, hunting rules deployed for jQuery CDN profile",
+      "desc": "전체 C2 인프라의 운영 상태를 확인하고 작전 준비 완료를 확인합니다.",
+      "descEn": "Verifying the operational status of the complete C2 infrastructure and confirming readiness.",
+      "stepTitle": "인프라 상태 확인 — 작전 준비 완료",
+      "stepTitleEn": "Infrastructure Status Check — Operational Ready",
+      "feynman": "모든 준비가 완료되었습니다. 방탄 호스팅의 VPS, 추적 불가능한 XMR 결제, 3중 익명화, jQuery로 위장된 C2 통신까지 완벽한 공격 인프라가 구축되었습니다. 이 인프라는 법 집행 기관의 추적과 보안 시스템의 탐지를 동시에 회피하도록 설계되었습니다.",
+      "feynmanEn": "Everything is ready. A complete attack infrastructure with bulletproof VPS, untraceable XMR payment, triple anonymization, and jQuery-disguised C2 communication is built. This infrastructure is designed to simultaneously evade law enforcement tracking and security system detection.",
+      "expert": "전체 인프라 OPSEC을 확인합니다. KYC 없는 계정, 로그 미보관, XMR 결제, Tor 접근의 4중 익명화가 적용되어 있습니다. jQuery Malleable 프로파일과 30% 지터로 네트워크 탐지를 최소화합니다.",
+      "expertEn": "Verifying overall infrastructure OPSEC. Quad-layer anonymization with no-KYC account, no logs, XMR payment, and Tor access. jQuery Malleable profile and 30% jitter minimize network detection.",
+      "defTooltip": "🗺️ SIEM: 방탄 호스팅 기반 완전한 C2 인프라 운영 확인",
+      "defTooltipEn": "🗺️ SIEM: Complete C2 infrastructure on bulletproof hosting — operational confirmed",
+      "hackerLog": {
+        "title": "infra_status.log",
+        "lines": [
+          { "log": "Server: Moldova, Bulletproof", "desc": "💡 법 집행 공조 어려운 위치 + 방탄 호스팅 = 서버 압수 극히 어려움" },
+          { "log": "Anonymization: Tor → VPS (3+ hops)", "desc": "💡 3중 이상 홉으로 공격 원점 역추적 사실상 불가능" },
+          { "log": "Infrastructure ready for operations", "desc": "💡 완전한 공격 인프라 구축 완료 — 작전 개시 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "OPSEC (Operational Security)", "desc": "작전 보안. 공격자가 자신의 신원과 활동을 보호하기 위해 취하는 모든 조치를 포함합니다" },
+        { "name": "KYC (Know Your Customer)", "desc": "고객 신원 확인 절차. 방탄 호스팅은 KYC를 요구하지 않아 익명으로 서비스를 이용할 수 있습니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "torsocks curl (PID: 9101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "ssh → apt install (PID: 9134)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "docker → Covenant (PID: 9201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "covenant-cli listener (PID: 9289)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "covenant-cli test (PID: 9345)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

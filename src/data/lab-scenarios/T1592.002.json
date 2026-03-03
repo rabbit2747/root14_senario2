@@ -1,0 +1,180 @@
+{
+  "id": "T1592.002",
+  "title": "소프트웨어 정보 수집 시뮬레이션",
+  "titleEn": "Software Information Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 HTTP 헤더 분석", "labelEn": "🔍 HTTP Header Analysis", "steps": [0, 1] },
+    { "label": "⚡ 기술 스택 식별", "labelEn": "⚡ Tech Stack ID", "steps": [2, 3] },
+    { "label": "✅ 취약점 매칭", "labelEn": "✅ Vuln Matching", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "webserver", "label": "Web Server", "x": 200, "y": 30 },
+    { "id": "headers", "label": "HTTP Headers", "x": 200, "y": 90 },
+    { "id": "techstack", "label": "Tech Stack", "x": 350, "y": 60 },
+    { "id": "cvedb", "label": "CVE Database", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "webserver", "minStep": 0 },
+    { "from": "webserver", "to": "headers", "minStep": 0 },
+    { "from": "headers", "to": "techstack", "minStep": 2 },
+    { "from": "techstack", "to": "cvedb", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Web", "icon": "📁" },
+    { "name": "software_report.txt", "icon": "📄", "alert": true },
+    { "name": "CVE Search", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "curl -sI https://target.{companyName}.com | grep -iE 'server|x-powered|x-aspnet|x-generator'",
+      "out": "Server: Apache/2.4.41 (Ubuntu)\nX-Powered-By: PHP/8.1.2\nX-Generator: WordPress 6.4.2",
+      "def": "[WAF] HTTP header fingerprinting request detected",
+      "defAction": "Source: 10.0.1.45\nTarget: target.{companyName}.com\nAction: Header probe logged, monitoring increased",
+      "desc": "HTTP 응답 헤더에서 웹 서버, 프로그래밍 언어, CMS 버전을 추출합니다.",
+      "descEn": "Extracting web server, programming language, and CMS versions from HTTP response headers.",
+      "stepTitle": "HTTP 응답 헤더 분석",
+      "stepTitleEn": "HTTP Response Header Analysis",
+      "feynman": "웹 서버에 요청을 보내면 응답에 '명함'이 들어있습니다. Server 헤더에 Apache 2.4.41, X-Powered-By에 PHP 8.1, X-Generator에 WordPress 6.4라고 친절하게 알려줍니다. 도둑에게 집에 어떤 자물쇠를 썼는지 말해주는 셈입니다.",
+      "feynmanEn": "When you send a request to a web server, the response includes a 'business card.' The Server header says Apache 2.4.41, X-Powered-By says PHP 8.1, and X-Generator says WordPress 6.4. It's like telling a burglar what kind of lock you use.",
+      "expert": "HTTP 응답 헤더의 Server, X-Powered-By, X-Generator는 서버 소프트웨어 핑거프린팅의 기본 벡터입니다. Apache 2.4.41은 CVE-2021-41773(Path Traversal), WordPress 6.4.2는 POP chain을 통한 RCE 가능성이 있습니다.",
+      "expertEn": "HTTP response headers Server, X-Powered-By, X-Generator are primary vectors for server software fingerprinting. Apache 2.4.41 has CVE-2021-41773 (Path Traversal), WordPress 6.4.2 has potential RCE via POP chain.",
+      "defTooltip": "🔍 WAF: HTTP 헤더 핑거프린팅 요청 감지",
+      "defTooltipEn": "🔍 WAF: HTTP header fingerprinting request detected",
+      "hackerLog": {
+        "title": "http_headers.log",
+        "lines": [
+          { "log": "Server: Apache/2.4.41 (Ubuntu)", "desc": "Apache 2.4.41 - 알려진 경로 순회 취약점 존재" },
+          { "log": "X-Powered-By: PHP/8.1.2", "desc": "PHP 버전 노출 - 버전별 취약점 매칭 가능" },
+          { "log": "X-Generator: WordPress 6.4.2", "desc": "WordPress CMS 확인 - 플러그인 취약점 탐색 대상" }
+        ]
+      },
+      "terms": [
+        { "name": "HTTP Response Header", "desc": "웹 서버가 클라이언트에 보내는 메타 정보. Server, Content-Type 등의 필드가 포함됩니다" },
+        { "name": "Banner Grabbing", "desc": "서비스의 환영 메시지나 헤더에서 소프트웨어 이름과 버전을 추출하는 정찰 기법" }
+      ]
+    },
+    {
+      "cmd": "whatweb -a 3 https://target.{companyName}.com --color=never",
+      "out": "https://target.{companyName}.com [200 OK]\n  Apache[2.4.41], Bootstrap[5.3.2], Country[KOREA],\n  HTML5, HTTPServer[Ubuntu Linux][Apache/2.4.41 (Ubuntu)],\n  JQuery[3.7.1], MetaGenerator[WordPress 6.4.2],\n  PHP[8.1.2], Script[text/javascript],\n  UncommonHeaders[x-redirect-by], WordPress[6.4.2],\n  WooCommerce[8.4.0], Yoast-SEO[21.6]\n\nPlugins detected: 3 (WooCommerce, Yoast SEO, Contact Form 7)",
+      "def": "[WAF] WhatWeb aggressive scan (-a 3) detected - multiple probing requests",
+      "defAction": "Source: 10.0.1.45\nTarget: target.{companyName}.com\nAction: Aggressive fingerprinting blocked, scanner User-Agent flagged",
+      "desc": "WhatWeb으로 웹사이트의 전체 기술 스택을 공격적으로 식별합니다.",
+      "descEn": "WhatWeb aggressively identifies the complete technology stack of the website.",
+      "stepTitle": "WhatWeb 기술 스택 핑거프린팅",
+      "stepTitleEn": "WhatWeb Technology Stack Fingerprinting",
+      "feynman": "WhatWeb은 웹사이트의 '성분 분석기'입니다. HTML 소스, 쿠키, HTTP 헤더, JavaScript 파일을 분석해서 사용된 모든 기술을 알아냅니다. WordPress, WooCommerce, Yoast SEO까지 - 마치 음식의 원재료를 모두 밝히는 것과 같습니다.",
+      "feynmanEn": "WhatWeb is a website 'ingredient analyzer.' It analyzes HTML source, cookies, HTTP headers, and JavaScript files to identify all technologies used. WordPress, WooCommerce, Yoast SEO - like revealing all ingredients of a dish.",
+      "expert": "-a 3(aggression level 3)은 추가 HTTP 요청을 생성하여 더 많은 기술을 식별합니다. WooCommerce 8.4.0은 결제 관련 취약점, Contact Form 7은 파일 업로드 취약점의 대상이 됩니다. jQuery 3.7.1의 XSS 취약점도 확인이 필요합니다.",
+      "expertEn": "-a 3 (aggression level 3) generates additional HTTP requests to identify more technologies. WooCommerce 8.4.0 targets payment vulnerabilities, Contact Form 7 targets file upload vulnerabilities. jQuery 3.7.1 XSS vulnerabilities also need checking.",
+      "defTooltip": "🛡️ WAF: WhatWeb 공격적 스캔(-a 3) 감지 - 다중 프로빙 요청",
+      "defTooltipEn": "🛡️ WAF: WhatWeb aggressive scan (-a 3) detected - multiple probing requests",
+      "hackerLog": {
+        "title": "whatweb_results.log",
+        "lines": [
+          { "log": "WordPress[6.4.2], WooCommerce[8.4.0]", "desc": "전자상거래 사이트 - 결제 정보와 고객 데이터 탈취 가능성" },
+          { "log": "JQuery[3.7.1]", "desc": "jQuery 구버전 - DOM 기반 XSS 취약점 확인 필요" },
+          { "log": "Plugins: WooCommerce, Yoast SEO, Contact Form 7", "desc": "3개 플러그인 식별 - 각각의 취약점 데이터베이스 확인 대상" }
+        ]
+      },
+      "terms": [
+        { "name": "WhatWeb", "desc": "웹사이트의 기술 스택을 자동으로 식별하는 오픈소스 도구. 1,800개 이상의 플러그인으로 다양한 기술을 탐지합니다" },
+        { "name": "CMS (Content Management System)", "desc": "WordPress, Joomla, Drupal 같은 콘텐츠 관리 시스템. 플러그인 취약점이 주요 공격 벡터입니다" }
+      ]
+    },
+    {
+      "cmd": "wpscan --url https://target.{companyName}.com --enumerate ap,at,tt,cb,dbe --api-token $WP_TOKEN",
+      "out": "[+] WordPress version 6.4.2 identified\n[+] WordPress theme in use: flavor-flavor v2.1\n\n[+] Enumerating All Plugins\n[i] 12 plugins found:\n  [+] woocommerce 8.4.0\n  [+] contact-form-7 5.8.4\n  [+] yoast-seo 21.6\n  [+] elementor 3.18.3\n  [+] wpforms-lite 1.8.5\n  [+] all-in-one-wp-migration 7.79\n  [!] updraftplus 1.23.11 - VULNERABLE\n      | CVE-2024-XXXXX: Arbitrary file download\n  [!] really-simple-ssl 7.2.3 - VULNERABLE\n      | CVE-2024-XXXXX: Authentication bypass\n\n[+] 2 vulnerabilities found",
+      "def": "[WAF] WordPress-specific scanning (WPScan) detected - plugin enumeration pattern",
+      "defAction": "Source: 10.0.1.45\nTarget: target.{companyName}.com (WordPress)\nAction: WPScan User-Agent blocked, enumeration attempt logged",
+      "desc": "WPScan으로 WordPress 플러그인, 테마, 사용자를 열거하고 취약점을 식별합니다.",
+      "descEn": "WPScan enumerates WordPress plugins, themes, and users while identifying known vulnerabilities.",
+      "stepTitle": "WPScan WordPress 취약점 스캔",
+      "stepTitleEn": "WPScan WordPress Vulnerability Scan",
+      "feynman": "WordPress 사이트 전용 보안 점검 도구입니다. 설치된 모든 플러그인과 테마를 찾아내고, 각각에 알려진 보안 결함이 있는지 확인합니다. UpdraftPlus의 파일 다운로드 취약점과 Really Simple SSL의 인증 우회 취약점이 발견되었습니다.",
+      "feynmanEn": "A security scanner specifically for WordPress sites. It finds all installed plugins and themes, then checks each for known security flaws. Vulnerabilities found in UpdraftPlus (file download) and Really Simple SSL (auth bypass).",
+      "expert": "WPScan은 WordPress 전용 취약점 스캐너로, WPVulnDB API를 통해 실시간 취약점 데이터를 조회합니다. --enumerate ap은 모든 플러그인을, at은 모든 테마를 열거합니다. UpdraftPlus의 Arbitrary File Download는 wp-config.php 탈취로 이어질 수 있습니다.",
+      "expertEn": "WPScan is a WordPress-specific vulnerability scanner using WPVulnDB API for real-time vulnerability data. --enumerate ap lists all plugins, at lists all themes. UpdraftPlus Arbitrary File Download can lead to wp-config.php theft.",
+      "defTooltip": "🔍 WAF: WPScan 기반 WordPress 플러그인 열거 패턴 감지",
+      "defTooltipEn": "🔍 WAF: WPScan-based WordPress plugin enumeration pattern detected",
+      "hackerLog": {
+        "title": "wpscan_results.log",
+        "lines": [
+          { "log": "updraftplus 1.23.11 - VULNERABLE: Arbitrary file download", "desc": "백업 플러그인 취약점 - wp-config.php(DB 비밀번호 포함) 다운로드 가능" },
+          { "log": "really-simple-ssl 7.2.3 - VULNERABLE: Authentication bypass", "desc": "SSL 플러그인의 인증 우회 - 관리자 계정으로 로그인 가능" },
+          { "log": "all-in-one-wp-migration 7.79", "desc": "마이그레이션 플러그인 - 전체 사이트 백업 파일 접근 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "WPScan", "desc": "WordPress 전용 보안 스캐너. 플러그인, 테마, 사용자 열거와 취약점 탐지를 수행합니다" },
+        { "name": "Plugin Enumeration", "desc": "WordPress에 설치된 플러그인 목록을 추출하는 기법. /wp-content/plugins/ 경로와 readme.txt 파일을 활용합니다" }
+      ]
+    },
+    {
+      "cmd": "nuclei -u https://target.{companyName}.com -t technologies/ -t exposures/ -o tech_scan.txt",
+      "out": "[INF] nuclei v3.1.0\n[INF] Templates loaded: 892\n\n[info] [tech-detect:apache] https://target.{companyName}.com\n[info] [tech-detect:php] https://target.{companyName}.com\n[info] [tech-detect:wordpress] https://target.{companyName}.com\n[info] [tech-detect:mysql] https://target.{companyName}.com\n[high] [wordpress-xmlrpc-listmethods] https://target.{companyName}.com/xmlrpc.php\n[medium] [wordpress-user-enum] https://target.{companyName}.com/?author=1 → admin\n[info] [robots-txt] https://target.{companyName}.com/robots.txt\n\n[INF] 7 results found in 1m 12s",
+      "def": "[IDS] Nuclei technology detection templates executed against target",
+      "defAction": "Source: 10.0.1.45\nTarget: target.{companyName}.com\nAction: Template-based scanning detected, correlation with prior WPScan activity",
+      "desc": "Nuclei 템플릿으로 기술 스택을 검증하고 추가 노출점을 발견합니다.",
+      "descEn": "Nuclei templates verify the technology stack and discover additional exposure points.",
+      "stepTitle": "Nuclei 기술 탐지 및 노출 확인",
+      "stepTitleEn": "Nuclei Technology Detection and Exposure Check",
+      "feynman": "WhatWeb이 외관을 보는 것이라면, Nuclei는 각 기술의 '약한 고리'를 직접 테스트합니다. WordPress의 XMLRPC가 활성화되어 있는지, 사용자 이름이 노출되는지 등을 892개의 체크리스트로 확인합니다.",
+      "feynmanEn": "If WhatWeb looks at the exterior, Nuclei directly tests each technology's 'weak links.' It uses 892 checklists to verify if WordPress XMLRPC is enabled, if usernames are exposed, etc.",
+      "expert": "Nuclei의 technologies/ 템플릿은 Wappalyzer 기반 기술 탐지를, exposures/ 템플릿은 설정 오류를 검사합니다. XMLRPC는 브루트포스와 DDoS(Pingback) 벡터로, 사용자 열거는 ?author=N 파라미터로 관리자 계정명을 노출합니다.",
+      "expertEn": "Nuclei's technologies/ templates perform Wappalyzer-based tech detection, exposures/ templates check misconfigurations. XMLRPC enables brute-force and DDoS (Pingback), user enumeration via ?author=N exposes admin usernames.",
+      "defTooltip": "⚡ IDS: Nuclei 기술 탐지 템플릿 실행 감지 - WPScan 활동과 상관 분석",
+      "defTooltipEn": "⚡ IDS: Nuclei technology detection templates executed - correlated with WPScan activity",
+      "hackerLog": {
+        "title": "nuclei_tech.log",
+        "lines": [
+          { "log": "[high] wordpress-xmlrpc-listmethods", "desc": "XMLRPC 활성화 - 비밀번호 브루트포스와 DDoS 공격 가능" },
+          { "log": "wordpress-user-enum → admin", "desc": "관리자 계정명 'admin' 노출 - 비밀번호 공격의 50% 완성" },
+          { "log": "7 results found in 1m 12s", "desc": "1분 만에 7개 정보 수집 - 효율적인 정찰 완료" }
+        ]
+      },
+      "terms": [
+        { "name": "XMLRPC", "desc": "WordPress의 원격 호출 인터페이스. 비밀번호 브루트포스, DDoS, SSRF 등의 공격 벡터로 악용됩니다" },
+        { "name": "User Enumeration", "desc": "시스템의 유효한 사용자 계정 목록을 추출하는 기법. 로그인 공격의 첫 단계입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 sw_vuln_matcher.py --tech whatweb_output.json --wpscan wpscan_results.json --nuclei tech_scan.txt",
+      "out": "[+] Matching software versions against CVE database...\n\n=== SOFTWARE VULNERABILITY REPORT ===\nCritical:\n  1. WordPress UpdraftPlus 1.23.11 → Arbitrary File Download\n  2. Really Simple SSL 7.2.3 → Authentication Bypass\n\nHigh:\n  3. Apache 2.4.41 → CVE-2021-41773 (Path Traversal)\n  4. WordPress XMLRPC → Brute-force / DDoS vector\n\nMedium:\n  5. jQuery 3.7.1 → DOM XSS potential\n  6. PHP 8.1.2 → Known information disclosure\n\nAttack Path:\n  Step 1: UpdraftPlus → download wp-config.php → DB credentials\n  Step 2: Really Simple SSL bypass → admin dashboard access\n  Step 3: Upload webshell via admin → RCE\n\n[+] Report saved to sw_attack_plan.pdf",
+      "def": "[SIEM Correlation] Complete software reconnaissance campaign - 4 tools, 19 findings",
+      "defAction": "Source: Correlation of WhatWeb + WPScan + Nuclei + manual analysis\nTarget: target.{companyName}.com\nAction: Incident escalated to IR team, vulnerability patching recommended",
+      "desc": "모든 소프트웨어 정보를 통합하여 CVE 매칭 결과와 공격 경로를 도출합니다.",
+      "descEn": "All software information is consolidated for CVE matching and attack path derivation.",
+      "stepTitle": "소프트웨어 취약점 종합 분석",
+      "stepTitleEn": "Software Vulnerability Comprehensive Analysis",
+      "feynman": "지금까지 수집한 모든 소프트웨어 정보를 하나의 공격 계획으로 정리합니다. 1단계: 백업 플러그인 취약점으로 설정 파일 탈취, 2단계: SSL 플러그인 우회로 관리자 접근, 3단계: 웹셸 업로드로 서버 장악. 이것이 소프트웨어 정찰의 최종 목적입니다.",
+      "feynmanEn": "All collected software information is organized into a single attack plan. Step 1: Steal config file via backup plugin vulnerability, Step 2: Admin access via SSL plugin bypass, Step 3: Server takeover via webshell upload. This is the ultimate goal of software reconnaissance.",
+      "expert": "다중 도구 상관 분석으로 공격 체인을 구성합니다. UpdraftPlus의 파일 다운로드로 wp-config.php(DB 자격증명)를 획득하고, Really Simple SSL 인증 우회로 관리자 대시보드에 접근한 뒤, 테마 에디터나 플러그인 업로드를 통해 웹셸을 배포하여 RCE를 달성합니다.",
+      "expertEn": "Multi-tool correlation constructs the attack chain. UpdraftPlus file download acquires wp-config.php (DB credentials), Really Simple SSL auth bypass accesses admin dashboard, then webshell deployment via theme editor or plugin upload achieves RCE.",
+      "defTooltip": "🗺️ SIEM: 4개 도구를 활용한 완전한 소프트웨어 정찰 캠페인 감지 - 19개 발견사항",
+      "defTooltipEn": "🗺️ SIEM: Complete software reconnaissance campaign using 4 tools - 19 findings",
+      "hackerLog": {
+        "title": "sw_attack_plan.log",
+        "lines": [
+          { "log": "Step 1: UpdraftPlus → wp-config.php → DB credentials", "desc": "설정 파일에서 데이터베이스 비밀번호 획득" },
+          { "log": "Step 2: Really Simple SSL bypass → admin dashboard", "desc": "관리자 대시보드 접근 - 사이트 완전 제어" },
+          { "log": "Step 3: Upload webshell → RCE", "desc": "웹셸로 서버에서 임의 명령 실행 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Attack Chain", "desc": "여러 취약점을 순서대로 연결하여 최종 목표에 도달하는 공격 경로. 개별 취약점보다 조합이 더 위험합니다" },
+        { "name": "Web Shell", "desc": "웹 서버에 업로드되어 원격 명령 실행을 가능하게 하는 악성 스크립트. PHP, ASP, JSP 등으로 작성됩니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "curl -sI (PID: 5101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "whatweb -a 3 (PID: 5145)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "wpscan (PID: 5200)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "nuclei (PID: 5267)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 sw_vuln_matcher.py (PID: 5310)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

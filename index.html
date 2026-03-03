@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="(주)갓루트(GOTROOT) 공식 사이버보안 교육 플랫폼 — ATT&CK 기반 위협 시뮬레이션 및 방어 훈련" />
+    <meta name="keywords" content="갓루트, GOTROOT, 사이버보안, 정보보안, 해킹, 교육, ATT&CK, 모의해킹, 보안교육" />
+    <meta name="author" content="(주)갓루트 GOTROOT" />
+    <meta property="og:title" content="GOTROOT EDU | (주)갓루트 사이버보안 교육 플랫폼" />
+    <meta property="og:description" content="글로벌 정보보안 선두기업 갓루트의 공식 사이버보안 교육 플랫폼 — ATT&CK 기반 위협 시뮬레이션 및 방어 훈련" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/logo/logo-name-dark-nobg.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="ko_KR" />
+    <!-- 카카오톡 미리보기용 -->
+    <meta property="og:site_name" content="GOTROOT EDU" />
+    <!-- 파비콘 -->
+    <link rel="icon" type="image/png" href="/logo/logo-name-dark-nobg.png" />
+    <link rel="apple-touch-icon" href="/logo/logo-name-dark-nobg.png" />
+    <!-- CSP: XSS 방어 — 허용된 출처만 스크립트/스타일 로드 가능 -->
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: blob: https:;
+        connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://api.ipify.org https://region1.google-analytics.com;
+        frame-src 'none';
+        object-src 'none';
+        base-uri 'self';" />
+    <!-- X-Content-Type-Options: MIME 타입 스니핑 방지 -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <!-- Referrer-Policy: 외부 사이트에 URL 노출 최소화 -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | (주)갓루트 사이버보안 교육 플랫폼</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

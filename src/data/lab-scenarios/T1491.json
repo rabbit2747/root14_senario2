@@ -1,0 +1,187 @@
+{
+  "id": "T1491",
+  "title": "웹사이트 변조 시뮬레이션",
+  "titleEn": "Defacement Attack Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "침투", "labelEn": "Intrusion", "icon": "🔓" },
+    { "label": "변조", "labelEn": "Deface", "icon": "🎨" },
+    { "label": "확산", "labelEn": "Spread", "icon": "📢" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "icon": "☠️" },
+    { "id": "websvr", "label": "Web Server", "icon": "🌐" },
+    { "id": "db", "label": "Database", "icon": "🗄️" },
+    { "id": "cdn", "label": "CDN / Cache", "icon": "🔄" },
+    { "id": "waf", "label": "WAF / FIM", "icon": "🛡️" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "websvr", "label": "SQLi / Upload", "activeStep": [0, 1] },
+    { "from": "attacker", "to": "db", "label": "DB Exploit", "activeStep": [0] },
+    { "from": "websvr", "to": "cdn", "label": "Cache Poison", "activeStep": [3] },
+    { "from": "websvr", "to": "waf", "label": "Alert", "activeStep": [1, 2, 3, 4] }
+  ],
+  "desktopIcons": [
+    { "name": "sqlmap", "icon": "💉", "alertOnStep": 0 },
+    { "name": "webshell.php", "icon": "🐚", "alertOnStep": 1 },
+    { "name": "index.html", "icon": "🌐", "alertOnStep": 2 },
+    { "name": "defaced_page", "icon": "🎨", "alertOnStep": 3 }
+  ],
+  "steps": [
+    {
+      "cmd": "bash -c \"\n# SQL Injection to extract admin credentials\necho 'Target: https://www.example-corp.com';\necho 'Scanning for SQL injection vulnerabilities...';\necho '';\necho 'Vulnerable parameter found: /login.php?id=';\necho '  Payload: 1\\' OR 1=1 UNION SELECT username,password FROM admin_users--';\necho '';\necho 'Admin credentials extracted:';\necho '  Username: admin@example-corp.com';\necho '  Password Hash: $2y$10$rK9GfQb...(bcrypt)';\necho '  Cracked: P@ssw0rd123! (rainbow table match)';\necho '';\necho 'CMS admin login: SUCCESS'\"",
+      "out": "Target: https://www.example-corp.com\nScanning for SQL injection vulnerabilities...\n\nVulnerable parameter found: /login.php?id=\n  Payload: 1' OR 1=1 UNION SELECT username,password FROM admin_users--\n\nAdmin credentials extracted:\n  Username: admin@example-corp.com\n  Password Hash: $2y$10$rK9GfQb...(bcrypt)\n  Cracked: P@ssw0rd123! (rainbow table match)\n\nCMS admin login: SUCCESS",
+      "def": "[WAF] SQL injection attempt detected on login.php",
+      "defAction": "Source IP: 198.51.100.42\nTarget: /login.php?id=\nPayload: UNION SELECT (SQL Injection)\nResult: Admin credentials extracted\nRisk: CRITICAL\nAction: IP blocked, admin password reset forced",
+      "desc": "SQL Injection으로 관리자 자격증명을 탈취합니다. 약한 비밀번호(P@ssw0rd123!)가 레인보우 테이블로 즉시 크래킹됩니다.",
+      "descEn": "Extracts admin credentials via SQL Injection. Weak password (P@ssw0rd123!) is immediately cracked via rainbow table.",
+      "stepTitle": "SQL Injection 침투",
+      "stepTitleEn": "SQL Injection Intrusion",
+      "feynman": "웹사이트의 로그인 창에 특수한 주문(SQL 구문)을 입력해서 데이터베이스가 관리자 비밀번호를 알려주도록 속이는 것과 같아요. 비밀번호가 약하면 바로 풀려버립니다.",
+      "feynmanEn": "Like entering a special incantation (SQL syntax) into a login form that tricks the database into revealing admin passwords. Weak passwords are cracked immediately.",
+      "expert": "UNION-based SQL Injection은 OWASP Top 10의 A03:2021 (Injection)에 해당합니다. Bcrypt 해시도 약한 비밀번호는 프리컴퓨팅된 레인보우 테이블이나 hashcat으로 크래킹됩니다. 매개변수화된 쿼리(Prepared Statement)와 WAF의 SQL Injection 규칙으로 방어해야 합니다.",
+      "expertEn": "UNION-based SQL Injection maps to OWASP Top 10 A03:2021 (Injection). Even bcrypt hashes with weak passwords fall to rainbow tables or hashcat. Defend with parameterized queries and WAF SQL Injection rules.",
+      "defTooltip": "WAF에서 UNION SELECT, OR 1=1 등 SQL Injection 패턴을 차단하세요. 모든 데이터베이스 쿼리에 매개변수화된 쿼리(Prepared Statement)를 사용하세요.",
+      "defTooltipEn": "Block UNION SELECT, OR 1=1 SQL Injection patterns in WAF. Use parameterized queries (Prepared Statements) for all database queries.",
+      "hackerLog": {
+        "title": "SQL Injection 관리자 탈취",
+        "lines": [
+          { "text": "/login.php?id=1' UNION SELECT...", "desc": "SQL Injection 취약점 발견 및 악용" },
+          { "text": "admin@example-corp.com", "desc": "관리자 계정 정보 추출" },
+          { "text": "Password cracked: P@ssw0rd123!", "desc": "약한 비밀번호 즉시 크래킹" }
+        ]
+      },
+      "terms": [
+        { "term": "SQL Injection", "desc": "웹 애플리케이션의 입력값에 SQL 구문을 삽입하여 데이터베이스를 조작하는 공격입니다." },
+        { "term": "Rainbow Table", "desc": "사전에 계산된 해시값 테이블로, 비밀번호 해시를 빠르게 역추적합니다." },
+        { "term": "WAF", "desc": "Web Application Firewall의 약자로, 웹 공격을 탐지하고 차단하는 보안 장비입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\n# Upload webshell via CMS file manager\necho 'CMS Admin Panel accessed';\necho 'File Manager → Upload feature';\necho '';\necho 'Uploading webshell:';\necho '  File: maintenance.php (disguised as legitimate)';\necho '  Location: /var/www/html/assets/maintenance.php';\necho '  Size: 4.2 KB';\necho '  Detection: None (not in WAF signature)';\necho '';\necho 'Webshell test:';\necho '  $ curl https://target.com/assets/maintenance.php?cmd=id';\necho '  uid=33(www-data) gid=33(www-data)';\necho '';\necho 'Server control: ACHIEVED (www-data)'\"",
+      "out": "CMS Admin Panel accessed\nFile Manager → Upload feature\n\nUploading webshell:\n  File: maintenance.php (disguised as legitimate)\n  Location: /var/www/html/assets/maintenance.php\n  Size: 4.2 KB\n  Detection: None (not in WAF signature)\n\nWebshell test:\n  $ curl https://target.com/assets/maintenance.php?cmd=id\n  uid=33(www-data) gid=33(www-data)\n\nServer control: ACHIEVED (www-data)",
+      "def": "[FIM] New PHP file created in web root — webshell suspected",
+      "defAction": "File: /var/www/html/assets/maintenance.php\nSize: 4.2 KB\nContent: PHP eval/exec functions detected\nUser: www-data\nRisk: CRITICAL\nAction: File quarantined, upload feature disabled",
+      "desc": "CMS 파일 관리자를 통해 웹셸(maintenance.php)을 업로드합니다. www-data 권한으로 서버 명령 실행이 가능해집니다.",
+      "descEn": "Uploads a webshell (maintenance.php) via CMS file manager. Server command execution is now possible with www-data privileges.",
+      "stepTitle": "웹셸 업로드",
+      "stepTitleEn": "Webshell Upload",
+      "feynman": "건물의 관리자 열쇠로 비밀 통로(웹셸)를 만들어놓는 것과 같아요. 이제 언제든 이 통로를 통해 서버에 명령을 내릴 수 있습니다.",
+      "feynmanEn": "Like using the building manager's key to create a secret passage (webshell). Now commands can be sent to the server at any time through this passage.",
+      "expert": "웹셸 업로드는 T1505.003 (Server Software Component: Web Shell)에 해당합니다. PHP의 eval(), exec(), system() 함수를 포함한 파일을 탐지해야 합니다. FIM(File Integrity Monitoring)으로 웹 루트의 파일 변경을 실시간 모니터링하세요.",
+      "expertEn": "Webshell upload maps to T1505.003. Detect files containing PHP eval(), exec(), system() functions. Use FIM to monitor web root file changes in real-time.",
+      "defTooltip": "웹 루트 디렉토리에 새로운 PHP 파일 생성을 FIM으로 즉시 탐지하세요. CMS 파일 업로드 기능에 화이트리스트 확장자 검증을 적용하세요.",
+      "defTooltipEn": "Immediately detect new PHP file creation in web root via FIM. Apply whitelist extension validation to CMS file upload features.",
+      "hackerLog": {
+        "title": "웹셸 설치",
+        "lines": [
+          { "text": "maintenance.php → /var/www/html/assets/", "desc": "정상 파일로 위장한 웹셸 업로드" },
+          { "text": "uid=33(www-data)", "desc": "웹서버 권한으로 명령 실행 가능" },
+          { "text": "Server control: ACHIEVED", "desc": "웹 서버 완전 장악" }
+        ]
+      },
+      "terms": [
+        { "term": "Webshell", "desc": "웹 서버에 설치되어 원격 명령 실행을 허용하는 악성 스크립트입니다." },
+        { "term": "www-data", "desc": "Linux 웹서버(Apache/Nginx)의 기본 실행 사용자 계정입니다." },
+        { "term": "FIM (File Integrity Monitoring)", "desc": "파일의 변경, 생성, 삭제를 실시간으로 감시하는 보안 도구입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\n# Backup original and replace index.html\necho 'Backing up original index.html...';\necho '  cp /var/www/html/index.html /tmp/.index.bak';\necho '';\necho 'Replacing with defacement page...';\necho '  echo \\\"<html><body style=bgcolor:black;color:lime;text-align:center>\\\" > /var/www/html/index.html';\necho '  echo \\\"<h1>HACKED BY PHANTOM CREW</h1>\\\" >> /var/www/html/index.html';\necho '  echo \\\"<p>Your security is a joke.</p>\\\" >> /var/www/html/index.html';\necho '';\necho 'Defacement deployed:';\necho '  File: /var/www/html/index.html';\necho '  Original size: 45.2 KB → New size: 0.3 KB';\necho '  Visible to: All website visitors';\necho '  Estimated exposure: ~50,000 daily visitors'\"",
+      "out": "Backing up original index.html...\n  cp /var/www/html/index.html /tmp/.index.bak\n\nReplacing with defacement page...\n  echo \"<html><body style=bgcolor:black;color:lime;text-align:center>\" > /var/www/html/index.html\n  echo \"<h1>HACKED BY PHANTOM CREW</h1>\" >> /var/www/html/index.html\n  echo \"<p>Your security is a joke.</p>\" >> /var/www/html/index.html\n\nDefacement deployed:\n  File: /var/www/html/index.html\n  Original size: 45.2 KB → New size: 0.3 KB\n  Visible to: All website visitors\n  Estimated exposure: ~50,000 daily visitors",
+      "def": "[FIM] index.html modified — content dramatically changed (45KB → 0.3KB)",
+      "defAction": "File: /var/www/html/index.html\nChange: Size reduced 45.2KB → 0.3KB (99% reduction)\nContent: Defacement message detected\nRisk: CRITICAL\nAction: File restored from backup, incident declared",
+      "desc": "메인 페이지(index.html)를 해커의 변조 페이지로 교체합니다. 하루 약 5만 명의 방문자가 변조된 페이지를 보게 됩니다.",
+      "descEn": "Replaces the main page (index.html) with a defacement page. Approximately 50,000 daily visitors will see the defaced page.",
+      "stepTitle": "메인 페이지 변조",
+      "stepTitleEn": "Main Page Defacement",
+      "feynman": "가게 간판을 떼고 '해킹당했다'는 낙서를 붙이는 것과 같아요. 모든 방문 고객(5만 명)이 이 낙서를 보게 되므로 기업 이미지에 큰 타격을 줍니다.",
+      "feynmanEn": "Like removing a store's sign and putting up 'HACKED' graffiti. All visiting customers (50,000) will see this graffiti, dealing a major blow to the company's image.",
+      "expert": "index.html 교체는 T1491.001 (Internal Defacement) 또는 T1491.002 (External Defacement)의 핵심 행위입니다. FIM은 파일 크기의 급격한 변화(45KB → 0.3KB)를 즉시 탐지합니다. CDN 캐시가 있으면 원본 복구 후에도 캐시된 변조 페이지가 남을 수 있으므로 캐시 퍼지가 필요합니다.",
+      "expertEn": "Replacing index.html is the core action of T1491.001/T1491.002. FIM immediately detects dramatic file size changes (45KB → 0.3KB). CDN cache may retain defaced pages even after restoration, requiring cache purge.",
+      "defTooltip": "index.html 등 핵심 웹 파일의 해시값을 FIM으로 실시간 비교하세요. 파일 크기가 급격히 변하면 즉시 경보를 발생시키세요.",
+      "defTooltipEn": "Compare hash values of critical web files like index.html via FIM in real-time. Trigger immediate alerts on dramatic file size changes.",
+      "hackerLog": {
+        "title": "메인 페이지 변조",
+        "lines": [
+          { "text": "index.html → 'HACKED BY PHANTOM CREW'", "desc": "메인 페이지를 변조 메시지로 교체" },
+          { "text": "45.2 KB → 0.3 KB", "desc": "파일 크기 99% 감소 (원본 파괴)" },
+          { "text": "Exposure: ~50,000 daily visitors", "desc": "일 5만 방문자가 변조 페이지 노출" }
+        ]
+      },
+      "terms": [
+        { "term": "Defacement", "desc": "웹사이트의 외관을 허가 없이 변경하는 공격으로, 주로 정치적 메시지나 과시 목적입니다." },
+        { "term": "index.html", "desc": "웹사이트의 기본 첫 페이지 파일로, 방문자가 가장 먼저 보는 페이지입니다." },
+        { "term": "CDN Cache Purge", "desc": "CDN에 캐시된 이전 콘텐츠를 강제로 삭제하고 원본 서버에서 새로 가져오는 작업입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\n# Spread defacement to subdomains and internal pages\necho '=== Defacement Propagation ===';\necho '';\necho 'Subdomains defaced:';\necho '  blog.example-corp.com    → DEFACED';\necho '  careers.example-corp.com → DEFACED';\necho '  support.example-corp.com → DEFACED';\necho '';\necho 'CDN cache poisoned:';\necho '  CloudFront distribution: d1234567.cloudfront.net';\necho '  Cached defacement pages propagated to 14 edge locations';\necho '  Cache TTL: 3600s (defacement visible for ~1 hour after fix)';\necho '';\necho 'Social media exposure:';\necho '  Screenshots shared on Twitter/X: 45 posts';\necho '  News coverage: 3 tech media outlets';\necho '  Brand reputation damage: SIGNIFICANT'\"",
+      "out": "=== Defacement Propagation ===\n\nSubdomains defaced:\n  blog.example-corp.com    → DEFACED\n  careers.example-corp.com → DEFACED\n  support.example-corp.com → DEFACED\n\nCDN cache poisoned:\n  CloudFront distribution: d1234567.cloudfront.net\n  Cached defacement pages propagated to 14 edge locations\n  Cache TTL: 3600s (defacement visible for ~1 hour after fix)\n\nSocial media exposure:\n  Screenshots shared on Twitter/X: 45 posts\n  News coverage: 3 tech media outlets\n  Brand reputation damage: SIGNIFICANT",
+      "def": "[SIEM] Multi-subdomain defacement — coordinated web attack",
+      "defAction": "Scope:\n  - Main site: DEFACED\n  - 3 subdomains: DEFACED\n  - CDN: 14 edge locations cached\nMedia Exposure:\n  - Social media: 45 posts\n  - News outlets: 3 articles\nRisk: CRITICAL\nResponse: CDN purge, all sites taken offline for restoration",
+      "desc": "변조가 3개 서브도메인과 CDN 14개 엣지 로케이션으로 확산됩니다. SNS와 뉴스 미디어에 노출되어 브랜드 이미지가 훼손됩니다.",
+      "descEn": "Defacement spreads to 3 subdomains and 14 CDN edge locations. Exposure on social media and news outlets damages brand reputation.",
+      "stepTitle": "서브도메인 확산 + 미디어 노출",
+      "stepTitleEn": "Subdomain Spread + Media Exposure",
+      "feynman": "한 가게의 간판뿐 아니라 체인점 전체(서브도메인)의 간판까지 바꿔치기하고, 그 사진이 SNS와 뉴스에 퍼지는 것과 같아요. CDN 캐시 때문에 원본을 복구해도 한동안 변조된 페이지가 보입니다.",
+      "feynmanEn": "Like replacing signs not just at one store but all franchise locations (subdomains), with photos going viral on social media and news. CDN caching means defaced pages remain visible even after restoration.",
+      "expert": "서브도메인 변조는 공유 인프라(같은 웹서버, 같은 CMS)의 위험성을 보여줍니다. CDN 캐시 포이즈닝은 복구를 복잡하게 만듭니다. 인시던트 대응 시 CDN 캐시 퍼지, DNS 변경, 모든 서브도메인 검증을 동시에 수행해야 합니다.",
+      "expertEn": "Subdomain defacement highlights risks of shared infrastructure (same web server, same CMS). CDN cache poisoning complicates recovery. Incident response must simultaneously purge CDN cache, change DNS, and verify all subdomains.",
+      "defTooltip": "서브도메인별 독립적인 FIM 모니터링을 설정하세요. CDN 설정에서 캐시 무효화(Invalidation) API를 자동 호출하는 인시던트 대응 플레이북을 준비하세요.",
+      "defTooltipEn": "Set up independent FIM monitoring per subdomain. Prepare incident response playbooks that automatically invoke CDN cache invalidation APIs.",
+      "hackerLog": {
+        "title": "변조 확산 및 미디어 노출",
+        "lines": [
+          { "text": "3 subdomains defaced", "desc": "blog, careers, support 서브도메인 변조" },
+          { "text": "CDN: 14 edge locations cached", "desc": "CDN에 변조 페이지 캐시 — 복구 지연" },
+          { "text": "Twitter/X: 45 posts, News: 3 outlets", "desc": "SNS·미디어 노출로 브랜드 이미지 훼손" }
+        ]
+      },
+      "terms": [
+        { "term": "CDN Cache Poisoning", "desc": "CDN에 악성 콘텐츠를 캐시시켜 다수 사용자에게 전파하는 공격입니다." },
+        { "term": "Subdomain", "desc": "주 도메인의 하위 도메인(예: blog.example.com)으로, 별도 서비스를 운영합니다." },
+        { "term": "Brand Reputation Damage", "desc": "보안 사고로 인한 기업 브랜드 신뢰도 하락을 의미합니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\n# Attack summary\necho '=== DEFACEMENT ATTACK COMPLETE ===';\necho '';\necho 'Attack Vector: SQL Injection → Admin Access → Webshell';\necho '';\necho 'Impact Summary:';\necho '  Pages defaced    : 4 (main + 3 subdomains)';\necho '  CDN edge nodes   : 14 locations cached';\necho '  Visitor exposure : ~50,000/day';\necho '  Media coverage   : 3 news outlets + 45 social posts';\necho '  Downtime         : 4 hours (detection + restoration)';\necho '';\necho 'Business Impact:';\necho '  Revenue loss     : ~$120,000 (4 hours downtime)';\necho '  Reputation cost  : Estimated $500,000+';\necho '  Customer trust   : Significantly degraded';\necho '  Regulatory       : Possible data breach notification required'\"",
+      "out": "=== DEFACEMENT ATTACK COMPLETE ===\n\nAttack Vector: SQL Injection → Admin Access → Webshell\n\nImpact Summary:\n  Pages defaced    : 4 (main + 3 subdomains)\n  CDN edge nodes   : 14 locations cached\n  Visitor exposure : ~50,000/day\n  Media coverage   : 3 news outlets + 45 social posts\n  Downtime         : 4 hours (detection + restoration)\n\nBusiness Impact:\n  Revenue loss     : ~$120,000 (4 hours downtime)\n  Reputation cost  : Estimated $500,000+\n  Customer trust   : Significantly degraded\n  Regulatory       : Possible data breach notification required",
+      "def": "[SIEM] Defacement attack lifecycle complete — full incident review",
+      "defAction": "Attack Chain: SQLi → Admin → Webshell → Defacement\nScope: 4 pages, 14 CDN nodes\nDowntime: 4 hours\nFinancial Impact: $620K+\nResponse: Full web infrastructure audit required",
+      "desc": "공격 전체 요약입니다. SQL Injection부터 변조까지의 공격 체인과 비즈니스 영향(62만 달러 이상 손실)을 분석합니다.",
+      "descEn": "Full attack summary. Analyzes the attack chain from SQL Injection to defacement and business impact ($620K+ in losses).",
+      "stepTitle": "공격 완료 요약",
+      "stepTitleEn": "Attack Complete Summary",
+      "feynman": "가게 간판이 바뀐 4시간 동안 매출 손실(12만 달러)이 발생하고, 언론 보도로 인한 브랜드 이미지 손상(50만 달러 이상)이 더 큰 피해입니다. 기술적으로는 간단한 공격이지만 비즈니스 영향은 막대합니다.",
+      "feynmanEn": "Revenue loss ($120K) during 4 hours of downtime, plus brand damage from media coverage ($500K+) is the bigger impact. Technically a simple attack, but business consequences are enormous.",
+      "expert": "웹사이트 변조는 기술적 난이도는 낮지만 비즈니스 영향이 큽니다. 총 비용은 직접 손실(12만 달러) + 평판 비용(50만 달러) = 62만 달러 이상입니다. GDPR/개인정보보호법에 따라 데이터 유출 통지 의무가 발생할 수 있습니다. 예방 비용(WAF + FIM + MFA)은 피해 비용의 1/10 미만입니다.",
+      "expertEn": "Defacement is low technical difficulty but high business impact. Total cost: direct loss ($120K) + reputation ($500K) = $620K+. GDPR may require data breach notification. Prevention cost (WAF + FIM + MFA) is less than 1/10 of damage cost.",
+      "defTooltip": "WAF, FIM, MFA를 조합한 방어 체계를 구축하세요. 특히 CMS 관리자 계정에 MFA를 필수 적용하고, 정기적인 웹 취약점 스캔을 수행하세요.",
+      "defTooltipEn": "Build defense with WAF + FIM + MFA combination. Apply mandatory MFA to CMS admin accounts and perform regular web vulnerability scanning.",
+      "hackerLog": {
+        "title": "웹사이트 변조 공격 완료",
+        "lines": [
+          { "text": "Attack: SQLi → Admin → Webshell → Deface", "desc": "SQL Injection부터 변조까지의 공격 체인" },
+          { "text": "4 pages defaced, 4 hours downtime", "desc": "4개 페이지 변조, 4시간 중단" },
+          { "text": "Total impact: $620K+", "desc": "매출 손실 + 평판 비용 = 62만 달러 이상" }
+        ]
+      },
+      "terms": [
+        { "term": "Hacktivism", "desc": "정치적 또는 사회적 메시지를 전달하기 위한 해킹 활동입니다." },
+        { "term": "Incident Response", "desc": "보안 사고 발생 시 피해를 최소화하기 위한 체계적 대응 절차입니다." },
+        { "term": "MFA (Multi-Factor Authentication)", "desc": "비밀번호 외 추가 인증 수단을 요구하는 보안 방식입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "attacker (198.51.100.42)", "depth": 0, "alert": true, "minStep": 0 },
+    { "name": "sqlmap (SQL Injection scan)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "CMS admin login (stolen creds)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "maintenance.php (webshell)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "echo > index.html (defacement)", "depth": 3, "alert": true, "minStep": 2 },
+    { "name": "subdomain defacement (3 sites)", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "CDN cache poisoned (14 edges)", "depth": 3, "alert": true, "minStep": 3 }
+  ]
+}

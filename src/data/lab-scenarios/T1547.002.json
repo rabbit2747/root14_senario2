@@ -1,0 +1,189 @@
+{
+  "id": "T1547.002",
+  "title": "시작 폴더 지속성 시뮬레이션",
+  "titleEn": "Startup Folder Persistence Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 페이로드 배치", "labelEn": "⚡ Payload Staging", "steps": [1] },
+    { "label": "🔓 지속성 등록", "labelEn": "🔓 Persistence Setup", "steps": [2, 3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim PC\nDESKTOP-HR01", "x": 250, "y": 80 },
+    { "id": "startup_user", "label": "User Startup\nFolder", "x": 400, "y": 30 },
+    { "id": "startup_all", "label": "All Users\nStartup", "x": 400, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n198.51.100.22", "x": 50, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "startup_user", "minStep": 2 },
+    { "from": "victim", "to": "startup_all", "minStep": 3 },
+    { "from": "startup_user", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "File Explorer", "icon": "📁" },
+    { "name": "Windows Security", "icon": "🛡️" },
+    { "name": "Task Manager", "icon": "📊" },
+    { "name": "PowerShell", "icon": "💻" }
+  ],
+  "steps": [
+    {
+      "cmd": "dir \"%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\" && dir \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\"",
+      "out": " Volume in drive C has no label.\n Directory of C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\n\n03/01/2026  09:15 AM    <DIR>          .\n03/01/2026  09:15 AM    <DIR>          ..\n01/15/2026  02:30 PM             1,024 desktop.ini\n               1 File(s)          1,024 bytes\n\n Directory of C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\n\n03/01/2026  09:15 AM    <DIR>          .\n03/01/2026  09:15 AM    <DIR>          ..\n02/10/2026  11:00 AM             2,048 SecurityHealthMonitor.lnk\n               1 File(s)          2,048 bytes\n\n[*] User startup folder: writable without admin\n[*] All Users startup: requires admin privileges\n[*] Only desktop.ini and one legit shortcut found",
+      "def": "[EDR] Startup folder enumeration detected - directory listing of startup locations",
+      "defAction": "Source: File system monitoring\nTarget: Startup folder paths\nAction: Directory access logged, baseline comparison initiated",
+      "desc": "시작 프로그램 폴더의 현재 항목을 확인하여 기존 파일과 혼합할 수 있는 환경을 파악합니다.",
+      "descEn": "The attacker enumerates current startup folder contents to understand the environment for blending in.",
+      "stepTitle": "시작 폴더 정찰 (기존 항목 확인)",
+      "stepTitleEn": "Startup Folder Reconnaissance (Existing Items Check)",
+      "feynman": "새 학교에 전학 온 첫날, 교실을 둘러보며 자리 배치를 파악하는 것과 같습니다. 어떤 프로그램들이 이미 시작 폴더에 있는지 확인해야 자연스럽게 끼어들 수 있습니다.",
+      "feynmanEn": "It's like a transfer student looking around the classroom on the first day to understand the seating arrangement. You need to see what programs are already in the startup folder to blend in naturally.",
+      "expert": "Windows 시작 폴더는 사용자별(APPDATA)과 전체 시스템(ProgramData) 두 위치가 있습니다. 공격자는 먼저 기존 항목을 열거하여 명명 규칙을 파악하고, 관리자 권한 보유 여부에 따라 대상 폴더를 결정합니다.",
+      "expertEn": "Windows startup folders exist in two locations: per-user (APPDATA) and system-wide (ProgramData). Attackers first enumerate existing items to understand naming conventions and determine the target folder based on privilege level.",
+      "defTooltip": "🔐 시작 폴더 디렉토리 열거가 감지되었습니다! 지속성 정찰의 전형적인 패턴입니다.",
+      "defTooltipEn": "🔐 Startup folder directory enumeration detected! Typical persistence reconnaissance pattern.",
+      "hackerLog": {
+        "title": "startup_recon.txt",
+        "lines": [
+          { "log": "User startup folder: writable without admin", "desc": "💡 사용자 시작 폴더는 관리자 권한 없이 쓸 수 있음 - 가장 쉬운 진입점" },
+          { "log": "All Users startup: requires admin privileges", "desc": "💡 공용 시작 폴더는 관리자 권한 필요 - 모든 사용자에게 영향" },
+          { "log": "Only desktop.ini and one legit shortcut found", "desc": "💡 기존 항목이 적으면 새 파일 추가 시 눈에 띌 수 있음" }
+        ]
+      },
+      "terms": [
+        { "name": "시작 폴더 (Startup Folder)", "desc": "Windows 사용자가 로그인할 때 자동으로 실행되는 프로그램을 모아놓는 특수 폴더입니다." },
+        { "name": "APPDATA", "desc": "현재 사용자의 애플리케이션 데이터가 저장되는 환경 변수. 사용자별 설정과 데이터가 저장됩니다." },
+        { "name": "ProgramData", "desc": "모든 사용자에게 공유되는 프로그램 데이터 폴더. 수정에 관리자 권한이 필요합니다." }
+      ]
+    },
+    {
+      "cmd": "copy C:\\Windows\\Temp\\beacon.exe \"%APPDATA%\\Microsoft\\SystemUpdater.exe\" && attrib +h +s \"%APPDATA%\\Microsoft\\SystemUpdater.exe\"",
+      "out": "        1 file(s) copied.\n\n[*] Payload staged:\n    Path: C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\SystemUpdater.exe\n    Size: 142KB\n    Attributes: Hidden, System\n\n[*] File disguised as Microsoft system updater\n[*] Hidden from standard directory listings\n[*] Located in trusted Microsoft subdirectory",
+      "def": "[EDR] Suspicious executable created in AppData\\Microsoft with Hidden+System attributes",
+      "defAction": "Source: File integrity monitoring\nTarget: SystemUpdater.exe in AppData\\Microsoft\nAction: File hash checked - unknown binary, quarantine recommended",
+      "desc": "악성 페이로드를 Microsoft 하위 폴더에 위장 배치하고 숨김 속성을 설정합니다.",
+      "descEn": "The attacker stages the malicious payload in a Microsoft subdirectory with hidden attributes.",
+      "stepTitle": "페이로드 위장 배치 (Microsoft 폴더 활용)",
+      "stepTitleEn": "Payload Staging (Microsoft Directory Disguise)",
+      "feynman": "경찰서 안에 있는 사물함에 물건을 숨기는 것과 같습니다. Microsoft라는 이름이 붙은 폴더 안에 파일을 넣으면 시스템 파일처럼 보여서 의심받지 않습니다.",
+      "feynmanEn": "It's like hiding something in a locker inside a police station. Placing a file in a folder named 'Microsoft' makes it look like a system file that won't raise suspicion.",
+      "expert": "AppData\\Roaming\\Microsoft 경로는 정상적인 Windows 구성 요소가 데이터를 저장하는 위치입니다. 공격자는 이 신뢰성을 악용하여 페이로드를 배치합니다. Hidden+System 파일 속성은 기본 dir 명령과 파일 탐색기에서 파일을 숨깁니다.",
+      "expertEn": "AppData\\Roaming\\Microsoft is where legitimate Windows components store data. Attackers exploit this trust to stage payloads. Hidden+System file attributes hide files from default dir commands and File Explorer.",
+      "defTooltip": "🔐 AppData\\Microsoft에서 숨김+시스템 속성의 실행 파일 생성 감지!",
+      "defTooltipEn": "🔐 Executable with Hidden+System attributes created in AppData\\Microsoft!",
+      "hackerLog": {
+        "title": "payload_staging.txt",
+        "lines": [
+          { "log": "Path: ...\\AppData\\Roaming\\Microsoft\\SystemUpdater.exe", "desc": "💡 Microsoft 폴더 안에 배치 - 정상 시스템 파일과 혼동 유발" },
+          { "log": "Attributes: Hidden, System", "desc": "💡 숨김+시스템 속성으로 일반 파일 탐색에서 보이지 않음" },
+          { "log": "File disguised as Microsoft system updater", "desc": "💡 합법적 업데이트 프로그램으로 위장한 이름 사용" }
+        ]
+      },
+      "terms": [
+        { "name": "파일 속성 (File Attributes)", "desc": "Windows 파일의 메타데이터. Hidden과 System 속성을 설정하면 일반적인 파일 목록에서 숨겨집니다." },
+        { "name": "attrib 명령", "desc": "Windows에서 파일 속성을 변경하는 명령어. +h는 숨김, +s는 시스템 속성을 추가합니다." },
+        { "name": "페이로드 스테이징", "desc": "악성 파일을 대상 시스템의 전략적 위치에 배치하는 단계입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"$ws = New-Object -ComObject WScript.Shell; $lnk = $ws.CreateShortcut('%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\SystemUpdater.lnk'); $lnk.TargetPath = '%APPDATA%\\Microsoft\\SystemUpdater.exe'; $lnk.IconLocation = 'shell32.dll,14'; $lnk.Description = 'Microsoft System Update Service'; $lnk.Save()\"",
+      "out": "[*] Shortcut created:\n    Location: C:\\Users\\{userName}\\...\\Startup\\SystemUpdater.lnk\n    Target: C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\SystemUpdater.exe\n    Icon: Windows Update icon (shell32.dll,14)\n    Description: Microsoft System Update Service\n\n[*] Persistence established:\n    - Executes at user login\n    - No admin privileges needed\n    - Shortcut uses legitimate Windows icon\n    - Points to hidden payload in Microsoft directory",
+      "def": "[EDR] New shortcut (.lnk) created in user Startup folder pointing to AppData executable",
+      "defAction": "Source: Startup folder monitoring (Sysmon Event ID 11)\nTarget: SystemUpdater.lnk\nAction: Shortcut target analyzed - points to suspicious non-standard binary",
+      "desc": "사용자 시작 폴더에 악성 바로가기를 생성하여 로그인 시 자동 실행되도록 합니다.",
+      "descEn": "The attacker creates a malicious shortcut in the user Startup folder for auto-execution at login.",
+      "stepTitle": "사용자 시작 폴더에 악성 바로가기 생성",
+      "stepTitleEn": "Malicious Shortcut Creation in User Startup Folder",
+      "feynman": "식당 예약 명부에 가짜 이름으로 예약을 넣는 것과 같습니다. Windows가 로그인할 때 시작 폴더를 확인하면, 이 바로가기 파일을 찾아서 자동으로 실행합니다. 바로가기는 Windows 업데이트 아이콘으로 위장되어 있어서 사용자가 봐도 의심하지 않습니다.",
+      "feynmanEn": "It's like putting a fake name on a restaurant reservation list. When Windows checks the startup folder at login, it finds this shortcut and auto-executes it. The shortcut is disguised with a Windows Update icon so users won't suspect anything.",
+      "expert": "WScript.Shell COM 객체를 사용한 .lnk 파일 생성은 PowerShell에서 가장 일반적인 바로가기 생성 방법입니다. shell32.dll의 아이콘 인덱스 14는 Windows Update 아이콘으로, 사용자 인터페이스 수준에서의 위장을 제공합니다. Sysmon Event ID 11(FileCreate)로 시작 폴더의 파일 생성을 감지할 수 있습니다.",
+      "expertEn": "Creating .lnk files using WScript.Shell COM object is the most common shortcut creation method in PowerShell. Shell32.dll icon index 14 is the Windows Update icon, providing UI-level camouflage. Sysmon Event ID 11 (FileCreate) can detect file creation in startup folders.",
+      "defTooltip": "🔐 사용자 시작 폴더에 새 바로가기 생성 감지! AppData의 실행 파일을 가리킵니다.",
+      "defTooltipEn": "🔐 New shortcut created in user Startup folder! Points to executable in AppData.",
+      "hackerLog": {
+        "title": "lnk_creation.txt",
+        "lines": [
+          { "log": "Icon: Windows Update icon (shell32.dll,14)", "desc": "💡 정상 Windows 업데이트 아이콘으로 위장 - 시각적 검사 회피" },
+          { "log": "No admin privileges needed", "desc": "💡 사용자 시작 폴더는 일반 권한으로 수정 가능" },
+          { "log": "Points to hidden payload in Microsoft directory", "desc": "💡 바로가기와 실제 페이로드가 분리되어 탐지 어려움" }
+        ]
+      },
+      "terms": [
+        { "name": "바로가기 파일 (.lnk)", "desc": "다른 파일이나 폴더를 가리키는 Windows 바로가기. 대상 경로, 아이콘, 실행 인수 등을 포함합니다." },
+        { "name": "WScript.Shell", "desc": "Windows Script Host의 COM 객체. 바로가기 생성, 환경 변수 접근 등 시스템 작업에 사용됩니다." },
+        { "name": "Sysmon Event ID 11", "desc": "파일 생성 이벤트. 시작 폴더 같은 중요 경로의 파일 생성을 감지하는 데 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "copy C:\\Windows\\Temp\\updater.bat \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\SecurityHealthCheck.bat\"",
+      "out": "        1 file(s) copied.\n\n[*] Batch file placed in All Users startup:\n    Path: C:\\ProgramData\\...\\Startup\\SecurityHealthCheck.bat\n    Content: @echo off && start /b \"\" \"%APPDATA%\\Microsoft\\SystemUpdater.exe\" && exit\n\n[*] All Users persistence:\n    - Requires admin (already escalated)\n    - Runs for ALL users who log in\n    - Batch file hides console window with @echo off\n    - Redundant persistence layer",
+      "def": "[EDR] Batch file created in All Users Startup folder - suspicious persistence mechanism",
+      "defAction": "Source: File system monitoring\nTarget: SecurityHealthCheck.bat in ProgramData Startup\nAction: Batch file content analyzed - launches hidden process, removed and quarantined",
+      "desc": "관리자 권한으로 전체 사용자 시작 폴더에 배치 파일을 추가하여 이중 지속성을 확보합니다.",
+      "descEn": "The attacker adds a batch file to the All Users startup folder with admin privileges for dual persistence.",
+      "stepTitle": "전체 사용자 시작 폴더 배치 파일 추가 (이중 지속성)",
+      "stepTitleEn": "All Users Startup Batch File (Dual Persistence)",
+      "feynman": "건물의 모든 층에 불을 켜는 스위치를 설치하는 것과 같습니다. 개인 방에만 스위치를 두면 그 사람이 들어올 때만 켜지지만, 공용 복도에 스위치를 추가하면 누가 들어오든 불이 켜집니다.",
+      "feynmanEn": "It's like installing a light switch for every floor in a building. A switch in a private room only activates when that person enters, but a switch in the common hallway activates for anyone who enters.",
+      "expert": "ProgramData의 공용 시작 폴더는 관리자 권한이 필요하지만, 모든 사용자 로그인 시 실행됩니다. @echo off와 start /b를 조합하면 콘솔 창 없이 백그라운드에서 실행됩니다. 이중 지속성은 하나가 제거되어도 다른 하나가 동작하도록 보장합니다.",
+      "expertEn": "The ProgramData shared startup folder requires admin privileges but executes at all user logins. Combining @echo off with start /b runs processes in the background without console windows. Dual persistence ensures operation even if one mechanism is removed.",
+      "defTooltip": "🔐 전체 사용자 시작 폴더에 배치 파일 생성! 숨겨진 프로세스를 실행하는 의심스러운 배치입니다.",
+      "defTooltipEn": "🔐 Batch file created in All Users Startup! Suspicious batch launching hidden processes.",
+      "hackerLog": {
+        "title": "allusers_startup.txt",
+        "lines": [
+          { "log": "Batch file placed in All Users startup", "desc": "💡 모든 사용자 로그인 시 실행 - 파급력 극대화" },
+          { "log": "start /b hides console window", "desc": "💡 /b 플래그로 새 창 없이 백그라운드 실행 - 사용자 눈에 보이지 않음" },
+          { "log": "Redundant persistence layer", "desc": "💡 사용자 시작 폴더와 이중으로 설정 - 하나 제거해도 지속" }
+        ]
+      },
+      "terms": [
+        { "name": "배치 파일 (.bat)", "desc": "Windows 명령어를 순서대로 실행하는 스크립트 파일. @echo off로 명령어 출력을 숨길 수 있습니다." },
+        { "name": "start /b", "desc": "Windows에서 새 창을 열지 않고 백그라운드에서 프로그램을 실행하는 명령입니다." },
+        { "name": "이중 지속성 (Dual Persistence)", "desc": "두 가지 이상의 지속성 메커니즘을 동시에 사용하여 방어자의 제거를 어렵게 만드는 전략입니다." }
+      ]
+    },
+    {
+      "cmd": "# [Verification] System reboot and startup folder persistence check",
+      "out": "[System Reboot - DESKTOP-HR01]\n\n[Boot sequence - startup triggers]\n1. User Startup Folder → SystemUpdater.lnk\n   > SystemUpdater.exe started (PID: 4521)\n   > C2 beacon established → 198.51.100.22:443\n   > Running as: {companyName}\\{userName}\n\n2. All Users Startup → SecurityHealthCheck.bat\n   > @echo off executed\n   > SystemUpdater.exe (duplicate - mutex active)\n   > Second instance terminated (mutex check)\n\n[+] User startup persistence: ACTIVE\n[+] All Users startup persistence: ACTIVE (redundant)\n[+] C2 connectivity: ESTABLISHED\n[+] Payload surviving reboots: CONFIRMED",
+      "def": "[SIEM] Multiple startup folder persistence mechanisms triggered at login - coordinated activity",
+      "defAction": "Source: Boot-time monitoring + EDR\nTarget: DESKTOP-HR01 startup sequence\nAction: Both startup items removed, malicious executable quarantined, system scan initiated",
+      "desc": "시스템 재부팅 후 시작 폴더 기반 지속성이 정상 동작하는지 검증합니다.",
+      "descEn": "The attacker verifies that startup folder persistence mechanisms survive reboot successfully.",
+      "stepTitle": "재부팅 후 지속성 검증",
+      "stepTitleEn": "Post-Reboot Persistence Verification",
+      "feynman": "집을 나갔다 돌아왔을 때 설치한 CCTV가 정상 작동하는지 확인하는 것과 같습니다. 재부팅 후에도 악성 프로그램이 자동으로 시작되고 C2 서버와 연결이 되는지 확인합니다.",
+      "feynmanEn": "It's like checking that your installed CCTV still works when you leave and come back home. After reboot, verify that the malicious program auto-starts and connects to the C2 server.",
+      "expert": "Mutex를 사용한 중복 실행 방지는 이중 지속성의 부작용(동일 프로세스 2개 실행)을 해결합니다. 두 메커니즘 모두 동작하지만, 실제로는 하나의 인스턴스만 활성화됩니다. 방어자는 시작 폴더와 프로세스 모니터링을 조합하여 이러한 패턴을 탐지해야 합니다.",
+      "expertEn": "Mutex-based duplicate prevention addresses the side effect of dual persistence (two instances of the same process). Both mechanisms trigger but only one instance remains active. Defenders should combine startup folder and process monitoring to detect such patterns.",
+      "defTooltip": "🔐 로그인 시 여러 시작 폴더 지속성 메커니즘이 동시에 활성화! 시스템 스캔이 필요합니다.",
+      "defTooltipEn": "🔐 Multiple startup folder persistence mechanisms triggered at login! System scan required.",
+      "hackerLog": {
+        "title": "persistence_verify.txt",
+        "lines": [
+          { "log": "SystemUpdater.exe started (PID: 4521)", "desc": "💡 사용자 시작 폴더의 바로가기를 통해 실행 성공" },
+          { "log": "Second instance terminated (mutex check)", "desc": "💡 이중 지속성이지만 Mutex로 중복 실행 방지" },
+          { "log": "C2 connectivity: ESTABLISHED", "desc": "💡 C2 서버와 연결 성공 - 공격자의 원격 제어 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Mutex", "desc": "상호 배제(Mutual Exclusion) 객체. 프로그램의 중복 실행을 방지하기 위해 사용됩니다." },
+        { "name": "C2 비콘 (Beacon)", "desc": "감염된 시스템이 C2 서버에 주기적으로 연결하여 명령을 대기하는 통신 메커니즘입니다." },
+        { "name": "시작 폴더 모니터링", "desc": "Sysmon이나 EDR을 이용하여 시작 폴더의 파일 변경을 실시간으로 감시하는 탐지 기법입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "cmd.exe (attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "dir.exe (startup enum) (PID: 5001)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "copy.exe (payload staging) (PID: 5101)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "powershell.exe (lnk creation) (PID: 5201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "copy.exe (batch file) (PID: 5301)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "[After Reboot]", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "SystemUpdater.exe (PID: 4521)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "SecurityHealthCheck.bat (PID: 4601)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

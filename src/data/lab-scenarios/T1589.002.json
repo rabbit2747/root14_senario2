@@ -1,0 +1,182 @@
+{
+  "id": "T1589.002",
+  "title": "이메일 주소 수집 시뮬레이션",
+  "titleEn": "Email Address Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 이메일 수집", "labelEn": "🔍 Email Harvesting", "steps": [0, 1] },
+    { "label": "📧 검증 및 분석", "labelEn": "📧 Verification & Analysis", "steps": [2, 3] },
+    { "label": "🎯 타겟팅", "labelEn": "🎯 Targeting", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "osint", "label": "OSINT Sources", "x": 200, "y": 30 },
+    { "id": "target", "label": "Target Org", "x": 200, "y": 90 },
+    { "id": "hunter", "label": "Hunter.io", "x": 350, "y": 30 },
+    { "id": "linkedin", "label": "LinkedIn", "x": 350, "y": 90 },
+    { "id": "smtp", "label": "SMTP Server", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "osint", "minStep": 0 },
+    { "from": "attacker", "to": "target", "minStep": 0 },
+    { "from": "attacker", "to": "hunter", "minStep": 1 },
+    { "from": "attacker", "to": "linkedin", "minStep": 2 },
+    { "from": "attacker", "to": "smtp", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "email_harvest.csv", "icon": "📧", "alert": true },
+    { "name": "{companyName} Recon", "icon": "📁" },
+    { "name": "phishing_targets.xlsx", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "theHarvester -d {companyName}.com -b google,bing,linkedin,dnsdumpster -l 500 -f harvest_results",
+      "out": "[*] Target: {companyName}.com\n[*] Searching Google...\n[*] Searching Bing...\n[*] Searching LinkedIn...\n[*] Searching DNSDumpster...\n\n[*] Emails found: 47\n------------------\nadmin@{companyName}.com\ninfo@{companyName}.com\nhr@{companyName}.com\nj.kim@{companyName}.com\ns.park@{companyName}.com\nm.lee@{companyName}.com\ncto@{companyName}.com\nciso@{companyName}.com\ndev-team@{companyName}.com\nsupport@{companyName}.com\n... (37 more)\n\n[*] Hosts found: 12\n[*] Results saved to harvest_results.xml",
+      "def": "[SIEM] Unusual search engine query volume detected targeting organization domain",
+      "defAction": "Source: External search engines\nTarget: {companyName}.com domain\nAction: Domain monitoring alert triggered, brand protection team notified",
+      "desc": "theHarvester로 검색엔진과 공개 소스에서 대상 조직의 이메일 주소를 자동 수집합니다.",
+      "descEn": "theHarvester automatically collects email addresses from search engines and public sources for the target organization.",
+      "stepTitle": "theHarvester 이메일 수집",
+      "stepTitleEn": "theHarvester Email Harvesting",
+      "feynman": "theHarvester는 인터넷에서 특정 회사의 이메일 주소를 찾아주는 도구입니다. Google, Bing, LinkedIn 등을 검색해서 공개된 이메일을 모읍니다. 마치 전화번호부에서 특정 회사 직원들의 연락처를 찾는 것과 같습니다. 47개의 이메일을 찾았다면, 그만큼 피싱 공격 대상이 늘어난 것입니다.",
+      "feynmanEn": "theHarvester searches the internet for email addresses of a specific company. It searches Google, Bing, LinkedIn, etc. to collect publicly available emails. Like looking up employee contacts in a phone book. Finding 47 emails means 47 potential phishing targets.",
+      "expert": "theHarvester는 다중 소스 OSINT 수집 도구로, 패시브 DNS, 검색엔진 스크래핑, API 쿼리를 통해 이메일을 열거합니다. -b 옵션으로 복수 데이터 소스를 지정하고, -l 500은 검색 결과 제한을 설정합니다. DNSDumpster는 MX 레코드 기반 이메일 도메인 검증에도 활용됩니다.",
+      "expertEn": "theHarvester is a multi-source OSINT collection tool that enumerates emails through passive DNS, search engine scraping, and API queries. The -b option specifies multiple data sources, and -l 500 sets the search result limit. DNSDumpster is also used for MX record-based email domain verification.",
+      "defTooltip": "📡 SIEM: 조직 도메인 대상 비정상적 검색엔진 쿼리 감지",
+      "defTooltipEn": "📡 SIEM: Unusual search engine query volume detected targeting organization domain",
+      "hackerLog": {
+        "title": "harvest_results.log",
+        "lines": [
+          { "log": "[*] Emails found: 47", "desc": "💡 47개의 이메일이 공개 소스에서 발견 - 모두 피싱 공격에 활용될 수 있습니다" },
+          { "log": "ciso@{companyName}.com", "desc": "💡 CISO(최고정보보안책임자) 이메일 발견 - 고위 경영진 대상 스피어피싱에 활용 가능" },
+          { "log": "dev-team@{companyName}.com", "desc": "💡 개발팀 그룹 이메일 - 악성 코드가 포함된 가짜 개발 도구 메일을 보낼 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "theHarvester", "desc": "이메일, 서브도메인, 호스트 등을 검색엔진과 공개 소스에서 수집하는 OSINT 도구. 정찰 단계의 핵심 도구입니다" },
+        { "name": "OSINT (Open Source Intelligence)", "desc": "공개적으로 이용 가능한 정보를 수집·분석하는 정보 수집 방법. 검색엔진, SNS, 공개 데이터베이스 등이 소스입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 hunter_api.py --domain {companyName}.com --type all --limit 100 --output hunter_results.json",
+      "out": "[*] Hunter.io API Query: {companyName}.com\n[*] Domain info:\n    Organization: {companyName} Inc.\n    Pattern: {first}.{last}@{companyName}.com\n    Webmail: No\n    MX Records: mx1.{companyName}.com, mx2.{companyName}.com\n\n[*] Email addresses found: 83\n    Personal: 71\n    Generic: 12\n\n[*] Department breakdown:\n    Engineering: 28\n    Sales: 15\n    HR: 8\n    Finance: 6\n    Executive: 5\n    Marketing: 9\n\n[*] Confidence scores:\n    High (>90%): 52\n    Medium (50-90%): 24\n    Low (<50%): 7\n\n[+] Results exported to hunter_results.json",
+      "def": "[Threat Intel] Hunter.io API query detected for organization domain",
+      "defAction": "Source: Hunter.io API\nTarget: {companyName}.com\nAction: Domain enumeration alert logged, email security team notified",
+      "desc": "Hunter.io API로 이메일 패턴을 분석하고 부서별 이메일 목록을 확보합니다.",
+      "descEn": "Hunter.io API analyzes email patterns and retrieves department-specific email lists.",
+      "stepTitle": "Hunter.io API 이메일 패턴 분석",
+      "stepTitleEn": "Hunter.io API Email Pattern Analysis",
+      "feynman": "Hunter.io는 회사의 이메일 패턴을 알아내는 서비스입니다. 예를 들어 '{first}.{last}@회사.com' 패턴을 알면, 직원 이름만 알아도 이메일 주소를 추측할 수 있습니다. 83개의 이메일을 부서별로 분류해서, 공격자가 특정 부서(예: 재무팀)를 정밀 공격할 수 있게 합니다.",
+      "feynmanEn": "Hunter.io discovers a company's email patterns. Knowing the pattern '{first}.{last}@company.com' lets attackers guess email addresses from employee names. With 83 emails sorted by department, attackers can precisely target specific departments like Finance.",
+      "expert": "Hunter.io는 이메일 패턴 인식과 신뢰도 점수를 제공하는 상용 OSINT 플랫폼입니다. MX 레코드 검증, 패턴 마이닝({first}.{last}), 부서별 분류를 수행합니다. 신뢰도 90% 이상의 52개 이메일은 실제 존재할 확률이 높아 즉각적인 피싱 공격에 활용 가능합니다.",
+      "expertEn": "Hunter.io is a commercial OSINT platform providing email pattern recognition and confidence scoring. It performs MX record verification, pattern mining ({first}.{last}), and department classification. 52 emails with >90% confidence are highly likely to exist and can be immediately used for phishing.",
+      "defTooltip": "🔍 위협정보: 조직 도메인에 대한 Hunter.io API 쿼리 감지",
+      "defTooltipEn": "🔍 Threat Intel: Hunter.io API query detected for organization domain",
+      "hackerLog": {
+        "title": "hunter_results.log",
+        "lines": [
+          { "log": "Pattern: {first}.{last}@{companyName}.com", "desc": "💡 이메일 패턴 발견! 직원 이름만 알면 이메일 주소를 생성할 수 있습니다" },
+          { "log": "Finance: 6", "desc": "💡 재무팀 6명의 이메일 - 금융 관련 피싱(BEC 공격)의 핵심 타겟입니다" },
+          { "log": "High (>90%): 52", "desc": "💡 52개 이메일이 90% 이상 확률로 실제 존재 - 즉시 공격에 활용 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Hunter.io", "desc": "기업 이메일 주소를 검색하고 패턴을 분석하는 상용 OSINT 서비스. 이메일의 존재 확률을 신뢰도 점수로 제공합니다" },
+        { "name": "Email Pattern (이메일 패턴)", "desc": "조직의 이메일 주소 생성 규칙. 예: first.last@회사.com. 패턴을 알면 직원 이름으로 이메일을 추측할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "linkedin-scraper --company \"{companyName}\" --role \"all\" --output linkedin_emails.csv --format name,title,email_guess",
+      "out": "[*] Scraping LinkedIn for {companyName} employees...\n[*] Profiles found: 156\n\nName               | Title                    | Email Guess\n-------------------|--------------------------|---------------------------\nJohn Kim           | CTO                      | john.kim@{companyName}.com\nSarah Park         | VP of Engineering        | sarah.park@{companyName}.com\nMike Lee           | Sr. Security Engineer    | mike.lee@{companyName}.com\nJane Choi          | Finance Director         | jane.choi@{companyName}.com\nDavid Jung         | System Administrator     | david.jung@{companyName}.com\nLisa Han           | HR Manager               | lisa.han@{companyName}.com\n... (150 more profiles)\n\n[*] Email pattern applied: {first}.{last}@{companyName}.com\n[*] High-value targets identified: 23 (C-suite, IT, Finance)\n[+] Exported to linkedin_emails.csv",
+      "def": "[Threat Intel] Automated LinkedIn scraping detected for organization employees",
+      "defAction": "Source: LinkedIn scraping activity\nTarget: {companyName} employee profiles\nAction: LinkedIn abuse report filed, employee awareness alert sent",
+      "desc": "LinkedIn에서 직원 프로필을 스크래핑하고 이메일 패턴을 적용해 이메일 주소를 추측합니다.",
+      "descEn": "Scrape LinkedIn employee profiles and apply email patterns to guess email addresses.",
+      "stepTitle": "LinkedIn 직원 프로필 스크래핑",
+      "stepTitleEn": "LinkedIn Employee Profile Scraping",
+      "feynman": "LinkedIn은 직원들의 이름과 직책이 공개된 '디지털 명함'입니다. 앞서 알아낸 이메일 패턴(first.last@회사.com)을 적용하면, 156명의 LinkedIn 프로필에서 이메일을 추측할 수 있습니다. 특히 CTO, 재무담당자 같은 고위직은 스피어피싱의 주요 타겟입니다.",
+      "feynmanEn": "LinkedIn is like a digital business card where employee names and titles are public. Applying the email pattern (first.last@company.com) to 156 profiles generates guessed emails. C-suite and finance roles are prime targets for spear-phishing.",
+      "expert": "LinkedIn OSINT는 직원 열거와 조직도 매핑에 활용됩니다. 이메일 패턴을 프로필 데이터에 적용하여 대량의 이메일 주소를 생성합니다. 23명의 고가치 타겟(C-suite, IT, Finance)은 BEC(Business Email Compromise)와 Whaling 공격의 주요 대상입니다.",
+      "expertEn": "LinkedIn OSINT is used for employee enumeration and org chart mapping. Email patterns applied to profile data generate bulk email addresses. 23 high-value targets (C-suite, IT, Finance) are prime candidates for BEC (Business Email Compromise) and Whaling attacks.",
+      "defTooltip": "📋 위협정보: 조직 직원 대상 자동 LinkedIn 스크래핑 감지",
+      "defTooltipEn": "📋 Threat Intel: Automated LinkedIn scraping detected for organization employees",
+      "hackerLog": {
+        "title": "linkedin_scrape.log",
+        "lines": [
+          { "log": "Profiles found: 156", "desc": "💡 156명의 직원 정보가 LinkedIn에서 수집됨 - 조직도 파악에 활용됩니다" },
+          { "log": "John Kim | CTO | john.kim@{companyName}.com", "desc": "💡 CTO 이메일 추측 성공 - Whaling(고위직 대상 피싱)에 핵심 타겟" },
+          { "log": "High-value targets identified: 23", "desc": "💡 23명의 고가치 타겟 - IT/재무/경영진은 권한이 높아 피해가 클 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "LinkedIn Scraping", "desc": "LinkedIn에서 직원 이름, 직책, 소속 등을 자동으로 수집하는 행위. 공격자가 조직 구조를 파악하는 데 활용합니다" },
+        { "name": "Whaling (웨일링)", "desc": "고위 경영진(CEO, CFO, CTO 등)을 대상으로 하는 고급 피싱 공격. 일반 피싱보다 정교하고 피해 규모가 큽니다" }
+      ]
+    },
+    {
+      "cmd": "emailverifier --input all_emails_combined.csv --smtp-check --catch-all-check --output verified_emails.json",
+      "out": "[*] Loading 186 unique emails from all_emails_combined.csv\n[*] Performing MX record lookup...\n[*] SMTP verification in progress...\n\nVerification Results:\n  ✅ Valid (SMTP confirmed): 134\n  ⚠️ Catch-all domain: 28\n  ❌ Invalid/Bounced: 18\n  🔒 Greylisted: 6\n\nSMTP Server Analysis:\n  MX1: mx1.{companyName}.com (Microsoft 365)\n  SPF: v=spf1 include:spf.protection.outlook.com -all\n  DMARC: v=DMARC1; p=quarantine; rua=mailto:dmarc@{companyName}.com\n\nEmail Security Posture:\n  SPF: Configured (strict -all)\n  DKIM: Enabled\n  DMARC: Quarantine policy (not reject)\n\n[+] 134 verified emails saved to verified_emails.json",
+      "def": "[Email Gateway] SMTP enumeration attempts detected - multiple RCPT TO probes",
+      "defAction": "Source: External IP 10.0.1.45\nTarget: mx1.{companyName}.com\nAction: SMTP rate limiting applied, IP added to greylist",
+      "desc": "수집된 이메일 주소를 SMTP 프로토콜로 검증하고 이메일 보안 설정(SPF/DKIM/DMARC)을 분석합니다.",
+      "descEn": "Verify collected email addresses via SMTP protocol and analyze email security settings (SPF/DKIM/DMARC).",
+      "stepTitle": "SMTP 이메일 검증 및 보안 분석",
+      "stepTitleEn": "SMTP Email Verification & Security Analysis",
+      "feynman": "수집한 이메일이 실제로 존재하는지 확인하는 단계입니다. SMTP 서버에 '이 주소로 메일 보낼 수 있나요?'라고 물어봅니다. 186개 중 134개가 실제 존재하는 것으로 확인됐습니다. 또한 이메일 보안 설정(SPF/DKIM/DMARC)을 분석해서 스푸핑 공격이 가능한지 판단합니다.",
+      "feynmanEn": "This step verifies if collected emails actually exist by asking the SMTP server 'Can I send mail to this address?' 134 out of 186 were confirmed valid. It also analyzes email security (SPF/DKIM/DMARC) to determine if spoofing attacks are feasible.",
+      "expert": "SMTP VRFY/RCPT TO 기반 이메일 검증으로 134개 유효 주소를 확인했습니다. Catch-all 도메인(28개)은 모든 주소를 수신하므로 검증이 불확실합니다. DMARC가 quarantine(격리)으로 설정되어 reject보다 약한 보호를 제공하며, 이는 스푸핑 이메일이 스팸함에 도달할 수 있음을 의미합니다.",
+      "expertEn": "SMTP VRFY/RCPT TO verification confirmed 134 valid addresses. Catch-all domains (28) accept all addresses, making verification uncertain. DMARC set to quarantine provides weaker protection than reject, meaning spoofed emails may reach spam folders rather than being blocked.",
+      "defTooltip": "📧 이메일 게이트웨이: SMTP 열거 시도 감지 - 다수의 RCPT TO 프로브",
+      "defTooltipEn": "📧 Email Gateway: SMTP enumeration attempts detected - multiple RCPT TO probes",
+      "hackerLog": {
+        "title": "smtp_verify.log",
+        "lines": [
+          { "log": "✅ Valid (SMTP confirmed): 134", "desc": "💡 134개의 실제 존재하는 이메일 확인 - 피싱 캠페인에 즉시 사용 가능" },
+          { "log": "DMARC: v=DMARC1; p=quarantine", "desc": "💡 DMARC가 reject가 아닌 quarantine - 스푸핑 이메일이 스팸함에 도달할 수 있습니다" },
+          { "log": "MX1: mx1.{companyName}.com (Microsoft 365)", "desc": "💡 Microsoft 365 사용 확인 - O365 피싱 템플릿을 활용한 공격이 효과적입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "SMTP Verification", "desc": "SMTP 프로토콜을 이용해 이메일 주소의 존재 여부를 확인하는 기법. RCPT TO 명령으로 서버에 직접 확인합니다" },
+        { "name": "DMARC (Domain-based Message Authentication)", "desc": "이메일 발신자 인증 프로토콜. none/quarantine/reject 정책 중 reject가 가장 강력한 보호를 제공합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 target_profiler.py --emails verified_emails.json --linkedin linkedin_emails.csv --output phishing_targets.xlsx",
+      "out": "[*] Building target profiles...\n[*] Cross-referencing email data with LinkedIn profiles...\n[*] Calculating targeting priority scores...\n\n=== PHISHING TARGET REPORT ===\n\nTier 1 - Executive Targets (5):\n  john.kim@{companyName}.com    | CTO         | Priority: 9.5/10\n  jane.choi@{companyName}.com   | CFO         | Priority: 9.2/10\n  david.jung@{companyName}.com  | SysAdmin    | Priority: 8.8/10\n\nTier 2 - High Value (18):\n  IT Department: 8 targets\n  Finance Team: 6 targets\n  HR Department: 4 targets\n\nTier 3 - General Staff (111):\n  Engineering: 45 | Sales: 32 | Marketing: 20 | Others: 14\n\nRecommended Attack Vectors:\n  → Executive: Whaling with board meeting themes\n  → IT Staff: Fake security alert phishing\n  → Finance: Invoice/payment fraud (BEC)\n  → HR: Resume-themed malware delivery\n\n[+] Report saved to phishing_targets.xlsx\n[+] Total targets: 134 verified emails across 6 departments",
+      "def": "[SIEM Correlation] Email reconnaissance campaign complete - 134 targets profiled",
+      "defAction": "Source: Correlation of OSINT collection activities\nTarget: {companyName} employees (134 profiles)\nAction: Incident #2024-1210 created, phishing defense activated, employee training scheduled",
+      "desc": "수집된 이메일과 LinkedIn 데이터를 결합하여 피싱 타겟 우선순위 보고서를 작성합니다.",
+      "descEn": "Combine collected emails and LinkedIn data to create a phishing target priority report.",
+      "stepTitle": "피싱 타겟 프로파일링 보고서",
+      "stepTitleEn": "Phishing Target Profiling Report",
+      "feynman": "모든 정보를 하나로 합치는 마지막 단계입니다. 이메일 주소, 직책, 부서를 결합해서 '누구를 먼저 공격할지' 순위를 매깁니다. CTO는 시스템 접근 권한이 높고, CFO는 자금 이체가 가능하므로 최우선 대상입니다. 각 부서에 맞는 맞춤형 피싱 전략도 수립됩니다.",
+      "feynmanEn": "The final step combines all information. Emails, titles, and departments are merged to rank 'who to attack first.' The CTO has high system access and the CFO can authorize fund transfers, making them top targets. Custom phishing strategies are created for each department.",
+      "expert": "다중 소스 정보를 융합하여 타겟 프로파일링을 수행합니다. 우선순위 점수는 직급(C-suite 가중치 높음), 부서(IT/Finance 가중치), 이메일 검증 신뢰도를 기반으로 산출됩니다. BEC(Business Email Compromise) 공격은 FBI 보고 기준 연간 26억 달러의 피해를 발생시키는 고위험 공격 벡터입니다.",
+      "expertEn": "Multi-source intelligence fusion performs target profiling. Priority scores are calculated based on seniority (C-suite weighted higher), department (IT/Finance weighted), and email verification confidence. BEC attacks cause $2.6 billion in annual losses per FBI reports.",
+      "defTooltip": "🗺️ SIEM: 이메일 정찰 캠페인 완료 - 134명 타겟 프로파일링 감지",
+      "defTooltipEn": "🗺️ SIEM: Email reconnaissance campaign complete - 134 targets profiled",
+      "hackerLog": {
+        "title": "target_report.log",
+        "lines": [
+          { "log": "john.kim@{companyName}.com | CTO | Priority: 9.5/10", "desc": "💡 CTO는 시스템 관리자 권한을 가져 최우선 공격 대상입니다" },
+          { "log": "Finance Team: 6 targets", "desc": "💡 재무팀 6명 - BEC 공격으로 허위 송금을 유도할 수 있는 핵심 그룹" },
+          { "log": "Total targets: 134 verified emails across 6 departments", "desc": "💡 6개 부서 134명의 검증된 타겟 - 대규모 피싱 캠페인 준비 완료" }
+        ]
+      },
+      "terms": [
+        { "name": "BEC (Business Email Compromise)", "desc": "경영진을 사칭하여 송금이나 기밀 정보를 요청하는 이메일 사기. FBI 기준 연간 26억 달러의 피해를 발생시킵니다" },
+        { "name": "Spear Phishing (스피어 피싱)", "desc": "특정 개인이나 조직을 표적으로 한 맞춤형 피싱 공격. 일반 피싱보다 성공률이 높고 탐지가 어렵습니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "theHarvester (PID: 4201)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "python3 hunter_api.py (PID: 4278)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "linkedin-scraper (PID: 4356)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "emailverifier (PID: 4412)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 target_profiler.py (PID: 4489)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

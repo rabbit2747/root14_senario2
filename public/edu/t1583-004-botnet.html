@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1583.004">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1583-004-botnet&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1583.004 봇넷 인프라 구축">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';"/>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff"/><meta name="referrer" content="strict-origin-when-cross-origin"/>
+    <title>GOTROOT EDU | T1583.004 봇넷 — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
+    <style>body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s ease,color .3s ease;}.glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05);}.dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4);}.hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}.terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div><div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1583.004: 봇넷</p></div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch1">1. 봇넷이란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch2">2. 봇넷 아키텍처</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch3">3. 탐지와 대응</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Resource Development</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">봇넷 인프라</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">수만 대의 좀비 PC가 하나의 명령으로 움직인다</p>
+            </header>
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#1.</span> 봇넷이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"좀비 군단"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed"><strong>봇넷(Botnet)</strong>은 악성코드에 감염된 수천~수백만 대의 컴퓨터(봇/좀비)가 하나의 C2(Command & Control) 서버의 명령을 따르는 네트워크입니다. DDoS 공격, 스팸 발송, 크리덴셜 스터핑, 크립토마이닝에 활용됩니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">봇넷 임대 서비스(BaaS)</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">다크웹에서는 봇넷을 시간 단위로 임대하는 <strong>Botnet-as-a-Service</strong>가 성행합니다. 기술이 없는 공격자도 돈만 있으면 DDoS 공격을 수행할 수 있습니다. 평균 1시간 DDoS: $50~$300, 1주일: $500~$2,000.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 text-[#1e293b] dark:text-white">대표적 봇넷 사례</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"><div class="font-bold text-red-700 dark:text-red-300 text-sm">Mirai</div><div class="text-xs text-cgray dark:text-slate-400 mt-1">IoT 장치 대상, 2016년 Dyn DNS 1.2Tbps DDoS</div></div>
+                            <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4"><div class="font-bold text-orange-700 dark:text-orange-300 text-sm">Emotet</div><div class="text-xs text-cgray dark:text-slate-400 mt-1">이메일 기반 확산, 랜섬웨어 배포 플랫폼</div></div>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4"><div class="font-bold text-purple-700 dark:text-purple-300 text-sm">TrickBot</div><div class="text-xs text-cgray dark:text-slate-400 mt-1">뱅킹 트로이목마 → 범용 봇넷으로 진화</div></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#2.</span> 봇넷 아키텍처</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-5 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h3 class="font-bold mb-2 hl-yel text-center">중앙 집중형 (C2)</h3>
+                            <p class="text-xs text-cgray dark:text-slate-300 leading-relaxed">하나의 C2 서버가 모든 봇에 명령을 내립니다. 관리가 쉽지만, C2 서버가 차단되면 전체 봇넷이 무력화됩니다.</p>
+                            <div class="terminal-bg p-2 rounded text-xs mt-3">
+                                <div class="text-slate-500"># C2 구조</div>
+                                <div>Bot → C2 Server → Operator</div>
+                                <div class="text-red-400">취약점: SPOF(단일 장애점)</div>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-t-4 border-t-[#9DD9D2]">
+                            <h3 class="font-bold mb-2 hl-teal text-center">P2P 분산형</h3>
+                            <p class="text-xs text-cgray dark:text-slate-300 leading-relaxed">봇 간 직접 통신으로 명령을 전파합니다. 중앙 서버가 없어 차단이 매우 어렵습니다. GameOver Zeus가 대표적입니다.</p>
+                            <div class="terminal-bg p-2 rounded text-xs mt-3">
+                                <div class="text-slate-500"># P2P 구조</div>
+                                <div>Bot ↔ Bot ↔ Bot ↔ Bot</div>
+                                <div class="text-[#9DD9D2]">장점: 복원력, 은닉성</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">DGA (Domain Generation Algorithm)</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed text-sm">봇넷은 매일 수천 개의 랜덤 도메인을 생성하고, 그 중 하나만 등록하여 C2로 사용합니다. 방어측은 어떤 도메인이 활성화될지 예측할 수 없어 차단이 어렵습니다.</p>
+                    </div>
+                </div>
+            </section>
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#3.</span> 탐지와 대응</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-3 hl-teal">네트워크 기반 탐지</h3>
+                        <ul class="space-y-2 text-sm text-cgray dark:text-slate-300">
+                            <li class="flex items-start gap-2"><span class="text-teal-500 mt-0.5">●</span> DGA 도메인 탐지: 엔트로피 분석, 머신러닝 기반 분류</li>
+                            <li class="flex items-start gap-2"><span class="text-teal-500 mt-0.5">●</span> DNS 싱크홀링: 악성 도메인을 제어된 서버로 리다이렉트</li>
+                            <li class="flex items-start gap-2"><span class="text-teal-500 mt-0.5">●</span> 비정상 트래픽 패턴: 주기적 비콘, 비정상 DNS 쿼리량 모니터링</li>
+                        </ul>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <h3 class="font-bold text-lg mb-3 hl-yel">호스트 기반 방어</h3>
+                        <ul class="space-y-2 text-sm text-cgray dark:text-slate-300">
+                            <li class="flex items-start gap-2"><span class="text-orange-500 mt-0.5">●</span> IoT 기기 기본 비밀번호 변경 (Mirai 방지)</li>
+                            <li class="flex items-start gap-2"><span class="text-orange-500 mt-0.5">●</span> 네트워크 세그멘테이션으로 감염 확산 차단</li>
+                            <li class="flex items-start gap-2"><span class="text-orange-500 mt-0.5">●</span> EDR/XDR로 봇 행위(비콘, 횡이동) 탐지</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            <section id="quiz" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="quiz-container" class="space-y-6">
+                        <div class="quiz-q" data-correct="3">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q. DGA(Domain Generation Algorithm)의 목적은?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> 도메인을 대량으로 등록하여 판매하기 위해</label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> DNS 서버의 성능을 테스트하기 위해</label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> C2 서버의 도메인을 예측 불가능하게 만들어 차단을 회피하기 위해</label>
+                            </div>
+                        </div>
+                        <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                </div>
+            </section>
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">다음 기법을 학습해 보세요!</h2>
+                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] dark:from-[#9DD9D2] dark:to-[#F4D06F] text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl"><span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span></button>
+            </div>
+        </div>
+    </main>
+    </div>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='☀️';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='🌙';}}
+        var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+        function checkQuiz(){var q=document.querySelector('input[name="q1"]:checked');if(!q){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]','bg-red-100','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');if(q.value==='3'){r.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');r.innerHTML='✅ 정답입니다!<br><span class="text-xs mt-1 block font-normal">DGA는 매일 수천 개의 랜덤 도메인을 생성하여 방어측이 C2 도메인을 예측하고 차단하기 어렵게 만드는 회피 기법입니다.</span>';}else{r.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');r.innerHTML='❌ 오답입니다. DGA의 핵심은 "예측 불가능한 도메인 생성"입니다.';}}
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

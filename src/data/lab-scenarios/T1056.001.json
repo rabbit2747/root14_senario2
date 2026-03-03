@@ -1,0 +1,193 @@
+{
+  "id": "T1056.001",
+  "title": "Keylogging 시뮬레이션",
+  "titleEn": "Keylogging Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔧 키로거 설치", "labelEn": "🔧 Keylogger Installation", "steps": [0] },
+    { "label": "⌨️ 키 입력 캡처", "labelEn": "⌨️ Keystroke Capture", "steps": [1, 2] },
+    { "label": "📤 데이터 유출", "labelEn": "📤 Data Exfiltration", "steps": [3] },
+    { "label": "🔍 탐지 분석", "labelEn": "🔍 Detection Analysis", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "victim", "label": "Victim\nWorkstation", "x": 50, "y": 80 },
+    { "id": "keylogger", "label": "Keylogger\n(Hooked)", "x": 200, "y": 30 },
+    { "id": "logfile", "label": "Local\nLog File", "x": 200, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n(Exfil)", "x": 380, "y": 80 },
+    { "id": "attacker", "label": "Attacker\nDashboard", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "victim", "to": "keylogger", "minStep": 0 },
+    { "from": "keylogger", "to": "logfile", "minStep": 1 },
+    { "from": "logfile", "to": "c2", "minStep": 3 },
+    { "from": "c2", "to": "attacker", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Terminal", "icon": "🖥️" },
+    { "name": "svchost32.exe", "icon": "⚙️" },
+    { "name": "keylog.dat", "icon": "📄" },
+    { "name": "Task Manager", "icon": "📊" },
+    { "name": "Sysmon", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "Add-Type -TypeDefinition @\"\nusing System;\nusing System.Runtime.InteropServices;\npublic class KeyLogger {\n  [DllImport(\"user32.dll\")] public static extern IntPtr SetWindowsHookEx(int idHook, IntPtr lpfn, IntPtr hMod, uint dwThreadId);\n  [DllImport(\"user32.dll\")] public static extern bool UnhookWindowsHookEx(IntPtr hhk);\n}\n\"@\n$hook = [KeyLogger]::SetWindowsHookEx(13, $callback, [IntPtr]::Zero, 0)",
+      "out": "[*] Keyboard hook installed successfully\n[*] Hook ID: 0x00A3F210\n[*] Hook Type: WH_KEYBOARD_LL (13)\n[*] Scope: Global (all processes)\n[*] Logging to: %TEMP%\\cache\\keylog.dat\n[*] Keystroke capture active...",
+      "def": "[EDR] SetWindowsHookEx(WH_KEYBOARD_LL) called by unsigned process",
+      "defAction": "Tool: SetWindowsHookEx API Hook\nHook Type: WH_KEYBOARD_LL (13)\nProcess: powershell.exe (unsigned script)\nScope: Global keyboard hook\nRisk Level: Critical\nAction: Block hook installation, alert SOC",
+      "desc": "공격자가 Windows API SetWindowsHookEx를 사용하여 WH_KEYBOARD_LL(Low-Level Keyboard Hook)을 설치합니다. 이 후킹은 시스템 전체의 모든 키 입력을 가로챕니다.",
+      "descEn": "The attacker installs a WH_KEYBOARD_LL (Low-Level Keyboard Hook) using SetWindowsHookEx Windows API. This hook intercepts all keystrokes system-wide.",
+      "stepTitle": "SetWindowsHookEx로 글로벌 키보드 후킹 설치",
+      "stepTitleEn": "Install Global Keyboard Hook via SetWindowsHookEx",
+      "feynman": "키보드와 컴퓨터 사이에 투명한 복사기를 설치하는 것입니다. 사용자가 무엇을 입력하든 원본은 정상적으로 전달되지만, 복사본이 은밀하게 만들어집니다. WH_KEYBOARD_LL은 '모든 프로그램의 키 입력을 복사한다'는 의미입니다.",
+      "feynmanEn": "Installing an invisible copier between the keyboard and computer. Whatever the user types goes through normally, but a copy is secretly made. WH_KEYBOARD_LL means 'copy keystrokes from all programs.'",
+      "expert": "SetWindowsHookEx(WH_KEYBOARD_LL=13)는 저수준 키보드 후크를 설치합니다. LowLevelKeyboardProc 콜백이 모든 WM_KEYDOWN/WM_KEYUP 메시지를 가로채며, nCode=HC_ACTION일 때 KBDLLHOOKSTRUCT에서 vkCode를 추출합니다. 글로벌 후크이므로 모든 프로세스의 키 입력이 캡처됩니다.",
+      "expertEn": "SetWindowsHookEx(WH_KEYBOARD_LL=13) installs a low-level keyboard hook. The LowLevelKeyboardProc callback intercepts all WM_KEYDOWN/WM_KEYUP messages, extracting vkCode from KBDLLHOOKSTRUCT when nCode=HC_ACTION.",
+      "defTooltip": "🔐 글로벌 키보드 후킹 설치! 모든 키 입력이 감시됩니다!",
+      "defTooltipEn": "🔐 Global keyboard hook installed! All keystrokes are being monitored!",
+      "hackerLog": {
+        "title": "hook_install.log",
+        "lines": [
+          "[09:15:33] SetWindowsHookEx(13) 호출",
+          "[09:15:33] Hook ID: 0x00A3F210 할당",
+          "[09:15:34] Global scope 설정 완료",
+          "[09:15:34] 키 입력 캡처 시작"
+        ]
+      },
+      "terms": [
+        { "term": "SetWindowsHookEx", "def": "Windows 메시지를 가로채는 후크를 설치하는 API" },
+        { "term": "WH_KEYBOARD_LL", "def": "저수준 키보드 입력을 가로채는 후크 타입 (ID: 13)" }
+      ]
+    },
+    {
+      "cmd": "type %TEMP%\\cache\\keylog.dat | Select-String -Pattern 'password|login|bank|credit'",
+      "out": "[09:20:15] [Chrome - corp.local/login]\n  Keys: admin@corp.local[TAB]S3cur3P@ss!2026[ENTER]\n\n[09:25:43] [Chrome - bank.example.com]\n  Keys: john.doe[TAB]MyB@nk#2026[ENTER]\n\n[09:31:02] [Outlook - New Email]\n  Keys: Subject: Quarterly Report[TAB]...\n  Body: The Q1 budget is $2.4M...\n\n[09:35:18] [Chrome - vpn.corp.local]\n  Keys: jdoe[TAB]VPN_P@ss!123[ENTER]\n\n[Captured] 2,847 keystrokes | 4 credential pairs identified",
+      "def": "[EDR] Suspicious file write to %TEMP%\\cache\\keylog.dat - credential data pattern",
+      "defAction": "Tool: Keystroke log analysis\nCaptured: 2,847 keystrokes in 20 minutes\nCredentials Found: 4 pairs (corp login, bank, email, VPN)\nLog Location: %TEMP%\\cache\\keylog.dat\nRisk Level: Critical\nAction: Quarantine process, reset all captured credentials",
+      "desc": "키로거가 20분간 2,847개의 키 입력을 캡처했습니다. 로그에서 로그인 자격 증명, 은행 비밀번호, VPN 자격 증명 등 민감한 정보가 식별됩니다.",
+      "descEn": "The keylogger captured 2,847 keystrokes in 20 minutes. Login credentials, bank passwords, and VPN credentials are identified in the logs.",
+      "stepTitle": "캡처된 키 입력에서 자격 증명 식별",
+      "stepTitleEn": "Identify Credentials from Captured Keystrokes",
+      "feynman": "투명 복사기가 20분 동안 작동하여 사용자가 입력한 모든 것을 기록했습니다. 이 기록 중에서 '비밀번호'처럼 보이는 부분만 골라내면, 회사 로그인, 은행 계좌, VPN 접속 정보 등을 한 번에 얻을 수 있습니다.",
+      "feynmanEn": "The invisible copier ran for 20 minutes, recording everything typed. By filtering for 'password-like' entries, the attacker obtains corporate login, bank account, and VPN credentials all at once.",
+      "expert": "키로거는 WM_KEYDOWN 이벤트에서 가상 키코드(vkCode)를 ASCII로 변환하고, GetForegroundWindow()+GetWindowText()로 현재 활성 창 제목을 함께 기록합니다. 이를 통해 어떤 애플리케이션에서 어떤 입력이 발생했는지 컨텍스트를 파악할 수 있습니다.",
+      "expertEn": "The keylogger converts virtual key codes (vkCode) from WM_KEYDOWN events to ASCII, recording active window titles via GetForegroundWindow()+GetWindowText() for context about which application each keystroke belongs to.",
+      "defTooltip": "🔐 2,847 키스트로크 캡처! 4쌍의 자격 증명 노출!",
+      "defTooltipEn": "🔐 2,847 keystrokes captured! 4 credential pairs exposed!",
+      "hackerLog": {
+        "title": "keystroke_analysis.log",
+        "lines": [
+          "[09:35:00] 키 입력 로그 분석 시작",
+          "[09:35:02] 총 2,847 keystrokes 캡처",
+          "[09:35:05] 자격 증명 4쌍 식별",
+          "[09:35:08] 고가치 타겟: corp login, bank, VPN"
+        ]
+      },
+      "terms": [
+        { "term": "vkCode", "def": "Virtual Key Code, 키보드의 각 키에 할당된 고유 코드 값" },
+        { "term": "GetForegroundWindow", "def": "현재 활성화된 최상위 윈도우 핸들을 반환하는 API" }
+      ]
+    },
+    {
+      "cmd": "Get-Process | Where-Object { $_.Modules.ModuleName -contains 'user32.dll' -and $_.Path -notlike 'C:\\Windows\\*' } | Format-Table Id,ProcessName,Path -AutoSize",
+      "out": "  Id ProcessName      Path\n  -- -----------      ----\n3847 svchost32        C:\\Users\\victim\\AppData\\Local\\Temp\\svchost32.exe\n4102 updater          C:\\ProgramData\\updater\\updater.exe\n\n[추가 분석]\nPID 3847 (svchost32.exe):\n  - 서명: 없음 (Unsigned)\n  - 생성: 2026-01-20 09:15:30\n  - 부모: explorer.exe (PID 2104)\n  - 크기: 45 KB (의심스럽게 작음)\n  - user32.dll 로드 + SetWindowsHookEx 호출 이력",
+      "def": "[Sysmon] Unsigned process loading user32.dll from suspicious path",
+      "defAction": "Tool: Process analysis\nSuspicious PID: 3847 (svchost32.exe)\nPath: %TEMP%\\svchost32.exe (mimicking system process)\nSignature: Unsigned\nSize: 45 KB (abnormally small)\nRisk Level: Critical\nAction: Kill process, quarantine binary, scan for persistence",
+      "desc": "방어자 관점에서 user32.dll을 로드한 비정상적인 프로세스를 검색합니다. svchost32.exe는 시스템 프로세스를 위장한 키로거로, Temp 폴더에서 실행되고 서명이 없습니다.",
+      "descEn": "From a defender's perspective, searching for abnormal processes loading user32.dll. svchost32.exe is a keylogger masquerading as a system process, running from Temp folder without a signature.",
+      "stepTitle": "의심스러운 프로세스 분석 및 키로거 식별",
+      "stepTitleEn": "Analyze Suspicious Process and Identify Keylogger",
+      "feynman": "건물의 모든 방에 설치된 감시 카메라를 점검하는 것입니다. 정상적인 카메라는 관리실(Windows 폴더)에서 관리하지만, 누군가 몰래 임시 보관소(Temp)에 가짜 카메라를 설치했습니다. 이름은 비슷하지만(svchost32) 인증서가 없어 가짜임을 알 수 있습니다.",
+      "feynmanEn": "Inspecting all surveillance cameras in the building. Legitimate cameras are managed from the control room (Windows folder), but someone secretly installed a fake one in temporary storage (Temp). Similar name (svchost32) but no certificate reveals it's fake.",
+      "expert": "정상적인 svchost.exe는 C:\\Windows\\System32에서만 실행되며 Microsoft 서명이 있습니다. svchost32.exe는 이름이 유사하지만 Temp 경로, 미서명, 45KB 크기가 비정상입니다. user32.dll 로드는 GUI 인터랙션을 나타내며, SetWindowsHookEx 호출 이력이 키로거 활동을 확인합니다.",
+      "expertEn": "Legitimate svchost.exe only runs from C:\\Windows\\System32 with Microsoft signature. svchost32.exe has a similar name but its Temp path, unsigned status, and 45KB size are abnormal. user32.dll loading indicates GUI interaction, and SetWindowsHookEx call history confirms keylogger activity.",
+      "defTooltip": "🔐 위장 프로세스 svchost32.exe 탐지! Temp 폴더 실행!",
+      "defTooltipEn": "🔐 Masquerading process svchost32.exe detected! Running from Temp!",
+      "hackerLog": {
+        "title": "process_hunt.log",
+        "lines": [
+          "[10:00:00] user32.dll 로드 프로세스 스캔",
+          "[10:00:03] PID 3847: svchost32.exe (미서명)",
+          "[10:00:05] 경로: %TEMP% - 의심스러운 위치",
+          "[10:00:08] SetWindowsHookEx 호출 이력 확인"
+        ]
+      },
+      "terms": [
+        { "term": "Process Masquerading", "def": "악성 프로세스가 정상 시스템 프로세스 이름을 사칭하는 기법" },
+        { "term": "Unsigned Binary", "def": "코드 서명이 없는 실행 파일, 출처 검증 불가" }
+      ]
+    },
+    {
+      "cmd": "netstat -ano | findstr 3847\nGet-NetTCPConnection -OwningProcess 3847 | Format-Table LocalPort,RemoteAddress,RemotePort,State",
+      "out": "  TCP    10.0.5.20:49832    185.234.xx.xx:443    ESTABLISHED    3847\n\nLocalPort RemoteAddress     RemotePort State\n--------- -------------     ---------- -----\n    49832 185.234.xx.xx            443 Established\n\n[DNS 분석]\n185.234.xx.xx → update-service.cloud (의심 도메인)\n연결 패턴: 15분마다 HTTPS POST (평균 12KB)\n마지막 전송: 2026-01-20 09:35:00\n총 전송량: 847 KB (키 입력 로그)",
+      "def": "[SIEM] Periodic outbound connections from PID 3847 to suspicious C2 server",
+      "defAction": "Tool: Network connection analysis\nSource PID: 3847 (svchost32.exe)\nC2 Server: 185.234.xx.xx:443 (update-service.cloud)\nPattern: HTTPS POST every 15 minutes\nData Sent: 847 KB (keystroke logs)\nRisk Level: Critical\nAction: Block C2 IP, sinkhole domain, terminate process",
+      "desc": "키로거가 15분 간격으로 캡처된 키 입력 데이터를 C2 서버(185.234.xx.xx)로 HTTPS를 통해 전송합니다. 의심스러운 도메인(update-service.cloud)을 사용하여 정상 트래픽처럼 위장합니다.",
+      "descEn": "The keylogger exfiltrates captured keystroke data to a C2 server (185.234.xx.xx) via HTTPS every 15 minutes, using a suspicious domain (update-service.cloud) disguised as normal traffic.",
+      "stepTitle": "키로거의 C2 통신 및 데이터 유출 분석",
+      "stepTitleEn": "Analyze Keylogger C2 Communication and Data Exfiltration",
+      "feynman": "가짜 카메라가 녹화한 영상을 15분마다 외부 서버로 전송합니다. '업데이트 서비스'라는 이름으로 위장하여 정상적인 소프트웨어 업데이트처럼 보이게 합니다. 하지만 네트워크 감시를 통해 이 비정상적인 통신 패턴을 발견할 수 있습니다.",
+      "feynmanEn": "The fake camera sends recordings to an external server every 15 minutes, disguised as 'update-service' to look like normal software updates. Network monitoring can detect this abnormal communication pattern.",
+      "expert": "C2 통신은 HTTPS(443)를 사용하여 DPI(Deep Packet Inspection)를 회피합니다. 15분 간격의 비커닝(beaconing) 패턴은 JA3 해시 분석이나 통계적 유의성 검정으로 탐지 가능합니다. DNS 조회에서 update-service.cloud는 DGA(Domain Generation Algorithm) 특성을 보이며, 최근 등록된 도메인입니다.",
+      "expertEn": "C2 uses HTTPS (443) to evade DPI. The 15-minute beaconing pattern is detectable via JA3 hash analysis or statistical significance testing. DNS lookup shows update-service.cloud has DGA characteristics and is recently registered.",
+      "defTooltip": "🔐 C2 통신 탐지! 15분마다 키 입력 데이터 유출!",
+      "defTooltipEn": "🔐 C2 communication detected! Keystroke data exfiltrated every 15 min!",
+      "hackerLog": {
+        "title": "c2_analysis.log",
+        "lines": [
+          "[10:10:00] PID 3847 네트워크 연결 분석",
+          "[10:10:02] C2: 185.234.xx.xx:443 (ESTABLISHED)",
+          "[10:10:05] 도메인: update-service.cloud (최근 등록)",
+          "[10:10:08] 전송 패턴: 15분 간격, 총 847KB"
+        ]
+      },
+      "terms": [
+        { "term": "Beaconing", "def": "감염된 시스템이 C2 서버에 주기적으로 신호를 보내는 패턴" },
+        { "term": "JA3 Hash", "def": "TLS 핸드셰이크의 클라이언트 핑거프린트를 해시한 값" }
+      ]
+    },
+    {
+      "cmd": "Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational';Id=1,7,3} -MaxEvents 100 | Where-Object { $_.Properties[4].Value -match 'svchost32|keylog' } | Format-List TimeCreated,Id,Message",
+      "out": "TimeCreated : 2026-01-20 09:15:30\nId          : 1 (Process Create)\nMessage     : svchost32.exe created by explorer.exe\n              CommandLine: C:\\Users\\victim\\AppData\\Local\\Temp\\svchost32.exe -hidden\n              Hashes: SHA256=a1b2c3d4...\n\nTimeCreated : 2026-01-20 09:15:33\nId          : 7 (Image Loaded)\nMessage     : user32.dll loaded by svchost32.exe\n              Signed: Yes (Microsoft)\n\nTimeCreated : 2026-01-20 09:15:35\nId          : 3 (Network Connection)\nMessage     : svchost32.exe → 185.234.xx.xx:443\n              Protocol: TCP | Initiated: Yes\n\n[IOC Summary]\n- SHA256: a1b2c3d4... (svchost32.exe)\n- C2: 185.234.xx.xx / update-service.cloud\n- Hook: SetWindowsHookEx(13)\n- Persistence: HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "def": "[SIEM] Full IOC chain reconstructed - keylogger lifecycle from installation to exfiltration",
+      "defAction": "Tool: Sysmon event correlation (Event ID 1, 3, 7)\nIOCs Identified:\n  - Binary: SHA256=a1b2c3d4... (svchost32.exe)\n  - C2: 185.234.xx.xx / update-service.cloud\n  - Hook API: SetWindowsHookEx(13)\n  - Persistence: Run key registry\nAction: Full incident response - isolate host, block IOCs, reset all credentials",
+      "desc": "Sysmon 이벤트 ID 1(프로세스 생성), 7(이미지 로드), 3(네트워크 연결)을 상관 분석하여 키로거의 전체 라이프사이클을 재구성합니다. IOC(침해 지표)를 추출하여 조직 전체 스캔에 활용합니다.",
+      "descEn": "Sysmon Event IDs 1 (Process Create), 7 (Image Loaded), 3 (Network Connection) are correlated to reconstruct the keylogger's full lifecycle. IOCs are extracted for organization-wide scanning.",
+      "stepTitle": "Sysmon 상관 분석으로 IOC 추출 및 대응",
+      "stepTitleEn": "IOC Extraction and Response via Sysmon Correlation",
+      "feynman": "CCTV 녹화, 출입 기록, 전화 기록을 종합하여 범인의 행동을 처음부터 끝까지 재구성합니다. 언제 들어왔는지(프로세스 생성), 무슨 도구를 사용했는지(DLL 로드), 누구에게 보고했는지(네트워크 연결)를 파악하고, 범인의 지문(해시값)과 연락처(C2 서버)를 조직 전체에 공유합니다.",
+      "feynmanEn": "Combining CCTV footage, entry logs, and phone records to reconstruct the criminal's timeline. When they entered (process create), what tools they used (DLL load), who they reported to (network connection), then sharing their fingerprints (hashes) and contacts (C2) organization-wide.",
+      "expert": "Sysmon 이벤트 상관 분석은 킬체인 재구성의 핵심입니다. Event ID 1은 -hidden 플래그 사용, Event ID 7은 user32.dll 로드 시점, Event ID 3는 C2 초기 연결을 기록합니다. SHA256 해시는 VirusTotal 조회에 사용하고, C2 IP/도메인은 방화벽 차단 규칙에 추가합니다. Run 키 지속성은 재부팅 후에도 키로거가 실행됨을 의미합니다.",
+      "expertEn": "Sysmon event correlation is key to kill chain reconstruction. Event ID 1 records the -hidden flag, Event ID 7 the user32.dll load timing, Event ID 3 the initial C2 connection. SHA256 hashes are queried on VirusTotal, C2 indicators added to firewall block rules.",
+      "defTooltip": "🔐 키로거 전체 라이프사이클 재구성 완료! IOC 추출!",
+      "defTooltipEn": "🔐 Full keylogger lifecycle reconstructed! IOCs extracted!",
+      "hackerLog": {
+        "title": "ioc_report.log",
+        "lines": [
+          "[10:30:00] Sysmon 이벤트 상관 분석 시작",
+          "[10:30:05] 킬체인 재구성: 설치→후킹→캡처→유출",
+          "[10:30:10] IOC 추출: SHA256, C2 IP, 도메인",
+          "[10:30:15] 조직 전체 스캔 및 차단 규칙 배포"
+        ]
+      },
+      "terms": [
+        { "term": "IOC", "def": "Indicator of Compromise, 침해 사고의 증거가 되는 기술적 지표" },
+        { "term": "Kill Chain", "def": "공격의 단계별 흐름을 체계화한 모델" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "explorer.exe",
+    "pid": 2104,
+    "children": [
+      {
+        "name": "svchost32.exe",
+        "pid": 3847,
+        "children": [
+          { "name": "keylog-thread", "pid": 3848, "children": [] },
+          { "name": "exfil-thread", "pid": 3849, "children": [] }
+        ]
+      }
+    ]
+  }
+}

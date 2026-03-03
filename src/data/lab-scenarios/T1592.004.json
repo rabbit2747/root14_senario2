@@ -1,0 +1,180 @@
+{
+  "id": "T1592.004",
+  "title": "클라이언트 구성 정보 수집 시뮬레이션",
+  "titleEn": "Client Configuration Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 User-Agent 분석", "labelEn": "🔍 User-Agent Analysis", "steps": [0, 1] },
+    { "label": "⚡ 핑거프린팅", "labelEn": "⚡ Fingerprinting", "steps": [2, 3] },
+    { "label": "✅ 맞춤형 공격 준비", "labelEn": "✅ Tailored Attack Prep", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "phishing", "label": "Phishing Site", "x": 200, "y": 30 },
+    { "id": "victim", "label": "Victim Browser", "x": 200, "y": 90 },
+    { "id": "fingerprint", "label": "Fingerprint DB", "x": 350, "y": 60 },
+    { "id": "exploit", "label": "Custom Exploit", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "phishing", "minStep": 0 },
+    { "from": "victim", "to": "phishing", "minStep": 1 },
+    { "from": "phishing", "to": "fingerprint", "minStep": 2 },
+    { "from": "fingerprint", "to": "exploit", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "fingerprints/", "icon": "📁" },
+    { "name": "client_report.json", "icon": "📄", "alert": true },
+    { "name": "FingerprintJS", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "cat /var/log/apache2/access.log | awk '{print $12\" \"$13\" \"$14}' | sort | uniq -c | sort -rn | head -10",
+      "out": "   156 Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0\n    89 Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 Safari/17.2\n    67 Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Edge/120.0.0.0\n    34 Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1) AppleWebKit/605.1.15 Mobile/15E148\n    23 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/119.0.0.0\n    12 Microsoft Outlook 16.0 (Windows NT 10.0; Microsoft Outlook 16.0.17126)\n     8 Thunderbird/115.6.0\n     5 Python-urllib/3.11\n     3 curl/8.4.0\n     2 Slack-ImgProxy (+https://api.slack.com/robots)",
+      "def": "[Web Server] User-Agent analysis from access logs - passive reconnaissance",
+      "defAction": "Source: Web server logs (passive analysis)\nTarget: {companyName} employee client information\nAction: No real-time detection - log analysis happens offline",
+      "desc": "웹 서버 로그의 User-Agent를 분석하여 직원들이 사용하는 브라우저, OS, 이메일 클라이언트를 파악합니다.",
+      "descEn": "Analyzing User-Agent strings from web server logs to identify employees' browsers, OS, and email clients.",
+      "stepTitle": "User-Agent 로그 분석",
+      "stepTitleEn": "User-Agent Log Analysis",
+      "feynman": "웹사이트를 방문하면 브라우저가 자동으로 '자기소개'를 합니다. 이 정보(User-Agent)를 분석하면 직원 대부분이 Windows 10에 Chrome을 쓰고, 일부는 Mac을 쓰며, Outlook으로 이메일을 확인하고, 모바일은 iPhone을 사용한다는 것을 알 수 있습니다.",
+      "feynmanEn": "When visiting a website, the browser automatically 'introduces itself.' Analyzing User-Agent reveals most employees use Windows 10 with Chrome, some use Mac, check email with Outlook, and use iPhones for mobile.",
+      "expert": "User-Agent 문자열은 OS 버전(NT 10.0=Win10), 브라우저 엔진(AppleWebKit), 브라우저 버전(Chrome/120)을 노출합니다. Outlook 16.0은 Microsoft 365의 데스크톱 클라이언트를 나타내며, Python-urllib과 curl은 자동화 스크립트의 존재를 시사합니다.",
+      "expertEn": "User-Agent strings expose OS version (NT 10.0=Win10), browser engine (AppleWebKit), browser version (Chrome/120). Outlook 16.0 indicates Microsoft 365 desktop client, Python-urllib and curl suggest automation scripts.",
+      "defTooltip": "📊 Web Server: User-Agent 분석은 패시브 정찰 - 실시간 탐지가 어렵습니다",
+      "defTooltipEn": "📊 Web Server: User-Agent analysis is passive recon - difficult to detect in real-time",
+      "hackerLog": {
+        "title": "useragent_analysis.log",
+        "lines": [
+          { "log": "156x Chrome/120.0 on Windows 10", "desc": "주요 브라우저는 Chrome 120 - 해당 버전 취약점 검색 대상" },
+          { "log": "12x Microsoft Outlook 16.0", "desc": "Outlook 사용 확인 - 이메일 피싱 페이로드 형식 결정" },
+          { "log": "34x iPhone OS 17_2_1", "desc": "iPhone 사용자 존재 - 모바일 타겟 피싱 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "User-Agent", "desc": "HTTP 요청에 포함되는 클라이언트 식별 문자열. 브라우저 종류, OS, 버전 정보를 포함합니다" },
+        { "name": "Passive Reconnaissance", "desc": "대상 시스템에 직접 접촉하지 않고 공개 정보만으로 수행하는 정찰. 탐지가 매우 어렵습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 email_header_analyzer.py --mbox collected_emails.mbox",
+      "out": "[+] Analyzing 47 email headers...\n\nEmail Client Distribution:\n  Microsoft Outlook 16.0 (Office 365): 28 (59.6%)\n  Apple Mail (macOS Sonoma): 11 (23.4%)\n  Thunderbird 115.6: 5 (10.6%)\n  Gmail Web: 3 (6.4%)\n\nEmail Security:\n  X-MS-Exchange-Organization-AuthAs: Internal (Microsoft 365)\n  X-Mailer: Microsoft Outlook 16.0.17126.20190\n  X-MS-Has-Attach: yes (18 emails)\n  SPF: pass (all)\n  DKIM: pass (all)\n  DMARC: pass (all)\n\nInternal Infrastructure:\n  SMTP Server: outlook.office365.com\n  Internal relay: mail-gateway.{companyName}.com\n  Authentication: OAuth 2.0 (Microsoft 365)",
+      "def": "[Email Security] Email header analysis from externally obtained emails",
+      "defAction": "Source: Publicly available email samples / mailing list archives\nTarget: {companyName} email infrastructure\nAction: Passive analysis - no network-level detection",
+      "desc": "이메일 헤더를 분석하여 조직의 이메일 클라이언트, 보안 설정, 내부 인프라를 파악합니다.",
+      "descEn": "Analyzing email headers to identify the organization's email clients, security settings, and internal infrastructure.",
+      "stepTitle": "이메일 헤더 분석",
+      "stepTitleEn": "Email Header Analysis",
+      "feynman": "이메일에는 보이지 않는 '소인'이 찍혀 있습니다. 이 소인(헤더)을 분석하면 조직이 Microsoft 365를 사용하고, Outlook 데스크톱 앱이 주력이며, SPF/DKIM/DMARC 보안이 모두 설정되어 있다는 것을 알 수 있습니다.",
+      "feynmanEn": "Emails have invisible 'stamps.' Analyzing these stamps (headers) reveals the organization uses Microsoft 365, primarily Outlook desktop, with SPF/DKIM/DMARC security all configured.",
+      "expert": "X-Mailer 헤더는 이메일 클라이언트의 정확한 버전을 노출합니다. X-MS-Exchange-Organization-AuthAs는 Microsoft 365 환경을 확인시키고, 내부 릴레이 호스트명은 내부 네이밍 규칙을 드러냅니다. DMARC pass는 이메일 스푸핑이 어렵다는 것을 의미합니다.",
+      "expertEn": "X-Mailer header exposes exact email client version. X-MS-Exchange-Organization-AuthAs confirms Microsoft 365. Internal relay hostname reveals internal naming conventions. DMARC pass means email spoofing will be difficult.",
+      "defTooltip": "📧 Email: 이메일 헤더 분석은 오프라인 정찰 - 탐지 불가",
+      "defTooltipEn": "📧 Email: Email header analysis is offline recon - undetectable",
+      "hackerLog": {
+        "title": "email_headers.log",
+        "lines": [
+          { "log": "Microsoft Outlook 16.0.17126: 59.6%", "desc": "주력 이메일 클라이언트 확인 - Outlook 전용 피싱 템플릿 준비" },
+          { "log": "DMARC: pass (all)", "desc": "이메일 스푸핑 방어가 설정됨 - 다른 피싱 방법 필요" },
+          { "log": "mail-gateway.{companyName}.com", "desc": "내부 메일 게이트웨이 호스트명 노출 - 인프라 구조 파악" }
+        ]
+      },
+      "terms": [
+        { "name": "Email Header", "desc": "이메일의 메타데이터. 발신자, 수신자, 경유 서버, 인증 정보 등이 포함됩니다" },
+        { "name": "DMARC", "desc": "Domain-based Message Authentication. SPF와 DKIM을 결합하여 이메일 스푸핑을 방지하는 인증 프로토콜" }
+      ]
+    },
+    {
+      "cmd": "python3 fingerprint_server.py --port 8443 --collect-all",
+      "out": "[+] Fingerprint collection server running on https://0.0.0.0:8443\n[+] Waiting for victims to visit phishing page...\n\n[2026-03-01 10:15:23] New fingerprint collected:\n  IP: 203.0.113.55 (KR, Seoul)\n  Browser: Chrome 120.0.6099.130 (64-bit)\n  OS: Windows 10 Pro 22H2 (Build 19045)\n  Screen: 1920x1080 @ 2x DPI (Dell U2722D)\n  GPU: NVIDIA GeForce RTX 3060\n  Fonts: 287 installed (Malgun Gothic, NanumGothic...)\n  Plugins: PDF Viewer, Chrome PDF\n  Languages: ko-KR, en-US\n  Timezone: Asia/Seoul (UTC+9)\n  Canvas FP: 0x3A7F2B1C4D5E6F89\n  WebGL FP: ANGLE (NVIDIA, RTX 3060 Direct3D11)\n  Do Not Track: disabled\n  Cookies: enabled\n  LocalStorage: enabled",
+      "def": "[Phishing Detection] Victim accessed phishing page with fingerprinting scripts",
+      "defAction": "Source: Phishing page (attacker-controlled)\nTarget: {companyName} employee browser\nAction: Fingerprint data exfiltrated to attacker's server",
+      "desc": "피싱 페이지에 삽입된 JavaScript로 방문자의 상세한 브라우저 핑거프린트를 수집합니다.",
+      "descEn": "JavaScript embedded in a phishing page collects detailed browser fingerprints from visitors.",
+      "stepTitle": "JavaScript 브라우저 핑거프린팅",
+      "stepTitleEn": "JavaScript Browser Fingerprinting",
+      "feynman": "피싱 페이지에 숨겨진 코드가 방문자의 '디지털 지문'을 수집합니다. 브라우저, OS, 화면 해상도, GPU, 설치된 글꼴까지 287개의 정보를 모아서 이 사람의 컴퓨터를 완벽하게 파악합니다. Canvas와 WebGL 핑거프린트는 쿠키 없이도 개인을 추적할 수 있는 고유 식별자입니다.",
+      "feynmanEn": "Hidden code in a phishing page collects the visitor's 'digital fingerprint.' It gathers 287 data points including browser, OS, screen resolution, GPU, and installed fonts. Canvas and WebGL fingerprints uniquely identify individuals even without cookies.",
+      "expert": "Canvas API와 WebGL API의 렌더링 차이를 이용한 핑거프린팅은 브라우저/GPU 조합에 따라 고유한 해시를 생성합니다. 287개 설치 글꼴은 기업 환경(한글 글꼴 다수)을 나타내며, RTX 3060은 개발자/디자이너 워크스테이션을 시사합니다.",
+      "expertEn": "Canvas and WebGL API rendering differences create unique hashes per browser/GPU combination. 287 installed fonts indicate corporate environment (many Korean fonts), RTX 3060 suggests developer/designer workstation.",
+      "defTooltip": "🎣 Phishing: 피싱 페이지의 핑거프린팅 스크립트가 방문자 정보를 수집",
+      "defTooltipEn": "🎣 Phishing: Fingerprinting scripts on phishing page collected visitor information",
+      "hackerLog": {
+        "title": "fingerprint_collected.log",
+        "lines": [
+          { "log": "Chrome 120.0.6099.130 on Windows 10 Pro 22H2", "desc": "정확한 브라우저/OS 버전 - 맞춤형 익스플로잇 선택 가능" },
+          { "log": "NVIDIA GeForce RTX 3060", "desc": "고성능 GPU - 개발자/디자이너 워크스테이션으로 추정" },
+          { "log": "Canvas FP: 0x3A7F2B1C4D5E6F89", "desc": "고유 핑거프린트 - 쿠키 없이도 이 사용자를 추적 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Browser Fingerprinting", "desc": "브라우저의 다양한 속성(글꼴, 플러그인, Canvas 등)을 조합하여 고유한 식별자를 생성하는 기법" },
+        { "name": "Canvas Fingerprinting", "desc": "HTML5 Canvas의 렌더링 차이를 이용한 핑거프린팅. GPU, 드라이버, 폰트 렌더링에 따라 고유 해시가 생성됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 av_detect.py --fingerprints collected_fps.json",
+      "out": "[+] Analyzing security software indicators...\n\nDetected Security Products:\n  203.0.113.55:\n    - Windows Defender (active, signatures up to date)\n    - CrowdStrike Falcon Sensor (EDR detected via timing side-channel)\n    - Cisco AnyConnect VPN Client 4.10\n    - Microsoft Intune (MDM enrollment detected)\n  \n  203.0.113.60:\n    - Symantec Endpoint Protection 14.3\n    - GlobalProtect VPN 6.1\n    - No EDR detected\n  \n  203.0.113.70:\n    - macOS Gatekeeper (active)\n    - SentinelOne Agent\n    - Zscaler Internet Access\n\n[+] AV/EDR coverage: 3/3 endpoints protected\n[+] VPN usage: 2/3 use corporate VPN",
+      "def": "[Endpoint] Security product detection via JavaScript timing and behavioral analysis",
+      "defAction": "Source: Phishing page JavaScript\nTarget: Victim endpoint security stack\nAction: AV/EDR/VPN product information exfiltrated",
+      "desc": "JavaScript 타이밍 분석과 행동 패턴으로 설치된 보안 제품(AV, EDR, VPN)을 탐지합니다.",
+      "descEn": "JavaScript timing analysis and behavioral patterns detect installed security products (AV, EDR, VPN).",
+      "stepTitle": "보안 제품 원격 탐지",
+      "stepTitleEn": "Remote Security Product Detection",
+      "feynman": "보안 제품이 설치되어 있으면 브라우저의 동작이 미세하게 달라집니다. 파일 다운로드 시간, 특정 URL 접근 패턴, 네트워크 요청 시간 등을 분석하면 CrowdStrike, SentinelOne, Zscaler 같은 보안 제품이 설치되어 있는지 간접적으로 알 수 있습니다.",
+      "feynmanEn": "Installed security products cause subtle changes in browser behavior. Analyzing file download timing, specific URL access patterns, and network request timing can indirectly reveal products like CrowdStrike, SentinelOne, and Zscaler.",
+      "expert": "JavaScript 기반 보안 제품 탐지는 타이밍 사이드 채널을 활용합니다. EDR 제품은 특정 API 호출에 마이크로초 단위 지연을 추가하며, VPN 탐지는 WebRTC ICE Candidate에서 내부 IP를 확인합니다. Intune MDM 등록은 navigator.managed API로 확인됩니다.",
+      "expertEn": "JavaScript-based security product detection uses timing side channels. EDR products add microsecond-level delays to certain API calls, VPN detection checks WebRTC ICE Candidates for internal IPs. Intune MDM enrollment is detected via navigator.managed API.",
+      "defTooltip": "🔬 Endpoint: JavaScript 타이밍/행동 분석을 통한 보안 제품 탐지",
+      "defTooltipEn": "🔬 Endpoint: Security product detection via JavaScript timing/behavioral analysis",
+      "hackerLog": {
+        "title": "av_detection.log",
+        "lines": [
+          { "log": "CrowdStrike Falcon Sensor detected", "desc": "EDR 설치 확인 - 페이로드가 CrowdStrike를 우회해야 합니다" },
+          { "log": "Cisco AnyConnect VPN Client 4.10", "desc": "VPN 사용 - 내부 네트워크 접근 경로 존재" },
+          { "log": "Microsoft Intune (MDM)", "desc": "모바일 장치 관리 사용 - 관리 정책 우회 필요" }
+        ]
+      },
+      "terms": [
+        { "name": "EDR (Endpoint Detection and Response)", "desc": "엔드포인트에서 위협을 실시간 탐지하고 대응하는 보안 솔루션. CrowdStrike, SentinelOne 등이 대표적입니다" },
+        { "name": "Timing Side-Channel", "desc": "작업 실행 시간의 미세한 차이를 분석하여 정보를 추출하는 기법. 보안 소프트웨어 존재를 간접적으로 확인합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 client_intel_report.py --fps collected_fps.json --av av_results.json --email email_analysis.json",
+      "out": "[+] Generating client intelligence report...\n\n=== CLIENT CONFIGURATION INTEL ===\nPrimary Environment:\n  OS: Windows 10 Pro 22H2 (65%), macOS Sonoma (25%), Linux (10%)\n  Browser: Chrome 120 (dominant), Safari 17, Edge 120\n  Email: Microsoft 365 + Outlook Desktop\n  VPN: Cisco AnyConnect 4.10, GlobalProtect 6.1\n\nSecurity Stack:\n  AV: Windows Defender + CrowdStrike Falcon (Windows)\n       SentinelOne (macOS)\n  MDM: Microsoft Intune\n  Web Filter: Zscaler Internet Access\n  Email Security: Microsoft Defender for Office 365\n\nAttack Recommendations:\n  1. Craft Chrome 120-specific exploit (CVE-2024-XXXXX)\n  2. Design Outlook-themed phishing template\n  3. Develop CrowdStrike-evasive payload\n  4. Use OAuth phishing to bypass DMARC\n\n[+] Report saved to client_intel_report.pdf",
+      "def": "[SIEM Correlation] Complete client reconnaissance campaign - 47 endpoints profiled",
+      "defAction": "Source: Multi-phase client analysis\nTarget: {companyName} employee endpoints\nAction: Full client stack profiled, tailored attack preparation detected",
+      "desc": "모든 클라이언트 정보를 통합하여 맞춤형 공격 전략을 수립합니다.",
+      "descEn": "All client information is consolidated to develop a tailored attack strategy.",
+      "stepTitle": "클라이언트 인텔리전스 종합 보고서",
+      "stepTitleEn": "Client Intelligence Comprehensive Report",
+      "feynman": "수집한 모든 정보를 하나의 보고서로 정리합니다. 직원의 65%가 Windows 10+Chrome, 보안은 CrowdStrike+Defender, 이메일은 Outlook. 이 정보로 Chrome 취약점 공격, Outlook 피싱, CrowdStrike 우회 페이로드를 준비합니다.",
+      "feynmanEn": "All collected info is compiled into one report. 65% use Windows 10+Chrome, security is CrowdStrike+Defender, email is Outlook. This enables Chrome exploit attacks, Outlook phishing, and CrowdStrike-evasive payloads.",
+      "expert": "클라이언트 프로파일링은 Watering Hole, 스피어피싱, 브라우저 익스플로잇의 정밀도를 극대화합니다. CrowdStrike Falcon 우회에는 BYOVD(취약 드라이버 로드), 메모리 전용 실행, Direct Syscall 기법이 필요합니다. OAuth 피싱은 DMARC를 우회하면서 Microsoft 365 토큰을 탈취할 수 있습니다.",
+      "expertEn": "Client profiling maximizes the precision of Watering Hole, spearphishing, and browser exploits. CrowdStrike Falcon evasion requires BYOVD, memory-only execution, and Direct Syscall techniques. OAuth phishing can steal M365 tokens while bypassing DMARC.",
+      "defTooltip": "🗺️ SIEM: 47개 엔드포인트에 대한 완전한 클라이언트 정찰 캠페인 완료",
+      "defTooltipEn": "🗺️ SIEM: Complete client reconnaissance campaign - 47 endpoints profiled",
+      "hackerLog": {
+        "title": "client_intel.log",
+        "lines": [
+          { "log": "CrowdStrike Falcon (Windows), SentinelOne (macOS)", "desc": "모든 OS에 EDR 설치 확인 - 고급 우회 기법 필요" },
+          { "log": "Craft Chrome 120-specific exploit", "desc": "가장 많이 사용되는 브라우저 타겟팅 전략" },
+          { "log": "Use OAuth phishing to bypass DMARC", "desc": "이메일 보안 우회를 위한 정교한 피싱 전략" }
+        ]
+      },
+      "terms": [
+        { "name": "BYOVD (Bring Your Own Vulnerable Driver)", "desc": "취약한 드라이버를 직접 로드하여 커널 수준 권한을 획득하는 EDR 우회 기법" },
+        { "name": "OAuth Phishing", "desc": "Microsoft/Google의 OAuth 인증 흐름을 악용하여 접근 토큰을 탈취하는 피싱 기법. 비밀번호가 아닌 토큰을 훔칩니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "awk access.log (PID: 7101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "email_header_analyzer.py (PID: 7145)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "fingerprint_server.py (PID: 7200)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "av_detect.py (PID: 7267)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "client_intel_report.py (PID: 7310)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

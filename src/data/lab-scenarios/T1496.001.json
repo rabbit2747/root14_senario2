@@ -1,0 +1,188 @@
+{
+  "id": "T1496.001",
+  "title": "크립토마이닝 시뮬레이션",
+  "titleEn": "Cryptomining Attack Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "침투", "labelEn": "Intrusion", "icon": "🔓" },
+    { "label": "설치", "labelEn": "Install", "icon": "⛏️" },
+    { "label": "채굴", "labelEn": "Mine", "icon": "💰" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "icon": "☠️" },
+    { "id": "victim", "label": "Victim Server", "icon": "🖥️" },
+    { "id": "pool", "label": "Mining Pool", "icon": "⛏️" },
+    { "id": "wallet", "label": "XMR Wallet", "icon": "💰" },
+    { "id": "edr", "label": "EDR / SIEM", "icon": "🛡️" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "label": "SSH Brute", "activeStep": [0] },
+    { "from": "victim", "to": "pool", "label": "Stratum", "activeStep": [2, 3, 4] },
+    { "from": "pool", "to": "wallet", "label": "XMR Payout", "activeStep": [3, 4] },
+    { "from": "victim", "to": "edr", "label": "Alert", "activeStep": [1, 2, 3, 4] }
+  ],
+  "desktopIcons": [
+    { "name": "ssh_brute.py", "icon": "🔑", "alertOnStep": 0 },
+    { "name": "xmrig", "icon": "⛏️", "alertOnStep": 1 },
+    { "name": "config.json", "icon": "⚙️", "alertOnStep": 2 },
+    { "name": "systemd_service", "icon": "🔄", "alertOnStep": 3 }
+  ],
+  "steps": [
+    {
+      "cmd": "bash -c \"\n# SSH brute force to gain initial access\necho 'SSH Brute Force Attack:';\necho '  Target: 203.0.113.50 (Ubuntu 22.04 LTS)';\necho '  Port: 22';\necho '  Wordlist: top-10000-passwords.txt';\necho '';\necho 'Attempt [3847/10000]: root / admin123';\necho 'Attempt [3848/10000]: root / server2024';\necho 'Attempt [3849/10000]: root / P@ssw0rd!';\necho '';\necho '[SUCCESS] Valid credentials found:';\necho '  Username: root';\necho '  Password: P@ssw0rd!';\necho '  Login: ssh root@203.0.113.50';\necho '';\necho 'System Info:';\necho '  OS: Ubuntu 22.04 LTS';\necho '  CPU: AMD EPYC 7763 (64 cores)';\necho '  RAM: 128 GB';\necho '  GPU: None (CPU mining target)'\"",
+      "out": "SSH Brute Force Attack:\n  Target: 203.0.113.50 (Ubuntu 22.04 LTS)\n  Port: 22\n  Wordlist: top-10000-passwords.txt\n\nAttempt [3847/10000]: root / admin123\nAttempt [3848/10000]: root / server2024\nAttempt [3849/10000]: root / P@ssw0rd!\n\n[SUCCESS] Valid credentials found:\n  Username: root\n  Password: P@ssw0rd!\n  Login: ssh root@203.0.113.50\n\nSystem Info:\n  OS: Ubuntu 22.04 LTS\n  CPU: AMD EPYC 7763 (64 cores)\n  RAM: 128 GB\n  GPU: None (CPU mining target)",
+      "def": "[SIEM] SSH brute force detected — 3849 failed attempts followed by success",
+      "defAction": "Source: 198.51.100.42\nTarget: 203.0.113.50:22\nAttempts: 3849 (3848 failed, 1 success)\nCredential: root / P@ssw0rd!\nRisk: CRITICAL\nAction: Account locked, SSH key-only auth enforced",
+      "desc": "SSH 브루트포스로 약한 root 비밀번호를 크래킹합니다. 64코어 AMD EPYC CPU가 탑재된 서버를 장악합니다.",
+      "descEn": "Cracks weak root password via SSH brute force. Gains control of a server with 64-core AMD EPYC CPU.",
+      "stepTitle": "SSH 브루트포스 침투",
+      "stepTitleEn": "SSH Brute Force Intrusion",
+      "feynman": "집의 모든 열쇠를 하나씩 대보는 것과 같아요. 3,849번째 시도에서 비밀번호(P@ssw0rd!)가 맞아 서버에 들어갑니다. 64코어 CPU가 있는 서버는 채굴에 매우 유리합니다.",
+      "feynmanEn": "Like trying every key until one fits the lock. On the 3,849th attempt, the password (P@ssw0rd!) works. A server with 64 CPU cores is extremely valuable for mining.",
+      "expert": "SSH 브루트포스는 T1110.001 (Password Guessing)에 해당합니다. 약한 비밀번호(P@ssw0rd!)는 일반 워드리스트에 포함되어 있습니다. fail2ban을 설치하면 5번 실패 시 자동 차단됩니다. SSH 키 인증만 허용하면 브루트포스를 원천 차단할 수 있습니다.",
+      "expertEn": "SSH brute force maps to T1110.001 (Password Guessing). Weak password (P@ssw0rd!) is in common wordlists. fail2ban auto-blocks after 5 failures. SSH key-only authentication completely prevents brute force.",
+      "defTooltip": "SSH 인증을 공개키 기반으로 전환하고, fail2ban으로 반복 로그인 시도를 차단하세요. root 직접 로그인을 비활성화하세요.",
+      "defTooltipEn": "Switch SSH to public key authentication and block repeated login attempts with fail2ban. Disable direct root login.",
+      "hackerLog": {
+        "title": "SSH 브루트포스 성공",
+        "lines": [
+          { "text": "3849 attempts → root / P@ssw0rd!", "desc": "3,849번째 시도에서 비밀번호 크래킹" },
+          { "text": "CPU: AMD EPYC 7763 (64 cores)", "desc": "채굴에 최적화된 고성능 CPU 발견" },
+          { "text": "RAM: 128 GB", "desc": "대용량 메모리 — 다중 스레드 채굴 가능" }
+        ]
+      },
+      "terms": [
+        { "term": "SSH Brute Force", "desc": "SSH 로그인에 대량의 비밀번호 조합을 시도하는 공격입니다." },
+        { "term": "fail2ban", "desc": "반복적인 로그인 실패 시 자동으로 IP를 차단하는 Linux 보안 도구입니다." },
+        { "term": "EPYC", "desc": "AMD의 서버용 고성능 CPU 브랜드로, 코어 수가 많아 채굴에 악용됩니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\n# Download and configure XMRig miner\necho 'Downloading XMRig cryptocurrency miner...';\necho '  URL: https://github.com/xmrig/xmrig/releases/download/v6.21.0/xmrig-6.21.0-linux-static-x64.tar.gz';\necho '  Size: 4.2 MB';\necho '  Hash: SHA256 verified';\necho '';\necho 'Installation:';\necho '  Location: /opt/.system/xmrig';\necho '  Config: /opt/.system/config.json';\necho '  Binary renamed: syshealth (disguise)';\necho '';\necho 'Configuration:';\necho '  Algorithm: RandomX (Monero-optimized)';\necho '  Pool: pool.hashvault.pro:443 (SSL)';\necho '  Wallet: 48edfHu7V9Z84YzzMa6fUueoELZ9ZRVKp...';\necho '  Threads: 60/64 (leaves 4 for system)';\necho '  CPU Priority: 1 (low — stealth mode)'\"",
+      "out": "Downloading XMRig cryptocurrency miner...\n  URL: https://github.com/xmrig/xmrig/releases/download/v6.21.0/xmrig-6.21.0-linux-static-x64.tar.gz\n  Size: 4.2 MB\n  Hash: SHA256 verified\n\nInstallation:\n  Location: /opt/.system/xmrig\n  Config: /opt/.system/config.json\n  Binary renamed: syshealth (disguise)\n\nConfiguration:\n  Algorithm: RandomX (Monero-optimized)\n  Pool: pool.hashvault.pro:443 (SSL)\n  Wallet: 48edfHu7V9Z84YzzMa6fUueoELZ9ZRVKp...\n  Threads: 60/64 (leaves 4 for system)\n  CPU Priority: 1 (low — stealth mode)",
+      "def": "[EDR] Known mining binary downloaded and renamed — cryptojacking setup",
+      "defAction": "Process: wget → /opt/.system/xmrig\nBinary: XMRig 6.21.0 (known miner)\nRenamed to: syshealth (masquerading)\nConfig: RandomX, 60 threads, pool.hashvault.pro\nRisk: CRITICAL\nAction: Binary quarantined, process tree killed",
+      "desc": "XMRig 채굴기를 다운로드하고 syshealth로 위장합니다. 64코어 중 60코어를 채굴에 할당하고 4코어만 시스템 유지에 남깁니다.",
+      "descEn": "Downloads XMRig miner and disguises it as syshealth. Allocates 60 of 64 cores for mining, leaving only 4 for system maintenance.",
+      "stepTitle": "채굴기 설치 + 위장",
+      "stepTitleEn": "Miner Installation + Disguise",
+      "feynman": "남의 공장에 몰래 채굴 장비를 설치하고, 이름표를 '시스템 점검 도구'로 바꿔놓는 것과 같아요. 64대의 기계(코어) 중 60대를 채굴에 사용하고, 4대만 공장 운영에 남깁니다.",
+      "feynmanEn": "Like secretly installing mining equipment in someone's factory and relabeling it 'system health tool'. 60 of 64 machines (cores) are used for mining, leaving only 4 for factory operations.",
+      "expert": "XMRig의 RandomX 알고리즘은 CPU 최적화되어 GPU 없이도 효율적으로 Monero를 채굴합니다. 바이너리명을 syshealth로 변경하는 것은 T1036 (Masquerading)에 해당합니다. SSL(443포트)로 마이닝 풀에 연결하여 네트워크 탐지를 회피합니다.",
+      "expertEn": "XMRig's RandomX algorithm is CPU-optimized for efficient Monero mining without GPU. Renaming binary to syshealth maps to T1036 (Masquerading). SSL connection (port 443) to mining pool evades network detection.",
+      "defTooltip": "EDR에서 XMRig, CCMiner 등 알려진 채굴 바이너리의 해시값을 차단하세요. 프로세스명이 변경되어도 파일 해시로 탐지합니다.",
+      "defTooltipEn": "Block known miner binary hashes (XMRig, CCMiner) in EDR. File hash detection works even when process names are changed.",
+      "hackerLog": {
+        "title": "XMRig 채굴기 설치",
+        "lines": [
+          { "text": "XMRig 6.21.0 → /opt/.system/syshealth", "desc": "채굴기를 숨겨진 디렉토리에 설치 및 위장" },
+          { "text": "RandomX / pool.hashvault.pro:443", "desc": "Monero 채굴 알고리즘 + SSL 풀 연결" },
+          { "text": "Threads: 60/64 (stealth mode)", "desc": "시스템 운영 최소분만 남기고 채굴 할당" }
+        ]
+      },
+      "terms": [
+        { "term": "XMRig", "desc": "오픈소스 Monero 채굴 프로그램으로, 크립토재킹에 가장 많이 악용됩니다." },
+        { "term": "RandomX", "desc": "Monero의 채굴 알고리즘으로, CPU에 최적화되어 있습니다." },
+        { "term": "Mining Pool", "desc": "여러 채굴자의 연산력을 합쳐 보상을 분배하는 서비스입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\n# Establish persistence and start mining\necho 'Creating systemd service for persistence...';\necho '  Service: /etc/systemd/system/syshealth.service';\necho '  Description: System Health Monitor (disguise)';\necho '  ExecStart: /opt/.system/syshealth';\necho '  Restart: always';\necho '  RestartSec: 10';\necho '';\necho 'Service started:';\necho '  systemctl enable syshealth --now';\necho '  Status: Active (running)';\necho '  PID: 24601';\necho '';\necho 'Mining initiated:';\necho '  Algorithm : RandomX';\necho '  Threads   : 60';\necho '  CPU Usage : 93%';\necho '  Hashrate  : 42,000 H/s';\necho '  Pool      : pool.hashvault.pro:443 (SSL)';\necho '  Shares    : 12 accepted, 0 rejected'\"",
+      "out": "Creating systemd service for persistence...\n  Service: /etc/systemd/system/syshealth.service\n  Description: System Health Monitor (disguise)\n  ExecStart: /opt/.system/syshealth\n  Restart: always\n  RestartSec: 10\n\nService started:\n  systemctl enable syshealth --now\n  Status: Active (running)\n  PID: 24601\n\nMining initiated:\n  Algorithm : RandomX\n  Threads   : 60\n  CPU Usage : 93%\n  Hashrate  : 42,000 H/s\n  Pool      : pool.hashvault.pro:443 (SSL)\n  Shares    : 12 accepted, 0 rejected",
+      "def": "[EDR] Suspicious systemd service with high CPU — cryptomining confirmed",
+      "defAction": "Service: syshealth.service\nBinary: /opt/.system/syshealth (XMRig)\nCPU: 93% (60 threads)\nHashrate: 42,000 H/s\nPool: pool.hashvault.pro:443\nRisk: CRITICAL\nAction: Service stopped, binary removed, persistence cleaned",
+      "desc": "systemd 서비스로 영구 실행을 설정하고 채굴을 시작합니다. 60스레드로 42,000 H/s 해시레이트를 달성합니다.",
+      "descEn": "Sets up persistent execution via systemd service and starts mining. Achieves 42,000 H/s hashrate with 60 threads.",
+      "stepTitle": "지속성 설정 + 채굴 시작",
+      "stepTitleEn": "Persistence + Mining Start",
+      "feynman": "채굴 장비에 자동 재시작 장치를 달아서 누군가 끄더라도 10초 후 다시 켜지게 만드는 것과 같아요. 서버가 재부팅되어도 채굴이 자동으로 다시 시작됩니다.",
+      "feynmanEn": "Like attaching an auto-restart device to mining equipment so it turns back on 10 seconds after anyone switches it off. Mining automatically resumes even after server reboot.",
+      "expert": "systemd 서비스 등록은 T1543.002 (Create or Modify System Process: Systemd Service)에 해당합니다. Restart=always + RestartSec=10으로 채굴 프로세스가 종료되어도 자동 복구됩니다. /etc/systemd/system 디렉토리의 새로운 서비스 파일 생성을 모니터링해야 합니다.",
+      "expertEn": "Systemd service registration maps to T1543.002. Restart=always + RestartSec=10 ensures auto-recovery when mining process is killed. Monitor new service file creation in /etc/systemd/system.",
+      "defTooltip": "새로운 systemd 서비스 파일 생성을 auditd 규칙으로 모니터링하세요. CPU 사용률이 장시간 90% 이상인 프로세스를 자동 경보하세요.",
+      "defTooltipEn": "Monitor new systemd service file creation with auditd rules. Auto-alert on processes maintaining 90%+ CPU usage for extended periods.",
+      "hackerLog": {
+        "title": "채굴 서비스 시작",
+        "lines": [
+          { "text": "syshealth.service → enabled (Restart=always)", "desc": "자동 재시작 서비스로 등록 — 지속성 확보" },
+          { "text": "CPU: 93% / Hashrate: 42,000 H/s", "desc": "60 스레드로 42 KH/s 해시레이트 달성" },
+          { "text": "pool.hashvault.pro:443 (SSL encrypted)", "desc": "SSL로 암호화된 채굴 풀 연결" }
+        ]
+      },
+      "terms": [
+        { "term": "systemd Service", "desc": "Linux에서 백그라운드 프로세스를 관리하는 시스템 서비스 매니저입니다." },
+        { "term": "Persistence", "desc": "시스템 재부팅 후에도 악성코드가 자동 실행되도록 설정하는 기법입니다." },
+        { "term": "Hashrate", "desc": "채굴 장비의 연산 속도를 나타내는 단위(H/s: 초당 해시 연산 수)입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\n# Mining operation status after 30 days\necho '=== 30-Day Mining Report ===';\necho '';\necho 'Mining Performance:';\necho '  Uptime        : 29 days 18 hours (99.2%)';\necho '  Avg Hashrate  : 41,500 H/s';\necho '  Total Hashes  : 107.4 trillion';\necho '  Shares        : 124,500 accepted';\necho '';\necho 'Revenue (Attacker):';\necho '  XMR Mined     : 0.82 XMR';\necho '  Market Value  : ~$140 USD';\necho '';\necho 'Cost to Victim:';\necho '  Electricity   : +$450/month (93% CPU 24/7)';\necho '  CPU degradation: Estimated 3-year life → 1.5 years';\necho '  Performance   : 93% CPU stolen → services degraded';\necho '  Other services: Response time 300% slower'\"",
+      "out": "=== 30-Day Mining Report ===\n\nMining Performance:\n  Uptime        : 29 days 18 hours (99.2%)\n  Avg Hashrate  : 41,500 H/s\n  Total Hashes  : 107.4 trillion\n  Shares        : 124,500 accepted\n\nRevenue (Attacker):\n  XMR Mined     : 0.82 XMR\n  Market Value  : ~$140 USD\n\nCost to Victim:\n  Electricity   : +$450/month (93% CPU 24/7)\n  CPU degradation: Estimated 3-year life → 1.5 years\n  Performance   : 93% CPU stolen → services degraded\n  Other services: Response time 300% slower",
+      "def": "[Monitoring] Persistent 93% CPU usage for 30 days — cryptomining confirmed",
+      "defAction": "Duration: 30 days continuous\nCPU: 93% average\nProcess: syshealth (XMRig)\nAttacker Revenue: $140/month\nVictim Cost: $450/month electricity + hardware degradation\nRisk: HIGH\nAction: Miner removed, SSH hardened, full system audit",
+      "desc": "30일간 채굴 결과입니다. 공격자는 $140의 Monero를 얻지만, 피해자는 전기료 $450 + 하드웨어 수명 단축의 피해를 입습니다.",
+      "descEn": "30-day mining results. Attacker earns $140 in Monero, but victim suffers $450/month in electricity plus hardware degradation.",
+      "stepTitle": "30일 채굴 보고서",
+      "stepTitleEn": "30-Day Mining Report",
+      "feynman": "남의 공장에서 한 달간 몰래 제품을 만들어 14만원을 벌었지만, 공장 주인은 전기료 45만원이 더 나오고 기계 수명도 절반으로 줄어들었습니다. 기생충처럼 숙주에게 더 큰 피해를 주는 공격입니다.",
+      "feynmanEn": "Made $140 worth of products secretly in someone's factory for a month, but the factory owner faces $450 more in electricity and halved machine lifespan. Like a parasite causing more damage to the host than benefit to itself.",
+      "expert": "크립토재킹의 경제적 비대칭이 핵심입니다. 공격자 수익($140) 대비 피해자 비용($450 전기 + 하드웨어)이 3배 이상입니다. 이는 공격의 비효율성을 보여주지만, 공격자 입장에서는 비용이 0이므로 순수익입니다. 클라우드 환경에서는 Auto Scaling으로 인해 피해가 수천 달러로 급증할 수 있습니다.",
+      "expertEn": "The economic asymmetry of cryptojacking is key. Victim cost ($450 electricity + hardware) is 3x+ attacker revenue ($140). While inefficient, it's pure profit for the attacker at zero cost. In cloud environments, auto-scaling can escalate damages to thousands of dollars.",
+      "defTooltip": "클라우드 환경에서는 CPU 크레딧 사용량과 비용 알림을 설정하세요. 예상 외 CPU 사용량 증가가 크립토재킹의 첫 번째 징후입니다.",
+      "defTooltipEn": "In cloud environments, set up CPU credit usage and cost alerts. Unexpected CPU usage increases are the first sign of cryptojacking.",
+      "hackerLog": {
+        "title": "30일 채굴 보고서",
+        "lines": [
+          { "text": "0.82 XMR mined (~$140)", "desc": "공격자 수익: 0.82 Monero ($140)" },
+          { "text": "Victim electricity: +$450/month", "desc": "피해자 전기료: 월 $450 추가" },
+          { "text": "CPU lifespan: 3yr → 1.5yr", "desc": "CPU 수명 절반으로 단축" }
+        ]
+      },
+      "terms": [
+        { "term": "Monero (XMR)", "desc": "프라이버시 중심의 암호화폐로, 추적이 어려워 크립토재킹에 선호됩니다." },
+        { "term": "Cryptojacking", "desc": "타인의 컴퓨터 자원을 무단으로 사용하여 암호화폐를 채굴하는 공격입니다." },
+        { "term": "CPU Degradation", "desc": "과도한 부하로 인한 CPU 성능 저하 및 수명 단축입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\n# Lateral spread to other servers\necho '=== Cryptomining Worm Propagation ===';\necho '';\necho 'Scanning internal network for more targets...';\necho '  10.0.1.0/24: 12 SSH servers found';\necho '  Attempting same credentials (root/P@ssw0rd!)...';\necho '';\necho 'Propagation results:';\necho '  10.0.1.10 (web-01)    : INFECTED (16 cores)';\necho '  10.0.1.11 (web-02)    : INFECTED (16 cores)';\necho '  10.0.1.20 (db-01)     : FAILED (key-only auth)';\necho '  10.0.1.30 (app-01)    : INFECTED (32 cores)';\necho '  10.0.1.31 (app-02)    : INFECTED (32 cores)';\necho '';\necho '=== TOTAL MINING OPERATION ===';\necho '  Servers infected: 5';\necho '  Total CPU cores : 160';\necho '  Combined hashrate: 98,000 H/s';\necho '  Monthly revenue : ~$330 (attacker)';\necho '  Monthly cost    : ~$2,100 (victim electricity)';\necho '  Annual loss     : ~$25,200 (electricity + hardware)'\"",
+      "out": "=== Cryptomining Worm Propagation ===\n\nScanning internal network for more targets...\n  10.0.1.0/24: 12 SSH servers found\n  Attempting same credentials (root/P@ssw0rd!)...\n\nPropagation results:\n  10.0.1.10 (web-01)    : INFECTED (16 cores)\n  10.0.1.11 (web-02)    : INFECTED (16 cores)\n  10.0.1.20 (db-01)     : FAILED (key-only auth)\n  10.0.1.30 (app-01)    : INFECTED (32 cores)\n  10.0.1.31 (app-02)    : INFECTED (32 cores)\n\n=== TOTAL MINING OPERATION ===\n  Servers infected: 5\n  Total CPU cores : 160\n  Combined hashrate: 98,000 H/s\n  Monthly revenue : ~$330 (attacker)\n  Monthly cost    : ~$2,100 (victim electricity)\n  Annual loss     : ~$25,200 (electricity + hardware)",
+      "def": "[SIEM] Cryptomining worm propagation — 4 additional servers infected",
+      "defAction": "Propagation: Same credentials across 5 servers\nTotal Cores: 160\nHashrate: 98 KH/s\nMonthly Revenue (Attacker): $330\nMonthly Cost (Victim): $2,100\nAnnual Loss: $25,200\nRisk: CRITICAL\nResponse: All miners removed, passwords reset, SSH hardened",
+      "desc": "같은 자격증명으로 내부 서버 4대에 추가 감염됩니다. 총 160코어, 98 KH/s 해시레이트, 연간 2.5만 달러의 피해가 발생합니다.",
+      "descEn": "Spreads to 4 additional internal servers using the same credentials. Total 160 cores, 98 KH/s hashrate, $25,200 annual victim loss.",
+      "stepTitle": "내부 확산 + 피해 총계",
+      "stepTitleEn": "Internal Spread + Total Impact",
+      "feynman": "한 공장에서 성공하면 같은 열쇠(비밀번호)로 옆 공장에도 몰래 채굴 장비를 설치합니다. 5개 공장 160대의 기계를 돌려 월 33만원을 벌지만, 피해 공장들은 전기료만 월 210만원이 더 나옵니다.",
+      "feynmanEn": "After succeeding in one factory, the same key (password) is used to install mining equipment in neighboring factories. Running 160 machines across 5 factories earns $330/month, but victims pay $2,100/month more in electricity.",
+      "expert": "동일 자격증명을 사용한 횡적 확산은 T1021.004 (SSH)와 T1078 (Valid Accounts)의 결합입니다. db-01이 키 인증만 허용하여 감염을 차단한 것이 방어 효과를 보여줍니다. 크립토재킹 웜은 SSH, Redis, Docker API 등 다양한 벡터로 확산합니다.",
+      "expertEn": "Lateral spread using same credentials combines T1021.004 (SSH) with T1078 (Valid Accounts). db-01 blocking infection via key-only auth demonstrates defense effectiveness. Cryptojacking worms spread via SSH, Redis, Docker API, and other vectors.",
+      "defTooltip": "모든 서버에 고유한 비밀번호를 사용하고, SSH 키 인증으로 전환하세요. 내부 네트워크에서도 마이닝 풀 도메인/IP를 DNS 차단하세요.",
+      "defTooltipEn": "Use unique passwords for all servers and switch to SSH key authentication. Block mining pool domains/IPs via DNS even on internal networks.",
+      "hackerLog": {
+        "title": "크립토마이닝 확산 및 피해 총계",
+        "lines": [
+          { "text": "4 additional servers infected (same password)", "desc": "동일 비밀번호로 4대 추가 감염" },
+          { "text": "160 cores / 98 KH/s combined", "desc": "총 160코어, 98 KH/s 해시레이트" },
+          { "text": "Annual loss: $25,200 vs attacker revenue: $3,960", "desc": "피해 $25,200 vs 공격자 수익 $3,960" }
+        ]
+      },
+      "terms": [
+        { "term": "Cryptomining Worm", "desc": "네트워크를 통해 자동으로 확산하는 크립토재킹 악성코드입니다." },
+        { "term": "Lateral Movement", "desc": "네트워크 내부에서 다른 시스템으로 이동하는 공격 기법입니다." },
+        { "term": "Key-only Authentication", "desc": "비밀번호 대신 공개키만으로 인증하는 방식으로, 브루트포스를 차단합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "sshd (brute force entry)", "depth": 0, "alert": true, "minStep": 0 },
+    { "name": "bash (attacker session)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "wget (XMRig download)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "syshealth (XMRig disguised)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "systemd: syshealth.service", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "Stratum → pool.hashvault.pro:443", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "ssh-scan (lateral movement)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "web-01, web-02, app-01, app-02 infected", "depth": 3, "alert": true, "minStep": 4 }
+  ]
+}

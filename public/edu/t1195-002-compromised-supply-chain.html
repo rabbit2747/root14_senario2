@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1195.002">
+<head>
+    <script>
+        (function() {
+            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+            try {
+                var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
+                var session = sessionStorage.getItem(key);
+                if (!session || !JSON.parse(session)) {
+                    var redirect = encodeURIComponent(window.location.href);
+                    window.location.replace('/login?redirect=' + redirect);
+                }
+            } catch(e) { window.location.replace('/login'); }
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded = false;
+        (async function() {
+            try {
+                var SUPA = 'https://bnwbybawqrnhznirivfg.supabase.co';
+                var KEY  = 'sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';
+                var res = await fetch(SUPA + '/rest/v1/edu_html_content?page_id=eq.t1195-002-compromised-supply-chain&select=content&limit=1', { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY } });
+                if (res.ok) { var data = await res.json(); if (data && data.length > 0 && data[0].content) { _eduDynLoaded = true; document.open(); document.write(data[0].content); document.close(); return; } }
+            } catch(e) {}
+            document.documentElement.classList.add('edu-ready');
+        })();
+        setTimeout(function() { if (!_eduDynLoaded) document.documentElement.classList.add('edu-ready'); }, 3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <title>GOTROOT EDU | T1195.002 Compromised Supply Chain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] }, colors: { cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569' } } } }</script>
+    <style>
+        body { scroll-behavior:smooth; background-color:#FFF8F0; color:#1e293b; transition: background-color 0.3s ease, color 0.3s ease; }
+        .glass-panel { background:rgba(255,255,255,0.7); backdrop-filter:blur(16px); border:1px solid rgba(157,217,210,0.5); }
+        .dark body { background-color:#0f172a; color:#f8fafc; }
+        .dark .glass-panel { background:rgba(30,41,59,0.7); border:1px solid rgba(244,208,111,0.2); }
+        .hl-teal { color:#0f766e; font-weight:700; } .dark .hl-teal { color:#9DD9D2; }
+        .hl-yel { color:#b45309; font-weight:700; } .dark .hl-yel { color:#F4D06F; }
+        .nav-item.active { background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%); border-left:4px solid #9DD9D2; color:#0f766e; font-weight:700; }
+        .dark .nav-item.active { background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%); border-left:4px solid #F4D06F; color:#F4D06F; }
+        .terminal-bg { background-color:#1e293b; color:#9DD9D2; font-family:'JetBrains Mono',monospace; }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #9DD9D2; border-radius: 4px; } .dark ::-webkit-scrollbar-thumb { background: #F4D06F; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family: 'JetBrains Mono', monospace;">
+        <div class="flex items-center gap-2">
+            <span style="font-size:9px; font-weight:900; color:#bb3e03; letter-spacing:0.25em;">GOTROOT</span>
+            <span style="font-size:8px; color:#94a3b8;">|</span>
+            <span style="font-size:8px; color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="goToDashboard()" style="font-size:8px; color:#bb3e03; background:transparent; border:1px solid rgba(187,62,3,0.3); padding:3px 10px; border-radius:4px; cursor:pointer; font-family:inherit;" onmouseover="this.style.background='rgba(187,62,3,0.08)'" onmouseout="this.style.background='transparent'">← 매트릭스 대시보드</button>
+            <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px; color:rgba(187,62,3,0.5); text-decoration:none;" class="hidden sm:inline" onmouseover="this.style.color='#bb3e03'" onmouseout="this.style.color='rgba(187,62,3,0.5)'">gotroot.co.kr ↗</a>
+        </div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40 relative">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2] mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1195.002: Compromised Supply Chain</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch1">1. 공급망 공격이란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch2">2. 소프트웨어 서명 침해</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch3">3. Mini Lab & Quiz</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Initial Access</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Supply Chain Compromise</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">택배 기사가 배달 중간에 소포를 바꿔치기 — 공급망 공격</p>
+            </header>
+
+            <!-- Chapter 1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> 공급망 공격이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">📦 ➜ 🔄 ➜ 🏭 ➜ 💥</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"택배 기사가 배달 중간에 소포를 바꿔치기"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">
+                            여러분이 인터넷에서 주문한 택배가 배달되는 중간에, 누군가 포장을 뜯고 안에 도청기를 넣은 뒤 다시 포장한다면? 받는 사람은 정상 택배라고 믿고 집에 들여놓습니다. <strong>공급망 공격(Supply Chain Attack)</strong>은 정상적인 소프트웨어 배포 과정에 악성 코드를 끼워 넣어, 수만~수십만 사용자에게 동시에 감염시키는 기법입니다.
+                        </p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-3 hl-teal">실제 사례로 이해하기</h3>
+                        <div class="space-y-4">
+                            <div class="flex gap-3 items-start">
+                                <span class="bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded text-xs font-bold text-red-600 dark:text-red-400 shrink-0">SolarWinds</span>
+                                <p class="text-sm text-cgray dark:text-slate-300">IT 관리 소프트웨어 Orion의 업데이트 서버가 해킹되어, 18,000개 이상의 조직(미국 정부기관 포함)에 악성 업데이트가 배포되었습니다.</p>
+                            </div>
+                            <div class="flex gap-3 items-start">
+                                <span class="bg-orange-100 dark:bg-orange-900/30 px-2 py-1 rounded text-xs font-bold text-orange-600 dark:text-orange-400 shrink-0">Codecov</span>
+                                <p class="text-sm text-cgray dark:text-slate-300">코드 커버리지 도구의 CI/CD 스크립트가 변조되어, 사용자의 환경변수(API 키, 토큰)가 공격자 서버로 유출되었습니다.</p>
+                            </div>
+                            <div class="flex gap-3 items-start">
+                                <span class="bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded text-xs font-bold text-purple-600 dark:text-purple-400 shrink-0">NPM 패키지</span>
+                                <p class="text-sm text-cgray dark:text-slate-300">인기 패키지와 유사한 이름(typosquatting)으로 악성 패키지를 업로드하여 개발자가 실수로 설치하도록 유도합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chapter 2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> 소프트웨어 서명 & 패키지 매니저 침해</h2>
+                <div class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h3 class="font-bold text-center mb-3 hl-yel">코드 서명(Code Signing) 공격</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed mb-3">공격자가 소프트웨어 빌드 서버에 침투하여, 정상적인 코드 서명 인증서로 악성 코드를 서명합니다. OS는 서명이 유효하므로 경고 없이 실행합니다.</p>
+                            <div class="terminal-bg rounded p-3 text-xs overflow-x-auto">
+                                <code><span class="text-[#F4D06F]"># 정상 업데이트 해시</span><br>SHA256: a1b2c3d4e5f6...<br><br><span class="text-red-400"># 변조된 업데이트 해시</span><br>SHA256: 9x8y7z6w5v4... <span class="text-red-400">← 다름!</span></code>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#9DD9D2]">
+                            <h3 class="font-bold text-center mb-3 hl-teal">패키지 매니저 침해</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed mb-3">npm, pip, Maven 등 패키지 저장소에 악성 패키지를 올리거나, 기존 패키지 관리자의 계정을 탈취하여 악성 버전을 배포합니다.</p>
+                            <div class="terminal-bg rounded p-3 text-xs overflow-x-auto">
+                                <code><span class="text-[#F4D06F]"># Typosquatting 예시</span><br>npm install <span class="text-green-400">lodash</span>     <span class="text-slate-500"># 정상</span><br>npm install <span class="text-red-400">l0dash</span>     <span class="text-red-400"># 악성!</span><br>npm install <span class="text-red-400">lodash-utils</span> <span class="text-red-400"># 악성!</span></code>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">공급망 공격이 위험한 이유</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-cgray dark:text-slate-300">
+                            <div class="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                <div class="text-2xl mb-2">🌐</div>
+                                <strong>대규모 확산</strong><br>한 번의 침투로 수만 조직 동시 감염
+                            </div>
+                            <div class="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                <div class="text-2xl mb-2">🛡️</div>
+                                <strong>신뢰 악용</strong><br>정상 업데이트 채널이므로 보안 솔루션 우회
+                            </div>
+                            <div class="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                <div class="text-2xl mb-2">🔍</div>
+                                <strong>탐지 어려움</strong><br>정상 소프트웨어 안에 숨어있어 발견이 늦음
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chapter 3: Mini Lab & Quiz -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> Mini Lab & Quiz</h2>
+                <div class="space-y-8">
+                    <!-- Mini Lab: Hash Verification -->
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm">
+                            <span class="hl-teal">Mini Lab: 업데이트 해시 검증 시뮬레이션</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">소프트웨어 업데이트를 받았습니다. 공식 사이트의 해시와 다운로드한 파일의 해시를 비교하여 변조 여부를 확인하세요.</p>
+                            <div class="space-y-4 max-w-lg mx-auto">
+                                <div class="terminal-bg rounded-lg p-4 text-xs">
+                                    <div class="text-[#F4D06F] mb-2"># 공식 사이트 공개 해시 (SHA256)</div>
+                                    <div id="official-hash" class="break-all select-all">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+                                </div>
+                                <div class="terminal-bg rounded-lg p-4 text-xs">
+                                    <div class="text-[#F4D06F] mb-2"># 다운로드한 파일의 해시</div>
+                                    <div id="download-hash" class="break-all"></div>
+                                </div>
+                                <div class="flex gap-3 justify-center">
+                                    <button onclick="generateSafeHash()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-4 rounded text-sm transition border border-[#7cc2b9]">정상 파일 다운로드</button>
+                                    <button onclick="generateBadHash()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded text-sm transition">변조된 파일 다운로드</button>
+                                </div>
+                                <button onclick="verifyHash()" class="w-full bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 font-bold py-2 rounded text-sm transition">해시 비교 검증 실행</button>
+                                <div id="hash-result" class="hidden text-center p-4 rounded-lg text-sm font-bold"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="text-xl font-bold mb-4 hl-teal">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-q" data-correct="2">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. 공급망 공격이 일반 악성코드 배포보다 위험한 가장 큰 이유는?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> 악성코드의 크기가 더 크기 때문이다.</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> 신뢰할 수 있는 소프트웨어 배포 채널을 통해 전달되므로 보안 검사를 우회하기 때문이다.</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> 공급망 공격은 암호화가 더 강력하기 때문이다.</label>
+                                </div>
+                            </div>
+                            <div class="quiz-q" data-correct="3">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. 공급망 공격 방어에 가장 효과적인 방법은?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="1" class="mr-3"> 모든 소프트웨어 업데이트를 중단한다.</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="2" class="mr-3"> 무료 소프트웨어만 사용한다.</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="3" class="mr-3"> 해시 검증, SBOM(Software Bill of Materials) 관리, 의존성 잠금 파일(lock file) 사용을 조합한다.</label>
+                                </div>
+                            </div>
+                            <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                        </div>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">공급망 보안의 중요성을 배웠습니다!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">소프트웨어 공급망 공격의 원리와 방어법을 학습했습니다. 대시보드로 돌아가 더 많은 기법을 알아보세요.</p>
+                <button onclick="goToDashboard()" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] dark:from-[#9DD9D2] dark:to-[#F4D06F] text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl"><span class="text-2xl">🏠</span><span>매트릭스 대시보드로 돌아가기</span></button>
+            </div>
+        </div>
+    </main>
+    <script>
+        var currentHash = '';
+        var officialHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+        function go(id) { var el = document.getElementById(id); if (el) document.getElementById('main-scroll').scrollTo({ top: el.offsetTop - 40, behavior: 'smooth' }); }
+        function goToDashboard() { window.location.href = '/'; }
+        function toggleTheme() {
+            var html = document.documentElement; var icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) { html.classList.remove('dark'); html.classList.add('light'); icon.textContent = '☀️'; }
+            else { html.classList.remove('light'); html.classList.add('dark'); icon.textContent = '🌙'; }
+        }
+        function generateSafeHash() {
+            currentHash = officialHash;
+            document.getElementById('download-hash').textContent = currentHash;
+            document.getElementById('download-hash').classList.remove('text-red-400');
+            document.getElementById('download-hash').classList.add('text-[#9DD9D2]');
+            document.getElementById('hash-result').classList.add('hidden');
+        }
+        function generateBadHash() {
+            currentHash = 'f7c3bc1d808e04732adf679965ccc34ca7ae3441569a6ebf7c7a4d5f3e8b1d2a';
+            document.getElementById('download-hash').textContent = currentHash;
+            document.getElementById('download-hash').classList.remove('text-[#9DD9D2]');
+            document.getElementById('download-hash').classList.add('text-red-400');
+            document.getElementById('hash-result').classList.add('hidden');
+        }
+        function verifyHash() {
+            if (!currentHash) { alert('먼저 파일을 다운로드하세요.'); return; }
+            var result = document.getElementById('hash-result');
+            result.classList.remove('hidden','bg-green-100','border-green-500','text-green-700','bg-red-100','border-red-500','text-red-700','dark:bg-green-900/30','dark:text-green-400','dark:bg-red-900/30','dark:text-red-400');
+            if (currentHash === officialHash) {
+                result.classList.add('bg-green-100','border','border-green-500','text-green-700','dark:bg-green-900/30','dark:text-green-400');
+                result.innerHTML = '✅ 해시 일치! 파일이 변조되지 않았습니다. 안전하게 설치할 수 있습니다.';
+            } else {
+                result.classList.add('bg-red-100','border','border-red-500','text-red-700','dark:bg-red-900/30','dark:text-red-400');
+                result.innerHTML = '⚠️ 해시 불일치! 파일이 변조되었을 가능성이 높습니다. 즉시 삭제하고 공식 사이트에서 다시 다운로드하세요.';
+            }
+        }
+        function checkQuiz() {
+            var q1 = document.querySelector('input[name="q1"]:checked');
+            var q2 = document.querySelector('input[name="q2"]:checked');
+            if (!q1 || !q2) { alert('모든 문제의 답을 선택해주세요.'); return; }
+            var score = 0;
+            if (q1.value === '2') score++;
+            if (q2.value === '3') score++;
+            var resultBox = document.getElementById('quiz-result');
+            resultBox.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','bg-red-100','border-red-400','text-red-700','dark:text-[#9DD9D2]','dark:bg-red-900/50','dark:text-red-400');
+            if (score === 2) {
+                resultBox.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');
+                resultBox.innerHTML = '✅ 2/2 정답! 공급망 공격의 위험성과 방어 전략을 정확히 이해하고 있습니다.';
+            } else {
+                resultBox.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');
+                resultBox.innerHTML = '❌ ' + score + '/2 정답입니다. 공급망 공격의 특성과 해시 검증의 중요성을 다시 복습해 보세요.';
+            }
+        }
+        var observerOptions = { root: document.getElementById('main-scroll'), rootMargin: '0px 0px -40% 0px', threshold: 0.1 };
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0','translate-y-10');
+                    entry.target.classList.add('opacity-100','translate-y-0');
+                    var id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-item').forEach(function(nav) { nav.classList.remove('active'); if (nav.getAttribute('data-target') === id) nav.classList.add('active'); });
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s) { observer.observe(s); });
+        window.onload = function() { setTimeout(function() { go('ch1'); }, 100); };
+    </script>
+    </div>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

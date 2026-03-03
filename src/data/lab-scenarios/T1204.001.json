@@ -1,0 +1,125 @@
+{
+  "id": "T1204.001",
+  "title": "악성 파일 실행 유도 시뮬레이션",
+  "titleEn": "Malicious File Simulation",
+  "duration": 8,
+  "phases": [
+    {"label":"🔍 정찰","labelEn":"🔍 Recon","steps":[0]},
+    {"label":"⚡ 실행","labelEn":"⚡ Execution","steps":[1]},
+    {"label":"🎯 공격","labelEn":"🎯 Attack","steps":[2]},
+    {"label":"🔍 탐지 & 방어","labelEn":"🔍 Detection & Defense","steps":[3]}
+  ],
+  "topoNodes": [
+    {"id":"attacker","label":"Attacker","x":50,"y":80},
+    {"id":"target","label":"Target\nSystem","x":200,"y":80},
+    {"id":"internal","label":"Internal\nNetwork","x":350,"y":80},
+    {"id":"c2","label":"C2\nServer","x":480,"y":80}
+  ],
+  "topoEdges": [
+    {"from":"attacker","to":"target","minStep":1},
+    {"from":"target","to":"internal","minStep":2},
+    {"from":"internal","to":"c2","minStep":2}
+  ],
+  "desktopIcons": [
+    {"name":"Terminal","icon":"💻"},
+    {"name":"File Manager","icon":"📁"},
+    {"name":"Browser","icon":"🌐"},
+    {"name":"Monitor","icon":"📊"},
+    {"name":"SIEM","icon":"🔍"}
+  ],
+  "steps": [
+    {
+      "cmd": "# 매크로 악성 문서 분석\nolevba malicious_invoice.docm\n\n# 이중 확장자 공격\n# 파일명: Annual_Report_2026.pdf.exe\n# Windows 기본 설정: 확장자 숨김 → .pdf로 보임\n\n# ISO 마운트로 MOTW 우회\n# ISO 내부 파일은 Mark-of-the-Web 없음\n\n// 사용자의 클릭 = 공격자의 승리",
+      "out": "[실행 결과]\nOffice 매크로: AutoOpen/Document_Open 매크로로 자동 실행\n이중 확장자: Windows 확장자 숨김 기능 악용\nISO/IMG: MOTW(Mark-of-the-Web) 우회\nLNK 드로퍼: 바로가기 파일에 PowerShell 명령 삽입\n\n[탐지 지표]\n⚠️ 비정상 활동 탐지",
+      "def": "[SIEM] Malicious File activity detected — suspicious execution pattern",
+      "defAction": "Tool: Malicious File analysis\nTechnique: T1204.001\nTarget: System under attack\nRisk Level: High\nAction: Investigate and contain",
+      "desc": "Office 매크로: AutoOpen/Document_Open 매크로로 자동 실행",
+      "descEn": "Malicious File technique execution detected and analyzed.",
+      "stepTitle": "악성 파일 실행 유도 기법 분석",
+      "stepTitleEn": "Malicious File Technique Analysis",
+      "feynman": "공격자가 악성 파일 실행 유도 기법을 사용하여 시스템에 접근합니다. 이는 정상적인 도구나 기능을 악용하는 방식입니다.",
+      "feynmanEn": "The attacker uses the Malicious File technique to access the system, abusing legitimate tools or features.",
+      "expert": "이메일 첨부파일, 다운로드 등을 통해 전달된 악성 파일을 사용자가 직접 실행하도록 유도하는 기법입니다. 매크로 문서(Word/Excel), 스크립트 파일(.js/.vbs), 실행파일(.exe/.msi), 압축파일(.zip/.iso) 등 다양한 형태로 전달됩니다.",
+      "expertEn": "Malicious File: This technique leverages legitimate system capabilities for malicious purposes.",
+      "defTooltip": "🔐 악성 파일 실행 유도 기법 탐지!",
+      "defTooltipEn": "🔐 Malicious File technique detected!",
+      "hackerLog": {"title":"attack.log","lines":["[00:00] 악성 파일 실행 유도 시작","[00:05] 시스템 접근","[00:10] 명령 실행","[00:15] 활동 완료"]},
+      "terms": [
+        {"term": "Malicious File", "def": "사용자가 악성 파일을 실행하도록 유도하여 코드 실행"},
+        {"term": "IoC", "def": "Indicator of Compromise, 침해 지표"}
+      ]
+    },
+    {
+      "cmd": "# 악성 파일 실행 유도 공격 실행\n# 매크로 악성 문서 분석\nolevba malicious_invoice.docm\n\n# 이중 확장자 공격",
+      "out": "[공격 실행 결과]\n✅ 명령 실행 성공\n✅ 시스템 접근 확보\n⚠️ 비정상 활동 시작\n\n[수집 정보]\n- 시스템 정보 수집 완료\n- 네트워크 구조 파악\n- 추가 공격 벡터 식별",
+      "def": "[EDR] Suspicious Malicious File execution — abnormal process behavior detected",
+      "defAction": "Tool: Malicious File execution\nStatus: Active\nImpact: System compromised\nRisk Level: Critical\nAction: Isolate system, forensic analysis",
+      "desc": "악성 파일 실행 유도 기법으로 시스템에서 악성 명령을 실행하고 추가 공격을 위한 정보를 수집합니다.",
+      "descEn": "Execute malicious commands via Malicious File and gather information for further attacks.",
+      "stepTitle": "악성 파일 실행 유도 실행 + 정보 수집",
+      "stepTitleEn": "Malicious File Execution + Intelligence Gathering",
+      "feynman": "공격자가 시스템의 정상 도구를 악용하여 명령을 실행합니다. 이 도구가 원래 합법적이기 때문에 보안 솔루션이 쉽게 탐지하지 못합니다.",
+      "feynmanEn": "The attacker abuses legitimate system tools. Since these tools are normally legal, security solutions have difficulty detecting the activity.",
+      "expert": "Malicious File 기법은 MITRE ATT&CK 프레임워크의 Execution 전술에 분류됩니다. 정상 시스템 도구를 악용하는 Living Off the Land(LOL) 기법의 일종으로, 전통적인 시그니처 기반 탐지를 우회합니다.",
+      "expertEn": "Malicious File is classified under Execution in MITRE ATT&CK. As a Living Off the Land technique, it bypasses traditional signature-based detection.",
+      "defTooltip": "🔐 악성 파일 실행 유도 실행 탐지!",
+      "defTooltipEn": "🔐 Malicious File execution detected!",
+      "hackerLog": {"title":"execution.log","lines":["[00:20] 명령 실행 시작","[00:25] 시스템 정보 수집","[00:30] 네트워크 스캔","[00:35] 추가 공격 준비"]},
+      "terms": [
+        {"term": "LOL", "def": "Living Off the Land, 정상 시스템 도구를 악용하는 공격 기법"},
+        {"term": "EDR", "def": "Endpoint Detection and Response, 엔드포인트 위협 탐지 및 대응"}
+      ]
+    },
+    {
+      "cmd": "# 악성 파일 실행 유도 심화 공격\n# 지속성 확보 및 횡이동",
+      "out": "[심화 공격 결과]\n✅ 지속성 확보\n✅ 권한 상승\n✅ 횡이동 시도\n\n[피해 범위]\n- 시스템 완전 장악\n- 내부 네트워크 접근\n- 데이터 유출 가능",
+      "def": "[SIEM] Malicious File — lateral movement and persistence established",
+      "defAction": "Tool: Malicious File + lateral movement\nPersistence: Established\nPrivilege: Elevated\nLateral Movement: Active\nRisk Level: Critical\nAction: Network-wide containment",
+      "desc": "악성 파일 실행 유도를 통해 지속성을 확보하고 내부 네트워크로 횡이동합니다.",
+      "descEn": "Establish persistence via Malicious File and move laterally within the internal network.",
+      "stepTitle": "지속성 확보 + 횡이동",
+      "stepTitleEn": "Persistence + Lateral Movement",
+      "feynman": "공격자가 하나의 문(시스템)을 열고 나서, 그 문이 다시 잠기지 않도록 테이프(지속성)를 붙이고, 다른 방(시스템)으로 이동합니다.",
+      "feynmanEn": "After opening one door (system), the attacker tapes it open (persistence) and moves to other rooms (systems).",
+      "expert": "매크로 차단: 인터넷 출처 Office 매크로 기본 차단 (MS 정책) 확장자 표시: 그룹 정책으로 파일 확장자 항상 표시 ASR 규칙: Office 앱의 자식 프로세스 차단 MOTW 적용: ISO/IMG 파일에도 MOTW 표시 샌드박스: 의심 파일을 격리 환경에서 분석",
+      "expertEn": "Defense measures include monitoring, access control, and regular auditing of Malicious File activities.",
+      "defTooltip": "🔐 지속성 + 횡이동 탐지!",
+      "defTooltipEn": "🔐 Persistence + lateral movement detected!",
+      "hackerLog": {"title":"persist.log","lines":["[00:40] 지속성 메커니즘 설치","[00:45] 권한 상승","[00:50] 횡이동 시작","[00:55] 추가 시스템 장악"]},
+      "terms": [
+        {"term": "Persistence", "def": "지속성, 시스템 재시작 후에도 접근을 유지하는 기법"},
+        {"term": "Lateral Movement", "def": "횡이동, 초기 침투 후 내부 네트워크의 다른 시스템으로 이동"}
+      ]
+    },
+    {
+      "cmd": "# 악성 파일 실행 유도 탐지 및 방어\n# 종합 대응",
+      "out": "[방어 조치]\n✅ 매크로 차단: 인터넷 출처 Office 매크로 기본 차단 (MS 정책)\n✅ 확장자 표시: 그룹 정책으로 파일 확장자 항상 표시\n✅ ASR 규칙: Office 앱의 자식 프로세스 차단\n✅ MOTW 적용: ISO/IMG 파일에도 MOTW 표시\n✅ 샌드박스: 의심 파일을 격리 환경에서 분석\n\n[모니터링]\n✅ SIEM 규칙 적용\n✅ EDR 정책 업데이트\n✅ 정기 감사 시작",
+      "def": "[SIEM] Malicious File defense deployed — comprehensive monitoring and controls",
+      "defAction": "Tool: Defense deployment\nControls: 5 measures implemented\nMonitoring: Active\nRisk Level: Low (with implementation)\nAction: Maintain and quarterly review",
+      "desc": "악성 파일 실행 유도에 대한 종합 방어 체계를 구축합니다. 모니터링, 접근 제어, 정기 감사를 적용합니다.",
+      "descEn": "Build comprehensive defense against Malicious File. Apply monitoring, access control, and regular audits.",
+      "stepTitle": "악성 파일 실행 유도 종합 방어",
+      "stepTitleEn": "Malicious File Comprehensive Defense",
+      "feynman": "여러 겹의 그물(방어 계층)을 쳐서 공격자가 어떤 경로로 들어와도 잡을 수 있게 합니다. 문마다 경보기(모니터링)를 달고, 정기적으로 순찰(감사)합니다.",
+      "feynmanEn": "Cast multiple nets (defense layers) to catch attackers regardless of entry path. Install alarms on every door (monitoring) and patrol regularly (audits).",
+      "expert": "Malicious File 방어는 탐지(Detection), 예방(Prevention), 대응(Response)의 세 축으로 구성됩니다. MITRE D3FEND 프레임워크를 참조하여 각 기법에 맞는 대응 기술을 매핑합니다.",
+      "expertEn": "Malicious File defense consists of Detection, Prevention, and Response. Reference MITRE D3FEND framework to map countermeasures for each technique.",
+      "defTooltip": "🔐 악성 파일 실행 유도 방어 체계 완성!",
+      "defTooltipEn": "🔐 Malicious File defense system complete!",
+      "hackerLog": {"title":"defense.log","lines":["[01:00] 방어 체계 배포","[01:05] SIEM 규칙 적용","[01:10] EDR 정책 업데이트","[01:15] 정기 감사 시작"]},
+      "terms": [
+        {"term": "D3FEND", "def": "MITRE의 방어 기법 프레임워크, ATT&CK 기법에 대한 대응 기술 매핑"},
+        {"term": "Defense in Depth", "def": "심층 방어, 여러 계층의 보안 통제를 적용하는 전략"}
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "init/systemd",
+    "pid": 1,
+    "children": [{
+      "name": "malicious_file",
+      "pid": 1000,
+      "children": [{ "name": "malicious_payload", "pid": 1100, "children": [] }]
+    }]
+  }
+}

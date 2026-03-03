@@ -1,0 +1,192 @@
+{
+  "id": "T1027.002",
+  "title": "Software Packing 시뮬레이션",
+  "titleEn": "Software Packing Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "📦 패킹 수행", "labelEn": "📦 Packing Execution", "steps": [0] },
+    { "label": "🔍 패킹 탐지", "labelEn": "🔍 Packing Detection", "steps": [1, 2] },
+    { "label": "📂 언패킹", "labelEn": "📂 Unpacking", "steps": [3] },
+    { "label": "🛡️ 분석 완료", "labelEn": "🛡️ Analysis Complete", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "malware", "label": "Original\nMalware", "x": 50, "y": 80 },
+    { "id": "packer", "label": "UPX\nPacker", "x": 200, "y": 30 },
+    { "id": "packed", "label": "Packed\nBinary", "x": 200, "y": 130 },
+    { "id": "av", "label": "AV/EDR\n(Bypassed)", "x": 380, "y": 80 },
+    { "id": "exec", "label": "Memory\nExecution", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "malware", "to": "packer", "minStep": 0 },
+    { "from": "packer", "to": "packed", "minStep": 0 },
+    { "from": "packed", "to": "av", "minStep": 1 },
+    { "from": "av", "to": "exec", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Terminal", "icon": "🖥️" },
+    { "name": "malware.exe", "icon": "⚙️" },
+    { "name": "DIE (Detect It Easy)", "icon": "🔍" },
+    { "name": "PE-bear", "icon": "🐻" },
+    { "name": "x64dbg", "icon": "🔬" }
+  ],
+  "steps": [
+    {
+      "cmd": "upx --best -o malware_packed.exe malware_original.exe",
+      "out": "        Ultimate Packer for eXecutables\n   Copyright (C) 1996-2024 UPX 4.2.1\n\n   File size         Ratio      Format      Name\n   ----------   ------   -----------   -----------\n   245760 ->    89088   36.24%    win64/pe    malware_packed.exe\n\nPacked 1 file.\n\n[비교]\nOriginal: 245,760 bytes | SHA256: a1b2c3d4...\nPacked:    89,088 bytes | SHA256: e5f6g7h8...\nCompression: 63.76% 크기 감소\nAV Detection: 47/72 → 3/72 (탐지율 급감!)",
+      "def": "[SIEM] UPX packer execution detected - binary size reduction 63%",
+      "defAction": "Tool: UPX 4.2.1 (Ultimate Packer for eXecutables)\nOriginal: 245,760 bytes (47/72 AV detection)\nPacked: 89,088 bytes (3/72 AV detection)\nCompression: 63.76%\nRisk Level: High\nAction: Flag UPX-packed binaries for additional analysis",
+      "desc": "공격자가 UPX 패커로 악성코드를 압축합니다. 파일 크기가 63% 줄고, 바이너리 시그니처가 완전히 변경되어 AV 탐지율이 47/72에서 3/72로 급감합니다.",
+      "descEn": "The attacker compresses malware with UPX packer. File size reduces by 63%, binary signatures change completely, dropping AV detection from 47/72 to 3/72.",
+      "stepTitle": "UPX 패커로 악성코드 압축 및 시그니처 변경",
+      "stepTitleEn": "Compress Malware and Change Signatures with UPX Packer",
+      "feynman": "악성코드라는 '위험물'을 선물 포장지(UPX)로 감싸는 것입니다. X-ray 검사(AV 시그니처 스캔)는 포장지 안의 내용물을 볼 수 없습니다. 원래 72개 검사 중 47개에 걸리던 것이 포장 후 3개만 걸립니다.",
+      "feynmanEn": "Wrapping 'dangerous goods' (malware) in gift wrapping (UPX). X-ray inspection (AV signature scan) can't see inside the wrapper. Previously caught by 47/72 scanners, now only 3/72 after wrapping.",
+      "expert": "UPX는 PE 실행 파일의 .text/.data 섹션을 LZMA/NRV 알고리즘으로 압축하고, 언패킹 스텁을 .UPX0 섹션에 삽입합니다. 실행 시 스텁이 원본 코드를 메모리에 복원합니다. SHA256 해시가 완전히 변경되어 시그니처 기반 탐지를 우회하며, 정적 분석에서 Import Table이 최소화됩니다.",
+      "expertEn": "UPX compresses PE .text/.data sections with LZMA/NRV algorithms, inserting an unpacking stub in .UPX0. At runtime, the stub restores original code in memory. SHA256 hash changes completely, bypassing signature-based detection.",
+      "defTooltip": "🔐 UPX 패킹으로 AV 탐지율 47/72 → 3/72로 급감!",
+      "defTooltipEn": "🔐 UPX packing drops AV detection from 47/72 to 3/72!",
+      "hackerLog": {
+        "title": "packing.log",
+        "lines": [
+          "[10:00:00] UPX 4.2.1 실행",
+          "[10:00:02] 압축률: 63.76% (245KB → 89KB)",
+          "[10:00:03] SHA256 해시 변경 완료",
+          "[10:00:05] AV 탐지율: 47/72 → 3/72"
+        ]
+      },
+      "terms": [
+        { "term": "UPX", "def": "Ultimate Packer for eXecutables, 오픈소스 실행 파일 압축 도구" },
+        { "term": "Signature-based Detection", "def": "파일 해시나 바이트 패턴으로 악성코드를 탐지하는 방식" }
+      ]
+    },
+    {
+      "cmd": "python3 -c \"import pefile; pe=pefile.PE('malware_packed.exe'); [print(f'Section: {s.Name.decode().strip(chr(0)):10} VirtSize:{s.Misc_VirtualSize:#010x} RawSize:{s.SizeOfRawData:#010x} Entropy:{s.get_entropy():.2f}') for s in pe.sections]\"",
+      "out": "Section: .UPX0      VirtSize:0x00015000 RawSize:0x00000000 Entropy:0.00\nSection: .UPX1      VirtSize:0x00008000 RawSize:0x00007200 Entropy:7.89\nSection: .rsrc      VirtSize:0x00001000 RawSize:0x00000800 Entropy:3.42\n\n[분석 결과]\n.UPX0: RawSize=0 (디스크에 데이터 없음) → 런타임에 언패킹 대상\n.UPX1: 엔트로피 7.89 → 압축/암호화된 데이터\n.rsrc: 엔트로피 3.42 → 정상 리소스\nImport Table: GetProcAddress, LoadLibraryA (2개만!)",
+      "def": "[AV] High entropy section detected (7.89) with zero-size raw sections - packing indicators",
+      "defAction": "Tool: pefile Python analysis\nSections: .UPX0 (empty), .UPX1 (entropy 7.89)\nImports: Only 2 (GetProcAddress, LoadLibraryA)\nPacking Indicators: High entropy, section name, empty sections\nRisk Level: High\nAction: Submit to sandbox for dynamic analysis",
+      "desc": "PE 파일의 섹션을 분석합니다. .UPX0 섹션의 RawSize가 0(디스크에 데이터 없음)이고, .UPX1의 엔트로피가 7.89로 매우 높습니다. Import Table에 GetProcAddress와 LoadLibraryA만 있어 동적 로딩을 사용합니다.",
+      "descEn": "PE file section analysis shows .UPX0 with RawSize=0 (no data on disk) and .UPX1 entropy at 7.89 (very high). Import Table contains only GetProcAddress and LoadLibraryA, indicating dynamic loading.",
+      "stepTitle": "PE 섹션 분석: 엔트로피와 섹션 크기 이상 탐지",
+      "stepTitleEn": "PE Section Analysis: Entropy and Size Anomaly Detection",
+      "feynman": "선물 상자를 흔들어보면(엔트로피 분석) 정상 상자보다 훨씬 묵직하고 균일한 소리가 납니다(7.89/8.0). 라벨을 보면 'UPX'라고 적혀 있고, 빈 칸(RawSize=0)이 있어 실행할 때 내용물이 채워질 것임을 알 수 있습니다.",
+      "feynmanEn": "Shaking the gift box (entropy analysis) reveals it's much denser and more uniform than normal (7.89/8.0). The label says 'UPX' and has empty spaces (RawSize=0) that will be filled when opened.",
+      "expert": "Shannon 엔트로피 7.89는 이론적 최대값 8.0에 근접하여 거의 완전한 무작위/압축 데이터를 나타냅니다. 정상 PE의 .text 섹션은 보통 6.0-6.5입니다. .UPX0의 VirtualSize>0, RawSize=0은 런타임 언패킹을 위한 메모리 예약입니다. Import Table의 최소화는 런타임에 GetProcAddress로 필요한 API를 동적 해석함을 의미합니다.",
+      "expertEn": "Shannon entropy 7.89 approaches the theoretical maximum 8.0, indicating nearly perfect random/compressed data. Normal PE .text sections average 6.0-6.5. .UPX0's VirtualSize>0, RawSize=0 is memory reservation for runtime unpacking.",
+      "defTooltip": "🔐 엔트로피 7.89 탐지! UPX 섹션 이름 확인!",
+      "defTooltipEn": "🔐 Entropy 7.89 detected! UPX section names confirmed!",
+      "hackerLog": {
+        "title": "pe_analysis.log",
+        "lines": [
+          "[10:05:00] PE 헤더 파싱 시작",
+          "[10:05:02] .UPX0: RawSize=0 (빈 섹션)",
+          "[10:05:03] .UPX1: 엔트로피 7.89 (고엔트로피)",
+          "[10:05:05] Import: GetProcAddress, LoadLibraryA만 존재"
+        ]
+      },
+      "terms": [
+        { "term": "Entropy", "def": "데이터의 무작위성 지표, 0(모두 같은 값)~8(완전 무작위)" },
+        { "term": "PE Section", "def": "Portable Executable 파일의 코드/데이터/리소스 구분 영역" }
+      ]
+    },
+    {
+      "cmd": "die malware_packed.exe",
+      "out": "Detect It Easy v3.09\n\nPE64\n  Packer: UPX(3.96w)[NRV,best]\n  Compiler: Microsoft Visual C/C++(2022)\n  Linker: Microsoft Linker(14.36)\n  OS: Windows(10)[AMD64,64-bit]\n\n[추가 YARA 스캔]\nrule UPX_packed {\n  meta: description = \"UPX packed PE file\"\n  match: malware_packed.exe\n  confidence: 99%\n}\n\nrule custom_stub {\n  meta: description = \"Modified UPX stub\"\n  match: NONE (표준 UPX 스텁 사용)\n}",
+      "def": "[AV] Detect It Easy identified UPX 3.96w packer - automated packer detection",
+      "defAction": "Tool: Detect It Easy (DIE) + YARA\nPacker: UPX 3.96w (NRV, best compression)\nCompiler: MSVC 2022\nYARA Match: UPX_packed (99% confidence)\nStub: Standard (not modified)\nRisk Level: High\nAction: Unpack with upx -d, then re-analyze",
+      "desc": "Detect It Easy(DIE) 도구가 UPX 3.96w 패커를 자동 식별합니다. YARA 규칙으로도 UPX 패킹 패턴이 99% 신뢰도로 매칭됩니다. 표준 UPX 스텁을 사용하여 upx -d로 언패킹 가능합니다.",
+      "descEn": "Detect It Easy (DIE) automatically identifies UPX 3.96w packer. YARA rules also match UPX packing patterns with 99% confidence. Standard UPX stub allows unpacking with upx -d.",
+      "stepTitle": "DIE/YARA로 패커 종류 자동 식별",
+      "stepTitleEn": "Automatic Packer Identification with DIE/YARA",
+      "feynman": "선물 포장지의 브랜드를 식별하는 전문가(DIE)를 부르는 것입니다. 포장지의 재질, 테이프 패턴, 접는 방식을 보고 'UPX 3.96w 포장지'라고 정확히 알려줍니다. 이제 어떤 방법으로 포장을 풀어야 하는지 알 수 있습니다.",
+      "feynmanEn": "Calling an expert (DIE) to identify the gift wrapping brand. By examining material, tape pattern, and folding method, they identify it as 'UPX 3.96w wrapping.' Now we know how to unwrap it.",
+      "expert": "DIE는 PE 파일의 Entry Point 코드 패턴, 섹션 헤더 시그니처, IAT(Import Address Table) 구조를 분석하여 패커를 식별합니다. UPX는 고유한 언패킹 스텁 시그니처(PUSHAD/POPAD 시퀀스)를 가지며, NRV 압축 알고리즘의 바이트 시퀀스도 탐지 가능합니다. 수정된 UPX 스텁은 자동 언패킹이 실패할 수 있어 수동 분석이 필요합니다.",
+      "expertEn": "DIE analyzes PE Entry Point code patterns, section header signatures, and IAT structure to identify packers. UPX has unique unpacking stub signatures (PUSHAD/POPAD sequences), and NRV compression byte sequences are detectable.",
+      "defTooltip": "🔐 DIE로 UPX 3.96w 패커 식별! YARA 99% 매칭!",
+      "defTooltipEn": "🔐 UPX 3.96w identified by DIE! YARA 99% match!",
+      "hackerLog": {
+        "title": "packer_id.log",
+        "lines": [
+          "[10:10:00] Detect It Easy 스캔 시작",
+          "[10:10:03] 패커 식별: UPX 3.96w (NRV, best)",
+          "[10:10:05] YARA 매칭: UPX_packed (99%)",
+          "[10:10:07] 스텁 타입: 표준 (언패킹 가능)"
+        ]
+      },
+      "terms": [
+        { "term": "DIE", "def": "Detect It Easy, PE 파일의 패커/컴파일러를 자동 식별하는 도구" },
+        { "term": "YARA", "def": "패턴 매칭 기반 악성코드 분류 규칙 엔진" }
+      ]
+    },
+    {
+      "cmd": "upx -d malware_packed.exe -o malware_unpacked.exe && python3 -c \"import pefile; pe=pefile.PE('malware_unpacked.exe'); print(f'Entropy: {sum(s.get_entropy() for s in pe.sections)/len(pe.sections):.2f}'); print(f'Imports: {len(pe.DIRECTORY_ENTRY_IMPORT)} DLLs')\"",
+      "out": "        Ultimate Packer for eXecutables\n   Copyright (C) 1996-2024 UPX 4.2.1\n\n   File size         Ratio      Format      Name\n   ----------   ------   -----------   -----------\n    245760 <-    89088   36.24%    win64/pe    malware_unpacked.exe\n\nUnpacked 1 file.\n\nEntropy: 5.87\nImports: 12 DLLs\n\n[언패킹 후 분석]\nkernel32.dll: CreateProcess, WriteProcessMemory, VirtualAllocEx\nws2_32.dll: connect, send, recv\nadvapi32.dll: OpenProcessToken, AdjustTokenPrivileges\n\n[AV 재스캔] 탐지율: 3/72 → 52/72 (시그니처 복원!)",
+      "def": "[AV] Unpacked binary reveals C2 and process injection capabilities",
+      "defAction": "Tool: UPX unpacking + re-analysis\nUnpacked Size: 245,760 bytes (original)\nEntropy: 5.87 (normal range)\nImports: 12 DLLs (process injection, networking)\nAV Detection: 52/72 (signatures restored)\nAction: Block hash, deploy IOC across organization",
+      "desc": "upx -d로 언패킹하면 원본 바이너리가 복원됩니다. 엔트로피가 5.87로 정상화되고, Import Table에서 프로세스 인젝션(CreateProcess, WriteProcessMemory)과 네트워크(connect, send) API가 드러납니다. AV 탐지율이 52/72로 복원됩니다.",
+      "descEn": "Unpacking with upx -d restores the original binary. Entropy normalizes to 5.87, Import Table reveals process injection and networking APIs. AV detection restores to 52/72.",
+      "stepTitle": "UPX 언패킹 후 원본 악성코드 분석",
+      "stepTitleEn": "Analyze Original Malware After UPX Unpacking",
+      "feynman": "선물 포장을 벗기면(언패킹) 안에 숨겨진 위험물이 드러납니다. X-ray(AV)가 이제 내용물을 볼 수 있어 탐지율이 52/72로 급증합니다. 프로세스 인젝션 도구와 네트워크 통신 장비가 발견됩니다.",
+      "feynmanEn": "Removing the gift wrapping (unpacking) reveals the hidden dangerous goods. X-ray (AV) can now see the contents, spiking detection to 52/72. Process injection tools and network equipment are found.",
+      "expert": "언패킹 후 IAT가 복원되어 실제 API 의존성이 드러납니다. WriteProcessMemory+VirtualAllocEx는 프로세스 인젝션, ws2_32.dll 함수는 C2 통신, AdjustTokenPrivileges는 권한 상승을 나타냅니다. 정적 분석에서 숨겨졌던 모든 기능이 가시화되어 시그니처 기반 탐지가 다시 작동합니다.",
+      "expertEn": "After unpacking, IAT restoration reveals actual API dependencies. WriteProcessMemory+VirtualAllocEx indicate process injection, ws2_32.dll functions indicate C2, AdjustTokenPrivileges indicates privilege escalation.",
+      "defTooltip": "🔐 언패킹 완료! AV 탐지율 3/72 → 52/72 복원!",
+      "defTooltipEn": "🔐 Unpacking complete! AV detection restored 3/72 → 52/72!",
+      "hackerLog": {
+        "title": "unpack.log",
+        "lines": [
+          "[10:15:00] UPX 언패킹 실행",
+          "[10:15:02] 원본 복원: 245,760 bytes",
+          "[10:15:05] 엔트로피 정상화: 5.87",
+          "[10:15:08] AV 재스캔: 52/72 탐지"
+        ]
+      },
+      "terms": [
+        { "term": "IAT", "def": "Import Address Table, PE 파일이 사용하는 외부 DLL 함수 목록" },
+        { "term": "Process Injection", "def": "다른 프로세스의 메모리에 코드를 삽입하여 실행하는 기법" }
+      ]
+    },
+    {
+      "cmd": "yara -r custom_packer_rules.yar /suspicious/ && Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational';Id=1} | Where-Object { $_.Message -match 'upx|themida|vmprotect' }",
+      "out": "[YARA Scan Results]\nUPX_packed    → 3 matches in /suspicious/\nThemida_v3    → 1 match: /suspicious/updater.exe\nVMProtect_v3  → 0 matches\nCustom_packer → 2 matches (unknown packer)\n\n[Sysmon Event ID 1 - Process Creation]\nTimeCreated: 2026-01-20 08:45:00\nProcess: C:\\Users\\victim\\Downloads\\installer.exe\nHashes: SHA256=x9y8z7...\nParent: explorer.exe\nPacker: Themida v3.1.4 (detected by import pattern)\n\n[대응 조치]\n- 6개 패킹된 바이너리 격리\n- SHA256 해시 IOC 목록에 추가\n- 샌드박스 동적 분석 제출",
+      "def": "[SOC] Organization-wide packed binary hunt - 6 suspicious files identified",
+      "defAction": "Tool: YARA bulk scan + Sysmon correlation\nUPX Packed: 3 files\nThemida Packed: 1 file\nUnknown Packer: 2 files\nTotal Suspicious: 6 binaries\nAction: Quarantine all 6, submit to sandbox, deploy YARA rules to all endpoints",
+      "desc": "YARA 규칙으로 조직 전체의 패킹된 바이너리를 일괄 스캔합니다. UPX 3개, Themida 1개, 알 수 없는 패커 2개가 발견됩니다. Sysmon 이벤트와 상관 분석하여 실행 이력을 확인합니다.",
+      "descEn": "YARA rules scan the entire organization for packed binaries. 3 UPX, 1 Themida, and 2 unknown packer files are found. Sysmon events are correlated to check execution history.",
+      "stepTitle": "YARA 규칙으로 조직 전체 패킹 바이너리 사냥",
+      "stepTitleEn": "Hunt Packed Binaries Across Organization with YARA Rules",
+      "feynman": "건물 전체를 돌며 수상한 선물 포장을 찾는 것입니다. UPX 포장 3개, Themida 포장 1개, 알 수 없는 포장 2개를 발견했습니다. 각 포장의 지문(해시)을 기록하고, 누가 언제 이 포장을 가져왔는지(Sysmon) 추적합니다.",
+      "feynmanEn": "Searching the entire building for suspicious gift wrapping. Found 3 UPX, 1 Themida, 2 unknown. Recording each wrapper's fingerprint (hash) and tracking who brought them (Sysmon).",
+      "expert": "YARA 규칙 배포는 EPP/EDR 에이전트를 통해 모든 엔드포인트에서 실행됩니다. 패커별 고유 시그니처(UPX: PUSHAD/POPAD, Themida: VM handler dispatch table)를 매칭합니다. Sysmon Event ID 1의 해시 필드를 YARA 매칭 결과와 교차 확인하여 실제 실행된 패킹 바이너리를 식별합니다. 알 수 없는 패커는 수동 리버스 엔지니어링이 필요합니다.",
+      "expertEn": "YARA rules are deployed via EPP/EDR agents across all endpoints. Packer-specific signatures (UPX: PUSHAD/POPAD, Themida: VM handler dispatch table) are matched. Sysmon Event ID 1 hashes cross-referenced with YARA results identify executed packed binaries.",
+      "defTooltip": "🔐 조직 전체 스캔: 6개 패킹 바이너리 식별!",
+      "defTooltipEn": "🔐 Organization-wide scan: 6 packed binaries identified!",
+      "hackerLog": {
+        "title": "hunt_results.log",
+        "lines": [
+          "[10:30:00] YARA 일괄 스캔 시작",
+          "[10:30:15] UPX: 3개, Themida: 1개, Unknown: 2개",
+          "[10:30:20] Sysmon 이벤트 상관 분석 완료",
+          "[10:30:25] 6개 바이너리 격리 및 IOC 등록"
+        ]
+      },
+      "terms": [
+        { "term": "Threat Hunting", "def": "능동적으로 네트워크에서 위협을 찾아내는 보안 활동" },
+        { "term": "Sandbox", "def": "격리된 환경에서 악성코드를 실행하여 행위를 분석하는 시스템" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "cmd.exe",
+    "pid": 4100,
+    "children": [
+      {
+        "name": "upx.exe",
+        "pid": 4101,
+        "children": [
+          { "name": "malware_packed.exe", "pid": 4102, "children": [] }
+        ]
+      }
+    ]
+  }
+}

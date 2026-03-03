@@ -1,0 +1,102 @@
+{
+  "tacticId": "t11",
+  "tacticName": "Collection",
+  "tacticNameKo": "수집",
+  "dictionaryTitle": "Collection Dictionary",
+  "bgLogo": "/logo/logo-name-dark-nobg.png",
+  "speedStorageKey": "collection_widget_speed",
+
+  "glossary": {
+    "screen_capture": {
+      "term": "Screen Capture",
+      "fullName": "Screen Capture (T1113)",
+      "analogy": "📸 몰래 화면 스크린샷",
+      "easyDesc": "감염된 컴퓨터의 화면을 주기적으로 캡처하여 사용자가 보고 있는 내용(문서, 이메일, 비밀번호 입력 등)을 훔쳐보는 것",
+      "techDesc": "GDI+ BitBlt API 또는 PrintWindow 함수로 데스크톱/특정 윈도우의 스크린샷을 주기적으로 캡처합니다. JPEG 압축 후 C2 서버로 전송하며, 화면 녹화(Screen Recording)로 확장되기도 합니다"
+    },
+    "keylog_collect": {
+      "term": "Keylogging",
+      "fullName": "Input Capture: Keylogging (T1056.001)",
+      "analogy": "⌨️ 키보드 입력 몰래 녹화",
+      "easyDesc": "사용자가 타이핑하는 모든 내용을 기록하여 비밀번호, 채팅 내용, 검색어 등을 수집하는 것",
+      "techDesc": "SetWindowsHookEx(WH_KEYBOARD_LL) 또는 Raw Input API로 키스트로크를 캡처합니다. 윈도우 타이틀도 함께 기록하여 어떤 애플리케이션에서 입력했는지 매핑합니다"
+    },
+    "email_harvest": {
+      "term": "Email Collection",
+      "fullName": "Email Collection: Local Email Collection (T1114.001)",
+      "analogy": "📬 우편함 통째로 복사",
+      "easyDesc": "Outlook 등 이메일 클라이언트의 데이터 파일(.pst/.ost)을 통째로 복사하여 수년치 이메일을 한꺼번에 확보하는 것",
+      "techDesc": "Outlook의 .pst/.ost 파일을 직접 복사하거나, MAPI/EWS API로 Exchange 사서함을 프로그래밍 방식으로 열거하여 특정 키워드(password, confidential, 계약서)가 포함된 이메일을 수집합니다"
+    },
+    "archive_data": {
+      "term": "Data Staging",
+      "fullName": "Archive Collected Data: Archive via Utility (T1560.001)",
+      "analogy": "📦 훔친 물건 포장하기",
+      "easyDesc": "여러 곳에서 수집한 데이터를 하나의 압축 파일로 모아서 유출 준비를 하는 단계",
+      "techDesc": "7zip, WinRAR, tar 등으로 수집된 파일들을 압축/암호화하여 단일 아카이브로 만듭니다. 암호화된 아카이브는 DLP(데이터 유출 방지) 솔루션의 콘텐츠 검사를 우회합니다"
+    },
+    "clipboard": {
+      "term": "Clipboard Data",
+      "fullName": "Clipboard Data (T1115)",
+      "analogy": "📋 복사-붙여넣기 훔쳐보기",
+      "easyDesc": "사용자가 Ctrl+C로 복사한 텍스트(비밀번호, 계좌번호 등)를 실시간으로 가로채는 것",
+      "techDesc": "GetClipboardData API 또는 AddClipboardFormatListener로 클립보드 변경을 모니터링합니다. 비밀번호 관리자에서 복사된 자격 증명, 암호화폐 지갑 주소 등 민감 데이터를 탈취합니다"
+    }
+  },
+
+  "attackCases": [
+    {
+      "id": 1,
+      "subTechniqueId": "T1113",
+      "subTechniqueName": "Screen Capture",
+      "tactic": "Collection (수집)",
+      "technique": "Screen Capture",
+      "log": "[EDR-ALRT] Process 'svchost_helper.exe' calling GDI+ BitBlt every 30 seconds — 247 JPEG files (38MB total) staged in C:\\Users\\Public\\cache\\.",
+      "report": "공격자는 30초 간격으로 사용자 화면을 캡처하는 스크린샷 모듈을 배포했습니다. 2시간 동안 247장의 스크린샷이 수집되어 재무 보고서, 이메일 내용, 내부 대시보드 화면이 모두 노출되었습니다.",
+      "mechanismTitle": "주기적 스크린 캡처를 통한 시각 정보 수집",
+      "mechanismDesc": "공격자는 GDI+ API를 이용해 활성 데스크톱의 스크린샷을 주기적으로 캡처합니다. JPEG으로 압축하여 용량을 최소화하고, 스테이징 폴더에 누적시킨 뒤 일괄 유출합니다. 키로거로는 캡처할 수 없는 차트, 이미지, 화면 기반 2FA 코드 등의 시각 정보를 탈취합니다.",
+      "animationPreset": "scan",
+      "targets": { "step1": "screen_capture", "step2": "keylog_collect", "step3": "clipboard" }
+    },
+    {
+      "id": 2,
+      "subTechniqueId": "T1114.001",
+      "subTechniqueName": "Local Email Collection",
+      "tactic": "Collection (수집)",
+      "technique": "Email Collection",
+      "log": "[DLP-ALRT] Large file copy detected — 'outlook_backup.pst' (4.7GB) copied from C:\\Users\\CFO\\AppData\\Local\\Microsoft\\Outlook\\ to staging directory.",
+      "report": "공격자는 CFO(최고재무책임자)의 Outlook PST 파일(4.7GB)을 통째로 복사했습니다. 이 파일에는 3년치 이메일, 첨부 파일, 일정이 포함되어 있어 M&A 정보, 재무 전략, 내부 커뮤니케이션이 모두 노출되었습니다.",
+      "mechanismTitle": "Outlook PST 파일 탈취를 통한 이메일 일괄 수집",
+      "mechanismDesc": "Outlook은 로컬에 .pst/.ost 파일로 이메일을 저장합니다. 공격자는 이 파일을 직접 복사하면 수년치 이메일을 한꺼번에 확보할 수 있습니다. PST 파일은 별도 도구 없이 다른 시스템의 Outlook에서 열 수 있으며, 파워셸 스크립트로 키워드 기반 필터링도 가능합니다.",
+      "animationPreset": "query",
+      "targets": { "step1": "email_harvest", "step2": "archive_data" }
+    },
+    {
+      "id": 3,
+      "subTechniqueId": "T1560.001",
+      "subTechniqueName": "Archive via Utility",
+      "tactic": "Collection (수집)",
+      "technique": "Archive Collected Data",
+      "log": "[SIEM-ALRT] 7z.exe executed with AES-256 encryption — archive 'backup_2026Q1.7z' (12.3GB) created from file server share \\\\FS-01\\Confidential\\.",
+      "report": "공격자는 파일 서버의 기밀 폴더에서 수집한 12.3GB의 데이터를 7-Zip으로 AES-256 암호화 압축했습니다. 암호화된 아카이브는 DLP 솔루션이 내용을 검사할 수 없어 유출 탐지가 불가능합니다.",
+      "mechanismTitle": "암호화 압축을 통한 DLP 우회 데이터 패키징",
+      "mechanismDesc": "공격자는 수집한 데이터를 7z 또는 RAR로 암호화 압축합니다. AES-256으로 암호화된 아카이브는 DLP(Data Loss Prevention) 솔루션이 내용을 분석할 수 없으므로, '기밀 문서 유출' 규칙을 트리거하지 않습니다. 파일명도 'backup', 'archive' 등 일상적인 이름으로 위장합니다.",
+      "animationPreset": "flow",
+      "targets": { "step1": "archive_data", "step2": "email_harvest", "step3": "screen_capture" }
+    }
+  ],
+
+  "stepTimings": {
+    "alert": 3000,
+    "context": 4000,
+    "mechanism": 5000,
+    "identified": 5500
+  },
+
+  "speedOptions": [
+    { "label": "0.5x", "value": 0.5 },
+    { "label": "1x", "value": 1 },
+    { "label": "1.5x", "value": 1.5 },
+    { "label": "2x", "value": 2 }
+  ]
+}

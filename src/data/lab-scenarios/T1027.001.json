@@ -1,0 +1,231 @@
+{
+  "id": "T1027.001",
+  "title": "바이너리 패딩 시뮬레이션",
+  "titleEn": "Binary Padding Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "target", "label": "Target PC", "x": 280, "y": 150, "type": "server" },
+    { "id": "av", "label": "Antivirus", "x": 280, "y": 50, "type": "defense" },
+    { "id": "siem", "label": "EDR/SIEM", "x": 480, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "Payload", "activeStep": 0 },
+    { "from": "target", "to": "av", "label": "AV Bypass", "activeStep": 3 },
+    { "from": "target", "to": "target", "label": "Execute", "activeStep": 6 },
+    { "from": "target", "to": "siem", "label": "Behavioral Alert", "activeStep": 6 }
+  ],
+  "desktopIcons": [
+    { "label": "Payload", "icon": "🦠", "alertOnStep": 0 },
+    { "label": "Junk Data", "icon": "📄", "alertOnStep": 2 },
+    { "label": "Padded EXE", "icon": "💻", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "dir C:\\Users\\{userName}\\malware\\payload.exe",
+      "out": " Volume in drive C has no label.\n Volume Serial Number is 4A3B-8C1D\n\n Directory of C:\\Users\\{userName}\\malware\n\n03/01/2026  10:15 AM            45,056 payload.exe\n               1 File(s)         45,056 bytes\n               0 Dir(s)  120,345,600 free",
+      "def": "[EDR] Suspicious executable detected in user directory",
+      "defAction": "File: C:\\Users\\{userName}\\malware\\payload.exe\nSize: 45,056 bytes\nHash: 7f83b1657ff1fc53b92dc18148a1d65d\nVirusTotal: 48/72 detections\nRisk Level: Critical\nAction: File quarantined",
+      "desc": "원본 악성 파일의 크기를 확인합니다. 45KB 크기의 파일은 대부분의 안티바이러스에서 시그니처 기반으로 쉽게 탐지됩니다.",
+      "descEn": "Checks the size of the original malicious file. A 45KB file is easily detected by most antivirus solutions through signature-based detection.",
+      "stepTitle": "원본 악성코드 확인",
+      "stepTitleEn": "Original Malware Check",
+      "feynman": "경찰이 수배 중인 범인의 얼굴 사진이 있는 것과 같습니다. 45KB 크기의 악성 파일은 이미 모든 보안 업체에 '지명수배'되어 있어, 그대로 사용하면 즉시 잡힙니다.",
+      "feynmanEn": "It's like police having a wanted poster with the criminal's photo. The 45KB malicious file is already 'wanted' by all security vendors, so using it as-is means immediate detection.",
+      "expert": "45KB 악성코드의 SHA-256 해시가 VirusTotal에서 48/72 탐지율을 보이므로, 시그니처 기반 AV에서 거의 확실히 차단됩니다. 바이너리 패딩은 해시를 변경하여 시그니처 매칭을 우회하는 가장 기본적인 AV 회피 기법(T1027.001)입니다.",
+      "expertEn": "With 48/72 detection rate on VirusTotal, the 45KB malware's SHA-256 hash is almost certainly blocked by signature-based AV. Binary padding is the most basic AV evasion technique (T1027.001), changing the hash to bypass signature matching.",
+      "defTooltip": "EDR에서 알려진 악성코드 해시 목록(IoC)을 지속적으로 업데이트하세요. VirusTotal API를 통한 자동화된 해시 조회를 SIEM에 통합합니다.",
+      "defTooltipEn": "Continuously update known malware hash lists (IoC) in EDR. Integrate automated hash lookups via VirusTotal API into SIEM.",
+      "hackerLog": {
+        "title": "payload_check.log",
+        "lines": [
+          { "log": "dir ...\\malware\\payload.exe", "desc": "💡 원본 악성 파일의 크기를 확인하여 패딩 전 상태를 파악합니다" },
+          { "log": "45,056 payload.exe", "desc": "💡 45KB 크기의 파일 - AV 시그니처 DB에 등록된 알려진 악성코드입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Signature-based Detection", "desc": "파일의 해시값이나 바이트 패턴을 알려진 악성코드 DB와 비교하는 탐지 방식입니다" },
+        { "term": "VirusTotal", "desc": "70개 이상의 AV 엔진으로 파일과 URL을 검사하는 온라인 분석 서비스입니다" }
+      ]
+    },
+    {
+      "cmd": "copy /b payload.exe+NUL payload_padded.exe",
+      "out": "        1 file(s) copied.",
+      "def": "[EDR] Binary copy with NUL append detected",
+      "defAction": "Process: cmd.exe -> copy /b (binary mode)\nSource: payload.exe\nOperation: NUL byte append\nRisk Level: Medium\nAction: Monitor output file",
+      "desc": "바이너리 모드로 파일을 복사하면서 NUL 바이트를 추가합니다. 기본적인 패딩 기법의 시작 단계입니다.",
+      "descEn": "Copies the file in binary mode while appending NUL bytes. This is the beginning of a basic padding technique.",
+      "stepTitle": "NUL 바이트 패딩",
+      "stepTitleEn": "NUL Byte Padding",
+      "feynman": "수배 전단지의 사진에 선글라스를 그려 넣는 것과 같습니다. NUL 바이트를 추가하면 파일의 '지문'(해시)이 미세하게 변하여 단순한 사진 대조(시그니처 매칭)를 피할 수 있습니다.",
+      "feynmanEn": "It's like drawing sunglasses on a wanted poster photo. Adding NUL bytes slightly changes the file's 'fingerprint' (hash), evading simple photo matching (signature matching).",
+      "expert": "copy /b의 바이너리 모드에서 NUL 디바이스를 연결하면 0x00 바이트가 추가됩니다. PE(Portable Executable) 포맷에서 헤더에 정의된 크기만 실행되므로, 패딩된 데이터는 PE 로더에 의해 무시됩니다. 이는 가장 원시적인 형태의 해시 변경 기법입니다.",
+      "expertEn": "In copy /b binary mode, concatenating the NUL device appends 0x00 bytes. In PE (Portable Executable) format, only the size defined in headers is executed, so padded data is ignored by the PE loader. This is the most primitive form of hash modification.",
+      "defTooltip": "Sysmon Event ID 1에서 copy /b 명령과 NUL 디바이스 결합을 모니터링하세요. 실행 파일(.exe, .dll)에 대한 바이너리 결합 작업은 의심스러운 활동입니다.",
+      "defTooltipEn": "Monitor copy /b commands combined with NUL device in Sysmon Event ID 1. Binary concatenation operations on executable files (.exe, .dll) are suspicious activities.",
+      "hackerLog": {
+        "title": "nul_padding.log",
+        "lines": [
+          { "log": "copy /b payload.exe+NUL payload_padded.exe", "desc": "💡 바이너리 모드로 악성 파일에 NUL 바이트를 추가하여 해시를 변경합니다" },
+          { "log": "1 file(s) copied.", "desc": "💡 패딩된 파일이 새로운 해시값을 가지게 되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Binary Padding", "desc": "파일 끝에 쓸모없는 데이터를 추가하여 해시를 변경하는 AV 회피 기법입니다" },
+        { "term": "NUL Device", "desc": "Windows에서 빈 데이터(0x00)를 생성하는 특수 디바이스로, 파일에 널 바이트를 추가할 때 사용됩니다" }
+      ]
+    },
+    {
+      "cmd": "fsutil file createnew junk.bin 104857600",
+      "out": "File C:\\Users\\{userName}\\malware\\junk.bin is created\nNew file length: 104857600 bytes (100 MB)",
+      "def": "[SIEM] Large file creation detected - potential binary padding preparation",
+      "defAction": "Process: fsutil.exe\nFile: junk.bin (100 MB)\nContent: Null bytes\nRisk Level: Medium\nAction: Correlate with nearby malware artifacts",
+      "desc": "100MB 크기의 정크 파일을 생성합니다. 이 데이터를 악성 파일에 추가하여 해시를 변경하고 AV 스캔을 회피합니다.",
+      "descEn": "Creates a 100MB junk file. This data will be appended to the malicious file to change its hash and evade AV scanning.",
+      "stepTitle": "정크 데이터 생성",
+      "stepTitleEn": "Junk Data Generation",
+      "feynman": "범인이 두꺼운 외투를 입어 체형을 바꾸는 것과 같습니다. 100MB의 쓸모없는 데이터를 만들어 악성 파일에 입히면, 원래 45KB 파일과는 완전히 다른 '체형'(해시)을 가지게 됩니다.",
+      "feynmanEn": "It's like a fugitive wearing a thick coat to change their body shape. Creating 100MB of useless data to 'wear over' the malware gives it a completely different 'figure' (hash) from the original 45KB file.",
+      "expert": "fsutil은 Windows 내장 도구(LOLBin)로, 탐지가 어렵습니다. 100MB의 NUL 패딩은 일부 AV의 최대 스캔 크기 제한(기본 50~100MB)을 초과하여 스캔을 아예 건너뛰게 만들 수 있습니다. 이는 의도적인 AV 스캔 제한 우회 기법입니다.",
+      "expertEn": "fsutil is a Windows built-in tool (LOLBin), making detection difficult. 100MB NUL padding can exceed some AV's maximum scan size limits (default 50-100MB), causing scans to be skipped entirely. This is an intentional AV scan limit bypass technique.",
+      "defTooltip": "Sysmon Event ID 11에서 100MB 이상의 파일이 갑자기 생성되는 이벤트를 모니터링하세요. 특히 같은 디렉토리에 실행 파일이 있는 경우 바이너리 패딩 준비일 수 있습니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 11 for files over 100MB suddenly created. If executable files exist in the same directory, it may indicate binary padding preparation.",
+      "hackerLog": {
+        "title": "junk_creation.log",
+        "lines": [
+          { "log": "fsutil file createnew junk.bin 104857600", "desc": "💡 100MB 크기의 널 바이트로 채워진 정크 파일을 생성합니다" },
+          { "log": "New file length: 104857600 bytes (100 MB)", "desc": "💡 AV 스캔 크기 제한을 초과시킬 수 있는 대용량 패딩 데이터입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "fsutil", "desc": "Windows 내장 파일 시스템 유틸리티로, 파일 생성, 디스크 관리 등에 사용됩니다" },
+        { "term": "LOLBin (Living off the Land Binary)", "desc": "운영체제에 기본 설치된 도구를 악용하여 공격하는 기법으로, 별도 도구 설치가 불필요합니다" }
+      ]
+    },
+    {
+      "cmd": "copy /b payload.exe + junk.bin payload_fat.exe",
+      "out": "        1 file(s) copied.\n\n C:\\Users\\{userName}\\malware\\payload_fat.exe - 104,902,656 bytes",
+      "def": "[EDR] ALERT: Binary concatenation - payload.exe merged with junk data",
+      "defAction": "Process: cmd.exe -> copy /b\nInput: payload.exe (45KB) + junk.bin (100MB)\nOutput: payload_fat.exe (100MB)\nRisk Level: High\nAction: Hash mismatch with known malware - deep scan required",
+      "desc": "원본 악성코드와 정크 데이터를 결합하여 100MB짜리 새 파일을 만듭니다. 해시 값이 완전히 달라져 시그니처 탐지를 우회합니다.",
+      "descEn": "Combines the original malware with junk data to create a new 100MB file. The hash value completely changes, bypassing signature detection.",
+      "stepTitle": "패딩된 악성코드 생성",
+      "stepTitleEn": "Padded Malware Creation",
+      "feynman": "원래 작은 범인이 큰 탈인형 안에 들어가는 것과 같습니다. 45KB 악성코드가 100MB의 껍데기 안에 숨으면, 경찰(AV)의 수배 사진과 전혀 다르게 보입니다. 하지만 탈인형을 벗으면(실행하면) 원래 범인이 나타납니다.",
+      "feynmanEn": "It's like a small criminal hiding inside a large mascot costume. The 45KB malware hidden in a 100MB shell looks completely different from the police (AV) wanted poster. But when the costume comes off (execution), the original criminal appears.",
+      "expert": "copy /b의 바이너리 결합에서 PE 헤더의 SizeOfImage와 각 섹션의 VirtualSize는 변경되지 않으므로, PE 로더는 원래 45KB 부분만 메모리에 매핑합니다. 이 기법은 정적 분석을 우회하지만, 동적/행위 분석에서는 동일하게 탐지됩니다.",
+      "expertEn": "In copy /b binary concatenation, PE header's SizeOfImage and each section's VirtualSize remain unchanged, so the PE loader only maps the original 45KB portion into memory. This technique bypasses static analysis but is equally detected by dynamic/behavioral analysis.",
+      "defTooltip": "AV/EDR에서 파일 크기가 비정상적으로 큰 실행 파일(PE 헤더 크기와 실제 파일 크기 불일치)을 탐지 규칙으로 설정하세요. PE 섹션 분석으로 패딩을 식별할 수 있습니다.",
+      "defTooltipEn": "Set AV/EDR detection rules for executables with abnormally large file sizes (mismatch between PE header size and actual file size). PE section analysis can identify padding.",
+      "hackerLog": {
+        "title": "binary_concat.log",
+        "lines": [
+          { "log": "copy /b payload.exe + junk.bin payload_fat.exe", "desc": "💡 45KB 악성코드와 100MB 정크를 결합하여 새로운 파일을 생성합니다" },
+          { "log": "payload_fat.exe - 104,902,656 bytes", "desc": "💡 100MB 크기의 패딩된 악성코드 - 원본과 완전히 다른 해시를 가집니다" }
+        ]
+      },
+      "terms": [
+        { "term": "PE (Portable Executable)", "desc": "Windows 실행 파일(.exe, .dll) 형식으로, 헤더에 코드 크기와 메모리 매핑 정보가 정의됩니다" },
+        { "term": "Hash Evasion", "desc": "파일 내용을 변경하여 해시값을 바꿔 시그니처 기반 탐지를 우회하는 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "certutil -hashfile payload.exe SHA256 && certutil -hashfile payload_fat.exe SHA256",
+      "out": "SHA256 hash of payload.exe:\n7f83b1657ff1fc53b92dc18148a1d65dfc5d7c03e6e1f3b7e6d5c4a3b2f1e0d9\n\nSHA256 hash of payload_fat.exe:\na1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2\n\nCertUtil: -hashfile command completed successfully.",
+      "def": "[SIEM] Hash comparison reveals different signatures for functionally identical malware",
+      "defAction": "File 1: payload.exe -> SHA256: 7f83b165... (KNOWN MALWARE)\nFile 2: payload_fat.exe -> SHA256: a1b2c3d4... (UNKNOWN)\nRisk Level: High\nAction: Submit to sandbox for behavioral analysis",
+      "desc": "두 파일의 해시를 비교합니다. 기능은 동일하지만 해시가 완전히 다르므로 정적 시그니처 기반 탐지를 우회할 수 있습니다.",
+      "descEn": "Compares the hashes of both files. Although functionally identical, the completely different hash can bypass static signature-based detection.",
+      "stepTitle": "해시 변경 확인",
+      "stepTitleEn": "Hash Change Verification",
+      "feynman": "같은 범인인데 지문이 완전히 달라진 것과 같습니다. 두 파일은 실행하면 동일한 악성 행위를 하지만, '디지털 지문'(SHA-256 해시)이 완전히 달라서 경찰의 지문 DB(시그니처 DB)에서 검색되지 않습니다.",
+      "feynmanEn": "It's like the same criminal but with completely different fingerprints. Both files perform identical malicious actions when executed, but their 'digital fingerprints' (SHA-256 hashes) are completely different, not matching in the police fingerprint DB (signature DB).",
+      "expert": "SHA-256은 1비트 변경에도 완전히 다른 해시를 생성합니다(눈사태 효과). 시그니처 기반 AV는 정확한 해시 매칭에 의존하므로, 패딩으로 해시가 변경되면 탐지할 수 없습니다. 이를 보완하기 위해 Fuzzy Hashing(ssdeep), YARA 규칙, 행위 기반 탐지가 필요합니다.",
+      "expertEn": "SHA-256 produces completely different hashes with even 1-bit change (avalanche effect). Signature-based AV relies on exact hash matching, so padding-changed hashes are undetectable. Fuzzy Hashing (ssdeep), YARA rules, and behavioral detection are needed to compensate.",
+      "defTooltip": "ssdeep(Fuzzy Hash)을 사용하여 유사한 바이너리를 탐지하세요. 기존 악성코드와 높은 유사도를 보이는 파일을 자동으로 플래그합니다. YARA 규칙에서 PE 섹션 내 바이트 패턴 매칭도 효과적입니다.",
+      "defTooltipEn": "Use ssdeep (Fuzzy Hash) to detect similar binaries. Automatically flag files showing high similarity to known malware. YARA rules with byte pattern matching within PE sections are also effective.",
+      "hackerLog": {
+        "title": "hash_compare.log",
+        "lines": [
+          { "log": "SHA256 of payload.exe: 7f83b165...", "desc": "💡 원본 악성코드의 해시 - AV 시그니처 DB에 등록된 알려진 해시입니다" },
+          { "log": "SHA256 of payload_fat.exe: a1b2c3d4...", "desc": "💡 패딩 후 해시가 완전히 변경되어 시그니처 탐지를 우회합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "SHA-256", "desc": "256비트 해시를 생성하는 암호학적 해시 함수로, 파일의 고유한 디지털 지문 역할을 합니다" },
+        { "term": "Fuzzy Hashing (ssdeep)", "desc": "파일 간 유사도를 비교하는 해시 기법으로, 약간 변형된 악성코드도 탐지할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"$bytes = [IO.File]::ReadAllBytes('payload.exe'); $random = New-Object byte[] 52428800; (New-Object Random).NextBytes($random); $result = $bytes + $random; [IO.File]::WriteAllBytes('payload_random.exe', $result)\"",
+      "out": "PS C:\\Users\\{userName}\\malware> [File written: payload_random.exe - 52,473,856 bytes]",
+      "def": "[EDR] ALERT: PowerShell writing random-padded executable",
+      "defAction": "Process: powershell.exe\nOperation: Read malware + random byte generation + write\nOutput: payload_random.exe (50MB)\nRisk Level: Critical\nAction: Block execution, AMSI scan triggered",
+      "desc": "랜덤 바이트로 패딩하여 더 고급스러운 회피를 시도합니다. NUL 패딩과 달리 엔트로피 분석으로도 패딩을 식별하기 어렵습니다.",
+      "descEn": "Attempts more advanced evasion by padding with random bytes. Unlike NUL padding, entropy analysis makes it harder to identify the padding.",
+      "stepTitle": "랜덤 바이트 패딩",
+      "stepTitleEn": "Random Byte Padding",
+      "feynman": "범인이 외투 대신 군중 속에 섞이는 것과 같습니다. NUL(0) 패딩은 '빈 외투'라서 쉽게 발각되지만, 랜덤 바이트 패딩은 '진짜 데이터'처럼 보여 보안 도구의 '빈 공간 탐지'를 속일 수 있습니다.",
+      "feynmanEn": "It's like a criminal blending into a crowd instead of wearing a coat. NUL (0) padding is an 'empty coat' easily spotted, but random byte padding looks like 'real data', fooling security tools' 'empty space detection'.",
+      "expert": "NUL 패딩(엔트로피 ≈ 0)은 PE 분석에서 쉽게 식별되지만, 랜덤 패딩(엔트로피 ≈ 8.0)은 암호화된 데이터나 압축 데이터와 구분이 어렵습니다. 고급 EDR은 PE 섹션별 엔트로피 분석, 코드/데이터 비율 분석, 실행 코드 커버리지 분석을 통해 패딩을 탐지합니다.",
+      "expertEn": "NUL padding (entropy ≈ 0) is easily identified in PE analysis, but random padding (entropy ≈ 8.0) is difficult to distinguish from encrypted or compressed data. Advanced EDRs detect padding through per-PE-section entropy analysis, code/data ratio analysis, and execution code coverage analysis.",
+      "defTooltip": "PE 분석 도구에서 섹션별 엔트로피를 검사하세요. 실행 코드 섹션(.text)과 비실행 영역의 엔트로피 차이가 큰 파일은 패딩된 악성코드일 수 있습니다.",
+      "defTooltipEn": "Inspect per-section entropy in PE analysis tools. Files with large entropy differences between code sections (.text) and non-executable areas may be padded malware.",
+      "hackerLog": {
+        "title": "random_padding.log",
+        "lines": [
+          { "log": "(New-Object Random).NextBytes($random)", "desc": "💡 50MB의 랜덤 바이트를 생성하여 NUL 패딩보다 고급스러운 회피를 시도합니다" },
+          { "log": "payload_random.exe - 52,473,856 bytes", "desc": "💡 랜덤 패딩된 50MB 악성코드 - 엔트로피 분석으로도 패딩 식별이 어렵습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Entropy Analysis", "desc": "파일의 데이터 무작위성을 측정하는 분석 기법으로, 암호화/압축/패딩 여부를 판단합니다" },
+        { "term": "Random Padding", "desc": "랜덤 바이트로 파일을 패딩하여 엔트로피 기반 탐지도 우회하는 고급 회피 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "payload_fat.exe",
+      "out": "[payload_fat.exe executing...]\n[PE loader reads only first 45,056 bytes]\n[Junk data ignored by PE parser]\n[Malware functionality intact]\n[Reverse shell established to 10.0.0.50:4443]\n\nWindows Defender: No threats found (hash not in signature database)",
+      "def": "[EDR] CRITICAL: Padded executable running - behavioral detection triggered despite hash evasion",
+      "defAction": "Process: payload_fat.exe (PID: 8200)\nBehavior: Reverse shell to 10.0.0.50:4443\nStatic Detection: MISSED (unknown hash)\nBehavioral Detection: CAUGHT\nRisk Level: Critical\nAction: Process killed, endpoint isolated",
+      "desc": "패딩된 악성 파일을 실행합니다. PE 로더는 정크 데이터를 무시하고 원본 코드만 실행합니다. 해시 기반 탐지는 우회했지만 행위 기반 탐지에 걸립니다.",
+      "descEn": "Executes the padded malicious file. The PE loader ignores the junk data and executes only the original code. Hash-based detection is bypassed but behavioral detection catches it.",
+      "stepTitle": "패딩 악성코드 실행",
+      "stepTitleEn": "Padded Malware Execution",
+      "feynman": "변장한 범인이 결국 범죄를 저지르면 잡히는 것과 같습니다. 겉모습(해시)은 바꿨지만, 실행 후 행동(리버스 쉘 연결)은 동일합니다. 시그니처 기반 AV는 속았지만, 행위 기반 EDR은 '이 프로그램의 행동이 수상하다'고 탐지합니다.",
+      "feynmanEn": "It's like a disguised criminal eventually getting caught when committing the crime. The appearance (hash) changed, but post-execution behavior (reverse shell connection) is the same. Signature-based AV is fooled, but behavioral EDR detects 'this program's behavior is suspicious'.",
+      "expert": "PE 로더는 PE 헤더의 AddressOfEntryPoint에서 실행을 시작하고, 각 섹션의 VirtualSize만큼만 메모리에 매핑합니다. 따라서 패딩 데이터는 절대 실행되지 않습니다. 이는 정적 분석(해시, YARA)은 우회하지만, 동적 분석(샌드박스, 행위 분석)에서는 원본과 동일하게 탐지됩니다.",
+      "expertEn": "The PE loader starts execution at PE header's AddressOfEntryPoint, mapping only each section's VirtualSize into memory. Padding data is never executed. This bypasses static analysis (hash, YARA) but is identically detected by dynamic analysis (sandbox, behavioral).",
+      "defTooltip": "행위 기반 탐지(EDR)에서 리버스 쉘 연결 패턴, 비정상 네트워크 연결을 모니터링하세요. AV 스캔 크기 제한을 제거하거나 증가시켜 대용량 파일도 스캔하도록 설정합니다.",
+      "defTooltipEn": "Monitor reverse shell connection patterns and abnormal network connections in behavioral detection (EDR). Remove or increase AV scan size limits to scan large files.",
+      "hackerLog": {
+        "title": "execution.log",
+        "lines": [
+          { "log": "PE loader reads only first 45,056 bytes", "desc": "💡 PE 로더가 원본 코드만 읽고 패딩 데이터는 무시합니다" },
+          { "log": "Reverse shell established to 10.0.0.50:4443", "desc": "💡 해시 우회에 성공했지만 행위 기반 EDR에서 리버스 쉘을 탐지합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Behavioral Detection", "desc": "프로그램의 실행 행위(네트워크 연결, 파일 접근 등)를 분석하여 악성 여부를 판단하는 탐지 방식입니다" },
+        { "term": "PE Loader", "desc": "Windows가 실행 파일을 메모리에 로드하고 실행을 시작하는 시스템 컴포넌트입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 2100)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "dir (file enumeration)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "copy /b (binary concat)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "fsutil.exe (junk generation)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "certutil.exe (hash check)", "depth": 2, "alert": false, "minStep": 4 },
+    { "name": "powershell.exe (random padding)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "payload_fat.exe (PID: 8200)", "depth": 1, "alert": true, "minStep": 6 },
+    { "name": "reverse_shell (10.0.0.50:4443)", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

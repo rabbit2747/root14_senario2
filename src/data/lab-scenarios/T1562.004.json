@@ -1,0 +1,149 @@
+{
+  "id": "T1562.004",
+  "title": "Disable or Modify System Firewall 시뮬레이션",
+  "titleEn": "Disable or Modify System Firewall Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "🔥 방화벽 비활성화", "labelEn": "🔥 Firewall Disable", "steps": [0] },
+    { "label": "📋 위장 규칙 추가", "labelEn": "📋 Disguised Rule", "steps": [1] },
+    { "label": "🐧 Linux iptables", "labelEn": "🐧 Linux iptables", "steps": [2] },
+    { "label": "🔍 탐지", "labelEn": "🔍 Detection", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Admin)", "x": 50, "y": 80 },
+    { "id": "firewall", "label": "System\nFirewall", "x": 200, "y": 80 },
+    { "id": "c2rule", "label": "C2 Allow\nRule", "x": 350, "y": 30 },
+    { "id": "disabled", "label": "Firewall\nDisabled", "x": 350, "y": 130 },
+    { "id": "c2", "label": "C2\nServer", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "firewall", "minStep": 0 },
+    { "from": "firewall", "to": "c2rule", "minStep": 1 },
+    { "from": "firewall", "to": "disabled", "minStep": 0 },
+    { "from": "c2rule", "to": "c2", "minStep": 1 },
+    { "from": "disabled", "to": "c2", "minStep": 0 }
+  ],
+  "desktopIcons": [
+    { "name": "PowerShell (Admin)", "icon": "⚡" },
+    { "name": "Windows Firewall", "icon": "🔥" },
+    { "name": "netsh", "icon": "🔧" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "iptables", "icon": "🐧" }
+  ],
+  "steps": [
+    {
+      "cmd": "netsh advfirewall set allprofiles state off\nnetsh advfirewall show allprofiles state",
+      "out": "Ok.\n\nDomain Profile:\n  State: OFF\nPrivate Profile:\n  State: OFF\nPublic Profile:\n  State: OFF\n\n[영향 분석]\n- 모든 인바운드 규칙 무효화\n- 모든 아웃바운드 규칙 무효화\n- 노출 포트: 445(SMB), 3389(RDP), 5985(WinRM), 135(RPC)\n- C2 통신: 제한 없음\n- 횡적 이동: 모든 포트 접근 가능",
+      "def": "[SIEM] Windows Firewall disabled on all profiles - Event ID 2003",
+      "defAction": "Tool: netsh advfirewall\nProfiles Disabled: Domain, Private, Public\nExposed Ports: 445, 3389, 5985, 135\nEvent ID: 2003 (Firewall setting changed)\nRisk Level: Critical\nAction: Re-enable firewall via GPO, investigate",
+      "desc": "netsh advfirewall set allprofiles state off로 모든 방화벽 프로필을 비활성화합니다. SMB, RDP, WinRM 등 관리 포트가 노출되어 횡적 이동과 C2 통신이 자유로워집니다.",
+      "descEn": "netsh disables all firewall profiles. Management ports like SMB, RDP, WinRM are exposed, enabling unrestricted lateral movement and C2 communication.",
+      "stepTitle": "netsh로 Windows 방화벽 전체 비활성화",
+      "stepTitleEn": "Disable All Windows Firewall Profiles via netsh",
+      "feynman": "성벽(방화벽)의 모든 문을 열어놓는 것입니다. 동문(Domain), 서문(Private), 남문(Public) 모두 열려서 누구든 자유롭게 드나들 수 있습니다. 특히 관리실 입구(445, 3389)가 완전히 노출됩니다.",
+      "feynmanEn": "Opening all gates of the castle wall (firewall). East gate (Domain), west gate (Private), south gate (Public) all open for anyone to freely enter. Management office entrances (445, 3389) are fully exposed.",
+      "expert": "netsh advfirewall은 WFP(Windows Filtering Platform) 규칙을 관리합니다. set allprofiles state off는 모든 프로필의 방화벽 정책을 비활성화하여 WFP 필터링을 중단합니다. Event ID 2003(A Windows Defender Firewall setting has changed)이 기록됩니다. GPO로 'Windows Defender Firewall: Protect all network connections' 정책을 적용하면 로컬 비활성화를 방지합니다.",
+      "expertEn": "netsh advfirewall manages WFP rules. set allprofiles state off disables firewall policies, stopping WFP filtering. Event ID 2003 is logged. GPO 'Protect all network connections' prevents local disable.",
+      "defTooltip": "🔐 방화벽 전체 비활성화! 모든 포트 노출!",
+      "defTooltipEn": "🔐 All firewall profiles disabled! All ports exposed!",
+      "hackerLog": { "title": "fw_disable.log", "lines": ["[09:30:00] 방화벽 전체 비활성화", "[09:30:01] Domain/Private/Public: OFF", "[09:30:02] 모든 포트 노출", "[09:30:03] Event ID 2003 기록"] },
+      "terms": [
+        { "term": "WFP", "def": "Windows Filtering Platform, 네트워크 패킷 필터링 프레임워크" },
+        { "term": "netsh advfirewall", "def": "Windows 방화벽을 명령줄에서 관리하는 유틸리티" }
+      ]
+    },
+    {
+      "cmd": "netsh advfirewall firewall add rule name=\"Windows Update Service\" dir=in action=allow protocol=TCP localport=4444 profile=any\nnetsh advfirewall firewall add rule name=\"System Diagnostic\" dir=out action=allow program=\"C:\\temp\\beacon.exe\" profile=any",
+      "out": "Ok.\nOk.\n\n[추가된 규칙]\n1. \"Windows Update Service\" (인바운드)\n   Protocol: TCP | Port: 4444 | Action: Allow | Profile: Any\n   → C2 리버스 쉘 포트 허용!\n\n2. \"System Diagnostic\" (아웃바운드)\n   Program: C:\\temp\\beacon.exe | Action: Allow | Profile: Any\n   → 악성코드 아웃바운드 통신 허용!\n\n[위장] 정상 서비스 이름을 사용하여 규칙 감사에서 발견하기 어려움",
+      "def": "[SIEM] New firewall rules added with legitimate-sounding names - potential C2 port opening",
+      "defAction": "Tool: netsh firewall rule add\nRule 1: 'Windows Update Service' → TCP 4444 inbound (C2!)\nRule 2: 'System Diagnostic' → beacon.exe outbound\nDisguise: Legitimate service names\nRisk Level: Critical\nAction: Remove rules, block port 4444, quarantine beacon.exe",
+      "desc": "정상 서비스 이름('Windows Update Service')으로 위장한 인바운드 규칙으로 C2 포트(4444)를 허용하고, 악성코드의 아웃바운드 통신을 허용하는 규칙을 추가합니다.",
+      "descEn": "Adds an inbound rule disguised as 'Windows Update Service' to allow C2 port (4444), and an outbound rule allowing malware communication.",
+      "stepTitle": "위장 이름으로 C2 포트 허용 방화벽 규칙 추가",
+      "stepTitleEn": "Add Disguised Firewall Rules to Allow C2 Port",
+      "feynman": "성벽에 새로운 비밀 통로를 만들고 '수도관'이라고 이름표를 붙이는 것입니다. 성벽 관리자가 점검할 때 정상적인 시설로 착각합니다. 실제로는 이 통로로 범인이 자유롭게 드나듭니다.",
+      "feynmanEn": "Creating a secret tunnel in the castle wall and labeling it 'Water Pipe.' When the wall manager inspects, they think it's a normal facility. In reality, criminals freely pass through.",
+      "expert": "netsh firewall add rule은 WFP에 새 규칙을 추가합니다. name 파라미터에 'Windows Update Service'처럼 정상적인 이름을 사용하면 수동 감사에서 발견하기 어렵습니다. profile=any는 모든 네트워크 프로필에 적용됩니다. 방어를 위해 GPO로 방화벽 규칙 추가를 제한하고, Event ID 2004(A rule has been added)를 모니터링해야 합니다.",
+      "expertEn": "netsh adds new WFP rules. Using legitimate names like 'Windows Update Service' makes manual audits difficult. profile=any applies across all network profiles. GPO can restrict rule additions; Event ID 2004 monitors rule creation.",
+      "defTooltip": "🔐 위장 규칙! 'Windows Update Service'로 C2 포트 4444 허용!",
+      "defTooltipEn": "🔐 Disguised rule! 'Windows Update Service' allows C2 port 4444!",
+      "hackerLog": { "title": "disguised_rule.log", "lines": ["[09:35:00] 위장 규칙 1: Windows Update Service (4444)", "[09:35:02] 위장 규칙 2: System Diagnostic (beacon.exe)", "[09:35:03] Event ID 2004 기록", "[09:35:05] C2 통신 경로 확보"] },
+      "terms": [
+        { "term": "Inbound Rule", "def": "외부에서 내부로 들어오는 트래픽을 제어하는 방화벽 규칙" },
+        { "term": "Event ID 2004", "def": "Windows 방화벽에 새 규칙이 추가되었음을 기록하는 이벤트" }
+      ]
+    },
+    {
+      "cmd": "# Linux 방화벽 비활성화\niptables -F          # 모든 규칙 삭제\niptables -P INPUT ACCEPT\niptables -P OUTPUT ACCEPT\niptables -P FORWARD ACCEPT\nufw disable",
+      "out": "[*] iptables: All rules flushed\n[*] Default policy: ACCEPT (all chains)\n[*] UFW: Firewall stopped and disabled on system startup\n\n[영향]\n- 모든 인바운드 트래픽 허용\n- 모든 아웃바운드 트래픽 허용\n- 노출 서비스: SSH(22), HTTP(80/443), MySQL(3306), Redis(6379)\n- C2 통신: 제한 없음",
+      "def": "[auditd] iptables rules flushed and UFW disabled - all traffic allowed",
+      "defAction": "Tool: iptables -F + ufw disable\nAll Rules: Flushed\nDefault Policy: ACCEPT (all chains)\nExposed Services: SSH, HTTP, MySQL, Redis\nRisk Level: Critical\nAction: Restore iptables rules from backup, re-enable UFW",
+      "desc": "Linux에서 iptables -F로 모든 방화벽 규칙을 삭제하고, 기본 정책을 ACCEPT로 설정합니다. ufw disable로 영구 비활성화합니다. 모든 서비스가 외부에 노출됩니다.",
+      "descEn": "On Linux, iptables -F flushes all firewall rules and sets default policy to ACCEPT. ufw disable permanently disables the firewall. All services are exposed externally.",
+      "stepTitle": "Linux iptables 규칙 삭제 및 UFW 비활성화",
+      "stepTitleEn": "Flush Linux iptables Rules and Disable UFW",
+      "feynman": "Linux 성벽의 모든 문을 열고 경비원(규칙)을 모두 해고하는 것입니다. 심지어 채용 공고(ufw)도 내리서 재부팅 후에도 경비원이 돌아오지 않습니다. 모든 방(서비스)이 완전히 노출됩니다.",
+      "feynmanEn": "Opening all gates and firing all guards (rules) on the Linux castle wall. Even the job posting (ufw) is removed so guards don't return after reboot. All rooms (services) are fully exposed.",
+      "expert": "iptables -F는 filter 테이블의 모든 체인(INPUT, OUTPUT, FORWARD)에서 규칙을 삭제합니다. -P ACCEPT는 기본 정책을 허용으로 변경합니다. ufw disable은 시스템 부팅 시에도 방화벽을 시작하지 않습니다. auditd의 -w /sbin/iptables -p x 감시 규칙으로 iptables 실행을 기록할 수 있습니다.",
+      "expertEn": "iptables -F removes all rules from filter table chains. -P ACCEPT changes default policy to allow. ufw disable prevents firewall start at boot. auditd -w /sbin/iptables can monitor iptables execution.",
+      "defTooltip": "🔐 Linux 방화벽 완전 무력화! 모든 서비스 노출!",
+      "defTooltipEn": "🔐 Linux firewall completely disabled! All services exposed!",
+      "hackerLog": { "title": "linux_fw.log", "lines": ["[09:40:00] iptables -F 실행", "[09:40:01] 기본 정책: ACCEPT", "[09:40:02] ufw disable 완료", "[09:40:03] 모든 서비스 노출"] },
+      "terms": [
+        { "term": "iptables", "def": "Linux 커널의 netfilter 프레임워크를 관리하는 방화벽 유틸리티" },
+        { "term": "UFW", "def": "Uncomplicated Firewall, iptables의 간편한 프론트엔드" }
+      ]
+    },
+    {
+      "cmd": "Get-NetFirewallRule | Where-Object { $_.Enabled -eq 'True' -and $_.Action -eq 'Allow' -and $_.Direction -eq 'Inbound' } | Sort-Object -Property DisplayName | Format-Table DisplayName,LocalPort,Program,Profile -AutoSize",
+      "out": "DisplayName               LocalPort Program                        Profile\n-----------               --------- -------                        -------\nCore Networking - DNS     53        System                         Any\nRemote Desktop            3389      %SystemRoot%\\system32\\mstsc.exe Domain\nSMB File Sharing          445       System                         Domain\nSystem Diagnostic         Any       C:\\temp\\beacon.exe              Any      ← 의심!\nWindows Remote Mgmt       5985      System                         Domain\nWindows Update Service    4444      Any                            Any      ← 의심!\n\n[규칙 감사 결과]\n총 인바운드 Allow 규칙: 47개\n의심스러운 규칙: 2개\n  - \"Windows Update Service\" (TCP 4444) → 비표준 포트\n  - \"System Diagnostic\" (beacon.exe) → 미서명 바이너리",
+      "def": "[SIEM] Firewall rule audit reveals 2 suspicious inbound allow rules",
+      "defAction": "Tool: PowerShell firewall rule audit\nTotal Inbound Allow Rules: 47\nSuspicious: 2\n  1. 'Windows Update Service' (TCP 4444)\n  2. 'System Diagnostic' (beacon.exe)\nAction: Remove both rules, investigate rule creator",
+      "desc": "PowerShell로 모든 인바운드 Allow 규칙을 감사합니다. 47개 규칙 중 비표준 포트(4444)를 사용하는 'Windows Update Service'와 미서명 바이너리를 허용하는 'System Diagnostic' 2개가 의심됩니다.",
+      "descEn": "PowerShell audits all inbound Allow rules. Among 47 rules, 'Windows Update Service' using non-standard port (4444) and 'System Diagnostic' allowing unsigned binary are suspicious.",
+      "stepTitle": "방화벽 규칙 감사: 의심스러운 인바운드 규칙 탐지",
+      "stepTitleEn": "Firewall Rule Audit: Detect Suspicious Inbound Rules",
+      "feynman": "성벽의 모든 통로를 점검하면서 허가증(규칙)을 확인합니다. '수도관(Windows Update)'이라고 적힌 통로를 실제로 열어보니 비표준 규격(포트 4444)이고, '점검 통로(System Diagnostic)'는 정체불명의 사람(beacon.exe)이 사용 중입니다.",
+      "feynmanEn": "Inspecting all castle wall passages and checking permits (rules). A passage labeled 'Water Pipe (Windows Update)' has non-standard specifications (port 4444), and 'Inspection Tunnel (System Diagnostic)' is used by an unidentified person (beacon.exe).",
+      "expert": "Get-NetFirewallRule은 WFP 규칙 저장소에서 모든 규칙을 조회합니다. 정상 Windows 규칙은 System 프로그램이나 %SystemRoot% 경로를 사용하며, 표준 포트를 사용합니다. C:\\temp 경로나 비표준 포트는 수동 추가된 의심 규칙입니다. Event ID 2004(Rule added)와 상관 분석하여 규칙 추가 시점과 사용자를 확인합니다.",
+      "expertEn": "Get-NetFirewallRule queries the WFP rule store. Normal Windows rules use System programs or %SystemRoot% paths with standard ports. C:\\temp paths and non-standard ports indicate manually added suspicious rules.",
+      "defTooltip": "🔐 2개 의심 규칙 탐지! 비표준 포트 + 미서명 바이너리!",
+      "defTooltipEn": "🔐 2 suspicious rules detected! Non-standard port + unsigned binary!",
+      "hackerLog": { "title": "audit.log", "lines": ["[10:00:00] 방화벽 규칙 감사 시작", "[10:00:05] 총 47개 인바운드 규칙", "[10:00:08] 의심 규칙 2개 탐지", "[10:00:10] 제거 및 조사 진행"] },
+      "terms": [
+        { "term": "Get-NetFirewallRule", "def": "PowerShell에서 Windows 방화벽 규칙을 조회하는 cmdlet" },
+        { "term": "Non-standard Port", "def": "일반적으로 사용되지 않는 포트 번호 (예: 4444는 Metasploit 기본 포트)" }
+      ]
+    },
+    {
+      "cmd": "# 방어 강화\nRemove-NetFirewallRule -DisplayName 'Windows Update Service'\nRemove-NetFirewallRule -DisplayName 'System Diagnostic'\nSet-NetFirewallProfile -Profile Domain,Private,Public -Enabled True\n# GPO 방화벽 정책 배포\nGPO: Computer Config > Admin Templates > Network > Network Connections > Windows Defender Firewall > Prohibit use of Internet Connection Firewall: Enabled",
+      "out": "[*] Rule removed: 'Windows Update Service' (TCP 4444)\n[*] Rule removed: 'System Diagnostic' (beacon.exe)\n[*] Firewall enabled: Domain=ON, Private=ON, Public=ON\n\n[GPO 적용]\n✓ 방화벽 비활성화 차단 정책 배포\n✓ 규칙 추가 제한 (관리자만 GPO로 추가 가능)\n✓ Event ID 2003/2004/2006 알림 규칙 생성\n\n[추가 조치]\n✓ Port 4444 네트워크 차단\n✓ beacon.exe 해시 IOC 등록\n✓ 모든 엔드포인트 방화벽 규칙 감사",
+      "def": "[GPO] Firewall restored, suspicious rules removed, GPO hardening applied",
+      "defAction": "Defense Actions:\n  1. Removed 2 malicious rules\n  2. Re-enabled all firewall profiles\n  3. GPO: Prohibit firewall disable\n  4. Monitoring: Event ID 2003/2004/2006\n  5. Network: Blocked port 4444\nRisk Level: Critical → Low",
+      "desc": "의심스러운 규칙을 제거하고 방화벽을 재활성화합니다. GPO로 방화벽 비활성화를 차단하고, Event ID 2003/2004/2006 알림을 설정합니다. Port 4444를 네트워크 레벨에서 차단합니다.",
+      "descEn": "Remove suspicious rules and re-enable firewall. GPO blocks firewall disable, alerts set for Event IDs 2003/2004/2006. Port 4444 blocked at network level.",
+      "stepTitle": "위장 규칙 제거 + GPO 방화벽 강화 + 네트워크 차단",
+      "stepTitleEn": "Remove Disguised Rules + GPO Hardening + Network Block",
+      "feynman": "발견된 비밀 통로 2개를 폐쇄하고, 성문을 다시 닫습니다. 본사(GPO)에서 '현장 관리자는 성문을 열 수 없다'는 명령을 내리고, 비밀 통로가 새로 만들어지면 즉시 알림이 오도록 합니다.",
+      "feynmanEn": "Closing 2 discovered secret tunnels and relocking the gates. Headquarters (GPO) orders 'local managers cannot open gates,' and sets immediate alerts for new tunnel creation.",
+      "expert": "Remove-NetFirewallRule은 WFP 규칙을 삭제합니다. GPO의 'Prohibit use of Internet Connection Firewall'은 로컬 방화벽 비활성화를 방지합니다. Event ID 2003(설정 변경), 2004(규칙 추가), 2006(규칙 삭제)를 SIEM에서 상관 분석합니다. 네트워크 방화벽(Palo Alto, FortiGate)에서도 Port 4444를 차단하여 다계층 방어를 구현합니다.",
+      "expertEn": "Remove-NetFirewallRule deletes WFP rules. GPO 'Prohibit Internet Connection Firewall' prevents local disable. Event IDs 2003/2004/2006 are correlated in SIEM. Network firewalls also block port 4444 for defense-in-depth.",
+      "defTooltip": "🔐 위장 규칙 제거 + GPO 강화 + 네트워크 차단!",
+      "defTooltipEn": "🔐 Disguised rules removed + GPO hardened + network blocked!",
+      "hackerLog": { "title": "remediation.log", "lines": ["[10:15:00] 의심 규칙 2개 제거", "[10:15:02] 방화벽 재활성화", "[10:15:05] GPO 방화벽 정책 배포", "[10:15:08] Port 4444 네트워크 차단"] },
+      "terms": [
+        { "term": "Defense-in-Depth", "def": "여러 보안 계층을 겹쳐 배치하는 방어 전략" },
+        { "term": "Remove-NetFirewallRule", "def": "PowerShell에서 Windows 방화벽 규칙을 삭제하는 cmdlet" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "cmd.exe",
+    "pid": 4700,
+    "children": [
+      { "name": "netsh.exe (set state off)", "pid": 4701, "children": [] },
+      { "name": "netsh.exe (add rule)", "pid": 4702, "children": [] },
+      { "name": "powershell.exe (audit)", "pid": 4703, "children": [] }
+    ]
+  }
+}

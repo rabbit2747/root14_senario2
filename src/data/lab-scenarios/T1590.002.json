@@ -1,0 +1,183 @@
+{
+  "id": "T1590.002",
+  "title": "DNS 정보 수집 시뮬레이션",
+  "titleEn": "DNS Information Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 DNS 조회", "labelEn": "🔍 DNS Lookup", "steps": [0, 1] },
+    { "label": "📡 Zone Transfer", "labelEn": "📡 Zone Transfer", "steps": [2] },
+    { "label": "🌐 서브도메인 열거", "labelEn": "🌐 Subdomain Enum", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "dns", "label": "DNS Server", "x": 200, "y": 30 },
+    { "id": "target", "label": "Target Domain", "x": 200, "y": 90 },
+    { "id": "subdomains", "label": "Subdomains", "x": 350, "y": 30 },
+    { "id": "mailsrv", "label": "Mail Server", "x": 350, "y": 90 },
+    { "id": "internal", "label": "Internal Net", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "dns", "minStep": 0 },
+    { "from": "attacker", "to": "target", "minStep": 0 },
+    { "from": "dns", "to": "subdomains", "minStep": 2 },
+    { "from": "dns", "to": "mailsrv", "minStep": 1 },
+    { "from": "subdomains", "to": "internal", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "dns_records.txt", "icon": "📋", "alert": true },
+    { "name": "{companyName} Recon", "icon": "📁" },
+    { "name": "zone_dump.txt", "icon": "📄" }
+  ],
+  "steps": [
+    {
+      "cmd": "dig {companyName}.com ANY +noall +answer",
+      "out": "; <<>> DiG 9.18.18 <<>> {companyName}.com ANY\n;; ANSWER SECTION:\n{companyName}.com.        3600  IN  A      104.16.51.111\n{companyName}.com.        3600  IN  A      104.16.52.111\n{companyName}.com.        3600  IN  AAAA   2606:4700::6810:336f\n{companyName}.com.        3600  IN  NS     ns1.cloudflare.com.\n{companyName}.com.        3600  IN  NS     ns2.cloudflare.com.\n{companyName}.com.        3600  IN  MX  10 mail.{companyName}.com.\n{companyName}.com.        3600  IN  MX  20 mail2.{companyName}.com.\n{companyName}.com.        3600  IN  TXT    \"v=spf1 include:_spf.google.com include:spf.protection.outlook.com ~all\"\n{companyName}.com.        3600  IN  TXT    \"google-site-verification=abc123xyz\"\n{companyName}.com.        3600  IN  SOA    ns1.cloudflare.com. dns.cloudflare.com. 2025010101 10000 2400 604800 3600",
+      "def": "[DNS Monitor] ANY query detected for organization domain - potential reconnaissance",
+      "defAction": "Source: External resolver\nTarget: {companyName}.com DNS records\nAction: DNS query logging activated, rate limiting applied",
+      "desc": "dig ANY 쿼리로 대상 도메인의 모든 DNS 레코드 유형(A, MX, NS, TXT, SOA)을 한 번에 조회합니다.",
+      "descEn": "Query all DNS record types (A, MX, NS, TXT, SOA) for the target domain using dig ANY.",
+      "stepTitle": "dig ANY 전체 DNS 레코드 조회",
+      "stepTitleEn": "dig ANY - Full DNS Record Query",
+      "feynman": "dig ANY는 전화번호부에서 특정 회사의 '모든 연락처'를 한 번에 찾는 것입니다. A 레코드는 회사 주소(IP), MX는 우편함(메일서버), NS는 전화번호부 관리자(네임서버), TXT는 메모(인증 정보)입니다. SPF 레코드에서 Google과 Outlook을 동시에 사용하는 것을 발견했습니다.",
+      "feynmanEn": "dig ANY is like looking up all contacts for a company in one go. A records are addresses (IP), MX is mailbox (mail server), NS is directory manager (nameserver), TXT is notes (auth info). The SPF record reveals they use both Google and Outlook.",
+      "expert": "dig ANY(RFC 8482)는 모든 레코드 유형을 요청하지만, 많은 DNS 서버가 ANY 응답을 제한합니다. SPF 레코드에서 Google Workspace와 Microsoft 365를 동시에 사용하는 하이브리드 메일 환경이 확인됩니다. SOA의 시리얼 번호(2025010101)로 마지막 DNS 업데이트 시점을 추정할 수 있습니다.",
+      "expertEn": "dig ANY (RFC 8482) requests all record types, though many DNS servers limit ANY responses. The SPF record reveals a hybrid mail environment using both Google Workspace and Microsoft 365. SOA serial (2025010101) helps estimate the last DNS update time.",
+      "defTooltip": "📡 DNS 모니터: 조직 도메인에 대한 ANY 쿼리 감지 - 정찰 가능성",
+      "defTooltipEn": "📡 DNS Monitor: ANY query detected for organization domain - potential reconnaissance",
+      "hackerLog": {
+        "title": "dig_any.log",
+        "lines": [
+          { "log": "MX  10 mail.{companyName}.com.", "desc": "💡 메일 서버 주소 발견 - 피싱 메일의 발신자 위장에 활용됩니다" },
+          { "log": "TXT \"v=spf1 include:_spf.google.com include:spf.protection.outlook.com ~all\"", "desc": "💡 SPF에 ~all(soft fail) 사용 - 스푸핑 메일이 거부되지 않고 스팸함으로 갈 수 있습니다" },
+          { "log": "NS ns1.cloudflare.com.", "desc": "💡 Cloudflare DNS 사용 확인 - CDN 뒤의 실제 IP를 찾아야 합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "dig (Domain Information Groper)", "desc": "DNS 서버에 쿼리를 보내 레코드를 조회하는 CLI 도구. nslookup보다 상세한 정보를 제공합니다" },
+        { "name": "SPF (Sender Policy Framework)", "desc": "어떤 메일 서버가 해당 도메인의 이메일을 보낼 수 있는지 정의하는 DNS TXT 레코드. 이메일 스푸핑을 방지합니다" }
+      ]
+    },
+    {
+      "cmd": "dnsrecon -d {companyName}.com -t std,brt -D /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt",
+      "out": "[*] Performing DNS Standard Enumeration for {companyName}.com\n[*] SOA ns1.cloudflare.com 172.64.32.1\n[*] NS ns1.cloudflare.com 172.64.32.1\n[*] NS ns2.cloudflare.com 172.64.33.1\n[*] MX mail.{companyName}.com 10.0.1.25\n[*] MX mail2.{companyName}.com 10.0.1.26\n[*] A {companyName}.com 104.16.51.111\n[*] TXT v=spf1 include:_spf.google.com ~all\n\n[*] Performing Brute Force Subdomain Enumeration...\n[+] A www.{companyName}.com 104.16.51.111\n[+] A api.{companyName}.com 10.0.1.50\n[+] A mail.{companyName}.com 10.0.1.25\n[+] A vpn.{companyName}.com 10.0.2.1\n[+] A dev.{companyName}.com 10.0.3.10\n[+] A staging.{companyName}.com 10.0.3.11\n[+] A admin.{companyName}.com 10.0.1.100\n[+] A jira.{companyName}.com 10.0.3.15\n[+] A gitlab.{companyName}.com 10.0.3.20\n[+] A jenkins.{companyName}.com 10.0.3.25\n[+] A monitor.{companyName}.com 10.0.1.80\n[+] A backup.{companyName}.com 10.0.4.10\n\n[*] 12 subdomains found via brute force\n[*] 18 total records enumerated",
+      "def": "[DNS Firewall] High-volume DNS brute force queries detected from single source",
+      "defAction": "Source: 10.0.1.45\nTarget: {companyName}.com DNS\nAction: DNS rate limiting enforced, source IP flagged for monitoring",
+      "desc": "dnsrecon으로 표준 DNS 열거와 서브도메인 브루트포스를 수행하여 숨겨진 서브도메인을 발견합니다.",
+      "descEn": "Use dnsrecon for standard DNS enumeration and subdomain brute force to discover hidden subdomains.",
+      "stepTitle": "dnsrecon DNS 열거 + 서브도메인 브루트포스",
+      "stepTitleEn": "dnsrecon DNS Enumeration + Subdomain Brute Force",
+      "feynman": "dnsrecon은 전화번호부에서 회사의 모든 부서 번호를 찾는 도구입니다. 먼저 공식적으로 등록된 번호(표준 열거)를 확인하고, 그 다음 '인사부', '개발팀', '관리자' 같은 이름을 하나씩 시도해서(브루트포스) 비공개 번호까지 찾아냅니다. 12개의 숨겨진 서브도메인을 발견했습니다.",
+      "feynmanEn": "dnsrecon finds all department phone numbers of a company. First it checks officially registered numbers (standard enum), then tries names like 'HR', 'dev', 'admin' one by one (brute force) to find unlisted numbers. 12 hidden subdomains were discovered.",
+      "expert": "dnsrecon의 -t std는 SOA, NS, MX, A, AAAA, TXT 등 표준 레코드를 열거하고, -t brt는 워드리스트 기반 서브도메인 브루트포스를 수행합니다. 내부 IP(10.x.x.x) 대역의 서브도메인은 Split-horizon DNS를 사용하지 않는 구성 오류를 나타내며, 내부 네트워크 구조가 외부에 노출됩니다.",
+      "expertEn": "dnsrecon -t std enumerates standard records (SOA, NS, MX, A, AAAA, TXT) and -t brt performs wordlist-based subdomain brute force. Subdomains resolving to internal IPs (10.x.x.x) indicate misconfigured split-horizon DNS, exposing internal network structure.",
+      "defTooltip": "🔒 DNS 방화벽: 단일 소스에서 대량 DNS 브루트포스 쿼리 감지",
+      "defTooltipEn": "🔒 DNS Firewall: High-volume DNS brute force queries detected from single source",
+      "hackerLog": {
+        "title": "dnsrecon_results.log",
+        "lines": [
+          { "log": "[+] A admin.{companyName}.com 10.0.1.100", "desc": "💡 관리자 패널이 내부 IP에서 운영 중 - DNS로 내부 구조가 노출되었습니다" },
+          { "log": "[+] A backup.{companyName}.com 10.0.4.10", "desc": "💡 백업 서버 발견 - 백업 데이터에 접근하면 전체 시스템을 복원할 수 있습니다" },
+          { "log": "12 subdomains found via brute force", "desc": "💡 12개 서브도메인 중 대부분이 내부 IP - Split DNS 미설정의 전형적 사례" }
+        ]
+      },
+      "terms": [
+        { "name": "dnsrecon", "desc": "DNS 정찰을 위한 다기능 도구. 표준 열거, Zone Transfer, 브루트포스, 역방향 조회 등을 지원합니다" },
+        { "name": "Split-Horizon DNS", "desc": "내부와 외부 사용자에게 다른 DNS 응답을 제공하는 구성. 미설정 시 내부 IP가 외부에 노출됩니다" }
+      ]
+    },
+    {
+      "cmd": "dig axfr @ns1.{companyName}.com {companyName}.com",
+      "out": "; <<>> DiG 9.18.18 <<>> axfr @ns1.{companyName}.com {companyName}.com\n;; ANSWER SECTION:\n{companyName}.com.          3600  IN  SOA   ns1.{companyName}.com. admin.{companyName}.com. 2025010501 3600 900 604800 86400\n{companyName}.com.          3600  IN  NS    ns1.{companyName}.com.\n{companyName}.com.          3600  IN  NS    ns2.{companyName}.com.\n{companyName}.com.          3600  IN  A     104.16.51.111\n{companyName}.com.          3600  IN  MX 10 mail.{companyName}.com.\nwww.{companyName}.com.      300   IN  CNAME {companyName}.com.\napi.{companyName}.com.      300   IN  A     10.0.1.50\ndb-master.{companyName}.com. 300  IN  A     10.0.5.1\ndb-slave.{companyName}.com.  300  IN  A     10.0.5.2\nredis.{companyName}.com.     300  IN  A     10.0.5.10\nelastic.{companyName}.com.   300  IN  A     10.0.5.20\nk8s-master.{companyName}.com. 300 IN  A     10.0.6.1\nk8s-node1.{companyName}.com. 300  IN  A     10.0.6.11\nk8s-node2.{companyName}.com. 300  IN  A     10.0.6.12\nvault.{companyName}.com.     300  IN  A     10.0.7.1\n;; XFR size: 38 records",
+      "def": "[DNS Security] AXFR (Zone Transfer) attempt SUCCEEDED - CRITICAL ALERT",
+      "defAction": "Source: 10.0.1.45\nTarget: ns1.{companyName}.com\nAction: CRITICAL incident created, Zone Transfer disabled immediately, DNS config audit",
+      "desc": "DNS Zone Transfer(AXFR)를 시도하여 전체 DNS 존 데이터를 유출합니다.",
+      "descEn": "Attempt DNS Zone Transfer (AXFR) to exfiltrate the entire DNS zone data.",
+      "stepTitle": "DNS Zone Transfer (AXFR) 공격",
+      "stepTitleEn": "DNS Zone Transfer (AXFR) Attack",
+      "feynman": "Zone Transfer는 전화번호부 전체를 복사하는 것입니다. 원래는 보조 DNS 서버가 주 DNS 서버의 데이터를 동기화하기 위한 기능인데, 잘못 설정하면 누구나 전체 데이터를 복사할 수 있습니다. 여기서 데이터베이스(db-master, db-slave), Kubernetes 클러스터(k8s), 비밀 관리(vault) 서버까지 발견됐습니다.",
+      "feynmanEn": "Zone Transfer copies the entire phone book. Originally meant for secondary DNS servers to sync data, misconfiguration lets anyone copy everything. Here we found databases (db-master, db-slave), Kubernetes clusters (k8s), and secrets management (vault).",
+      "expert": "AXFR(RFC 5936)는 DNS 존의 전체 레코드를 전송하는 프로토콜입니다. 38개 레코드가 전송되어 내부 인프라가 완전히 노출되었습니다. db-master/slave(MySQL 복제), redis, elasticsearch, k8s-master/node, vault(HashiCorp Vault) 등 전체 백엔드 아키텍처가 드러났습니다.",
+      "expertEn": "AXFR (RFC 5936) transfers the complete DNS zone. 38 records were transferred, fully exposing internal infrastructure including db-master/slave (MySQL replication), redis, elasticsearch, k8s-master/nodes, and vault (HashiCorp Vault).",
+      "defTooltip": "🚨 DNS 보안: Zone Transfer(AXFR) 성공 - 치명적 경고 발생",
+      "defTooltipEn": "🚨 DNS Security: AXFR Zone Transfer SUCCEEDED - CRITICAL ALERT",
+      "hackerLog": {
+        "title": "zone_transfer.log",
+        "lines": [
+          { "log": "db-master.{companyName}.com. 300 IN A 10.0.5.1", "desc": "💡 마스터 DB 서버 IP 노출 - 데이터베이스 직접 공격이 가능합니다" },
+          { "log": "vault.{companyName}.com. 300 IN A 10.0.7.1", "desc": "💡 HashiCorp Vault 발견 - 비밀키/인증서 저장소에 접근하면 모든 시스템이 위험합니다" },
+          { "log": "XFR size: 38 records", "desc": "💡 38개 레코드 전체 유출 - 조직의 전체 인프라 구조가 드러났습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Zone Transfer (AXFR)", "desc": "DNS 존의 전체 레코드를 전송하는 프로토콜. 원래 DNS 서버 간 동기화용이지만, 잘못 설정하면 외부에 전체 DNS 데이터가 유출됩니다" },
+        { "name": "HashiCorp Vault", "desc": "비밀키, API 토큰, 인증서 등 민감 데이터를 안전하게 저장·관리하는 도구. 공격자에게 최고 가치의 타겟입니다" }
+      ]
+    },
+    {
+      "cmd": "subfinder -d {companyName}.com -all -o subfinder_results.txt && httpx -l subfinder_results.txt -title -tech-detect -status-code -o httpx_results.txt",
+      "out": "[INF] subfinder v2.6.3\n[INF] Loading sources: 23 passive sources\n\n[INF] Found 67 subdomains for {companyName}.com\n\n--- httpx probe results ---\nhttps://www.{companyName}.com [200] [Welcome to {companyName}] [Cloudflare,React]\nhttps://api.{companyName}.com [200] [API Documentation] [nginx,Swagger]\nhttps://mail.{companyName}.com [302] [Outlook Web] [Microsoft Exchange]\nhttps://vpn.{companyName}.com [200] [SSL VPN Portal] [Fortinet FortiGate]\nhttps://dev.{companyName}.com [200] [Dev Portal] [nginx,Node.js]\nhttps://jira.{companyName}.com [200] [Atlassian Jira] [Jira 9.4.1]\nhttps://gitlab.{companyName}.com [200] [GitLab] [GitLab CE 16.5]\nhttps://jenkins.{companyName}.com [200] [Jenkins Dashboard] [Jenkins 2.426]\nhttps://grafana.{companyName}.com [200] [Grafana] [Grafana 10.2]\nhttps://sentry.{companyName}.com [200] [Sentry] [Sentry 23.11]\n\n[INF] 67 subdomains found, 45 alive (httpx probe)",
+      "def": "[DNS Firewall] Passive subdomain enumeration detected via multiple OSINT sources",
+      "defAction": "Source: Multiple OSINT platforms\nTarget: {companyName}.com subdomains\nAction: Subdomain inventory audit initiated, unused subdomains flagged",
+      "desc": "subfinder로 패시브 서브도메인 열거 후 httpx로 활성 서브도메인의 기술 스택을 프로빙합니다.",
+      "descEn": "Passive subdomain enumeration with subfinder followed by httpx probing for technology stack detection on active subdomains.",
+      "stepTitle": "subfinder + httpx 서브도메인 기술 스택 분석",
+      "stepTitleEn": "subfinder + httpx Subdomain Tech Stack Analysis",
+      "feynman": "subfinder는 인터넷의 여러 소스에서 서브도메인을 '조용히' 수집합니다(패시브). DNS 서버에 직접 물어보지 않으므로 탐지가 어렵습니다. 67개 서브도메인을 찾고, httpx로 각각이 무엇을 실행하는지 확인했습니다. Jira, GitLab, Jenkins 같은 개발 도구가 외부에 노출된 것이 특히 위험합니다.",
+      "feynmanEn": "subfinder quietly collects subdomains from multiple internet sources (passive). It doesn't query DNS servers directly, making detection difficult. 67 subdomains found, and httpx reveals what each runs. Exposed dev tools like Jira, GitLab, Jenkins are especially dangerous.",
+      "expert": "subfinder는 23개 이상의 패시브 소스(Certificate Transparency, VirusTotal, Shodan 등)에서 서브도메인을 수집합니다. httpx의 기술 탐지에서 Jira 9.4.1, GitLab CE 16.5, Jenkins 2.426은 모두 알려진 CVE가 있는 버전입니다. Fortinet VPN은 CVE-2023-27997(Heap overflow) 대상일 수 있습니다.",
+      "expertEn": "subfinder collects subdomains from 23+ passive sources (Certificate Transparency, VirusTotal, Shodan, etc.). httpx tech detection reveals Jira 9.4.1, GitLab CE 16.5, Jenkins 2.426 - all versions with known CVEs. Fortinet VPN may be vulnerable to CVE-2023-27997 (Heap overflow).",
+      "defTooltip": "🌐 DNS 방화벽: 다중 OSINT 소스를 통한 패시브 서브도메인 열거 감지",
+      "defTooltipEn": "🌐 DNS Firewall: Passive subdomain enumeration detected via multiple OSINT sources",
+      "hackerLog": {
+        "title": "httpx_results.log",
+        "lines": [
+          { "log": "jenkins.{companyName}.com [200] [Jenkins 2.426]", "desc": "💡 Jenkins CI/CD 서버 노출 - 인증 우회 시 코드 실행이 가능합니다" },
+          { "log": "vpn.{companyName}.com [200] [Fortinet FortiGate]", "desc": "💡 VPN 게이트웨이 노출 - Fortinet CVE를 이용한 내부 침투 경로" },
+          { "log": "67 subdomains found, 45 alive", "desc": "💡 45개 활성 서브도메인 - 각각이 잠재적 공격 진입점입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "subfinder", "desc": "패시브 소스를 이용한 서브도메인 발견 도구. DNS 서버에 직접 쿼리하지 않아 탐지가 어렵습니다" },
+        { "name": "Certificate Transparency (CT)", "desc": "SSL/TLS 인증서 발급 내역이 공개적으로 기록되는 로그. 서브도메인을 발견하는 중요한 패시브 소스입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 dns_intel_report.py --dig dig_results.txt --dnsrecon dnsrecon.json --zone zone_transfer.txt --subfinder httpx_results.txt --output dns_report.pdf",
+      "out": "[+] Consolidating DNS intelligence...\n[+] Building infrastructure map...\n\n=== DNS INTELLIGENCE REPORT ===\n\nTarget: {companyName}.com\nDNS Provider: Cloudflare (primary), Self-hosted (secondary)\n\nDNS Security Posture:\n  DNSSEC: NOT CONFIGURED ⚠️\n  Zone Transfer: OPEN (CRITICAL) 🔴\n  SPF: Soft fail (~all) ⚠️\n  DMARC: Not found ⚠️\n\nInfrastructure Map:\n  Frontend: Cloudflare CDN (104.16.51.111)\n  Backend: Internal 10.0.x.x (exposed via DNS)\n  Database: 10.0.5.x (master/slave + redis + elastic)\n  DevOps: 10.0.3.x (jira/gitlab/jenkins)\n  Kubernetes: 10.0.6.x (master + 2 nodes)\n  Secrets: 10.0.7.1 (vault)\n\nCritical Findings:\n  1. Zone Transfer open → Full infrastructure exposed\n  2. Internal IPs in public DNS → No split-horizon\n  3. DevOps tools externally accessible → CI/CD compromise\n  4. DNSSEC disabled → DNS spoofing possible\n\n[+] Report saved to dns_report.pdf",
+      "def": "[SIEM Correlation] Complete DNS reconnaissance campaign detected - infrastructure fully mapped",
+      "defAction": "Source: Correlation of DNS reconnaissance activities\nTarget: {companyName} DNS infrastructure\nAction: Incident #2024-1220 created, DNS hardening initiated, Zone Transfer disabled",
+      "desc": "모든 DNS 정보를 통합하여 인프라 맵과 보안 취약점 보고서를 생성합니다.",
+      "descEn": "Consolidate all DNS intelligence into an infrastructure map and security vulnerability report.",
+      "stepTitle": "DNS 정보 통합 인프라 보고서",
+      "stepTitleEn": "DNS Intelligence Infrastructure Report",
+      "feynman": "모든 DNS 정보를 하나로 합쳐서 조직의 전체 '네트워크 지도'를 완성합니다. 프론트엔드(Cloudflare), 백엔드(10.0.1.x), 데이터베이스(10.0.5.x), DevOps(10.0.3.x), Kubernetes(10.0.6.x), 비밀키 저장소(10.0.7.1)까지 전체 구조가 드러났습니다. Zone Transfer가 열려 있어 이 모든 정보가 유출된 것입니다.",
+      "feynmanEn": "All DNS information is combined to create a complete 'network map' of the organization. Frontend (Cloudflare), backend (10.0.1.x), databases (10.0.5.x), DevOps (10.0.3.x), Kubernetes (10.0.6.x), and secrets store (10.0.7.1) are all revealed. The open Zone Transfer caused all this exposure.",
+      "expert": "DNS 인텔리전스 분석 결과 Zone Transfer 개방, Split-Horizon DNS 미설정, DNSSEC 부재, SPF soft fail, DMARC 미설정 등 다수의 DNS 보안 결함이 식별되었습니다. 특히 Kubernetes 클러스터와 Vault 서버의 DNS 노출은 클라우드 네이티브 인프라의 완전한 침해로 이어질 수 있는 치명적 발견입니다.",
+      "expertEn": "DNS intelligence analysis identified multiple security deficiencies: open Zone Transfer, no Split-Horizon DNS, absent DNSSEC, SPF soft fail, and no DMARC. The DNS exposure of Kubernetes cluster and Vault server are critical findings that could lead to complete cloud-native infrastructure compromise.",
+      "defTooltip": "🗺️ SIEM: 완전한 DNS 정찰 캠페인 감지 - 인프라 전체 매핑됨",
+      "defTooltipEn": "🗺️ SIEM: Complete DNS reconnaissance campaign detected - infrastructure fully mapped",
+      "hackerLog": {
+        "title": "dns_intel_report.log",
+        "lines": [
+          { "log": "Zone Transfer: OPEN (CRITICAL) 🔴", "desc": "💡 Zone Transfer가 열려 있어 전체 DNS 데이터가 유출 가능합니다" },
+          { "log": "Kubernetes: 10.0.6.x (master + 2 nodes)", "desc": "💡 K8s 클러스터 노출 - 컨테이너 인프라 전체가 위험합니다" },
+          { "log": "DMARC: Not found ⚠️", "desc": "💡 DMARC 미설정 - 이메일 스푸핑을 탐지하거나 차단할 수 없습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "DMARC (Domain-based Message Authentication)", "desc": "SPF와 DKIM의 결과를 기반으로 이메일 인증을 수행하는 프로토콜. 미설정 시 도메인을 사칭한 피싱 메일을 차단할 수 없습니다" },
+        { "name": "Split-Horizon DNS", "desc": "내부 네트워크와 외부 네트워크에 다른 DNS 응답을 제공하는 구성. 내부 IP가 외부에 노출되는 것을 방지합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "dig ANY (PID: 6101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "dnsrecon (PID: 6178)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "dig axfr (PID: 6245)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "subfinder (PID: 6312)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "httpx (PID: 6389)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 dns_intel_report.py (PID: 6456)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

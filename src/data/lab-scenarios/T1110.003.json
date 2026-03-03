@@ -1,0 +1,182 @@
+{
+  "id": "T1110.003",
+  "title": "Password Spraying 시뮬레이션",
+  "titleEn": "Password Spraying Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 사용자 수집", "labelEn": "🔍 User Collection", "steps": [0] },
+    { "label": "⚡ 스프레이 공격", "labelEn": "⚡ Spray Attack", "steps": [1, 2] },
+    { "label": "🔓 계정 침해", "labelEn": "🔓 Account Compromise", "steps": [3] },
+    { "label": "🧹 탐지 확인", "labelEn": "🧹 Detection Check", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(External)", "x": 50, "y": 80 },
+    { "id": "enum", "label": "User\nEnumeration", "x": 200, "y": 30 },
+    { "id": "spray", "label": "Password\nSpraying", "x": 200, "y": 130 },
+    { "id": "access", "label": "Compromised\nAccount", "x": 380, "y": 80 },
+    { "id": "lateral", "label": "Lateral\nMovement", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "enum", "minStep": 0 },
+    { "from": "enum", "to": "spray", "minStep": 1 },
+    { "from": "spray", "to": "access", "minStep": 3 },
+    { "from": "access", "to": "lateral", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Terminal", "icon": "🖥️" },
+    { "name": "User List", "icon": "📋" },
+    { "name": "{companyName} Portal", "icon": "🌐" },
+    { "name": "Email Client", "icon": "📧" },
+    { "name": "VPN Client", "icon": "🔒" }
+  ],
+  "steps": [
+    {
+      "cmd": "kerbrute userenum --dc DC01.corp.local -d corp.local users.txt",
+      "out": "2026/01/20 14:35:22 >  [+] VALID USERNAME: admin@corp.local\n2026/01/20 14:35:22 >  [+] VALID USERNAME: jsmith@corp.local\n2026/01/20 14:35:22 >  [+] VALID USERNAME: jdoe@corp.local\n2026/01/20 14:35:22 >  [+] VALID USERNAME: svc_backup@corp.local\n2026/01/20 14:35:22 >  [+] VALID USERNAME: hr_manager@corp.local\n2026/01/20 14:35:22 >  [+] VALID USERNAME: it_support@corp.local\n... [847 valid usernames found]",
+      "def": "[SIEM] Kerberos pre-authentication enumeration - 847 valid usernames discovered",
+      "defAction": "Tool: kerbrute (Kerberos enumeration)\nDiscovered: 847 valid usernames\nSource IP: 10.0.1.200 (external)\nRisk Level: High\nAction: Block source IP, alert SOC",
+      "desc": "공격자가 Kerberos 사전 인증을 이용해 유효한 사용자 이름을 열거합니다. AS-REQ에 대한 응답 차이로 계정 존재 여부를 판별합니다.",
+      "descEn": "The attacker enumerates valid usernames using Kerberos pre-authentication. Account existence is determined by differences in AS-REQ responses.",
+      "stepTitle": "Kerberos 사전 인증으로 유효 사용자 열거",
+      "stepTitleEn": "Valid User Enumeration via Kerberos Pre-Auth",
+      "feynman": "건물의 모든 방에 노크하여 '사람이 있는 방(유효 계정)'을 확인하는 것입니다. Kerberos는 '이 사용자가 존재하지 않습니다'와 '비밀번호가 틀렸습니다'를 서로 다른 에러로 응답하므로, 비밀번호를 몰라도 계정이 존재하는지 알 수 있습니다.",
+      "feynmanEn": "Knocking on every door in a building to find which rooms are occupied (valid accounts). Kerberos responds differently to 'user doesn't exist' vs 'wrong password,' revealing account existence without knowing passwords.",
+      "expert": "kerbrute는 Kerberos AS-REQ를 보내 사전 인증 응답을 분석합니다. KDC_ERR_PREAUTH_REQUIRED는 유효한 계정, KDC_ERR_C_PRINCIPAL_UNKNOWN은 존재하지 않는 계정을 나타냅니다. LDAP 열거보다 은밀하며, 인증 없이 수행 가능합니다.",
+      "expertEn": "kerbrute sends Kerberos AS-REQs and analyzes pre-authentication responses. KDC_ERR_PREAUTH_REQUIRED indicates a valid account, KDC_ERR_C_PRINCIPAL_UNKNOWN indicates a non-existent account.",
+      "defTooltip": "🔐 대량 Kerberos 사전 인증 요청 감지! 사용자 열거 시도!",
+      "defTooltipEn": "🔐 Mass Kerberos pre-authentication requests detected! User enumeration attempt!",
+      "hackerLog": {
+        "title": "user_enum.txt",
+        "lines": [
+          { "log": "847 valid usernames found", "desc": "💡 847개 유효 계정 발견 - Password Spraying의 타겟 리스트" },
+          { "log": "svc_backup, hr_manager", "desc": "💡 서비스 계정과 관리자 계정 발견 - 높은 가치의 타겟" }
+        ]
+      },
+      "terms": [
+        { "name": "kerbrute", "desc": "Kerberos 프로토콜을 이용해 유효한 사용자 이름을 열거하고 비밀번호를 테스트하는 도구입니다." },
+        { "name": "Kerberos 사전 인증", "desc": "Kerberos AS-REQ에서 사용자의 비밀번호로 타임스탬프를 암호화하여 신원을 증명하는 단계입니다." },
+        { "name": "AS-REQ (Authentication Service Request)", "desc": "Kerberos 인증의 첫 단계. KDC에 TGT를 요청하는 메시지입니다." }
+      ]
+    },
+    {
+      "cmd": "kerbrute passwordspray --dc DC01.corp.local -d corp.local valid_users.txt 'Spring2026!'",
+      "out": "2026/01/20 14:40:00 >  Using password: Spring2026!\n2026/01/20 14:40:01 >  [-] admin@corp.local : FAILED\n2026/01/20 14:40:01 >  [-] jsmith@corp.local : FAILED\n2026/01/20 14:40:01 >  [-] jdoe@corp.local : FAILED\n2026/01/20 14:40:02 >  [-] svc_backup@corp.local : FAILED\n2026/01/20 14:40:02 >  [+] VALID LOGIN: hr_manager@corp.local:Spring2026!\n2026/01/20 14:40:02 >  [-] it_support@corp.local : FAILED\n... [scanning 847 accounts]\n2026/01/20 14:40:15 >  [+] VALID LOGIN: intern01@corp.local:Spring2026!\n2026/01/20 14:40:18 >  [+] VALID LOGIN: marketing@corp.local:Spring2026!\n\nDone! 3 valid logins found.",
+      "def": "[SIEM] ALERT: Password Spraying detected - 847 auth attempts with same password in 18 seconds",
+      "defAction": "Source: 10.0.1.200\nPattern: 847 accounts, 1 password\nSuccesses: 3 accounts\nRisk Level: Critical\nAction: Block source, disable compromised accounts",
+      "desc": "847개 계정에 대해 'Spring2026!' 비밀번호를 한 번씩 시도합니다. 3개 계정이 이 비밀번호를 사용하고 있어 로그인에 성공합니다.",
+      "descEn": "Trying the password 'Spring2026!' once against 847 accounts. 3 accounts using this password are successfully logged in.",
+      "stepTitle": "Password Spraying 실행 (Spring2026!)",
+      "stepTitleEn": "Password Spraying Execution (Spring2026!)",
+      "feynman": "847개의 자물쇠(계정)에 하나의 흔한 열쇠('Spring2026!')를 차례로 시도하는 것입니다. 대부분은 열리지 않지만, 3개의 자물쇠(hr_manager, intern01, marketing)가 같은 열쇠를 사용하고 있어 열립니다. 각 자물쇠에 한 번만 시도하므로 경보(계정 잠금)가 울리지 않습니다.",
+      "feynmanEn": "Trying one common key ('Spring2026!') on 847 locks (accounts) sequentially. Most don't open, but 3 locks use the same key. Trying each lock only once means the alarm (account lockout) doesn't trigger.",
+      "expert": "kerbrute passwordspray는 각 사용자에 대해 AS-REQ를 전송하여 지정된 비밀번호로 사전 인증을 시도합니다. 성공하면 KDC가 TGT를 발급하므로 유효한 자격증명이 확인됩니다. 계정 잠금 임계값이 5회라면, 1회만 시도하는 스프레이는 잠금을 트리거하지 않습니다. 그러나 단시간에 다수 계정에 대한 인증 실패는 SIEM에서 상관 분석으로 탐지 가능합니다.",
+      "expertEn": "kerbrute passwordspray sends AS-REQs for each user attempting pre-auth with the specified password. Success means the KDC issues a TGT, confirming valid credentials.",
+      "defTooltip": "🔐 18초 동안 847개 계정에 동일 비밀번호로 인증 시도 감지! Password Spraying!",
+      "defTooltipEn": "🔐 847 auth attempts with same password in 18 seconds detected! Password Spraying!",
+      "hackerLog": {
+        "title": "spray_results.txt",
+        "lines": [
+          { "log": "[+] hr_manager:Spring2026!", "desc": "💡 HR 관리자 계정 침해 - 인사 데이터 접근 가능" },
+          { "log": "3 valid logins / 847 attempts", "desc": "💡 0.35% 성공률 - 실제 공격에서도 이 정도면 충분히 효과적" }
+        ]
+      },
+      "terms": [
+        { "name": "Password Spraying", "desc": "하나의 비밀번호를 다수의 계정에 시도하는 공격 기법. 계정 잠금 정책을 우회합니다." },
+        { "name": "계정 잠금 임계값", "desc": "연속 인증 실패 허용 횟수. 초과 시 계정이 잠깁니다. 기본값은 보통 5-10회입니다." },
+        { "name": "상관 분석 (Correlation)", "desc": "SIEM에서 다수의 이벤트를 연결하여 공격 패턴을 탐지하는 분석 기법입니다." }
+      ]
+    },
+    {
+      "cmd": "kerbrute passwordspray --dc DC01.corp.local -d corp.local valid_users.txt 'Company2026!' --delay 1800",
+      "out": "2026/01/20 15:10:00 >  Using password: Company2026!\n2026/01/20 15:10:00 >  [*] Delay between attempts: 30 minutes\n... [low and slow scanning]\n2026/01/20 15:10:02 >  [+] VALID LOGIN: dev_lead@corp.local:Company2026!\n... [continuing scan]\n\nDone! 1 valid login found (2nd spray round).",
+      "def": "[SIEM] Low-and-slow spray detected via cross-account correlation",
+      "defAction": "Source: 10.0.1.200\nPattern: Slow spray (30min intervals)\nNew success: dev_lead\nRisk Level: High\nAction: Disable dev_lead, continue monitoring",
+      "desc": "두 번째 라운드에서는 다른 비밀번호('Company2026!')를 사용하고, 계정 간 30분 간격을 두어 더 은밀하게 공격합니다.",
+      "descEn": "In the second round, a different password ('Company2026!') is used with 30-minute intervals between accounts for stealthier attack.",
+      "stepTitle": "Low-and-Slow 스프레이 (2차 라운드)",
+      "stepTitleEn": "Low-and-Slow Spray (2nd Round)",
+      "feynman": "첫 번째 열쇠(Spring2026!)로 열린 문 외에, 두 번째 열쇠(Company2026!)를 가지고 다시 순회하되, 이번에는 30분 간격으로 느리게 시도합니다. 보안 카메라(SIEM)가 '짧은 시간에 많은 시도'를 감지하는 것을 피하기 위한 전술입니다.",
+      "feynmanEn": "Besides doors opened with the first key, going around again with a second key (Company2026!) at 30-minute intervals. This is a tactic to avoid security cameras (SIEM) detecting 'many attempts in a short time.'",
+      "expert": "--delay 옵션은 각 인증 시도 사이에 대기 시간을 추가합니다. 이는 시간 기반 탐지 규칙(예: '5분 내 10회 이상 실패')을 우회하기 위한 전술입니다. 효과적인 방어를 위해서는 시간 창을 넓힌 상관 분석(예: '24시간 내 동일 소스에서 50회 이상 다양한 계정 인증 실패')이 필요합니다.",
+      "expertEn": "The --delay option adds wait time between authentication attempts to bypass time-based detection rules. Effective defense requires widened correlation windows.",
+      "defTooltip": "🔐 Low-and-Slow 스프레이 감지! 30분 간격으로 분산된 인증 시도입니다.",
+      "defTooltipEn": "🔐 Low-and-slow spray detected! Auth attempts distributed at 30-minute intervals.",
+      "hackerLog": {
+        "title": "slow_spray.txt",
+        "lines": [
+          { "log": "Delay: 30 minutes", "desc": "💡 시간 기반 탐지 규칙 우회를 위한 느린 스프레이" },
+          { "log": "[+] dev_lead:Company2026!", "desc": "💡 개발 리더 계정 추가 침해 - 코드 저장소 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Low-and-Slow", "desc": "탐지를 피하기 위해 긴 시간에 걸쳐 느리게 수행하는 공격 전술입니다." },
+        { "name": "시간 기반 탐지", "desc": "특정 시간 창 내의 이벤트 빈도로 공격을 탐지하는 규칙. 느린 공격에 취약합니다." },
+        { "name": "상관 분석 창 (Correlation Window)", "desc": "SIEM에서 이벤트를 연관시키는 시간 범위. 넓을수록 느린 공격도 탐지 가능합니다." }
+      ]
+    },
+    {
+      "cmd": "evil-winrm -i 10.0.1.50 -u hr_manager -p 'Spring2026!'",
+      "out": "Evil-WinRM shell v3.5\nInfo: Establishing connection to remote endpoint\n\n*Evil-WinRM* PS C:\\Users\\hr_manager\\Documents>\n*Evil-WinRM* PS> whoami /groups\ncorp\\hr_department\ncorp\\domain users\ncorp\\shared_drives_rw",
+      "def": "[EDR] ALERT: WinRM session from sprayed account hr_manager",
+      "defAction": "User: hr_manager\nConnection: WinRM from 10.0.1.200\nContext: Post-spray compromise\nRisk Level: Critical\nAction: Terminate session, disable account, investigate",
+      "desc": "스프레이로 침해한 hr_manager 계정으로 Evil-WinRM 원격 셸을 획득합니다. HR 부서 파일과 공유 드라이브에 접근 가능합니다.",
+      "descEn": "Obtaining a remote shell via Evil-WinRM with the sprayed hr_manager account. Access to HR department files and shared drives is possible.",
+      "stepTitle": "침해된 계정으로 원격 접근 획득",
+      "stepTitleEn": "Remote Access via Compromised Account",
+      "feynman": "스프레이로 열린 자물쇠(hr_manager) 뒤의 방에 들어가는 것입니다. HR 부서 계정이므로 인사 데이터, 급여 정보, 공유 드라이브에 접근할 수 있습니다. 여기서 수집한 정보로 더 높은 권한의 계정을 찾아 권한을 상승시킬 수 있습니다.",
+      "feynmanEn": "Entering the room behind the opened lock (hr_manager). As an HR account, access to personnel data, payroll information, and shared drives is possible.",
+      "expert": "Evil-WinRM은 WinRM(5985/5986)을 통한 원격 PowerShell 세션 도구입니다. hr_manager가 'Remote Management Users' 그룹에 속하거나 관리자이면 WinRM 접근이 가능합니다. shared_drives_rw 그룹 멤버십은 네트워크 공유에 읽기/쓰기 접근을 의미하며, 횡적 이동의 발판이 됩니다.",
+      "expertEn": "Evil-WinRM provides remote PowerShell sessions via WinRM (5985/5986). shared_drives_rw group membership means read/write access to network shares, providing a foothold for lateral movement.",
+      "defTooltip": "🔐 스프레이로 침해된 hr_manager 계정에서 WinRM 세션이 감지되었습니다!",
+      "defTooltipEn": "🔐 WinRM session detected from spray-compromised hr_manager account!",
+      "hackerLog": {
+        "title": "winrm_session.txt",
+        "lines": [
+          { "log": "Evil-WinRM shell established", "desc": "💡 원격 PowerShell 셸 획득 - 명령 실행 및 파일 접근 가능" },
+          { "log": "corp\\shared_drives_rw", "desc": "💡 공유 드라이브 쓰기 권한 - 랜섬웨어 배포나 데이터 탈취 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Evil-WinRM", "desc": "WinRM 프로토콜을 이용한 원격 관리 도구. 침투 테스트에서 원격 셸 획득에 사용됩니다." },
+        { "name": "WinRM (5985/5986)", "desc": "Windows Remote Management 서비스. HTTP(5985) 또는 HTTPS(5986)를 통한 원격 관리를 제공합니다." },
+        { "name": "횡적 이동 (Lateral Movement)", "desc": "초기 침해 후 네트워크 내 다른 시스템으로 이동하는 공격 단계입니다." }
+      ]
+    },
+    {
+      "cmd": "Get-WinEvent -FilterHashtable @{LogName='Security';Id=4776} | Group-Object -Property {$_.Properties[1].Value} | Sort-Object Count -Descending | Select-Object -First 5",
+      "out": "Count Name\n----- ----\n  847 10.0.1.200\n    12 DC01\n     3 DC02\n     1 WORKSTATION01",
+      "def": "[SIEM] Event ID 4776 correlation - 847 NTLM auth from single source IP",
+      "defAction": "Source IP: 10.0.1.200\nAuth Attempts: 847 (Event ID 4776)\nPattern: Password Spraying confirmed\nRisk Level: Critical\nAction: Block IP, reset compromised passwords",
+      "desc": "Event ID 4776(NTLM 인증)을 분석하면 단일 IP(10.0.1.200)에서 847회의 인증 시도가 발생한 것이 확인됩니다.",
+      "descEn": "Analyzing Event ID 4776 (NTLM authentication) reveals 847 authentication attempts from a single IP (10.0.1.200).",
+      "stepTitle": "Event ID 4776 상관 분석으로 스프레이 탐지",
+      "stepTitleEn": "Spray Detection via Event ID 4776 Correlation",
+      "feynman": "보안 로그를 분석해보니, 한 IP 주소(10.0.1.200)에서 847번이나 인증을 시도한 기록이 있습니다. 정상적인 업무에서 한 IP가 847개의 다른 계정으로 로그인을 시도하는 것은 있을 수 없으므로, 이것은 Password Spraying의 확실한 증거입니다.",
+      "feynmanEn": "Security log analysis reveals one IP address (10.0.1.200) made 847 authentication attempts. It's impossible for one IP to try logging in with 847 different accounts in normal operations, making this definitive evidence of Password Spraying.",
+      "expert": "Event ID 4776은 NTLM 인증 시도를 기록합니다(성공/실패 모두). 소스 IP별로 그룹화하면 단일 소스에서의 대량 인증 시도를 식별할 수 있습니다. Kerberos 기반 스프레이는 Event ID 4771(Kerberos pre-auth failure)로 탐지합니다. Azure AD의 경우 Smart Lockout과 Risk-based Conditional Access가 추가 방어 계층을 제공합니다.",
+      "expertEn": "Event ID 4776 logs NTLM authentication attempts (both success/failure). Grouping by source IP identifies mass auth attempts from a single source. Kerberos-based spraying is detected via Event ID 4771.",
+      "defTooltip": "🔐 단일 IP에서 847회 인증 시도 감지! Password Spraying 확정!",
+      "defTooltipEn": "🔐 847 auth attempts from single IP detected! Password Spraying confirmed!",
+      "hackerLog": {
+        "title": "event_4776.txt",
+        "lines": [
+          { "log": "847 attempts from 10.0.1.200", "desc": "💡 한 IP에서 847회 인증 - Password Spraying의 명확한 패턴" },
+          { "log": "Normal: DC01(12), DC02(3)", "desc": "💡 정상 트래픽과 비교하면 847회는 극단적으로 비정상적" }
+        ]
+      },
+      "terms": [
+        { "name": "Event ID 4776", "desc": "NTLM 인증 시도를 기록하는 Windows Security 이벤트. 소스 IP와 결과(성공/실패)가 포함됩니다." },
+        { "name": "Event ID 4771", "desc": "Kerberos 사전 인증 실패를 기록하는 이벤트. Kerberos 기반 Password Spraying 탐지에 사용됩니다." },
+        { "name": "Smart Lockout (Azure AD)", "desc": "클라우드 기반 지능형 잠금 기능. 친숙한/비친숙한 위치를 구분하여 스프레이를 탐지합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash (Attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "kerbrute userenum", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "kerbrute passwordspray (Round 1)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "kerbrute passwordspray (Round 2, slow)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "evil-winrm (hr_manager)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "Remote PowerShell Session", "depth": 2, "alert": true, "minStep": 3 }
+  ]
+}

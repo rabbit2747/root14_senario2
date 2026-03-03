@@ -1,0 +1,183 @@
+{
+  "id": "T1608.002",
+  "title": "SEO 포이즈닝 시뮬레이션",
+  "titleEn": "SEO Poisoning Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 사이트 구축", "labelEn": "🔍 Site Setup", "steps": [0, 1] },
+    { "label": "⚡ SEO 조작", "labelEn": "⚡ SEO Manipulation", "steps": [2, 3] },
+    { "label": "✅ 감염 테스트", "labelEn": "✅ Infection Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "site", "label": "Fake Download Site", "x": 200, "y": 30 },
+    { "id": "google", "label": "Google Search", "x": 200, "y": 90 },
+    { "id": "download", "label": "Trojanized App", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim PC", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "site", "minStep": 0 },
+    { "from": "site", "to": "google", "minStep": 2 },
+    { "from": "google", "to": "download", "minStep": 3 },
+    { "from": "download", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "seo-site/", "icon": "🌐" },
+    { "name": "trojan-installer.exe", "icon": "⚙️", "alert": true },
+    { "name": "google-ads.json", "icon": "📄" }
+  ],
+  "steps": [
+    {
+      "cmd": "cat > index.html << 'EOF'\n<!DOCTYPE html>\n<html>\n<head><title>Free PDF Editor Download 2026 - Best PDF Tools</title>\n<meta name=\"description\" content=\"Download the best free PDF editor. Convert, edit, merge PDF files. 100% free, no registration.\">\n<meta name=\"keywords\" content=\"free pdf editor, pdf editor download, best pdf tools 2026, convert pdf free\">\n</head><body>\n<h1>Download Free PDF Editor 2026</h1>\n<a href=\"/download/pdf-editor-setup.exe\" class=\"download-btn\">Download Now (v3.2.1)</a>\n</body></html>\nEOF\necho '[+] Fake download site created'",
+      "out": "[+] Fake download site created\n\n[*] Site structure:\n    /index.html — SEO-optimized landing page\n    /download/pdf-editor-setup.exe — Trojanized installer\n    /about.html — Fake company page\n    /privacy.html — Privacy policy (copied template)\n    /sitemap.xml — For search engine indexing\n\n[*] Domain: pdf-editor-free[.]download\n[*] SSL: Let's Encrypt (auto-provisioned)\n[*] Hosting: Bulletproof VPS (Moldova)",
+      "def": "[Threat Intel] New domain registered matching software download SEO poisoning pattern",
+      "defAction": "Source: Domain registration monitoring\nTarget: pdf-editor-free[.]download\nAction: Domain flagged as NRD, added to suspicious domain watchlist",
+      "desc": "검색 엔진에 최적화된 가짜 소프트웨어 다운로드 사이트를 생성합니다.",
+      "descEn": "Creating a fake software download site optimized for search engines.",
+      "stepTitle": "가짜 다운로드 사이트 생성",
+      "stepTitleEn": "Fake Download Site Creation",
+      "feynman": "가짜 소프트웨어 가게를 열고 간판을 크게 다는 것입니다. HTML 페이지에 'PDF 편집기 무료 다운로드'라는 키워드를 대량 삽입하여, 구글에서 검색했을 때 상위에 노출되도록 합니다. 다운로드 버튼을 누르면 진짜 PDF 편집기 대신 악성코드가 설치됩니다.",
+      "feynmanEn": "Like opening a fake software store with a big sign. HTML pages are stuffed with 'free PDF editor download' keywords to appear high in Google results. Clicking download installs malware instead of a real PDF editor.",
+      "expert": "SEO 포이즈닝은 meta description, title, keywords 태그를 최적화하여 검색 순위를 조작합니다. Let's Encrypt 인증서와 개인정보처리방침 페이지로 신뢰도를 높입니다.",
+      "expertEn": "SEO poisoning manipulates search rankings by optimizing meta description, title, and keyword tags. Let's Encrypt certificate and privacy policy pages increase credibility.",
+      "defTooltip": "🔗 위협 인텔: SEO 포이즈닝 패턴의 신규 도메인 등록 감지",
+      "defTooltipEn": "🔗 Threat Intel: New domain registration matching SEO poisoning pattern detected",
+      "hackerLog": {
+        "title": "site_setup.log",
+        "lines": [
+          { "log": "Domain: pdf-editor-free[.]download", "desc": "💡 소프트웨어명 포함 도메인 — 검색 연관성 극대화" },
+          { "log": "SSL: Let's Encrypt (HTTPS)", "desc": "💡 자물쇠 아이콘 표시 — 사용자 신뢰 확보" },
+          { "log": "Pages: landing, about, privacy, sitemap", "desc": "💡 합법 사이트처럼 보이는 완전한 구조" }
+        ]
+      },
+      "terms": [
+        { "name": "SEO 포이즈닝", "desc": "검색 엔진 최적화를 악용하여 악성 사이트를 검색 결과 상위에 노출시키는 공격 기법." },
+        { "name": "키워드 스터핑", "desc": "검색 순위를 조작하기 위해 웹페이지에 타겟 키워드를 대량 삽입하는 SEO 조작 기법." }
+      ]
+    },
+    {
+      "cmd": "python3 trojanize.py --legitimate-installer 'PDFEditor-3.2.1-Setup.exe' --payload beacon_loader.exe --output pdf-editor-setup.exe --icon pdf_icon.ico --sign stolen_cert.pfx",
+      "out": "[*] Trojanizer v2.1 — Legitimate + Malicious bundle\n[*] Legitimate: PDFEditor-3.2.1-Setup.exe (45.2 MB)\n[*] Payload: beacon_loader.exe (842 KB)\n[*] Bundling method: SFX archive with auto-extract\n\n[+] Step 1: Extracting legitimate installer... OK\n[+] Step 2: Bundling payload with installer... OK\n[+] Step 3: Setting icon to pdf_icon.ico... OK\n[+] Step 4: Signing with stolen certificate... OK\n[+] Step 5: Testing execution flow...\n    → Runs legitimate installer (user sees normal setup)\n    → Silently executes beacon_loader.exe in background\n\n[+] Output: pdf-editor-setup.exe (46.1 MB)\n[+] VT Detection: 3/68 (4.4%)\n[+] SmartScreen: PASS (signed)",
+      "def": "[Sandbox] Bundled executable detected — legitimate installer + hidden malicious payload",
+      "defAction": "Source: pdf-editor-setup.exe\nTarget: Sandbox analysis\nAction: Dual-purpose executable flagged, signature updated",
+      "desc": "정상 PDF 편집기 설치 파일에 악성코드를 번들링하여 트로이 목마를 생성합니다.",
+      "descEn": "Creating a trojan by bundling malware with a legitimate PDF editor installer.",
+      "stepTitle": "트로이 목마 설치 파일 생성",
+      "stepTitleEn": "Trojanized Installer Creation",
+      "feynman": "진짜 상품 안에 도청 장치를 숨기는 것입니다. 진짜 PDF 편집기 설치 파일에 악성코드를 몰래 포함시킵니다. 사용자가 설치하면 PDF 편집기가 정상적으로 설치되면서 동시에 백그라운드에서 악성코드가 실행됩니다.",
+      "feynmanEn": "Like hiding a wiretap inside a real product. Malware is secretly included in a real PDF editor installer. When users install it, the PDF editor works normally while malware runs in the background.",
+      "expert": "SFX 아카이브 번들링은 정상 설치 프로그램과 악성 페이로드를 하나의 실행 파일로 결합합니다. 사용자는 정상 설치 경험을 하므로 의심하지 않습니다.",
+      "expertEn": "SFX archive bundling combines legitimate installer and malicious payload into a single executable. Users experience normal installation, raising no suspicion.",
+      "defTooltip": "🔗 샌드박스: 정상 설치 프로그램 + 숨겨진 악성 페이로드 번들 감지",
+      "defTooltipEn": "🔗 Sandbox: Legitimate installer + hidden malicious payload bundle detected",
+      "hackerLog": {
+        "title": "trojanize.log",
+        "lines": [
+          { "log": "Bundle: PDFEditor + beacon_loader", "desc": "💡 정상 프로그램 + 악성코드를 하나로 결합" },
+          { "log": "User sees: Normal PDF Editor setup", "desc": "💡 사용자는 정상 설치 과정만 목격" },
+          { "log": "Background: beacon_loader.exe runs", "desc": "💡 백그라운드에서 C2 비콘 자동 실행" }
+        ]
+      },
+      "terms": [
+        { "name": "트로이 목마", "desc": "정상 프로그램으로 위장한 악성코드. 사용자가 자발적으로 설치하도록 유도." },
+        { "name": "SFX 아카이브", "desc": "Self-Extracting Archive. 실행 시 자동으로 파일을 추출하고 실행하는 압축 형식." }
+      ]
+    },
+    {
+      "cmd": "python3 seo_boost.py --target 'pdf-editor-free[.]download' --keywords 'free pdf editor download 2026, best pdf tools, pdf converter free' --method backlinks --count 500",
+      "out": "[*] SEO Boost Campaign — Building backlinks\n[*] Target: pdf-editor-free[.]download\n[*] Keywords: free pdf editor download 2026, best pdf tools, pdf converter free\n\n[+] Phase 1: Blog comment spam (200 links)... Done\n[+] Phase 2: Forum signature links (150 links)... Done\n[+] Phase 3: Hacked site injections (100 links)... Done\n[+] Phase 4: Social media shares (50 links)... Done\n\n[+] Total backlinks created: 500\n[+] Estimated ranking improvement: Page 5 → Page 1 (7-14 days)\n[+] Current Google position: #47 → targeting #3-5",
+      "def": "[Search Engine] Suspicious backlink pattern detected — rapid link building from low-quality sources",
+      "defAction": "Source: pdf-editor-free[.]download\nTarget: Google Search index\nAction: Manual review triggered, potential SEO manipulation flagged",
+      "desc": "대량 백링크를 생성하여 악성 사이트의 Google 검색 순위를 인위적으로 올립니다.",
+      "descEn": "Creating mass backlinks to artificially boost the malicious site's Google search ranking.",
+      "stepTitle": "SEO 순위 조작",
+      "stepTitleEn": "SEO Ranking Manipulation",
+      "feynman": "가짜 가게의 별점을 대량으로 조작하는 것입니다. 500개의 다른 웹사이트에서 악성 사이트로 링크를 걸면, 구글은 이 사이트가 '인기 있다'고 판단하여 검색 순위를 올립니다. 블로그 댓글, 포럼, 해킹된 사이트 등을 이용합니다.",
+      "feynmanEn": "Like mass-manipulating fake ratings for a fake store. Creating 500 backlinks from different websites makes Google think the site is popular, boosting its ranking. Uses blog comments, forums, and hacked sites.",
+      "expert": "블랙햇 SEO 기법인 링크 팜, 코멘트 스팸, 해킹된 사이트 인젝션으로 PageRank를 조작합니다. 7-14일이면 첫 페이지 진입이 가능합니다.",
+      "expertEn": "Black hat SEO techniques like link farms, comment spam, and hacked site injections manipulate PageRank. Page 1 entry is possible within 7-14 days.",
+      "defTooltip": "🔗 검색 엔진: 저품질 소스에서의 급격한 백링크 증가 패턴 감지",
+      "defTooltipEn": "🔗 Search Engine: Rapid backlink increase from low-quality sources detected",
+      "hackerLog": {
+        "title": "seo_boost.log",
+        "lines": [
+          { "log": "Backlinks: 500 created", "desc": "💡 대량 백링크로 검색 순위 인위적 상승" },
+          { "log": "Methods: spam, forum, hacked sites", "desc": "💡 다양한 블랙햇 SEO 기법 동시 활용" },
+          { "log": "Target: #47 → #3-5 (7-14 days)", "desc": "💡 첫 페이지 진입 목표 — 검색 트래픽 확보" }
+        ]
+      },
+      "terms": [
+        { "name": "백링크", "desc": "다른 웹사이트에서 자신의 사이트로 연결되는 링크. 검색 엔진은 백링크 수를 사이트 인기도 지표로 활용." },
+        { "name": "블랙햇 SEO", "desc": "검색 엔진 가이드라인을 위반하여 순위를 조작하는 비윤리적 SEO 기법." }
+      ]
+    },
+    {
+      "cmd": "python3 google_ads_setup.py --keyword 'pdf editor download' --display-url 'www.adobe-pdf-editor.com' --landing 'https://pdf-editor-free[.]download/ad-landing' --budget 500 --cpc-bid 2.50",
+      "out": "[*] Google Ads Campaign Setup\n[*] Campaign: PDF Editor Download\n[*] Keyword: \"pdf editor download\" (Exact match)\n[*] Display URL: www.adobe-pdf-editor.com\n[*] Landing URL: https://pdf-editor-free[.]download/ad-landing\n[*] Daily Budget: $500\n[*] CPC Bid: $2.50\n\n[+] Ad Preview:\n    ┌─────────────────────────────────────────┐\n    │ Ad · www.adobe-pdf-editor.com           │\n    │ Free PDF Editor - Download Now          │\n    │ Edit, Convert, Merge PDF Files Free.    │\n    │ Trusted by millions. No registration.   │\n    └─────────────────────────────────────────┘\n\n[+] Ad Status: Under Review\n[+] Expected impressions: 50,000/day\n[+] Expected clicks: 2,000/day (4% CTR)",
+      "def": "[Google Ads] Ad campaign flagged — display URL doesn't match landing URL domain",
+      "defAction": "Source: Google Ads review system\nTarget: pdf-editor-free[.]download campaign\nAction: Ad suspended for policy violation, account flagged",
+      "desc": "Google Ads에서 합법 소프트웨어를 사칭한 광고를 구매하여 검색 결과 최상단에 노출합니다.",
+      "descEn": "Purchasing Google Ads impersonating legitimate software to appear at the top of search results.",
+      "stepTitle": "Google Ads 악용 (Malvertising)",
+      "stepTitleEn": "Google Ads Abuse (Malvertising)",
+      "feynman": "가짜 가게 광고를 검색 결과 맨 위에 사는 것입니다. 'PDF 편집기 다운로드'를 검색하면 광고가 첫 번째로 나옵니다. 광고에는 adobe-pdf-editor.com이라고 표시되지만, 실제로는 악성 사이트로 연결됩니다. 하루 $500을 투자하면 약 2,000명이 클릭합니다.",
+      "feynmanEn": "Like buying a fake store ad at the very top of search results. Searching 'PDF editor download' shows the ad first. It displays adobe-pdf-editor.com but actually links to a malicious site. $500/day investment yields ~2,000 clicks.",
+      "expert": "Malvertising은 광고 표시 URL과 실제 랜딩 URL을 다르게 설정합니다. Google의 검토 시스템을 우회하기 위해 초기에는 합법 페이지를 보여준 후 승인 후 악성 페이지로 변경하는 클로킹 기법을 사용합니다.",
+      "expertEn": "Malvertising sets different display URLs and landing URLs. Cloaking techniques show legitimate pages during Google review, then switch to malicious pages after approval.",
+      "defTooltip": "🔗 Google Ads: 표시 URL과 랜딩 URL 도메인 불일치 감지",
+      "defTooltipEn": "🔗 Google Ads: Display URL and landing URL domain mismatch detected",
+      "hackerLog": {
+        "title": "google_ads.log",
+        "lines": [
+          { "log": "Display: adobe-pdf-editor.com", "desc": "💡 합법 브랜드를 사칭하는 표시 URL" },
+          { "log": "Landing: pdf-editor-free[.]download", "desc": "💡 실제로는 악성 사이트로 연결" },
+          { "log": "Budget: $500/day → 2,000 clicks", "desc": "💡 하루 2,000명에게 악성코드 배포 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Malvertising", "desc": "악성 광고. 합법적인 광고 플랫폼을 악용하여 악성 콘텐츠를 배포하는 기법." },
+        { "name": "클로킹", "desc": "검색 봇/광고 심사관과 일반 사용자에게 다른 콘텐츠를 보여주는 기법. 심사 우회 목적." }
+      ]
+    },
+    {
+      "cmd": "python3 campaign_monitor.py --site 'pdf-editor-free[.]download' --period 7d",
+      "out": "[*] SEO Poisoning Campaign Report (7 days)\n\n=== Traffic ===\nTotal visitors:        14,832\nOrganic search:         8,291 (55.9%)\nGoogle Ads:             5,612 (37.8%)\nDirect/Referral:          929 (6.3%)\n\n=== Infections ===\nDownloads:              3,247 (21.9% conversion)\nSuccessful executions:  2,156 (66.4% of downloads)\nBeacon check-ins:       1,892 (87.7% of executions)\n\n=== Geographic Distribution ===\nSouth Korea:              782 (41.3%)\nJapan:                    412 (21.8%)\nUnited States:            298 (15.7%)\nOther:                    400 (21.2%)\n\n[+] Campaign ROI: $3,500 spent → 1,892 infections\n[+] Cost per infection: $1.85",
+      "def": "[SIEM] Mass infection event correlated with SEO poisoned download site — 1,892 beacons detected",
+      "defAction": "Source: pdf-editor-free[.]download\nTarget: 1,892 infected endpoints\nAction: Emergency response — domain sinkholed, infected hosts quarantined, cleanup initiated",
+      "desc": "7일간 SEO 포이즈닝 캠페인 결과를 모니터링합니다. 약 1,900대의 감염에 성공했습니다.",
+      "descEn": "Monitoring 7-day SEO poisoning campaign results. Approximately 1,900 infections achieved.",
+      "stepTitle": "캠페인 결과 분석",
+      "stepTitleEn": "Campaign Results Analysis",
+      "feynman": "가짜 가게의 '영업 실적'을 확인하는 것입니다. 7일 동안 약 15,000명이 방문하여 3,247명이 다운로드했고, 그 중 1,892대의 컴퓨터가 감염되었습니다. 감염 1건당 비용이 $1.85로 매우 저렴하여, 공격자에게는 매우 효율적인 투자입니다.",
+      "feynmanEn": "Like checking sales results of a fake store. Over 7 days, ~15,000 visitors led to 3,247 downloads and 1,892 infections. At $1.85 per infection, this is a very cost-effective investment for attackers.",
+      "expert": "감염 전환율 21.9%와 실행 성공률 66.4%는 SEO 포이즈닝의 전형적인 수치입니다. 지역 분포에서 한국 41.3%는 한국어 키워드 타겟팅의 결과입니다.",
+      "expertEn": "21.9% download conversion and 66.4% execution success are typical SEO poisoning metrics. South Korea at 41.3% reflects Korean keyword targeting.",
+      "defTooltip": "🔗 SIEM: SEO 포이즈닝 사이트 기반 대량 감염 — 1,892개 비콘 탐지",
+      "defTooltipEn": "🔗 SIEM: Mass infection from SEO poisoned site — 1,892 beacons detected",
+      "hackerLog": {
+        "title": "campaign_report.log",
+        "lines": [
+          { "log": "Infections: 1,892 (7 days)", "desc": "💡 일주일에 약 2,000대 감염 — 대규모 캠페인" },
+          { "log": "Cost: $1.85/infection", "desc": "💡 감염당 비용이 매우 저렴 — 높은 ROI" },
+          { "log": "Korea: 41.3% of infections", "desc": "💡 한국어 키워드 타겟팅으로 한국 사용자 집중 감염" }
+        ]
+      },
+      "terms": [
+        { "name": "전환율", "desc": "방문자 중 실제 다운로드/감염으로 이어진 비율. SEO 포이즈닝의 효과를 측정하는 핵심 지표." },
+        { "name": "DNS 싱크홀", "desc": "악성 도메인의 DNS 응답을 보안 서버로 변경하여 피해자의 악성 사이트 접속을 차단하는 방어 기법." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "pid": 1, "name": "init", "children": [
+      { "pid": 1200, "name": "bash", "children": [
+        { "pid": 1201, "name": "site creation", "children": [] },
+        { "pid": 1205, "name": "trojanize.py", "children": [] },
+        { "pid": 1210, "name": "seo_boost.py", "children": [] },
+        { "pid": 1215, "name": "google_ads_setup.py", "children": [] },
+        { "pid": 1220, "name": "campaign_monitor.py", "children": [] }
+      ]}
+    ]}
+  ]
+}

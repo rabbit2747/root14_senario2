@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1587.003">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1587-003-digital-certificates&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1587.003 디지털 인증서 개발">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1587.003 디지털 인증서 개발 — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}.glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05);}.dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);}.hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}.terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div><div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1587.003: 디지털 인증서 개발</p></div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch1">1. 디지털 인증서 개요</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch2">2. 인증서 생성 및 활용</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch3">3. 탐지와 방어</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Resource Development</div>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">T1587.003<br><span class="hl-teal">디지털 인증서 개발</span></h2>
+                <p class="text-lg text-cgray dark:text-slate-400 max-w-2xl mx-auto">공격자가 자체 SSL/TLS 인증서를 생성하거나 무료 CA를 활용하여 C2 통신 암호화 및 피싱 인프라를 구축하는 기법을 학습합니다.</p>
+            </header>
+
+            <section id="ch1" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">🔒 Chapter 1 — 디지털 인증서 개요</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <p>디지털 인증서(SSL/TLS)는 웹 통신의 <span class="hl-teal">암호화와 서버 인증</span>을 제공합니다. 공격자는 자체 인증서를 개발하여 C2 통신을 암호화하고, 피싱 사이트를 합법적으로 보이게 만듭니다. T1588.004(인증서 탈취)와 달리 <span class="hl-yel">직접 생성</span>합니다.</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">인증서 생성 방법</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- 자체 서명 (Self-signed) — OpenSSL</li>
+                                <li>- 무료 CA — Let's Encrypt (자동 발급)</li>
+                                <li>- 저가 DV 인증서 — 리셀러 구매</li>
+                                <li>- 내부 CA 악용 — AD CS 공격</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">인증서 악용 목적</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- C2 통신 HTTPS 암호화</li>
+                                <li>- 피싱 사이트 자물쇠 아이콘 표시</li>
+                                <li>- MitM 프록시 인증서</li>
+                                <li>- Domain Fronting 인프라</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># Let's Encrypt 통계 — 악성 활용 현황</p>
+                        <p class="text-cyel">$ python3 le_abuse_stats.py --year 2025</p>
+                        <p>[*] Let's Encrypt Certificate Statistics (2025):</p>
+                        <p>  Total certificates issued:    ~400 million</p>
+                        <p>  Used for phishing:            ~1.2 million (0.3%)</p>
+                        <p>  Used for C2 infrastructure:   ~180,000 (estimated)</p>
+                        <p>  Used for malware delivery:    ~95,000 (estimated)</p>
+                        <p class="text-red-400">[!] 83% of phishing sites now use HTTPS (up from 50% in 2020)</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch2" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">⚡ Chapter 2 — 인증서 생성 및 활용</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="space-y-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">Let's Encrypt 자동 발급</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">Let's Encrypt는 도메인 소유권만 확인하면 무료로 SSL 인증서를 발급합니다. ACME 프로토콜로 완전히 자동화되어, 스크립트 하나로 수백 개의 C2 도메인에 인증서를 배포할 수 있습니다. 90일 자동 갱신으로 장기 운영도 가능합니다.</p>
+                        </div>
+                        <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                            <p class="text-slate-500"># 자체 서명 인증서 생성 — C2 내부 통신용</p>
+                            <p class="text-cyel">$ openssl req -x509 -newkey rsa:4096 -sha256 -days 365 \</p>
+                            <p>  -nodes -keyout c2_key.pem -out c2_cert.pem \</p>
+                            <p>  -subj "/CN=microsoft-update-service.com" \</p>
+                            <p>  -addext "subjectAltName=DNS:microsoft-update-service.com,DNS:*.microsoft-update-service.com"</p>
+                            <p class="mt-2">Generating a RSA private key</p>
+                            <p>writing new private key to 'c2_key.pem'</p>
+                            <p class="text-green-400">[+] Self-signed certificate created</p>
+                            <p class="text-green-400">[+] Valid for 365 days</p>
+                            <p class="text-green-400">[+] CN mimics Microsoft update service</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold hl-yel mb-2">피싱 사이트 인증서</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">사용자의 83%가 자물쇠 아이콘을 "안전한 사이트"로 인식합니다. 공격자는 Let's Encrypt로 피싱 사이트에 합법 인증서를 설치하여, 브라우저에 자물쇠 아이콘을 표시합니다. "https://microsofit-login[.]com"은 자물쇠가 있어도 피싱입니다.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">자체 CA 구축 (Advanced)</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">고급 공격자는 자체 Root CA를 생성하여 다수의 C2 서버에 인증서를 발급합니다. 이 인증서는 공개 CA 인프라에 등록되지 않아 CT(Certificate Transparency) 로그에 남지 않습니다. 자체 임플란트가 이 CA를 신뢰하도록 하드코딩합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch3" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">🛡️ Chapter 3 — 탐지와 방어</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">인증서 모니터링</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- CT 로그 모니터링 (crt.sh, Censys)</li>
+                                <li>- 브랜드 유사 도메인 인증서 알림</li>
+                                <li>- JA3/JA3S TLS 핑거프린트 분석</li>
+                                <li>- 인증서 발급자/유효기간 이상 탐지</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">네트워크 방어</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- SSL/TLS 검사 (복호화 + 재암호화)</li>
+                                <li>- 자체 서명 인증서 차단 정책</li>
+                                <li>- HSTS Preload List 활용</li>
+                                <li>- Certificate Pinning (모바일 앱)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                        <h5 class="font-bold text-sm hl-teal mb-2">사용자 교육</h5>
+                        <p class="text-sm text-cgray dark:text-slate-400">자물쇠 아이콘은 "통신이 암호화되었다"는 의미이지, "사이트가 안전하다"는 의미가 아닙니다. 사용자에게 URL을 직접 확인하도록 교육하고, 의심스러운 사이트에서는 인증서 세부 정보(발급자, 유효기간, 도메인)를 확인하는 습관을 기르도록 합니다.</p>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># CT 로그 모니터링 — 브랜드 위협 탐지</p>
+                        <p class="text-cyel">$ python3 ct_monitor.py --domain "example-corp.com" --similar --alert</p>
+                        <p>[*] Monitoring CT logs for example-corp.com and similar domains...</p>
+                        <p class="text-red-400">[ALERT] New cert: examp1e-corp[.]com (Let's Encrypt) — homoglyph attack</p>
+                        <p class="text-red-400">[ALERT] New cert: example-corp-login[.]com (Let's Encrypt) — phishing suspected</p>
+                        <p class="text-green-400">[OK] New cert: example-corp.com (DigiCert) — legitimate renewal</p>
+                        <p class="text-red-400">[ALERT] New cert: example-c0rp[.]com (ZeroSSL) — typosquat detected</p>
+                        <p class="mt-2 text-cyel">[*] Actions: Phishing domains reported to Google Safe Browsing</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+    <script>
+    function toggleTheme(){document.documentElement.classList.toggle('dark');var ic=document.getElementById('theme-icon');ic.textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙';}
+    function go(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});}
+    var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var id=e.target.id;document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),threshold:0.3});
+    document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
+    </script>
+</body>
+</html>

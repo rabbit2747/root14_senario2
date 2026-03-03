@@ -1,0 +1,152 @@
+{
+  "id": "T1566.004",
+  "title": "보이스 피싱(비싱) 시뮬레이션",
+  "titleEn": "Spearphishing Voice (Vishing) Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 음성 수집", "labelEn": "🔍 Voice Collection", "steps": [0] },
+    { "label": "📞 비싱 통화", "labelEn": "📞 Vishing Call", "steps": [1] },
+    { "label": "🎯 정보 탈취", "labelEn": "🎯 Info Extraction", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(AI Voice)", "x": 50, "y": 80 },
+    { "id": "voip", "label": "VoIP\nSIP Trunk", "x": 180, "y": 30 },
+    { "id": "pbx", "label": "Corp\nPBX", "x": 180, "y": 130 },
+    { "id": "victim", "label": "CFO\nPhone", "x": 330, "y": 80 },
+    { "id": "bank", "label": "Bank\nTransfer", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "voip", "minStep": 1 },
+    { "from": "voip", "to": "pbx", "minStep": 1 },
+    { "from": "pbx", "to": "victim", "minStep": 1 },
+    { "from": "victim", "to": "bank", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "VoIP Phone", "icon": "📞" },
+    { "name": "AI Voice Lab", "icon": "🤖" },
+    { "name": "SIP Client", "icon": "📱" },
+    { "name": "Call Recorder", "icon": "🎙️" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# CEO 음성 샘플 수집 (공개 소스)\n# YouTube 인터뷰, 팟캐스트, 웨비나\n\nyt-dlp --extract-audio --audio-format wav \\\n  'https://youtube.com/watch?v=CEO_interview_2025'\n\n# 음성 분리 (배경 소음 제거)\ndemucs --two-stems=vocals CEO_interview.wav\n\n# AI 음성 클론 모델 학습\npython voice_clone.py \\\n  --input ceo_vocals.wav \\\n  --model vall-e-x \\\n  --output ceo_clone_model.pt \\\n  --min-duration 300  # 최소 5분 샘플",
+      "out": "[음성 샘플 수집]\n소스 1: YouTube 인터뷰 (12분 32초)\n소스 2: 기업 웨비나 (8분 15초)\n소스 3: 팟캐스트 출연 (15분 48초)\n총 음성 데이터: 36분 35초\n\n[음성 처리]\n✅ 배경 소음 분리 완료 (Demucs)\n✅ 순수 음성: 28분 12초\n✅ 샘플링 레이트: 24kHz\n\n[AI 음성 클론]\n모델: VALL-E-X (제로샷 음성 합성)\n학습 시간: 45분\n음성 유사도: 96.2%\n감정 표현: 4가지 (평상/긴급/화남/부드러움)\n실시간 변환 지연: 180ms\n\n[발신번호 위조]\nSIP Provider: 해외 VoIP 서비스\n위조 번호: 02-1234-5678 (CEO 내선)",
+      "def": "[Threat Intel] Voice cloning model trained from public media — CEO voice synthesis capability acquired",
+      "defAction": "Tool: yt-dlp + Demucs + VALL-E-X\nVoice Source: YouTube, webinar, podcast (36 min)\nClone Quality: 96.2% similarity\nReal-time Latency: 180ms\nCaller ID Spoof: VoIP SIP trunk\nTarget: CFO (financial authority)\nRisk Level: Pre-attack preparation\nAction: Remove executive voice samples, monitor VoIP anomalies",
+      "desc": "공개된 YouTube 인터뷰와 웨비나에서 CEO의 음성 샘플을 수집하고, AI 모델(VALL-E-X)로 96%의 유사도를 가진 음성 클론을 생성합니다.",
+      "descEn": "Collect CEO voice samples from public YouTube interviews and webinars. Train an AI model (VALL-E-X) to create a voice clone with 96% similarity.",
+      "stepTitle": "공개 음성 수집 + AI 음성 클론 생성",
+      "stepTitleEn": "Public Voice Collection + AI Voice Clone Generation",
+      "feynman": "사기꾼이 사장님의 인터뷰 영상(공개 자료)에서 목소리를 녹음합니다. AI에게 이 목소리를 학습시키면, AI가 사장님처럼 말할 수 있게 됩니다. 5분짜리 녹음만으로도 96%의 정확도를 달성합니다.",
+      "feynmanEn": "The con artist records the boss's voice from interview videos (public sources). Teaching this voice to AI enables it to speak like the boss. Just 5 minutes of audio achieves 96% accuracy.",
+      "expert": "VALL-E-X는 Microsoft Research의 제로샷 음성 합성 모델로, 3초의 음성 샘플만으로도 음성 클론이 가능합니다. 그러나 고품질 클론에는 5분 이상이 권장됩니다. Demucs는 Meta AI의 음원 분리 도구로 BGM/소음에서 음성을 분리합니다. SIP(Session Initiation Protocol) 트렁크를 통한 Caller ID Spoofing은 STIR/SHAKEN 미적용 네트워크에서 가능합니다.",
+      "expertEn": "VALL-E-X from Microsoft Research enables zero-shot voice cloning from just 3 seconds of audio, though 5+ minutes is recommended for high quality. Demucs by Meta AI separates vocals from background. Caller ID Spoofing via SIP trunks works on networks without STIR/SHAKEN.",
+      "defTooltip": "🔐 CEO 음성 클론 완료! 96.2% 유사도!",
+      "defTooltipEn": "🔐 CEO voice clone complete! 96.2% similarity!",
+      "hackerLog": { "title": "voice_clone.log", "lines": ["[08:00:00] YouTube 인터뷰 다운로드", "[08:05:00] 음성 분리 (Demucs)", "[08:10:00] VALL-E-X 모델 학습 시작", "[08:55:00] 음성 클론 완료 (96.2%)"] },
+      "terms": [
+        { "term": "VALL-E", "def": "Microsoft의 AI 음성 합성 모델, 짧은 샘플에서 음성을 복제하는 제로샷 TTS" },
+        { "term": "Caller ID Spoofing", "def": "VoIP/SIP를 이용하여 발신번호를 위조하는 기법" }
+      ]
+    },
+    {
+      "cmd": "# AI 음성으로 CFO에게 전화\n# 실시간 음성 변환 + 발신번호 위조\n\n# VoIP 발신 설정\nlinphonec -c sip_config.ini\n# Caller ID: 02-1234-5678 (CEO 내선)\n# Voice Filter: ceo_clone_model.pt\n\n# 통화 스크립트:\n# [AI CEO 음성]\n# \"김 부장, 나 대표야. 지금 해외 출장 중이야.\n# 급한 건이 있어서 전화했어.\n# 파트너사에 오늘 중으로 선급금 3억을 송금해야 하는데,\n# 내가 지금 이동 중이라 직접 처리가 안 돼.\n# 바로 처리해줄 수 있어?\n# 이 건은 보안상 아무에게도 말하지 마.\"",
+      "out": "[비싱 통화 진행]\nCaller ID: 02-1234-5678 (CEO 내선) ✅\nAI Voice: CEO 음성 클론 (실시간 변환)\nDuration: 4분 32초\n\n[통화 분석]\n00:00 — \"김 부장, 나 대표야\" (친밀감)\n00:15 — \"해외 출장 중\" (물리적 확인 차단)\n00:30 — \"급한 건\" + \"오늘 중으로\" (긴급성)\n01:00 — \"선급금 3억 송금\" (금전 요구)\n01:30 — \"내가 처리가 안 돼\" (책임 전가)\n02:00 — \"아무에게도 말하지 마\" (비밀유지 압박)\n03:00 — CFO: \"네, 대표님. 바로 처리하겠습니다\"\n04:00 — 계좌 정보 전달\n04:32 — 통화 종료\n\n[사회공학 기법]\n✅ 권위: CEO 사칭\n✅ 긴급성: \"오늘 중으로\"\n✅ 비밀유지: \"아무에게도\"\n✅ 물리적 격리: \"해외 출장\"",
+      "def": "[PBX Log] Suspicious VoIP call to CFO — Caller ID matches CEO but originates from external SIP trunk",
+      "defAction": "Tool: VoIP + AI Voice Clone + SIP Caller ID Spoof\nSpoofed ID: CEO internal extension\nVoice: AI-cloned (real-time conversion)\nTarget: CFO (financial authority)\nRequest: Wire transfer 300M KRW\nSocial Engineering: Authority, urgency, secrecy\nDuration: 4 min 32 sec\nRisk Level: Critical\nAction: Freeze transfer, verify with CEO via alternate channel",
+      "desc": "AI가 CEO의 목소리로 CFO에게 전화하여 긴급 송금을 지시합니다. 발신번호를 CEO 내선으로 위조하고, 비밀유지를 압박하여 검증 절차를 우회합니다.",
+      "descEn": "AI calls the CFO using CEO's cloned voice demanding urgent wire transfer. Caller ID spoofed to CEO's extension, with secrecy pressure to bypass verification procedures.",
+      "stepTitle": "AI 음성 비싱 + 긴급 송금 지시",
+      "stepTitleEn": "AI Voice Vishing + Urgent Wire Transfer Request",
+      "feynman": "사기꾼이 AI 가면(음성 클론)을 쓰고 사장님인 척 재무팀장에게 전화합니다. 전화기에도 사장님 번호(위조)가 뜹니다. '급해', '비밀로 해', '오늘 중으로'라는 3가지 압박으로 생각할 시간을 주지 않습니다.",
+      "feynmanEn": "The con artist wears an AI mask (voice clone) and calls the CFO pretending to be the CEO. The phone even shows the CEO's number (spoofed). Three pressures — 'urgent', 'keep secret', 'today' — leave no time to think.",
+      "expert": "실시간 음성 변환(RVC - Retrieval-based Voice Conversion)은 180ms 이내의 지연으로 자연스러운 대화가 가능합니다. SIP INVITE 메시지의 From 헤더를 조작하면 발신번호를 위조할 수 있습니다. BEC(Business Email Compromise)와 결합된 비싱은 이메일 피싱보다 높은 성공률을 보입니다. STIR(Secure Telephony Identity Revisited)/SHAKEN(Signature-based Handling of Asserted info using toKENs)은 발신번호 위조를 방지하는 표준입니다.",
+      "expertEn": "Real-time voice conversion (RVC) achieves natural conversation with <180ms latency. Modifying SIP INVITE From headers spoofs caller ID. Vishing combined with BEC shows higher success than email phishing alone. STIR/SHAKEN standards prevent caller ID spoofing.",
+      "defTooltip": "🔐 AI CEO 음성으로 3억 송금 지시!",
+      "defTooltipEn": "🔐 AI CEO voice orders 300M KRW transfer!",
+      "hackerLog": { "title": "vishing_call.log", "lines": ["[09:30:00] VoIP 발신 (CEO 번호 위조)", "[09:30:15] AI 음성 변환 시작", "[09:33:00] CFO 송금 동의", "[09:34:32] 통화 종료"] },
+      "terms": [
+        { "term": "RVC", "def": "Retrieval-based Voice Conversion, 실시간 AI 음성 변환 기술" },
+        { "term": "BEC", "def": "Business Email Compromise, 기업 이메일 사기 (CEO 사칭 송금 사기)" }
+      ]
+    },
+    {
+      "cmd": "# CFO가 송금 처리\n# 공격자 제공 계좌로 3억원 이체\n\n# 공격자 계좌 정보 (통화 중 전달)\nBank: 해외 은행 (Singapore)\nAccount: SG-8827-4451-XXXX\nBeneficiary: TechPartner Holdings Ltd.\nAmount: 300,000,000 KRW\nReference: Project Alpha - Advance Payment\n\n# CFO의 행동\n# 1. 인터넷 뱅킹 접속\n# 2. 해외 송금 신청\n# 3. OTP 인증\n# 4. 송금 완료",
+      "out": "[송금 처리]\nTimestamp: 2026-03-01 10:15:00\nFrom: Corp Main Account (법인 계좌)\nTo: SG-8827-4451-XXXX (Singapore)\nAmount: 300,000,000 KRW (₩3억)\nStatus: Completed ✅\nOTP: 인증 완료\n\n[피해 분석]\n- 송금 완료: 3억원 해외 이체\n- 수취 계좌: 페이퍼 컴퍼니\n- 자금 이동: 3단계 세탁 (SG→HK→Crypto)\n- 회수 가능성: 매우 낮음 (24시간 이내 분산)\n\n[CFO 인식]\n- CEO 목소리 확인: \"맞다고 생각했음\"\n- 발신번호 확인: \"CEO 내선이었음\"\n- 의심 여부: \"긴급하다고 해서 바로 처리\"\n- 보고 여부: \"비밀로 하라고 해서 미보고\"",
+      "def": "[Banking Alert] Unusual overseas wire transfer — 300M KRW to Singapore account, requires investigation",
+      "defAction": "Tool: Wire transfer via internet banking\nFrom: Corporate main account\nTo: Singapore paper company\nAmount: 300,000,000 KRW\nMoney Trail: SG → HK → Cryptocurrency\nRecovery Chance: Very low\nCFO Awareness: None (believed CEO's voice)\nRisk Level: Critical — Financial loss\nAction: Contact bank immediately, freeze remaining funds, file police report",
+      "desc": "CFO가 AI CEO의 지시를 믿고 3억원을 해외 페이퍼 컴퍼니로 송금합니다. 자금은 수 시간 내에 암호화폐로 세탁되어 회수가 거의 불가능합니다.",
+      "descEn": "CFO trusts AI CEO's instruction and wires 300M KRW to an overseas paper company. Funds are laundered through cryptocurrency within hours, making recovery nearly impossible.",
+      "stepTitle": "긴급 해외 송금 + 자금 세탁",
+      "stepTitleEn": "Urgent Overseas Transfer + Money Laundering",
+      "feynman": "재무팀장이 사장님(가짜)의 말을 믿고 회사 돈을 해외 계좌로 보냅니다. 돈은 빠르게 다른 나라로 이동하고, 마지막에는 암호화폐로 바뀌어 흔적이 사라집니다. 24시간 안에 돈을 찾아야 하지만 이미 늦었습니다.",
+      "feynmanEn": "The CFO trusts the fake boss and sends company money overseas. The money quickly moves between countries and converts to cryptocurrency, erasing the trail. Must recover within 24 hours but it's already too late.",
+      "expert": "국제 송금의 SWIFT 네트워크를 통한 자금 이동은 T+0~T+2일 소요됩니다. 머니 뮬(Money Mule) 네트워크를 통해 다단계 세탁 후 암호화폐(Monero/Bitcoin mixer)로 변환됩니다. 금융 사기 피해 시 '지급정지 제도'를 통해 수취 은행에 즉시 연락해야 합니다. 골든타임은 24시간입니다. FATF(Financial Action Task Force) 권고에 따라 100만 달러 이상 국제 송금은 강화된 고객확인(EDD)이 필요합니다.",
+      "expertEn": "SWIFT international transfers take T+0 to T+2 days. Money mule networks perform multi-stage laundering before converting to cryptocurrency (Monero/Bitcoin mixer). The golden time for fraud recovery is 24 hours. FATF recommends Enhanced Due Diligence for transfers over $1M.",
+      "defTooltip": "🔐 3억원 해외 송금 완료! 자금 세탁 시작!",
+      "defTooltipEn": "🔐 300M KRW transferred overseas! Money laundering begun!",
+      "hackerLog": { "title": "wire_transfer.log", "lines": ["[10:10:00] 인터넷 뱅킹 접속", "[10:12:00] 해외 송금 신청 (3억)", "[10:14:00] OTP 인증 완료", "[10:15:00] 송금 완료 → 자금 세탁 시작"] },
+      "terms": [
+        { "term": "Money Mule", "def": "범죄 수익금을 세탁하기 위해 이용되는 중간 계좌/인물" },
+        { "term": "SWIFT", "def": "국제 은행 간 금융 메시지 네트워크, 국제 송금에 사용" }
+      ]
+    },
+    {
+      "cmd": "# 비싱 공격 탐지 분석\n# 1. PBX/VoIP 로그 분석\n# 2. AI 음성 탐지\n# 3. 금융 이상거래 탐지\n\n# PBX 로그 확인\ngrep 'CEO_extension' /var/log/asterisk/cdr-csv/*.csv |\nawk -F',' '{print $1,$2,$3,$5}'\n\n# 통화 녹음 AI 분석\npython deepfake_detector.py \\\n  --input call_recording.wav \\\n  --model resemblyzer \\\n  --compare ceo_reference.wav",
+      "out": "[PBX 로그 분석]\nCall Record:\n  Time: 2026-03-01 09:30:00\n  From: EXTERNAL_SIP (위조됨) ⚠️\n  Display: 02-1234-5678 (CEO 내선)\n  To: CFO 내선 (02-1234-8901)\n  Duration: 4:32\n  Source IP: 185.234.xxx.xxx (해외 VoIP) ⚠️\n  SIP Header: Via: SIP/2.0/UDP evil-sip.com ⚠️\n\n[AI 음성 분석]\nReference: CEO 공식 음성 샘플\nCall Sample: 의심 통화 녹음\n유사도: 94.7% (높음)\n딥페이크 지표:\n  - 마이크로 떨림 패턴: 인공적 ⚠️\n  - 호흡 패턴: 비정상 ⚠️\n  - 감정 전환: 기계적 ⚠️\n  - 배경 소음: 일관성 없음 ⚠️\n딥페이크 확률: 87.3%\n\n[금융 이상거래]\n해외 송금 3억 → 전례 없는 금액 ⚠️\n수취인: 미등록 업체 ⚠️\n승인 절차: 단독 (2인 승인 위반) ⚠️",
+      "def": "[SIEM] Deepfake vishing confirmed — external VoIP, 87% AI probability, unauthorized wire transfer",
+      "defAction": "Tool: PBX log analysis + AI deepfake detector\nCall Source: External VoIP (not internal PBX)\nCaller ID: Spoofed CEO extension\nVoice Analysis: 87.3% deepfake probability\nIndicators: Artificial micro-tremor, abnormal breathing\nFinancial: Unauthorized 300M KRW transfer\nApproval: Single person (violated dual-approval policy)\nRisk Level: Critical\nAction: Freeze accounts, contact bank, forensic investigation",
+      "desc": "PBX 로그에서 외부 VoIP 발신을 확인하고, AI 음성 분석으로 딥페이크 확률 87%를 확인합니다. 금융 이상거래 시스템에서 미승인 해외 송금을 탐지합니다.",
+      "descEn": "PBX logs reveal external VoIP origin. AI voice analysis confirms 87% deepfake probability. Financial anomaly detection catches unauthorized overseas wire transfer.",
+      "stepTitle": "PBX 로그 + AI 음성 분석 + 이상거래 탐지",
+      "stepTitleEn": "PBX Log + AI Voice Analysis + Financial Anomaly Detection",
+      "feynman": "보안 요원이 3가지를 확인합니다: 1) 전화가 어디서 왔는지(외부 인터넷 전화 ≠ 사내 전화), 2) 녹음된 목소리가 진짜인지(AI 분석으로 87% 가짜), 3) 돈이 정상적으로 나갔는지(혼자 승인 = 규정 위반).",
+      "feynmanEn": "Security checks three things: 1) Where the call came from (external VoIP not internal), 2) Whether the voice is real (AI analysis says 87% fake), 3) Whether money left properly (single approval = policy violation).",
+      "expert": "Asterisk PBX의 CDR(Call Detail Record)에서 SIP Via 헤더를 분석하면 실제 발신 IP를 확인할 수 있습니다. Resemblyzer는 d-vector 기반 화자 인식 라이브러리로, 음성 임베딩을 비교하여 화자 동일성을 검증합니다. 딥페이크 음성은 마이크로 프로소디(micro-prosody), F0 변화율, 호흡 패턴에서 자연 음성과 차이를 보입니다. FDS(Fraud Detection System)는 거래 금액, 수취인, 시간, 패턴을 분석합니다.",
+      "expertEn": "Asterisk PBX CDR analysis of SIP Via headers reveals actual source IP. Resemblyzer uses d-vector speaker recognition to verify speaker identity. Deepfake voice differs in micro-prosody, F0 variation rate, and breathing patterns. FDS analyzes transaction amount, recipient, timing, and patterns.",
+      "defTooltip": "🔐 딥페이크 87.3%! 외부 VoIP! 미승인 송금!",
+      "defTooltipEn": "🔐 Deepfake 87.3%! External VoIP! Unauthorized transfer!",
+      "hackerLog": { "title": "vishing_detect.log", "lines": ["[10:30:00] PBX 로그 분석 시작", "[10:30:05] 외부 SIP 발신 확인", "[10:30:10] AI 음성 분석: 87.3% 딥페이크", "[10:30:15] 이상거래 3억 미승인 송금 탐지"] },
+      "terms": [
+        { "term": "CDR", "def": "Call Detail Record, 통화 상세 기록 (발신/수신/시간/경로)" },
+        { "term": "FDS", "def": "Fraud Detection System, 금융 이상거래 탐지 시스템" }
+      ]
+    },
+    {
+      "cmd": "# 종합 비싱 방어 체계\n# 1. 콜백 절차 수립\n# 2. 코드워드 시스템\n# 3. 듀얼 승인\n# 4. STIR/SHAKEN\n\n# 코드워드 정책\n# 임원 간 사전 합의된 인증 단어\n# 분기별 변경, 구두로만 전달\n# 예: \"프로젝트 블루\" (2026 Q1)\n\n# 듀얼 승인 정책\nSet-FinancePolicy -Name 'Wire Transfer' \\\n  -Threshold 50000000 \\\n  -RequiredApprovers 2 \\\n  -ApprovalMethod 'InPerson OR VideoCall'\n\n# STIR/SHAKEN 적용\n# 통신사 레벨 발신번호 인증",
+      "out": "[콜백 절차]\n✅ 모든 금전 요청 → 공식 번호로 재확인 필수\n✅ 해외 출장 중 연락 → 별도 확인 채널 (Signal)\n✅ 비밀유지 요청 = 레드 플래그 → 즉시 보고\n\n[코드워드 시스템]\n✅ 임원 간 분기별 코드워드 변경\n✅ 구두 전달만 허용 (이메일/문서 금지)\n✅ 코드워드 미확인 → 요청 거부\n✅ 현재: \"프로젝트 블루\" (2026 Q1)\n\n[듀얼 승인]\n✅ 5천만원 이상: 2인 승인 필수\n✅ 1억원 이상: 대면 또는 화상 확인\n✅ 해외 송금: 추가 24시간 보류\n✅ 단독 승인 차단\n\n[STIR/SHAKEN]\n✅ 통신사 레벨 발신번호 인증\n✅ 미인증 통화: 경고 표시\n✅ VoIP 발신번호 위조 탐지\n\n[보안 교육]\n✅ 비싱 시뮬레이션 분기별 실시\n✅ AI 딥페이크 인식 교육\n✅ 임원 음성 노출 최소화 가이드",
+      "def": "[SIEM] Anti-vishing defense deployed — callback, codeword, dual approval, STIR/SHAKEN",
+      "defAction": "Tool: Callback + Codeword + Dual Approval + STIR/SHAKEN\nCallback: Verify all financial requests via official number\nCodeword: Quarterly rotation, verbal-only delivery\nDual Approval: 2+ approvers for transfers over 50M KRW\nSTIR/SHAKEN: Carrier-level caller ID authentication\nTraining: Quarterly vishing simulation\nRisk Level: Low (with full implementation)\nAction: Maintain procedures, quarterly codeword rotation",
+      "desc": "콜백 절차, 임원 코드워드, 듀얼 승인으로 비싱을 방어합니다. STIR/SHAKEN으로 발신번호 위조를 탐지하고, 분기별 비싱 시뮬레이션을 실시합니다.",
+      "descEn": "Defend against vishing with callback procedures, executive codewords, and dual approval. STIR/SHAKEN detects caller ID spoofing, with quarterly vishing simulations.",
+      "stepTitle": "콜백 + 코드워드 + 듀얼 승인 + STIR/SHAKEN",
+      "stepTitleEn": "Callback + Codeword + Dual Approval + STIR/SHAKEN",
+      "feynman": "4겹 보호: 1) 중요한 전화를 받으면 끊고 공식 번호로 다시 건다(콜백), 2) 사장님만 아는 비밀 단어(코드워드)를 물어본다, 3) 큰 돈은 혼자 보낼 수 없고 2명이 함께 확인해야 한다(듀얼 승인), 4) 전화 회사가 번호가 진짜인지 확인해준다(STIR/SHAKEN).",
+      "feynmanEn": "4-layer protection: 1) Hang up important calls and call back on official numbers, 2) Ask for a secret word only the CEO knows (codeword), 3) Large sums need 2 people to approve (dual approval), 4) The phone company verifies if the number is real (STIR/SHAKEN).",
+      "expert": "STIR(Secure Telephony Identity Revisited)은 X.509 인증서로 발신자 신원을 서명하고, SHAKEN(Signature-based Handling of Asserted info using toKENs)은 이를 네트워크 레벨에서 검증합니다. Attestation Level A(Full)는 발신자가 해당 번호의 정당한 사용자임을 보증합니다. 코드워드는 대역 외(out-of-band) 인증의 일종으로, AI가 예측할 수 없는 사전 합의된 정보입니다. 듀얼 승인은 Segregation of Duties(SoD) 원칙을 적용합니다.",
+      "expertEn": "STIR signs caller identity with X.509 certificates, SHAKEN verifies at network level. Attestation Level A guarantees the caller is the legitimate number user. Codewords are out-of-band authentication that AI cannot predict. Dual approval implements Segregation of Duties principle.",
+      "defTooltip": "🔐 콜백+코드워드+듀얼승인 비싱 방어!",
+      "defTooltipEn": "🔐 Callback+Codeword+Dual approval anti-vishing!",
+      "hackerLog": { "title": "defense_deploy.log", "lines": ["[11:00:00] 콜백 절차 수립", "[11:00:02] 코드워드 시스템 도입", "[11:00:04] 듀얼 승인 정책 적용", "[11:00:06] STIR/SHAKEN 요청"] },
+      "terms": [
+        { "term": "STIR/SHAKEN", "def": "발신번호 인증 표준, 통신사 레벨에서 Caller ID 위조를 방지" },
+        { "term": "SoD", "def": "Segregation of Duties, 업무 분리 원칙으로 단독 행위에 의한 사기 방지" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "VoIP Client",
+    "pid": 1000,
+    "children": [
+      {
+        "name": "AI Voice Engine (VALL-E-X)",
+        "pid": 1100,
+        "children": [
+          { "name": "SIP Call (spoofed caller ID)", "pid": 1110, "children": [] }
+        ]
+      }
+    ]
+  }
+}

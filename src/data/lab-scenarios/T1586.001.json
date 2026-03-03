@@ -1,0 +1,176 @@
+{
+  "id": "T1586.001",
+  "title": "소셜 미디어 계정 탈취 시뮬레이션",
+  "titleEn": "Social Media Account Compromise Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 유출 크레덴셜 수집", "labelEn": "🔍 Leaked Credential Collection", "steps": [0] },
+    { "label": "⚡ 크레덴셜 스터핑", "labelEn": "⚡ Credential Stuffing", "steps": [1, 2] },
+    { "label": "🔓 계정 장악", "labelEn": "🔓 Account Takeover", "steps": [3] },
+    { "label": "✅ 공격 활용", "labelEn": "✅ Attack Utilization", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "breach", "label": "Breach DB", "x": 200, "y": 30 },
+    { "id": "linkedin", "label": "LinkedIn", "x": 200, "y": 90 },
+    { "id": "account", "label": "Stolen Account", "x": 350, "y": 60 },
+    { "id": "victims", "label": "Victims", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "breach", "minStep": 0 },
+    { "from": "breach", "to": "linkedin", "minStep": 1 },
+    { "from": "linkedin", "to": "account", "minStep": 2 },
+    { "from": "account", "to": "victims", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "stolen_accounts", "icon": "📁" },
+    { "name": "credential_list.csv", "icon": "📄", "alert": true },
+    { "name": "phishing_messages.txt", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 breach_search.py --domain {companyName}.com --sources \"HIBP,DeHashed,IntelX\" --output breach_creds.csv",
+      "out": "[*] Searching breach databases for {companyName}.com...\n[+] Have I Been Pwned: 3 breaches found\n  - LinkedIn 2021 breach: 12 accounts\n  - Collection #1 (2019): 8 accounts\n  - Adobe breach (2013): 5 accounts\n[+] DeHashed: 47 unique email:password pairs\n[+] IntelX: 23 additional credentials\n\n[+] Total unique credentials: 68\n[+] With plaintext passwords: 41\n[+] With hashed passwords: 27 (MD5: 15, SHA1: 8, bcrypt: 4)\n\nSample (redacted):\n  kim.mh@{companyName}.com : P@ssw0rd2020!\n  lee.dw@{companyName}.com : Qwerty123!@#\n  park.sj@{companyName}.com : {companyName}2019$$\n  ...\n\n[+] 68 credentials saved to breach_creds.csv",
+      "def": "[DarkWeb Monitor] Breach database queries detected for organization domain",
+      "defAction": "Source: Breach monitoring service\nTarget: {companyName}.com credentials\nAction: Credential exposure alert - 68 unique accounts compromised",
+      "desc": "유출 데이터베이스(HIBP, DeHashed)에서 대상 조직 직원의 이메일-비밀번호 조합을 수집합니다.",
+      "descEn": "The attacker collects email-password pairs for target employees from breach databases (HIBP, DeHashed).",
+      "stepTitle": "유출 크레덴셜 수집",
+      "stepTitleEn": "Leaked Credential Collection",
+      "feynman": "과거 데이터 유출 사건(LinkedIn, Adobe 해킹)에서 흘러나온 비밀번호가 다크웹에 저장되어 있습니다. 회사 이메일로 검색하면 직원 68명의 비밀번호를 찾을 수 있습니다. 많은 사람들이 같은 비밀번호를 여러 곳에 사용하기 때문에 이 정보가 가치가 있습니다.",
+      "feynmanEn": "Passwords leaked from past data breaches (LinkedIn, Adobe hacks) are stored on the dark web. Searching by company email reveals 68 employee passwords. Since many people reuse passwords across services, this information is valuable.",
+      "expert": "HIBP, DeHashed, IntelX 등 다수 소스에서 유출 크레덴셜을 수집합니다. LinkedIn 2021 breach의 평문 패스워드와 Collection #1의 콤보 리스트에서 41개 평문 크레덴셜을 확보했으며, MD5 해시 15개는 레인보우 테이블로 즉시 크래킹 가능합니다.",
+      "expertEn": "Collecting leaked credentials from multiple sources (HIBP, DeHashed, IntelX). 41 plaintext credentials obtained from LinkedIn 2021 breach and Collection #1 combo lists, with 15 MD5 hashes crackable via rainbow tables.",
+      "defTooltip": "🌑 다크웹 모니터: 조직 도메인에 대한 유출 DB 쿼리 감지",
+      "defTooltipEn": "🌑 DarkWeb Monitor: Breach database queries detected for organization domain",
+      "hackerLog": {
+        "title": "breach_search.log",
+        "lines": [
+          { "log": "Total unique credentials: 68", "desc": "68개 유출 계정 - 크레덴셜 스터핑 공격의 탄약" },
+          { "log": "park.sj@{companyName}.com : {companyName}2019$$", "desc": "회사명 포함 비밀번호 - 예측 가능한 패턴" }
+        ]
+      },
+      "terms": [
+        { "name": "HIBP (Have I Been Pwned)", "desc": "이메일 주소가 데이터 유출에 포함되었는지 확인하는 무료 서비스" },
+        { "name": "Credential Stuffing", "desc": "유출된 비밀번호로 다른 서비스에 자동 로그인을 시도하는 공격. 비밀번호 재사용을 악용합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 credential_stuffer.py --target linkedin --creds breach_creds.csv --proxy-list socks5_proxies.txt --rate-limit 3/min",
+      "out": "[*] Starting credential stuffing against LinkedIn...\n[+] Loaded 68 credentials\n[+] Using 50 SOCKS5 proxies (rotating)\n[+] Rate: 3 attempts/min/proxy (stealth mode)\n\n[*] Progress: 68/68 tested\n[+] Results:\n  ✅ Valid logins: 7 (10.3% success rate)\n  ❌ Invalid: 54\n  🔒 MFA blocked: 5\n  ⚠️ Account locked: 2\n\n[+] Compromised LinkedIn accounts:\n  1. kim.mh@{companyName}.com (500+ connections, IT Manager)\n  2. lee.dw@{companyName}.com (400+ connections, Senior Dev)\n  3. choi.yj@{companyName}.com (300+ connections, HR)\n  4. jung.sw@{companyName}.com (250+ connections, Finance)\n  5. han.jh@{companyName}.com (200+ connections, Marketing)\n  6. shin.mk@{companyName}.com (180+ connections, Sales)\n  7. oh.hs@{companyName}.com (150+ connections, Support)\n\n[+] 7 valid credentials saved",
+      "def": "[Identity Protection] Credential stuffing attack detected against employee LinkedIn accounts",
+      "defAction": "Source: LinkedIn security alerts\nTarget: 7 {companyName} employee accounts\nAction: Password reset forced, MFA enrollment campaign initiated",
+      "desc": "유출된 비밀번호로 LinkedIn에 자동 로그인을 시도하여 7개 계정을 탈취합니다.",
+      "descEn": "The attacker performs credential stuffing against LinkedIn, successfully compromising 7 accounts.",
+      "stepTitle": "LinkedIn 크레덴셜 스터핑",
+      "stepTitleEn": "LinkedIn Credential Stuffing",
+      "feynman": "유출된 68개 비밀번호를 LinkedIn에 하나씩 시도합니다. 50개 프록시를 돌아가며 사용하고, 분당 3회로 천천히 시도하여 보안 탐지를 피합니다. 결과: 7개 계정(10.3%)이 같은 비밀번호를 그대로 사용하고 있어 로그인에 성공했습니다.",
+      "feynmanEn": "Testing 68 leaked passwords against LinkedIn one by one. Using 50 rotating proxies at 3 attempts/min for stealth. Result: 7 accounts (10.3%) were using the same passwords, enabling successful login.",
+      "expert": "SOCKS5 프록시 로테이션으로 IP 기반 차단을 우회하고, 분당 3회 속도 제한으로 Rate Limiting을 회피합니다. 10.3% 성공률은 업계 평균(1-2%)보다 높으며, 5개 계정의 MFA가 공격을 차단했습니다. MFA 미설정 계정이 핵심 취약점입니다.",
+      "expertEn": "SOCKS5 proxy rotation bypasses IP-based blocking, 3/min rate limiting evades detection. 10.3% success rate exceeds industry average (1-2%), and MFA blocked 5 accounts. Accounts without MFA are the critical vulnerability.",
+      "defTooltip": "🔓 신원 보호: 직원 LinkedIn 계정에 대한 크레덴셜 스터핑 공격 감지",
+      "defTooltipEn": "🔓 Identity Protection: Credential stuffing attack detected against employee LinkedIn accounts",
+      "hackerLog": {
+        "title": "stuffing_results.log",
+        "lines": [
+          { "log": "Valid logins: 7 (10.3% success rate)", "desc": "68명 중 7명이 유출된 비밀번호를 그대로 사용" },
+          { "log": "MFA blocked: 5", "desc": "MFA가 5개 계정을 보호 - MFA의 중요성 입증" }
+        ]
+      },
+      "terms": [
+        { "name": "SOCKS5 Proxy", "desc": "네트워크 트래픽을 중개하는 프록시 서버. 공격자의 실제 IP를 숨기고 차단을 회피합니다" },
+        { "name": "Rate Limiting", "desc": "일정 시간 내 요청 횟수를 제한하는 보안 기법. 브루트포스 공격을 방지합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 account_takeover.py --account kim.mh@{companyName}.com --platform linkedin --persist --output ato_kim.json",
+      "out": "[*] Performing account takeover for kim.mh (IT Manager)...\n\n[+] Step 1: Login successful\n  Session token: eyJhbGci...\n  Last login: 2026-02-28 09:15 KST (normal activity)\n\n[+] Step 2: Persistence setup\n  - Added recovery email: attacker-backup@protonmail.com\n  - OAuth app authorized: \"LinkedIn Helper Pro\" (data access)\n  - Session token exported for API access\n  - Email notification settings: Disabled login alerts\n\n[+] Step 3: Profile assessment\n  Name: Kim Minhyuk (IT Manager @ {companyName})\n  Connections: 523 (87 at {companyName})\n  Groups: Korean IT Professionals, AWS Korea UG\n  Recent activity: Tech article sharing, job referrals\n  Trust level: HIGH (established profile, active engagement)\n\n[+] Account takeover complete. Persistence established.",
+      "def": "[Account Security] Suspicious account changes detected - recovery email modified",
+      "defAction": "Source: LinkedIn security logs\nTarget: kim.mh@{companyName}.com account\nAction: Account compromise confirmed, forensic review initiated",
+      "desc": "탈취한 계정에 지속 접근 권한을 설정하고 프로필의 신뢰도와 연결 네트워크를 평가합니다.",
+      "descEn": "The attacker establishes persistence on the compromised account and assesses the profile's trust level and connection network.",
+      "stepTitle": "계정 장악 및 지속성 확보",
+      "stepTitleEn": "Account Takeover and Persistence",
+      "feynman": "계정에 로그인한 후 공격자는 세 가지 작업을 합니다. 1) 복구 이메일을 바꿔서 계속 접근할 수 있게 함. 2) 로그인 알림을 꺼서 주인이 눈치 못 채게 함. 3) 523명의 연결과 {companyName} 내부 87명의 동료를 확인하여 다음 공격 대상을 파악합니다.",
+      "feynmanEn": "After login, the attacker does three things. 1) Change recovery email for persistent access. 2) Disable login alerts so the owner doesn't notice. 3) Review 523 connections including 87 {companyName} colleagues for next attack targets.",
+      "expert": "ATO(Account Takeover) 후 지속성 확보: ProtonMail 복구 이메일 추가, OAuth 앱으로 API 접근, 로그인 알림 비활성화. 87명의 {companyName} 내부 연결은 사내 스피어피싱의 최적 경로이며, IT Manager 직함은 기술 관련 메시지의 신뢰도를 높입니다.",
+      "expertEn": "Post-ATO persistence: ProtonMail recovery email, OAuth app API access, disabled login alerts. 87 internal {companyName} connections provide optimal spearphishing paths, and IT Manager title increases credibility for technical messages.",
+      "defTooltip": "🔐 계정 보안: 의심스러운 계정 변경 감지 - 복구 이메일 수정됨",
+      "defTooltipEn": "🔐 Account Security: Suspicious account changes detected - recovery email modified",
+      "hackerLog": {
+        "title": "ato_kim.log",
+        "lines": [
+          { "log": "Connections: 523 (87 at {companyName})", "desc": "내부 직원 87명에게 신뢰받는 메시지 전송 가능" },
+          { "log": "Email notifications: Disabled login alerts", "desc": "계정 주인이 탈취 사실을 인지하지 못하도록 설정" }
+        ]
+      },
+      "terms": [
+        { "name": "ATO (Account Takeover)", "desc": "타인의 계정을 탈취하여 악의적 목적으로 사용하는 공격" },
+        { "name": "OAuth App", "desc": "제3자 앱에 계정 접근을 허용하는 인증 방식. 악성 OAuth 앱으로 지속적 데이터 접근이 가능합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 session_hijacker.py --account kim.mh --export-cookies --clone-fingerprint --output session_data.json",
+      "out": "[*] Hijacking active session for kim.mh...\n\n[+] Session data extracted:\n  JSESSIONID: a3f7b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c\n  li_at: AQEDATb8...(LinkedIn auth token)\n  bcookie: v=2&d94a3f7b...\n  UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\n  Screen: 1920x1080\n  Language: ko-KR\n  Timezone: Asia/Seoul (UTC+9)\n\n[+] Browser fingerprint cloned:\n  Canvas hash: 0x3f7a2b1c\n  WebGL: Intel UHD Graphics 630\n  Fonts: NanumGothic, Malgun Gothic, ...\n\n[+] Session replay ready:\n  - Can browse as kim.mh without re-authentication\n  - MFA bypassed via session token\n  - Activity appears from normal device/location\n\n[+] Session data saved to session_data.json",
+      "def": "[Session Security] Unusual session cloning activity detected",
+      "defAction": "Source: Browser fingerprint analysis\nTarget: kim.mh@{companyName}.com session\nAction: Session invalidation recommended, device verification required",
+      "desc": "세션 쿠키와 브라우저 핑거프린트를 복제하여 MFA를 우회하고 정상 사용자로 위장합니다.",
+      "descEn": "The attacker clones session cookies and browser fingerprint to bypass MFA and masquerade as the legitimate user.",
+      "stepTitle": "세션 하이재킹",
+      "stepTitleEn": "Session Hijacking",
+      "feynman": "비밀번호만 알아도 MFA가 있으면 로그인이 어렵습니다. 하지만 세션 쿠키(로그인 상태를 유지하는 열쇠)를 복사하면 MFA 없이도 로그인할 수 있습니다. 브라우저 화면 크기, 폰트, 시간대까지 똑같이 복사하면 LinkedIn 보안 시스템도 정상 사용자로 인식합니다.",
+      "feynmanEn": "Even with passwords, MFA makes login difficult. But copying session cookies (the key that maintains login state) bypasses MFA. Cloning browser screen size, fonts, and timezone makes LinkedIn security recognize the attacker as the legitimate user.",
+      "expert": "세션 토큰(li_at)과 브라우저 핑거프린트(Canvas hash, WebGL, 폰트)를 복제합니다. MFA는 인증 시에만 작동하므로 기존 인증 세션 토큰으로 우회됩니다. 핑거프린트 복제로 이상 탐지(Device Fingerprinting)도 회피합니다.",
+      "expertEn": "Cloning session token (li_at) and browser fingerprint (Canvas hash, WebGL, fonts). MFA only triggers during authentication, so existing session tokens bypass it. Fingerprint cloning evades anomaly detection (Device Fingerprinting).",
+      "defTooltip": "🔑 세션 보안: 비정상적인 세션 복제 활동 감지",
+      "defTooltipEn": "🔑 Session Security: Unusual session cloning activity detected",
+      "hackerLog": {
+        "title": "session_data.log",
+        "lines": [
+          { "log": "MFA bypassed via session token", "desc": "세션 토큰으로 MFA 우회 - 추가 인증 없이 접근" },
+          { "log": "Browser fingerprint cloned", "desc": "브라우저 핑거프린트 복제로 이상 탐지 회피" }
+        ]
+      },
+      "terms": [
+        { "name": "Session Hijacking", "desc": "다른 사용자의 세션 쿠키를 탈취하여 인증 없이 해당 사용자로 접근하는 공격" },
+        { "name": "Browser Fingerprinting", "desc": "브라우저의 고유 특성(화면 크기, 폰트, GPU 등)을 조합하여 사용자를 식별하는 기법" }
+      ]
+    },
+    {
+      "cmd": "python3 linkedin_phisher.py --account kim.mh --targets \"{companyName} employees\" --template job_referral --output phishing_messages.txt",
+      "out": "[*] Preparing spearphishing campaign via compromised LinkedIn...\n\n[+] Target selection:\n  Internal {companyName} connections: 87\n  Filtered (IT/Security - avoid): 12\n  Final targets: 75 employees (Finance, HR, Sales, Marketing)\n\n[+] Phishing message template:\n  Subject: [추천] 프로젝트 관련 문서 공유\n  Body:\n  \"안녕하세요, 김민혁(IT팀)입니다.\n  지난 미팅에서 논의된 프로젝트 관련 자료를 공유드립니다.\n  아래 링크에서 확인해 주세요.\n  [악성 링크 - Credential Harvesting]\n  감사합니다.\"\n\n[+] Delivery schedule:\n  Batch 1 (25 targets): Monday 09:30 KST\n  Batch 2 (25 targets): Tuesday 10:00 KST\n  Batch 3 (25 targets): Wednesday 09:45 KST\n\n[+] Expected click rate: 35-45% (trusted internal sender)\n[+] Estimated credential harvest: 15-20 accounts\n\n[+] Campaign ready. Messages saved to phishing_messages.txt",
+      "def": "[Email Security] Spearphishing campaign launched from compromised employee LinkedIn account",
+      "defAction": "Source: Phishing detection system\nTarget: 75 {companyName} employees\nAction: CRITICAL - Account suspended, phishing URLs blocked, all recipients notified",
+      "desc": "탈취한 IT Manager 계정으로 동료 75명에게 프로젝트 문서 공유를 가장한 피싱 메시지를 전송합니다.",
+      "descEn": "The attacker sends phishing messages disguised as project document sharing to 75 colleagues using the compromised IT Manager account.",
+      "stepTitle": "탈취 계정으로 내부 피싱 캠페인",
+      "stepTitleEn": "Internal Phishing via Compromised Account",
+      "feynman": "IT Manager 김민혁의 LinkedIn으로 동료 75명에게 '프로젝트 문서 공유' 메시지를 보냅니다. 받는 사람은 실제 동료가 보낸 것이므로 의심하지 않고 클릭합니다(예상 클릭률 35-45%). IT/보안팀은 피하고, 재무/인사/영업 등 비기술직을 대상으로 합니다.",
+      "feynmanEn": "Using IT Manager Kim's LinkedIn to send 'project document sharing' messages to 75 colleagues. Recipients don't suspect it since it comes from a real colleague (expected 35-45% click rate). IT/Security teams are avoided, targeting Finance/HR/Sales instead.",
+      "expert": "탈취 계정의 신뢰도를 활용한 내부 스피어피싱: IT Manager 직함의 기술 문서 공유는 자연스럽고, IT/보안팀을 제외하여 탐지 확률을 낮춥니다. 3일에 걸쳐 배치 전송하여 일시적 급증을 방지합니다. 35-45% 클릭률은 외부 피싱(3-5%)의 10배입니다.",
+      "expertEn": "Internal spearphishing leveraging compromised account trust: IT Manager sharing technical documents is natural, excluding IT/Security teams reduces detection. Batch delivery over 3 days prevents sudden spikes. 35-45% click rate is 10x external phishing (3-5%).",
+      "defTooltip": "🚨 이메일 보안: 탈취된 직원 LinkedIn 계정에서 스피어피싱 캠페인 시작",
+      "defTooltipEn": "🚨 Email Security: Spearphishing campaign launched from compromised employee LinkedIn account",
+      "hackerLog": {
+        "title": "phishing_campaign.log",
+        "lines": [
+          { "log": "Expected click rate: 35-45% (trusted sender)", "desc": "내부 신뢰 관계 악용으로 외부 피싱 대비 10배 높은 성공률" },
+          { "log": "Estimated credential harvest: 15-20 accounts", "desc": "추가 15-20개 계정 탈취로 공격 확대" }
+        ]
+      },
+      "terms": [
+        { "name": "Spearphishing", "desc": "특정 대상을 겨냥한 맞춤형 피싱 공격. 일반 피싱보다 성공률이 훨씬 높습니다" },
+        { "name": "Credential Harvesting", "desc": "가짜 로그인 페이지로 사용자의 아이디/비밀번호를 수집하는 기법" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "python3 breach_search.py (PID: 10101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 credential_stuffer.py (PID: 10156)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "python3 account_takeover.py (PID: 10201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 session_hijacker.py (PID: 10289)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 linkedin_phisher.py (PID: 10345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

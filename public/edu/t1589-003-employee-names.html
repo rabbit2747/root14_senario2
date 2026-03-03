@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1589.003">
+<head>
+    <script>
+        (function() {
+            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+            try {
+                var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
+                var session = sessionStorage.getItem(key);
+                if (!session || !JSON.parse(session)) {
+                    var redirect = encodeURIComponent(window.location.href);
+                    window.location.replace('/login?redirect=' + redirect);
+                }
+            } catch(e) { window.location.replace('/login'); }
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded = false;
+        (async function() {
+            try {
+                var SUPA = 'https://bnwbybawqrnhznirivfg.supabase.co';
+                var KEY  = 'sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';
+                var res = await fetch(
+                    SUPA + '/rest/v1/edu_html_content?page_id=eq.t1589-003-employee-names&select=content&limit=1',
+                    { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY } }
+                );
+                if (res.ok) {
+                    var data = await res.json();
+                    if (data && data.length > 0 && data[0].content) {
+                        _eduDynLoaded = true;
+                        document.open(); document.write(data[0].content); document.close(); return;
+                    }
+                }
+            } catch(e) {}
+            document.documentElement.classList.add('edu-ready');
+        })();
+        setTimeout(function() { if (!_eduDynLoaded) document.documentElement.classList.add('edu-ready'); }, 3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1589.003 Employee Names 직원 이름 수집을 통한 정찰 기법 분석">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1589.003 Employee Names — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }, colors: { cbg: '#FFF8F0', cyel: '#F4D06F', cteal: '#9DD9D2', cdark: '#1e293b', cgray: '#475569', slate: { 850: '#151e2e', 900: '#0f172a', 950: '#020617' } } } } }
+    </script>
+    <style>
+        body { scroll-behavior: smooth; background-color: #FFF8F0; color: #1e293b; transition: background-color 0.3s ease, color 0.3s ease; }
+        .glass-panel { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(157,217,210,0.5); box-shadow: 0 8px 32px rgba(30,41,59,0.05); }
+        .dark body { background-color: #0f172a; color: #f8fafc; }
+        .dark .glass-panel { background: rgba(30,41,59,0.7); border: 1px solid rgba(244,208,111,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        .hl-teal { color: #0f766e; font-weight: 700; } .dark .hl-teal { color: #9DD9D2; }
+        .hl-yel { color: #b45309; font-weight: 700; } .dark .hl-yel { color: #F4D06F; }
+        .nav-item.active { background: linear-gradient(90deg, rgba(157,217,210,0.3) 0%, transparent 100%); border-left: 4px solid #9DD9D2; color: #0f766e; font-weight: 700; }
+        .dark .nav-item.active { background: linear-gradient(90deg, rgba(244,208,111,0.2) 0%, transparent 100%); border-left: 4px solid #F4D06F; color: #F4D06F; }
+        .terminal-bg { background-color: #1e293b; color: #9DD9D2; font-family: 'JetBrains Mono', monospace; }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #9DD9D2; border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: #7cc2b9; } .dark ::-webkit-scrollbar-thumb { background: #F4D06F; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <!-- GOTROOT Brand Banner -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family: 'JetBrains Mono', monospace;">
+        <div class="flex items-center gap-2">
+            <span style="font-size:9px; font-weight:900; color:#bb3e03; letter-spacing:0.25em;">GOTROOT</span>
+            <span style="font-size:8px; color:#94a3b8;">|</span>
+            <span style="font-size:8px; color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='/'" style="font-size:8px; color:#bb3e03; background:transparent; border:1px solid rgba(187,62,3,0.3); padding:3px 10px; border-radius:4px; cursor:pointer; font-family:inherit;">← 매트릭스 대시보드</button>
+        </div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 hover:border-[#9DD9D2] shadow transition-all">← 대시보드</button>
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1589.003: Employee Names</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch1">1. 직원 이름이 무기가 되는 이유</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch2">2. OSINT 도구로 이메일 추론</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch3">3. 이메일 패턴 추론 실습</button>
+        </nav>
+    </aside>
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <!-- Title -->
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Reconnaissance</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Employee Names</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">회사 직원 명부가 곧 해킹의 시작 — 호텔 투숙객 명단을 알면 방 번호를 추측할 수 있듯이</p>
+            </header>
+
+            <!-- Chapter 1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> 직원 이름이 무기가 되는 이유</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">🏨 ➜ 📋 ➜ 🔑 ➜ 🚪</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"호텔 투숙객 명단의 비밀"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">
+                            호텔에 침입하려는 도둑이 있다고 상상해 보세요. 투숙객 이름만 알면 "김철수님, 프런트에서 연락드립니다"라고 속여 방 번호를 알아낼 수 있습니다. 마찬가지로, <strong>직원 이름만 알면 이메일 주소를 추측</strong>하고, 그 이메일로 피싱 메일을 보내 회사 시스템에 침입할 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <div class="text-2xl mb-2">🔍 ➜ 👤 ➜ 📧 ➜ 🎣</div>
+                        <h3 class="font-bold text-lg mb-2 hl-teal">"이름에서 이메일까지의 연쇄 반응"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">
+                            대부분의 기업은 <strong>일정한 이메일 패턴</strong>을 사용합니다. 예를 들어 "홍길동"이라는 직원이 있으면 <code class="bg-slate-100 dark:bg-slate-800 px-1 rounded text-sm">gildong.hong@company.com</code> 또는 <code class="bg-slate-100 dark:bg-slate-800 px-1 rounded text-sm">ghong@company.com</code>처럼요. 공격자는 LinkedIn, 회사 소개 페이지, 블로그 기고문에서 직원 이름을 수집한 뒤 이메일 패턴을 조합합니다.
+                        </p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 text-[#1e293b] dark:text-white">공격자가 직원 이름을 수집하는 경로</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-center">
+                                <div class="text-3xl mb-2">💼</div>
+                                <div class="font-bold text-sm text-blue-700 dark:text-blue-300">LinkedIn</div>
+                                <div class="text-xs text-cgray dark:text-slate-400 mt-1">직함, 부서, 재직 기간까지 공개</div>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center">
+                                <div class="text-3xl mb-2">🌐</div>
+                                <div class="font-bold text-sm text-green-700 dark:text-green-300">회사 홈페이지</div>
+                                <div class="text-xs text-cgray dark:text-slate-400 mt-1">"팀 소개" 페이지에 이름+사진</div>
+                            </div>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 text-center">
+                                <div class="text-3xl mb-2">📰</div>
+                                <div class="font-bold text-sm text-purple-700 dark:text-purple-300">보도자료 / 블로그</div>
+                                <div class="text-xs text-cgray dark:text-slate-400 mt-1">기고자 이름, 인터뷰 기사</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chapter 2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> OSINT 도구로 이메일 추론</h2>
+                <div class="space-y-8">
+                    <p class="text-cgray dark:text-slate-300 leading-relaxed">
+                        공격자는 단순히 이름만 수집하지 않습니다. <strong>OSINT(Open Source Intelligence, 공개 출처 정보)</strong> 도구를 활용해 이메일 패턴을 자동으로 추론하고 검증합니다.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h3 class="font-bold text-lg mb-3 hl-yel text-center">theHarvester</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed mb-4">구글, Bing 등 검색엔진에서 특정 도메인에 연결된 이메일, 서브도메인, IP를 자동 수집하는 도구입니다.</p>
+                            <div class="terminal-bg p-3 rounded text-xs overflow-x-auto">
+                                <div class="text-slate-500"># theHarvester 실행 예시</div>
+                                <div>$ theHarvester -d company.com -b google</div>
+                                <div class="text-[#F4D06F] mt-2">[*] Emails found:</div>
+                                <div class="text-white">  admin@company.com</div>
+                                <div class="text-white">  j.kim@company.com</div>
+                                <div class="text-white">  s.lee@company.com</div>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#9DD9D2]">
+                            <h3 class="font-bold text-lg mb-3 hl-teal text-center">Hunter.io</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed mb-4">도메인을 입력하면 해당 회사의 이메일 패턴(first.last, f.last 등)을 자동으로 추론하고, 실제 존재하는 이메일 목록을 보여주는 웹 서비스입니다.</p>
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-700 text-sm">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs font-bold">Pattern</span>
+                                    <span class="font-mono text-xs">{first}.{last}@company.com</span>
+                                </div>
+                                <div class="text-xs text-cgray dark:text-slate-400">신뢰도: 92% | 발견된 이메일: 47개</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">공격 시나리오 흐름</h3>
+                        <div class="flex flex-wrap items-center gap-2 text-sm font-mono">
+                            <span class="bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded">LinkedIn에서 이름 수집</span>
+                            <span class="text-slate-400">→</span>
+                            <span class="bg-yellow-100 dark:bg-yellow-900/30 px-3 py-1 rounded">Hunter.io로 패턴 추론</span>
+                            <span class="text-slate-400">→</span>
+                            <span class="bg-orange-100 dark:bg-orange-900/30 px-3 py-1 rounded">이메일 목록 생성</span>
+                            <span class="text-slate-400">→</span>
+                            <span class="bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded">스피어 피싱 발송</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chapter 3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> Mini Lab: 이메일 패턴 추론 시뮬레이션</h2>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm">
+                            <span class="hl-teal">Mini Lab: 이메일 패턴 추론기</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div>
+                        </div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-6 text-center">아래 직원 정보로 이메일 주소를 추론해 보세요. 패턴 버튼을 클릭하면 결과가 생성됩니다.</p>
+                            <div class="glass-panel p-4 rounded-lg mb-6">
+                                <div class="text-sm font-bold mb-3 text-[#1e293b] dark:text-white">수집된 직원 정보 (LinkedIn)</div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                                    <div class="bg-white dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-700">
+                                        <div class="font-bold">김민수</div>
+                                        <div class="text-xs text-cgray">개발팀 | Team Lead</div>
+                                    </div>
+                                    <div class="bg-white dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-700">
+                                        <div class="font-bold">이서연</div>
+                                        <div class="text-xs text-cgray">마케팅팀 | Manager</div>
+                                    </div>
+                                    <div class="bg-white dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-700">
+                                        <div class="font-bold">박준혁</div>
+                                        <div class="text-xs text-cgray">보안팀 | Analyst</div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-xs text-cgray dark:text-slate-400">회사 도메인: <span class="font-mono font-bold">gotroot.co.kr</span></div>
+                            </div>
+                            <div class="text-sm font-bold mb-3 text-center text-[#1e293b] dark:text-white">이메일 패턴 선택:</div>
+                            <div class="flex flex-wrap gap-3 justify-center mb-6">
+                                <button onclick="generateEmails('first.last')" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-4 rounded transition text-sm border border-[#7cc2b9]">first.last 패턴</button>
+                                <button onclick="generateEmails('flast')" class="bg-[#F4D06F] hover:bg-[#e3c160] text-yellow-900 font-bold py-2 px-4 rounded transition text-sm border border-[#d4b050]">f.last 패턴</button>
+                                <button onclick="generateEmails('firstl')" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold py-2 px-4 rounded transition text-sm">first.l 패턴</button>
+                            </div>
+                            <div id="email-result" class="hidden terminal-bg p-4 rounded-lg text-sm">
+                                <div class="text-slate-500 mb-2"># 추론된 이메일 목록</div>
+                                <div id="email-list"></div>
+                                <div id="email-count" class="mt-3 text-[#F4D06F] text-xs"></div>
+                            </div>
+                            <div id="email-warning" class="hidden mt-4 bg-red-50 dark:bg-red-900/20 border border-red-400 rounded-lg p-4 text-center">
+                                <div class="text-2xl mb-2">⚠️</div>
+                                <div class="text-red-600 dark:text-red-400 font-bold text-sm">이 이메일 목록으로 스피어 피싱 공격이 가능합니다!</div>
+                                <div class="text-xs text-cgray dark:text-slate-400 mt-2">직원 이름과 도메인만으로 실제 이메일 주소를 높은 확률로 추론할 수 있습니다.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quiz -->
+            <section id="quiz" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="quiz-container" class="space-y-6">
+                        <div class="quiz-q" data-correct="2">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q. OSINT을 통해 수집된 직원 이름이 조직에 위험한 가장 핵심적인 이유는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q1" value="1" class="mr-3"> 직원 이름을 알면 사내 Wi-Fi 비밀번호를 바로 알 수 있기 때문이다.
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q1" value="2" class="mr-3"> 직원 이름으로 이메일 주소 패턴을 추론하여 표적형 피싱(Spear Phishing) 공격의 기반을 만들 수 있기 때문이다.
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q1" value="3" class="mr-3"> 직원 이름만 있으면 바로 서버에 SSH 접속이 가능하기 때문이다.
+                                </label>
+                            </div>
+                        </div>
+                        <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                </div>
+            </section>
+
+            <!-- CTA -->
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">🎉 학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">다음 기법을 학습해 보세요!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">직원 이름 수집은 정찰의 시작입니다. 대시보드에서 다른 ATT&CK 기법들도 학습하여 방어 능력을 키워보세요.</p>
+                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] dark:from-[#9DD9D2] dark:to-[#F4D06F] text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl">
+                    <span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span>
+                </button>
+            </div>
+        </div>
+    </main>
+    </div>
+    <script>
+        function go(id) { var el = document.getElementById(id); if (el) document.getElementById('main-scroll').scrollTo({ top: el.offsetTop - 40, behavior: 'smooth' }); }
+        function toggleTheme() { var h = document.documentElement, i = document.getElementById('theme-icon'); if (h.classList.contains('dark')) { h.classList.remove('dark'); h.classList.add('light'); i.textContent = '☀️'; } else { h.classList.remove('light'); h.classList.add('dark'); i.textContent = '🌙'; } }
+
+        var observerOptions = { root: document.getElementById('main-scroll'), rootMargin: '0px 0px -40% 0px', threshold: 0.1 };
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    var id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-item').forEach(function(nav) {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-target') === id) nav.classList.add('active');
+                    });
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s) { observer.observe(s); });
+
+        var employees = [
+            { name: '김민수', first: 'minsu', last: 'kim', fi: 'm', li: 'k' },
+            { name: '이서연', first: 'seoyeon', last: 'lee', fi: 's', li: 'l' },
+            { name: '박준혁', first: 'junhyuk', last: 'park', fi: 'j', li: 'p' }
+        ];
+        function generateEmails(pattern) {
+            var domain = 'gotroot.co.kr';
+            var list = document.getElementById('email-list');
+            var result = document.getElementById('email-result');
+            var warning = document.getElementById('email-warning');
+            var count = document.getElementById('email-count');
+            list.innerHTML = '';
+            employees.forEach(function(emp) {
+                var email = '';
+                if (pattern === 'first.last') email = emp.first + '.' + emp.last + '@' + domain;
+                else if (pattern === 'flast') email = emp.fi + '.' + emp.last + '@' + domain;
+                else if (pattern === 'firstl') email = emp.first + '.' + emp.li + '@' + domain;
+                list.innerHTML += '<div class="text-white">  ' + emp.name + ' → <span class="text-[#9DD9D2]">' + email + '</span></div>';
+            });
+            count.textContent = '[*] ' + employees.length + '개 이메일 추론 완료 (패턴: ' + pattern + ')';
+            result.classList.remove('hidden');
+            warning.classList.remove('hidden');
+        }
+
+        function checkQuiz() {
+            var q1 = document.querySelector('input[name="q1"]:checked');
+            if (!q1) { alert('답을 선택해주세요.'); return; }
+            var r = document.getElementById('quiz-result');
+            r.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]','bg-red-100','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');
+            if (q1.value === '2') {
+                r.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');
+                r.innerHTML = '✅ 정답입니다!<br><span class="text-xs mt-1 block font-normal">직원 이름은 이메일 주소 패턴 추론의 핵심 재료입니다. 이를 기반으로 한 표적형 피싱(Spear Phishing)은 가장 높은 성공률을 보이는 초기 침투 기법 중 하나입니다.</span>';
+            } else {
+                r.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');
+                r.innerHTML = '❌ 오답입니다. 직원 이름이 "이메일 주소 추론"에 어떻게 활용되는지 다시 생각해 보세요.';
+            }
+        }
+        window.onload = function() { setTimeout(function() { go('ch1'); }, 100); };
+    </script>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

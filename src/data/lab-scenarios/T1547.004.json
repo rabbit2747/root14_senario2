@@ -1,0 +1,190 @@
+{
+  "id": "T1547.004",
+  "title": "Winlogon Helper DLL 지속성 시뮬레이션",
+  "titleEn": "Winlogon Helper DLL Persistence Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 페이로드 준비", "labelEn": "⚡ Payload Prep", "steps": [1] },
+    { "label": "🔓 Winlogon 변조", "labelEn": "🔓 Winlogon Modification", "steps": [2, 3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim PC\nDC-SEC01", "x": 250, "y": 80 },
+    { "id": "winlogon", "label": "Winlogon\nProcess", "x": 400, "y": 30 },
+    { "id": "shell", "label": "Shell\n(explorer.exe)", "x": 400, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n203.0.113.55", "x": 50, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "winlogon", "minStep": 2 },
+    { "from": "winlogon", "to": "shell", "minStep": 3 },
+    { "from": "winlogon", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "Registry Editor", "icon": "📝" },
+    { "name": "Windows Security", "icon": "🛡️" },
+    { "name": "Task Manager", "icon": "📊" },
+    { "name": "Event Viewer", "icon": "📋" }
+  ],
+  "steps": [
+    {
+      "cmd": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v Shell && reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v Userinit",
+      "out": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\n    Shell    REG_SZ    explorer.exe\n\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\n    Userinit    REG_SZ    C:\\Windows\\system32\\userinit.exe,\n\n[*] Current Winlogon configuration:\n    Shell: explorer.exe (default - unmodified)\n    Userinit: userinit.exe (default - unmodified)\n[*] Both values accept comma-separated entries\n[*] HKLM modification requires admin privileges",
+      "def": "[EDR] Winlogon registry key query detected - potential persistence reconnaissance",
+      "defAction": "Source: Registry access monitoring\nTarget: Winlogon Shell and Userinit values\nAction: Query logged, values compared against known-good baseline",
+      "desc": "Winlogon의 현재 Shell과 Userinit 값을 확인하여 변조 가능 여부를 파악합니다.",
+      "descEn": "The attacker queries current Winlogon Shell and Userinit values to assess modification possibilities.",
+      "stepTitle": "Winlogon 레지스트리 정찰",
+      "stepTitleEn": "Winlogon Registry Reconnaissance",
+      "feynman": "건물 정문의 경비원이 누구인지, 어떤 규칙으로 사람을 들여보내는지 먼저 파악하는 것과 같습니다. Winlogon의 Shell과 Userinit 값이 기본값인지 확인하면, 여기에 악성 코드를 끼워넣을 수 있는지 알 수 있습니다.",
+      "feynmanEn": "It's like first identifying who the building's front gate guard is and what rules they follow for admitting people. Checking if Winlogon's Shell and Userinit values are at default tells you whether malicious code can be inserted here.",
+      "expert": "Winlogon의 Shell 값은 사용자 로그인 후 실행할 셸을 지정하고(기본값: explorer.exe), Userinit은 로그인 초기화 프로그램을 지정합니다(기본값: userinit.exe,). 두 값 모두 쉼표로 구분하여 여러 프로그램을 지정할 수 있어 악용이 가능합니다.",
+      "expertEn": "Winlogon's Shell value specifies the shell to execute after user login (default: explorer.exe), and Userinit specifies login initialization programs (default: userinit.exe,). Both values accept comma-separated entries, making them exploitable.",
+      "defTooltip": "🔐 Winlogon 레지스트리 키 조회가 감지되었습니다! Shell과 Userinit 값에 대한 정찰입니다.",
+      "defTooltipEn": "🔐 Winlogon registry key query detected! Reconnaissance on Shell and Userinit values.",
+      "hackerLog": {
+        "title": "winlogon_recon.txt",
+        "lines": [
+          { "log": "Shell: explorer.exe (default - unmodified)", "desc": "💡 기본값 확인 - 쉼표로 악성 프로그램 추가 가능" },
+          { "log": "Userinit: userinit.exe (default - unmodified)", "desc": "💡 Userinit도 기본값 - 체인에 악성 프로그램 삽입 가능" },
+          { "log": "HKLM modification requires admin privileges", "desc": "💡 관리자 권한 필요 - 이미 권한 상승된 상태여야 함" }
+        ]
+      },
+      "terms": [
+        { "name": "Winlogon", "desc": "Windows 로그인/로그아웃/화면 잠금을 관리하는 핵심 시스템 프로세스. SYSTEM 권한으로 실행됩니다." },
+        { "name": "Shell (Winlogon)", "desc": "사용자 로그인 후 실행되는 기본 셸 프로그램. 기본값은 explorer.exe(바탕화면)입니다." },
+        { "name": "Userinit", "desc": "사용자 로그인 시 초기화 작업을 수행하는 프로그램. 기본값은 userinit.exe입니다." }
+      ]
+    },
+    {
+      "cmd": "copy C:\\Windows\\Temp\\implant.dll \"C:\\Windows\\System32\\wlnotify.dll\" && attrib +s \"C:\\Windows\\System32\\wlnotify.dll\"",
+      "out": "        1 file(s) copied.\n\n[*] Malicious DLL staged:\n    Path: C:\\Windows\\System32\\wlnotify.dll\n    Size: 98KB\n    Attributes: System\n    Signed: NO (unsigned)\n\n[*] DLL placed in System32:\n    - Blends with legitimate system DLLs\n    - Name resembles Winlogon notification DLL\n    - System attribute hides from casual inspection",
+      "def": "[EDR] Unsigned DLL created in System32 - suspicious file placement",
+      "defAction": "Source: File integrity monitoring\nTarget: wlnotify.dll in System32\nAction: File hash unknown, digital signature missing - flagged for analysis",
+      "desc": "악성 DLL을 System32에 배치하여 합법적인 시스템 DLL처럼 위장합니다.",
+      "descEn": "The attacker places the malicious DLL in System32 to disguise it as a legitimate system DLL.",
+      "stepTitle": "악성 DLL 배치 (System32 위장)",
+      "stepTitleEn": "Malicious DLL Staging (System32 Disguise)",
+      "feynman": "경찰서 사물함에 가짜 경찰 배지를 넣어두는 것과 같습니다. System32 폴더는 정상 시스템 DLL이 모인 곳이므로, 여기에 악성 DLL을 넣으면 시스템 파일처럼 보입니다.",
+      "feynmanEn": "It's like placing a fake police badge in the police station's locker room. System32 is where legitimate system DLLs reside, so placing a malicious DLL here makes it look like a system file.",
+      "expert": "System32에 DLL을 배치하면 경로 기반 탐지를 우회할 수 있습니다. 'wlnotify'라는 이름은 Windows Logon Notification의 약자처럼 보여 Winlogon 관련 합법적 컴포넌트로 오인될 수 있습니다. 그러나 디지털 서명이 없다는 점이 주요 탐지 포인트입니다.",
+      "expertEn": "Placing a DLL in System32 can bypass path-based detection. The name 'wlnotify' appears to stand for Windows Logon Notification, potentially being mistaken for a legitimate Winlogon component. However, the lack of digital signature is a key detection point.",
+      "defTooltip": "🔐 System32에 서명되지 않은 DLL 생성 감지! Winlogon 관련 이름을 사용하고 있습니다.",
+      "defTooltipEn": "🔐 Unsigned DLL created in System32! Using a Winlogon-related name.",
+      "hackerLog": {
+        "title": "dll_staging.txt",
+        "lines": [
+          { "log": "Path: C:\\Windows\\System32\\wlnotify.dll", "desc": "💡 System32에 배치 - 정상 시스템 파일과 혼합" },
+          { "log": "Signed: NO (unsigned)", "desc": "💡 디지털 서명 없음 - 서명 검증으로 탐지 가능" },
+          { "log": "Name resembles Winlogon notification DLL", "desc": "💡 합법적 Winlogon 컴포넌트 이름 사칭" }
+        ]
+      },
+      "terms": [
+        { "name": "DLL (Dynamic Link Library)", "desc": "여러 프로그램이 공유할 수 있는 코드와 리소스를 담은 라이브러리 파일입니다." },
+        { "name": "System32", "desc": "Windows 핵심 시스템 파일이 저장되는 디렉토리. 중요한 DLL과 실행 파일이 위치합니다." },
+        { "name": "디지털 서명", "desc": "파일의 출처와 무결성을 증명하는 암호화 서명. Microsoft 서명이 없는 System32 파일은 의심스럽습니다." }
+      ]
+    },
+    {
+      "cmd": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v Userinit /t REG_SZ /d \"C:\\Windows\\system32\\userinit.exe,C:\\Windows\\System32\\wlnotify.dll,\" /f",
+      "out": "The operation completed successfully.\n\n[*] Winlogon Userinit modified:\n    Before: C:\\Windows\\system32\\userinit.exe,\n    After:  C:\\Windows\\system32\\userinit.exe,C:\\Windows\\System32\\wlnotify.dll,\n\n[*] Effect:\n    - Malicious DLL loads at every user login\n    - Runs as SYSTEM in Winlogon context\n    - Original userinit.exe still runs (no visible impact)\n    - DLL loaded before user desktop appears",
+      "def": "[EDR] CRITICAL - Winlogon Userinit value modified with additional entry",
+      "defAction": "Source: Sysmon Event ID 13\nTarget: Winlogon\\Userinit\nAction: Registry value restored to default, suspicious DLL quarantined",
+      "desc": "Winlogon의 Userinit 값에 악성 DLL을 추가하여 SYSTEM 권한으로 자동 로드되게 합니다.",
+      "descEn": "The attacker adds the malicious DLL to Winlogon's Userinit value for automatic loading with SYSTEM privileges.",
+      "stepTitle": "Userinit 레지스트리 값 변조",
+      "stepTitleEn": "Userinit Registry Value Modification",
+      "feynman": "직원 출근 체크리스트에 몰래 한 줄을 추가하는 것과 같습니다. 원래 '출근 카드 찍기'만 있었는데 '특정 프로그램도 실행하기'를 추가합니다. 관리자(userinit.exe)가 먼저 실행되고 나서 악성 DLL도 함께 로드됩니다.",
+      "feynmanEn": "It's like secretly adding an extra line to the employee check-in checklist. Originally it only had 'swipe card,' but now 'run specific program' is added. The manager (userinit.exe) runs first, then the malicious DLL also loads.",
+      "expert": "Userinit 값은 쉼표로 구분된 프로그램 목록을 허용합니다. 기존 userinit.exe를 유지하면서 악성 DLL을 추가하면 정상적인 로그인 프로세스에 영향 없이 악성 코드가 실행됩니다. SYSTEM 컨텍스트에서 실행되므로 최고 권한을 가집니다.",
+      "expertEn": "The Userinit value accepts a comma-separated list of programs. Adding the malicious DLL while keeping the original userinit.exe ensures malicious code runs without affecting the normal login process. Running in SYSTEM context provides maximum privileges.",
+      "defTooltip": "🔐 Winlogon Userinit 값이 변경되었습니다! 추가 항목이 삽입되었습니다. 즉시 복원이 필요합니다.",
+      "defTooltipEn": "🔐 Winlogon Userinit value modified! Additional entry inserted. Immediate restoration required.",
+      "hackerLog": {
+        "title": "userinit_modify.txt",
+        "lines": [
+          { "log": "After: userinit.exe,wlnotify.dll,", "desc": "💡 원래 프로그램은 유지하면서 악성 DLL 추가 - 정상 동작에 영향 없음" },
+          { "log": "Runs as SYSTEM in Winlogon context", "desc": "💡 SYSTEM 권한으로 실행 - 모든 파일과 프로세스에 접근 가능" },
+          { "log": "DLL loaded before user desktop appears", "desc": "💡 바탕화면이 나타나기 전에 실행 - 사용자가 눈치채기 어려움" }
+        ]
+      },
+      "terms": [
+        { "name": "Sysmon Event ID 13", "desc": "레지스트리 값 설정(RegistryValueSet) 이벤트. Winlogon 키 변경 탐지의 핵심 소스입니다." },
+        { "name": "SYSTEM 컨텍스트", "desc": "Windows 최고 권한의 실행 환경. 모든 파일, 레지스트리, 프로세스에 제한 없이 접근 가능합니다." },
+        { "name": "DLL 로딩", "desc": "프로세스가 실행 중에 DLL 파일을 메모리에 로드하여 기능을 사용하는 메커니즘입니다." }
+      ]
+    },
+    {
+      "cmd": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v Shell /t REG_SZ /d \"explorer.exe,C:\\Windows\\System32\\wlnotify.dll\" /f",
+      "out": "The operation completed successfully.\n\n[*] Winlogon Shell modified:\n    Before: explorer.exe\n    After:  explorer.exe,C:\\Windows\\System32\\wlnotify.dll\n\n[*] Dual persistence via Winlogon:\n    - Userinit chain: loads DLL during login initialization\n    - Shell chain: loads DLL when shell starts\n    - Both run as SYSTEM\n    - Redundant persistence ensures survival",
+      "def": "[EDR] CRITICAL - Winlogon Shell value modified - secondary persistence mechanism",
+      "defAction": "Source: Sysmon Event ID 13\nTarget: Winlogon\\Shell\nAction: Both Shell and Userinit restored, incident escalated to SOC",
+      "desc": "Winlogon의 Shell 값에도 악성 DLL을 추가하여 이중 지속성을 확보합니다.",
+      "descEn": "The attacker also adds the malicious DLL to Winlogon's Shell value for dual persistence.",
+      "stepTitle": "Shell 값 변조 (이중 지속성)",
+      "stepTitleEn": "Shell Value Modification (Dual Persistence)",
+      "feynman": "집의 현관문과 뒷문 양쪽에 자물쇠를 설치하는 것과 같습니다. 방어자가 Userinit의 변조를 찾아서 복구해도, Shell 값에도 같은 악성 코드가 등록되어 있으므로 여전히 동작합니다.",
+      "feynmanEn": "It's like installing locks on both the front door and back door of a house. Even if defenders find and fix the Userinit modification, the same malicious code registered in the Shell value still operates.",
+      "expert": "Shell과 Userinit의 이중 변조는 방어자가 하나만 복구할 경우를 대비한 redundancy 전략입니다. 두 값 모두 Sysmon Event ID 13으로 모니터링해야 하며, Winlogon 키 전체의 기본값 무결성을 정기적으로 검증하는 것이 중요합니다.",
+      "expertEn": "Dual modification of Shell and Userinit is a redundancy strategy in case defenders only restore one. Both values should be monitored via Sysmon Event ID 13, and regular integrity verification of default values across the entire Winlogon key is crucial.",
+      "defTooltip": "🔐 Winlogon Shell 값도 변경! 이중 지속성 메커니즘이 설정되었습니다. SOC 에스컬레이션이 필요합니다.",
+      "defTooltipEn": "🔐 Winlogon Shell value also modified! Dual persistence mechanism established. SOC escalation required.",
+      "hackerLog": {
+        "title": "shell_modify.txt",
+        "lines": [
+          { "log": "After: explorer.exe,wlnotify.dll", "desc": "💡 explorer.exe 유지 + 악성 DLL 추가 - 바탕화면 정상 표시" },
+          { "log": "Dual persistence via Winlogon", "desc": "💡 Userinit과 Shell 모두 변조 - 하나 복구해도 다른 하나 동작" },
+          { "log": "Redundant persistence ensures survival", "desc": "💡 방어자의 부분적 복구에 대한 대비책" }
+        ]
+      },
+      "terms": [
+        { "name": "이중 지속성 (Dual Persistence)", "desc": "두 가지 이상의 지속성 메커니즘을 동시에 사용하는 전략. 방어자의 부분적 제거에 대비합니다." },
+        { "name": "SOC (Security Operations Center)", "desc": "보안 운영 센터. 보안 이벤트를 24/7 모니터링하고 대응하는 조직입니다." },
+        { "name": "기본값 무결성 검증", "desc": "레지스트리 값이 알려진 정상 기본값과 일치하는지 정기적으로 확인하는 보안 절차입니다." }
+      ]
+    },
+    {
+      "cmd": "# [Verification] System reboot and Winlogon persistence check",
+      "out": "[System Reboot - DC-SEC01]\n\n[Boot sequence - Winlogon triggers]\n1. Winlogon.exe started (SYSTEM)\n   > Loading Userinit chain...\n   > userinit.exe (PID: 1201) - normal\n   > wlnotify.dll loaded (PID: 1201 context) - MALICIOUS\n   > C2 beacon: 203.0.113.55:443 ESTABLISHED\n\n2. Shell initialization...\n   > explorer.exe (PID: 2401) - normal\n   > wlnotify.dll (duplicate load - mutex active)\n   > Second load skipped\n\n[+] Winlogon Userinit persistence: ACTIVE\n[+] Winlogon Shell persistence: ACTIVE (redundant)\n[+] Running as: NT AUTHORITY\\SYSTEM\n[+] C2 connectivity: ESTABLISHED",
+      "def": "[SIEM] Winlogon process loaded unsigned DLL during login - CRITICAL persistence indicator",
+      "defAction": "Source: Boot-time DLL monitoring + EDR\nTarget: DC-SEC01 Winlogon process\nAction: Winlogon registry restored, DLL removed, system reimaged as precaution",
+      "desc": "시스템 재부팅 후 Winlogon 기반 지속성이 SYSTEM 권한으로 동작하는지 검증합니다.",
+      "descEn": "The attacker verifies Winlogon-based persistence operates with SYSTEM privileges after reboot.",
+      "stepTitle": "재부팅 후 SYSTEM 권한 지속성 검증",
+      "stepTitleEn": "Post-Reboot SYSTEM Persistence Verification",
+      "feynman": "건물의 보안 시스템을 끄고 다시 켰을 때, 몰래 설치한 CCTV가 여전히 작동하는지 확인하는 것과 같습니다. Winlogon이 재부팅 후에도 악성 DLL을 로드하고 C2 서버와 연결하는지 확인합니다.",
+      "feynmanEn": "It's like turning the building's security system off and back on to check if the secretly installed CCTV still works. Verify that Winlogon still loads the malicious DLL and connects to the C2 server after reboot.",
+      "expert": "Winlogon은 부팅 초기에 SYSTEM 권한으로 시작되므로, 악성 DLL은 사용자 프로세스보다 먼저 실행됩니다. Mutex 체크로 Userinit과 Shell 양쪽에서 중복 로드되는 것을 방지합니다. 대응 시에는 Winlogon 레지스트리 복원뿐 아니라 시스템 재이미징을 고려해야 합니다.",
+      "expertEn": "Winlogon starts with SYSTEM privileges early in the boot process, so the malicious DLL executes before user processes. Mutex checking prevents duplicate loading from both Userinit and Shell. Response should consider system reimaging in addition to Winlogon registry restoration.",
+      "defTooltip": "🔐 Winlogon이 서명되지 않은 DLL을 로드했습니다! SYSTEM 권한의 지속성 - 시스템 재이미징을 권장합니다.",
+      "defTooltipEn": "🔐 Winlogon loaded unsigned DLL! SYSTEM-level persistence - system reimaging recommended.",
+      "hackerLog": {
+        "title": "winlogon_verify.txt",
+        "lines": [
+          { "log": "wlnotify.dll loaded (PID: 1201 context) - MALICIOUS", "desc": "💡 Winlogon 프로세스 컨텍스트에서 악성 DLL 로드 성공" },
+          { "log": "Running as: NT AUTHORITY\\SYSTEM", "desc": "💡 최고 권한으로 실행 - 모든 시스템 리소스 접근 가능" },
+          { "log": "Second load skipped", "desc": "💡 Shell 경로에서의 중복 로드는 Mutex로 방지" }
+        ]
+      },
+      "terms": [
+        { "name": "NT AUTHORITY\\SYSTEM", "desc": "Windows 최고 권한 계정. 모든 파일, 레지스트리, 서비스에 무제한 접근이 가능합니다." },
+        { "name": "부팅 시퀀스", "desc": "컴퓨터가 켜진 후 운영체제가 완전히 로드될 때까지의 과정. Winlogon은 초기 단계에서 실행됩니다." },
+        { "name": "시스템 재이미징", "desc": "감염된 시스템을 깨끗한 이미지로 완전히 교체하는 복구 방법. 깊은 수준의 지속성 제거에 가장 확실합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "winlogon.exe (SYSTEM)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "reg.exe query Winlogon (PID: 6001)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "copy.exe (DLL staging) (PID: 6101)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "reg.exe modify Userinit (PID: 6201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "reg.exe modify Shell (PID: 6301)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "[After Reboot]", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "winlogon.exe → wlnotify.dll (SYSTEM)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "userinit.exe (PID: 1201)", "depth": 1, "alert": false, "minStep": 4 },
+    { "name": "explorer.exe (PID: 2401)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

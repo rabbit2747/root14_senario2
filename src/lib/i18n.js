@@ -1,0 +1,326 @@
+/**
+ * 커뮤니티 UI 다국어 번역 상수
+ * localStorage 'gotroot_lang' 키 기반
+ */
+import { LANG_STORAGE_KEY, LANG_DEFAULT } from '../components/LangToggle';
+
+export function getLang() {
+  return localStorage.getItem(LANG_STORAGE_KEY) || LANG_DEFAULT;
+}
+
+// ── 시간 포맷 (timeAgo) ──
+const TIME_UNITS = {
+  ko: { now: '방금', min: '분 전', hr: '시간 전', day: '일 전' },
+  en: { now: 'just now', min: 'm ago', hr: 'h ago', day: 'd ago' },
+  ja: { now: 'たった今', min: '分前', hr: '時間前', day: '日前' },
+  zh: { now: '刚刚', min: '分钟前', hr: '小时前', day: '天前' },
+  hi: { now: 'अभी', min: 'मिनट पहले', hr: 'घंटे पहले', day: 'दिन पहले' },
+};
+
+export function timeAgo(dateStr, lang) {
+  const l = lang || getLang();
+  const u = TIME_UNITS[l] || TIME_UNITS.ko;
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return u.now;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}${u.min}`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}${u.hr}`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day}${u.day}`;
+  return new Date(dateStr).toLocaleDateString(l === 'ko' ? 'ko-KR' : l === 'ja' ? 'ja-JP' : l === 'zh' ? 'zh-CN' : l === 'hi' ? 'hi-IN' : 'en-US');
+}
+
+// ── 카테고리 라벨 ──
+export const CAT_LABELS = {
+  ko: { general: '일반', update: '업데이트', maintenance: '점검', event: '이벤트', important: '🚨 중요' },
+  en: { general: 'General', update: 'Update', maintenance: 'Maint.', event: 'Event', important: '🚨 Alert' },
+  ja: { general: '一般', update: '更新', maintenance: 'メンテ', event: 'イベント', important: '🚨 重要' },
+  zh: { general: '一般', update: '更新', maintenance: '维护', event: '活动', important: '🚨 重要' },
+  hi: { general: 'सामान्य', update: 'अपडेट', maintenance: 'रखरखाव', event: 'इवेंट', important: '🚨 महत्वपूर्ण' },
+};
+
+export function getCatLabel(category, lang) {
+  const l = lang || getLang();
+  const labels = CAT_LABELS[l] || CAT_LABELS.ko;
+  return labels[category] || labels.general;
+}
+
+// ── 피드백 보드 UI 텍스트 ──
+export const FEEDBACK_UI = {
+  ko: {
+    title: '커뮤니티 피드백',
+    placeholder: '피드백을 남겨주세요... (Enter로 전송)',
+    sending: '전송 중...',
+    post: '등록',
+    loginPrompt: '로그인 후 피드백을 확인하고 참여하세요',
+    login: '로그인',
+    loginRequired: '피드백 내용을 확인하려면 로그인이 필요합니다',
+    loginBtn: '로그인하기',
+    empty: '아직 피드백이 없습니다',
+    emptyHint: '첫 번째 피드백을 남겨주세요!',
+    deleteConfirm: '댓글을 삭제하시겠습니까?',
+    deleteSuccess: '댓글이 삭제되었습니다',
+    deleteFail: '삭제에 실패했습니다',
+    deleteAdmin: '관리자 권한으로 삭제',
+    deleteMine: '내 댓글 삭제',
+    deleteBtn: '삭제',
+    adminOnly: '관리자 댓글은 관리자만 삭제할 수 있습니다',
+    adminReplyLock: '관리자 답글이 있어 삭제할 수 없습니다',
+    policy: '본인 댓글/답글 삭제 가능',
+    policyAdmin: '관리자 댓글은 관리자만 삭제 가능',
+    policyLock: '관리자 답글이 달린 댓글은 삭제 불가',
+    admin: '🛡️ 관리자',
+    myComment: '내 댓글',
+    reply: '답글',
+    replyBtn: '💬 답글',
+    like: '좋아요',
+    unlike: '좋아요 취소',
+    loginNeeded: '로그인 필요',
+    replyCount: (n) => `답글 ${n}개`,
+    collapse: '접기',
+    expand: '보기',
+    replyTo: (name) => `💬 @${name}님에게 답글`,
+    replyPlaceholder: '답글을 입력하세요... (Enter로 전송, Esc로 취소)',
+    cancel: '취소',
+    postReply: '답글 등록',
+    loadMore: '더보기 ↓',
+    anon: '익명',
+    editBtn: '✏️ 수정',
+    editSave: '저장',
+    editCancel: '취소',
+    editSuccess: '댓글이 수정되었습니다',
+    editFail: '수정에 실패했습니다',
+    edited: '(수정됨)',
+    boldTip: 'Ctrl+B로 굵게',
+  },
+  en: {
+    title: 'Community Feedback',
+    placeholder: 'Leave feedback... (Enter to send)',
+    sending: 'Sending...',
+    post: 'Post',
+    loginPrompt: 'Log in to view and join feedback',
+    login: 'Login',
+    loginRequired: 'Login required to view feedback',
+    loginBtn: 'Log in',
+    empty: 'No feedback yet',
+    emptyHint: 'Be the first to leave feedback!',
+    deleteConfirm: 'Delete this comment?',
+    deleteSuccess: 'Comment deleted',
+    deleteFail: 'Failed to delete',
+    deleteAdmin: 'Delete as admin',
+    deleteMine: 'Delete my comment',
+    deleteBtn: 'Delete',
+    adminOnly: 'Only admins can delete admin comments',
+    adminReplyLock: 'Cannot delete: has admin reply',
+    policy: 'You can delete your own comments',
+    policyAdmin: 'Admin comments: admin only',
+    policyLock: 'Comments with admin replies: locked',
+    admin: '🛡️ Admin',
+    myComment: 'Mine',
+    reply: 'Reply',
+    replyBtn: '💬 Reply',
+    like: 'Like',
+    unlike: 'Unlike',
+    loginNeeded: 'Login required',
+    replyCount: (n) => `${n} replies`,
+    collapse: 'Hide',
+    expand: 'Show',
+    replyTo: (name) => `💬 Reply to @${name}`,
+    replyPlaceholder: 'Write a reply... (Enter to send, Esc to cancel)',
+    cancel: 'Cancel',
+    postReply: 'Reply',
+    loadMore: 'Load more ↓',
+    anon: 'Anonymous',
+    editBtn: '✏️ Edit',
+    editSave: 'Save',
+    editCancel: 'Cancel',
+    editSuccess: 'Comment updated',
+    editFail: 'Failed to update',
+    edited: '(edited)',
+    boldTip: 'Ctrl+B to bold',
+  },
+  ja: {
+    title: 'フィードバック',
+    placeholder: 'フィードバックを入力... (Enterで送信)',
+    sending: '送信中...',
+    post: '投稿',
+    loginPrompt: 'ログインしてフィードバックに参加',
+    login: 'ログイン',
+    loginRequired: 'フィードバックの閲覧にはログインが必要です',
+    loginBtn: 'ログイン',
+    empty: 'フィードバックはまだありません',
+    emptyHint: '最初のフィードバックを残してください！',
+    deleteConfirm: 'コメントを削除しますか？',
+    deleteSuccess: 'コメントが削除されました',
+    deleteFail: '削除に失敗しました',
+    deleteAdmin: '管理者として削除',
+    deleteMine: '自分のコメントを削除',
+    deleteBtn: '削除',
+    adminOnly: '管理者コメントは管理者のみ削除可能',
+    adminReplyLock: '管理者の返信があり削除できません',
+    policy: '自分のコメント/返信を削除可能',
+    policyAdmin: '管理者コメントは管理者のみ',
+    policyLock: '管理者返信付きコメントは削除不可',
+    admin: '🛡️ 管理者',
+    myComment: '自分',
+    reply: '返信',
+    replyBtn: '💬 返信',
+    like: 'いいね',
+    unlike: 'いいね取消',
+    loginNeeded: 'ログイン必要',
+    replyCount: (n) => `返信 ${n}件`,
+    collapse: '閉じる',
+    expand: '表示',
+    replyTo: (name) => `💬 @${name}への返信`,
+    replyPlaceholder: '返信を入力... (Enterで送信、Escで取消)',
+    cancel: 'キャンセル',
+    postReply: '返信',
+    loadMore: 'もっと見る ↓',
+    anon: '匿名',
+    editBtn: '✏️ 編集',
+    editSave: '保存',
+    editCancel: 'キャンセル',
+    editSuccess: 'コメントが更新されました',
+    editFail: '更新に失敗しました',
+    edited: '(編集済み)',
+    boldTip: 'Ctrl+Bで太字',
+  },
+  zh: {
+    title: '社区反馈',
+    placeholder: '留下反馈... (Enter发送)',
+    sending: '发送中...',
+    post: '发布',
+    loginPrompt: '登录后查看并参与反馈',
+    login: '登录',
+    loginRequired: '查看反馈需要登录',
+    loginBtn: '登录',
+    empty: '还没有反馈',
+    emptyHint: '成为第一个留下反馈的人！',
+    deleteConfirm: '删除此评论？',
+    deleteSuccess: '评论已删除',
+    deleteFail: '删除失败',
+    deleteAdmin: '以管理员身份删除',
+    deleteMine: '删除我的评论',
+    deleteBtn: '删除',
+    adminOnly: '管理员评论仅管理员可删除',
+    adminReplyLock: '有管理员回复，无法删除',
+    policy: '可删除自己的评论/回复',
+    policyAdmin: '管理员评论仅管理员可删除',
+    policyLock: '有管理员回复的评论无法删除',
+    admin: '🛡️ 管理员',
+    myComment: '我的',
+    reply: '回复',
+    replyBtn: '💬 回复',
+    like: '点赞',
+    unlike: '取消点赞',
+    loginNeeded: '需要登录',
+    replyCount: (n) => `${n}条回复`,
+    collapse: '收起',
+    expand: '展开',
+    replyTo: (name) => `💬 回复@${name}`,
+    replyPlaceholder: '输入回复... (Enter发送，Esc取消)',
+    cancel: '取消',
+    postReply: '回复',
+    loadMore: '加载更多 ↓',
+    anon: '匿名',
+    editBtn: '✏️ 编辑',
+    editSave: '保存',
+    editCancel: '取消',
+    editSuccess: '评论已更新',
+    editFail: '更新失败',
+    edited: '(已编辑)',
+    boldTip: 'Ctrl+B加粗',
+  },
+  hi: {
+    title: 'सामुदायिक फीडबैक',
+    placeholder: 'फीडबैक दें... (Enter भेजें)',
+    sending: 'भेज रहा है...',
+    post: 'पोस्ट',
+    loginPrompt: 'फीडबैक देखने के लिए लॉगिन करें',
+    login: 'लॉगिन',
+    loginRequired: 'फीडबैक देखने के लिए लॉगिन आवश्यक',
+    loginBtn: 'लॉगिन',
+    empty: 'अभी तक कोई फीडबैक नहीं',
+    emptyHint: 'पहला फीडबैक दें!',
+    deleteConfirm: 'टिप्पणी हटाएं?',
+    deleteSuccess: 'टिप्पणी हटा दी गई',
+    deleteFail: 'हटाने में विफल',
+    deleteAdmin: 'एडमिन के रूप में हटाएं',
+    deleteMine: 'मेरी टिप्पणी हटाएं',
+    deleteBtn: 'हटाएं',
+    adminOnly: 'एडमिन टिप्पणी केवल एडमिन हटा सकते हैं',
+    adminReplyLock: 'एडमिन उत्तर है, हटा नहीं सकते',
+    policy: 'अपनी टिप्पणियां हटा सकते हैं',
+    policyAdmin: 'एडमिन टिप्पणी: केवल एडमिन',
+    policyLock: 'एडमिन उत्तर वाली टिप्पणी: लॉक',
+    admin: '🛡️ एडमिन',
+    myComment: 'मेरा',
+    reply: 'उत्तर',
+    replyBtn: '💬 उत्तर',
+    like: 'लाइक',
+    unlike: 'अनलाइक',
+    loginNeeded: 'लॉगिन आवश्यक',
+    replyCount: (n) => `${n} उत्तर`,
+    collapse: 'छुपाएं',
+    expand: 'दिखाएं',
+    replyTo: (name) => `💬 @${name} को उत्तर`,
+    replyPlaceholder: 'उत्तर लिखें... (Enter भेजें, Esc रद्द करें)',
+    cancel: 'रद्द',
+    postReply: 'उत्तर',
+    loadMore: 'और लोड करें ↓',
+    anon: 'अनाम',
+    editBtn: '✏️ संपादित',
+    editSave: 'सहेजें',
+    editCancel: 'रद्द',
+    editSuccess: 'टिप्पणी अपडेट हुई',
+    editFail: 'अपडेट विफल',
+    edited: '(संपादित)',
+    boldTip: 'Ctrl+B बोल्ड',
+  },
+};
+
+// ── 공지사항 UI 텍스트 ──
+export const ANNOUNCE_UI = {
+  ko: { title: '공지사항', viewAll: '전체보기 →', empty: '등록된 공지사항이 없습니다', pinned: '고정', all: '전체', items: '건', delete: '삭제', deleting: '삭제 중...', deleteConfirm: '이 공지사항을 삭제하시겠습니까?', noAnn: '공지사항이 없습니다', noAnnHint: '새로운 공지사항이 등록되면 여기에 표시됩니다' },
+  en: { title: 'Announcements', viewAll: 'View all →', empty: 'No announcements', pinned: 'Pinned', all: 'All', items: '', delete: 'Delete', deleting: 'Deleting...', deleteConfirm: 'Delete this announcement?', noAnn: 'No announcements', noAnnHint: 'New announcements will appear here' },
+  ja: { title: 'お知らせ', viewAll: 'すべて見る →', empty: 'お知らせはありません', pinned: '固定', all: '全て', items: '件', delete: '削除', deleting: '削除中...', deleteConfirm: 'このお知らせを削除しますか？', noAnn: 'お知らせはありません', noAnnHint: '新しいお知らせがここに表示されます' },
+  zh: { title: '公告', viewAll: '查看全部 →', empty: '没有公告', pinned: '置顶', all: '全部', items: '条', delete: '删除', deleting: '删除中...', deleteConfirm: '删除此公告？', noAnn: '没有公告', noAnnHint: '新公告将显示在这里' },
+  hi: { title: 'घोषणाएं', viewAll: 'सभी देखें →', empty: 'कोई घोषणा नहीं', pinned: 'पिन', all: 'सभी', items: '', delete: 'हटाएं', deleting: 'हटा रहा है...', deleteConfirm: 'यह घोषणा हटाएं?', noAnn: 'कोई घोषणा नहीं', noAnnHint: 'नई घोषणाएं यहां दिखाई देंगी' },
+};
+
+export function getFeedbackUI(lang) {
+  const l = lang || getLang();
+  return FEEDBACK_UI[l] || FEEDBACK_UI.ko;
+}
+
+export function getAnnounceUI(lang) {
+  const l = lang || getLang();
+  return ANNOUNCE_UI[l] || ANNOUNCE_UI.ko;
+}
+
+// ── 날짜 포맷 (formatDate) ──
+const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN', hi: 'hi-IN' };
+
+export function formatDate(dateStr, lang) {
+  const l = lang || getLang();
+  return new Date(dateStr).toLocaleDateString(
+    LOCALE_MAP[l] || 'ko-KR',
+    { year: 'numeric', month: 'long', day: 'numeric' },
+  );
+}
+
+// ── 이모지 피커 UI 텍스트 ──
+export const EMOJI_UI = {
+  ko: { title: '이모티콘', smile: '스마일', gesture: '제스처', heart: '하트/심볼', tech: '테크' },
+  en: { title: 'Emoji', smile: 'Smile', gesture: 'Gesture', heart: 'Hearts', tech: 'Tech' },
+  ja: { title: '絵文字', smile: 'スマイル', gesture: 'ジェスチャー', heart: 'ハート', tech: 'テック' },
+  zh: { title: '表情', smile: '笑脸', gesture: '手势', heart: '爱心', tech: '技术' },
+  hi: { title: 'इमोजी', smile: 'स्माइल', gesture: 'जेस्चर', heart: 'दिल', tech: 'टेक' },
+};
+
+export function getEmojiUI(lang) {
+  const l = lang || getLang();
+  return EMOJI_UI[l] || EMOJI_UI.ko;
+}

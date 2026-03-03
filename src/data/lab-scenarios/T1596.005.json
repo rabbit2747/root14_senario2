@@ -1,0 +1,181 @@
+{
+  "id": "T1596.005",
+  "title": "스캔 데이터베이스 검색 시뮬레이션",
+  "titleEn": "Scan Databases Search Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 Shodan 인터넷 스캔 검색", "labelEn": "🔍 Shodan Internet Scan Search", "steps": [0, 1] },
+    { "label": "🎯 Censys 호스트 분석", "labelEn": "🎯 Censys Host Analysis", "steps": [2, 3] },
+    { "label": "✅ 취약 서비스 종합 보고서", "labelEn": "✅ Vulnerable Services Report", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "shodan", "label": "Shodan", "x": 200, "y": 30 },
+    { "id": "censys", "label": "Censys", "x": 200, "y": 90 },
+    { "id": "targets", "label": "Exposed Services", "x": 350, "y": 60 },
+    { "id": "vulns", "label": "Vulnerabilities", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "shodan", "minStep": 0 },
+    { "from": "shodan", "to": "targets", "minStep": 1 },
+    { "from": "ext", "to": "censys", "minStep": 2 },
+    { "from": "censys", "to": "targets", "minStep": 3 },
+    { "from": "targets", "to": "vulns", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "scan_results/", "icon": "📁" },
+    { "name": "shodan_export.json", "icon": "📄", "alert": true },
+    { "name": "vuln_report.pdf", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "shodan search 'hostname:target-corp.com' --fields ip_str,port,org,os,product,version",
+      "out": "ip_str          port   org              os              product          version\n203.0.113.50    80     HostingCo        Ubuntu 22.04    nginx            1.18.0\n203.0.113.50    443    HostingCo        Ubuntu 22.04    nginx            1.18.0\n203.0.113.50    22     HostingCo        Ubuntu 22.04    OpenSSH          8.9p1\n203.0.113.51    3306   HostingCo        Ubuntu 20.04    MySQL            8.0.28\n203.0.113.52    8080   HostingCo        Windows Server  Apache Tomcat    9.0.62\n203.0.113.52    3389   HostingCo        Windows Server  RDP              10.0\n203.0.113.53    9200   HostingCo        CentOS 7        Elasticsearch    7.10.2\n203.0.113.53    5601   HostingCo        CentOS 7        Kibana           7.10.2\n\nTotal results: 8",
+      "def": "[Threat Intel] Shodan queries targeting organization's IP range detected",
+      "defAction": "Source: Threat Intelligence Feed\nTarget: Shodan queries for hostname:target-corp.com\nAction: Alert generated, exposed service audit initiated",
+      "desc": "Shodan에서 대상 조직의 호스트명으로 검색하여 인터넷에 노출된 모든 서비스를 파악합니다. 웹서버, DB, RDP, Elasticsearch 등이 노출되어 있습니다.",
+      "descEn": "Searching Shodan for target organization's hostname to identify all internet-exposed services. Web servers, DB, RDP, Elasticsearch are found exposed.",
+      "stepTitle": "Shodan 호스트 검색",
+      "stepTitleEn": "Shodan Host Search",
+      "feynman": "Shodan은 '인터넷의 구글'입니다. 일반 구글이 웹페이지를 검색하듯, Shodan은 인터넷에 연결된 모든 기기와 서비스를 검색합니다. 회사 이름을 넣으면 열려있는 '문(포트)'이 모두 보입니다.",
+      "feynmanEn": "Shodan is the 'Google of the Internet'. While Google searches web pages, Shodan searches all devices and services connected to the internet. Enter a company name and all open 'doors (ports)' appear.",
+      "expert": "Shodan의 hostname 필터로 대상 조직의 인터넷 노출 표면을 매핑합니다. MySQL(3306), RDP(3389), Elasticsearch(9200/5601) 등 일반적으로 내부망에만 있어야 할 서비스가 외부 노출된 것은 심각한 보안 위협입니다.",
+      "expertEn": "Shodan hostname filter maps the target's internet exposure surface. MySQL (3306), RDP (3389), Elasticsearch (9200/5601) — services typically internal-only being externally exposed represents severe security risks.",
+      "defTooltip": "🔍 위협 인텔: 조직 IP 범위 대상 Shodan 쿼리 감지",
+      "defTooltipEn": "🔍 Threat Intel: Shodan queries targeting organization's IP range",
+      "hackerLog": {
+        "title": "shodan_search.log",
+        "lines": [
+          { "log": "8 services found for target-corp.com", "desc": "💡 8개 노출 서비스 발견" },
+          { "log": "MySQL 8.0.28 on port 3306 — externally accessible", "desc": "💡 MySQL DB가 외부에서 접근 가능 — 심각" },
+          { "log": "Elasticsearch 7.10.2 on port 9200 — unauthenticated?", "desc": "💡 Elasticsearch 인증 없이 노출 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "Shodan", "desc": "인터넷에 연결된 기기와 서비스를 검색하는 검색 엔진 — IoT, 서버, 산업 시스템 포함" },
+        { "name": "Attack Surface", "desc": "공격자가 접근할 수 있는 모든 인터넷 노출 서비스의 총합" }
+      ]
+    },
+    {
+      "cmd": "shodan search 'hostname:target-corp.com' --fields ip_str,vulns | sort -u",
+      "out": "203.0.113.50    CVE-2021-23017 (nginx resolver vuln)\n203.0.113.51    CVE-2023-21912 (MySQL auth bypass)\n                CVE-2022-21270 (MySQL privilege escalation)\n203.0.113.52    CVE-2022-22965 (Spring4Shell - Tomcat)\n                CVE-2021-34527 (PrintNightmare - RDP)\n203.0.113.53    CVE-2021-44228 (Log4Shell - Elasticsearch)\n                CVE-2021-22145 (Elasticsearch info disclosure)\n\n=== Vulnerability Summary ===\nCritical: 3 (Spring4Shell, Log4Shell, PrintNightmare)\nHigh:     2 (MySQL auth bypass, nginx resolver)\nMedium:   2 (MySQL priv esc, ES info disclosure)\n\nTotal CVEs: 7 across 4 hosts",
+      "def": "[Vulnerability Management] Shodan vulnerability query reveals known CVEs on exposed services",
+      "defAction": "Source: Vulnerability Management Platform\nTarget: 4 hosts with 7 known CVEs\nAction: Emergency patching initiated for critical CVEs (Spring4Shell, Log4Shell)",
+      "desc": "Shodan의 vulns 필드를 활용하여 노출된 서비스의 알려진 취약점(CVE)을 조회합니다. Spring4Shell, Log4Shell 등 치명적 취약점이 발견됩니다.",
+      "descEn": "Using Shodan's vulns field to query known CVEs for exposed services. Critical vulnerabilities like Spring4Shell and Log4Shell are discovered.",
+      "stepTitle": "Shodan CVE 취약점 매핑",
+      "stepTitleEn": "Shodan CVE Vulnerability Mapping",
+      "feynman": "Shodan은 열린 문을 찾을 뿐만 아니라 '이 문에 알려진 결함이 있는지'도 알려줍니다. Log4Shell(CVE-2021-44228)은 잠금장치가 고장난 것과 같아서, 누구나 열 수 있는 상태입니다.",
+      "feynmanEn": "Shodan not only finds open doors but also tells you if those doors have known defects. Log4Shell (CVE-2021-44228) is like a broken lock — anyone can open it.",
+      "expert": "Shodan의 vulns 필드는 CPE(Common Platform Enumeration) 매칭 기반으로 알려진 CVE를 매핑합니다. Log4Shell(CVSS 10.0), Spring4Shell(CVSS 9.8), PrintNightmare(CVSS 8.8)는 모두 원격 코드 실행이 가능한 치명적 취약점입니다.",
+      "expertEn": "Shodan's vulns field maps known CVEs via CPE matching. Log4Shell (CVSS 10.0), Spring4Shell (CVSS 9.8), PrintNightmare (CVSS 8.8) are all critical remote code execution vulnerabilities.",
+      "defTooltip": "🔍 취약점 관리: 노출 서비스의 7개 CVE 발견 — 긴급 패치 필요",
+      "defTooltipEn": "🔍 Vulnerability Management: 7 CVEs found on exposed services — emergency patching needed",
+      "hackerLog": {
+        "title": "shodan_vulns.log",
+        "lines": [
+          { "log": "7 CVEs across 4 hosts", "desc": "💡 4개 호스트에서 7개 알려진 취약점 발견" },
+          { "log": "CRITICAL: Log4Shell, Spring4Shell, PrintNightmare", "desc": "💡 원격 코드 실행 가능한 치명적 취약점 3개" },
+          { "log": "MySQL auth bypass → direct DB access possible", "desc": "💡 MySQL 인증 우회 → 데이터베이스 직접 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "CVE", "desc": "Common Vulnerabilities and Exposures — 알려진 보안 취약점의 고유 식별자" },
+        { "name": "CVSS", "desc": "Common Vulnerability Scoring System — 취약점의 심각도를 0~10으로 평가하는 점수 체계" }
+      ]
+    },
+    {
+      "cmd": "censys search 'autonomous_system.name: HOSTINGCO-AS AND services.tls.certificates.leaf_data.subject.common_name: target-corp.com' | jq '.[].ip,.services'",
+      "out": "[\n  {\n    \"ip\": \"203.0.113.50\",\n    \"services\": [\n      { \"port\": 80, \"service_name\": \"HTTP\", \"banner\": \"nginx/1.18.0\" },\n      { \"port\": 443, \"service_name\": \"HTTPS\", \"tls\": { \"version\": \"TLSv1.2\" } },\n      { \"port\": 22, \"service_name\": \"SSH\", \"banner\": \"SSH-2.0-OpenSSH_8.9p1\" }\n    ],\n    \"operating_system\": { \"product\": \"Ubuntu\", \"version\": \"22.04\" }\n  },\n  {\n    \"ip\": \"203.0.113.53\",\n    \"services\": [\n      { \"port\": 9200, \"service_name\": \"Elasticsearch\", \"banner\": \"7.10.2\" },\n      { \"port\": 5601, \"service_name\": \"Kibana\", \"banner\": \"7.10.2\" },\n      { \"port\": 22, \"service_name\": \"SSH\" }\n    ],\n    \"operating_system\": { \"product\": \"CentOS\", \"version\": \"7\" }\n  }\n]",
+      "def": "[Censys Alert] Detailed service enumeration via Censys API targeting organization",
+      "defAction": "Source: Censys API Monitoring\nTarget: HOSTINGCO-AS range with target-corp.com certificates\nAction: API query logged, cross-reference with Shodan results",
+      "desc": "Censys에서 ASN과 TLS 인증서를 조합하여 검색합니다. Shodan과 교차 검증하여 노출 서비스의 정확한 버전과 TLS 구성을 확인합니다.",
+      "descEn": "Searching Censys combining ASN and TLS certificates. Cross-validating with Shodan to confirm exact service versions and TLS configurations.",
+      "stepTitle": "Censys ASN + 인증서 교차 검색",
+      "stepTitleEn": "Censys ASN + Certificate Cross Search",
+      "feynman": "Censys는 Shodan의 '동료 탐정'입니다. 같은 서버를 다른 각도에서 조사합니다. 두 탐정의 보고서를 비교하면 더 정확한 정보를 얻을 수 있습니다. Censys는 특히 TLS 인증서와 네트워크 소속(ASN) 정보에 강합니다.",
+      "feynmanEn": "Censys is Shodan's 'partner detective'. It investigates the same servers from different angles. Comparing both reports gives more accurate information. Censys excels at TLS certificates and network ownership (ASN).",
+      "expert": "Censys의 ASN + TLS 인증서 조합 검색으로 Shodan 결과를 교차 검증합니다. TLSv1.2만 지원하는 서버는 TLSv1.3 미지원으로 인한 추가 공격 벡터가 존재합니다. CentOS 7의 Elasticsearch는 EOL 플랫폼에서 동작하여 OS 수준 패치도 불가능합니다.",
+      "expertEn": "Censys ASN + TLS certificate combined search cross-validates Shodan results. TLSv1.2-only servers have additional attack vectors from no TLSv1.3 support. Elasticsearch on CentOS 7 runs on an EOL platform with no OS-level patching possible.",
+      "defTooltip": "🔍 Censys: 조직 대상 상세 서비스 열거 감지",
+      "defTooltipEn": "🔍 Censys: Detailed service enumeration targeting organization detected",
+      "hackerLog": {
+        "title": "censys_search.log",
+        "lines": [
+          { "log": "Censys confirms Shodan findings: 2 hosts verified", "desc": "💡 Shodan 결과와 교차 검증 완료" },
+          { "log": "TLSv1.2 only — no TLSv1.3 support", "desc": "💡 TLS 다운그레이드 공격 가능" },
+          { "log": "CentOS 7 EOL — no security patches available", "desc": "💡 EOL 운영체제 — OS 수준 패치 불가" }
+        ]
+      },
+      "terms": [
+        { "name": "Censys", "desc": "인터넷 호스트, 인증서, 서비스를 검색하는 보안 연구 플랫폼" },
+        { "name": "ASN (Autonomous System Number)", "desc": "인터넷 라우팅에서 독립적으로 관리되는 네트워크의 고유 번호" }
+      ]
+    },
+    {
+      "cmd": "censys search 'services.http.response.body: \"target-corp\" AND NOT autonomous_system.name: CLOUDFLARENET' --fields ip,services.port,location.country",
+      "out": "[\n  {\n    \"ip\": \"203.0.113.54\",\n    \"services\": [{\"port\": 443}, {\"port\": 8443}],\n    \"location\": {\"country\": \"South Korea\"}\n  },\n  {\n    \"ip\": \"198.51.100.20\",\n    \"services\": [{\"port\": 443}],\n    \"location\": {\"country\": \"United States\"}\n  }\n]\n\n→ New discovery: 203.0.113.54 — previously unknown host!\n  Port 8443: Development/staging environment?\n\n→ 198.51.100.20 — US-based mirror/DR site\n  Potential disaster recovery or development clone",
+      "def": "[Asset Discovery] Previously unknown hosts found serving organization's content",
+      "defAction": "Source: Asset Inventory + Censys Monitoring\nTarget: 203.0.113.54 (unknown), 198.51.100.20 (unknown)\nAction: Shadow IT investigation, asset inventory update required",
+      "desc": "HTTP 응답 본문에서 대상 조직 이름을 검색하여 CDN 보호를 받지 않는 추가 호스트를 발견합니다. 개발/스테이징 서버와 DR 사이트가 노출될 수 있습니다.",
+      "descEn": "Searching HTTP response bodies for target org name to discover additional hosts without CDN protection. Development/staging servers and DR sites may be exposed.",
+      "stepTitle": "HTTP 콘텐츠 기반 숨겨진 호스트 발견",
+      "stepTitleEn": "HTTP Content-Based Hidden Host Discovery",
+      "feynman": "이것은 '회사 로고가 있는 모든 건물 찾기'와 같습니다. CDN으로 보호되는 본사 건물 외에도, 회사 로고가 붙어있는 다른 건물(개발 서버, 백업 서버)이 보호 없이 있을 수 있습니다.",
+      "feynmanEn": "This is like finding all buildings with the company logo. Besides the CDN-protected headquarters, other buildings (dev servers, backups) with the logo might exist unprotected.",
+      "expert": "Censys의 HTTP 응답 본문 검색으로 CDN 밖에서 조직 콘텐츠를 서빙하는 호스트를 발견합니다. 개발/스테이징 환경은 프로덕션보다 보안이 약하고, DR 사이트는 동일한 데이터를 가지지만 보호 수준이 낮은 경우가 많습니다.",
+      "expertEn": "Censys HTTP body search discovers hosts serving organization content outside CDN. Dev/staging environments have weaker security than production, and DR sites hold same data but often with lower protection levels.",
+      "defTooltip": "🔍 자산 관리: 조직 콘텐츠를 서빙하는 미등록 호스트 발견",
+      "defTooltipEn": "🔍 Asset Discovery: Unregistered hosts serving organization content found",
+      "hackerLog": {
+        "title": "hidden_hosts.log",
+        "lines": [
+          { "log": "203.0.113.54 — new host with port 8443", "desc": "💡 미등록 호스트 발견 — 개발/스테이징 서버 추정" },
+          { "log": "198.51.100.20 (US) — possible DR site", "desc": "💡 미국 소재 미러/DR 사이트 — 동일 데이터 보유 가능" },
+          { "log": "Neither host behind CDN protection", "desc": "💡 두 호스트 모두 CDN 미적용 — 직접 공격 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Shadow IT", "desc": "IT 부서의 공식 관리 범위 밖에서 운영되는 기술 자산" },
+        { "name": "DR (Disaster Recovery)", "desc": "재해 복구 사이트 — 주 시스템 장애 시 전환되는 백업 인프라" }
+      ]
+    },
+    {
+      "cmd": "python3 scan_db_report.py --shodan shodan_export.json --censys censys_export.json --output final_scan_report.json",
+      "out": "╔══════════════════════════════════════════════════════════╗\n║     T1596.005 Scan Database Intelligence Report          ║\n╠══════════════════════════════════════════════════════════╣\n\n📊 Attack Surface Summary:\n  Known Hosts:     4 (Shodan)\n  Hidden Hosts:    2 (Censys body search)\n  Total Services: 14\n  Total CVEs:      7 (3 Critical)\n\n🎯 High-Value Targets:\n  ┌──────────────────┬──────────────────────────────────────┐\n  │ Host             │ Risk Assessment                      │\n  ├──────────────────┼──────────────────────────────────────┤\n  │ 203.0.113.51     │ MySQL externally exposed + auth CVE  │\n  │ 203.0.113.52     │ Spring4Shell + PrintNightmare (RCE)  │\n  │ 203.0.113.53     │ Log4Shell + Kibana unauthenticated   │\n  │ 203.0.113.54     │ Shadow IT — no security monitoring   │\n  └──────────────────┴──────────────────────────────────────┘\n\n🔄 Cross-Validation: Shodan + Censys agree on 100% of findings\n\n🛡️ Priority Remediations:\n  1. CRITICAL: Patch Log4Shell, Spring4Shell, PrintNightmare\n  2. HIGH: Restrict MySQL/Elasticsearch to internal network\n  3. HIGH: Investigate shadow IT hosts (203.0.113.54)\n  4. MEDIUM: Upgrade CentOS 7 to supported OS\n  5. MEDIUM: Enable TLSv1.3 on all services\n\n╚══════════════════════════════════════════════════════════╝",
+      "def": "[CISO Report] Comprehensive scan database reconnaissance completed — 6 hosts, 7 CVEs, 2 shadow IT assets",
+      "defAction": "Source: CISO / Security Operations\nTarget: All identified hosts and services\nAction: Emergency patching sprint, shadow IT investigation, firewall rule audit",
+      "desc": "Shodan과 Censys의 스캔 데이터베이스 검색 결과를 종합하여 최종 정찰 보고서를 생성합니다. 공격 표면, 취약점, 우선순위 조치사항을 정리합니다.",
+      "descEn": "Consolidating Shodan and Censys scan database search results into a final reconnaissance report. Attack surface, vulnerabilities, and prioritized remediations are documented.",
+      "stepTitle": "스캔 DB 종합 정찰 보고서",
+      "stepTitleEn": "Scan Database Intelligence Report",
+      "feynman": "이 보고서는 '건물 보안 감사 결과'입니다. 두 명의 탐정(Shodan, Censys)이 조사한 결과를 합치면: 6개 건물, 14개 열린 문, 7개 결함이 있는 잠금장치, 2개 미등록 건물이 발견되었습니다. 가장 급한 것부터 수리해야 합니다.",
+      "feynmanEn": "This report is a 'building security audit'. Combining two detectives' (Shodan, Censys) findings: 6 buildings, 14 open doors, 7 defective locks, 2 unregistered buildings. The most urgent ones need fixing first.",
+      "expert": "Shodan + Censys 이중 검증으로 False Positive를 최소화한 종합 보고서입니다. RCE 가능 CVE 3개(CVSS 9.0+), 외부 노출 DB 서비스, Shadow IT 자산이 동시에 존재하는 것은 초기 접근부터 데이터 유출까지의 완전한 공격 체인을 가능하게 합니다.",
+      "expertEn": "Dual Shodan + Censys validation minimizes false positives. Three RCE-capable CVEs (CVSS 9.0+), externally exposed DB services, and shadow IT assets together enable a complete attack chain from initial access to data exfiltration.",
+      "defTooltip": "🔍 CISO: 6개 호스트, 7개 CVE, 2개 Shadow IT 자산 — 종합 정찰 보고서",
+      "defTooltipEn": "🔍 CISO: 6 hosts, 7 CVEs, 2 shadow IT assets — comprehensive recon report",
+      "hackerLog": {
+        "title": "final_report.log",
+        "lines": [
+          { "log": "6 hosts, 14 services, 7 CVEs mapped", "desc": "💡 전체 공격 표면 매핑 완료" },
+          { "log": "3 CRITICAL RCE vulns: Log4Shell, Spring4Shell, PrintNightmare", "desc": "💡 원격 코드 실행 3건 — 즉시 침투 가능" },
+          { "log": "2 shadow IT hosts without security monitoring", "desc": "💡 보안 모니터링 없는 미등록 자산 — 탐지 불가 공격 경로" }
+        ]
+      },
+      "terms": [
+        { "name": "Scan Database", "desc": "Shodan, Censys 등 인터넷 전체를 주기적으로 스캔하여 수집한 서비스/취약점 데이터베이스" },
+        { "name": "RCE (Remote Code Execution)", "desc": "원격에서 임의의 코드를 실행할 수 있는 취약점 — 가장 치명적인 취약점 유형" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "shodan search", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "  └─ vuln_mapping", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "censys search (ASN+cert)", "depth": 0, "alert": false, "minStep": 2 },
+    { "name": "censys search (HTTP body)", "depth": 0, "alert": true, "minStep": 3 },
+    { "name": "  └─ shadow_it_discovery", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "scan_db_report.py", "depth": 0, "alert": false, "minStep": 4 }
+  ]
+}

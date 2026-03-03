@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1588.003">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1588-003-code-signing-certificates&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1588.003 코드서명 인증서 획득">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1588.003 코드서명 인증서 획득 — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}
+        .glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05);}
+        .dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+        .hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}
+        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 hover:border-[#9DD9D2] shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1588.003: 코드서명 인증서 획득</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch1">1. 코드서명 개요</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch2">2. 인증서 탈취 기법</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch3">3. 탐지 및 방어</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Resource Development</div>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">T1588.003<br><span class="hl-teal">코드서명 인증서 획득</span></h2>
+                <p class="text-lg text-cgray dark:text-slate-400 max-w-2xl mx-auto">공격자가 코드서명 인증서를 탈취하거나 구매하여 악성코드에 신뢰성을 부여하는 기법을 학습합니다.</p>
+            </header>
+            <section id="ch1" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal flex items-center gap-2">🔏 Chapter 1 — 코드서명 개요</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <h4 class="text-lg font-bold hl-yel">코드서명이란?</h4>
+                    <p>코드서명은 소프트웨어 개발자가 <span class="hl-teal">자신의 신원을 인증</span>하고, 코드가 변조되지 않았음을 보증하는 디지털 서명 기술입니다. Windows SmartScreen, macOS Gatekeeper 등 운영체제 보안 기능은 서명된 소프트웨어를 더 신뢰합니다.</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">정상 코드서명 프로세스</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>1. CA(인증기관)에 사업자 등록증 제출</li>
+                                <li>2. 신원 확인 후 코드서명 인증서 발급</li>
+                                <li>3. 개인키로 실행 파일에 서명</li>
+                                <li>4. OS가 서명을 검증하여 신뢰 표시</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">공격자의 악용 방법</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>• 합법 기업의 인증서를 해킹으로 탈취</li>
+                                <li>• 다크웹에서 도난된 인증서 구매</li>
+                                <li>• 위장 회사 설립 후 직접 인증서 신청</li>
+                                <li>• 만료/폐기된 인증서로 타임스탬프 악용</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># 서명된 악성코드의 인증서 정보 확인</p>
+                        <p class="text-cyel">$ sigcheck -a malware_signed.exe</p>
+                        <p>Verified:        Signed</p>
+                        <p>Signing date:    2026-02-28 14:30:22</p>
+                        <p>Publisher:       "GlobalTech Solutions Ltd." (REVOKED)</p>
+                        <p>Company:         GlobalTech Solutions Ltd.</p>
+                        <p>Serial Number:   0x3A4B5C6D7E8F</p>
+                        <p class="text-red-400">[!] 인증서 폐기됨 — 이전에 탈취된 인증서로 서명된 악성코드</p>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal flex items-center gap-2">🔓 Chapter 2 — 인증서 탈취 기법</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <h4 class="text-lg font-bold hl-yel">실제 공격 사례</h4>
+                    <div class="space-y-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">1. 소프트웨어 회사 해킹</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">빌드 서버나 CI/CD 파이프라인을 침해하여 코드서명용 개인키(.pfx, .p12)를 탈취합니다. SolarWinds 공급망 공격에서 이 방법이 사용되었습니다.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold hl-yel mb-2">2. 다크웹 인증서 거래</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">EV(Extended Validation) 코드서명 인증서가 $1,000~$5,000에 거래됩니다. SmartScreen 우회가 가능한 EV 인증서가 더 높은 가격에 판매됩니다.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">3. 위장 회사 설립</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">명목상의 법인을 설립하고 CA에 코드서명 인증서를 합법적으로 신청합니다. Lazarus 그룹이 이 방법을 사용한 것으로 알려져 있습니다.</p>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># 탈취된 PFX 인증서로 악성코드 서명</p>
+                        <p class="text-cyel">$ signtool sign /f stolen_cert.pfx /p "P@ssw0rd" /t http://timestamp.digicert.com /fd sha256 payload.exe</p>
+                        <p>Done Adding Additional Store</p>
+                        <p>Successfully signed: payload.exe</p>
+                        <p class="text-cyel mt-2">$ sigcheck payload.exe</p>
+                        <p>Verified:       Signed</p>
+                        <p>Publisher:      "Legit Software Corp."</p>
+                        <p class="text-red-400">[!] 합법 기업 명의의 서명 — SmartScreen 경고 우회 가능</p>
+                    </div>
+                </div>
+            </section>
+            <section id="ch3" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal flex items-center gap-2">🛡️ Chapter 3 — 탐지 및 방어</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">탐지 방법</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>• CRL/OCSP로 인증서 폐기 상태 실시간 검증</li>
+                                <li>• 인증서 발급일과 바이너리 컴파일 시간 비교</li>
+                                <li>• Certificate Transparency 로그 모니터링</li>
+                                <li>• WDAC/AppLocker로 허용된 서명자만 실행 허가</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold hl-yel mb-2">방어 대책</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>• HSM(Hardware Security Module)에 서명키 보관</li>
+                                <li>• CI/CD 파이프라인에서 서명 프로세스 분리</li>
+                                <li>• 인증서 사용 이력 감사 로깅</li>
+                                <li>• 타임스탬프 서버 사용으로 서명 시점 기록</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="quiz" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal flex items-center gap-2">📝 퀴즈</h3>
+                <div class="glass-panel rounded-2xl p-8">
+                    <p class="font-bold mb-4">Q. 탈취된 코드서명 인증서로 서명된 악성코드를 방어하기 위한 가장 효과적인 방법은?</p>
+                    <div class="space-y-3" id="quiz-options">
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-cteal/10 cursor-pointer transition-colors"><input type="radio" name="q1" value="a" class="mt-1"><span>A. 모든 서명된 파일을 무조건 신뢰</span></label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-cteal/10 cursor-pointer transition-colors"><input type="radio" name="q1" value="b" class="mt-1"><span>B. WDAC 정책으로 허용된 서명자만 실행 허가 + CRL/OCSP 실시간 검증</span></label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-cteal/10 cursor-pointer transition-colors"><input type="radio" name="q1" value="c" class="mt-1"><span>C. 안티바이러스만 사용</span></label>
+                        <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-cteal/10 cursor-pointer transition-colors"><input type="radio" name="q1" value="d" class="mt-1"><span>D. 코드서명 기능 완전 비활성화</span></label>
+                    </div>
+                    <button onclick="checkQuiz()" class="mt-6 px-6 py-2 bg-cteal text-cdark font-bold rounded-lg hover:opacity-80 transition-opacity">정답 확인</button>
+                    <div id="quiz-result" class="mt-4 hidden p-4 rounded-lg bg-cteal/20 text-sm"></div>
+                </div>
+            </section>
+            <section class="text-center py-16">
+                <div class="glass-panel rounded-2xl p-10 inline-block">
+                    <p class="text-lg font-bold hl-teal mb-4">학습을 완료했습니다!</p>
+                    <p class="text-sm text-cgray dark:text-slate-400 mb-6">다음 기법을 학습하거나 매트릭스 대시보드로 돌아가세요.</p>
+                    <button onclick="window.location.href='/'" class="px-6 py-3 bg-gradient-to-r from-cteal to-cyel text-cdark font-bold rounded-lg hover:opacity-90 transition-opacity">← 매트릭스 대시보드</button>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+<script>
+function toggleTheme(){document.documentElement.classList.toggle('dark');const i=document.getElementById('theme-icon');i.textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙';}
+function go(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});}
+function checkQuiz(){const r=document.getElementById('quiz-result');const a=document.querySelector('input[name="q1"]:checked');if(!a){r.classList.remove('hidden');r.innerHTML='<span class="hl-yel">보기를 선택해주세요.</span>';return;}r.classList.remove('hidden');if(a.value==='b'){r.innerHTML='<span class="hl-teal">✅ 정답!</span> WDAC 정책으로 신뢰할 수 있는 서명자만 실행을 허가하고, CRL/OCSP로 폐기된 인증서를 실시간 차단하는 다층 방어가 가장 효과적입니다.';}else{r.innerHTML='<span class="hl-yel">❌ 오답입니다.</span> WDAC + CRL/OCSP 조합이 정답입니다. 서명된 파일도 무조건 신뢰하면 안 되며, 허용 목록 기반 정책과 폐기 검증을 병행해야 합니다.';}}
+const ob=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){const id=e.target.id;document.querySelectorAll('.nav-item').forEach(n=>{n.classList.toggle('active',n.dataset.target===id);});}});},{root:document.getElementById('main-scroll'),threshold:0.3});
+document.querySelectorAll('.section-observe').forEach(s=>ob.observe(s));
+</script>
+<script src="/edu/lab-link.js" defer></script>
+<script src="/edu/progress-tracker.js" defer></script>
+</body>
+</html>

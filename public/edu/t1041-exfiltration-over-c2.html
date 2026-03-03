@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1041">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1041-exfiltration-over-c2&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT 사이버보안 교육 — T1041 Exfiltration Over C2 Channel">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1041 Exfiltration Over C2 — 데이터 유출</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s}
+        .glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}
+        .dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+        .hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}
+        .hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F}
+        .terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px}.dark ::-webkit-scrollbar-thumb{background:#F4D06F}
+        .bar-fill{transition:width 0.5s ease-in-out}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="goToDashboard()" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(187,62,3,.08)'" onmouseout="this.style.background='transparent'">← 매트릭스 대시보드</button><a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:rgba(187,62,3,.5);text-decoration:none;" class="hidden sm:inline">gotroot.co.kr ↗</a></div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2] mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1041: Exfiltration Over C2</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch1">1. C2 채널 데이터 유출이란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch2">2. 청크 전송과 탐지 회피</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch3">3. 전송량 모니터링 실습</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Exfiltration</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Exfiltration Over C2</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">비밀 통신 채널로 기밀 문서 빼돌리기 — C2를 통한 데이터 유출</p>
+            </header>
+
+            <!-- Ch1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> C2 채널을 통한 유출이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">📁 ➜ 🔐 ➜ 📡 ➜ 🕵️</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"비밀 통신 채널로 기밀 문서 빼돌리기"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">해커가 이미 구축해 놓은 C2 통신 채널(HTTP/HTTPS 등)을 이용해 <strong>기밀 데이터를 외부로 유출</strong>합니다. 별도의 채널을 만들지 않으므로 추가적인 네트워크 연결이 생기지 않아 탐지가 더 어렵습니다. 마치 이미 열려 있는 비밀 통로로 서류를 조금씩 빼돌리는 것과 같습니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">왜 C2 채널을 재사용하나?</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">새로운 네트워크 연결을 만들면 <strong>이상 탐지(Anomaly Detection)</strong>에 걸릴 확률이 높습니다. 기존 C2 채널을 그대로 사용하면 이미 허용된 통신 경로이므로 추가 경보가 발생하지 않습니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> 청크 전송, 인코딩, 전송량 조절</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-panel p-5 rounded-xl text-center">
+                            <div class="text-3xl mb-2">📦</div>
+                            <h3 class="font-bold hl-teal mb-2">청크 전송</h3>
+                            <p class="text-xs text-cgray dark:text-slate-400">대용량 파일을 작은 조각(Chunk)으로 나눠 C2 Beacon마다 조금씩 전송</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl text-center">
+                            <div class="text-3xl mb-2">🔤</div>
+                            <h3 class="font-bold hl-teal mb-2">Base64 인코딩</h3>
+                            <p class="text-xs text-cgray dark:text-slate-400">바이너리 데이터를 텍스트로 변환하여 HTTP 요청 본문에 삽입</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl text-center">
+                            <div class="text-3xl mb-2">⏱️</div>
+                            <h3 class="font-bold hl-teal mb-2">전송량 조절</h3>
+                            <p class="text-xs text-cgray dark:text-slate-400">업무 시간에만, 소량씩 전송하여 트래픽 급증 경보 회피</p>
+                        </div>
+                    </div>
+                    <div class="terminal-bg p-4 rounded-xl text-xs">
+                        <div class="text-slate-500"># 청크 전송 시뮬레이션</div>
+                        <div class="text-[#F4D06F]">POST /api/telemetry HTTP/1.1</div>
+                        <div class="text-slate-400">Content-Type: application/json</div>
+                        <div class="text-[#9DD9D2] mt-2">{"session":"a3f2c","data":"UEsDBBQAAAA..."}</div>
+                        <div class="text-slate-500"># 정상 텔레메트리 데이터처럼 보이지만 실제로는 유출 데이터 청크</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> Mini Lab — 데이터 전송량 모니터링</h2>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm">
+                            <span class="hl-teal">Mini Lab: 데이터 전송량 임계값 탐지</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div>
+                        </div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">각 PC의 아웃바운드 전송량을 모니터링하세요. 임계값(100MB)을 넘으면 경보가 발생합니다.</p>
+                            <div class="flex justify-center mb-4">
+                                <button onclick="startMonitor()" id="btn-mon" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded shadow-sm transition border border-[#7cc2b9]">📊 모니터링 시작</button>
+                            </div>
+                            <div class="space-y-4 max-w-lg mx-auto" id="monitor-bars">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs w-20 text-right font-mono text-cgray dark:text-slate-400">PC-Sales</span>
+                                    <div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-6 overflow-hidden"><div id="bar1" class="h-full bg-[#9DD9D2] bar-fill rounded-full" style="width:0%"></div></div>
+                                    <span id="val1" class="text-xs w-16 font-mono text-cgray dark:text-slate-400">0 MB</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs w-20 text-right font-mono text-cgray dark:text-slate-400">PC-Dev</span>
+                                    <div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-6 overflow-hidden"><div id="bar2" class="h-full bg-[#9DD9D2] bar-fill rounded-full" style="width:0%"></div></div>
+                                    <span id="val2" class="text-xs w-16 font-mono text-cgray dark:text-slate-400">0 MB</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs w-20 text-right font-mono text-red-500 font-bold">PC-Infect</span>
+                                    <div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-6 overflow-hidden"><div id="bar3" class="h-full bg-[#9DD9D2] bar-fill rounded-full" style="width:0%"></div></div>
+                                    <span id="val3" class="text-xs w-16 font-mono text-cgray dark:text-slate-400">0 MB</span>
+                                </div>
+                            </div>
+                            <div class="text-center mt-2 text-xs text-slate-400">임계값: <span class="text-red-500 font-bold">100 MB</span></div>
+                            <div id="mon-alert" class="hidden mt-4 p-4 rounded text-center text-sm font-bold"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl mt-8">
+                        <h3 class="text-xl font-bold mb-4 text-[#1e293b] dark:text-white">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. C2 채널을 통한 유출이 별도 채널 유출보다 탐지가 어려운 이유는?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> C2 채널은 암호화가 더 강력하기 때문</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> 이미 허용된 통신 경로를 재사용하므로 추가적인 이상 징후가 없기 때문</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> 데이터 전송 속도가 더 빠르기 때문</label>
+                                </div>
+                            </div>
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. C2 유출 탐지에 가장 효과적인 방법은?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="1" class="mr-3"> 모든 HTTPS 트래픽을 차단</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="2" class="mr-3"> 아웃바운드 트래픽 볼륨 베이스라인 대비 이상치 탐지 + DLP 정책</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="3" class="mr-3"> 직원 PC에 백신만 설치하면 충분</label>
+                                </div>
+                            </div>
+                            <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                        </div>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">C2 채널 유출 학습 완료!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">C2 채널을 통한 데이터 유출과 전송량 기반 탐지 방법을 학습했습니다.</p>
+                <button onclick="goToDashboard()" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 hover:shadow-2xl transition">← 매트릭스 대시보드로 돌아가기</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function goToDashboard(){window.location.href='/';}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        var monInterval=null;
+        function startMonitor(){
+            var btn=document.getElementById('btn-mon');btn.disabled=true;btn.classList.add('opacity-50');
+            var v1=0,v2=0,v3=0,step=0;
+            monInterval=setInterval(function(){
+                step++;
+                v1+=Math.floor(Math.random()*5)+1; // normal
+                v2+=Math.floor(Math.random()*4)+1; // normal
+                v3+=Math.floor(Math.random()*15)+8; // infected — rapid increase
+                document.getElementById('bar1').style.width=Math.min(v1/200*100,100)+'%';
+                document.getElementById('bar2').style.width=Math.min(v2/200*100,100)+'%';
+                document.getElementById('bar3').style.width=Math.min(v3/200*100,100)+'%';
+                document.getElementById('val1').textContent=v1+' MB';
+                document.getElementById('val2').textContent=v2+' MB';
+                document.getElementById('val3').textContent=v3+' MB';
+                if(v3>=100){
+                    document.getElementById('bar3').classList.remove('bg-[#9DD9D2]');
+                    document.getElementById('bar3').classList.add('bg-red-500');
+                    document.getElementById('val3').classList.add('text-red-500','font-bold');
+                }
+                if(v3>=100&&step>=6){
+                    clearInterval(monInterval);
+                    var alert=document.getElementById('mon-alert');alert.classList.remove('hidden');
+                    alert.className='mt-4 p-4 rounded text-center text-sm font-bold bg-red-100 border border-red-500 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+                    alert.innerHTML='🚨 경보! <strong>PC-Infect</strong>가 임계값 100MB를 초과했습니다! ('+v3+' MB)<br><span class="text-xs font-normal block mt-1">정상 PC(Sales: '+v1+'MB, Dev: '+v2+'MB) 대비 비정상적으로 높은 아웃바운드 전송량이 탐지되었습니다.</span>';
+                }
+            },500);
+        }
+
+        function checkQuiz(){
+            var q1=document.querySelector('input[name="q1"]:checked');
+            var q2=document.querySelector('input[name="q2"]:checked');
+            if(!q1||!q2){alert('모든 문제에 답을 선택해주세요.');return;}
+            var score=0;if(q1.value==='2')score++;if(q2.value==='2')score++;
+            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
+            if(score===2){res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';res.textContent='모두 정답! C2 유출의 원리와 탐지 방법을 정확히 이해했습니다.';}
+            else{res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';res.textContent=score+'/2 정답입니다. 틀린 문제를 다시 확인해 보세요.';}
+        }
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+    </div>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

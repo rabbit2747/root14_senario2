@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1558.003">
+<head>
+    <script>
+        (function() {
+            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+            try { var key='sb-bnwbybawqrnhznirivfg-auth-token'; var s=sessionStorage.getItem(key); if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));} } catch(e){window.location.replace('/login');}
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded=false;
+        (async function(){try{var SUPA='https://bnwbybawqrnhznirivfg.supabase.co';var KEY='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var res=await fetch(SUPA+'/rest/v1/edu_html_content?page_id=eq.t1558-003-kerberoasting&select=content&limit=1',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});if(res.ok){var data=await res.json();if(data&&data.length>0&&data[0].content){_eduDynLoaded=true;document.open();document.write(data[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();
+        setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT EDU — T1558.003 Kerberoasting 자격 증명 접근 기법 교육">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <title>GOTROOT EDU | T1558.003 Kerberoasting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] }, colors: { cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569' } } } }
+    </script>
+    <style>
+        body { scroll-behavior:smooth; background:#FFF8F0; color:#1e293b; transition:background .3s,color .3s; }
+        .glass-panel { background:rgba(255,255,255,.7); backdrop-filter:blur(16px); border:1px solid rgba(157,217,210,.5); box-shadow:0 8px 32px rgba(30,41,59,.05); }
+        .dark body { background:#0f172a; color:#f8fafc; }
+        .dark .glass-panel { background:rgba(30,41,59,.7); border:1px solid rgba(244,208,111,.2); }
+        .hl-teal { color:#0f766e; font-weight:700; } .dark .hl-teal { color:#9DD9D2; }
+        .hl-yel { color:#b45309; font-weight:700; } .dark .hl-yel { color:#F4D06F; }
+        .nav-item.active { background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%); border-left:4px solid #9DD9D2; color:#0f766e; font-weight:700; }
+        .dark .nav-item.active { background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%); border-left:4px solid #F4D06F; color:#F4D06F; }
+        .terminal-bg { background:#1e293b; color:#9DD9D2; font-family:'JetBrains Mono',monospace; }
+        ::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:#9DD9D2; border-radius:4px; } .dark ::-webkit-scrollbar-thumb { background:#F4D06F; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2">
+            <span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span>
+            <span style="font-size:8px;color:#94a3b8;">|</span>
+            <span style="font-size:8px;color:#64748b;" class="hidden sm:inline">사이버보안 교육 플랫폼</span>
+        </div>
+        <button onclick="location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full hidden md:flex flex-col shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors"><span>←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1558.003: Kerberoasting</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch1">1. Kerberos 인증 기초</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch2">2. TGS 크래킹 기법</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch3">3. 실습 & 퀴즈</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Credential Access</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 dark:text-white">Kerberoasting</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">합법적인 티켓의 암호를 해독하는 기법</p>
+            </header>
+            <!-- Ch1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#1.</span> Kerberos 인증 프로토콜 기초</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"놀이공원 티켓" 비유</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">놀이공원(Active Directory)에 입장하려면 매표소(KDC)에서 <strong>입장권(TGT)</strong>을 받습니다. 특정 놀이기구(서비스)를 타려면 입장권을 보여주고 <strong>탑승권(TGS)</strong>을 받습니다. 이 탑승권은 <strong>놀이기구 담당자(서비스 계정)의 비밀번호</strong>로 암호화되어 있습니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">Kerberos 3단계 인증 흐름</h3>
+                        <div class="space-y-3 mt-3">
+                            <div class="flex items-center gap-3"><span class="bg-blue-100 dark:bg-blue-900/40 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-blue-800 dark:text-blue-300">1</span><span class="text-sm"><strong>AS-REQ/AS-REP</strong>: 사용자 인증 → TGT 발급</span></div>
+                            <div class="flex items-center gap-3"><span class="bg-green-100 dark:bg-green-900/40 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-green-800 dark:text-green-300">2</span><span class="text-sm"><strong>TGS-REQ/TGS-REP</strong>: TGT 제시 → 서비스 티켓(TGS) 발급</span></div>
+                            <div class="flex items-center gap-3"><span class="bg-red-100 dark:bg-red-900/40 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-red-800 dark:text-red-300">3</span><span class="text-sm"><strong>AP-REQ</strong>: TGS를 서비스에 제시 → 접근 허용</span></div>
+                        </div>
+                        <div class="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-300 dark:border-red-700">
+                            <p class="text-xs text-red-700 dark:text-red-400"><strong>핵심 취약점:</strong> TGS는 서비스 계정의 비밀번호 해시로 암호화됩니다. 누구나 TGS를 요청할 수 있으며, 오프라인에서 크래킹을 시도할 수 있습니다!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Ch2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#2.</span> GetUserSPNs & hashcat 크래킹</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-panel p-5 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h4 class="font-bold hl-yel mb-2">Step 1: SPN 열거 & 티켓 요청</h4>
+                            <div class="terminal-bg rounded p-3 text-xs mt-2">
+                                <div class="text-slate-500"># Impacket GetUserSPNs.py</div>
+                                <div class="text-[#F4D06F]">GetUserSPNs.py corp.local/alice</div>
+                                <div class="text-[#F4D06F]">&nbsp; -request -outputfile hashes.txt</div>
+                                <div class="mt-1 text-green-400">[*] SPN found: MSSQLSvc/db01:1433</div>
+                                <div class="text-green-400">[*] Requesting TGS for svc_sql...</div>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-t-4 border-t-red-400">
+                            <h4 class="font-bold text-red-600 dark:text-red-400 mb-2">Step 2: 오프라인 크래킹</h4>
+                            <div class="terminal-bg rounded p-3 text-xs mt-2">
+                                <div class="text-slate-500"># hashcat으로 TGS 크래킹</div>
+                                <div class="text-[#F4D06F]">hashcat -m 13100 hashes.txt</div>
+                                <div class="text-[#F4D06F]">&nbsp; rockyou.txt --force</div>
+                                <div class="mt-1 text-red-400">[CRACKED] svc_sql:Summer2026!</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">왜 탐지가 어려운가?</h3>
+                        <p class="text-cgray dark:text-slate-300 text-sm">TGS 요청은 <strong>100% 합법적인 Kerberos 프로토콜 동작</strong>입니다. 방화벽이나 IDS는 이를 정상 트래픽으로 분류합니다. 크래킹은 오프라인에서 진행되어 네트워크에 흔적이 남지 않습니다.</p>
+                    </div>
+                </div>
+            </section>
+            <!-- Ch3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#3.</span> Mini Lab & 퀴즈</h2>
+                <div class="space-y-8">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] font-mono text-sm hl-teal">Mini Lab: Kerberoasting 시뮬레이션</div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">단계별로 클릭하여 Kerberoasting 전체 과정을 체험하세요.</p>
+                            <div class="flex flex-col gap-3 max-w-md mx-auto">
+                                <button onclick="kStep(1)" id="k-btn-1" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 font-bold py-3 rounded transition flex items-center justify-between px-4 border border-slate-300 dark:border-slate-600 text-sm text-slate-700 dark:text-slate-300">
+                                    <span>1. SPN이 있는 서비스 계정 열거</span><span>🔍</span>
+                                </button>
+                                <button onclick="kStep(2)" id="k-btn-2" disabled class="opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-800 font-bold py-3 rounded transition flex items-center justify-between px-4 border border-slate-300 dark:border-slate-600 text-sm text-slate-700 dark:text-slate-300">
+                                    <span>2. TGS 티켓 요청 (합법적)</span><span>🎫</span>
+                                </button>
+                                <button onclick="kStep(3)" id="k-btn-3" disabled class="opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-800 font-bold py-3 rounded transition flex items-center justify-between px-4 border border-slate-300 dark:border-slate-600 text-sm text-slate-700 dark:text-slate-300">
+                                    <span>3. 오프라인 크래킹 실행</span><span>🔥</span>
+                                </button>
+                                <div id="k-progress" class="hidden mt-2">
+                                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
+                                        <div id="k-bar" class="bg-gradient-to-r from-red-500 to-[#F4D06F] h-3 rounded-full transition-all duration-1000" style="width:0%"></div>
+                                    </div>
+                                    <div id="k-speed" class="text-xs text-center text-slate-500 mt-1"></div>
+                                </div>
+                                <div id="k-result" class="hidden mt-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-500 rounded-lg text-center"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 dark:text-white">종합 퀴즈</h3>
+                        <div class="quiz-q" data-correct="1">
+                            <p class="font-bold mb-3 dark:text-slate-200">Q. Kerberoasting을 방어하기 위한 가장 효과적인 조합은?</p>
+                            <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent mb-2">
+                                <input type="radio" name="q1" value="1" class="mr-3"> 서비스 계정에 25자 이상 비밀번호 + AES 암호화 사용 + gMSA(관리 서비스 계정) 도입
+                            </label>
+                            <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent mb-2">
+                                <input type="radio" name="q1" value="2" class="mr-3"> Kerberos를 비활성화하고 NTLM만 사용한다
+                            </label>
+                            <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                <input type="radio" name="q1" value="3" class="mr-3"> 모든 서비스 계정의 SPN을 삭제한다
+                            </label>
+                        </div>
+                        <button onclick="checkQuiz()" class="mt-4 bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded transition">정답 확인</button>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold"></div>
+                    </div>
+                    <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30">
+                        <h2 class="text-2xl font-extrabold dark:text-white mb-4">학습 완료!</h2>
+                        <p class="text-cgray dark:text-slate-400 mb-6">대시보드로 돌아가 다른 기법도 학습해 보세요.</p>
+                        <button onclick="location.href='/'" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 transition">매트릭스 대시보드로 이동</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        function kStep(s){
+            if(s===1){
+                var b=document.getElementById('k-btn-1');b.classList.replace('bg-slate-200','bg-green-100');b.classList.replace('dark:bg-slate-800','dark:bg-green-900/40');b.innerHTML='<span>1. 발견: svc_sql (MSSQLSvc/db01:1433) ✔</span><span>🔍</span>';
+                setTimeout(function(){var b2=document.getElementById('k-btn-2');b2.disabled=false;b2.classList.remove('opacity-50','cursor-not-allowed');b2.classList.add('hover:bg-slate-300','dark:hover:bg-slate-700');},500);
+            }else if(s===2){
+                var b=document.getElementById('k-btn-2');b.classList.replace('bg-slate-200','bg-green-100');b.classList.replace('dark:bg-slate-800','dark:bg-green-900/40');b.innerHTML='<span>2. TGS 수신 (RC4 암호화) ✔</span><span>🎫</span>';
+                setTimeout(function(){var b3=document.getElementById('k-btn-3');b3.disabled=false;b3.classList.remove('opacity-50','cursor-not-allowed');b3.classList.add('bg-red-500','hover:bg-red-600','text-white');},500);
+            }else if(s===3){
+                document.getElementById('k-progress').classList.remove('hidden');
+                var bar=document.getElementById('k-bar'),sp=document.getElementById('k-speed');
+                var pct=0;
+                var iv=setInterval(function(){
+                    pct+=Math.random()*15+5;if(pct>100)pct=100;
+                    bar.style.width=pct+'%';
+                    sp.textContent='hashcat: '+Math.floor(pct)+'% — '+Math.floor(Math.random()*500+800)+' kH/s';
+                    if(pct>=100){clearInterval(iv);sp.textContent='크래킹 완료!';
+                        var b=document.getElementById('k-btn-3');b.classList.replace('bg-red-500','bg-green-600');b.classList.replace('hover:bg-red-600','hover:bg-green-700');b.innerHTML='<span>3. 크래킹 성공 ✔</span><span>🔓</span>';
+                        var r=document.getElementById('k-result');r.classList.remove('hidden');
+                        r.innerHTML='<div class="text-3xl mb-2">🔓</div><div class="text-red-600 dark:text-red-400 font-bold text-lg">비밀번호 해독 성공!</div><div class="text-sm font-mono mt-2 bg-white dark:bg-slate-900 p-2 rounded border border-red-200 dark:border-red-800">svc_sql : <span class="text-red-500">Summer2026!</span></div><div class="text-xs text-slate-500 mt-2">RC4 암호화 + 약한 비밀번호 = 2분 내 크래킹</div>';
+                    }
+                },300);
+            }
+        }
+        function checkQuiz(){var q=document.querySelector('input[name="q1"]:checked');if(!q){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden');if(q.value==='1'){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';r.innerHTML='✅ 정답! 긴 비밀번호는 크래킹 시간을 기하급수적으로 늘리고, AES는 RC4보다 강력하며, gMSA는 자동으로 복잡한 비밀번호를 관리합니다.';}else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';r.innerHTML='❌ 오답. Kerberos를 비활성화하면 보안이 더 약해지고, SPN 삭제는 서비스 운영을 방해합니다.';}}
+        var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
+    </script>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

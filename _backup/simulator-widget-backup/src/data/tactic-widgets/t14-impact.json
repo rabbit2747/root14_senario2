@@ -1,0 +1,102 @@
+{
+  "tacticId": "t14",
+  "tacticName": "Impact",
+  "tacticNameKo": "영향",
+  "dictionaryTitle": "Impact Dictionary",
+  "bgLogo": "/logo/logo-name-dark-nobg.png",
+  "speedStorageKey": "impact_widget_speed",
+
+  "glossary": {
+    "ransomware": {
+      "term": "Data Encrypted for Impact",
+      "fullName": "Data Encrypted for Impact",
+      "analogy": "\ud83d\udd12 모든 파일에 자물쇠 채우고 열쇠값 요구",
+      "easyDesc": "해커가 회사의 모든 파일을 강력한 암호로 잠가버린 후, '돈을 내면 풀어주겠다'며 비트코인을 요구합니다. 몸값을 내도 파일을 돌려받는다는 보장이 없어 매우 위험합니다.",
+      "techDesc": "랜섬웨어는 AES-256으로 파일을 암호화한 후, 해당 AES 키를 공격자의 RSA 공개키로 다시 암호화하여 이중 잠금합니다. 피해자는 공격자의 RSA 개인키 없이는 파일을 복호화할 수 없으며, 최근에는 데이터 유출 협박(Double Extortion)을 병행하여 백업이 있어도 몸값을 지불하도록 압박합니다."
+    },
+    "wiper": {
+      "term": "Disk Wipe",
+      "fullName": "Disk Wipe: Disk Content Wipe",
+      "analogy": "\ud83d\udca3 건물 자체를 폭파하기",
+      "easyDesc": "해커가 컴퓨터의 하드디스크를 완전히 파괴하여 운영체제조차 부팅할 수 없게 만듭니다. 랜섬웨어와 달리 돈을 내도 복구가 불가능하며, 순수한 파괴가 목적입니다.",
+      "techDesc": "MBR(Master Boot Record) 또는 GPT 파티션 테이블을 0x00으로 덮어쓰거나, 디스크 전체 섹터를 임의 데이터로 와이핑합니다. NotPetya, Shamoon 등의 와이퍼 멀웨어가 대표적이며, 파괴된 데이터는 포렌식으로도 복구가 불가능합니다."
+    },
+    "dos_attack": {
+      "term": "Network DoS",
+      "fullName": "Network Denial of Service: Direct Network Flood",
+      "analogy": "\ud83c\udf0a 가게 앞에 사람을 가득 채워 영업 방해",
+      "easyDesc": "해커가 수천~수만 대의 감염된 컴퓨터(봇넷)를 동원하여 회사 서버에 엄청난 양의 트래픽을 한꺼번에 보내, 정상 사용자가 서비스를 이용할 수 없게 마비시킵니다.",
+      "techDesc": "봇넷(Botnet)을 이용한 DDoS(Distributed Denial of Service) 공격으로, SYN Flood, UDP Flood, HTTP Flood 등의 기법을 복합적으로 사용합니다. Tbps 단위의 대역폭 공격과 Millions RPS의 애플리케이션 레이어 공격을 병행하여, CDN이나 WAF의 단일 방어 계층을 무력화합니다."
+    },
+    "defacement": {
+      "term": "Defacement",
+      "fullName": "Defacement: Internal Defacement",
+      "analogy": "\ud83c\udfa8 가게 간판을 해커 메시지로 바꾸기",
+      "easyDesc": "해커가 회사의 공식 웹사이트를 해킹하여 화면을 자기들의 메시지로 바꿔버립니다. 고객이 변조된 웹사이트를 보게 되어 회사의 신뢰와 이미지에 큰 타격을 줍니다.",
+      "techDesc": "웹 서버의 취약점(SQL Injection, RCE 등)을 이용하여 웹 루트 디렉토리의 index.html 등 정적 파일을 변조하거나, CMS 관리자 계정을 탈취하여 콘텐츠를 수정합니다. 핵티비즘(Hacktivism) 목적이 대부분이며, 조직의 브랜드 신뢰도와 고객 관계에 심각한 피해를 줍니다."
+    },
+    "data_manipulation": {
+      "term": "Data Manipulation",
+      "fullName": "Data Manipulation: Stored Data Manipulation",
+      "analogy": "\ud83d\udcdd 장부를 몰래 위조하기",
+      "easyDesc": "해커가 회사의 데이터베이스에 저장된 재무 기록, 환자 진료 기록, 재고 정보 등을 몰래 바꿉니다. 데이터가 삭제되지 않고 '변조'되므로, 문제를 발견하기까지 오랜 시간이 걸립니다.",
+      "techDesc": "데이터베이스의 저장된 레코드를 직접 수정하여 데이터 무결성(Integrity)을 훼손합니다. 재무 보고서, 의료 기록, 공급망 데이터 등 핵심 비즈니스 데이터를 미세하게 변조하면, 탐지까지 수개월이 소요될 수 있으며, 백업 데이터의 무결성도 의심해야 하므로 복구 비용이 기하급수적으로 증가합니다."
+    }
+  },
+
+  "attackCases": [
+    {
+      "id": 1,
+      "subTechniqueId": "T1486",
+      "subTechniqueName": "Data Encrypted for Impact",
+      "tactic": "Impact (영향)",
+      "technique": "Data Encrypted for Impact",
+      "log": "[RANSOMWARE-ALERT] LockBit 3.0 encryption activity detected — Domain Controller DC-01 propagating AES-256 file encryption via GPO to 1,247 endpoints, ransom note 'README-LOCKBIT.txt' deployed.",
+      "report": "LockBit 3.0 랜섬웨어가 도메인 컨트롤러를 장악한 후 GPO(그룹 정책)를 통해 전체 1,247대의 엔드포인트에 동시 배포되었습니다. 모든 파일이 AES-256으로 암호화되었으며, 복호화 키는 공격자의 RSA-4096 공개키로 이중 암호화되었습니다. 암호화 전 주요 데이터를 미리 유출하여 이중 협박(Double Extortion)을 진행했으며, 와이퍼 모듈로 VSS(볼륨 섀도 복사본)를 삭제하고 일부 서버의 MBR을 변조하여 백업 복구까지 방해했습니다.",
+      "mechanismTitle": "도메인 전체 랜섬웨어 배포 및 이중 협박",
+      "mechanismDesc": "공격자는 도메인 관리자 권한을 획득한 후, Active Directory의 GPO를 악용하여 랜섬웨어를 전체 네트워크에 동시 배포합니다. 각 엔드포인트에서 파일별로 고유한 AES-256 키를 생성하여 암호화한 후, 해당 키를 공격자의 RSA 공개키로 봉인합니다. 백업 복구를 차단하기 위해 VSS를 삭제하고 MBR을 변조하며, 사전에 유출한 데이터로 '몸값을 내지 않으면 공개하겠다'는 이중 협박을 가합니다. 이 전략은 백업이 있는 조직도 몸값 지불을 고려하게 만드는 매우 효과적인 공격입니다.",
+      "animationPreset": "inject",
+      "targets": { "step1": "ransomware", "step2": "wiper", "step3": "data_manipulation" }
+    },
+    {
+      "id": 2,
+      "subTechniqueId": "T1561.001",
+      "subTechniqueName": "Disk Content Wipe",
+      "tactic": "Impact (영향)",
+      "technique": "Disk Wipe",
+      "log": "[EDR-CRITICAL] Disk wipe activity on 340 hosts — MBR overwritten with 0x00 pattern, GPT partition tables destroyed, boot sector corruption confirmed on SCADA-SVR and DC-02.",
+      "report": "공격자는 340대의 호스트에서 MBR과 GPT 파티션 테이블을 0x00 패턴으로 덮어써 운영체제 부팅을 완전히 불가능하게 만들었습니다. SCADA 서버와 백업 도메인 컨트롤러가 우선 표적이 되었으며, 디스크 포렌식으로도 데이터 복구가 불가능한 상태입니다. 공격 전 랜섬웨어를 위장 배포하여 초기 대응팀의 관심을 분산시킨 후, 실제 목적인 완전 파괴를 실행했습니다.",
+      "mechanismTitle": "MBR/파티션 테이블 파괴를 통한 시스템 완전 무력화",
+      "mechanismDesc": "와이퍼 멀웨어는 디스크의 MBR(Master Boot Record, 처음 512바이트)과 GPT 파티션 테이블을 0x00으로 덮어쓰므로, 운영체제가 디스크 구조를 인식할 수 없어 부팅 자체가 불가능합니다. 랜섬웨어와 달리 복호화 키가 존재하지 않으므로, 어떤 금액을 지불해도 복구가 불가능합니다. 공격자는 종종 랜섬웨어를 위장막으로 배포하여 실제 와이퍼 공격의 시간을 벌며, OT/SCADA 등 핵심 인프라 시스템을 우선 표적으로 삼아 물리적 운영 중단까지 유발합니다.",
+      "animationPreset": "probe",
+      "targets": { "step1": "wiper", "step2": "ransomware" }
+    },
+    {
+      "id": 3,
+      "subTechniqueId": "T1498.001",
+      "subTechniqueName": "Direct Network Flood",
+      "tactic": "Impact (영향)",
+      "technique": "Network Denial of Service",
+      "log": "[SOC-ALERT] Volumetric DDoS attack in progress — 2.4 Tbps SYN/UDP flood from 85,000+ botnet nodes targeting edge routers and public-facing web cluster, CDN failover exhausted.",
+      "report": "85,000대 이상의 봇넷 노드에서 2.4Tbps 규모의 SYN/UDP 혼합 DDoS 공격이 동시에 발생하여, CDN 방어 용량을 초과하고 엣지 라우터가 과부하 상태에 빠졌습니다. 공격이 진행되는 동안 웹 서비스가 12시간 이상 마비되었으며, 공격자는 별도의 HTTP Flood로 WAF를 우회하여 웹 애플리케이션 계층까지 공격했습니다. 서비스 복구 후 공격자가 변조한 웹사이트 메인 페이지가 발견되어, DDoS가 디페이스먼트의 위장 공격이었음이 확인되었습니다.",
+      "mechanismTitle": "대규모 봇넷을 이용한 다층 DDoS 서비스 마비",
+      "mechanismDesc": "공격자는 IoT 디바이스 등으로 구성된 대규모 봇넷을 동원하여 네트워크 계층(L3/L4)과 애플리케이션 계층(L7) DDoS를 동시에 실행합니다. SYN Flood와 UDP Flood로 회선 대역폭을 포화시키고, HTTP Flood로 웹 서버의 처리 능력을 고갈시키는 다층 공격입니다. CDN과 WAF의 방어 용량을 초과하는 트래픽을 집중시켜 서비스를 마비시키며, DDoS로 보안팀의 관심을 분산시킨 뒤 별도의 채널로 웹사이트 디페이스먼트를 실행하는 복합 전술도 병행합니다.",
+      "animationPreset": "flow",
+      "targets": { "step1": "dos_attack", "step2": "defacement" }
+    }
+  ],
+
+  "stepTimings": {
+    "alert": 3000,
+    "context": 4000,
+    "mechanism": 5000,
+    "identified": 5500
+  },
+
+  "speedOptions": [
+    { "label": "0.5x", "value": 0.5 },
+    { "label": "1x", "value": 1 },
+    { "label": "1.5x", "value": 1.5 },
+    { "label": "2x", "value": 2 }
+  ]
+}

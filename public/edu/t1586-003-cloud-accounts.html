@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1586.003">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1586-003-cloud-accounts&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1586.003 클라우드 계정 탈취">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1586.003 클라우드 계정 탈취 — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}.glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05);}.dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);}.hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}.terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div><div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1586.003: 클라우드 계정 탈취</p></div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch1">1. 클라우드 계정 탈취 개요</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch2">2. 공격 기법</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch3">3. 탐지와 방어</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Resource Development</div>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">T1586.003<br><span class="hl-teal">클라우드 계정 탈취</span></h2>
+                <p class="text-lg text-cgray dark:text-slate-400 max-w-2xl mx-auto">기존 클라우드 서비스 계정(AWS, Azure, GCP 등)을 탈취하여 공격 인프라로 활용하는 기법을 학습합니다.</p>
+            </header>
+
+            <section id="ch1" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">☁️ Chapter 1 — 클라우드 계정 탈취 개요</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <p>공격자는 <span class="hl-teal">기존 클라우드 서비스 계정을 탈취</span>하여 공격 인프라로 활용합니다. 새로운 계정을 생성하는 것보다 기존 계정을 사용하면 평판이 높고, 결제 정보가 이미 등록되어 있으며, 보안 팀의 의심을 덜 받습니다.</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">탈취 대상 클라우드 서비스</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- AWS (EC2, S3, Lambda)</li>
+                                <li>- Microsoft Azure (VM, Storage, Functions)</li>
+                                <li>- Google Cloud Platform (Compute, Storage)</li>
+                                <li>- DigitalOcean, Linode, Vultr (VPS)</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">탈취된 계정의 악용</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- C2 서버 호스팅 (합법 클라우드 IP 대역)</li>
+                                <li>- 피싱 인프라 구축 (높은 도메인 평판)</li>
+                                <li>- 암호화폐 채굴 (피해자 비용)</li>
+                                <li>- 데이터 유출 스테이징 (S3/Blob Storage)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># 다크웹에서 판매되는 클라우드 계정 조사</p>
+                        <p class="text-cyel">$ python3 darkweb_cloud_market.py --type "cloud accounts" --provider all</p>
+                        <p>[*] Dark Web Cloud Account Market Scan:</p>
+                        <p>  AWS Root accounts:     $150 ~ $500 (credit balance dependent)</p>
+                        <p>  Azure Subscriptions:   $100 ~ $400</p>
+                        <p>  GCP Projects:          $80 ~ $300</p>
+                        <p>  DigitalOcean accounts: $30 ~ $80</p>
+                        <p class="text-red-400">  [!] Premium: AWS accounts with $10K+ credits → $1,200</p>
+                        <p class="text-red-400">  [!] Bulk deal: 10 mixed cloud accounts → $800</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch2" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">⚡ Chapter 2 — 공격 기법</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="space-y-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">자격증명 탈취 (Credential Theft)</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">GitHub 리포지토리에 실수로 커밋된 AWS Access Key, .env 파일에 하드코딩된 API 키, Infostealer에 의해 탈취된 브라우저 세션 쿠키를 통해 클라우드 콘솔에 접근합니다. 2024년 기준 AWS 키 유출은 GitHub에서 시간당 수백 건 발생합니다.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold hl-yel mb-2">피싱/AiTM 공격</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">Microsoft 365/Azure AD 로그인 페이지를 피싱하여 MFA 토큰까지 실시간 탈취하는 AiTM(Adversary-in-the-Middle) 공격입니다. EvilGinx2, Modlishka 같은 프레임워크가 MFA 우회를 자동화합니다.</p>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold hl-teal mb-2">OAuth 토큰 악용</h5>
+                            <p class="text-sm text-cgray dark:text-slate-400">악성 OAuth 앱을 통해 사용자가 권한을 부여하면, 비밀번호 없이도 클라우드 리소스에 접근할 수 있습니다. 토큰은 비밀번호 변경이나 MFA 추가로도 무효화되지 않아 지속적인 접근이 가능합니다.</p>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># GitHub에서 유출된 AWS 키 검색 — TruffleHog</p>
+                        <p class="text-cyel">$ trufflehog github --org target-corp --only-verified --json</p>
+                        <p>{</p>
+                        <p>  "detector": "AWS",</p>
+                        <p>  "verified": true,</p>
+                        <p>  "raw": "AKIAIOSFODNN7EXAMPLE",</p>
+                        <p>  "repository": "target-corp/internal-tools",</p>
+                        <p>  "commit": "a1b2c3d4",</p>
+                        <p>  "file": "deploy/config.env",</p>
+                        <p>  "timestamp": "2026-02-15T09:23:41Z"</p>
+                        <p>}</p>
+                        <p class="text-red-400">[!] Active AWS key found with AdministratorAccess policy!</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch3" class="section-observe space-y-8 scroll-mt-20">
+                <h3 class="text-2xl font-bold hl-teal">🛡️ Chapter 3 — 탐지와 방어</h3>
+                <div class="glass-panel rounded-2xl p-8 space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                            <h5 class="font-bold text-sm hl-teal mb-2">키 관리 및 보호</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- AWS Secrets Manager / Azure Key Vault 사용</li>
+                                <li>- Git pre-commit hooks로 키 유출 방지</li>
+                                <li>- IAM 키 자동 회전 (90일 주기)</li>
+                                <li>- GitHub Secret Scanning 활성화</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cyel/20">
+                            <h5 class="font-bold text-sm hl-yel mb-2">접근 제어 강화</h5>
+                            <ul class="text-sm space-y-1 text-cgray dark:text-slate-400">
+                                <li>- MFA 필수 적용 (FIDO2/하드웨어 키)</li>
+                                <li>- 조건부 접근 정책 (IP/위치 기반)</li>
+                                <li>- 최소 권한 원칙 (Least Privilege)</li>
+                                <li>- OAuth 앱 허용 목록 관리</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-cteal/20">
+                        <h5 class="font-bold text-sm hl-teal mb-2">이상 행위 탐지</h5>
+                        <p class="text-sm text-cgray dark:text-slate-400">AWS GuardDuty, Azure Sentinel, GCP Security Command Center 같은 클라우드 네이티브 SIEM을 활용하여 비정상적인 API 호출, 새로운 지역에서의 로그인, 대량 리소스 생성 등을 탐지합니다. CloudTrail/Activity Log를 항상 활성화하고 외부 SIEM으로 전송해야 합니다.</p>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+                        <p class="text-slate-500"># AWS GuardDuty 이상 행위 알림 예시</p>
+                        <p class="text-cyel">Finding Type: UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration.OutsideAWS</p>
+                        <p>Severity: HIGH</p>
+                        <p>Description: IAM credentials from EC2 instance i-0abc123 are being used from IP 45.33.x.x (outside AWS)</p>
+                        <p>Action: ec2:RunInstances (10 instances in ap-northeast-2)</p>
+                        <p class="text-green-400">Recommended: Rotate credentials, investigate instance, enable IMDSv2</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+    <script>
+    function toggleTheme(){document.documentElement.classList.toggle('dark');var ic=document.getElementById('theme-icon');ic.textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙';}
+    function go(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});}
+    var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var id=e.target.id;document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),threshold:0.3});
+    document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
+    </script>
+</body>
+</html>

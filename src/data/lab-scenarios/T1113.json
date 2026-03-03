@@ -1,0 +1,230 @@
+{
+  "id": "T1113",
+  "title": "화면 캡처 시뮬레이션",
+  "titleEn": "Screen Capture Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "target", "label": "Target PC", "x": 280, "y": 150, "type": "server" },
+    { "id": "display", "label": "Display", "x": 280, "y": 50, "type": "server" },
+    { "id": "siem", "label": "EDR/SIEM", "x": 480, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "PowerShell", "activeStep": 0 },
+    { "from": "display", "to": "target", "label": "Screen Data", "activeStep": 1 },
+    { "from": "target", "to": "target", "label": "Capture Loop", "activeStep": 2 },
+    { "from": "target", "to": "siem", "label": "Alert", "activeStep": 4 }
+  ],
+  "desktopIcons": [
+    { "label": "PowerShell", "icon": "💻", "alertOnStep": 0 },
+    { "label": "Screenshots", "icon": "📸", "alertOnStep": 2 },
+    { "label": "Archive", "icon": "📦", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::AllScreens\"",
+      "out": "BitsPerPixel : 32\nBounds       : {X=0,Y=0,Width=1920,Height=1080}\nDeviceName   : \\\\.\\DISPLAY1\nPrimary      : True\nWorkingArea  : {X=0,Y=0,Width=1920,Height=1040}\n\nBitsPerPixel : 32\nBounds       : {X=1920,Y=0,Width=2560,Height=1440}\nDeviceName   : \\\\.\\DISPLAY2\nPrimary      : False\nWorkingArea  : {X=1920,Y=0,Width=2560,Height=1400}",
+      "def": "[EDR] .NET assembly loaded for screen enumeration",
+      "defAction": "Process: powershell.exe (PID: 6120)\nAssembly: System.Windows.Forms\nMethod: Screen.AllScreens\nRisk: MEDIUM",
+      "desc": "공격자가 시스템에 연결된 모든 디스플레이의 정보를 수집합니다. 이후 캡처 대상 화면을 결정합니다.",
+      "descEn": "The attacker enumerates all connected displays on the system to determine which screens to capture.",
+      "stepTitle": "디스플레이 정보 수집",
+      "stepTitleEn": "Display Enumeration",
+      "feynman": "도둑이 건물의 창문이 몇 개인지, 어디를 향하고 있는지 살피는 것과 같습니다. 공격자는 화면이 몇 개인지, 해상도가 어떤지 확인하여 어떤 화면을 촬영할지 계획합니다.",
+      "feynmanEn": "It's like a burglar counting how many windows a building has and which direction they face. The attacker checks how many screens exist and their resolution to plan which screens to capture.",
+      "expert": "System.Windows.Forms.Screen 클래스를 통한 디스플레이 열거는 T1082(System Information Discovery)의 하위 활동입니다. 듀얼 모니터 환경에서는 두 화면 모두 캡처해야 전체 사용자 활동을 감시할 수 있습니다. RDP 세션에서는 mstsc 클라이언트의 화면도 캡처 대상이 됩니다.",
+      "expertEn": "Display enumeration via System.Windows.Forms.Screen is a sub-activity of T1082 (System Information Discovery). In dual monitor setups, both screens must be captured for full user activity surveillance. In RDP sessions, the mstsc client's screen is also a capture target.",
+      "defTooltip": "PowerShell에서 System.Windows.Forms 어셈블리 로드를 Sysmon Event ID 7로 모니터링하세요. 스크립트 블록 로깅(Event ID 4104)에서 Screen.AllScreens 호출을 탐지합니다.",
+      "defTooltipEn": "Monitor System.Windows.Forms assembly load in PowerShell via Sysmon Event ID 7. Detect Screen.AllScreens calls in Script Block Logging (Event ID 4104).",
+      "hackerLog": {
+        "title": "display_enum.log",
+        "lines": [
+          { "log": "[System.Windows.Forms.Screen]::AllScreens", "desc": "💡 시스템에 연결된 모든 모니터 정보를 열거합니다" },
+          { "log": "Width=1920,Height=1080 / Width=2560,Height=1440", "desc": "💡 듀얼 모니터 환경 - 두 화면 모두 캡처 가능한 대상입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "System.Windows.Forms", "desc": ".NET Framework의 GUI 관련 클래스 라이브러리로, 화면 캡처 API를 포함합니다" },
+        { "term": "Screen Enumeration", "desc": "시스템에 연결된 모든 디스플레이의 정보를 수집하는 정찰 활동입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds;\n$bitmap = New-Object System.Drawing.Bitmap($bounds.Width, $bounds.Height);\n$graphics = [System.Drawing.Graphics]::FromImage($bitmap);\n$graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size);\n$bitmap.Save('C:\\Users\\{userName}\\AppData\\Local\\Temp\\ss_001.png');\n$graphics.Dispose(); $bitmap.Dispose()\"",
+      "out": "",
+      "def": "[EDR] Screen capture API call detected",
+      "defAction": "Process: powershell.exe (PID: 6120)\nAPI: Graphics.CopyFromScreen\nOutput: C:\\Users\\{userName}\\AppData\\Local\\Temp\\ss_001.png\nSize: 2.4 MB\nRisk: HIGH",
+      "desc": "System.Drawing을 사용하여 주 모니터의 전체 화면을 캡처하고 임시 폴더에 PNG로 저장합니다.",
+      "descEn": "Captures the entire primary screen using System.Drawing and saves it as PNG in the temp folder.",
+      "stepTitle": "화면 캡처 실행",
+      "stepTitleEn": "Screen Capture Execution",
+      "feynman": "창문 밖에서 몰래 사진을 찍는 것과 같습니다. CopyFromScreen은 모니터에 보이는 모든 것을 그대로 이미지 파일로 저장합니다. 비밀번호 입력 화면, 기밀 문서 등 화면에 표시된 모든 정보가 노출됩니다.",
+      "feynmanEn": "It's like secretly taking photos through a window. CopyFromScreen saves everything visible on the monitor as an image file. Passwords being typed, confidential documents - everything displayed on screen is exposed.",
+      "expert": "Graphics.CopyFromScreen은 GDI+ API(BitBlt)를 호출합니다. Windows 10에서는 DXGI Output Duplication API가 더 효율적인 대안입니다. 일부 EDR은 GDI+ 스크린 캡처 호출을 후킹하여 탐지하지만, DirectX 기반 캡처는 탐지가 어렵습니다. DWM(Desktop Window Manager) 캡처도 대안 기법입니다.",
+      "expertEn": "Graphics.CopyFromScreen calls the GDI+ API (BitBlt). On Windows 10, DXGI Output Duplication API is a more efficient alternative. Some EDRs hook GDI+ screen capture calls for detection, but DirectX-based captures are harder to detect. DWM (Desktop Window Manager) capture is another alternative technique.",
+      "defTooltip": "EDR에서 CopyFromScreen 또는 BitBlt API 호출을 모니터링하세요. Sysmon Event ID 11에서 %TEMP% 폴더에 대량의 PNG/JPG 파일이 생성되는 패턴을 탐지합니다.",
+      "defTooltipEn": "Monitor CopyFromScreen or BitBlt API calls in EDR. Detect patterns of bulk PNG/JPG file creation in %TEMP% folders via Sysmon Event ID 11.",
+      "hackerLog": {
+        "title": "screen_capture.log",
+        "lines": [
+          { "log": "$graphics.CopyFromScreen($bounds.Location, ...)", "desc": "💡 GDI+ API로 주 모니터의 전체 화면을 비트맵으로 복사합니다" },
+          { "log": "$bitmap.Save('...\\ss_001.png')", "desc": "💡 캡처한 이미지를 임시 폴더에 PNG 형식으로 저장합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "CopyFromScreen", "desc": ".NET Graphics 클래스의 메서드로, 화면 내용을 비트맵 이미지로 복사합니다" },
+        { "term": "GDI+ (Graphics Device Interface)", "desc": "Windows의 2D 그래픽 API로, 화면 캡처, 이미지 처리 등에 사용됩니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"1..10 | ForEach-Object { Start-Sleep -Seconds 5; $b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $bm=New-Object System.Drawing.Bitmap($b.Width,$b.Height); $g=[System.Drawing.Graphics]::FromImage($bm); $g.CopyFromScreen($b.Location,[System.Drawing.Point]::Empty,$b.Size); $bm.Save(\\\"C:\\Users\\{userName}\\AppData\\Local\\Temp\\ss_$('{0:D3}' -f $_).png\\\"); $g.Dispose(); $bm.Dispose(); Write-Host \\\"Captured frame $_\\\" }\"",
+      "out": "Captured frame 1\nCaptured frame 2\nCaptured frame 3\nCaptured frame 4\nCaptured frame 5\nCaptured frame 6\nCaptured frame 7\nCaptured frame 8\nCaptured frame 9\nCaptured frame 10",
+      "def": "[SIEM] Repeated screen capture activity detected (10 captures in 50s)",
+      "defAction": "Process: powershell.exe (PID: 6120)\nPattern: Periodic screen capture (5s interval)\nCaptures: 10 files\nTotal Size: ~24 MB\nRisk: HIGH\nAction: Alert escalated to SOC",
+      "desc": "5초 간격으로 10장의 스크린샷을 자동 캡처합니다. 사용자의 실시간 활동을 감시하는 데 사용됩니다.",
+      "descEn": "Automatically captures 10 screenshots at 5-second intervals. Used to monitor the user's real-time activity.",
+      "stepTitle": "주기적 화면 감시",
+      "stepTitleEn": "Periodic Screen Surveillance",
+      "feynman": "CCTV를 설치하는 것과 같습니다. 5초마다 사진을 찍어두면 사용자가 무엇을 하고 있었는지 시간순으로 파악할 수 있습니다. 이메일을 읽거나, 비밀번호를 입력하거나, 기밀 문서를 작업하는 순간이 모두 기록됩니다.",
+      "feynmanEn": "It's like installing CCTV. Taking photos every 5 seconds lets you track what the user was doing chronologically. Every moment of reading emails, typing passwords, or working on confidential documents is recorded.",
+      "expert": "주기적 캡처에서 5초 간격은 사용자 활동 모니터링에 최적입니다. APT 그룹(OilRig, Carbanak)은 이 기법을 자주 사용합니다. 탐지를 위해 SIEM에서 동일 프로세스의 반복적 CopyFromScreen 호출 패턴을 상관분석해야 합니다. EDR의 API 호출 빈도 분석이 효과적입니다.",
+      "expertEn": "A 5-second interval is optimal for user activity monitoring in periodic captures. APT groups (OilRig, Carbanak) frequently use this technique. SIEM should correlate repetitive CopyFromScreen call patterns from the same process. EDR API call frequency analysis is effective for detection.",
+      "defTooltip": "SIEM에서 동일 프로세스가 짧은 간격으로 반복적으로 이미지 파일을 생성하는 패턴을 탐지 규칙으로 설정하세요. Sysmon Event ID 11에서 %TEMP% 경로의 연속 파일 생성을 모니터링합니다.",
+      "defTooltipEn": "Set SIEM detection rules for patterns where the same process creates image files at short intervals. Monitor consecutive file creation in %TEMP% paths via Sysmon Event ID 11.",
+      "hackerLog": {
+        "title": "periodic_capture.log",
+        "lines": [
+          { "log": "1..10 | ForEach-Object { Start-Sleep -Seconds 5; ...CopyFromScreen... }", "desc": "💡 5초 간격으로 10회 반복하여 화면을 캡처하는 자동화 루프입니다" },
+          { "log": "Captured frame 10", "desc": "💡 10장의 스크린샷이 모두 캡처되어 사용자 활동 타임라인이 완성되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Periodic Capture", "desc": "일정 간격으로 반복적으로 화면을 캡처하여 사용자 활동을 시간순으로 기록하는 기법입니다" },
+        { "term": "Surveillance", "desc": "대상의 활동을 지속적으로 모니터링하고 기록하는 행위입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"Get-Process | Where-Object {$_.MainWindowTitle -ne ''} | Select-Object ProcessName, MainWindowTitle | Format-Table -AutoSize\"",
+      "out": "ProcessName     MainWindowTitle\n-----------     ---------------\nchrome          {companyName} Portal - Google Chrome\nOUTLOOK         Inbox - {userName}@{companyName}.com - Outlook\nEXCEL           Q1_Financial_Report_2026.xlsx - Excel\nmstsc           10.10.15.100 - Remote Desktop Connection\nnotepad         credentials_backup.txt - Notepad",
+      "def": "[EDR] Window enumeration detected - potential surveillance",
+      "defAction": "Process: powershell.exe (PID: 6120)\nAPI: Get-Process (MainWindowTitle)\nWindows Found: 5 with titles\nSensitive: credentials_backup.txt, Financial Report\nRisk: MEDIUM",
+      "desc": "현재 열려 있는 창 목록을 수집하여 중요한 문서나 인증 정보가 화면에 표시되어 있는지 확인합니다.",
+      "descEn": "Collects a list of open windows to identify if sensitive documents or credential information is displayed on screen.",
+      "stepTitle": "활성 창 목록 수집",
+      "stepTitleEn": "Active Window Enumeration",
+      "feynman": "건물 밖에서 각 방의 창문을 통해 '무슨 일이 벌어지고 있는지' 확인하는 것과 같습니다. 공격자는 어떤 프로그램이 열려 있는지, 특히 '비밀번호', '재무보고서' 같은 민감한 내용이 화면에 있는지 파악합니다.",
+      "feynmanEn": "It's like peeking through each room's window from outside a building to see 'what's happening inside'. The attacker identifies which programs are open, especially if sensitive content like 'passwords' or 'financial reports' is on screen.",
+      "expert": "Get-Process의 MainWindowTitle 속성을 통한 창 열거는 T1010(Application Window Discovery)에 해당합니다. 공격자는 이 정보로 가치 있는 타겟(재무 데이터, 자격 증명 파일, RDP 세션)을 식별합니다. SetForegroundWindow API와 결합하면 특정 창을 전경으로 전환하여 선택적 캡처가 가능합니다.",
+      "expertEn": "Window enumeration via Get-Process MainWindowTitle maps to T1010 (Application Window Discovery). Attackers use this to identify high-value targets (financial data, credential files, RDP sessions). Combined with SetForegroundWindow API, selective capture of specific windows becomes possible.",
+      "defTooltip": "PowerShell 스크립트 블록 로깅(Event ID 4104)에서 Get-Process와 MainWindowTitle 조합을 모니터링하세요. 창 열거 후 화면 캡처가 뒤따르는 패턴은 높은 위험 지표입니다.",
+      "defTooltipEn": "Monitor Get-Process combined with MainWindowTitle in PowerShell Script Block Logging (Event ID 4104). Window enumeration followed by screen capture is a high-risk indicator.",
+      "hackerLog": {
+        "title": "window_enum.log",
+        "lines": [
+          { "log": "Get-Process | Where-Object {$_.MainWindowTitle -ne ''}", "desc": "💡 제목이 있는(보이는) 모든 창의 프로세스를 필터링합니다" },
+          { "log": "notepad  credentials_backup.txt - Notepad", "desc": "💡 자격 증명 파일이 열려 있어 화면 캡처 시 내용이 노출됩니다" }
+        ]
+      },
+      "terms": [
+        { "term": "MainWindowTitle", "desc": "프로세스의 주 창 제목 표시줄 텍스트로, 열린 문서명이나 웹 페이지 제목이 포함됩니다" },
+        { "term": "Application Window Discovery", "desc": "MITRE ATT&CK T1010 - 실행 중인 애플리케이션과 열린 창을 열거하는 정찰 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\nAdd-Type @'\nusing System;\nusing System.Runtime.InteropServices;\npublic class WinAPI {\n  [DllImport(\"user32.dll\")] public static extern IntPtr GetForegroundWindow();\n  [DllImport(\"user32.dll\")] public static extern bool SetForegroundWindow(IntPtr hWnd);\n}\n'@\n$outlook = Get-Process OUTLOOK | Select-Object -First 1;\n[WinAPI]::SetForegroundWindow($outlook.MainWindowHandle);\nStart-Sleep -Milliseconds 500;\n# capture focused window\n$b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds;\n$bm=New-Object System.Drawing.Bitmap($b.Width,$b.Height);\n$g=[System.Drawing.Graphics]::FromImage($bm);\n$g.CopyFromScreen($b.Location,[System.Drawing.Point]::Empty,$b.Size);\n$bm.Save('C:\\Users\\{userName}\\AppData\\Local\\Temp\\outlook_capture.png');\nWrite-Host 'Outlook window captured'\"",
+      "out": "Outlook window captured",
+      "def": "[EDR] Window focus manipulation + screen capture combo detected",
+      "defAction": "Process: powershell.exe (PID: 6120)\nAPI: SetForegroundWindow → CopyFromScreen\nTarget App: OUTLOOK.EXE\nRisk: CRITICAL\nAction: Process termination recommended",
+      "desc": "특정 애플리케이션(Outlook)을 전경으로 전환한 후 화면을 캡처합니다. 이메일 내용을 노출시킵니다.",
+      "descEn": "Brings a specific application (Outlook) to the foreground and captures the screen, exposing email contents.",
+      "stepTitle": "표적 창 캡처",
+      "stepTitleEn": "Targeted Window Capture",
+      "feynman": "TV 채널을 원하는 곳으로 바꾼 후 화면을 촬영하는 것과 같습니다. 공격자가 Outlook을 화면 앞으로 가져온 후 캡처하면, 이메일 내용이 그대로 사진에 담깁니다. 기밀 이메일, 비밀번호 초기화 메일 등이 노출될 수 있습니다.",
+      "feynmanEn": "It's like changing the TV channel to what you want and then photographing the screen. When the attacker brings Outlook to the foreground and captures it, email contents are photographed. Confidential emails and password reset messages can be exposed.",
+      "expert": "SetForegroundWindow API를 통한 창 전환 후 캡처는 T1113의 고급 변형입니다. user32.dll의 P/Invoke를 사용하여 윈도우 핸들을 직접 조작합니다. 일부 APT(DarkHotel, Turla)는 특정 애플리케이션(뱅킹, 이메일)이 전경에 있을 때만 캡처하는 조건부 트리거를 사용합니다.",
+      "expertEn": "Window switching via SetForegroundWindow API followed by capture is an advanced variant of T1113. Uses P/Invoke with user32.dll to directly manipulate window handles. Some APTs (DarkHotel, Turla) use conditional triggers that capture only when specific applications (banking, email) are in the foreground.",
+      "defTooltip": "EDR에서 SetForegroundWindow와 CopyFromScreen API 호출이 짧은 시간 내 연속으로 발생하는 패턴을 탐지 규칙으로 설정하세요. 특히 PowerShell에서 user32.dll P/Invoke는 강력한 경고 지표입니다.",
+      "defTooltipEn": "Set EDR detection rules for SetForegroundWindow and CopyFromScreen API calls occurring in rapid succession. PowerShell user32.dll P/Invoke is a strong alert indicator.",
+      "hackerLog": {
+        "title": "targeted_capture.log",
+        "lines": [
+          { "log": "[WinAPI]::SetForegroundWindow($outlook.MainWindowHandle)", "desc": "💡 Outlook 창을 화면 맨 앞으로 전환하여 캡처 대상으로 만듭니다" },
+          { "log": "Outlook window captured", "desc": "💡 Outlook 이메일 내용이 포함된 스크린샷이 저장되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "SetForegroundWindow", "desc": "지정한 윈도우를 화면 맨 앞으로 가져오는 Windows API로, 사용자 입력 없이 창을 전환합니다" },
+        { "term": "P/Invoke", "desc": "Platform Invocation - .NET에서 네이티브 Windows DLL 함수를 호출하는 메커니즘입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"$files = Get-ChildItem 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\ss_*.png','C:\\Users\\{userName}\\AppData\\Local\\Temp\\outlook_capture.png'; $files | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize\"",
+      "out": "Name                  Length LastWriteTime\n----                  ------ -------------\nss_001.png           2457600 2026/03/01 10:15:22\nss_002.png           2340864 2026/03/01 10:15:27\nss_003.png           2519040 2026/03/01 10:15:32\nss_004.png           2412544 2026/03/01 10:15:37\nss_005.png           2498560 2026/03/01 10:15:42\nss_006.png           2375680 2026/03/01 10:15:47\nss_007.png           2441216 2026/03/01 10:15:52\nss_008.png           2467840 2026/03/01 10:15:57\nss_009.png           2503680 2026/03/01 10:16:02\nss_010.png           2389504 2026/03/01 10:16:07\noutlook_capture.png  2621440 2026/03/01 10:16:15",
+      "def": "[SIEM] Large collection of screen capture files staged in temp directory",
+      "defAction": "Path: C:\\Users\\{userName}\\AppData\\Local\\Temp\\\nFiles: 11 PNG files\nTotal Size: 27.0 MB\nPattern: Systematic screen capture collection\nRisk: HIGH",
+      "desc": "캡처된 스크린샷 파일 목록을 확인합니다. 11개 파일, 총 27MB의 화면 데이터가 수집되었습니다.",
+      "descEn": "Reviews the list of captured screenshot files. 11 files totaling 27MB of screen data have been collected.",
+      "stepTitle": "수집 파일 확인",
+      "stepTitleEn": "Collected Files Review",
+      "feynman": "도둑이 훔친 물건을 한곳에 모아 확인하는 것과 같습니다. 11장의 사진이 모두 잘 찍혔는지, 크기가 적절한지 확인합니다. 총 27MB의 데이터에는 사용자의 업무 활동이 시간순으로 기록되어 있습니다.",
+      "feynmanEn": "It's like a thief gathering stolen goods in one place to review them. Checking that all 11 photos turned out well and sizes are appropriate. The 27MB of data contains the user's work activity recorded chronologically.",
+      "expert": "스테이징 디렉토리 확인은 T1074(Data Staged)의 일부입니다. 임시 폴더(%TEMP%)에 다수의 이미지 파일이 짧은 시간 내 생성되는 패턴은 SIEM 상관분석 규칙으로 탐지해야 합니다. 파일 크기가 일정한 것은 동일 해상도의 반복 캡처를 의미합니다.",
+      "expertEn": "Staging directory review is part of T1074 (Data Staged). Multiple image files created in %TEMP% within a short timeframe should be detected by SIEM correlation rules. Consistent file sizes indicate repeated captures at the same resolution.",
+      "defTooltip": "Sysmon Event ID 11에서 %TEMP% 폴더에 다수의 이미지 파일(.png, .jpg)이 짧은 시간 내 생성되는 패턴을 모니터링하세요. DLP 솔루션에서 임시 폴더의 대량 이미지 파일을 감시합니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 11 for multiple image files (.png, .jpg) created in %TEMP% within a short timeframe. DLP solutions should watch for bulk image files in temp folders.",
+      "hackerLog": {
+        "title": "staging_review.log",
+        "lines": [
+          { "log": "11 PNG files, Total Size: 27.0 MB", "desc": "💡 11개의 스크린샷 파일이 스테이징 완료되어 유출 준비가 되었습니다" },
+          { "log": "outlook_capture.png  2621440", "desc": "💡 이메일 내용이 담긴 타겟 캡처 파일도 포함되어 있습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Data Staging", "desc": "유출 전에 수집한 데이터를 한 곳에 모아두는 단계로, MITRE ATT&CK T1074에 해당합니다" },
+        { "term": "%TEMP%", "desc": "Windows 임시 폴더 경로로, 공격자가 데이터를 숨기기 좋은 위치입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"Compress-Archive -Path 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\ss_*.png','C:\\Users\\{userName}\\AppData\\Local\\Temp\\outlook_capture.png' -DestinationPath 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\diaglog.zip' -Force; (Get-Item 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\diaglog.zip').Length / 1MB\"",
+      "out": "8.42",
+      "def": "[EDR] Screen captures compressed into archive for potential exfiltration",
+      "defAction": "Process: powershell.exe (PID: 6120)\nAction: Compress-Archive\nInput: 11 PNG files (27 MB)\nOutput: diaglog.zip (8.42 MB)\nRisk: HIGH\nAction: File access blocked pending review",
+      "desc": "수집된 스크린샷을 ZIP 파일로 압축합니다. 파일명을 'diaglog.zip'으로 위장하여 정상 진단 파일처럼 보이게 합니다.",
+      "descEn": "Compresses collected screenshots into a ZIP file. The filename is disguised as 'diaglog.zip' to appear as a legitimate diagnostic file.",
+      "stepTitle": "압축 및 위장",
+      "stepTitleEn": "Compression and Disguise",
+      "feynman": "훔친 사진을 봉투에 담아 '진단 자료'라고 적어두는 것과 같습니다. 27MB 분량의 스크린샷을 8.4MB로 압축하고, 파일 이름을 평범한 시스템 로그 파일처럼 보이게 바꿔 의심을 피합니다.",
+      "feynmanEn": "It's like putting stolen photos in an envelope labeled 'diagnostic materials'. Compressing 27MB of screenshots to 8.4MB and renaming the file to look like a normal system log file to avoid suspicion.",
+      "expert": "파일명 위장(diaglog.zip)은 T1036(Masquerading)의 일부입니다. 진단 파일로 위장하면 DLP 시스템의 파일명 기반 필터링을 우회할 수 있습니다. 방어를 위해 DLP에서 파일 내용(매직 바이트) 분석을 수행하고, 대용량 압축 파일의 %TEMP% 생성을 모니터링해야 합니다.",
+      "expertEn": "Filename disguise (diaglog.zip) is part of T1036 (Masquerading). Disguising as diagnostic files can bypass DLP filename-based filtering. Defense requires DLP content (magic byte) analysis and monitoring of large archive creation in %TEMP%.",
+      "defTooltip": "DLP 솔루션에서 압축 파일 내부의 이미지 파일 비율이 높은 경우를 탐지 규칙으로 설정하세요. Sysmon Event ID 1에서 Compress-Archive cmdlet 사용을 모니터링합니다.",
+      "defTooltipEn": "Set DLP detection rules for archives with high image file ratios. Monitor Compress-Archive cmdlet usage in Sysmon Event ID 1.",
+      "hackerLog": {
+        "title": "compression.log",
+        "lines": [
+          { "log": "Compress-Archive ... -DestinationPath '...\\diaglog.zip'", "desc": "💡 11개의 캡처 파일을 'diaglog.zip'이라는 이름의 압축 파일로 생성합니다" },
+          { "log": "8.42 (MB)", "desc": "💡 27MB에서 8.42MB로 압축하여 유출 시 전송 시간을 단축합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Masquerading", "desc": "악성 파일이나 활동을 정상적인 것처럼 위장하는 기법으로, MITRE ATT&CK T1036에 해당합니다" },
+        { "term": "Compress-Archive", "desc": "PowerShell의 내장 압축 cmdlet으로, 별도 도구 없이 ZIP 파일을 생성합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 6120)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "System.Windows.Forms [Screen Enum]", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "System.Drawing [CopyFromScreen]", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "ss_001~010.png (periodic capture)", "depth": 3, "alert": true, "minStep": 2 },
+    { "name": "user32.dll!SetForegroundWindow", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "outlook_capture.png", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "Compress-Archive → diaglog.zip", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

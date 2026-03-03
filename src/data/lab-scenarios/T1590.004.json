@@ -1,0 +1,182 @@
+{
+  "id": "T1590.004",
+  "title": "네트워크 토폴로지 수집 시뮬레이션",
+  "titleEn": "Network Topology Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 경로 추적", "labelEn": "🔍 Route Tracing", "steps": [0, 1] },
+    { "label": "📡 네트워크 매핑", "labelEn": "📡 Network Mapping", "steps": [2, 3] },
+    { "label": "🗺️ 토폴로지 완성", "labelEn": "🗺️ Topology Completion", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "isp", "label": "ISP Router", "x": 150, "y": 60 },
+    { "id": "fw_ext", "label": "External FW", "x": 250, "y": 60 },
+    { "id": "dmz", "label": "DMZ", "x": 350, "y": 30 },
+    { "id": "fw_int", "label": "Internal FW", "x": 350, "y": 90 },
+    { "id": "internal", "label": "Internal Net", "x": 450, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "isp", "minStep": 0 },
+    { "from": "isp", "to": "fw_ext", "minStep": 0 },
+    { "from": "fw_ext", "to": "dmz", "minStep": 1 },
+    { "from": "fw_ext", "to": "fw_int", "minStep": 2 },
+    { "from": "fw_int", "to": "internal", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "network_map.png", "icon": "🗺️", "alert": true },
+    { "name": "{companyName} Recon", "icon": "📁" },
+    { "name": "topology.graphml", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "traceroute -m 30 -q 3 target.{companyName}.com",
+      "out": "traceroute to target.{companyName}.com (104.16.51.111), 30 hops max\n 1  gateway (192.168.1.1)         1.234 ms  1.156 ms  1.089 ms\n 2  isp-gw1.provider.net (10.0.0.1)  5.678 ms  5.456 ms  5.234 ms\n 3  core-rtr1.provider.net (172.16.0.1)  8.901 ms  8.789 ms  8.567 ms\n 4  peering-ix.exchange.net (198.32.132.1)  12.345 ms  12.123 ms  11.901 ms\n 5  cloudflare-edge (172.68.0.1)  15.678 ms  15.456 ms  15.234 ms\n 6  * * *\n 7  * * *\n 8  target.{companyName}.com (104.16.51.111)  22.345 ms  22.123 ms  21.901 ms",
+      "def": "[IDS] ICMP traceroute activity detected from external source",
+      "defAction": "Source: 10.0.1.45\nTarget: 104.16.51.111\nAction: ICMP monitoring activated, source IP logged",
+      "desc": "traceroute로 대상까지의 네트워크 경로를 추적하여 중간 라우터와 방화벽 위치를 파악합니다.",
+      "descEn": "Trace network path to target using traceroute to identify intermediate routers and firewall locations.",
+      "stepTitle": "traceroute 네트워크 경로 추적",
+      "stepTitleEn": "traceroute Network Path Tracing",
+      "feynman": "traceroute는 택배가 목적지까지 거치는 모든 '물류 센터'를 보여줍니다. 패킷이 ISP 라우터(홉 2), 인터넷 교환점(홉 4), Cloudflare 엣지(홉 5)를 거쳐 도착합니다. 홉 6-7이 ***으로 표시된 것은 방화벽이 ICMP를 차단하고 있다는 뜻입니다. CDN 뒤에 숨겨진 구조를 파악할 수 있습니다.",
+      "feynmanEn": "traceroute shows every 'distribution center' a package passes through. Packets travel via ISP router (hop 2), internet exchange (hop 4), Cloudflare edge (hop 5). Hops 6-7 showing *** mean a firewall is blocking ICMP. This reveals the CDN-hidden architecture.",
+      "expert": "traceroute는 TTL(Time To Live)을 1부터 순차적으로 증가시켜 각 홉의 ICMP Time Exceeded 응답으로 경로를 매핑합니다. Cloudflare 엣지 뒤의 홉 6-7 필터링은 CDN 뒤 실제 인프라를 은닉하는 설정입니다. peering-ix는 IX(Internet Exchange) 포인트로 ISP 간 직접 연결을 나타냅니다.",
+      "expertEn": "traceroute increments TTL from 1 to map paths via ICMP Time Exceeded responses at each hop. Filtered hops 6-7 behind Cloudflare edge conceal actual infrastructure behind CDN. peering-ix indicates an Internet Exchange point for direct ISP interconnection.",
+      "defTooltip": "📡 IDS: 외부 소스에서 ICMP traceroute 활동 감지",
+      "defTooltipEn": "📡 IDS: ICMP traceroute activity detected from external source",
+      "hackerLog": {
+        "title": "traceroute.log",
+        "lines": [
+          { "log": "5  cloudflare-edge (172.68.0.1)", "desc": "💡 Cloudflare CDN 사용 확인 - 실제 서버 IP가 CDN 뒤에 숨겨져 있습니다" },
+          { "log": "6  * * *", "desc": "💡 ICMP 차단 구간 - 방화벽이 내부 구조를 숨기고 있습니다" },
+          { "log": "4  peering-ix.exchange.net", "desc": "💡 인터넷 교환점(IX) 통과 - ISP의 피어링 관계 파악 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Traceroute", "desc": "패킷이 목적지까지 거치는 모든 라우터를 추적하는 도구. TTL 값을 조작하여 각 홉에서 ICMP 응답을 유도합니다" },
+        { "name": "TTL (Time To Live)", "desc": "패킷이 네트워크에서 살아있을 수 있는 최대 홉 수. 각 라우터를 지날 때마다 1씩 감소하며, 0이 되면 라우터가 ICMP 응답을 보냅니다" }
+      ]
+    },
+    {
+      "cmd": "nmap -sn -traceroute --top-ports 100 192.168.50.0/24 -oX topology_scan.xml",
+      "out": "Starting Nmap 7.94\nNmap scan report for fw-external.{companyName}.local (192.168.50.1)\nHost is up (0.0012s latency).\nTRACEROUTE: 1 hop (direct)\n  gateway → 192.168.50.1\n\nNmap scan report for dmz-web01.{companyName}.local (192.168.50.10)\nHost is up (0.0032s latency).\nTRACEROUTE:\n  1  192.168.50.1 (fw-external)  1.2 ms\n  2  192.168.50.10 (dmz-web01)   3.2 ms\n\nNmap scan report for dmz-mail01.{companyName}.local (192.168.50.11)\nHost is up (0.0028s latency).\n\nNmap scan report for fw-internal.{companyName}.local (192.168.50.254)\nHost is up (0.0015s latency).\n\n... 23 hosts discovered\n\nNetwork Segments Identified:\n  192.168.50.0/24  - DMZ (web, mail, dns)\n  10.0.1.0/24      - Server Farm\n  10.0.2.0/24      - VPN/Remote Access\n  10.0.3.0/24      - Development\n  10.0.5.0/24      - Database\n\nNmap done: 256 IP addresses (23 hosts up)",
+      "def": "[IDS] Network sweep with traceroute detected - topology mapping in progress",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.50.0/24\nAction: Network scan blocked, source quarantined",
+      "desc": "Nmap으로 서브넷 전체를 스캔하고 traceroute로 네트워크 세그먼트를 식별합니다.",
+      "descEn": "Scan entire subnet with Nmap and identify network segments via traceroute.",
+      "stepTitle": "Nmap 서브넷 스캔 + 세그먼트 식별",
+      "stepTitleEn": "Nmap Subnet Scan + Segment Identification",
+      "feynman": "Nmap으로 네트워크의 '주민 명부'를 작성합니다. 256개 주소 중 23대의 장비를 발견하고, 이들이 어느 '동네'(세그먼트)에 속하는지 분류합니다. DMZ에는 웹/메일 서버, 10.0.1.x에는 서버 팜, 10.0.5.x에는 데이터베이스가 있다는 것을 알게 됩니다.",
+      "feynmanEn": "Nmap creates a 'resident directory' of the network. Finding 23 devices among 256 addresses, it classifies which 'neighborhood' (segment) they belong to. DMZ has web/mail servers, 10.0.1.x has server farm, 10.0.5.x has databases.",
+      "expert": "Nmap -sn은 호스트 디스커버리(ARP/ICMP/TCP)를 수행하고, --traceroute로 각 호스트까지의 경로를 추적합니다. 5개 서브넷이 식별되었으며, 192.168.50.0/24(DMZ)과 10.0.x.0/24(내부망)의 분리는 전통적인 3-tier 네트워크 아키텍처를 나타냅니다.",
+      "expertEn": "Nmap -sn performs host discovery (ARP/ICMP/TCP) and --traceroute traces paths to each host. Five subnets identified, with 192.168.50.0/24 (DMZ) and 10.0.x.0/24 (internal) separation indicating traditional 3-tier network architecture.",
+      "defTooltip": "🔍 IDS: traceroute를 포함한 네트워크 스윕 감지 - 토폴로지 매핑 진행 중",
+      "defTooltipEn": "🔍 IDS: Network sweep with traceroute detected - topology mapping in progress",
+      "hackerLog": {
+        "title": "nmap_topology.log",
+        "lines": [
+          { "log": "fw-external.{companyName}.local (192.168.50.1)", "desc": "💡 외부 방화벽 게이트웨이 발견 - DMZ 입구의 보안 경계입니다" },
+          { "log": "fw-internal.{companyName}.local (192.168.50.254)", "desc": "💡 내부 방화벽 발견 - DMZ와 내부망 사이의 보안 경계" },
+          { "log": "10.0.5.0/24 - Database", "desc": "💡 데이터베이스 전용 세그먼트 발견 - 공격의 최종 목표입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "DMZ (Demilitarized Zone)", "desc": "외부 네트워크와 내부 네트워크 사이의 완충 영역. 웹서버, 메일서버 등 외부에서 접근해야 하는 서비스를 배치합니다" },
+        { "name": "Network Segmentation", "desc": "네트워크를 기능별로 분리하여 보안을 강화하는 기법. DMZ, 서버팜, 개발망, DB망 등으로 구분합니다" }
+      ]
+    },
+    {
+      "cmd": "snmpwalk -v2c -c public 192.168.50.1 1.3.6.1.2.1.4.21",
+      "out": "iso.3.6.1.2.1.4.21.1.1.0.0.0.0 = IpAddress: 0.0.0.0\niso.3.6.1.2.1.4.21.1.1.10.0.1.0 = IpAddress: 10.0.1.0\niso.3.6.1.2.1.4.21.1.1.10.0.2.0 = IpAddress: 10.0.2.0\niso.3.6.1.2.1.4.21.1.1.10.0.3.0 = IpAddress: 10.0.3.0\niso.3.6.1.2.1.4.21.1.1.10.0.5.0 = IpAddress: 10.0.5.0\niso.3.6.1.2.1.4.21.1.1.10.0.6.0 = IpAddress: 10.0.6.0\niso.3.6.1.2.1.4.21.1.1.10.0.7.0 = IpAddress: 10.0.7.0\niso.3.6.1.2.1.4.21.1.1.192.168.50.0 = IpAddress: 192.168.50.0\n\niso.3.6.1.2.1.4.21.1.7.10.0.1.0 = IpAddress: 192.168.50.254\niso.3.6.1.2.1.4.21.1.7.10.0.2.0 = IpAddress: 192.168.50.254\niso.3.6.1.2.1.4.21.1.7.10.0.5.0 = IpAddress: 10.0.1.254\n\nRouting Table Summary:\n  7 internal subnets discovered\n  Next-hop analysis reveals 2-tier routing",
+      "def": "[SNMP Monitor] SNMP community string 'public' used - default credentials",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.50.1 (fw-external)\nAction: SNMP access logged, community string change enforced",
+      "desc": "SNMP로 방화벽/라우터의 라우팅 테이블을 조회하여 내부 서브넷 구조를 파악합니다.",
+      "descEn": "Query firewall/router routing tables via SNMP to discover internal subnet structure.",
+      "stepTitle": "SNMP 라우팅 테이블 수집",
+      "stepTitleEn": "SNMP Routing Table Collection",
+      "feynman": "SNMP는 네트워크 장비에게 '내부 지도를 보여줘'라고 요청하는 것입니다. 기본 비밀번호 'public'이 변경되지 않았기 때문에 방화벽의 라우팅 테이블을 그대로 볼 수 있었습니다. 7개의 내부 서브넷(10.0.1.0 ~ 10.0.7.0)이 발견되어 내부 네트워크의 전체 구조가 드러났습니다.",
+      "feynmanEn": "SNMP is like asking a network device 'show me the internal map.' Because the default password 'public' wasn't changed, the firewall's routing table is fully accessible. 7 internal subnets (10.0.1.0 through 10.0.7.0) reveal the entire internal structure.",
+      "expert": "SNMP MIB 1.3.6.1.2.1.4.21(ipRouteTable)은 라우팅 테이블을 노출합니다. SNMPv2c의 커뮤니티 스트링 'public'은 기본값으로, 변경하지 않은 것은 심각한 보안 미비입니다. Next-hop 분석(192.168.50.254 → 내부망)으로 방화벽의 라우팅 구조와 서브넷 간 관계를 매핑할 수 있습니다.",
+      "expertEn": "SNMP MIB 1.3.6.1.2.1.4.21 (ipRouteTable) exposes routing tables. SNMPv2c community string 'public' is default - leaving it unchanged is a severe security lapse. Next-hop analysis (192.168.50.254 → internal) maps firewall routing structure and inter-subnet relationships.",
+      "defTooltip": "📡 SNMP 모니터: 기본 커뮤니티 스트링 'public' 사용 감지",
+      "defTooltipEn": "📡 SNMP Monitor: Default community string 'public' used",
+      "hackerLog": {
+        "title": "snmp_routes.log",
+        "lines": [
+          { "log": "10.0.6.0 = IpAddress: 10.0.6.0", "desc": "💡 10.0.6.0/24 서브넷 발견 - Kubernetes 클러스터가 위치한 세그먼트" },
+          { "log": "10.0.7.0 = IpAddress: 10.0.7.0", "desc": "💡 10.0.7.0/24 서브넷 발견 - Vault 비밀키 관리 세그먼트" },
+          { "log": "SNMP community string 'public'", "desc": "💡 기본 비밀번호 미변경 - 가장 흔한 네트워크 장비 보안 실수입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "SNMP (Simple Network Management Protocol)", "desc": "네트워크 장비의 상태와 설정 정보를 원격으로 조회하는 프로토콜. 커뮤니티 스트링이 비밀번호 역할을 합니다" },
+        { "name": "Community String", "desc": "SNMP v1/v2c에서 사용하는 인증 문자열. 'public'(읽기), 'private'(쓰기)가 기본값이며, 반드시 변경해야 합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 bgp_lookup.py --asn AS{companyName} --prefixes --peers --output bgp_results.json",
+      "out": "[*] BGP Intelligence for {companyName}\n\n=== ASN Information ===\nAS Number: AS64512\nOrganization: {companyName} Inc.\nRegistered Prefixes:\n  104.16.48.0/20    (Cloudflare - announced)\n  198.51.100.0/24   (Direct allocation)\n  203.0.113.0/24    (Direct allocation)\n\n=== BGP Peers ===\nUpstream Providers:\n  AS174  (Cogent Communications)\n  AS3356 (Lumen Technologies)\n  AS6939 (Hurricane Electric)\n\nPeering Partners:\n  AS13335 (Cloudflare)\n  AS16509 (Amazon AWS)\n  AS15169 (Google)\n\n=== Route History ===\nPrefix 198.51.100.0/24:\n  Origin changes: 2 (last: 2024-11-15)\n  Path changes: 5 (last: 2025-01-02)\n  Hijack alerts: 0\n\n[+] Results saved to bgp_results.json",
+      "def": "[BGP Monitor] BGP route and peering intelligence gathering detected",
+      "defAction": "Source: Public BGP looking glass queries\nTarget: AS64512 ({companyName})\nAction: BGP route monitoring enhanced, RPKI validation reviewed",
+      "desc": "BGP Looking Glass로 ASN 정보, IP 프리픽스, 피어링 관계를 조회하여 인터넷 연결 구조를 파악합니다.",
+      "descEn": "Query BGP Looking Glass for ASN info, IP prefixes, and peering relationships to map internet connectivity.",
+      "stepTitle": "BGP/ASN 인터넷 연결 구조 분석",
+      "stepTitleEn": "BGP/ASN Internet Connectivity Analysis",
+      "feynman": "BGP는 인터넷의 '고속도로 지도'입니다. 어떤 ISP를 통해 인터넷에 연결되는지(Cogent, Lumen, HE), 어떤 IP 대역을 소유하는지(198.51.100.0, 203.0.113.0), 누구와 직접 연결되어 있는지(Cloudflare, AWS, Google)를 보여줍니다. 이 정보로 DDoS 공격의 효과적인 방향이나 BGP 하이재킹의 가능성을 평가합니다.",
+      "feynmanEn": "BGP is the internet's 'highway map.' It shows which ISPs provide connectivity (Cogent, Lumen, HE), which IP ranges are owned (198.51.100.0, 203.0.113.0), and direct connections (Cloudflare, AWS, Google). This helps assess DDoS attack vectors or BGP hijacking potential.",
+      "expert": "AS64512의 BGP 분석에서 멀티호밍(3개 업스트림)과 3개 피어링이 확인됩니다. 198.51.100.0/24의 Origin 변경 이력은 BGP 라우팅 안정성을 나타내며, RPKI(Resource Public Key Infrastructure) 미적용 시 BGP 하이재킹 공격에 취약합니다.",
+      "expertEn": "AS64512 BGP analysis shows multi-homing (3 upstreams) and 3 peering partners. Origin change history of 198.51.100.0/24 indicates BGP routing stability. Without RPKI (Resource Public Key Infrastructure), the ASN is vulnerable to BGP hijacking.",
+      "defTooltip": "🌐 BGP 모니터: BGP 라우트 및 피어링 정보 수집 감지",
+      "defTooltipEn": "🌐 BGP Monitor: BGP route and peering intelligence gathering detected",
+      "hackerLog": {
+        "title": "bgp_intel.log",
+        "lines": [
+          { "log": "198.51.100.0/24 (Direct allocation)", "desc": "💡 직접 할당된 IP 대역 - CDN을 우회하여 실제 서버에 접근할 수 있습니다" },
+          { "log": "AS174 (Cogent Communications)", "desc": "💡 주요 업스트림 ISP - DDoS 공격 시 이 경로를 집중 공격할 수 있습니다" },
+          { "log": "Origin changes: 2", "desc": "💡 BGP Origin 변경 이력 - BGP 하이재킹 시도의 흔적일 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "BGP (Border Gateway Protocol)", "desc": "인터넷의 AS(자율 시스템) 간 라우팅 정보를 교환하는 프로토콜. 인터넷 트래픽의 흐름 방향을 결정합니다" },
+        { "name": "ASN (Autonomous System Number)", "desc": "인터넷에서 독립적으로 라우팅 정책을 운영하는 네트워크에 부여되는 고유 번호. ISP, 대기업, 클라우드 서비스가 각각의 AS를 보유합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 topology_builder.py --traceroute traces.txt --nmap topology_scan.xml --snmp snmp_routes.log --bgp bgp_results.json --output network_map.graphml",
+      "out": "[+] Building comprehensive network topology...\n\n=== NETWORK TOPOLOGY REPORT ===\n\nExternal Infrastructure:\n  ISP: Cogent (AS174), Lumen (AS3356), HE (AS6939)\n  CDN: Cloudflare (104.16.48.0/20)\n  Direct IPs: 198.51.100.0/24, 203.0.113.0/24\n\nPerimeter (DMZ - 192.168.50.0/24):\n  fw-external (192.168.50.1) → Firewall/Router\n  dmz-web01 (192.168.50.10) → Web Server\n  dmz-mail01 (192.168.50.11) → Mail Server\n  fw-internal (192.168.50.254) → Internal Firewall\n\nInternal Network:\n  10.0.1.0/24 → Server Farm (API, monitoring)\n  10.0.2.0/24 → VPN/Remote Access\n  10.0.3.0/24 → Development (jira, gitlab, jenkins)\n  10.0.5.0/24 → Database (master/slave, redis, elastic)\n  10.0.6.0/24 → Kubernetes Cluster\n  10.0.7.0/24 → Secrets Management (vault)\n\nCritical Chokepoints:\n  1. fw-external → single point of entry (SPOF)\n  2. fw-internal → DMZ to internal gateway\n  3. 10.0.1.254 → DB segment gateway\n\n[+] Interactive topology saved to network_map.graphml",
+      "def": "[SIEM] Complete network topology reconnaissance campaign detected",
+      "defAction": "Source: Correlation of topology recon activities\nTarget: {companyName} network infrastructure\nAction: Incident #2024-1228 created, network segmentation audit initiated",
+      "desc": "모든 네트워크 데이터를 통합하여 완전한 토폴로지 맵과 핵심 병목점을 식별합니다.",
+      "descEn": "Consolidate all network data into a complete topology map and identify critical chokepoints.",
+      "stepTitle": "종합 네트워크 토폴로지 맵 생성",
+      "stepTitleEn": "Comprehensive Network Topology Map Generation",
+      "feynman": "모든 정보를 합쳐서 네트워크의 완전한 '설계도'를 완성합니다. 외부(ISP, CDN), 경계(DMZ, 방화벽), 내부(서버, DB, K8s, Vault) 세 층으로 구성된 구조가 드러났습니다. 특히 fw-external이 단일 진입점(SPOF)이라는 것은 이 장비가 장애나 공격에 취약하다는 뜻입니다.",
+      "feynmanEn": "All information combines to complete the network 'blueprint.' A three-layer structure emerges: external (ISP, CDN), perimeter (DMZ, firewalls), internal (servers, DB, K8s, Vault). The fw-external being a single entry point (SPOF) means this device is vulnerable to failure or attack.",
+      "expert": "토폴로지 통합 분석에서 3개의 핵심 병목점이 식별됐습니다. fw-external SPOF는 HA(High Availability) 구성 부재를 시사하며, DB 세그먼트 게이트웨이(10.0.1.254)는 데이터베이스 접근의 단일 제어점입니다. 마이크로세그멘테이션과 East-West 트래픽 모니터링이 필요합니다.",
+      "expertEn": "Topology analysis identified 3 critical chokepoints. The fw-external SPOF suggests lack of HA configuration, and the DB segment gateway (10.0.1.254) is a single control point for database access. Microsegmentation and East-West traffic monitoring are recommended.",
+      "defTooltip": "🗺️ SIEM: 완전한 네트워크 토폴로지 정찰 캠페인 감지",
+      "defTooltipEn": "🗺️ SIEM: Complete network topology reconnaissance campaign detected",
+      "hackerLog": {
+        "title": "topology_report.log",
+        "lines": [
+          { "log": "fw-external → single point of entry (SPOF)", "desc": "💡 단일 진입점 - 이 방화벽을 우회하면 전체 네트워크에 접근 가능합니다" },
+          { "log": "10.0.7.0/24 → Secrets Management (vault)", "desc": "💡 비밀키 관리 서버가 별도 세그먼트에 있지만, 경로가 파악되었습니다" },
+          { "log": "7 internal subnets identified", "desc": "💡 7개 내부 서브넷의 완전한 구조 파악 - 공격 경로 계획이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "SPOF (Single Point of Failure)", "desc": "장애 발생 시 전체 시스템이 중단되는 단일 지점. 고가용성(HA) 구성으로 이중화해야 합니다" },
+        { "name": "Microsegmentation", "desc": "네트워크를 아주 작은 단위로 분리하여 세밀한 접근 제어를 적용하는 보안 기법. Zero Trust 구현의 핵심입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "traceroute (PID: 8101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "nmap -sn --traceroute (PID: 8178)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "snmpwalk (PID: 8245)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 bgp_lookup.py (PID: 8312)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 topology_builder.py (PID: 8389)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

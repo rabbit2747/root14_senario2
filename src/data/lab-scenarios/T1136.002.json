@@ -1,0 +1,189 @@
+{
+  "id": "T1136.002",
+  "title": "도메인 백도어 계정 생성 시뮬레이션",
+  "titleEn": "Domain Backdoor Account Creation Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 계정 생성", "labelEn": "⚡ Account Creation", "steps": [1] },
+    { "label": "🔓 권한 부여", "labelEn": "🔓 Privilege Assignment", "steps": [2, 3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "dc", "label": "Domain Controller\nDC01.corp.local", "x": 250, "y": 80 },
+    { "id": "ad", "label": "Active Directory\nUsers OU", "x": 400, "y": 30 },
+    { "id": "admins", "label": "Domain Admins\nGroup", "x": 400, "y": 130 },
+    { "id": "network", "label": "Corp Network\n(All Hosts)", "x": 250, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "dc", "minStep": 0 },
+    { "from": "dc", "to": "ad", "minStep": 1 },
+    { "from": "ad", "to": "admins", "minStep": 2 },
+    { "from": "admins", "to": "network", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "AD Users & Computers", "icon": "👥" },
+    { "name": "PowerShell", "icon": "💻" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "Server Manager", "icon": "🖥️" }
+  ],
+  "steps": [
+    {
+      "cmd": "net user /domain | findstr /i \"svc_ admin_ backup\"",
+      "out": "The request will be processed at a domain controller for domain corp.local.\n\nadmin_jones          admin_smith          svc_exchange\nsvc_sql              svc_web              backup_daily\n\n[*] Existing service/admin accounts:\n    admin_jones, admin_smith (admin accounts)\n    svc_exchange, svc_sql, svc_web (service accounts)\n    backup_daily (backup account)\n\n[*] Naming convention identified:\n    - Admin: admin_[name]\n    - Service: svc_[service]\n    - Backup: backup_[schedule]",
+      "def": "[DC Security] Domain user enumeration with service account filter",
+      "defAction": "Source: DC Security Event Logs\nTarget: Domain user listing\nAction: User enumeration logged (Event ID 4661), baseline comparison",
+      "desc": "도메인의 기존 서비스/관리자 계정을 열거하여 명명 규칙을 파악합니다.",
+      "descEn": "The attacker enumerates existing service/admin accounts to identify naming conventions.",
+      "stepTitle": "도메인 계정 정찰 (명명 규칙 파악)",
+      "stepTitleEn": "Domain Account Reconnaissance (Naming Convention Analysis)",
+      "feynman": "회사의 사원 명단을 보면서 '직원 이름은 어떤 규칙으로 만들어지나?' 확인하는 것과 같습니다. svc_exchange, svc_sql 같은 패턴을 파악하면 svc_backup이라는 이름을 만들어도 자연스러워 보입니다.",
+      "feynmanEn": "It's like looking at the company's employee roster to figure out 'what naming convention do they use?' After identifying patterns like svc_exchange and svc_sql, creating svc_backup looks natural.",
+      "expert": "도메인 서비스 계정의 명명 규칙을 분석하면 탐지를 회피하는 백도어 계정 이름을 선택할 수 있습니다. net user /domain은 Event ID 4661(디렉토리 서비스 객체 접근)을 생성하며, findstr 필터링은 관심 있는 계정만 빠르게 식별합니다.",
+      "expertEn": "Analyzing domain service account naming conventions helps choose backdoor account names that evade detection. net user /domain generates Event ID 4661 (Directory Service Object Access), and findstr filtering quickly identifies accounts of interest.",
+      "defTooltip": "🔐 서비스 계정 필터를 사용한 도메인 사용자 열거 감지!",
+      "defTooltipEn": "🔐 Domain user enumeration with service account filter detected!",
+      "hackerLog": {
+        "title": "domain_recon.txt",
+        "lines": [
+          { "log": "Naming convention: svc_[service]", "desc": "💡 서비스 계정 명명 규칙 파악 - 위장에 활용" },
+          { "log": "admin_jones, admin_smith", "desc": "💡 관리자 계정 목록 - 그룹 멤버십 비교용" },
+          { "log": "backup_daily (backup account)", "desc": "💡 백업 계정도 존재 - 유사 이름으로 위장 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Active Directory", "desc": "Microsoft의 디렉토리 서비스. 사용자, 컴퓨터, 정책 등을 중앙에서 관리하는 기업 인증 시스템입니다." },
+        { "name": "도메인 계정", "desc": "Active Directory에 등록된 사용자 계정. 도메인 내 모든 리소스에 대한 인증에 사용됩니다." },
+        { "name": "서비스 계정", "desc": "애플리케이션이나 서비스가 사용하는 특수 계정. 보통 svc_ 프리픽스를 사용합니다." }
+      ]
+    },
+    {
+      "cmd": "net user svc_backup \"Str0ng!P@ssw0rd#2026\" /add /domain /comment:\"Backup Service Account\" /fullname:\"Backup Service\"",
+      "out": "The request will be processed at a domain controller for domain corp.local.\n\nThe command completed successfully.\n\n[*] Domain account created:\n    Username: svc_backup\n    Full Name: Backup Service\n    Comment: Backup Service Account\n    Domain: corp.local\n    Status: Enabled\n\n[*] Account created in default Users container\n[*] Event ID 4720 generated on DC01",
+      "def": "[DC Security] Event ID 4720 - New user account created: svc_backup",
+      "defAction": "Source: DC Security Event Log\nTarget: svc_backup account creation\nAction: New account flagged for review, creation source investigated",
+      "desc": "서비스 계정 이름으로 위장한 백도어 도메인 계정을 생성합니다.",
+      "descEn": "The attacker creates a backdoor domain account disguised as a service account.",
+      "stepTitle": "백도어 도메인 계정 생성",
+      "stepTitleEn": "Backdoor Domain Account Creation",
+      "feynman": "가짜 사원증을 만드는 것과 같습니다. 'svc_backup'이라는 이름은 백업 서비스용 계정처럼 보이지만, 실제로는 공격자가 언제든 로그인할 수 있는 백도어입니다. HR 담당자(관리자)가 이 계정을 봐도 '백업 서비스 계정이구나'라고 생각합니다.",
+      "feynmanEn": "It's like making a fake employee badge. The name 'svc_backup' looks like a backup service account, but it's actually a backdoor for the attacker to log in at any time. Even the HR manager (admin) would think 'oh, it's a backup service account.'",
+      "expert": "net user /add /domain은 Domain Controller의 SAM 데이터베이스에 새 계정을 생성합니다. Event ID 4720이 DC의 Security 로그에 기록되며, 계정을 생성한 사용자(Creator)도 함께 기록됩니다. /comment와 /fullname 옵션으로 합법적 서비스 계정처럼 보이게 꾸밉니다.",
+      "expertEn": "net user /add /domain creates a new account in the Domain Controller's SAM database. Event ID 4720 is recorded in the DC's Security log along with the creator. /comment and /fullname options make it look like a legitimate service account.",
+      "defTooltip": "🔐 새 도메인 계정 생성 감지 (Event ID 4720)! svc_backup - 승인된 계정인지 확인 필요.",
+      "defTooltipEn": "🔐 New domain account creation detected (Event ID 4720)! svc_backup - verify if approved.",
+      "hackerLog": {
+        "title": "account_creation.txt",
+        "lines": [
+          { "log": "Username: svc_backup", "desc": "💡 서비스 계정 명명 규칙에 맞춘 이름 - 위장 성공" },
+          { "log": "Comment: Backup Service Account", "desc": "💡 설명까지 꾸며서 관리자 검토 시 의심 회피" },
+          { "log": "Event ID 4720 generated on DC01", "desc": "💡 DC에서 계정 생성 이벤트 발생 - 모니터링 시 탐지 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Event ID 4720", "desc": "Windows Security 로그에서 새 사용자 계정이 생성될 때 기록되는 이벤트입니다." },
+        { "name": "SAM 데이터베이스", "desc": "Security Account Manager. Windows에서 사용자 계정 정보를 저장하는 데이터베이스입니다." },
+        { "name": "백도어 계정", "desc": "공격자가 지속적 접근을 위해 몰래 생성한 계정. 정상 계정처럼 위장됩니다." }
+      ]
+    },
+    {
+      "cmd": "net group \"Domain Admins\" svc_backup /add /domain && net localgroup \"Remote Desktop Users\" svc_backup /add",
+      "out": "The request will be processed at a domain controller for domain corp.local.\nThe command completed successfully.\n\nThe command completed successfully.\n\n[*] Privilege escalation:\n    svc_backup → Domain Admins group (ADDED)\n    svc_backup → Remote Desktop Users (ADDED)\n\n[*] Event IDs generated:\n    4728 - Member added to security-enabled global group\n    4732 - Member added to security-enabled local group\n\n[*] svc_backup now has:\n    - Full Domain Admin privileges\n    - RDP access to any domain host\n    - GPO management capability\n    - Active Directory modification rights",
+      "def": "[DC Security] CRITICAL - User added to Domain Admins group",
+      "defAction": "Source: DC Security Event Log (Event ID 4728)\nTarget: svc_backup added to Domain Admins\nAction: Membership immediately revoked, incident escalated to SOC",
+      "desc": "생성한 백도어 계정을 Domain Admins 그룹에 추가하여 최고 권한을 부여합니다.",
+      "descEn": "The attacker adds the backdoor account to the Domain Admins group for maximum privileges.",
+      "stepTitle": "Domain Admins 그룹 추가 (최고 권한 부여)",
+      "stepTitleEn": "Domain Admins Group Addition (Maximum Privileges)",
+      "feynman": "가짜 사원증을 만든 후 '이사회 구성원' 명단에 이름을 추가하는 것과 같습니다. Domain Admins에 들어가면 회사의 모든 문을 열 수 있는 마스터키를 갖게 됩니다. 모든 서버, 모든 데이터에 접근 가능합니다.",
+      "feynmanEn": "It's like making a fake badge and then adding your name to the 'board of directors' list. Joining Domain Admins gives you a master key that opens every door in the company. Access to all servers and all data.",
+      "expert": "Domain Admins 그룹 추가는 Event ID 4728(보안 활성 전역 그룹에 멤버 추가)을 생성합니다. 이 이벤트는 모든 DC에 복제되며, SIEM에서 최고 우선순위 알림으로 설정되어야 합니다. Remote Desktop Users 추가는 RDP를 통한 원격 접근을 보장합니다.",
+      "expertEn": "Adding to Domain Admins generates Event ID 4728 (Member added to security-enabled global group). This event replicates to all DCs and should be set as highest priority in SIEM. Adding to Remote Desktop Users ensures remote access via RDP.",
+      "defTooltip": "🔐 Domain Admins 그룹에 새 멤버 추가! Event ID 4728 - 즉시 조사 필요.",
+      "defTooltipEn": "🔐 New member added to Domain Admins! Event ID 4728 - immediate investigation required.",
+      "hackerLog": {
+        "title": "privilege_escalation.txt",
+        "lines": [
+          { "log": "svc_backup → Domain Admins group (ADDED)", "desc": "💡 도메인 최고 관리자 권한 획득 - 전체 네트워크 제어 가능" },
+          { "log": "4728 - Member added to security-enabled global group", "desc": "💡 DC Security 로그에 기록 - SIEM 고우선순위 알림 대상" },
+          { "log": "RDP access to any domain host", "desc": "💡 원격 데스크톱으로 모든 서버 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Domain Admins", "desc": "Active Directory에서 가장 높은 권한을 가진 그룹. 도메인 내 모든 리소스에 대한 완전한 제어 권한을 가집니다." },
+        { "name": "Event ID 4728", "desc": "보안 활성 전역 그룹에 멤버가 추가될 때 기록되는 이벤트입니다." },
+        { "name": "GPO (Group Policy Object)", "desc": "Active Directory에서 사용자와 컴퓨터에 대한 정책을 중앙에서 관리하는 메커니즘입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"Set-ADUser svc_backup -PasswordNeverExpires $true -CannotChangePassword $false; Set-ADAccountControl svc_backup -DoesNotRequirePreAuth $true; Move-ADObject (Get-ADUser svc_backup).DistinguishedName -TargetPath 'OU=Service Accounts,DC=corp,DC=local'\"",
+      "out": "[*] Account hardening for stealth:\n    PasswordNeverExpires: TRUE\n    DoesNotRequirePreAuth: TRUE (AS-REP roasting risk accepted)\n    Moved to: OU=Service Accounts\n\n[*] Stealth measures:\n    - Password won't expire (no forced reset alerts)\n    - Located in Service Accounts OU (expected location)\n    - No login restrictions set\n    - Account blends with legitimate service accounts",
+      "def": "[DC Security] Account properties modified - PasswordNeverExpires and PreAuth changes",
+      "defAction": "Source: DC Security Event Log (Event ID 4738)\nTarget: svc_backup properties\nAction: Account modifications flagged, DoesNotRequirePreAuth is high-risk setting",
+      "desc": "백도어 계정의 속성을 변경하여 만료 없이 지속적으로 사용 가능하게 합니다.",
+      "descEn": "The attacker modifies backdoor account properties for indefinite usability without expiration.",
+      "stepTitle": "계정 속성 조작 (만료 방지 및 OU 이동)",
+      "stepTitleEn": "Account Property Manipulation (Expiration Prevention & OU Move)",
+      "feynman": "가짜 사원증에 '영구직'이라고 표시하고, 정직원 사물함 구역으로 이사하는 것과 같습니다. 비밀번호가 만료되지 않으면 관리자가 '만료된 계정 정리'를 해도 이 계정은 살아남고, Service Accounts OU로 이동하면 다른 서비스 계정들 사이에 자연스럽게 섞입니다.",
+      "feynmanEn": "It's like marking the fake badge as 'permanent employee' and moving to the regular employee locker area. If the password never expires, the account survives 'expired account cleanup,' and moving to Service Accounts OU makes it blend naturally with other service accounts.",
+      "expert": "PasswordNeverExpires는 비밀번호 정책 기반 자동 만료를 방지합니다. DoesNotRequirePreAuth는 Kerberos 사전 인증을 비활성화하여 AS-REP Roasting 공격에 취약해지지만, 공격자 입장에서는 사전 인증 없이 TGT를 요청할 수 있어 편리합니다. OU 이동은 AD 구조 기반 탐지를 우회합니다.",
+      "expertEn": "PasswordNeverExpires prevents policy-based automatic expiration. DoesNotRequirePreAuth disables Kerberos pre-authentication, making it vulnerable to AS-REP Roasting but convenient for the attacker to request TGTs without pre-auth. OU move bypasses AD structure-based detection.",
+      "defTooltip": "🔐 계정 속성 변경 - PasswordNeverExpires 및 PreAuth 비활성화! Event ID 4738 확인 필요.",
+      "defTooltipEn": "🔐 Account properties changed - PasswordNeverExpires and PreAuth disabled! Check Event ID 4738.",
+      "hackerLog": {
+        "title": "account_hardening.txt",
+        "lines": [
+          { "log": "PasswordNeverExpires: TRUE", "desc": "💡 비밀번호 만료 방지 - 관리자의 정기 정리에서 생존" },
+          { "log": "DoesNotRequirePreAuth: TRUE", "desc": "💡 Kerberos 사전 인증 불필요 - AS-REP Roasting 가능하지만 공격자에겐 편리" },
+          { "log": "Moved to: OU=Service Accounts", "desc": "💡 서비스 계정 OU에 위치 - 자연스러운 위장" }
+        ]
+      },
+      "terms": [
+        { "name": "OU (Organizational Unit)", "desc": "Active Directory의 조직 단위. 사용자, 컴퓨터, 그룹을 논리적으로 구분하여 관리합니다." },
+        { "name": "Kerberos 사전 인증", "desc": "TGT 발급 전 사용자를 검증하는 과정. 비활성화하면 AS-REP Roasting 공격이 가능합니다." },
+        { "name": "Event ID 4738", "desc": "사용자 계정 속성이 변경될 때 기록되는 Windows Security 이벤트입니다." }
+      ]
+    },
+    {
+      "cmd": "runas /user:corp\\svc_backup \"cmd /c whoami /all && net group \\\"Domain Admins\\\" /domain\"",
+      "out": "Enter the password for corp\\svc_backup: ********\n\nUSER INFORMATION\n----------------\nUser Name           SID\n=================== =============================================\ncorp\\svc_backup     S-1-5-21-3623811015-3361044348-30300820-1145\n\nGROUP INFORMATION\n-----------------\nGroup Name                    Type             SID\n============================= ================ ====\ncorp\\Domain Admins            Group            S-1-5-21-...-512\ncorp\\Domain Users             Group            S-1-5-21-...-513\nBUILTIN\\Remote Desktop Users  Alias            S-1-5-32-555\n\nMembers of Domain Admins:\n    admin_jones\n    admin_smith\n    svc_backup    ← BACKDOOR\n    Administrator\n\n[+] Backdoor account verified: FULL DOMAIN ADMIN\n[+] Can access any host via RDP or PSRemoting\n[+] Credentials independent of original compromise",
+      "def": "[SIEM] Service account svc_backup authenticated with Domain Admin privileges - unusual activity",
+      "defAction": "Source: DC Security + SIEM correlation\nTarget: svc_backup login\nAction: Account disabled, Domain Admins membership removed, full AD audit initiated",
+      "desc": "생성한 백도어 계정으로 로그인하여 Domain Admin 권한이 동작하는지 검증합니다.",
+      "descEn": "The attacker logs in with the backdoor account to verify Domain Admin privileges are functional.",
+      "stepTitle": "백도어 계정 권한 검증",
+      "stepTitleEn": "Backdoor Account Privilege Verification",
+      "feynman": "만든 가짜 사원증으로 실제로 이사회 회의실에 들어갈 수 있는지 테스트하는 것과 같습니다. svc_backup으로 로그인하면 Domain Admin 권한이 있어 모든 서버에 접근하고, GPO를 수정하고, 다른 계정을 만들 수도 있습니다.",
+      "feynmanEn": "It's like testing whether the fake badge actually lets you enter the boardroom. Logging in as svc_backup with Domain Admin privileges allows access to all servers, GPO modification, and even creating other accounts.",
+      "expert": "백도어 계정은 원래 침투에 사용된 계정과 독립적이므로, 최초 침투 경로가 차단되어도 접근이 유지됩니다. Domain Admins 멤버십은 모든 DC에 복제되므로, 모든 DC를 점검해야 합니다. 대응 시 계정 비활성화, 그룹 멤버십 제거, 비밀번호 변경, 전체 AD 감사가 필요합니다.",
+      "expertEn": "The backdoor account is independent of the originally compromised account, maintaining access even if the initial intrusion path is blocked. Domain Admins membership replicates to all DCs, requiring inspection of every DC. Response requires account disabling, group membership removal, password change, and full AD audit.",
+      "defTooltip": "🔐 서비스 계정이 Domain Admin 권한으로 인증! 비정상적 활동 - 즉시 계정 비활성화 필요.",
+      "defTooltipEn": "🔐 Service account authenticated with Domain Admin privileges! Unusual activity - immediate account disable required.",
+      "hackerLog": {
+        "title": "backdoor_verify.txt",
+        "lines": [
+          { "log": "corp\\Domain Admins - Group", "desc": "💡 Domain Admin 그룹 멤버십 확인 - 최고 권한 보유" },
+          { "log": "svc_backup ← BACKDOOR", "desc": "💡 Domain Admins 목록에 백도어 계정이 정상적으로 포함" },
+          { "log": "Credentials independent of original compromise", "desc": "💡 최초 침투 계정과 독립적 - 원래 경로 차단되어도 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "runas", "desc": "Windows에서 다른 사용자 권한으로 프로그램을 실행하는 명령어입니다." },
+        { "name": "SID (Security Identifier)", "desc": "Windows에서 사용자, 그룹 등 보안 주체를 고유하게 식별하는 값입니다." },
+        { "name": "PSRemoting", "desc": "PowerShell 원격 실행. WinRM 프로토콜을 사용하여 원격 시스템에서 PowerShell 명령을 실행합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "cmd.exe (attacker - DA context)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "net.exe user /domain (enum)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "net.exe user svc_backup /add /domain", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "net.exe group \"Domain Admins\" /add", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "powershell.exe (AD property changes)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "[Backdoor Login]", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "runas /user:corp\\svc_backup cmd.exe", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "whoami.exe /all", "depth": 2, "alert": false, "minStep": 4 }
+  ]
+}

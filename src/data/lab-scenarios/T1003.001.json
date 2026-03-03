@@ -1,0 +1,236 @@
+{
+  "id": "T1003.001",
+  "title": "LSASS 메모리 덤프 시뮬레이션",
+  "titleEn": "LSASS Memory Credential Dumping Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon" },
+    { "label": "공격", "labelEn": "Attack" },
+    { "label": "침투", "labelEn": "Breach" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "target", "label": "Target PC", "type": "victim" },
+    { "id": "lsass", "label": "LSASS Process", "type": "server" },
+    { "id": "dc", "label": "Domain Controller", "type": "server" },
+    { "id": "edr", "label": "EDR / SIEM", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "Elevated Shell", "activeStep": 0 },
+    { "from": "target", "to": "lsass", "label": "Memory Access", "activeStep": 2 },
+    { "from": "lsass", "to": "dc", "label": "Cached Creds", "activeStep": 3 },
+    { "from": "edr", "to": "target", "label": "Alert", "activeStep": 1 }
+  ],
+  "desktopIcons": [
+    { "label": "Mimikatz", "icon": "🔑" },
+    { "label": "LSASS Dump", "icon": "💾" },
+    { "label": "Credentials", "icon": "🔓" }
+  ],
+  "steps": [
+    {
+      "cmd": "tasklist /FI \"IMAGENAME eq lsass.exe\" /V",
+      "out": "Image Name                     PID Session Name     Mem Usage Status          User Name\n========================= ======== ================ ========= =============== =============\nlsass.exe                      684 Services                0   52,480 K Running         NT AUTHORITY\\SYSTEM",
+      "def": "[EDR] LSASS process enumeration by {userName}",
+      "defAction": "Process: tasklist.exe\nTarget: lsass.exe (PID: 684)\nUser: {companyName}\\{userName}\nRisk Level: Medium\nAction: Monitor for credential access attempt",
+      "desc": "LSASS(Local Security Authority Subsystem Service) 프로세스의 PID를 확인합니다. LSASS는 인증 자격 증명을 메모리에 저장하는 핵심 보안 프로세스입니다.",
+      "descEn": "Identifies the PID of LSASS (Local Security Authority Subsystem Service). LSASS is a critical security process that stores authentication credentials in memory.",
+      "stepTitle": "LSASS PID 확인",
+      "stepTitleEn": "Find LSASS PID",
+      "feynman": "은행의 금고 관리인이 누구인지, 어느 방에 있는지 확인하는 것과 같습니다. 금고 관리인(LSASS)은 모든 고객의 비밀번호를 기억하고 있습니다.",
+      "feynmanEn": "It's like finding out who the bank's vault manager is and which room they're in. The vault manager (LSASS) remembers every customer's password.",
+      "expert": "LSASS(PID 684)는 NT AUTHORITY\\SYSTEM으로 실행되는 보호된 프로세스입니다. Windows 8.1+에서는 PPL(Protected Process Light)로 보호 가능합니다. tasklist로 LSASS를 검색하는 행위 자체를 Sysmon Event ID 1에서 모니터링해야 합니다.",
+      "expertEn": "LSASS (PID 684) runs as NT AUTHORITY\\SYSTEM as a protected process. On Windows 8.1+, it can be protected with PPL. Monitor tasklist searches for LSASS via Sysmon Event ID 1.",
+      "defTooltip": "Sysmon Event ID 1에서 tasklist.exe가 'lsass'를 인자로 포함하는 실행을 탐지하세요. 후속 Mimikatz 실행의 전조 지표입니다.",
+      "defTooltipEn": "Detect tasklist.exe execution with 'lsass' as argument in Sysmon Event ID 1. This is a precursor indicator for subsequent Mimikatz execution.",
+      "hackerLog": {
+        "title": "LSASS 프로세스 탐색",
+        "lines": [
+          { "text": "tasklist /FI \"IMAGENAME eq lsass.exe\"", "desc": "LSASS 프로세스 PID 검색" },
+          { "text": "lsass.exe  PID: 684  52,480 K", "desc": "LSASS PID 684 확인, 메모리 50MB" }
+        ]
+      },
+      "terms": [
+        { "term": "LSASS", "desc": "Local Security Authority Subsystem Service - Windows 인증 자격 증명을 관리하는 핵심 보안 프로세스" },
+        { "term": "PID (Process ID)", "desc": "운영체제가 각 프로세스에 부여하는 고유 식별 번호" }
+      ]
+    },
+    {
+      "cmd": "mimikatz.exe \"privilege::debug\" \"exit\"",
+      "out": "  .#####.   mimikatz 2.2.0 (x64) #19041\n .## ^ ##.  \"A La Vie, A L'Amour\"\n ## / \\ ##  /*** Benjamin DELPY `gentilkiwi`\n ## \\ / ##       > https://blog.gentilkiwi.com\n '## v ##'       Vincent LE TOUX\n  '#####'        > https://pingcastle.com\n\nmimikatz(commandline) # privilege::debug\nPrivilege '20' OK\n\nmimikatz(commandline) # exit\nBye!",
+      "def": "[EDR] CRITICAL: Mimikatz execution detected on PC-{userName}",
+      "defAction": "Process: mimikatz.exe (PID: 5500)\nHash: b4d7a8c1e2f3a4b5c6d7e8f9a0b1c2d3\nSignature: Known credential dumping tool\nRisk Level: Critical\nAction: KILL process, quarantine binary, alert IR",
+      "desc": "Mimikatz를 실행하고 SeDebugPrivilege를 활성화합니다. 이 권한이 있어야 LSASS 프로세스의 메모리에 접근할 수 있습니다.",
+      "descEn": "Executes Mimikatz and enables SeDebugPrivilege. This privilege is required to access LSASS process memory.",
+      "stepTitle": "디버그 권한 획득",
+      "stepTitleEn": "Enable Debug Privilege",
+      "feynman": "은행 금고실에 들어가기 위한 마스터키를 만드는 것과 같습니다. 디버그 권한은 다른 프로세스의 메모리를 들여다볼 수 있는 '만능 열쇠'입니다.",
+      "feynmanEn": "It's like crafting a master key to enter the bank vault. Debug privilege is a 'skeleton key' that lets you look into any other process's memory.",
+      "expert": "Mimikatz는 CVE 취약점을 이용하지 않고 Windows API(OpenProcess, ReadProcessMemory)를 정상적으로 호출합니다. SeDebugPrivilege(Privilege 20)는 관리자 토큰에 기본 포함되지만 활성화가 필요합니다. EDR은 mimikatz.exe 해시나 YARA 규칙으로 탐지합니다.",
+      "expertEn": "Mimikatz doesn't exploit CVEs but legitimately calls Windows APIs (OpenProcess, ReadProcessMemory). SeDebugPrivilege (Privilege 20) is included in admin tokens by default but needs activation. EDR detects via mimikatz.exe hash or YARA rules.",
+      "defTooltip": "EDR에서 mimikatz.exe의 파일 해시, PE 시그니처, YARA 룰을 기반으로 실행을 차단하세요. privilege::debug 호출 시 Sysmon Event ID 10 (ProcessAccess)이 생성됩니다.",
+      "defTooltipEn": "Block mimikatz.exe execution via file hash, PE signature, and YARA rules in EDR. Sysmon Event ID 10 (ProcessAccess) is generated on privilege::debug calls.",
+      "hackerLog": {
+        "title": "Mimikatz 실행 및 권한 획득",
+        "lines": [
+          { "text": "mimikatz 2.2.0 (x64) #19041", "desc": "Mimikatz 자격증명 덤핑 도구 실행" },
+          { "text": "privilege::debug - Privilege '20' OK", "desc": "SeDebugPrivilege 활성화 성공" }
+        ]
+      },
+      "terms": [
+        { "term": "Mimikatz", "desc": "Windows 자격 증명 추출 도구 - NTLM 해시, Kerberos 티켓 등을 덤프" },
+        { "term": "SeDebugPrivilege", "desc": "다른 프로세스의 메모리에 접근할 수 있는 Windows 디버그 권한" },
+        { "term": "YARA Rule", "desc": "악성코드 탐지를 위한 패턴 매칭 규칙 언어" }
+      ]
+    },
+    {
+      "cmd": "mimikatz.exe \"sekurlsa::logonpasswords\" \"exit\"",
+      "out": "Authentication Id : 0 ; 996 (00000000:000003E4)\nSession           : Service from 0\nUser Name         : {userName}\nDomain            : {companyName}\nLogon Server      : DC01\nLogon Time        : 3/1/2026 9:15:30 AM\nSID               : S-1-5-21-3623811015-3361044348-30300820-1013\n\n  msv :\n   [00000003] Primary\n   * Username : {userName}\n   * Domain   : {companyName}\n   * NTLM     : a87f3a337d73085c45f9416be5787d86\n   * SHA1     : da39a3ee5e6b4b0d3255bfef95601890afd80709\n\n  wdigest :\n   * Username : {userName}\n   * Domain   : {companyName}\n   * Password : (null)\n\n  kerberos :\n   * Username : {userName}\n   * Domain   : {companyName}.LOCAL\n   * Password : (null)",
+      "def": "[EDR] CRITICAL: LSASS memory dump - credential extraction in progress",
+      "defAction": "Process: mimikatz.exe -> lsass.exe (PID: 684)\nAPI: OpenProcess(PROCESS_ALL_ACCESS)\nData Extracted: NTLM hashes, Kerberos tickets\nCredentials Found: 4 accounts\nRisk Level: Critical\nAction: Force password reset for ALL extracted accounts",
+      "desc": "LSASS 메모리에서 로그온된 사용자의 자격 증명을 추출합니다. NTLM 해시, Kerberos 티켓 등이 평문 또는 해시 형태로 덤프됩니다.",
+      "descEn": "Extracts credentials of logged-on users from LSASS memory. NTLM hashes, Kerberos tickets, etc. are dumped in plaintext or hash form.",
+      "stepTitle": "자격 증명 덤프",
+      "stepTitleEn": "Dump Credentials",
+      "feynman": "금고 관리인의 머릿속을 들여다보는 것과 같습니다. 관리인이 기억하고 있는 모든 고객의 비밀번호(NTLM 해시)가 쏟아져 나옵니다.",
+      "feynmanEn": "It's like reading the vault manager's mind. Every customer's password (NTLM hash) that the manager remembers comes pouring out.",
+      "expert": "sekurlsa::logonpasswords는 LSASS 메모리에서 MSV1_0, WDigest, Kerberos, TSPKG 등 모든 인증 패키지의 자격 증명을 추출합니다. Windows 10+에서 WDigest 평문 패스워드는 기본적으로 비활성화(UseLogonCredential=0)이지만, NTLM 해시는 여전히 노출됩니다.",
+      "expertEn": "sekurlsa::logonpasswords extracts credentials from all authentication packages in LSASS memory (MSV1_0, WDigest, Kerberos, TSPKG). WDigest plaintext passwords are disabled by default on Win10+ (UseLogonCredential=0), but NTLM hashes remain exposed.",
+      "defTooltip": "Sysmon Event ID 10에서 lsass.exe에 대한 OpenProcess(PROCESS_ALL_ACCESS) 호출을 모니터링하세요. GrantedAccess 값 0x1010, 0x1038이 의심 지표입니다.",
+      "defTooltipEn": "Monitor OpenProcess(PROCESS_ALL_ACCESS) calls to lsass.exe in Sysmon Event ID 10. GrantedAccess values 0x1010, 0x1038 are suspicious indicators.",
+      "hackerLog": {
+        "title": "LSASS 메모리 자격 증명 추출",
+        "lines": [
+          { "text": "* NTLM : a87f3a337d73085c45f9416be5787d86", "desc": "사용자 NTLM 해시 추출 성공" },
+          { "text": "Logon Server : DC01", "desc": "도메인 컨트롤러 DC01 경유 인증 확인" }
+        ]
+      },
+      "terms": [
+        { "term": "NTLM Hash", "desc": "Windows NT LAN Manager 인증에 사용되는 비밀번호 해시 값" },
+        { "term": "WDigest", "desc": "Windows의 인증 프로토콜 - 구버전에서 평문 비밀번호를 메모리에 저장" },
+        { "term": "Kerberos Ticket", "desc": "Windows 도메인 인증에 사용되는 시간 제한 인증 토큰" }
+      ]
+    },
+    {
+      "cmd": "mimikatz.exe \"sekurlsa::logonpasswords\" \"exit\" | findstr /i \"Username Domain NTLM\"",
+      "out": "   * Username : {userName}\n   * Domain   : {companyName}\n   * NTLM     : a87f3a337d73085c45f9416be5787d86\n   * Username : svc_backup\n   * Domain   : {companyName}\n   * NTLM     : e52cac67419a9a224a3b108f3fa6cb6d\n   * Username : admin.jkim\n   * Domain   : {companyName}\n   * NTLM     : 8846f7eaee8fb117ad06bdd830b7586c\n   * Username : DomainAdmin01\n   * Domain   : {companyName}\n   * NTLM     : 2b576acbe6bcfda7294d6bd18041b8fe",
+      "def": "[EDR] CRITICAL: Multiple account credentials extracted including Domain Admin",
+      "defAction": "Accounts Compromised:\n  - {userName} (standard user)\n  - svc_backup (service account)\n  - admin.jkim (admin)\n  - DomainAdmin01 (domain admin)\nRisk Level: Critical\nAction: Emergency password reset for all accounts",
+      "desc": "총 4개 계정의 NTLM 해시가 추출되었습니다. 도메인 관리자 계정 포함으로 전체 도메인이 위험합니다.",
+      "descEn": "NTLM hashes for 4 accounts were extracted. Including the Domain Admin account, the entire domain is at risk.",
+      "stepTitle": "해시 필터 추출",
+      "stepTitleEn": "Filter Hashes",
+      "feynman": "수백 명의 고객 정보 중에서 VIP 고객(관리자)의 비밀번호만 골라내는 것과 같습니다. 특히 은행장(DomainAdmin01)의 비밀번호까지 확보하면 은행 전체를 장악할 수 있습니다.",
+      "feynmanEn": "It's like filtering through hundreds of customer records to pick out VIP (admin) passwords. Having the bank president's (DomainAdmin01) password means controlling the entire bank.",
+      "expert": "4개 계정 중 DomainAdmin01의 NTLM 해시 탈취는 전체 도메인 침해를 의미합니다. Pass the Hash(T1550.002)로 이 해시만으로 DC에 인증 가능합니다. 즉시 도메인 전체 비밀번호 리셋과 krbtgt 키 2회 롤오버가 필요합니다.",
+      "expertEn": "Compromising DomainAdmin01's NTLM hash means full domain compromise. Pass the Hash (T1550.002) can authenticate to DC with just this hash. Immediate domain-wide password reset and double krbtgt key rollover are needed.",
+      "defTooltip": "도메인 관리자 계정의 NTLM 해시가 탈취되면 즉시 비밀번호 리셋 + krbtgt 키 2회 롤오버를 수행하세요. Golden Ticket 공격 방지를 위해 반드시 2회 롤오버입니다.",
+      "defTooltipEn": "If Domain Admin NTLM hash is compromised, immediately reset passwords + double krbtgt key rollover. Two rollovers are mandatory to prevent Golden Ticket attacks.",
+      "hackerLog": {
+        "title": "핵심 계정 해시 추출",
+        "lines": [
+          { "text": "* Username: DomainAdmin01  NTLM: 2b576acbe6bc...", "desc": "도메인 관리자 해시 탈취 - 전체 도메인 위험" },
+          { "text": "* Username: svc_backup  NTLM: e52cac674...", "desc": "백업 서비스 계정 해시 - 데이터 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "term": "Pass the Hash (PtH)", "desc": "비밀번호 대신 NTLM 해시만으로 인증하는 측면 이동 공격 기법" },
+        { "term": "krbtgt", "desc": "Kerberos 티켓 발급에 사용되는 도메인 핵심 계정 - Golden Ticket의 열쇠" }
+      ]
+    },
+    {
+      "cmd": "rundll32.exe C:\\Windows\\System32\\comsvcs.dll MiniDump 684 C:\\Temp\\lsass.dmp full",
+      "out": "[Process lsass.exe dumped to C:\\Temp\\lsass.dmp]\n[File size: 52,428,800 bytes]",
+      "def": "[EDR] ALERT: LSASS process dump using comsvcs.dll (LOLBin technique)",
+      "defAction": "Process: rundll32.exe -> comsvcs.dll!MiniDump\nTarget: lsass.exe (PID: 684)\nDump File: C:\\Temp\\lsass.dmp (50 MB)\nTechnique: Living off the Land Binary\nRisk Level: Critical\nAction: Delete dump file, block comsvcs.dll MiniDump",
+      "desc": "comsvcs.dll을 이용한 LSASS 덤프는 별도 도구 없이 Windows 내장 파일만으로 수행됩니다. LOLBin(Living off the Land Binary) 기법입니다.",
+      "descEn": "LSASS dump using comsvcs.dll is performed using only built-in Windows files without additional tools. This is a LOLBin (Living off the Land Binary) technique.",
+      "stepTitle": "LOLBin 메모리 덤프",
+      "stepTitleEn": "LOLBin Memory Dump",
+      "feynman": "도둑이 자기 도구를 가져오지 않고 건물에 이미 있는 소방 도끼로 금고를 부수는 것과 같습니다. 건물 자체의 장비를 악용하기 때문에 외부 도구 탐지에 걸리지 않습니다.",
+      "feynmanEn": "It's like a thief not bringing their own tools but using the building's fire axe to break into the vault. Since they abuse the building's own equipment, external tool detection won't catch them.",
+      "expert": "comsvcs.dll의 MiniDump 함수는 Windows 내장 기능으로, Mimikatz 없이 LSASS 덤프가 가능합니다. rundll32.exe → comsvcs.dll!MiniDump 호출 체인은 Sysmon Event ID 7(Image Loaded)과 Event ID 11(File Created)로 탐지합니다.",
+      "expertEn": "comsvcs.dll's MiniDump function is a built-in Windows feature enabling LSASS dumps without Mimikatz. The rundll32.exe → comsvcs.dll!MiniDump call chain is detected via Sysmon Event ID 7 (Image Loaded) and Event ID 11 (File Created).",
+      "defTooltip": "Sysmon Event ID 11에서 lsass*.dmp 파일 생성을 모니터링하세요. rundll32.exe가 comsvcs.dll을 로드하면(Event ID 7) 즉시 알림을 생성하세요.",
+      "defTooltipEn": "Monitor lsass*.dmp file creation in Sysmon Event ID 11. Create immediate alerts when rundll32.exe loads comsvcs.dll (Event ID 7).",
+      "hackerLog": {
+        "title": "LOLBin LSASS 덤프",
+        "lines": [
+          { "text": "rundll32.exe comsvcs.dll MiniDump 684", "desc": "Windows 내장 DLL로 LSASS 메모리 덤프" },
+          { "text": "File size: 52,428,800 bytes", "desc": "50MB 덤프 파일 생성 - 오프라인 분석 가능" }
+        ]
+      },
+      "terms": [
+        { "term": "LOLBin (Living off the Land Binary)", "desc": "시스템에 기본 설치된 합법적 바이너리를 악용하는 공격 기법" },
+        { "term": "comsvcs.dll", "desc": "Windows COM+ 서비스 DLL - MiniDump 함수로 프로세스 메모리 덤프 가능" },
+        { "term": "MiniDump", "desc": "프로세스 메모리를 파일로 저장하는 Windows 디버깅 기능" }
+      ]
+    },
+    {
+      "cmd": "mimikatz.exe \"sekurlsa::minidump C:\\Temp\\lsass.dmp\" \"sekurlsa::logonpasswords\" \"exit\"",
+      "out": "Switch to MINIDUMP : 'C:\\Temp\\lsass.dmp'\n\nOpening : 'C:\\Temp\\lsass.dmp' file for minidump...\n\nAuthentication Id : 0 ; 996\n   * Username : {userName}\n   * NTLM     : a87f3a337d73085c45f9416be5787d86\n\nAuthentication Id : 0 ; 1205\n   * Username : DomainAdmin01\n   * NTLM     : 2b576acbe6bcfda7294d6bd18041b8fe",
+      "def": "[EDR] Offline credential extraction from LSASS dump file",
+      "defAction": "Process: mimikatz.exe\nInput: C:\\Temp\\lsass.dmp\nTechnique: Offline credential extraction\nRisk Level: Critical\nAction: Confirms dump file contains valid credentials",
+      "desc": "덤프 파일을 오프라인으로 분석하여 자격 증명을 추출합니다. 이 방법은 실시간 LSASS 접근 없이도 자격 증명을 획득할 수 있습니다.",
+      "descEn": "Analyzes the dump file offline to extract credentials. This method can obtain credentials without real-time LSASS access.",
+      "stepTitle": "오프라인 덤프 분석",
+      "stepTitleEn": "Offline Dump Analysis",
+      "feynman": "금고 관리인의 뇌를 복제해서 다른 장소에서 천천히 분석하는 것과 같습니다. 원본 은행에 직접 접근하지 않아도 모든 비밀번호를 알아낼 수 있습니다.",
+      "feynmanEn": "It's like cloning the vault manager's brain and analyzing it at a different location. You can extract all passwords without directly accessing the original bank.",
+      "expert": "오프라인 분석은 공격자의 로컬 머신에서 수행할 수 있어 실시간 EDR 탐지를 회피합니다. 덤프 파일만 유출되면 어디서든 자격 증명 추출이 가능합니다. 이는 DLP(Data Loss Prevention)에서 .dmp 파일 유출을 차단해야 하는 이유입니다.",
+      "expertEn": "Offline analysis can be performed on the attacker's local machine, evading real-time EDR detection. Once the dump file is exfiltrated, credentials can be extracted anywhere. This is why DLP must block .dmp file exfiltration.",
+      "defTooltip": "DLP에서 .dmp 확장자 파일의 네트워크 전송을 차단하세요. 특히 50MB 이상의 .dmp 파일이 외부로 전송되면 LSASS 덤프 유출 가능성이 높습니다.",
+      "defTooltipEn": "Block .dmp file network transfers in DLP. Files over 50MB with .dmp extension being sent externally are highly likely LSASS dump exfiltration.",
+      "hackerLog": {
+        "title": "오프라인 덤프 분석",
+        "lines": [
+          { "text": "Switch to MINIDUMP : 'C:\\Temp\\lsass.dmp'", "desc": "덤프 파일 오프라인 분석 시작" },
+          { "text": "* Username: DomainAdmin01  NTLM: 2b576acbe6bc...", "desc": "덤프 파일에서도 도메인 관리자 해시 추출 확인" }
+        ]
+      },
+      "terms": [
+        { "term": "Offline Analysis", "desc": "실시간 시스템 접근 없이 덤프 파일을 별도 환경에서 분석하는 기법" },
+        { "term": "DLP (Data Loss Prevention)", "desc": "민감 데이터의 무단 유출을 탐지하고 차단하는 보안 솔루션" }
+      ]
+    },
+    {
+      "cmd": "del C:\\Temp\\lsass.dmp && del mimikatz.exe",
+      "out": "C:\\Temp\\lsass.dmp - Deleted\nmimikatz.exe - Deleted",
+      "def": "[EDR] Anti-forensics: LSASS dump file and Mimikatz binary deleted",
+      "defAction": "Files Deleted:\n  - C:\\Temp\\lsass.dmp (50 MB)\n  - mimikatz.exe\nRisk Level: High\nAction: File recovery attempted from disk, MFT records preserved",
+      "desc": "공격자가 증거를 인멸하기 위해 덤프 파일과 도구를 삭제합니다. 하지만 파일 시스템 포렌식으로 복구가 가능할 수 있습니다.",
+      "descEn": "The attacker deletes the dump file and tool to destroy evidence. However, recovery may be possible through file system forensics.",
+      "stepTitle": "증거 인멸",
+      "stepTitleEn": "Evidence Cleanup",
+      "feynman": "범행 도구와 증거물을 태워서 없애는 것과 같습니다. 하지만 불에 타다 남은 파편(MFT 레코드)으로 어떤 도구가 사용되었는지 흔적을 복구할 수 있습니다.",
+      "feynmanEn": "It's like burning the crime tools and evidence. But forensic fragments (MFT records) left in the ashes can reveal what tools were used.",
+      "expert": "del 명령은 파일을 논리적으로만 삭제하며, MFT(Master File Table) 레코드와 $UsnJrnl(Update Sequence Number Journal)에 흔적이 남습니다. 디스크 포렌식으로 삭제된 파일의 존재와 타임스탬프를 복구할 수 있습니다.",
+      "expertEn": "The del command only logically deletes files. Traces remain in MFT (Master File Table) records and $UsnJrnl (Update Sequence Number Journal). Disk forensics can recover the existence and timestamps of deleted files.",
+      "defTooltip": "Sysmon Event ID 23 (FileDelete)에서 lsass.dmp와 mimikatz.exe 삭제를 탐지하세요. 삭제 자체가 공격 증거입니다. $MFT와 $UsnJrnl을 보존하면 포렌식 복구가 가능합니다.",
+      "defTooltipEn": "Detect lsass.dmp and mimikatz.exe deletion in Sysmon Event ID 23 (FileDelete). The deletion itself is evidence of attack. Preserving $MFT and $UsnJrnl enables forensic recovery.",
+      "hackerLog": {
+        "title": "증거 인멸 시도",
+        "lines": [
+          { "text": "del C:\\Temp\\lsass.dmp", "desc": "50MB LSASS 덤프 파일 삭제" },
+          { "text": "del mimikatz.exe", "desc": "공격 도구 삭제 - 하지만 MFT 흔적은 남음" }
+        ]
+      },
+      "terms": [
+        { "term": "MFT (Master File Table)", "desc": "NTFS 파일시스템의 모든 파일 메타데이터를 저장하는 핵심 테이블" },
+        { "term": "$UsnJrnl", "desc": "NTFS의 변경 사항 저널 - 파일 생성/삭제/변경 이력 기록" },
+        { "term": "Sysmon Event ID 23", "desc": "파일 삭제 이벤트 - 삭제된 파일의 이름과 해시를 기록" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "lsass.exe (PID: 684, SYSTEM)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (Elevated)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "tasklist.exe", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "mimikatz.exe (PID: 5500)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "[Reading lsass.exe memory]", "depth": 3, "alert": true, "minStep": 2 },
+    { "name": "rundll32.exe -> comsvcs.dll", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "[lsass.dmp created]", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "mimikatz.exe (offline analysis)", "depth": 2, "alert": true, "minStep": 5 }
+  ]
+}

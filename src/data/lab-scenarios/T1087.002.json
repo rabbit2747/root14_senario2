@@ -1,0 +1,235 @@
+{
+  "id": "T1087.002",
+  "title": "도메인 계정 탐색 시뮬레이션",
+  "titleEn": "Domain Account Discovery Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "dc", "label": "DC01 (AD)", "x": 350, "y": 50, "type": "server" },
+    { "id": "target", "label": "AD LDAP", "x": 350, "y": 150, "type": "server" },
+    { "id": "siem", "label": "SIEM", "x": 500, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "dc", "label": "net user", "activeStep": 0 },
+    { "from": "attacker", "to": "target", "label": "LDAP Query", "activeStep": 3 },
+    { "from": "dc", "to": "siem", "label": "Alert", "activeStep": 1 },
+    { "from": "target", "to": "siem", "label": "AD Audit", "activeStep": 6 }
+  ],
+  "desktopIcons": [
+    { "label": "Terminal", "icon": "💻", "alertOnStep": 0 },
+    { "label": "PowerShell", "icon": "🗂️", "alertOnStep": 3 },
+    { "label": "LDAP Tool", "icon": "🔑", "alertOnStep": 6 },
+    { "label": "AD Data", "icon": "📦", "alertOnStep": 5 }
+  ],
+  "steps": [
+    {
+      "cmd": "net user /domain",
+      "out": "The request will be processed at a domain controller for domain {companyName}.local.\n\nUser accounts for \\\\DC01.{companyName}.local\n\n-------------------------------------------------------------------------------\nAdministrator            {userName}               admin.jkim\nDomainAdmin01            guest                    krbtgt\nsqlsvc                   svc_backup               websvc\nhr.park                  it.lee                   ceo.kim\ndev.choi                 sales.jung               intern.han\nThe command completed successfully.",
+      "def": "[SIEM] Domain user enumeration from PC-{userName}",
+      "defAction": "Process: net.exe -> net1.exe\nUser: {companyName}\\{userName}\nDomain: {companyName}.local\nAccounts Listed: 15\nRisk Level: Medium\nAction: Log and monitor for further enumeration",
+      "desc": "net user /domain 명령으로 도메인의 모든 사용자 계정을 열거합니다. 공격자가 공격 대상을 식별하기 위한 기본적인 정찰입니다.",
+      "descEn": "Enumerates all domain user accounts with 'net user /domain'. This is basic reconnaissance for the attacker to identify targets.",
+      "stepTitle": "도메인 사용자 열거",
+      "stepTitleEn": "Domain User Enumeration",
+      "feynman": "회사 전화번호부를 펼쳐서 모든 직원의 이름을 읽는 것과 같습니다. 누가 있는지 알면, 중요한 사람이 누구인지 파악할 수 있습니다. 공격의 첫 단계는 항상 '누구'를 아는 것입니다.",
+      "feynmanEn": "It's like opening the company phone directory and reading all employee names. Knowing who exists helps identify who's important. The first step of any attack is knowing 'who'.",
+      "expert": "net user /domain은 SAMR RPC를 통해 DC에 쿼리합니다. 이는 T1087.002의 가장 기본적인 기법으로, BloodHound의 SharpHound 수집기도 동일한 데이터를 수집합니다. DCSync 권한이 없는 일반 사용자도 실행 가능합니다.",
+      "expertEn": "net user /domain queries DC via SAMR RPC. This is the most basic technique of T1087.002. BloodHound's SharpHound collector gathers the same data. Executable by regular users without DCSync privileges.",
+      "defTooltip": "Sysmon Event ID 1에서 net.exe 또는 net1.exe 프로세스 생성을 감시하세요. 명령줄에 '/domain' 인자가 포함된 경우 도메인 정찰 활동입니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 1 for net.exe or net1.exe process creation. Command line containing '/domain' indicates domain reconnaissance.",
+      "hackerLog": {
+        "title": "domain_enum.log",
+        "lines": [
+          { "log": "net user /domain", "desc": "💡 도메인 컨트롤러에 등록된 모든 사용자를 나열하는 명령입니다" },
+          { "log": "User accounts for \\\\DC01.{companyName}.local", "desc": "💡 DC01 서버에서 15개의 계정 정보가 반환되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Domain", "desc": "Active Directory에서 관리하는 컴퓨터와 사용자의 논리적 그룹입니다" },
+        { "term": "SAMR RPC", "desc": "Security Account Manager Remote - 원격으로 계정 정보를 조회하는 프로토콜입니다" }
+      ]
+    },
+    {
+      "cmd": "net group \"Domain Admins\" /domain",
+      "out": "The request will be processed at a domain controller for domain {companyName}.local.\n\nGroup name     Domain Admins\nComment        Designated administrators of the domain\n\nMembers\n\n-------------------------------------------------------------------------------\nadmin.jkim               Administrator            DomainAdmin01\nThe command completed successfully.",
+      "def": "[SIEM] ALERT: Domain Admins group enumeration by {userName}",
+      "defAction": "Process: net.exe\nGroup Queried: Domain Admins\nMembers Found: admin.jkim, Administrator, DomainAdmin01\nUser: {companyName}\\{userName}\nRisk Level: High\nAction: Alert SOC - privilege escalation reconnaissance",
+      "desc": "Domain Admins 그룹의 구성원을 열거합니다. 이 정보는 권한 상승과 래터럴 무브먼트의 핵심 타겟을 식별하는 데 사용됩니다.",
+      "descEn": "Enumerates members of the Domain Admins group. This information is used to identify key targets for privilege escalation and lateral movement.",
+      "stepTitle": "도메인 관리자 그룹 조회",
+      "stepTitleEn": "Domain Admins Group Query",
+      "feynman": "회사에서 금고 열쇠를 가진 사람이 누구인지 알아내는 것입니다. Domain Admins 그룹의 3명이 회사의 모든 시스템을 제어할 수 있습니다. 공격자에게 이들은 '황금 목표물'입니다.",
+      "feynmanEn": "It's finding out who holds the vault keys in the company. The 3 members of Domain Admins control all systems. For attackers, these are the 'golden targets'.",
+      "expert": "Domain Admins 열거는 BloodHound 경로 분석의 핵심 입력입니다. 이 그룹은 기본적으로 DC에 대한 Full Control ACL을 갖습니다. Tier 0 자산 보호 모델에서 Domain Admins는 최상위 보호 대상이며, Privileged Access Workstation(PAW)에서만 사용해야 합니다.",
+      "expertEn": "Domain Admins enumeration is a key input for BloodHound path analysis. This group has Full Control ACL on DCs by default. In the Tier 0 asset protection model, Domain Admins are the highest protection target and should only be used from Privileged Access Workstations (PAW).",
+      "defTooltip": "Event ID 4799 (보안 그룹 멤버십 열거)에서 Domain Admins 그룹 조회를 감시하세요. 일반 사용자가 이 그룹을 조회하면 높은 우선순위 경고를 발생시켜야 합니다.",
+      "defTooltipEn": "Monitor Event ID 4799 (security group membership enumeration) for Domain Admins queries. Non-admin users querying this group should trigger high-priority alerts.",
+      "hackerLog": {
+        "title": "group_enum.log",
+        "lines": [
+          { "log": "net group \"Domain Admins\" /domain", "desc": "💡 도메인 최고 권한 그룹의 구성원을 조회합니다" },
+          { "log": "admin.jkim  Administrator  DomainAdmin01", "desc": "💡 3개의 도메인 관리자 계정이 발견 - 공격의 핵심 타겟입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Domain Admins", "desc": "도메인 내 모든 시스템에 대한 완전한 제어 권한을 가진 최고 권한 그룹입니다" },
+        { "term": "Lateral Movement", "desc": "한 시스템에서 다른 시스템으로 이동하여 접근 범위를 확장하는 공격 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "net user admin.jkim /domain",
+      "out": "The request will be processed at a domain controller for domain {companyName}.local.\n\nUser name                    admin.jkim\nFull Name                    Kim Jihoon (Admin)\nComment                      IT Admin - Server Management\nUser's comment\nCountry/region code          082 (Korea)\nAccount active               Yes\nAccount expires              Never\n\nPassword last set            6/15/2024 2:30:00 PM\nPassword expires             9/13/2024 2:30:00 PM\nPassword changeable          6/16/2024 2:30:00 PM\nPassword required            Yes\nUser may change password     Yes\n\nWorkstations allowed         All\nLogon script                 logon.bat\nUser profile\nHome directory               \\\\DC01\\users\\admin.jkim\nLast logon                   3/1/2026 9:15:00 AM\n\nLogon hours allowed          All\n\nLocal Group Memberships      *Remote Desktop Users\nGlobal Group memberships     *Domain Admins        *Domain Users\n                             *Server Operators\nThe command completed successfully.",
+      "def": "[SIEM] Detailed user profile query for admin account",
+      "defAction": "Process: net.exe\nTarget: admin.jkim (Domain Admin)\nInfo Gathered: Full profile, group memberships, logon times\nRisk Level: High\nAction: Monitor for password attacks against this account",
+      "desc": "도메인 관리자 계정의 상세 정보를 조회합니다. 비밀번호 만료일, 로그온 시간, 그룹 멤버십 등 공격에 필요한 정보를 수집합니다.",
+      "descEn": "Queries detailed information of the Domain Admin account. Collects information needed for attacks including password expiry, logon times, and group memberships.",
+      "stepTitle": "관리자 계정 상세 조회",
+      "stepTitleEn": "Admin Account Detail Query",
+      "feynman": "건물 경비원의 근무 시간, 어떤 열쇠를 가지고 있는지, 비밀번호를 마지막으로 바꾼 날을 알아내는 것입니다. 이 정보가 있으면 경비원이 없는 시간을 노려 침입할 수 있습니다.",
+      "feynmanEn": "It's like learning the security guard's schedule, what keys they have, and when they last changed the lock code. With this info, you can time your break-in when the guard is away.",
+      "expert": "계정 상세 정보에서 비밀번호 만료(9/13/2024)가 540일 전인데 계정이 여전히 활성인 점은 FGPP 또는 DONT_EXPIRE_PASSWORD 플래그를 시사합니다. Server Operators 그룹 멤버십은 서비스 제어 권한을 부여하며, 권한 상승에 활용될 수 있습니다.",
+      "expertEn": "Password expiry (9/13/2024) being 540+ days past with the account still active suggests FGPP or DONT_EXPIRE_PASSWORD flag. Server Operators group membership grants service control rights, exploitable for privilege escalation.",
+      "defTooltip": "Event ID 4662 (디렉터리 서비스 객체 액세스)에서 관리자 계정의 상세 속성 조회를 추적하세요. 비인가 사용자가 비밀번호 관련 속성을 읽으면 공격 준비 단계입니다.",
+      "defTooltipEn": "Track Event ID 4662 (directory service object access) for detailed attribute queries on admin accounts. Unauthorized users reading password attributes indicates attack preparation.",
+      "hackerLog": {
+        "title": "admin_profile.log",
+        "lines": [
+          { "log": "net user admin.jkim /domain", "desc": "💡 특정 도메인 관리자의 전체 프로필을 조회합니다" },
+          { "log": "Global Group memberships  *Domain Admins  *Server Operators", "desc": "💡 Domain Admins + Server Operators 이중 권한 보유 - 고가치 타겟 확인" }
+        ]
+      },
+      "terms": [
+        { "term": "Server Operators", "desc": "서버 서비스를 관리하고 파일 공유를 제어할 수 있는 권한 그룹입니다" },
+        { "term": "Logon Script", "desc": "사용자 로그인 시 자동 실행되는 스크립트로, 악용 시 지속성 확보에 사용됩니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"Get-ADUser -Filter * -Properties LastLogonDate,Enabled,PasswordLastSet,MemberOf | Where-Object {$_.Enabled -eq $true} | Select Name,LastLogonDate,PasswordLastSet | Sort-Object PasswordLastSet\"",
+      "out": "Name              LastLogonDate          PasswordLastSet\n----              -------------          ---------------\nsvc_backup        2/15/2026 3:00:00 AM   8/1/2023 9:15:00 AM\nwebsvc            2/28/2026 12:00:00 PM  3/15/2024 10:00:00 AM\nsqlsvc            3/1/2026 6:00:00 AM    6/20/2024 2:30:00 PM\nadmin.jkim        3/1/2026 9:15:00 AM    6/15/2024 2:30:00 PM\nintern.han        2/25/2026 8:30:00 AM   1/10/2026 9:00:00 AM\n{userName}        3/1/2026 10:00:00 AM   2/28/2026 3:00:00 PM\nceo.kim           3/1/2026 8:45:00 AM    2/28/2026 4:00:00 PM",
+      "def": "[EDR] ALERT: Active Directory bulk user query with password age analysis",
+      "defAction": "Process: powershell.exe\nAD Query: All enabled users with password details\nTool: Get-ADUser cmdlet\nRisk Level: High\nAction: Accounts with oldest passwords flagged for rotation",
+      "desc": "PowerShell로 AD 사용자를 비밀번호 설정 날짜순으로 정렬하여 조회합니다. 오래된 비밀번호를 가진 계정이 크래킹 대상입니다.",
+      "descEn": "Queries AD users sorted by password set date using PowerShell. Accounts with older passwords are cracking targets.",
+      "stepTitle": "AD 비밀번호 연령 분석",
+      "stepTitleEn": "AD Password Age Analysis",
+      "feynman": "아파트 전체 입주민의 도어락 배터리가 언제 교체되었는지 확인하는 것입니다. 배터리가 가장 오래된 집의 도어락이 고장날 확률이 높듯이, 비밀번호가 오래된 계정이 크래킹에 가장 취약합니다.",
+      "feynmanEn": "It's like checking when each apartment's door lock battery was last replaced. Just as the oldest battery is most likely to fail, accounts with the oldest passwords are most vulnerable to cracking.",
+      "expert": "Get-ADUser로 PasswordLastSet을 정렬하면 오래된 비밀번호 계정을 우선 공격할 수 있습니다. svc_backup(2023년)은 2.5년 이상 비밀번호 미변경으로 NIST 가이드라인을 심각하게 위반합니다. Managed Service Accounts(gMSA)로 대체하면 자동 비밀번호 갱신이 가능합니다.",
+      "expertEn": "Sorting Get-ADUser by PasswordLastSet prioritizes accounts with old passwords. svc_backup (2023) with 2.5+ years without password change severely violates NIST guidelines. Replacing with Managed Service Accounts (gMSA) enables automatic password rotation.",
+      "defTooltip": "Event ID 4662와 Sysmon Event ID 1에서 Get-ADUser cmdlet 실행을 감시하세요. -Filter *와 -Properties 조합은 대량 AD 데이터 수집의 지표입니다.",
+      "defTooltipEn": "Monitor Event ID 4662 and Sysmon Event ID 1 for Get-ADUser cmdlet execution. -Filter * with -Properties combination indicates bulk AD data collection.",
+      "hackerLog": {
+        "title": "ad_password_age.log",
+        "lines": [
+          { "log": "Get-ADUser -Filter * -Properties LastLogonDate,PasswordLastSet | Sort-Object PasswordLastSet", "desc": "💡 모든 활성 계정을 비밀번호 설정일 기준으로 정렬합니다" },
+          { "log": "svc_backup  8/1/2023  (2.5년+ 미변경)", "desc": "💡 서비스 계정의 비밀번호가 2.5년 이상 변경되지 않아 최우선 공격 대상입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Get-ADUser", "desc": "Active Directory 사용자 정보를 조회하는 PowerShell cmdlet입니다" },
+        { "term": "PasswordLastSet", "desc": "비밀번호가 마지막으로 설정된 날짜를 나타내는 AD 속성입니다" },
+        { "term": "gMSA", "desc": "Group Managed Service Account - 자동 비밀번호 갱신이 되는 서비스 계정입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"Get-ADComputer -Filter * -Properties OperatingSystem,LastLogonDate | Select Name,OperatingSystem,LastLogonDate | Format-Table -AutoSize\"",
+      "out": "Name       OperatingSystem                    LastLogonDate\n----       ---------------                    -------------\nDC01       Windows Server 2019 Standard       3/1/2026 6:00:00 AM\nSQL01      Windows Server 2019 Standard       3/1/2026 6:00:00 AM\nWEB01      Windows Server 2022 Standard       3/1/2026 6:00:00 AM\nBACKUP01   Windows Server 2016 Standard       2/28/2026 12:00:00 AM\nPC-{userName}  Windows 10 Enterprise          3/1/2026 10:00:00 AM\nPC-HR01    Windows 10 Enterprise              3/1/2026 8:30:00 AM\nPC-DEV01   Windows 11 Enterprise              3/1/2026 9:00:00 AM",
+      "def": "[SIEM] AD computer object enumeration - network mapping in progress",
+      "defAction": "Process: powershell.exe\nAD Query: All computer objects\nServers Found: 4 (DC01, SQL01, WEB01, BACKUP01)\nWorkstations Found: 3\nRisk Level: High\nAction: Cross-reference with known lateral movement techniques",
+      "desc": "도메인에 참가한 모든 컴퓨터와 서버를 열거합니다. 운영체제 버전과 마지막 로그온 시간을 파악하여 래터럴 무브먼트 대상을 선정합니다.",
+      "descEn": "Enumerates all domain-joined computers and servers. Identifies OS versions and last logon times to select lateral movement targets.",
+      "stepTitle": "도메인 컴퓨터 열거",
+      "stepTitleEn": "Domain Computer Enumeration",
+      "feynman": "회사 건물의 평면도를 그리는 것입니다. 어떤 방에 어떤 장비가 있는지, 마지막으로 사용한 시간이 언제인지 파악합니다. BACKUP01이 오래된 Windows 2016이라는 것은 '뒷문이 약하다'는 뜻입니다.",
+      "feynmanEn": "It's like drawing a floor plan of the building. Finding what equipment is in each room and when it was last used. BACKUP01 running older Windows 2016 means 'the back door is weak'.",
+      "expert": "BACKUP01의 Windows Server 2016은 EternalBlue(MS17-010, CVE-2017-0143) 취약점에 노출될 수 있습니다. Get-ADComputer 열거는 BloodHound의 Computer Collection과 동일한 정보를 수집합니다. OS 버전별 취약점 매핑으로 최적의 공격 경로를 선정합니다.",
+      "expertEn": "BACKUP01 with Windows Server 2016 may be vulnerable to EternalBlue (MS17-010, CVE-2017-0143). Get-ADComputer enumeration collects the same info as BloodHound's Computer Collection. Vulnerability mapping by OS version selects optimal attack paths.",
+      "defTooltip": "Event ID 4662에서 Computer 객체 클래스에 대한 대량 읽기를 추적하세요. 단일 사용자가 전체 컴퓨터 목록을 조회하는 것은 네트워크 매핑 활동의 지표입니다.",
+      "defTooltipEn": "Track Event ID 4662 for bulk reads on Computer object class. A single user querying the entire computer list indicates network mapping activity.",
+      "hackerLog": {
+        "title": "computer_enum.log",
+        "lines": [
+          { "log": "Get-ADComputer -Filter * -Properties OperatingSystem,LastLogonDate", "desc": "💡 도메인에 참가한 모든 컴퓨터의 OS 및 로그온 정보를 수집합니다" },
+          { "log": "BACKUP01  Windows Server 2016 Standard", "desc": "💡 오래된 OS는 패치 미적용 취약점이 많아 우선 공격 대상입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Get-ADComputer", "desc": "Active Directory에 등록된 컴퓨터 객체를 조회하는 PowerShell cmdlet입니다" },
+        { "term": "EternalBlue", "desc": "MS17-010 취약점을 악용하는 SMB 공격으로, WannaCry 랜섬웨어에 사용되었습니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"Get-ADGroup -Filter * | Where-Object {$_.Name -like '*admin*' -or $_.Name -like '*backup*' -or $_.Name -like '*IT*'} | Get-ADGroupMember | Select Name,SamAccountName,ObjectClass\"",
+      "out": "Name              SamAccountName    ObjectClass\n----              --------------    -----------\nadmin.jkim        admin.jkim        user\nAdministrator     Administrator     user\nDomainAdmin01     DomainAdmin01     user\nsvc_backup        svc_backup        user\nit.lee            it.lee            user\ndev.choi          dev.choi          user",
+      "def": "[SIEM] Privileged group membership enumeration detected",
+      "defAction": "Process: powershell.exe\nGroups Queried: *admin*, *backup*, *IT*\nPrivileged Users Found: 6\nRisk Level: High\nAction: Monitor these accounts for anomalous activity",
+      "desc": "관리자, 백업, IT 관련 그룹의 멤버를 열거합니다. 이 계정들은 높은 권한을 가지고 있어 공격자의 주요 타겟입니다.",
+      "descEn": "Enumerates members of admin, backup, and IT-related groups. These accounts have elevated privileges and are primary targets.",
+      "stepTitle": "권한 그룹 멤버 열거",
+      "stepTitleEn": "Privileged Group Member Enum",
+      "feynman": "회사에서 '관리자', '백업 담당', 'IT팀' 이름표를 단 사람만 골라내는 것입니다. 이 6명은 특별한 열쇠를 가진 사람들이며, 이들의 계정을 탈취하면 회사 전체에 접근할 수 있습니다.",
+      "feynmanEn": "It's filtering out people wearing 'Admin', 'Backup', or 'IT team' badges. These 6 people hold special keys - compromising their accounts grants access to the entire company.",
+      "expert": "Wildcard 패턴(*admin*, *backup*, *IT*)으로 권한 그룹을 필터링하는 것은 Tier 0/1 자산 매핑입니다. svc_backup 계정은 Backup Operators 그룹 멤버일 경우 SeBackupPrivilege로 SAM/NTDS.dit 추출이 가능합니다. Microsoft LAPS와 Tiered Admin Model로 방어합니다.",
+      "expertEn": "Wildcard filtering (*admin*, *backup*, *IT*) maps Tier 0/1 assets. svc_backup as Backup Operators member can extract SAM/NTDS.dit via SeBackupPrivilege. Defend with Microsoft LAPS and Tiered Admin Model.",
+      "defTooltip": "Event ID 4799에서 admin/backup/IT 관련 그룹에 대한 멤버십 열거를 감시하세요. 짧은 시간 내 여러 권한 그룹을 조회하는 것은 공격 준비의 강력한 지표입니다.",
+      "defTooltipEn": "Monitor Event ID 4799 for membership enumeration of admin/backup/IT groups. Querying multiple privileged groups in a short time is a strong indicator of attack preparation.",
+      "hackerLog": {
+        "title": "priv_groups.log",
+        "lines": [
+          { "log": "Get-ADGroup -Filter * | Where-Object {$_.Name -like '*admin*'}", "desc": "💡 이름에 admin/backup/IT가 포함된 모든 그룹을 필터링합니다" },
+          { "log": "svc_backup  svc_backup  user", "desc": "💡 서비스 계정이 백업 권한 그룹에 속해 있어 SAM 데이터베이스 추출이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "SeBackupPrivilege", "desc": "파일 시스템의 모든 파일을 읽을 수 있는 Windows 백업 권한입니다" },
+        { "term": "NTDS.dit", "desc": "Active Directory의 모든 사용자 비밀번호 해시가 저장된 데이터베이스 파일입니다" }
+      ]
+    },
+    {
+      "cmd": "ldapsearch -H ldap://192.168.1.10 -D \"{userName}@{companyName}.local\" -w \"P@ssw0rd\" -b \"DC={companyName},DC=local\" \"(userAccountControl:1.2.840.113556.1.4.803:=65536)\" cn",
+      "out": "# extended LDIF\n# LDAPv3\n# base <DC={companyName},DC=local>\n\n# svc_backup, Users, {companyName}.local\ndn: CN=svc_backup,CN=Users,DC={companyName},DC=local\ncn: svc_backup\nuserAccountControl: 66048 (DONT_EXPIRE_PASSWORD)\n\n# sqlsvc, Users, {companyName}.local\ndn: CN=sqlsvc,CN=Users,DC={companyName},DC=local\ncn: sqlsvc\nuserAccountControl: 66048 (DONT_EXPIRE_PASSWORD)\n\n# result: 2 entries",
+      "def": "[SIEM] LDAP query for non-expiring password accounts",
+      "defAction": "Process: ldapsearch\nQuery: userAccountControl DONT_EXPIRE_PASSWORD flag\nResults: svc_backup, sqlsvc\nRisk Level: High\nAction: Review password-never-expires policy for service accounts",
+      "desc": "LDAP 쿼리로 비밀번호가 만료되지 않는 계정을 검색합니다. 이런 계정은 비밀번호가 오랜 기간 변경되지 않아 크래킹에 취약합니다.",
+      "descEn": "Searches for accounts with non-expiring passwords using LDAP query. These accounts are vulnerable to cracking as passwords remain unchanged for long periods.",
+      "stepTitle": "비밀번호 미만료 계정 검색",
+      "stepTitleEn": "Non-Expiring Password Search",
+      "feynman": "자물쇠를 절대 교체하지 않는 집을 찾는 것입니다. 대부분의 집은 정기적으로 자물쇠를 바꾸지만, svc_backup과 sqlsvc는 한 번도 바꾸지 않았습니다. 도둑에게는 가장 쉬운 목표입니다.",
+      "feynmanEn": "It's finding houses that never change their locks. Most houses change locks regularly, but svc_backup and sqlsvc never have. For a burglar, these are the easiest targets.",
+      "expert": "LDAP 비트 필터(1.2.840.113556.1.4.803:=65536)는 DONT_EXPIRE_PASSWORD(0x10000) 플래그를 검색합니다. UAC 값 66048 = NORMAL_ACCOUNT(512) + DONT_EXPIRE_PASSWORD(65536)입니다. Kerberoasting(T1558.003) 공격 시 이런 서비스 계정의 SPN을 타겟으로 TGS 티켓을 요청합니다.",
+      "expertEn": "LDAP bit filter (1.2.840.113556.1.4.803:=65536) searches for DONT_EXPIRE_PASSWORD (0x10000) flag. UAC value 66048 = NORMAL_ACCOUNT(512) + DONT_EXPIRE_PASSWORD(65536). Kerberoasting (T1558.003) targets SPNs of these service accounts to request TGS tickets.",
+      "defTooltip": "Event ID 2889 (LDAP 서명 없는 바인딩) 및 Event ID 4662 (디렉터리 접근)에서 userAccountControl 속성에 대한 비트 필터 쿼리를 감시하세요.",
+      "defTooltipEn": "Monitor Event ID 2889 (LDAP unsigned bind) and Event ID 4662 (directory access) for bit filter queries on userAccountControl attribute.",
+      "hackerLog": {
+        "title": "ldap_nonexpire.log",
+        "lines": [
+          { "log": "ldapsearch ... (userAccountControl:1.2.840.113556.1.4.803:=65536)", "desc": "💡 LDAP 비트 필터로 비밀번호가 만료되지 않도록 설정된 계정을 검색합니다" },
+          { "log": "userAccountControl: 66048 (DONT_EXPIRE_PASSWORD)", "desc": "💡 66048 = 일반계정(512) + 비밀번호만료안됨(65536) 플래그 조합입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "LDAP", "desc": "Lightweight Directory Access Protocol - Active Directory를 조회하는 표준 프로토콜입니다" },
+        { "term": "userAccountControl", "desc": "계정의 상태와 정책을 비트 플래그로 저장하는 AD 속성입니다" },
+        { "term": "Kerberoasting", "desc": "서비스 계정의 TGS 티켓을 요청하여 오프라인으로 비밀번호를 크래킹하는 기법입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 2400)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "net.exe (user enum)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "net.exe (group enum)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "net.exe (user detail)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "powershell.exe (AD queries)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "Get-ADUser (bulk query)", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "Get-ADComputer (network map)", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "Get-ADGroupMember (priv groups)", "depth": 3, "alert": true, "minStep": 5 },
+    { "name": "ldapsearch (LDAP query)", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

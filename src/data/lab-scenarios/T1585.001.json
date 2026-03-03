@@ -1,0 +1,210 @@
+{
+  "id": "T1585.001",
+  "title": "가짜 소셜미디어 계정 생성 시뮬레이션",
+  "titleEn": "Fake Social Media Account Creation Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🎭 페르소나 생성", "labelEn": "🎭 Persona Creation", "steps": [0, 1] },
+    { "label": "🤝 신뢰 구축", "labelEn": "🤝 Trust Building", "steps": [2, 3] },
+    { "label": "💬 접근 시도", "labelEn": "💬 Approach", "steps": [4] },
+    { "label": "🎯 페이로드 전달", "labelEn": "🎯 Payload Delivery", "steps": [5] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "social", "label": "Social Media", "x": 200, "y": 30 },
+    { "id": "fake", "label": "Fake Profile", "x": 200, "y": 90 },
+    { "id": "target", "label": "Target Employee", "x": 350, "y": 60 },
+    { "id": "pc", "label": "Victim PC", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "social", "minStep": 0 },
+    { "from": "social", "to": "fake", "minStep": 1 },
+    { "from": "fake", "to": "target", "minStep": 2 },
+    { "from": "target", "to": "pc", "minStep": 5 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "Job_Description.pdf", "icon": "📄", "alert": true },
+    { "name": "LinkedIn", "icon": "💼" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 profile_generator.py --persona \"IT Security Recruiter\" --company \"{companyName}\" --platform linkedin",
+      "out": "[+] Generating fake persona...\n[+] Name: Sarah Johnson\n[+] Title: Senior IT Security Recruiter\n[+] Company: {companyName} (impersonating)\n[+] Location: Seoul, South Korea\n[+] Profile photo: AI-generated (StyleGAN3)\n[+] Work history: 3 fabricated positions\n[+] Education: Fake CS degree\n[+] Connections seed list: 50 security professionals\n\n[+] Profile JSON saved to persona_linkedin.json",
+      "def": "[Brand Monitoring] New LinkedIn profile created impersonating {companyName} employee",
+      "defAction": "Source: Brand monitoring service\nTarget: LinkedIn platform\nAction: Impersonation alert raised, legal team prepared takedown request",
+      "desc": "AI로 생성한 프로필 사진과 가짜 경력을 사용하여 대상 기업의 가짜 LinkedIn 프로필을 생성합니다.",
+      "descEn": "The attacker creates a fake LinkedIn profile impersonating a target company employee using AI-generated photos and fabricated history.",
+      "stepTitle": "AI 생성 가짜 프로필 제작",
+      "stepTitleEn": "AI-Generated Fake Profile Creation",
+      "feynman": "공격자가 가짜 신분증을 만드는 것과 같습니다. AI(StyleGAN3)로 실존하지 않는 사람의 사진을 생성하고, 가짜 경력과 학력을 만들어 IT 채용 담당자를 사칭합니다. 이 가짜 프로필은 실제 사람처럼 보여서 받아들이는 사람들이 의심하지 않습니다.",
+      "feynmanEn": "It's like creating a fake ID. AI (StyleGAN3) generates a photo of a non-existent person, paired with fabricated work history and education to impersonate an IT recruiter. The fake profile looks so real that people accept it without suspicion.",
+      "expert": "StyleGAN3은 고해상도 포토리얼리스틱 이미지를 생성하는 GAN 모델로, 역이미지 검색으로 탐지가 어렵습니다. 시드 연결 50명은 프로필의 '사회적 증거'를 구축하여 후속 연결 요청의 수락률을 높입니다.",
+      "expertEn": "StyleGAN3 is a GAN model generating high-resolution photorealistic images that are difficult to detect via reverse image search. The 50 seed connections build 'social proof' for the profile, increasing acceptance rates for subsequent connection requests.",
+      "defTooltip": "🎭 브랜드 모니터링: 회사를 사칭하는 새 LinkedIn 프로필이 감지되었습니다",
+      "defTooltipEn": "🎭 Brand Monitoring: New LinkedIn profile impersonating company employee detected",
+      "hackerLog": {
+        "title": "profile_generator.log",
+        "lines": [
+          { "log": "[+] Profile photo: AI-generated (StyleGAN3)", "desc": "💡 AI가 만든 가짜 사진 - 실존하지 않는 사람이지만 매우 사실적입니다" },
+          { "log": "[+] Work history: 3 fabricated positions", "desc": "💡 가짜 경력 3개를 만들어 프로필의 신뢰도를 높였습니다" },
+          { "log": "[+] Connections seed list: 50 security professionals", "desc": "💡 보안 전문가 50명과 먼저 연결하여 '실제 사람'처럼 보이게 합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "StyleGAN3", "desc": "엔비디아의 AI 이미지 생성 모델. 실존하지 않는 사람의 매우 사실적인 얼굴 사진을 생성할 수 있습니다" },
+        { "name": "Social Engineering (사회공학)", "desc": "기술적 해킹이 아닌 인간의 심리를 이용하는 공격 기법. 신뢰, 호기심, 두려움 등의 감정을 악용합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 social_setup.py --platforms twitter,github,medium --persona persona_linkedin.json",
+      "out": "[+] Creating cross-platform presence...\n\nTwitter: @SarahJ_SecRecruit\n  - Bio: Recruiting top security talent for {companyName}\n  - Following: 200 infosec accounts\n  - Tweets scheduled: 30 (security industry content)\n\nGitHub: github.com/sarahjsecurity\n  - Repos: 5 forked security tools\n  - Contributions: Fabricated commit history\n\nMedium: medium.com/@sarahjsecurity\n  - Articles: 3 drafted (cybersecurity career advice)\n\n[+] All platforms configured with consistent persona",
+      "def": "[Threat Intel] Coordinated fake account creation detected across multiple platforms",
+      "defAction": "Source: Social media monitoring\nTarget: Multiple platforms (LinkedIn, Twitter, GitHub)\nAction: Accounts flagged for review, cross-platform correlation initiated",
+      "desc": "Twitter, GitHub, Medium 등 여러 플랫폼에 일관된 가짜 신원을 구축하여 신뢰도를 높입니다.",
+      "descEn": "The attacker establishes consistent fake identities across multiple platforms to build credibility.",
+      "stepTitle": "크로스 플랫폼 가짜 신원 구축",
+      "stepTitleEn": "Cross-Platform Fake Identity Setup",
+      "feynman": "한 플랫폼에만 프로필이 있으면 의심받을 수 있지만, Twitter, GitHub, Medium에도 같은 이름으로 활동하면 '실제 사람'이라는 증거가 됩니다. 마치 사기꾼이 명함, 회사 웹사이트, 사무실까지 만들어서 신뢰를 쌓는 것처럼, 여러 플랫폼에서 일관된 존재감을 만듭니다.",
+      "feynmanEn": "Having a profile on only one platform raises suspicion, but being active on Twitter, GitHub, and Medium under the same name serves as 'proof of being real.' Like a con artist who creates business cards, a website, and an office to build trust, consistent presence across platforms is key.",
+      "expert": "크로스 플랫폼 페르소나 구축은 OPSEC의 역이용입니다. GitHub의 커밋 히스토리 조작과 Medium 기사는 기술적 전문성을, Twitter 팔로잉 네트워크는 업계 연결을 증명합니다. 이는 후속 사회공학의 신뢰 기반이 됩니다.",
+      "expertEn": "Cross-platform persona building is reverse OPSEC. Fabricated GitHub commit histories and Medium articles demonstrate technical expertise, while Twitter following networks prove industry connections. This forms the trust foundation for subsequent social engineering.",
+      "defTooltip": "🌐 위협 인텔: 여러 플랫폼에서 조율된 가짜 계정 생성이 감지되었습니다",
+      "defTooltipEn": "🌐 Threat Intel: Coordinated fake account creation detected across multiple platforms",
+      "hackerLog": {
+        "title": "social_setup.log",
+        "lines": [
+          { "log": "GitHub: 5 forked security tools", "desc": "💡 보안 도구 레포지토리를 포크해서 기술적 전문성을 가장합니다" },
+          { "log": "Medium: 3 drafted (cybersecurity career advice)", "desc": "💡 사이버보안 채용 관련 글로 채용 담당자로서의 신뢰성을 구축합니다" },
+          { "log": "[+] All platforms configured with consistent persona", "desc": "💡 모든 플랫폼에서 동일한 이름, 사진, 경력으로 일관성을 유지합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Cross-Platform Presence", "desc": "여러 소셜미디어에서 동일한 신원으로 활동하는 것. 실존하는 사람임을 증명하는 '사회적 증거'로 작용합니다" },
+        { "name": "OPSEC (Operations Security)", "desc": "작전 보안. 자신의 정체나 활동을 숨기는 기술. 공격자는 OPSEC을 유지하면서도 가짜 신원의 OPSEC을 역이용합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 connection_builder.py --target-company \"{companyName}\" --persona persona_linkedin.json --strategy gradual",
+      "out": "[+] Phase 1: Connecting with 3rd-degree contacts...\n[+] Sent 50 connection requests to industry professionals\n[+] Accepted: 31/50 (62%)\n\n[+] Phase 2: Connecting with {companyName} employees...\n[+] Sent 20 connection requests\n[+] Accepted: 12/20 (60%)\n\nConnected employees:\n- {userName} (Security Engineer) ✓\n- Kim Jihye (HR Manager) ✓\n- Park Minsu (DevOps Lead) ✓\n- Lee Soyeon (Finance Director) ✓\n\n[+] Trust score: 7.2/10 (sufficient for social engineering)",
+      "def": "[Security Awareness] Multiple {companyName} employees accepted connections from unverified recruiter profile",
+      "defAction": "Source: Internal security monitoring\nTarget: {companyName} employees on LinkedIn\nAction: Security awareness reminder sent to affected employees",
+      "desc": "점진적으로 연결을 확장하여 대상 기업 직원들과 신뢰 관계를 구축합니다.",
+      "descEn": "The attacker gradually expands connections to build trust relationships with target company employees.",
+      "stepTitle": "점진적 연결 확장 및 신뢰 구축",
+      "stepTitleEn": "Gradual Connection Building",
+      "feynman": "한 번에 직원에게 연락하면 의심받으므로, 먼저 업계 사람들과 연결하고(Phase 1), 그 다음 회사 직원과 연결합니다(Phase 2). '공통 연결이 12명'이라고 표시되면 '이 사람은 우리 업계 사람이구나'라고 생각하게 됩니다. 이런 점진적 접근이 62%의 높은 수락률을 만듭니다.",
+      "feynmanEn": "Contacting employees directly would raise suspicion, so the attacker first connects with industry professionals (Phase 1), then company employees (Phase 2). When it shows '12 mutual connections,' people think 'this person is in our industry.' This gradual approach achieves a 62% acceptance rate.",
+      "expert": "점진적 네트워크 침투 전략으로, 3차 연결에서 시작하여 2차, 1차로 좁혀갑니다. LinkedIn의 '공통 연결' 표시는 사회적 증거로 작용하여 수락률을 높입니다. 신뢰 점수 7.2/10은 사회공학 공격 실행에 충분한 수준입니다.",
+      "expertEn": "A gradual network infiltration strategy starting from 3rd-degree connections and narrowing to 1st-degree. LinkedIn's 'mutual connections' display acts as social proof, increasing acceptance rates. A trust score of 7.2/10 is sufficient for social engineering execution.",
+      "defTooltip": "⚠️ 보안 인식: 확인되지 않은 채용 담당자의 연결 요청을 다수 수락했습니다",
+      "defTooltipEn": "⚠️ Security Awareness: Multiple employees accepted connections from unverified recruiter",
+      "hackerLog": {
+        "title": "connection_builder.log",
+        "lines": [
+          { "log": "[+] Accepted: 31/50 (62%)", "desc": "💡 62%의 높은 수락률 - 가짜 프로필이 충분히 신뢰할 만하다는 뜻입니다" },
+          { "log": "- Kim Jihye (HR Manager) ✓", "desc": "💡 HR 매니저가 연결을 수락 - 채용 관련 메시지에 반응할 확률이 높습니다" },
+          { "log": "[+] Trust score: 7.2/10", "desc": "💡 신뢰 점수 7.2 - 사회공학 공격을 진행하기에 충분한 수준입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Social Proof (사회적 증거)", "desc": "다른 사람들이 신뢰하면 나도 신뢰하게 되는 심리. '공통 연결 12명'이 표시되면 무의식적으로 신뢰하게 됩니다" },
+        { "name": "Gradual Infiltration", "desc": "점진적 침투 전략. 한 번에 접근하지 않고 단계적으로 신뢰를 쌓아 의심을 피하는 사회공학 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 content_poster.py --persona persona_linkedin.json --type engagement --duration 14d",
+      "out": "[+] Content engagement strategy: 14 days\n[+] Day 1-7: Sharing industry articles, commenting on {companyName} posts\n[+] Day 8-14: Posting original content, engaging with target employees\n\nEngagement metrics:\n- Posts: 12\n- Comments: 45 (on target employee posts)\n- Likes received: 234\n- Profile views: 89\n- Direct messages received: 7\n\n[+] Notable interaction:\n  {userName} commented: \"Great insights on cloud security!\"\n  Kim Jihye: \"Would love to discuss recruitment opportunities\"",
+      "def": "[Social Engineering Monitor] Sustained engagement pattern detected with {companyName} employees",
+      "defAction": "Source: Behavioral analysis\nTarget: {companyName} employee social media interactions\nAction: Potential social engineering campaign identified, employees warned",
+      "desc": "2주간 꾸준히 콘텐츠를 게시하고 상호작용하여 대상 직원들의 신뢰를 획득합니다.",
+      "descEn": "The attacker posts content and engages consistently over two weeks to gain trust from target employees.",
+      "stepTitle": "2주간 콘텐츠 활동으로 신뢰 획득",
+      "stepTitleEn": "Two-Week Content Engagement for Trust",
+      "feynman": "2주 동안 매일 보안 관련 글을 공유하고, 타겟 직원들의 게시물에 댓글을 달며 친근함을 쌓습니다. 직원이 '이 사람은 우리 업계에 관심이 많구나'라고 느끼게 만듭니다. 실제로 타겟이 먼저 '채용에 대해 이야기하고 싶다'고 연락해 올 정도로 신뢰가 구축됩니다.",
+      "feynmanEn": "Over two weeks, the attacker shares security-related posts daily and comments on target employees' posts to build familiarity. The goal is to make employees think 'this person is really into our industry.' Trust builds so much that targets initiate contact about 'recruitment opportunities.'",
+      "expert": "장기적 사회공학 캠페인으로, 14일간의 컨텐츠 전략은 타겟의 경계심을 완화합니다. Day 1-7의 산업 기사 공유는 전문성을, Day 8-14의 원본 콘텐츠와 직접 상호작용은 개인적 관계를 구축합니다.",
+      "expertEn": "A long-term social engineering campaign where the 14-day content strategy lowers targets' guard. Days 1-7 sharing industry articles builds expertise perception, while Days 8-14 original content and direct engagement builds personal rapport.",
+      "defTooltip": "📊 사회공학 모니터: 직원들과의 지속적 상호작용 패턴이 감지되었습니다",
+      "defTooltipEn": "📊 SE Monitor: Sustained engagement pattern with employees detected",
+      "hackerLog": {
+        "title": "engagement_metrics.log",
+        "lines": [
+          { "log": "Comments: 45 (on target employee posts)", "desc": "💡 45개의 댓글로 타겟 직원들과의 친밀도를 높였습니다" },
+          { "log": "{userName} commented: \"Great insights on cloud security!\"", "desc": "💡 타겟이 먼저 긍정적으로 반응 - 공격의 다음 단계로 넘어갈 준비가 되었습니다" },
+          { "log": "Kim Jihye: \"Would love to discuss recruitment opportunities\"", "desc": "💡 HR 매니저가 먼저 연락을 원함 - 사회공학이 성공적으로 작동하고 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Engagement Strategy", "desc": "소셜미디어에서 타겟과의 상호작용을 계획적으로 설계하는 전략. 좋아요, 댓글, 공유 등을 통해 관계를 구축합니다" },
+        { "name": "Pretext Building", "desc": "사회공학 공격에서 사용할 '구실'을 준비하는 과정. 채용 제안, 비즈니스 제안 등 그럴듯한 이유를 만듭니다" }
+      ]
+    },
+    {
+      "cmd": "python3 dm_campaign.py --targets \"{userName},Kim Jihye\" --pretext \"exclusive job opportunity\"",
+      "out": "[+] Initiating direct message campaign...\n\nMessage to {userName}:\n\"Hi {userName}, I've been following your security work. We have an\nexclusive CISO position at a Fortune 500 company. Would you be\ninterested in a confidential discussion? I can share the job\ndescription via our secure portal.\"\n\nMessage to Kim Jihye:\n\"Hi Jihye, I noticed {companyName}'s great culture. We're looking\nfor HR leaders for a tech unicorn. Can I share details?\"\n\n[+] Responses:\n  {userName}: \"Sure, send me the details\" (2 hours later)\n  Kim Jihye: \"Sounds interesting, please share\" (4 hours later)",
+      "def": "[Email Security] Suspicious external recruitment messages targeting key personnel",
+      "defAction": "Source: DLP monitoring\nTarget: {userName}, Kim Jihye\nAction: Employees contacted by security team for verification",
+      "desc": "신뢰 관계가 구축된 직원들에게 채용 제안을 빙자한 다이렉트 메시지를 전송합니다.",
+      "descEn": "The attacker sends direct messages with fake job offers to employees with established trust.",
+      "stepTitle": "가짜 채용 제안 메시지 전송",
+      "stepTitleEn": "Fake Job Offer Message Campaign",
+      "feynman": "2주간 쌓은 신뢰를 이용해 드디어 '미끼'를 던집니다. 'Fortune 500 기업의 CISO 포지션'이라는 매력적인 제안으로 호기심을 자극합니다. 이미 신뢰가 구축되어 있어서 두 사람 모두 몇 시간 안에 '자세히 알려달라'고 응답합니다. 이것이 사회공학의 위력입니다.",
+      "feynmanEn": "Using two weeks of built trust, the attacker finally throws the 'bait.' An enticing offer of 'CISO position at a Fortune 500 company' triggers curiosity. With trust already established, both targets respond within hours asking for details. This is the power of social engineering.",
+      "expert": "프리텍스트 기반 사회공학으로, '기밀 채용'이라는 구실은 타겟의 호기심과 경력 욕구를 자극합니다. '보안 포털을 통해 공유'라는 표현은 악성 링크 전달의 자연스러운 전환점을 제공합니다.",
+      "expertEn": "Pretext-based social engineering where 'confidential recruitment' exploits targets' curiosity and career aspirations. 'Share via our secure portal' provides a natural transition point for delivering malicious links.",
+      "defTooltip": "💬 이메일 보안: 핵심 인력을 대상으로 한 외부 채용 메시지가 감지되었습니다",
+      "defTooltipEn": "💬 Email Security: Suspicious external recruitment messages targeting key personnel",
+      "hackerLog": {
+        "title": "dm_campaign.log",
+        "lines": [
+          { "log": "exclusive CISO position at a Fortune 500 company", "desc": "💡 매력적인 직위와 회사명으로 호기심과 욕심을 자극합니다" },
+          { "log": "{userName}: \"Sure, send me the details\" (2 hours later)", "desc": "💡 2시간 만에 응답 - 2주간의 신뢰 구축이 효과를 발휘했습니다" },
+          { "log": "I can share the job description via our secure portal", "desc": "💡 '보안 포털'이라는 말로 악성 링크 전달을 자연스럽게 유도합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Pretext (프리텍스트)", "desc": "사회공학 공격에서 사용하는 '구실' 또는 '시나리오'. 채용 제안, 기술 지원, 임원 사칭 등 다양한 형태가 있습니다" },
+        { "name": "DM Campaign", "desc": "소셜미디어의 다이렉트 메시지를 통한 표적 접근. 이메일보다 개인적이고 친근한 채널로 인식되어 경계심이 낮습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 payload_deliver.py --method \"job description PDF\" --url \"https://secure-recruit.{companyName}-corp.com/jd.pdf\"",
+      "out": "[+] Preparing delivery mechanism...\n[+] Payload: Macro-enabled PDF (job description)\n[+] Hosted on: secure-recruit.{companyName}-corp.com\n[+] URL disguised via LinkedIn shortened link\n\nMessage sent to {userName}:\n\"Here's the job description for the CISO role. Please review\nthe attached PDF for full details and compensation package:\nhttps://lnkd.in/gXk9mPq\n\nPlease keep this confidential as it's an exclusive search.\"\n\n[+] Link clicked by {userName}: YES (after 35 minutes)\n[+] PDF downloaded: YES\n[+] Macro executed: PENDING",
+      "def": "[EDR] Suspicious PDF download from fake recruitment portal linked to impersonation campaign",
+      "defAction": "Source: Endpoint detection\nTarget: {userName}'s workstation\nAction: File quarantined, endpoint isolated, incident escalated to IR team",
+      "desc": "가짜 채용 공고 PDF를 통해 악성 페이로드를 전달하여 초기 침투를 시도합니다.",
+      "descEn": "The attacker delivers a malicious payload via a fake job description PDF to achieve initial access.",
+      "stepTitle": "악성 PDF를 통한 초기 침투",
+      "stepTitleEn": "Initial Access via Malicious PDF",
+      "feynman": "모든 준비가 끝나고 드디어 '공격' 순간입니다. 채용 공고 PDF라고 보낸 파일에는 악성 코드가 숨겨져 있습니다. LinkedIn 단축 URL로 진짜 URL을 숨기고, '기밀이니 비밀로 해달라'는 말로 다른 사람에게 확인하는 것을 막습니다. 35분 만에 클릭, 다운로드까지 성공했습니다.",
+      "feynmanEn": "After all the preparation, it's finally time to 'attack.' The job description PDF contains hidden malicious code. A LinkedIn shortened URL hides the real URL, and 'please keep this confidential' discourages verification with others. Click and download succeeded within 35 minutes.",
+      "expert": "매크로 활성화 PDF를 통한 초기 접근(Initial Access)입니다. LinkedIn URL 단축 서비스(lnkd.in)로 실제 URL을 은닉하고, '기밀 채용'이라는 프리텍스트로 피해자가 동료에게 확인하는 것을 방지합니다. 35분 내 클릭은 높은 사회공학 성공률을 나타냅니다.",
+      "expertEn": "Initial Access via macro-enabled PDF. LinkedIn's URL shortening (lnkd.in) conceals the actual URL, and the 'confidential search' pretext prevents victims from verifying with colleagues. A 35-minute click time indicates high social engineering success rate.",
+      "defTooltip": "🎯 EDR: 사칭 캠페인과 연관된 가짜 채용 포털에서 의심 PDF 다운로드 감지",
+      "defTooltipEn": "🎯 EDR: Suspicious PDF download from fake recruitment portal linked to impersonation campaign",
+      "hackerLog": {
+        "title": "payload_delivery.log",
+        "lines": [
+          { "log": "[+] Payload: Macro-enabled PDF (job description)", "desc": "💡 PDF 안에 악성 매크로가 숨겨져 있습니다 - 열면 코드가 실행됩니다" },
+          { "log": "Please keep this confidential", "desc": "💡 '기밀'이라고 하면 다른 사람에게 확인하지 않아 발각될 확률이 줄어듭니다" },
+          { "log": "[+] Link clicked by {userName}: YES (after 35 minutes)", "desc": "💡 35분 만에 클릭 - 수주간의 사회공학이 결실을 맺었습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Initial Access (초기 접근)", "desc": "MITRE ATT&CK의 첫 번째 공격 단계. 타겟 시스템에 처음으로 접근하는 것으로, 피싱이 가장 흔한 방법입니다" },
+        { "name": "Macro-enabled PDF", "desc": "매크로(자동 실행 코드)가 포함된 PDF 파일. 문서를 열면 악성 코드가 실행되어 시스템이 감염될 수 있습니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "python3 profile_generator.py (PID: 6101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "python3 social_setup.py (PID: 6178)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "python3 connection_builder.py (PID: 6234)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "python3 content_poster.py (PID: 6312)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "python3 dm_campaign.py (PID: 6389)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "python3 payload_deliver.py (PID: 6445)", "depth": 1, "alert": true, "minStep": 5 }
+  ]
+}

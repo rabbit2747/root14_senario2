@@ -1,0 +1,182 @@
+{
+  "id": "T1590.001",
+  "title": "도메인 속성 수집 시뮬레이션",
+  "titleEn": "Domain Properties Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 WHOIS 조회", "labelEn": "🔍 WHOIS Lookup", "steps": [0, 1] },
+    { "label": "📊 도메인 분석", "labelEn": "📊 Domain Analysis", "steps": [2, 3] },
+    { "label": "🎯 인프라 매핑", "labelEn": "🎯 Infrastructure Mapping", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "whois", "label": "WHOIS Server", "x": 200, "y": 30 },
+    { "id": "target", "label": "Target Domain", "x": 200, "y": 90 },
+    { "id": "sectrails", "label": "SecurityTrails", "x": 350, "y": 30 },
+    { "id": "registrar", "label": "Registrar", "x": 350, "y": 90 },
+    { "id": "infra", "label": "Infrastructure", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "whois", "minStep": 0 },
+    { "from": "attacker", "to": "target", "minStep": 0 },
+    { "from": "attacker", "to": "sectrails", "minStep": 2 },
+    { "from": "attacker", "to": "registrar", "minStep": 3 },
+    { "from": "target", "to": "infra", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "whois_data.txt", "icon": "📋", "alert": true },
+    { "name": "{companyName} Recon", "icon": "📁" },
+    { "name": "domain_report.pdf", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "whois {companyName}.com",
+      "out": "Domain Name: {companyName}.COM\nRegistry Domain ID: 2345678901_DOMAIN_COM-VRSN\nRegistrar WHOIS Server: whois.godaddy.com\nRegistrar URL: http://www.godaddy.com\nUpdated Date: 2025-01-15T10:30:00Z\nCreation Date: 2019-06-20T08:00:00Z\nRegistry Expiry Date: 2026-06-20T08:00:00Z\nRegistrar: GoDaddy.com, LLC\nRegistrar IANA ID: 146\n\nRegistrant Name: James Wilson\nRegistrant Organization: {companyName} Inc.\nRegistrant Street: 123 Tech Boulevard\nRegistrant City: San Francisco\nRegistrant State/Province: CA\nRegistrant Postal Code: 94105\nRegistrant Country: US\nRegistrant Phone: +1.4155551234\nRegistrant Email: admin@{companyName}.com\n\nAdmin Email: it-admin@{companyName}.com\nTech Email: devops@{companyName}.com\n\nName Server: NS1.CLOUDFLARE.COM\nName Server: NS2.CLOUDFLARE.COM\nDNSSEC: unsigned",
+      "def": "[Domain Monitoring] WHOIS query detected for organization domain",
+      "defAction": "Source: External WHOIS query\nTarget: {companyName}.com\nAction: Domain monitoring alert logged, registrar notified",
+      "desc": "WHOIS 프로토콜로 대상 도메인의 등록 정보(소유자, 등록기관, 네임서버, 만료일)를 조회합니다.",
+      "descEn": "Query WHOIS protocol to retrieve domain registration info including owner, registrar, nameservers, and expiry date.",
+      "stepTitle": "WHOIS 도메인 등록 정보 조회",
+      "stepTitleEn": "WHOIS Domain Registration Lookup",
+      "feynman": "WHOIS는 도메인의 '등기부등본'을 열람하는 것입니다. 부동산의 등기부에 소유자와 주소가 있듯, 도메인의 WHOIS에는 등록자 이름, 연락처, 등록기관, 만료일이 기록되어 있습니다. 공격자는 이 정보로 누가 도메인을 관리하는지, 어떤 인프라를 사용하는지 파악합니다.",
+      "feynmanEn": "WHOIS is like viewing a domain's property deed. Just as a real estate deed shows the owner and address, WHOIS records show registrant name, contact info, registrar, and expiry date. Attackers use this to understand who manages the domain and what infrastructure they use.",
+      "expert": "WHOIS(RFC 3912)는 도메인 등록 데이터를 조회하는 프로토콜입니다. 등록자 정보(이름, 이메일, 전화), 등록기관(GoDaddy IANA ID 146), 네임서버(Cloudflare), DNSSEC 상태를 반환합니다. GDPR 이후 많은 레지스트라가 개인정보를 마스킹하지만, 기업 도메인은 여전히 노출되는 경우가 많습니다.",
+      "expertEn": "WHOIS (RFC 3912) queries domain registration data. It returns registrant info (name, email, phone), registrar (GoDaddy IANA ID 146), nameservers (Cloudflare), and DNSSEC status. Post-GDPR many registrars mask personal data, but corporate domains often remain exposed.",
+      "defTooltip": "📋 도메인 모니터링: 조직 도메인에 대한 WHOIS 조회 감지",
+      "defTooltipEn": "📋 Domain Monitoring: WHOIS query detected for organization domain",
+      "hackerLog": {
+        "title": "whois_lookup.log",
+        "lines": [
+          { "log": "Registrant Email: admin@{companyName}.com", "desc": "💡 관리자 이메일 발견 - 소셜 엔지니어링/피싱 공격의 시작점입니다" },
+          { "log": "Registry Expiry Date: 2026-06-20T08:00:00Z", "desc": "💡 만료일이 가까우면 Domain Hijacking 시도가 가능합니다" },
+          { "log": "DNSSEC: unsigned", "desc": "💡 DNSSEC 미설정 - DNS 스푸핑/캐시 포이즈닝 공격에 취약합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "WHOIS", "desc": "도메인, IP 주소, AS 번호의 등록 정보를 조회하는 프로토콜. RFC 3912로 정의되며, 도메인 소유자와 기술 연락처 정보를 제공합니다" },
+        { "name": "DNSSEC", "desc": "DNS 응답의 진위를 암호학적으로 검증하는 보안 확장. 설정되지 않으면 DNS 스푸핑 공격에 취약합니다" }
+      ]
+    },
+    {
+      "cmd": "amass intel -d {companyName}.com -whois -o amass_whois.txt",
+      "out": "[INFO] Starting WHOIS-based reverse lookup...\n[INFO] Querying registrant: James Wilson\n[INFO] Querying organization: {companyName} Inc.\n\nReverse WHOIS Results (same registrant):\n  {companyName}.com          (Active)\n  {companyName}.net          (Active)\n  {companyName}.io           (Active)\n  {companyName}-dev.com      (Active)\n  {companyName}-staging.com  (Expired)\n  {companyName}-internal.net (Active)\n  {companyName}cdn.com       (Active)\n\n[INFO] 7 related domains discovered\n[INFO] 2 additional email contacts found\n[INFO] Results saved to amass_whois.txt",
+      "def": "[Threat Intel] Reverse WHOIS lookup detected - mapping organization's domain portfolio",
+      "defAction": "Source: WHOIS reverse query\nTarget: {companyName} Inc. registrant data\nAction: Brand monitoring alert, domain inventory audit triggered",
+      "desc": "Amass를 사용해 동일 등록자의 다른 도메인들을 역방향 WHOIS 조회로 발견합니다.",
+      "descEn": "Use Amass for reverse WHOIS lookup to discover other domains owned by the same registrant.",
+      "stepTitle": "Amass 역방향 WHOIS 조회",
+      "stepTitleEn": "Amass Reverse WHOIS Lookup",
+      "feynman": "역방향 WHOIS는 '이 사람이 다른 부동산도 소유하고 있나?'를 확인하는 것입니다. 등록자 이름 'James Wilson'으로 검색하면, 같은 사람이 등록한 7개의 다른 도메인을 발견합니다. 특히 staging이나 internal 같은 개발용 도메인은 보안이 약한 경우가 많아 공격의 좋은 진입점이 됩니다.",
+      "feynmanEn": "Reverse WHOIS is like asking 'Does this person own other properties?' Searching by registrant name 'James Wilson' reveals 7 related domains. Staging and internal domains often have weaker security, making them good entry points for attacks.",
+      "expert": "Amass intel 모듈의 -whois 옵션은 등록자 이름/조직/이메일을 키로 역방향 WHOIS 조회를 수행합니다. {companyName}-staging.com이 만료 상태인 것은 Domain Takeover 공격의 가능성을 시사합니다. -internal.net 도메인은 내부 인프라 매핑의 단서가 됩니다.",
+      "expertEn": "Amass intel module's -whois option performs reverse WHOIS lookups using registrant name/org/email as keys. The expired {companyName}-staging.com suggests Domain Takeover potential. The -internal.net domain provides clues for internal infrastructure mapping.",
+      "defTooltip": "🔍 위협정보: 조직 도메인 포트폴리오 매핑을 위한 역방향 WHOIS 조회 감지",
+      "defTooltipEn": "🔍 Threat Intel: Reverse WHOIS lookup detected for organization domain portfolio mapping",
+      "hackerLog": {
+        "title": "amass_whois.log",
+        "lines": [
+          { "log": "{companyName}-staging.com  (Expired)", "desc": "💡 만료된 스테이징 도메인 발견 - Domain Takeover 공격에 활용 가능합니다" },
+          { "log": "{companyName}-internal.net (Active)", "desc": "💡 내부용 도메인 발견 - 내부 인프라 구조 파악의 단서가 됩니다" },
+          { "log": "7 related domains discovered", "desc": "💡 7개 관련 도메인 - 공격 표면이 크게 확장되었습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Reverse WHOIS", "desc": "등록자 이름이나 이메일로 해당 사람/조직이 소유한 모든 도메인을 검색하는 기법. 숨겨진 인프라를 발견하는 데 유용합니다" },
+        { "name": "Domain Takeover", "desc": "만료되거나 관리되지 않는 도메인/서브도메인을 공격자가 탈취하여 피싱이나 악성코드 배포에 활용하는 공격" }
+      ]
+    },
+    {
+      "cmd": "python3 securitytrails_api.py --domain {companyName}.com --history --subdomains --output st_results.json",
+      "out": "[*] SecurityTrails API Query: {companyName}.com\n\n=== Domain History ===\nIP History (last 3 years):\n  2023-01: 104.16.51.111 (Cloudflare)\n  2022-06: 185.199.108.153 (GitHub Pages)\n  2021-03: 52.84.220.64 (AWS CloudFront)\n  2020-01: 192.168.1.100 (Self-hosted)\n\nNameserver Changes:\n  2023-01: ns1.cloudflare.com (current)\n  2021-03: ns-1234.awsdns-10.org\n  2020-01: ns1.{companyName}.com (self-hosted DNS)\n\n=== Subdomains (42 found) ===\napi.{companyName}.com        → 10.0.1.50\nmail.{companyName}.com       → 10.0.1.25\nvpn.{companyName}.com        → 10.0.2.1\ndev.{companyName}.com        → 10.0.3.10\njira.{companyName}.com       → 10.0.3.15\ngitlab.{companyName}.com     → 10.0.3.20\njenkins.{companyName}.com    → 10.0.3.25\n... (35 more)\n\n[+] Results saved to st_results.json",
+      "def": "[Threat Intel] SecurityTrails API reconnaissance query detected",
+      "defAction": "Source: SecurityTrails API\nTarget: {companyName}.com\nAction: Historical DNS change monitoring activated",
+      "desc": "SecurityTrails API로 도메인의 IP 변경 이력, 네임서버 변경 이력, 서브도메인 목록을 조회합니다.",
+      "descEn": "Query SecurityTrails API for domain IP change history, nameserver changes, and subdomain enumeration.",
+      "stepTitle": "SecurityTrails 도메인 히스토리 분석",
+      "stepTitleEn": "SecurityTrails Domain History Analysis",
+      "feynman": "SecurityTrails는 도메인의 '이사 이력'을 보여줍니다. 이 회사가 처음에는 자체 서버를 쓰다가, AWS로 옮기고, 나중에 Cloudflare로 바꾼 것을 알 수 있습니다. 또한 42개의 서브도메인(api, mail, vpn, jira 등)을 발견하면 조직의 전체 IT 인프라 구조를 파악할 수 있습니다.",
+      "feynmanEn": "SecurityTrails shows a domain's 'moving history.' We can see the company started with self-hosted servers, moved to AWS, then switched to Cloudflare. Discovering 42 subdomains (api, mail, vpn, jira, etc.) reveals the organization's entire IT infrastructure.",
+      "expert": "SecurityTrails는 과거 DNS 레코드, IP 변경 이력, 서브도메인을 추적하는 패시브 DNS 인텔리전스 플랫폼입니다. IP 히스토리에서 셀프 호스팅(192.168.1.100) 시절의 잔존 설정이나 AWS에서 Cloudflare로의 마이그레이션 미완료 부분이 공격 벡터가 될 수 있습니다.",
+      "expertEn": "SecurityTrails is a passive DNS intelligence platform tracking historical DNS records, IP changes, and subdomains. Residual configurations from the self-hosted era (192.168.1.100) or incomplete migration from AWS to Cloudflare can become attack vectors.",
+      "defTooltip": "📊 위협정보: SecurityTrails API 정찰 쿼리 감지",
+      "defTooltipEn": "📊 Threat Intel: SecurityTrails API reconnaissance query detected",
+      "hackerLog": {
+        "title": "securitytrails_results.log",
+        "lines": [
+          { "log": "2020-01: 192.168.1.100 (Self-hosted)", "desc": "💡 과거 셀프 호스팅 IP - 잔존 설정이나 백도어가 남아있을 수 있습니다" },
+          { "log": "jenkins.{companyName}.com → 10.0.3.25", "desc": "💡 Jenkins CI/CD 서버 발견 - 인증 우회 취약점의 주요 타겟" },
+          { "log": "vpn.{companyName}.com → 10.0.2.1", "desc": "💡 VPN 게이트웨이 발견 - 내부 네트워크 진입점이 될 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "SecurityTrails", "desc": "도메인의 과거 DNS 기록, IP 변경 이력, 서브도메인을 추적하는 패시브 DNS 인텔리전스 플랫폼" },
+        { "name": "Passive DNS", "desc": "실제 DNS 쿼리를 보내지 않고 과거에 수집된 DNS 데이터를 분석하는 기법. 탐지 없이 정보를 수집할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 registrar_enum.py --domain {companyName}.com --check-transfer-lock --check-2fa --output registrar_audit.json",
+      "out": "[*] Registrar Analysis: GoDaddy.com, LLC\n\n=== Transfer Security ===\nTransfer Lock: ENABLED ✅\nRegistrar Lock: CLIENT_TRANSFER_PROHIBITED\nAuth Code Required: Yes\n2FA on Registrar Account: UNKNOWN (cannot verify externally)\n\n=== Domain Security Assessment ===\nDNSSEC: NOT CONFIGURED ⚠️\nRegistry Lock: NOT ENABLED ⚠️\nCAA Records: NOT SET ⚠️\n\n=== Certificate Transparency Logs ===\nSSL Certificates issued (last 12 months): 8\n  *.{companyName}.com         - Let's Encrypt (auto-renewed)\n  api.{companyName}.com       - DigiCert\n  mail.{companyName}.com      - DigiCert\n  vpn.{companyName}.com       - DigiCert\n\n=== Risk Assessment ===\nDomain Hijack Risk: MEDIUM\nDNS Spoofing Risk: HIGH (no DNSSEC)\nUnauthorized Cert Risk: HIGH (no CAA records)\n\n[+] Report saved to registrar_audit.json",
+      "def": "[Domain Security] Registrar security audit probing detected",
+      "defAction": "Source: External probing\nTarget: {companyName}.com registrar settings\nAction: Registrar security review initiated, registry lock evaluation started",
+      "desc": "등록기관의 보안 설정(Transfer Lock, DNSSEC, CAA, Registry Lock)을 분석하여 도메인 보안 수준을 평가합니다.",
+      "descEn": "Analyze registrar security settings (Transfer Lock, DNSSEC, CAA, Registry Lock) to assess domain security posture.",
+      "stepTitle": "등록기관 보안 설정 분석",
+      "stepTitleEn": "Registrar Security Configuration Analysis",
+      "feynman": "이 단계는 도메인의 '보안 자물쇠'가 제대로 잠겨 있는지 확인합니다. Transfer Lock은 도메인이 무단으로 이전되는 것을 방지하고, DNSSEC는 DNS 응답의 위조를 방지합니다. CAA 레코드가 없으면 누구나 이 도메인의 SSL 인증서를 발급받을 수 있어 위험합니다.",
+      "feynmanEn": "This step checks if the domain's 'security locks' are properly set. Transfer Lock prevents unauthorized domain transfers, DNSSEC prevents DNS response forgery. Without CAA records, anyone can issue SSL certificates for the domain, which is dangerous.",
+      "expert": "도메인 보안 평가에서 DNSSEC 미설정과 CAA 레코드 부재는 심각한 보안 리스크입니다. CAA(RFC 8659) 없이는 어떤 CA든 해당 도메인의 인증서를 발급할 수 있어 MITM 공격이 가능합니다. Registry Lock은 레지스트리 수준에서 도메인 변경을 방지하는 최고 수준의 보호입니다.",
+      "expertEn": "Missing DNSSEC and CAA records are critical security risks. Without CAA (RFC 8659), any CA can issue certificates for the domain, enabling MITM attacks. Registry Lock provides the highest level of protection by preventing domain changes at the registry level.",
+      "defTooltip": "🔒 도메인 보안: 등록기관 보안 설정 탐색 감지",
+      "defTooltipEn": "🔒 Domain Security: Registrar security audit probing detected",
+      "hackerLog": {
+        "title": "registrar_audit.log",
+        "lines": [
+          { "log": "DNSSEC: NOT CONFIGURED ⚠️", "desc": "💡 DNSSEC 미설정 - DNS 응답을 위조하여 트래픽을 가로챌 수 있습니다" },
+          { "log": "CAA Records: NOT SET ⚠️", "desc": "💡 CAA 미설정 - 공격자가 가짜 SSL 인증서를 발급받을 수 있습니다" },
+          { "log": "DNS Spoofing Risk: HIGH", "desc": "💡 DNS 스푸핑 위험 높음 - 사용자를 가짜 사이트로 유도할 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "CAA (Certification Authority Authorization)", "desc": "특정 CA만 도메인의 SSL 인증서를 발급할 수 있도록 제한하는 DNS 레코드. 미설정 시 누구나 인증서를 발급받을 수 있습니다" },
+        { "name": "Registry Lock", "desc": "레지스트리 수준에서 도메인의 모든 변경(이전, NS 변경 등)을 잠그는 최고 수준의 도메인 보호 기능" }
+      ]
+    },
+    {
+      "cmd": "python3 domain_intel_report.py --whois whois_data.txt --amass amass_whois.txt --sectrails st_results.json --registrar registrar_audit.json --output domain_report.pdf",
+      "out": "[+] Consolidating domain intelligence...\n[+] Building infrastructure map...\n\n=== DOMAIN INTELLIGENCE REPORT ===\n\nTarget: {companyName}.com\nOwner: James Wilson ({companyName} Inc.)\nRegistrar: GoDaddy.com\n\nAttack Surface Summary:\n  Primary domains: 7 (1 expired)\n  Subdomains: 42\n  SSL Certificates: 8\n  Email contacts: 5\n\nCritical Findings:\n  1. Expired staging domain → Domain Takeover risk\n  2. DNSSEC not configured → DNS Spoofing risk\n  3. CAA records missing → Unauthorized certificate risk\n  4. Jenkins/GitLab exposed → CI/CD pipeline attack vector\n  5. Historical self-hosted IP → Potential residual access\n\nRecommended Attack Path:\n  Phase 1: Takeover {companyName}-staging.com\n  Phase 2: Issue fake SSL cert (no CAA)\n  Phase 3: DNS spoofing to redirect traffic\n\n[+] Report saved to domain_report.pdf",
+      "def": "[SIEM Correlation] Complete domain reconnaissance campaign detected",
+      "defAction": "Source: Correlation of domain intelligence activities\nTarget: {companyName} domain infrastructure\nAction: Incident #2024-1215 created, domain security hardening initiated",
+      "desc": "모든 도메인 정보를 통합하여 인프라 매핑과 공격 경로 보고서를 생성합니다.",
+      "descEn": "Consolidate all domain intelligence into an infrastructure map and attack path report.",
+      "stepTitle": "도메인 정보 통합 보고서 생성",
+      "stepTitleEn": "Domain Intelligence Report Generation",
+      "feynman": "모든 정보를 하나의 보고서로 정리하는 마지막 단계입니다. 7개 도메인, 42개 서브도메인, 5개 연락처를 종합해서 '어디를 먼저 공격할지' 계획을 세웁니다. 만료된 스테이징 도메인을 탈취하고, 가짜 SSL 인증서를 발급받고, DNS를 조작하는 3단계 공격 경로가 도출되었습니다.",
+      "feynmanEn": "The final step consolidates everything into one report. Combining 7 domains, 42 subdomains, and 5 contacts creates an attack plan. A 3-phase attack path emerges: take over the expired staging domain, issue a fake SSL cert, and manipulate DNS.",
+      "expert": "다중 소스 도메인 인텔리전스를 융합하여 공격 표면을 매핑합니다. 만료된 도메인의 Takeover, CAA 부재를 이용한 인증서 발급, DNSSEC 미설정을 이용한 DNS 스푸핑은 단독으로도 위험하지만, 연쇄적으로 결합하면 완전한 MITM 공격 체인을 구성할 수 있습니다.",
+      "expertEn": "Multi-source domain intelligence fusion maps the attack surface. Expired domain takeover, certificate issuance via missing CAA, and DNS spoofing via absent DNSSEC are dangerous individually but combined they form a complete MITM attack chain.",
+      "defTooltip": "🗺️ SIEM: 완전한 도메인 정찰 캠페인 감지 - 보안 강화 시작",
+      "defTooltipEn": "🗺️ SIEM: Complete domain reconnaissance campaign detected - security hardening initiated",
+      "hackerLog": {
+        "title": "domain_intel_report.log",
+        "lines": [
+          { "log": "Expired staging domain → Domain Takeover risk", "desc": "💡 만료된 도메인을 등록하면 기존 서비스를 가장할 수 있습니다" },
+          { "log": "Phase 2: Issue fake SSL cert (no CAA)", "desc": "💡 가짜 인증서로 HTTPS 사이트를 완벽하게 위장할 수 있습니다" },
+          { "log": "Subdomains: 42", "desc": "💡 42개 서브도메인은 거대한 공격 표면 - 하나라도 취약하면 침입 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Attack Surface (공격 표면)", "desc": "공격자가 침입할 수 있는 모든 진입점의 합. 도메인, 서브도메인, 서비스, API 등이 포함됩니다" },
+        { "name": "MITM (Man-in-the-Middle)", "desc": "통신 중간에 끼어들어 데이터를 도청하거나 변조하는 공격. DNS 스푸핑과 가짜 SSL 인증서를 결합하면 가능합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "whois (PID: 5101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "amass intel (PID: 5178)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "python3 securitytrails_api.py (PID: 5245)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 registrar_enum.py (PID: 5312)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 domain_intel_report.py (PID: 5389)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

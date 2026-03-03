@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1134.001">
+<head>
+    <script>
+        (function() {
+            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+            try { var key='sb-bnwbybawqrnhznirivfg-auth-token'; var s=sessionStorage.getItem(key); if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));} } catch(e){window.location.replace('/login');}
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded=false;
+        (async function(){try{var SUPA='https://bnwbybawqrnhznirivfg.supabase.co';var KEY='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var res=await fetch(SUPA+'/rest/v1/edu_html_content?page_id=eq.t1134-001-token-impersonation&select=content&limit=1',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});if(res.ok){var data=await res.json();if(data&&data.length>0&&data[0].content){_eduDynLoaded=true;document.open();document.write(data[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();
+        setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT EDU — T1134.001 Token Impersonation/Theft 권한 상승 기법 교육">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <title>GOTROOT EDU | T1134.001 Token Impersonation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] }, colors: { cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569' } } } }
+    </script>
+    <style>
+        body { scroll-behavior:smooth; background:#FFF8F0; color:#1e293b; transition:background .3s,color .3s; }
+        .glass-panel { background:rgba(255,255,255,.7); backdrop-filter:blur(16px); border:1px solid rgba(157,217,210,.5); box-shadow:0 8px 32px rgba(30,41,59,.05); }
+        .dark body { background:#0f172a; color:#f8fafc; }
+        .dark .glass-panel { background:rgba(30,41,59,.7); border:1px solid rgba(244,208,111,.2); }
+        .hl-teal { color:#0f766e; font-weight:700; } .dark .hl-teal { color:#9DD9D2; }
+        .hl-yel { color:#b45309; font-weight:700; } .dark .hl-yel { color:#F4D06F; }
+        .nav-item.active { background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%); border-left:4px solid #9DD9D2; color:#0f766e; font-weight:700; }
+        .dark .nav-item.active { background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%); border-left:4px solid #F4D06F; color:#F4D06F; }
+        .terminal-bg { background:#1e293b; color:#9DD9D2; font-family:'JetBrains Mono',monospace; }
+        ::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:#9DD9D2; border-radius:4px; } .dark ::-webkit-scrollbar-thumb { background:#F4D06F; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <!-- GOTROOT Banner -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2">
+            <span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span>
+            <span style="font-size:8px;color:#94a3b8;">|</span>
+            <span style="font-size:8px;color:#64748b;" class="hidden sm:inline">사이버보안 교육 플랫폼</span>
+        </div>
+        <button onclick="location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <!-- Theme Toggle -->
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full hidden md:flex flex-col shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors"><span>←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1134.001: Token Impersonation</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch1">1. 액세스 토큰이란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch2">2. Potato 공격 계열</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="ch3">3. 실습 & 퀴즈</button>
+        </nav>
+    </aside>
+    <!-- Main -->
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Privilege Escalation</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 dark:text-white">Token Impersonation</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">다른 사람의 사원증을 빌려 기밀구역에 출입하는 기법</p>
+            </header>
+            <!-- Ch1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#1.</span> 액세스 토큰이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"사원증(ID 배지) 비유"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">회사에 출근하면 사원증을 받습니다. 이 사원증에는 이름, 부서, 출입 가능 구역이 적혀 있죠. Windows에서 프로그램이 실행되면 OS가 <strong>액세스 토큰(Access Token)</strong>이라는 '디지털 사원증'을 발급합니다. 이 토큰에는 사용자 ID(SID), 소속 그룹, 권한 목록이 들어있습니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">토큰의 두 가지 종류</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div class="text-2xl mb-2">🔑</div>
+                                <h4 class="font-bold text-sm mb-1">Primary Token (주 토큰)</h4>
+                                <p class="text-xs text-cgray dark:text-slate-400">프로세스가 생성될 때 할당. 해당 프로세스의 '신분증' 역할.</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <div class="text-2xl mb-2">🎭</div>
+                                <h4 class="font-bold text-sm mb-1">Impersonation Token (가장 토큰)</h4>
+                                <p class="text-xs text-cgray dark:text-slate-400">다른 사용자 행세를 위한 임시 토큰. 서비스가 클라이언트 권한으로 작업할 때 사용.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-sm">
+                        <div class="text-slate-500 mb-2"># 현재 프로세스의 토큰 권한 확인</div>
+                        <div>C:\> <span class="text-[#F4D06F]">whoami /priv</span></div>
+                        <div class="mt-2 text-xs text-slate-400">SeImpersonatePrivilege &nbsp; Impersonate a client after authentication &nbsp; <span class="text-green-400">Enabled</span></div>
+                        <div class="text-xs text-slate-400">SeAssignPrimaryTokenPrivilege &nbsp; Replace a process level token &nbsp; <span class="text-red-400">Disabled</span></div>
+                    </div>
+                </div>
+            </section>
+            <!-- Ch2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#2.</span> SeImpersonatePrivilege & Potato 공격</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">핵심 권한: SeImpersonatePrivilege</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">IIS 웹 서버, SQL Server, MSSQL 같은 서비스 계정에는 기본적으로 <strong>SeImpersonatePrivilege</strong>가 부여됩니다. 이 권한이 있으면 다른 사용자의 토큰을 '빌려' 그 사람인 척 행동할 수 있습니다. 공격자가 이런 서비스 계정을 장악하면, <strong>SYSTEM 권한 토큰을 훔쳐</strong> 최고 관리자가 됩니다.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-panel p-4 rounded-xl text-center">
+                            <div class="text-3xl mb-2">🥔</div>
+                            <h4 class="font-bold text-sm hl-yel">JuicyPotato</h4>
+                            <p class="text-xs text-cgray dark:text-slate-400 mt-1">COM 서버를 악용해 SYSTEM 토큰 획득. Windows 10 1809 이전 동작.</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl text-center">
+                            <div class="text-3xl mb-2">🍠</div>
+                            <h4 class="font-bold text-sm hl-yel">SweetPotato</h4>
+                            <p class="text-xs text-cgray dark:text-slate-400 mt-1">여러 Potato 기법을 통합. 최신 Windows에도 일부 동작.</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl text-center">
+                            <div class="text-3xl mb-2">🖨️</div>
+                            <h4 class="font-bold text-sm hl-yel">PrintSpoofer</h4>
+                            <p class="text-xs text-cgray dark:text-slate-400 mt-1">Print Spooler 서비스 악용. Named Pipe로 SYSTEM 토큰 가로채기.</p>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-sm">
+                        <div class="text-slate-500 mb-2"># PrintSpoofer를 이용한 권한 상승 예시</div>
+                        <div>C:\> <span class="text-[#F4D06F]">PrintSpoofer.exe -i -c cmd</span></div>
+                        <div class="mt-1 text-xs text-green-400">[+] Found privilege: SeImpersonatePrivilege</div>
+                        <div class="text-xs text-green-400">[+] Named Pipe listening...</div>
+                        <div class="text-xs text-red-400">[+] Got SYSTEM token! Launching cmd as NT AUTHORITY\SYSTEM</div>
+                    </div>
+                </div>
+            </section>
+            <!-- Ch3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#3.</span> Mini Lab & 퀴즈</h2>
+                <div class="space-y-8">
+                    <!-- Mini Lab -->
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] font-mono text-sm hl-teal">Mini Lab: 토큰 권한 레벨 비교 시뮬레이션</div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-6 text-center">각 계정의 토큰을 확인하고 권한 차이를 비교해 보세요.</p>
+                            <div class="flex flex-wrap gap-3 justify-center mb-6">
+                                <button onclick="showToken('user')" class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-800 dark:text-blue-300 font-bold py-2 px-4 rounded transition text-sm">👤 일반 사용자</button>
+                                <button onclick="showToken('service')" class="bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/40 dark:hover:bg-yellow-900/60 text-yellow-800 dark:text-yellow-300 font-bold py-2 px-4 rounded transition text-sm">⚙️ 서비스 계정 (IIS)</button>
+                                <button onclick="showToken('system')" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-800 dark:text-red-300 font-bold py-2 px-4 rounded transition text-sm">👑 SYSTEM</button>
+                            </div>
+                            <div id="token-display" class="terminal-bg rounded-lg p-4 text-xs min-h-[120px]">
+                                <div class="text-slate-500">토큰을 선택하세요...</div>
+                            </div>
+                            <div id="token-msg" class="mt-3 text-sm font-bold text-center text-slate-500 h-6"></div>
+                        </div>
+                    </div>
+                    <!-- Quiz -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 dark:text-white">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-4">
+                            <div class="quiz-q" data-correct="2">
+                                <p class="font-bold mb-3 dark:text-slate-200">Q. 공격자가 Token Impersonation을 수행하기 위해 가장 먼저 필요한 것은?</p>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent mb-2">
+                                    <input type="radio" name="q1" value="1" class="mr-3"> Domain Admin 비밀번호
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent mb-2">
+                                    <input type="radio" name="q1" value="2" class="mr-3"> SeImpersonatePrivilege가 활성화된 서비스 계정 접근 권한
+                                </label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="q1" value="3" class="mr-3"> 물리적 서버 접근 권한
+                                </label>
+                            </div>
+                        </div>
+                        <button onclick="checkQuiz()" class="mt-4 bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded transition">정답 확인</button>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold"></div>
+                    </div>
+                    <!-- CTA -->
+                    <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30">
+                        <h2 class="text-2xl font-extrabold dark:text-white mb-4">학습 완료!</h2>
+                        <p class="text-cgray dark:text-slate-400 mb-6">대시보드로 돌아가 다른 기법도 학습해 보세요.</p>
+                        <button onclick="location.href='/'" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 transition">매트릭스 대시보드로 이동</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        var tokens={user:'User: GOTROOT\\alice\nSID: S-1-5-21-...-1104\nGroups: Domain Users\n\nPrivileges:\n  SeChangeNotifyPrivilege      Enabled\n  SeShutdownPrivilege          Disabled\n  SeUndockPrivilege            Disabled\n\n⚠️ SeImpersonatePrivilege: 없음',service:'User: IIS APPPOOL\\DefaultAppPool\nSID: S-1-5-82-...-3847\nGroups: IIS_IUSRS\n\nPrivileges:\n  SeImpersonatePrivilege       ✅ Enabled\n  SeAssignPrimaryTokenPrivilege Enabled\n  SeChangeNotifyPrivilege      Enabled\n\n⚠️ 이 계정으로 SYSTEM 토큰 탈취 가능!',system:'User: NT AUTHORITY\\SYSTEM\nSID: S-1-5-18\nGroups: Administrators, SYSTEM\n\nPrivileges:\n  SeDebugPrivilege             Enabled\n  SeTcbPrivilege               Enabled\n  SeImpersonatePrivilege       Enabled\n  (... 모든 권한 활성화)\n\n👑 최고 권한 — 모든 파일/프로세스 접근 가능'};
+        var tokenMsgs={user:'일반 사용자: 제한된 권한만 보유',service:'서비스 계정: SeImpersonatePrivilege 보유 → 공격 가능!',system:'SYSTEM: 최고 권한 — 공격자의 최종 목표'};
+        function showToken(type){document.getElementById('token-display').innerHTML='<pre class="whitespace-pre-wrap">'+tokens[type]+'</pre>';document.getElementById('token-msg').textContent=tokenMsgs[type];document.getElementById('token-msg').className='mt-3 text-sm font-bold text-center '+(type==='system'?'text-red-500':type==='service'?'text-yellow-600':'text-blue-500');}
+        function checkQuiz(){var q=document.querySelector('input[name="q1"]:checked');if(!q){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','bg-red-100','border-red-400','text-red-700');if(q.value==='2'){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';r.innerHTML='✅ 정답! SeImpersonatePrivilege가 있는 서비스 계정을 먼저 확보해야 토큰 도용이 가능합니다.';}else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';r.innerHTML='❌ 오답입니다. Token Impersonation의 핵심은 SeImpersonatePrivilege 권한입니다.';}}
+        var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
+    </script>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+{
+  "id": "T1595.001",
+  "title": "IP 블록 스캐닝 시뮬레이션",
+  "titleEn": "Scanning IP Blocks Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 호스트 발견", "labelEn": "🔍 Host Discovery", "steps": [0, 1] },
+    { "label": "⚡ 대규모 스캔", "labelEn": "⚡ Mass Scanning", "steps": [2, 3] },
+    { "label": "✅ 결과 분석", "labelEn": "✅ Result Analysis", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "subnet1", "label": "192.168.1.0/24", "x": 200, "y": 30 },
+    { "id": "subnet2", "label": "10.0.0.0/16", "x": 200, "y": 90 },
+    { "id": "server1", "label": "Web Server", "x": 350, "y": 30 },
+    { "id": "server2", "label": "DB Server", "x": 350, "y": 90 },
+    { "id": "firewall", "label": "Firewall", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "subnet1", "minStep": 0 },
+    { "from": "attacker", "to": "subnet2", "minStep": 2 },
+    { "from": "subnet1", "to": "server1", "minStep": 1 },
+    { "from": "subnet2", "to": "server2", "minStep": 3 },
+    { "from": "server1", "to": "firewall", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Network", "icon": "📁" },
+    { "name": "ip_ranges.txt", "icon": "📄", "alert": true },
+    { "name": "Scan Results", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "nmap -sn 192.168.1.0/24 -oG ping_sweep.txt",
+      "out": "Starting Nmap 7.94 ( https://nmap.org )\nNmap scan report for 192.168.1.1\nHost is up (0.0012s latency).\nMAC Address: 00:1A:2B:3C:4D:5E (Cisco)\nNmap scan report for 192.168.1.10\nHost is up (0.0023s latency).\nMAC Address: 08:00:27:AB:CD:EF (Oracle VirtualBox)\nNmap scan report for 192.168.1.20\nHost is up (0.0045s latency).\nMAC Address: DC:A6:32:12:34:56 (Raspberry Pi)\nNmap scan report for 192.168.1.50\nHost is up (0.0018s latency).\nMAC Address: 00:50:56:78:9A:BC (VMware)\nNmap scan report for 192.168.1.100\nHost is up (0.0031s latency).\nMAC Address: 00:0C:29:DE:F0:12 (VMware)\n\nNmap done: 256 IP addresses (5 hosts up) scanned in 2.84 seconds",
+      "def": "[IDS] ICMP sweep detected from 10.0.1.45 targeting 192.168.1.0/24",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.1.0/24 (256 hosts)\nAction: Snort alert SID:469 - ICMP Ping Sweep detected",
+      "desc": "Nmap의 -sn 옵션으로 포트 스캔 없이 호스트 존재 여부만 빠르게 확인합니다.",
+      "descEn": "Using Nmap's -sn option to quickly discover live hosts without port scanning.",
+      "stepTitle": "ICMP Ping Sweep",
+      "stepTitleEn": "ICMP Ping Sweep",
+      "feynman": "아파트 단지의 모든 문을 두드려서 누가 사는지 확인하는 것과 같습니다. 256개의 IP 주소를 하나씩 찔러보고, 응답이 오는 5개 호스트를 발견했습니다. MAC 주소를 보면 어떤 장비인지도 추측할 수 있습니다.",
+      "feynmanEn": "This is like knocking on every door in an apartment complex to see who lives there. We poke 256 IP addresses one by one and find 5 live hosts. The MAC address also hints at what type of device it is.",
+      "expert": "ICMP Echo Request(Type 8)를 256개 대상에 전송하여 Echo Reply(Type 0)를 수신한 호스트를 식별합니다. -sn은 포트 스캔을 비활성화하여 탐지 위험을 줄입니다. OUI(Organizationally Unique Identifier) 기반 MAC 분석으로 벤더를 식별합니다.",
+      "expertEn": "Sends ICMP Echo Request (Type 8) to 256 targets and identifies hosts that return Echo Reply (Type 0). The -sn flag disables port scanning to reduce detection risk. OUI-based MAC analysis identifies device vendors.",
+      "defTooltip": "🚨 IDS: 192.168.1.0/24 대역에 대한 ICMP Sweep이 감지되었습니다",
+      "defTooltipEn": "🚨 IDS: ICMP Sweep detected targeting 192.168.1.0/24 subnet",
+      "hackerLog": {
+        "title": "ping_sweep.log",
+        "lines": [
+          { "log": "256 IP addresses (5 hosts up) scanned in 2.84 seconds", "desc": "256개 IP 중 5개만 활성 상태 - 공격 대상이 좁혀졌습니다" },
+          { "log": "MAC Address: DC:A6:32:12:34:56 (Raspberry Pi)", "desc": "Raspberry Pi는 IoT 기기로 보안이 취약할 가능성이 높습니다" },
+          { "log": "MAC Address: 00:0C:29:DE:F0:12 (VMware)", "desc": "VMware 가상머신 - 서버 인프라의 일부로 추정됩니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Ping Sweep", "desc": "ICMP Echo Request를 IP 대역 전체에 보내서 응답하는(살아있는) 호스트를 찾는 네트워크 정찰 기법" },
+        { "name": "CIDR (Classless Inter-Domain Routing)", "desc": "IP 주소 범위를 표시하는 방법. /24는 256개, /16은 65,536개의 IP를 포함합니다" }
+      ]
+    },
+    {
+      "cmd": "nmap -sn -PS22,80,443 192.168.1.0/24 --reason",
+      "out": "Starting Nmap 7.94\nNmap scan report for 192.168.1.1\nHost is up, received syn-ack ttl 64 (0.0012s latency).\nNmap scan report for 192.168.1.10\nHost is up, received syn-ack ttl 64 (0.0023s latency).\nNmap scan report for 192.168.1.15\nHost is up, received syn-ack ttl 128 (0.0034s latency).\nNmap scan report for 192.168.1.50\nHost is up, received syn-ack ttl 128 (0.0019s latency).\nNmap scan report for 192.168.1.100\nHost is up, received syn-ack ttl 64 (0.0031s latency).\nNmap scan report for 192.168.1.200\nHost is up, received syn-ack ttl 64 (0.0041s latency).\n\nNmap done: 256 IP addresses (6 hosts up) scanned in 3.21 seconds",
+      "def": "[Firewall] TCP SYN probes to ports 22,80,443 from single source across /24 subnet",
+      "defAction": "Source: 10.0.1.45\nTarget: 192.168.1.0/24:22,80,443\nAction: Rate limiting applied, source flagged for monitoring",
+      "desc": "ICMP가 차단된 경우 TCP SYN 패킷을 사용하여 호스트를 발견합니다. TTL 값으로 OS를 추정합니다.",
+      "descEn": "When ICMP is blocked, TCP SYN packets are used for host discovery. TTL values hint at the OS type.",
+      "stepTitle": "TCP SYN Sweep (ICMP 우회)",
+      "stepTitleEn": "TCP SYN Sweep (ICMP Bypass)",
+      "feynman": "초인종이 고장난 집이 있으면(ICMP 차단), 대신 우편함을 확인하거나 차가 있는지 보는 것과 같습니다. TCP SYN 패킷으로 22번(SSH), 80번(웹), 443번(HTTPS) 포트에 노크해서 응답을 확인합니다. TTL 64면 Linux, 128이면 Windows로 추정합니다.",
+      "feynmanEn": "If the doorbell is broken (ICMP blocked), you check the mailbox or see if there's a car in the driveway. TCP SYN packets knock on ports 22 (SSH), 80 (web), and 443 (HTTPS). TTL 64 suggests Linux, while 128 suggests Windows.",
+      "expert": "-PS22,80,443은 TCP SYN Ping을 수행합니다. SYN 패킷에 SYN-ACK 또는 RST로 응답하는 호스트를 탐지합니다. --reason 플래그는 호스트 발견 이유를 표시합니다. TTL 기반 패시브 OS 핑거프린팅이 가능합니다.",
+      "expertEn": "-PS22,80,443 performs TCP SYN Ping. Hosts responding with SYN-ACK or RST are identified. The --reason flag shows why the host was discovered. TTL-based passive OS fingerprinting is possible.",
+      "defTooltip": "🛡️ 방화벽: 단일 소스에서 /24 대역의 22,80,443 포트로 TCP SYN 프로브 감지",
+      "defTooltipEn": "🛡️ Firewall: TCP SYN probes to ports 22,80,443 from single source across /24 subnet",
+      "hackerLog": {
+        "title": "syn_sweep.log",
+        "lines": [
+          { "log": "received syn-ack ttl 64", "desc": "TTL 64 = Linux/Unix 계열 시스템으로 추정" },
+          { "log": "received syn-ack ttl 128", "desc": "TTL 128 = Windows 시스템으로 추정" },
+          { "log": "6 hosts up (vs 5 from ICMP)", "desc": "TCP SYN으로 ICMP에서 못 찾은 추가 호스트 1개 발견!" }
+        ]
+      },
+      "terms": [
+        { "name": "TCP SYN Ping", "desc": "TCP 3-way handshake의 첫 번째 패킷(SYN)을 보내 호스트 존재를 확인하는 방법. ICMP가 차단되어도 동작합니다" },
+        { "name": "TTL (Time to Live)", "desc": "패킷의 수명. 운영체제마다 기본값이 달라(Linux=64, Windows=128) OS 추정에 활용됩니다" }
+      ]
+    },
+    {
+      "cmd": "masscan 10.0.0.0/16 -p80,443,8080,8443 --rate=50000 -oJ masscan_results.json",
+      "out": "Starting masscan 1.3.2 at 2026-03-01 09:05:00 GMT\nInitiating SYN Stealth Scan\nScanning 65536 hosts [4 ports/host]\n\nDiscovered open port 80/tcp on 10.0.1.15\nDiscovered open port 443/tcp on 10.0.1.15\nDiscovered open port 80/tcp on 10.0.2.30\nDiscovered open port 8080/tcp on 10.0.2.30\nDiscovered open port 443/tcp on 10.0.5.100\nDiscovered open port 8443/tcp on 10.0.5.100\nDiscovered open port 80/tcp on 10.0.10.50\nDiscovered open port 80/tcp on 10.0.15.200\nDiscovered open port 443/tcp on 10.0.20.75\n\nrate: 50000.00-kpps, 100.00% done, 0:00:00 remaining\n9 open ports found on 6 hosts",
+      "def": "[SIEM] High-rate SYN flood pattern detected - 50,000 packets/sec from 10.0.1.45",
+      "defAction": "Source: 10.0.1.45\nTarget: 10.0.0.0/16 (65536 hosts)\nAction: SOC alert generated, automated IP blocking initiated",
+      "desc": "Masscan으로 /16 대역(65,536개 IP)을 초당 5만 패킷으로 고속 스캔합니다.",
+      "descEn": "Masscan rapidly scans a /16 subnet (65,536 IPs) at 50,000 packets per second.",
+      "stepTitle": "Masscan 대규모 고속 스캔",
+      "stepTitleEn": "Masscan High-Speed Mass Scan",
+      "feynman": "Nmap이 한 집씩 방문하는 방문판매원이라면, Masscan은 헬기를 타고 아파트 단지 전체를 촬영하는 것입니다. 초당 5만 개의 패킷을 쏟아부어 6만 5천 개의 IP를 몇 초 만에 스캔합니다. 속도는 빠르지만 그만큼 시끄러워서 탐지되기 쉽습니다.",
+      "feynmanEn": "If Nmap is a door-to-door salesman, Masscan is a helicopter photographing the entire apartment complex. It floods 50,000 packets per second to scan 65,536 IPs in seconds. Fast but noisy, making it easy to detect.",
+      "expert": "Masscan은 비동기 TCP SYN 스캔을 수행하며, 자체 TCP/IP 스택을 사용하여 OS 스택 오버헤드를 우회합니다. --rate=50000은 초당 50K 패킷 전송률로, /16 대역을 약 5초 만에 스캔합니다. 커널 바이패스(PF_RING)로 더 높은 속도도 가능합니다.",
+      "expertEn": "Masscan performs asynchronous TCP SYN scans using its own TCP/IP stack to bypass OS overhead. --rate=50000 sets 50K packets/sec, scanning a /16 subnet in about 5 seconds. Kernel bypass via PF_RING enables even higher rates.",
+      "defTooltip": "📡 SIEM: 10.0.0.0/16 대역에 초당 50,000 패킷의 SYN 플러드 패턴 감지",
+      "defTooltipEn": "📡 SIEM: High-rate SYN flood pattern at 50,000 pps targeting 10.0.0.0/16",
+      "hackerLog": {
+        "title": "masscan_results.log",
+        "lines": [
+          { "log": "rate: 50000.00-kpps, 100.00% done", "desc": "초당 5만 패킷으로 전체 /16 대역 스캔 완료" },
+          { "log": "9 open ports found on 6 hosts", "desc": "65,536개 IP 중 6대에서 웹 서비스 포트가 열려 있음" },
+          { "log": "Discovered open port 8443/tcp on 10.0.5.100", "desc": "8443은 HTTPS 대체 포트 - 관리 인터페이스일 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "Masscan", "desc": "인터넷 전체를 6분 만에 스캔할 수 있는 초고속 포트 스캐너. 자체 TCP/IP 스택을 사용하여 극도로 빠른 속도를 달성합니다" },
+        { "name": "SYN Stealth Scan", "desc": "TCP 3-way handshake를 완료하지 않고 SYN 패킷만 보내 포트 상태를 확인하는 은밀한 스캔 기법" }
+      ]
+    },
+    {
+      "cmd": "zmap -p 443 10.0.0.0/8 -o zmap_443.csv -B 100M --seed=12345",
+      "out": "Mar 01 09:10:00.000 [INFO] zmap v3.0.0\nMar 01 09:10:00.001 [INFO] target: 10.0.0.0/8 (16777216 hosts)\nMar 01 09:10:00.002 [INFO] port: 443/TCP\nMar 01 09:10:00.003 [INFO] bandwidth: 100 Mbps\nMar 01 09:10:05.124 [INFO] 0.5% complete; send: 83886; recv: 2,451 (2.92%)\nMar 01 09:10:15.892 [INFO] 5.0% complete; send: 838860; recv: 24,789 (2.95%)\n...\nMar 01 09:15:42.331 [INFO] 100% complete\nMar 01 09:15:42.332 [INFO] 16777216 targets scanned in 342s\nMar 01 09:15:42.333 [INFO] 495,210 hosts responded (2.95% hit rate)\nMar 01 09:15:42.334 [INFO] results written to zmap_443.csv",
+      "def": "[ISP/Upstream] Massive scanning activity detected - 16.7M hosts targeted at 100Mbps",
+      "defAction": "Source: External scanning infrastructure\nTarget: 10.0.0.0/8 (entire Class A)\nAction: ISP abuse notification generated, upstream rate limiting applied",
+      "desc": "Zmap으로 /8 대역(약 1,677만 개 IP)을 100Mbps 대역폭으로 전수 스캔합니다.",
+      "descEn": "Zmap scans the entire /8 block (~16.7M IPs) at 100Mbps bandwidth for comprehensive coverage.",
+      "stepTitle": "Zmap 인터넷 규모 스캔",
+      "stepTitleEn": "Zmap Internet-Scale Scan",
+      "feynman": "Masscan이 아파트 단지를 스캔한다면, Zmap은 도시 전체를 스캔합니다. 1,677만 개의 IP를 약 6분 만에 확인하여, 443번 포트(HTTPS)가 열린 서버 49만 5천 대를 발견했습니다. 이것이 인터넷 규모의 정찰입니다.",
+      "feynmanEn": "If Masscan scans an apartment complex, Zmap scans an entire city. It checks 16.7 million IPs in about 6 minutes, finding 495,210 servers with open port 443 (HTTPS). This is internet-scale reconnaissance.",
+      "expert": "Zmap은 무작위 순열 기반 주소 선택으로 순차 탐지를 회피합니다. --seed는 재현 가능한 스캔을 위한 PRNG 시드입니다. 2.95% 응답률은 /8 대역에서 약 50만 대의 HTTPS 서버가 활성 상태임을 보여줍니다.",
+      "expertEn": "Zmap uses random permutation-based address selection to evade sequential detection. --seed provides a reproducible PRNG seed. The 2.95% response rate shows approximately 500K active HTTPS servers in the /8 block.",
+      "defTooltip": "🌐 ISP: /8 전체 대역(1,677만 호스트)에 대한 대규모 스캔 활동 감지",
+      "defTooltipEn": "🌐 ISP: Massive scanning activity targeting entire /8 block (16.7M hosts)",
+      "hackerLog": {
+        "title": "zmap_scan.log",
+        "lines": [
+          { "log": "target: 10.0.0.0/8 (16777216 hosts)", "desc": "Class A 전체 대역 - 약 1,677만 개의 IP를 스캔합니다" },
+          { "log": "495,210 hosts responded (2.95% hit rate)", "desc": "약 49만 대의 HTTPS 서버 발견 - 추가 취약점 스캔 대상" },
+          { "log": "16777216 targets scanned in 342s", "desc": "6분 미만에 1,677만 IP 스캔 완료 - Zmap의 놀라운 속도" }
+        ]
+      },
+      "terms": [
+        { "name": "Zmap", "desc": "미시간 대학에서 개발한 인터넷 전체 스캔 도구. 단일 포트에 대해 IPv4 전체 주소 공간을 45분 만에 스캔할 수 있습니다" },
+        { "name": "Hit Rate (응답률)", "desc": "스캔한 IP 중 응답한 비율. 인터넷 전체에서 특정 포트의 응답률은 서비스 보급률을 나타냅니다" }
+      ]
+    },
+    {
+      "cmd": "python3 consolidate_scan.py --ping ping_sweep.txt --masscan masscan_results.json --zmap zmap_443.csv",
+      "out": "[+] Loading scan results...\n[+] Ping sweep: 5 hosts\n[+] Masscan results: 6 hosts (9 open ports)\n[+] Zmap results: 495,210 hosts\n\n=== CONSOLIDATED TARGET LIST ===\nHigh Priority (internal network):\n  192.168.1.10  - Web Server (Apache), Linux, Ports: 80,443\n  192.168.1.100 - DB Server (MySQL), Linux, Port: 3306\n  10.0.2.30     - App Server (Tomcat), Ports: 80,8080\n  10.0.5.100    - Management Console, Ports: 443,8443\n\nMedium Priority:\n  192.168.1.20  - IoT Device (Raspberry Pi)\n  192.168.1.50  - Windows Workstation\n\n[+] 6 high-value targets identified for deep scanning\n[+] Report saved to target_list.json",
+      "def": "[SIEM Correlation] Multi-phase scanning campaign detected - ICMP, TCP SYN, and mass scanning tools used",
+      "defAction": "Source: 10.0.1.45 (correlated across 3 scan phases)\nTarget: Internal and external infrastructure\nAction: Incident #INC-2026-0301 created, threat level HIGH",
+      "desc": "모든 스캔 결과를 통합하여 공격 우선순위가 높은 타겟 목록을 생성합니다.",
+      "descEn": "All scan results are consolidated to generate a prioritized target list for subsequent attacks.",
+      "stepTitle": "스캔 결과 통합 및 타겟 선정",
+      "stepTitleEn": "Scan Consolidation and Target Selection",
+      "feynman": "여러 가지 방법으로 조사한 결과를 하나로 합칩니다. 초인종으로 찾은 5집, 우편함으로 찾은 6집, 항공 촬영으로 찾은 49만 집의 정보를 모아서, 가장 침입하기 쉬운 집 6곳을 골라냅니다. 웹 서버와 DB 서버가 최우선 대상입니다.",
+      "feynmanEn": "Results from different methods are combined into one report. Information from 5 houses found by doorbell, 6 by mailbox check, and 490K by aerial survey is merged to select the 6 easiest targets. Web and DB servers are top priorities.",
+      "expert": "다중 스캐너 결과를 상관 분석하여 false positive를 줄이고 공격 표면을 정확히 매핑합니다. 서비스 유형, OS, 노출된 포트를 기반으로 위험도를 산정합니다. 내부 네트워크 자산이 외부 스캔보다 높은 우선순위를 받습니다.",
+      "expertEn": "Multi-scanner results are correlated to reduce false positives and accurately map the attack surface. Risk is assessed based on service type, OS, and exposed ports. Internal network assets receive higher priority than external scan targets.",
+      "defTooltip": "🗺️ SIEM: ICMP/TCP SYN/대규모 스캔 도구를 활용한 다단계 스캐닝 캠페인 감지",
+      "defTooltipEn": "🗺️ SIEM: Multi-phase scanning campaign detected using ICMP, TCP SYN, and mass scanning tools",
+      "hackerLog": {
+        "title": "target_analysis.log",
+        "lines": [
+          { "log": "192.168.1.100 - DB Server (MySQL), Port: 3306", "desc": "DB 서버가 외부에 노출 - 최우선 공격 대상" },
+          { "log": "10.0.5.100 - Management Console, Ports: 443,8443", "desc": "관리 콘솔 접근 가능 - 기본 자격증명 시도 대상" },
+          { "log": "6 high-value targets identified", "desc": "수십만 개 IP 중 6개의 고가치 타겟을 선별하여 효율적 공격 준비 완료" }
+        ]
+      },
+      "terms": [
+        { "name": "Attack Surface (공격 표면)", "desc": "시스템에서 공격자가 침입할 수 있는 모든 진입점의 합계. 열린 포트, 서비스, API 등이 포함됩니다" },
+        { "name": "Target Prioritization", "desc": "발견된 대상을 공격 가치와 성공 가능성에 따라 순서를 매기는 과정. 취약한 서비스를 실행하는 서버가 우선됩니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "nmap -sn (PID: 2101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "nmap -sn -PS (PID: 2145)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "masscan (PID: 2200)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "zmap (PID: 2267)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 consolidate_scan.py (PID: 2310)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

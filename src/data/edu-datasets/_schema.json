@@ -1,0 +1,608 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gotroot-edu-dataset",
+  "title": "GOTROOT Education Dataset Schema",
+  "description": "Schema for per-technique education content datasets. Each file describes one MITRE ATT&CK sub-technique across up to 3 education levels (beginner, intermediate, advanced).",
+  "type": "object",
+  "required": ["techniqueId", "techniqueName", "tacticIds", "levels", "metadata"],
+  "properties": {
+    "techniqueId": {
+      "type": "string",
+      "pattern": "^T\\d{4}(\\.\\d{3})?$",
+      "description": "MITRE ATT&CK technique or sub-technique ID (e.g. T1078, T1078.002)"
+    },
+    "techniqueName": {
+      "type": "string",
+      "description": "Human-readable technique name (e.g. 'Valid Accounts: Domain Accounts')"
+    },
+    "tacticIds": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "List of MITRE ATT&CK tactic IDs this technique belongs to (e.g. ['TA0001', 'TA0003'])"
+    },
+    "tacticName": {
+      "type": "string",
+      "description": "Primary tactic display name (e.g. 'Initial Access')"
+    },
+    "levels": {
+      "type": "object",
+      "description": "Education content organized by difficulty level. At minimum, beginner level is required.",
+      "properties": {
+        "beginner": { "$ref": "#/$defs/level" },
+        "intermediate": { "$ref": "#/$defs/level" },
+        "advanced": { "$ref": "#/$defs/level" }
+      },
+      "required": ["beginner"],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Metadata about the dataset including sources, tags, and versioning.",
+      "required": ["ctiSources", "tags", "lastUpdated", "version"],
+      "properties": {
+        "ctiSources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ctiSource" },
+          "description": "Cyber Threat Intelligence sources referenced in this dataset"
+        },
+        "aptGroups": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "APT groups known to use this technique (e.g. ['APT29', 'Lazarus Group'])"
+        },
+        "relatedTechniques": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Related MITRE ATT&CK technique IDs (e.g. ['T1110', 'T1003'])"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Searchable tags for categorization (e.g. ['credential', 'active-directory', 'windows'])"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date of the last content update (e.g. '2026-03-02')"
+        },
+        "author": {
+          "type": "string",
+          "description": "Content author or team name"
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic version of this dataset file (e.g. '1.0.0')"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+
+  "$defs": {
+    "level": {
+      "type": "object",
+      "description": "A single education level containing overview, chapters, interactive labs, and a quiz.",
+      "required": ["title", "titleEn", "estimatedMinutes", "overviewPanel", "chapters", "quiz"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Level title in Korean (e.g. '도메인 계정 탈취 기초')"
+        },
+        "titleEn": {
+          "type": "string",
+          "description": "Level title in English (e.g. 'Domain Account Compromise Basics')"
+        },
+        "estimatedMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Estimated completion time in minutes"
+        },
+        "overviewPanel": {
+          "$ref": "#/$defs/overviewPanel",
+          "description": "Introductory overview panel shown before chapters"
+        },
+        "chapters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/chapter" },
+          "minItems": 1,
+          "description": "Ordered list of educational chapters"
+        },
+        "miniLabs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/miniLab" },
+          "description": "Interactive mini-lab exercises for hands-on learning"
+        },
+        "quiz": {
+          "$ref": "#/$defs/quiz",
+          "description": "End-of-level quiz to assess comprehension"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "overviewPanel": {
+      "type": "object",
+      "description": "Introductory panel that frames the topic with a motivating question and learning goals.",
+      "required": ["emoji", "question", "explanation", "learningGoals"],
+      "properties": {
+        "emoji": {
+          "type": "string",
+          "description": "Single emoji representing the topic (e.g. '\ud83d\udd11')"
+        },
+        "question": {
+          "type": "string",
+          "description": "Hook question to engage the learner (e.g. '\ub3c4\uba54\uc778 \uacc4\uc815\uc774 \ud0c8\ucde8\ub418\uba74 \ubb34\uc2a8 \uc77c\uc774 \uc77c\uc5b4\ub0a0\uae4c\uc694?')"
+        },
+        "explanation": {
+          "type": "string",
+          "description": "Brief explanation answering the hook question"
+        },
+        "learningGoals": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/learningGoal" },
+          "minItems": 1,
+          "description": "List of learning objectives for this level"
+        },
+        "nextLevelTeaser": {
+          "type": "string",
+          "description": "Preview text teasing what the next level covers (omitted for advanced level)"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "learningGoal": {
+      "type": "object",
+      "description": "A single learning objective with an emoji icon.",
+      "required": ["emoji", "title", "desc"],
+      "properties": {
+        "emoji": {
+          "type": "string",
+          "description": "Emoji icon for this goal (e.g. '\ud83c\udfaf')"
+        },
+        "title": {
+          "type": "string",
+          "description": "Short title of the learning goal"
+        },
+        "desc": {
+          "type": "string",
+          "description": "Detailed description of what the learner will achieve"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "chapter": {
+      "type": "object",
+      "description": "A chapter within a level, containing ordered educational panels.",
+      "required": ["id", "title", "panels"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique chapter identifier within the level (e.g. 'ch1', 'ch2')"
+        },
+        "title": {
+          "type": "string",
+          "description": "Chapter title displayed to the learner"
+        },
+        "panels": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/panel" },
+          "minItems": 1,
+          "description": "Ordered list of content panels in this chapter"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "panel": {
+      "type": "object",
+      "description": "A content panel within a chapter. The 'type' field determines which additional fields are relevant.",
+      "required": ["type", "heading"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["analogy", "concept", "comparison_table", "code", "diagram", "info", "warning"],
+          "description": "Panel display type determining layout and styling"
+        },
+        "borderColor": {
+          "type": "string",
+          "description": "Tailwind CSS border color class (e.g. 'border-blue-400', 'border-yellow-400')"
+        },
+        "heading": {
+          "type": "string",
+          "description": "Panel heading text"
+        },
+        "content": {
+          "type": "string",
+          "description": "Main text content of the panel (supports markdown-like formatting)"
+        },
+        "emojis": {
+          "type": "string",
+          "description": "Emoji characters for analogy-type panels to visually represent the analogy"
+        },
+        "headers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Column headers for comparison_table-type panels"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "description": "Table rows for comparison_table-type panels. Each row is an array of cell values matching the headers."
+        },
+        "filename": {
+          "type": "string",
+          "description": "Filename displayed above code blocks for code-type panels (e.g. 'exploit.py')"
+        },
+        "language": {
+          "type": "string",
+          "description": "Programming language for syntax context in code-type panels (e.g. 'python', 'powershell')"
+        },
+        "warning": {
+          "type": "string",
+          "description": "Warning message displayed with code-type panels (e.g. 'Do not run on production systems')"
+        },
+        "lines": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/codeLine" },
+          "description": "Colored code lines for code-type panels"
+        },
+        "ascii": {
+          "type": "string",
+          "description": "ASCII art diagram text for diagram-type panels (supports multi-line strings)"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "analogy" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "heading", "content", "emojis"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "comparison_table" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "heading", "headers", "rows"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "code" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "heading", "filename", "language", "lines"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "diagram" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "heading", "ascii"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "concept" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "heading", "content"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "info" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "heading", "content"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "warning" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "heading", "content"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+
+    "codeLine": {
+      "type": "object",
+      "description": "A single line of code with syntax-highlighting color.",
+      "required": ["text", "color"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The code text for this line"
+        },
+        "color": {
+          "type": "string",
+          "enum": ["purple", "green", "yellow", "orange", "slate", "red", "blue", "cyan", "white", "pink"],
+          "description": "Syntax highlight color mapped to Tailwind text color classes"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "pocCode": {
+      "type": "object",
+      "description": "Proof-of-concept code block with build commands and expected output for lab exercises.",
+      "required": ["filename", "language", "lines"],
+      "properties": {
+        "filename": {
+          "type": "string",
+          "description": "Source file name (e.g. 'poc_t1078.py')"
+        },
+        "language": {
+          "type": "string",
+          "description": "Programming language (e.g. 'python', 'bash', 'powershell')"
+        },
+        "buildCommands": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Shell commands to build or run the PoC (e.g. ['pip install impacket', 'python poc.py'])"
+        },
+        "lines": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/codeLine" },
+          "description": "Colored source code lines"
+        },
+        "expectedOutput": {
+          "type": "string",
+          "description": "Expected terminal output when the PoC runs successfully"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "miniLab": {
+      "type": "object",
+      "description": "An interactive mini-lab exercise. The 'type' field determines the exercise format and which additional fields are required.",
+      "required": ["type", "title"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["matching_game", "ordering_game", "step_click", "code_fill"],
+          "description": "Type of interactive exercise"
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title for the mini-lab"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief instructions explaining the exercise to the learner"
+        },
+        "pairs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/matchingPair" },
+          "description": "Matching pairs for matching_game-type labs"
+        },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/orderingItem" },
+          "description": "Ordered items for ordering_game-type labs (correct order = array index)"
+        },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stepClickItem" },
+          "description": "Sequential steps for step_click-type labs"
+        },
+        "code": {
+          "$ref": "#/$defs/pocCode",
+          "description": "Code template with blanks for code_fill-type labs"
+        },
+        "blanks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/codeFillBlank" },
+          "description": "Fill-in-the-blank definitions for code_fill-type labs"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "matching_game" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "title", "pairs"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "ordering_game" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "title", "items"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "step_click" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "title", "steps"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "code_fill" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["type", "title", "code", "blanks"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+
+    "matchingPair": {
+      "type": "object",
+      "description": "A pair of items to be matched in a matching_game exercise.",
+      "required": ["left", "right"],
+      "properties": {
+        "left": {
+          "type": "string",
+          "description": "Left-side item (e.g. a term or concept)"
+        },
+        "right": {
+          "type": "string",
+          "description": "Right-side item (e.g. definition or example)"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "orderingItem": {
+      "type": "object",
+      "description": "An item in an ordering_game exercise. Array position represents the correct order.",
+      "required": ["label"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Display text for this step/item"
+        },
+        "hint": {
+          "type": "string",
+          "description": "Optional hint to help the learner place this item correctly"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "stepClickItem": {
+      "type": "object",
+      "description": "A sequential step in a step_click exercise where learners click through an attack chain.",
+      "required": ["label", "detail"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Short step label (e.g. 'Step 1: Reconnaissance')"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Detailed explanation shown when this step is clicked/activated"
+        },
+        "emoji": {
+          "type": "string",
+          "description": "Emoji icon for visual representation of this step"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "codeFillBlank": {
+      "type": "object",
+      "description": "A blank in a code_fill exercise that the learner must fill with the correct value.",
+      "required": ["id", "answer"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique blank identifier referenced in the code template (e.g. 'blank1')"
+        },
+        "answer": {
+          "type": "string",
+          "description": "The correct answer for this blank"
+        },
+        "hint": {
+          "type": "string",
+          "description": "Optional hint displayed to the learner"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Alternative acceptable answers (case-insensitive matching)"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "quiz": {
+      "type": "object",
+      "description": "End-of-level quiz containing multiple-choice questions.",
+      "required": ["questions"],
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/quizQuestion" },
+          "minItems": 1,
+          "description": "List of quiz questions"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "quizQuestion": {
+      "type": "object",
+      "description": "A single multiple-choice quiz question with one correct answer.",
+      "required": ["question", "options", "correct", "explanation"],
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The question text"
+        },
+        "options": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 2,
+          "description": "List of answer options"
+        },
+        "correct": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Zero-based index of the correct answer in the options array"
+        },
+        "explanation": {
+          "type": "string",
+          "description": "Explanation shown after the learner answers, clarifying why the correct answer is right"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "ctiSource": {
+      "type": "object",
+      "description": "A Cyber Threat Intelligence source referenced in the dataset.",
+      "required": ["name", "url", "dataUsed"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Source name (e.g. 'MITRE ATT&CK', 'CISA Advisory AA23-347A')"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the source document"
+        },
+        "dataUsed": {
+          "type": "string",
+          "description": "Description of what data was used from this source (e.g. 'Technique description and detection guidance')"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

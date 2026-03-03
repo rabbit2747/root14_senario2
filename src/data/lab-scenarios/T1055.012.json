@@ -1,0 +1,210 @@
+{
+  "id": "T1055.012",
+  "title": "Process Hollowing 시뮬레이션",
+  "titleEn": "Process Hollowing Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 타겟 선정", "labelEn": "🔍 Target Selection", "steps": [0] },
+    { "label": "⚡ Hollowing", "labelEn": "⚡ Hollowing", "steps": [1, 2, 3] },
+    { "label": "🔓 코드 실행", "labelEn": "🔓 Code Execution", "steps": [4] },
+    { "label": "🧹 탐지 확인", "labelEn": "🧹 Detection Check", "steps": [5] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(malware.exe)", "x": 50, "y": 80 },
+    { "id": "create", "label": "CreateProcess\n(SUSPENDED)", "x": 180, "y": 30 },
+    { "id": "hollow", "label": "svchost.exe\n(Hollowed)", "x": 300, "y": 80 },
+    { "id": "inject", "label": "WriteProcess\nMemory", "x": 300, "y": 160 },
+    { "id": "c2", "label": "C2 Server\n(Beaconing)", "x": 460, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "create", "minStep": 1 },
+    { "from": "create", "to": "hollow", "minStep": 2 },
+    { "from": "inject", "to": "hollow", "minStep": 3 },
+    { "from": "hollow", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "Task Manager", "icon": "📊" },
+    { "name": "Command Prompt", "icon": "🖥️" },
+    { "name": "Process Monitor", "icon": "🔍" },
+    { "name": "{companyName} App", "icon": "🌐" },
+    { "name": "Windows Defender", "icon": "🛡️" }
+  ],
+  "steps": [
+    {
+      "cmd": "tasklist /FI \"IMAGENAME eq svchost.exe\" /V",
+      "out": "Image Name     PID  Session  Mem Usage  Status   User Name\nsvchost.exe    784  Services    14,320K Running  SYSTEM\nsvchost.exe   1024  Services    22,540K Running  SYSTEM\nsvchost.exe   1108  Services     8,680K Running  NETWORK SERVICE\nsvchost.exe   1452  Services    31,200K Running  LOCAL SERVICE",
+      "def": "[SIEM] Process enumeration - svchost.exe instances listed",
+      "defAction": "Process: cmd.exe -> tasklist.exe\nFilter: svchost.exe\nRisk Level: Low\nAction: Log & Monitor",
+      "desc": "공격자가 정상 svchost.exe 프로세스의 현재 상태를 확인합니다. Process Hollowing의 타겟으로 svchost.exe를 선택하는 이유는 다수의 인스턴스가 항상 실행 중이어서 하나가 추가되어도 눈에 띄지 않기 때문입니다.",
+      "descEn": "The attacker checks the current state of legitimate svchost.exe processes. svchost.exe is chosen as the Process Hollowing target because multiple instances are always running, making an additional one inconspicuous.",
+      "stepTitle": "svchost.exe 프로세스 현황 확인",
+      "stepTitleEn": "svchost.exe Process Status Check",
+      "feynman": "직원들의 유니폼을 관찰하여 '어떤 유니폼이 가장 흔하고, 하나 더 추가되어도 눈에 띄지 않을지' 파악하는 것입니다. svchost.exe는 Windows에서 가장 많은 인스턴스가 실행되는 프로세스라 하나가 더 생겨도 의심받지 않습니다.",
+      "feynmanEn": "It's like observing employee uniforms to determine which is most common and won't stand out if one more appears. svchost.exe has the most running instances in Windows, so an additional one goes unnoticed.",
+      "expert": "svchost.exe(Service Host)는 Windows 서비스를 호스팅하는 프로세스로, 일반적으로 10-20개 이상의 인스턴스가 동시에 실행됩니다. SYSTEM, NETWORK SERVICE, LOCAL SERVICE 컨텍스트에서 실행되며, Process Hollowing의 가장 인기 있는 타겟입니다. 새 인스턴스 생성 시 부모 프로세스가 services.exe가 아닌 점이 탐지 포인트입니다.",
+      "expertEn": "svchost.exe (Service Host) hosts Windows services, with typically 10-20+ instances running simultaneously. It runs in SYSTEM, NETWORK SERVICE, and LOCAL SERVICE contexts, making it the most popular Process Hollowing target. The detection point is when a new instance's parent process isn't services.exe.",
+      "defTooltip": "🔐 svchost.exe 프로세스 열거 감지! Process Hollowing 준비 단계일 수 있습니다.",
+      "defTooltipEn": "🔐 svchost.exe process enumeration detected! Could be preparation for Process Hollowing.",
+      "hackerLog": {
+        "title": "process_enum.txt",
+        "lines": [
+          { "log": "svchost.exe (4 instances)", "desc": "💡 다수의 svchost 인스턴스 실행 중 - 하나 추가되어도 탐지 어려움" },
+          { "log": "SYSTEM, NETWORK SERVICE, LOCAL SERVICE", "desc": "💡 다양한 보안 컨텍스트로 실행 - 높은 권한 컨텍스트 악용 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "svchost.exe", "desc": "Windows 서비스를 호스팅하는 핵심 시스템 프로세스. 여러 인스턴스가 동시에 실행되는 것이 정상입니다." },
+        { "name": "Process Hollowing 타겟", "desc": "합법적이고 다수 실행되는 프로세스(svchost, explorer, notepad)가 주로 선택됩니다." },
+        { "name": "서비스 컨텍스트", "desc": "SYSTEM, NETWORK SERVICE, LOCAL SERVICE 등 Windows 서비스가 실행되는 보안 계정입니다." }
+      ]
+    },
+    {
+      "cmd": "malware.exe --hollow --target svchost.exe --payload beacon.bin",
+      "out": "[*] Creating svchost.exe in SUSPENDED state...\n[+] Process created: PID 5280 (SUSPENDED)\n[*] Image base: 0x00007FF7A4200000\n[*] Entry point: 0x00007FF7A4201000",
+      "def": "[EDR] ALERT: svchost.exe created in SUSPENDED state by non-services.exe parent",
+      "defAction": "Process: malware.exe -> svchost.exe (SUSPENDED)\nParent: malware.exe (NOT services.exe)\nPID: 5280\nRisk Level: Critical\nAction: Monitor for hollow indicators",
+      "desc": "공격자가 svchost.exe를 CREATE_SUSPENDED 플래그로 생성합니다. 프로세스는 생성되었지만 아직 실행되지 않은 상태입니다.",
+      "descEn": "The attacker creates svchost.exe with the CREATE_SUSPENDED flag. The process is created but not yet running.",
+      "stepTitle": "SUSPENDED 상태로 svchost.exe 생성",
+      "stepTitleEn": "Creating svchost.exe in SUSPENDED State",
+      "feynman": "정상 직원의 유니폼(svchost.exe)을 하나 새로 만들되, 아직 입지 않고(SUSPENDED) 옷걸이에 걸어두는 단계입니다. 이 유니폼 안에 있는 원래 내용물(정상 코드)을 다음 단계에서 빼낼 것입니다.",
+      "feynmanEn": "It's like creating a new copy of a regular employee's uniform (svchost.exe) but not wearing it yet (SUSPENDED), just hanging it up. The original contents (legitimate code) inside will be removed in the next step.",
+      "expert": "CreateProcess에 CREATE_SUSPENDED(0x4) 플래그를 전달하면, 프로세스의 주 스레드가 일시 정지 상태로 생성됩니다. 이 시점에서 프로세스 주소 공간은 할당되었지만 코드가 실행되지 않아, 메모리 조작이 안전합니다. Image base와 entry point는 PE 헤더에서 읽으며, 이후 Hollowing에 사용됩니다.",
+      "expertEn": "Passing the CREATE_SUSPENDED (0x4) flag to CreateProcess creates the process with its main thread suspended. At this point, the process address space is allocated but no code executes, making memory manipulation safe.",
+      "defTooltip": "🔐 svchost.exe가 SUSPENDED 상태로 생성되었고 부모 프로세스가 services.exe가 아닙니다!",
+      "defTooltipEn": "🔐 svchost.exe created in SUSPENDED state with non-services.exe parent!",
+      "hackerLog": {
+        "title": "create_suspended.txt",
+        "lines": [
+          { "log": "PID 5280 (SUSPENDED)", "desc": "💡 svchost가 일시 정지 상태로 생성됨 - 아직 코드 실행 안 됨" },
+          { "log": "Image base: 0x00007FF7A4200000", "desc": "💡 PE 이미지의 메모리 기본 주소 - NtUnmapViewOfSection의 타겟" }
+        ]
+      },
+      "terms": [
+        { "name": "CREATE_SUSPENDED", "desc": "CreateProcess의 플래그(0x4). 프로세스를 생성하되 주 스레드를 일시 정지 상태로 유지합니다." },
+        { "name": "Image Base", "desc": "PE 실행 파일이 메모리에 로드되는 기본 주소. Hollowing 시 이 주소의 코드를 제거합니다." },
+        { "name": "Entry Point", "desc": "프로세스 실행이 시작되는 메모리 주소. Hollowing 후 이 주소를 악성 코드의 시작점으로 변경합니다." }
+      ]
+    },
+    {
+      "cmd": "[Hollowing Phase 2: NtUnmapViewOfSection]",
+      "out": "[*] Calling NtUnmapViewOfSection on PID 5280...\n[*] Unmapping section at 0x00007FF7A4200000\n[+] Original svchost.exe code removed from memory\n[+] Process memory is now hollow",
+      "def": "[EDR] CRITICAL: NtUnmapViewOfSection called on suspended svchost.exe",
+      "defAction": "API Call: NtUnmapViewOfSection\nTarget: svchost.exe (PID: 5280)\nSection: 0x00007FF7A4200000\nRisk Level: Critical\nAction: Process Hollowing CONFIRMED, prepare to kill",
+      "desc": "NtUnmapViewOfSection API로 svchost.exe의 원본 코드 섹션을 메모리에서 제거합니다. 이제 프로세스는 이름만 svchost.exe이고 내부는 비어있습니다.",
+      "descEn": "Using the NtUnmapViewOfSection API to remove svchost.exe's original code section from memory. The process now has the name svchost.exe but is empty inside.",
+      "stepTitle": "원본 코드 제거 (Hollowing)",
+      "stepTitleEn": "Original Code Removal (Hollowing)",
+      "feynman": "유니폼 안에 있는 원래 내용물을 모두 빼내는 단계입니다. 겉모습(svchost.exe라는 이름)은 그대로지만, 안은 완전히 비어있는 빈 껍데기가 됩니다. 이 빈 공간에 다음 단계에서 악성 코드를 채워 넣을 것입니다.",
+      "feynmanEn": "This is the stage of removing all original contents from inside the uniform. The appearance (the name svchost.exe) stays the same, but inside it becomes a completely empty shell. The malicious code will be filled into this empty space in the next step.",
+      "expert": "NtUnmapViewOfSection은 ntdll.dll의 비공개 API로, 프로세스의 메모리 매핑된 섹션을 해제합니다. PE 이미지의 .text(코드), .data(데이터), .rsrc(리소스) 등 모든 섹션이 제거됩니다. 이 API 호출 자체가 Process Hollowing의 가장 확실한 IOC(Indicator of Compromise)입니다.",
+      "expertEn": "NtUnmapViewOfSection is an undocumented API in ntdll.dll that unmaps memory-mapped sections of a process. All sections including .text (code), .data (data), .rsrc (resources) are removed. This API call itself is the most definitive IOC of Process Hollowing.",
+      "defTooltip": "🔐 NtUnmapViewOfSection이 SUSPENDED 프로세스에 호출되었습니다! Process Hollowing 확인!",
+      "defTooltipEn": "🔐 NtUnmapViewOfSection called on SUSPENDED process! Process Hollowing CONFIRMED!",
+      "hackerLog": {
+        "title": "unmap_section.txt",
+        "lines": [
+          { "log": "NtUnmapViewOfSection on PID 5280", "desc": "💡 svchost.exe의 원본 코드가 메모리에서 제거됨 - Hollowing의 핵심 단계" },
+          { "log": "Process memory is now hollow", "desc": "💡 프로세스가 빈 껍데기가 됨 - 악성 코드 주입 준비 완료" }
+        ]
+      },
+      "terms": [
+        { "name": "NtUnmapViewOfSection", "desc": "ntdll.dll의 비공개 API. 프로세스 메모리에서 섹션 매핑을 해제합니다. Process Hollowing의 핵심 API입니다." },
+        { "name": "PE 섹션", "desc": "PE 파일의 구성 요소. .text(실행 코드), .data(초기화 데이터), .rsrc(리소스), .reloc(재배치 정보) 등이 있습니다." },
+        { "name": "IOC (Indicator of Compromise)", "desc": "침해 지표. 시스템이 공격당했음을 나타내는 기술적 증거입니다." }
+      ]
+    },
+    {
+      "cmd": "[Hollowing Phase 3: WriteProcessMemory + SetThreadContext]",
+      "out": "[*] Allocating memory in PID 5280: VirtualAllocEx at 0x00007FF7A4200000\n[*] Writing malicious payload (beacon.bin, 45,056 bytes)...\n[+] Payload written to process memory\n[*] Updating thread context - setting new entry point\n[+] Entry point changed to 0x00007FF7A4201000",
+      "def": "[EDR] CRITICAL: WriteProcessMemory + SetThreadContext on hollowed process",
+      "defAction": "API Sequence: VirtualAllocEx -> WriteProcessMemory -> SetThreadContext\nTarget: svchost.exe (PID: 5280)\nPayload: 45,056 bytes\nRisk Level: Critical\nAction: KILL PROCESS immediately",
+      "desc": "비어있는 프로세스 메모리에 악성 페이로드를 주입하고, 스레드 컨텍스트를 수정하여 악성 코드의 시작점으로 변경합니다.",
+      "descEn": "Injecting malicious payload into the empty process memory and modifying the thread context to point to the malicious code's entry point.",
+      "stepTitle": "악성 페이로드 주입 및 진입점 변경",
+      "stepTitleEn": "Malicious Payload Injection and Entry Point Modification",
+      "feynman": "빈 유니폼에 공격자의 도구를 채워 넣고, 유니폼의 이름표(entry point)를 바꿔 달아 공격자의 도구가 먼저 실행되도록 설정합니다. 밖에서 보면 여전히 svchost.exe 유니폼이지만, 안에는 완전히 다른 프로그램이 들어있습니다.",
+      "feynmanEn": "Filling the empty uniform with the attacker's tools and changing the name tag (entry point) so the attacker's tools run first. From outside, it still looks like an svchost.exe uniform, but inside it contains a completely different program.",
+      "expert": "VirtualAllocEx로 프로세스 주소 공간에 메모리를 할당(MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)한 뒤, WriteProcessMemory로 악성 PE를 주입합니다. SetThreadContext로 CONTEXT 구조체의 RCX(64bit)/EAX(32bit) 레지스터를 새 entry point로 변경합니다. PEB의 ImageBaseAddress도 수정이 필요할 수 있습니다.",
+      "expertEn": "VirtualAllocEx allocates memory in the process address space (MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE), then WriteProcessMemory injects the malicious PE. SetThreadContext changes the CONTEXT structure's RCX (64-bit)/EAX (32-bit) register to the new entry point.",
+      "defTooltip": "🔐 Hollowed 프로세스에 WriteProcessMemory와 SetThreadContext가 감지되었습니다!",
+      "defTooltipEn": "🔐 WriteProcessMemory and SetThreadContext detected on hollowed process!",
+      "hackerLog": {
+        "title": "payload_inject.txt",
+        "lines": [
+          { "log": "Payload written: 45,056 bytes", "desc": "💡 악성 코드가 svchost.exe 프로세스 메모리에 주입됨" },
+          { "log": "Entry point changed to 0x00007FF7A4201000", "desc": "💡 프로세스 실행 시작점이 악성 코드로 변경됨" }
+        ]
+      },
+      "terms": [
+        { "name": "WriteProcessMemory", "desc": "다른 프로세스의 메모리 공간에 데이터를 쓰는 Windows API. 코드 인젝션의 핵심 API입니다." },
+        { "name": "SetThreadContext", "desc": "스레드의 실행 컨텍스트(레지스터 값)를 수정하는 API. entry point를 변경하여 악성 코드 실행을 지시합니다." },
+        { "name": "VirtualAllocEx", "desc": "다른 프로세스의 주소 공간에 메모리를 할당하는 API. 인젝션할 공간을 확보합니다." }
+      ]
+    },
+    {
+      "cmd": "[Hollowing Phase 4: ResumeThread - Execution]",
+      "out": "[*] Calling ResumeThread on PID 5280...\n[+] Thread resumed - payload executing!\n[+] Beacon initialized: callback to 185.141.62.47:443\n[+] svchost.exe (PID: 5280) now active with injected code\n\nC:\\> tasklist /FI \"PID eq 5280\"\nsvchost.exe    5280  Console     3,840K Running  {companyName}\\{userName}",
+      "def": "[EDR] CRITICAL: Hollowed svchost.exe resumed - C2 beacon detected to 185.141.62.47",
+      "defAction": "Process: svchost.exe (PID: 5280)\nC2: 185.141.62.47:443\nStatus: Active beacon\nRisk Level: Critical\nAction: KILL PROCESS, block C2 IP, full IR",
+      "desc": "ResumeThread로 프로세스를 재개합니다. 작업 관리자에서는 정상 svchost.exe로 보이지만, 실제로는 C2 비콘이 실행 중입니다.",
+      "descEn": "Resuming the process with ResumeThread. It appears as legitimate svchost.exe in Task Manager, but a C2 beacon is actually running.",
+      "stepTitle": "프로세스 재개 및 C2 비콘 실행",
+      "stepTitleEn": "Process Resume and C2 Beacon Execution",
+      "feynman": "마지막으로 유니폼을 입고(ResumeThread) 건물에 들어갑니다. 보안 카메라(작업 관리자)에는 정상 직원(svchost.exe)으로 보이지만, 실제로는 공격자가 원격 조종(C2 비콘)으로 모든 것을 통제하고 있습니다.",
+      "feynmanEn": "Finally putting on the uniform (ResumeThread) and entering the building. Security cameras (Task Manager) show a normal employee (svchost.exe), but the attacker is actually controlling everything via remote control (C2 beacon).",
+      "expert": "ResumeThread는 SUSPENDED 상태의 스레드를 재개합니다. 이 시점부터 수정된 entry point의 코드(악성 페이로드)가 실행됩니다. tasklist에서는 정상 svchost.exe로 표시되지만, 부모 프로세스가 services.exe가 아닌 점, 사용자 컨텍스트가 SYSTEM이 아닌 점이 탐지 단서입니다.",
+      "expertEn": "ResumeThread resumes a thread in SUSPENDED state. From this point, the code at the modified entry point (malicious payload) executes. It shows as normal svchost.exe in tasklist, but the parent not being services.exe and the user context not being SYSTEM are detection clues.",
+      "defTooltip": "🔐 Hollowed svchost.exe가 재개되어 C2 비콘이 활성화되었습니다! 즉시 프로세스를 종료하고 IR을 시작하세요.",
+      "defTooltipEn": "🔐 Hollowed svchost.exe resumed with active C2 beacon! Kill process immediately and initiate IR.",
+      "hackerLog": {
+        "title": "beacon_active.txt",
+        "lines": [
+          { "log": "Beacon callback to 185.141.62.47:443", "desc": "💡 C2 서버와 통신 시작 - 공격자가 원격으로 시스템을 제어 가능" },
+          { "log": "svchost.exe (PID: 5280) Running", "desc": "💡 작업 관리자에서 정상 프로세스로 표시됨 - 육안 탐지 불가" }
+        ]
+      },
+      "terms": [
+        { "name": "ResumeThread", "desc": "일시 정지된 스레드를 재개하는 Windows API. Process Hollowing의 마지막 단계입니다." },
+        { "name": "C2 비콘 (Beacon)", "desc": "공격자의 명령 제어(C2) 서버에 주기적으로 연결하여 명령을 수신하는 악성 프로그램입니다." },
+        { "name": "콜백 (Callback)", "desc": "감염된 시스템이 공격자 서버에 주기적으로 연결하는 통신 방식. 방화벽 아웃바운드 규칙을 우회합니다." }
+      ]
+    },
+    {
+      "cmd": "Get-Process svchost | Where-Object {$_.Path -ne 'C:\\Windows\\System32\\svchost.exe'} | Select-Object Id,Path,Parent",
+      "out": "  Id Path                                                   Parent\n---- ----                                                   ------\n5280 C:\\Windows\\System32\\svchost.exe                          malware.exe (PID: 2140)\n\n[!] Anomaly: svchost.exe (PID 5280) parent is NOT services.exe",
+      "def": "[EDR] Process tree anomaly: svchost.exe with suspicious parent process",
+      "defAction": "Process: svchost.exe (PID: 5280)\nAnomaly: Parent = malware.exe (expected: services.exe)\nRisk Level: Critical\nAction: Confirmed Process Hollowing, forensic evidence preserved",
+      "desc": "포렌식 분석으로 비정상적인 svchost.exe를 탐지합니다. 부모 프로세스가 services.exe가 아닌 malware.exe인 점이 결정적 증거입니다.",
+      "descEn": "Forensic analysis detects the abnormal svchost.exe. The parent process being malware.exe instead of services.exe is the conclusive evidence.",
+      "stepTitle": "프로세스 트리 이상 탐지 (포렌식)",
+      "stepTitleEn": "Process Tree Anomaly Detection (Forensics)",
+      "feynman": "CCTV를 면밀히 분석해보니, 의심스러운 직원(svchost PID 5280)이 '인사팀(services.exe)'이 아닌 '외부인(malware.exe)'에 의해 건물에 들어온 것이 확인됩니다. 정상 svchost.exe는 반드시 services.exe가 생성해야 합니다.",
+      "feynmanEn": "Careful CCTV analysis reveals the suspicious employee (svchost PID 5280) entered the building through an 'outsider (malware.exe)' instead of 'HR (services.exe)'. Legitimate svchost.exe must always be created by services.exe.",
+      "expert": "정상 svchost.exe의 부모 프로세스는 항상 services.exe(SCM)입니다. Process Hollowing으로 생성된 svchost.exe의 부모는 악성 프로세스이며, 이것이 가장 신뢰할 수 있는 탐지 방법입니다. 추가로 프로세스 메모리의 PE 헤더와 디스크의 PE 헤더를 비교하면 Hollowing을 확인할 수 있습니다.",
+      "expertEn": "The parent process of legitimate svchost.exe is always services.exe (SCM). The parent of a Process Hollowing-created svchost.exe will be the malicious process, making this the most reliable detection method.",
+      "defTooltip": "🔐 svchost.exe의 부모 프로세스가 services.exe가 아닌 것이 확인되었습니다! Process Hollowing 확정.",
+      "defTooltipEn": "🔐 svchost.exe parent process confirmed as non-services.exe! Process Hollowing confirmed.",
+      "hackerLog": {
+        "title": "forensic_detection.txt",
+        "lines": [
+          { "log": "Parent = malware.exe (PID: 2140)", "desc": "💡 결정적 탐지 단서 - 정상 svchost는 services.exe(PID: 640)만이 생성 가능" },
+          { "log": "Anomaly: parent is NOT services.exe", "desc": "💡 프로세스 트리 분석으로 Process Hollowing을 확인할 수 있음" }
+        ]
+      },
+      "terms": [
+        { "name": "프로세스 트리 분석", "desc": "부모-자식 프로세스 관계를 분석하여 비정상적인 프로세스 생성을 탐지하는 기법입니다." },
+        { "name": "services.exe (SCM)", "desc": "Service Control Manager. Windows 서비스를 관리하며, 모든 정상 svchost.exe의 부모 프로세스입니다." },
+        { "name": "PE 헤더 비교", "desc": "메모리에 로드된 PE와 디스크의 PE 파일을 비교하여 코드 변조를 탐지하는 포렌식 기법입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe (PID: 1000)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "malware.exe (PID: 2140)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "svchost.exe (PID: 5280, SUSPENDED)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "svchost.exe (PID: 5280, HOLLOWED)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "svchost.exe (PID: 5280, BEACON)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "C2: 185.141.62.47:443", "depth": 3, "alert": true, "minStep": 4 }
+  ]
+}

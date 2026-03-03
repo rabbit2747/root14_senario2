@@ -1,0 +1,177 @@
+{
+  "id": "T1597.002",
+  "title": "기술 데이터 구매 시뮬레이션",
+  "titleEn": "Purchase Technical Data Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 데이터 소스 탐색", "labelEn": "🔍 Data Source Discovery", "steps": [0, 1] },
+    { "label": "⚡ 크레덴셜 확보", "labelEn": "⚡ Credential Acquisition", "steps": [2] },
+    { "label": "🔓 네트워크 접근 구매", "labelEn": "🔓 Network Access Purchase", "steps": [3] },
+    { "label": "✅ 접근 검증", "labelEn": "✅ Access Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "darkweb", "label": "Dark Web", "x": 200, "y": 30 },
+    { "id": "iab", "label": "IAB Seller", "x": 200, "y": 90 },
+    { "id": "creds", "label": "Credentials", "x": 350, "y": 60 },
+    { "id": "access", "label": "Target Access", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "darkweb", "minStep": 0 },
+    { "from": "ext", "to": "iab", "minStep": 3 },
+    { "from": "darkweb", "to": "creds", "minStep": 2 },
+    { "from": "iab", "to": "access", "minStep": 3 },
+    { "from": "creds", "to": "access", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "darkweb_data", "icon": "📁" },
+    { "name": "purchased_creds.csv", "icon": "📄", "alert": true },
+    { "name": "access_verification.log", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "torify python3 darkweb_search.py --marketplace \"Genesis\" --query \"{companyName}\" --type credentials",
+      "out": "[*] Connecting to Genesis Market via Tor...\n[+] Searching for {companyName} credentials...\n[+] Results found: 23 listings\n\nListing #1: {companyName} VPN credentials\n  - Type: Citrix NetScaler VPN\n  - Access: Domain User level\n  - Price: $450 (BTC/XMR)\n  - Seller rating: 4.8/5 (127 sales)\n  - Last verified: 2 days ago\n\nListing #2: {companyName} email credentials (bulk)\n  - Type: O365 accounts (47 accounts)\n  - Price: $15/account\n  - Includes: Session cookies\n  - Seller: IAB_ProSeller",
+      "def": "[DarkWeb Monitor] Organization credentials listed on Genesis Market",
+      "defAction": "Source: DarkWeb monitoring service\nTarget: {companyName} credentials\nAction: CRITICAL alert to security team, credential reset initiated",
+      "desc": "다크웹 마켓플레이스에서 대상 조직의 유출된 크레덴셜과 접근 권한 판매 게시물을 검색합니다.",
+      "descEn": "The attacker searches dark web marketplaces for leaked credentials and access listings for the target organization.",
+      "stepTitle": "다크웹 마켓 검색",
+      "stepTitleEn": "Dark Web Market Search",
+      "feynman": "다크웹에는 해킹한 비밀번호를 사고파는 시장이 있습니다. Genesis Market에서 회사 이름을 검색하면 유출된 VPN 비밀번호, 이메일 계정을 구매할 수 있습니다. 마치 중고거래 사이트처럼 판매자 평점과 최근 확인 날짜까지 있습니다.",
+      "feynmanEn": "Dark web has marketplaces for buying and selling hacked passwords. Searching a company name on Genesis Market reveals leaked VPN passwords and email accounts for sale, complete with seller ratings and verification dates.",
+      "expert": "Genesis Market은 인포스틸러(Raccoon, RedLine)로 수집된 세션 쿠키와 크레덴셜을 판매하는 플랫폼입니다. Citrix NetScaler VPN 크레덴셜은 네트워크 경계 진입에 즉시 활용 가능하며, O365 세션 쿠키는 MFA를 우회합니다.",
+      "expertEn": "Genesis Market sells session cookies and credentials collected by infostealers (Raccoon, RedLine). Citrix NetScaler VPN credentials enable immediate network perimeter entry, and O365 session cookies bypass MFA.",
+      "defTooltip": "🌑 다크웹 모니터: Genesis Market에 조직 크레덴셜 등록 감지",
+      "defTooltipEn": "🌑 DarkWeb Monitor: Organization credentials listed on Genesis Market",
+      "hackerLog": {
+        "title": "genesis_search.log",
+        "lines": [
+          { "log": "VPN credentials - Citrix NetScaler - $450", "desc": "VPN 접근 권한이 $450에 판매 중 - 즉시 네트워크 진입 가능" },
+          { "log": "O365 accounts (47) with session cookies", "desc": "세션 쿠키 포함 - MFA 없이도 로그인 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Genesis Market", "desc": "인포스틸러로 수집된 크레덴셜과 세션 쿠키를 판매하는 다크웹 마켓플레이스" },
+        { "name": "Infostealer", "desc": "브라우저 저장 비밀번호, 쿠키, 암호화폐 지갑 등을 탈취하는 악성코드" }
+      ]
+    },
+    {
+      "cmd": "torify python3 shodan_search.py --org \"{companyName}\" --vuln --output shodan_results.json",
+      "out": "[*] Searching Shodan for {companyName} exposed services...\n[+] Results: 34 exposed hosts\n\nCritical findings:\n  203.0.113.50:443  - Apache 2.4.49 (CVE-2021-41773 - Path Traversal)\n  203.0.113.52:3389 - RDP exposed (no NLA)\n  203.0.113.55:8080 - Jenkins 2.319 (CVE-2022-27198)\n  203.0.113.60:9200 - Elasticsearch 7.10 (no auth)\n  203.0.113.61:27017 - MongoDB 4.4 (no auth)\n\n[+] 5 critical vulnerabilities on exposed services\n[+] Report saved to shodan_results.json",
+      "def": "[ASM Platform] Shodan scan results match organization IP ranges",
+      "defAction": "Source: Attack Surface Management\nTarget: {companyName} external assets\nAction: Vulnerability scan triggered, patch priority list generated",
+      "desc": "Shodan에서 대상 조직의 인터넷 노출 서비스와 알려진 취약점을 검색합니다.",
+      "descEn": "The attacker searches Shodan for the target's internet-exposed services and known vulnerabilities.",
+      "stepTitle": "Shodan 노출 서비스 스캔",
+      "stepTitleEn": "Shodan Exposed Service Scan",
+      "feynman": "Shodan은 인터넷에 연결된 모든 장치를 스캔한 검색엔진입니다. 회사 이름으로 검색하면 외부에 노출된 서버, 열린 포트, 취약점 있는 소프트웨어를 즉시 파악할 수 있습니다. 직접 스캔하지 않아도 되니 탐지 위험이 없습니다.",
+      "feynmanEn": "Shodan is a search engine for internet-connected devices. Searching by company name instantly reveals exposed servers, open ports, and vulnerable software without direct scanning, eliminating detection risk.",
+      "expert": "Shodan의 org 필터로 대상 조직의 IP 대역을 검색합니다. CVE-2021-41773(Apache Path Traversal), 인증 없는 Elasticsearch/MongoDB는 즉시 악용 가능하며, NLA 미설정 RDP는 BlueKeep 공격 벡터입니다.",
+      "expertEn": "Searching Shodan with org filter for target's IP ranges. CVE-2021-41773 (Apache Path Traversal), unauthenticated Elasticsearch/MongoDB are immediately exploitable, and RDP without NLA is a BlueKeep attack vector.",
+      "defTooltip": "🔎 ASM 플랫폼: Shodan 스캔 결과가 조직 IP 대역과 일치합니다",
+      "defTooltipEn": "🔎 ASM Platform: Shodan scan results match organization IP ranges",
+      "hackerLog": {
+        "title": "shodan_results.log",
+        "lines": [
+          { "log": "Apache 2.4.49 (CVE-2021-41773 - Path Traversal)", "desc": "원격 코드 실행이 가능한 심각한 취약점 발견" },
+          { "log": "MongoDB 4.4 (no auth)", "desc": "인증 없이 데이터베이스에 접근 가능 - 데이터 유출 위험" }
+        ]
+      },
+      "terms": [
+        { "name": "Shodan", "desc": "인터넷에 연결된 장치와 서비스를 검색하는 엔진. 서버, IoT 장치, 산업제어시스템까지 찾을 수 있습니다" },
+        { "name": "CVE (Common Vulnerabilities and Exposures)", "desc": "공개적으로 알려진 보안 취약점에 부여되는 고유 식별번호" }
+      ]
+    },
+    {
+      "cmd": "torify python3 credential_buyer.py --marketplace \"RussianMarket\" --target \"{companyName}\" --type vpn --payment XMR",
+      "out": "[*] Connecting to RussianMarket...\n[+] Purchasing VPN credentials for {companyName}...\n[+] Payment: 2.8 XMR ($450) sent to escrow\n[+] Seller confirmed delivery\n\nCredentials received:\n  Username: j.kim@{companyName}.com\n  Password: Qwerty2025!@#\n  VPN URL: vpn.{companyName}.com\n  2FA: SMS (phone: +82-10-****-5678)\n  Domain: CORP\\j.kim\n  Last login: 2026-02-28 09:15:00 KST\n  Notes: Domain User, member of 'IT-Support' group\n\n[+] Credentials saved to purchased_creds.csv",
+      "def": "[DarkWeb Monitor] Credential purchase transaction confirmed for organization account",
+      "defAction": "Source: DarkWeb intelligence feed\nTarget: j.kim@{companyName}.com\nAction: EMERGENCY - Account lockout initiated, password reset forced",
+      "desc": "다크웹 마켓에서 대상 조직의 VPN 크레덴셜을 암호화폐로 구매합니다.",
+      "descEn": "The attacker purchases VPN credentials for the target organization using cryptocurrency on a dark web market.",
+      "stepTitle": "VPN 크레덴셜 구매",
+      "stepTitleEn": "VPN Credential Purchase",
+      "feynman": "다크웹에서 회사 VPN 비밀번호를 45만원(2.8 XMR)에 구매했습니다. 에스크로(중개) 시스템으로 안전하게 거래됩니다. 받은 정보에는 아이디, 비밀번호뿐 아니라 2FA 전화번호, 소속 그룹까지 포함되어 있어 바로 로그인이 가능합니다.",
+      "feynmanEn": "The attacker bought company VPN password for $450 (2.8 XMR) on the dark web. The transaction uses an escrow system. Received info includes username, password, 2FA phone number, and group membership - enabling immediate login.",
+      "expert": "XMR(Monero)는 추적 불가능한 암호화폐로 다크웹 거래의 표준입니다. 획득한 크레덴셜의 'IT-Support' 그룹 멤버십은 내부 시스템 접근과 횡이동에 유리한 권한 수준입니다.",
+      "expertEn": "XMR (Monero) is an untraceable cryptocurrency standard for dark web transactions. The acquired credential's 'IT-Support' group membership provides favorable privilege levels for internal system access and lateral movement.",
+      "defTooltip": "🚨 다크웹 모니터: 조직 계정의 크레덴셜 구매 거래 확인",
+      "defTooltipEn": "🚨 DarkWeb Monitor: Credential purchase transaction confirmed for organization account",
+      "hackerLog": {
+        "title": "credential_purchase.log",
+        "lines": [
+          { "log": "Username: j.kim@{companyName}.com", "desc": "실제 직원 계정을 확보 - 정상 사용자로 위장 가능" },
+          { "log": "Domain: CORP\\j.kim, group: IT-Support", "desc": "IT 지원 그룹 - 다수 시스템에 접근 권한 보유" }
+        ]
+      },
+      "terms": [
+        { "name": "XMR (Monero)", "desc": "프라이버시 중심 암호화폐. 거래 추적이 불가능하여 다크웹 거래에 널리 사용됩니다" },
+        { "name": "Escrow", "desc": "구매자와 판매자 사이에서 대금을 중개하는 서비스. 다크웹에서도 사기 방지를 위해 사용됩니다" }
+      ]
+    },
+    {
+      "cmd": "torify python3 iab_broker.py --forum \"XSS.is\" --target \"{companyName}\" --negotiate --budget 15000",
+      "out": "[*] Connecting to XSS.is forum via Tor...\n[+] Found IAB listing for {companyName}:\n\n[SELL] Access to Korean Enterprise - {companyName}\n  Revenue: $500M+ | Employees: 2,000+\n  Access type: Citrix VPN → Domain Admin\n  EDR: CrowdStrike Falcon (bypassable)\n  Network: 5 subnets, 200+ endpoints\n  Proof: Screenshot of AD tree attached\n  Starting price: $12,000 BTC\n  Seller: IAB_KR_Specialist (Reputation: Tier 1)\n\n[+] Negotiation started...\n[+] Agreed price: $13,500 BTC (10% discount for repeat buyer)\n[+] Escrow transaction initiated",
+      "def": "[DarkWeb Intelligence] IAB offering detected for organization - Domain Admin access",
+      "defAction": "Source: DarkWeb monitoring\nTarget: {companyName} network\nAction: CRITICAL INCIDENT - Full network compromise assumed, IR team activated",
+      "desc": "다크웹 포럼에서 IAB(Initial Access Broker)가 판매하는 대상 조직의 네트워크 접근 권한을 구매합니다.",
+      "descEn": "The attacker purchases network access from an Initial Access Broker (IAB) selling access to the target on a dark web forum.",
+      "stepTitle": "IAB에서 네트워크 접근 구매",
+      "stepTitleEn": "Purchasing Network Access from IAB",
+      "feynman": "IAB는 '디지털 부동산 중개인'과 같습니다. 회사 네트워크에 미리 침투해 놓고 그 접근 권한을 판매합니다. 여기서는 도메인 관리자 수준의 접근을 1,350만원에 구매했습니다. 구매자는 직접 해킹할 필요 없이 바로 내부 네트워크에 들어갈 수 있습니다.",
+      "feynmanEn": "An IAB is like a 'digital real estate broker.' They pre-infiltrate a company network and sell the access. Here, Domain Admin level access was purchased for $13,500. The buyer can enter the internal network without hacking themselves.",
+      "expert": "XSS.is는 러시아어 기반 다크웹 포럼으로 IAB 활동이 활발합니다. Domain Admin 접근 판매는 전체 Active Directory 제어를 의미하며, 랜섬웨어 배포에 직결됩니다. Tier 1 평판의 IAB는 접근의 지속성과 EDR 우회를 보장합니다.",
+      "expertEn": "XSS.is is a Russian-language dark web forum with active IAB operations. Domain Admin access sale means complete Active Directory control, directly enabling ransomware deployment. Tier 1 reputation IABs guarantee access persistence and EDR bypass.",
+      "defTooltip": "🚨 다크웹 인텔: 조직에 대한 도메인 관리자 접근 권한 IAB 판매 감지",
+      "defTooltipEn": "🚨 DarkWeb Intel: IAB offering detected for organization - Domain Admin access",
+      "hackerLog": {
+        "title": "iab_purchase.log",
+        "lines": [
+          { "log": "Access: Citrix VPN → Domain Admin", "desc": "VPN에서 도메인 관리자까지 완전한 접근 경로 확보" },
+          { "log": "EDR: CrowdStrike Falcon (bypassable)", "desc": "IAB가 EDR 우회를 보장 - 탐지 없이 활동 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "IAB (Initial Access Broker)", "desc": "조직 네트워크에 미리 침투하여 접근 권한을 다른 공격자에게 판매하는 중개인" },
+        { "name": "Domain Admin", "desc": "Active Directory의 최고 관리자 권한. 전체 네트워크의 모든 시스템과 데이터에 접근할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 access_verifier.py --creds purchased_creds.csv --vpn vpn.{companyName}.com --stealth",
+      "out": "[*] Verifying purchased access (stealth mode)...\n[+] VPN connection test: SUCCESS\n  Connected as: CORP\\j.kim\n  Internal IP assigned: 10.0.5.45\n  Domain Controller: dc01.corp.{companyName}.com (10.0.1.10)\n\n[+] Access validation:\n  ✓ Active Directory enumeration: 2,347 user objects\n  ✓ File share access: \\\\fileserver\\IT-Support$ (writable)\n  ✓ Internal wiki: https://wiki.corp.{companyName}.com (accessible)\n  ✓ Email access: O365 via SSO (j.kim session valid)\n\n[!] Disconnected after 47 seconds (stealth)\n[+] Access confirmed - ready for operation",
+      "def": "[SOC Alert] VPN login from unusual location for j.kim account",
+      "defAction": "Source: VPN Gateway logs\nTarget: j.kim@{companyName}.com\nAction: Suspicious login flagged, user behavior analytics triggered",
+      "desc": "구매한 크레덴셜로 실제 접근이 가능한지 은밀하게 검증합니다.",
+      "descEn": "The attacker stealthily verifies that purchased credentials provide actual access to the target network.",
+      "stepTitle": "구매한 접근 권한 검증",
+      "stepTitleEn": "Verifying Purchased Access",
+      "feynman": "구매한 비밀번호가 실제로 작동하는지 47초 만에 빠르게 확인합니다. VPN에 로그인하여 내부 네트워크에 접근 가능하고, 파일 서버에 쓰기 권한까지 있는 것을 확인했습니다. 짧은 시간 안에 접속을 끊어 보안팀이 눈치 채지 못하도록 합니다.",
+      "feynmanEn": "The attacker quickly verifies purchased passwords work in just 47 seconds. Confirms VPN login, internal network access, and writable file share access. Disconnects quickly so the security team doesn't notice.",
+      "expert": "스텔스 모드로 47초간 접속하여 최소한의 로그를 남기면서 접근을 검증합니다. AD 열거로 2,347개 사용자 객체를 확인하고, IT-Support$ 숨김 공유 폴더에 쓰기 권한을 확인하여 악성코드 배포 경로로 활용 가능합니다.",
+      "expertEn": "Stealth mode connection for 47 seconds minimizes log footprint while validating access. AD enumeration confirms 2,347 user objects, and writable IT-Support$ hidden share can serve as malware distribution path.",
+      "defTooltip": "🔐 SOC 알림: j.kim 계정의 비정상 위치 VPN 로그인 감지",
+      "defTooltipEn": "🔐 SOC Alert: VPN login from unusual location for j.kim account",
+      "hackerLog": {
+        "title": "access_verification.log",
+        "lines": [
+          { "log": "AD enumeration: 2,347 user objects", "desc": "전체 직원 계정 목록 확보 - 표적 선정에 활용" },
+          { "log": "File share: IT-Support$ (writable)", "desc": "숨김 공유 폴더 쓰기 가능 - 악성코드 배포 경로" }
+        ]
+      },
+      "terms": [
+        { "name": "Stealth Mode", "desc": "최소한의 활동으로 로그를 줄이며 접속하는 방식. 보안팀의 탐지를 피하기 위해 짧은 시간 내에 필요한 정보만 수집합니다" },
+        { "name": "Hidden Share ($)", "desc": "Windows에서 $ 기호가 붙은 숨겨진 네트워크 공유. 일반 탐색으로는 보이지 않지만 직접 경로를 알면 접근 가능합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "torify python3 darkweb_search.py (PID: 4101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "torify python3 shodan_search.py (PID: 4156)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "torify python3 credential_buyer.py (PID: 4201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "torify python3 iab_broker.py (PID: 4289)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 access_verifier.py (PID: 4345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

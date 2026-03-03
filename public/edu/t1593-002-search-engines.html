@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1593.002">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1593-002-search-engines&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1593.002 검색 엔진을 통한 정찰">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <title>GOTROOT EDU | T1593.002 검색 엔진 정찰 — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
+    <style>body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s}.glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}.dark body{background-color:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2)}.hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}.hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F}.terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div><div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1593.002: 검색 엔진 정찰</p></div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch1">1. 구글 도킹(Dorking)이란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch2">2. 고급 검색 연산자</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch3">3. 탐지 및 퀴즈</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Reconnaissance</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">검색 엔진 정찰</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">구글에 올바른 질문을 하면 비밀번호도 나온다 — 구글 도킹의 세계</p>
+            </header>
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#1.</span> 구글 도킹이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">🔍 ➜ 🎯 ➜ 📄 ➜ 🔓</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"site:company.com filetype:pdf confidential"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed"><strong>구글 도킹(Google Dorking)</strong>은 검색 엔진의 고급 검색 연산자를 활용하여 의도치 않게 공개된 민감한 정보를 찾는 기법입니다. 관리자 로그인 페이지, 설정 파일, 비밀번호가 포함된 문서, 데이터베이스 백업 등을 검색할 수 있습니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">주요 검색 연산자</h3>
+                        <div class="terminal-bg p-4 rounded-lg text-xs space-y-2">
+                            <div><span class="text-[#F4D06F]">site:</span><span class="text-white">company.com</span> <span class="text-slate-400">→ 특정 도메인 내 검색</span></div>
+                            <div><span class="text-[#F4D06F]">filetype:</span><span class="text-white">pdf</span> <span class="text-slate-400">→ 특정 파일 형식 검색</span></div>
+                            <div><span class="text-[#F4D06F]">intitle:</span><span class="text-white">"index of"</span> <span class="text-slate-400">→ 디렉토리 리스팅 검색</span></div>
+                            <div><span class="text-[#F4D06F]">inurl:</span><span class="text-white">admin</span> <span class="text-slate-400">→ URL에 admin 포함 페이지</span></div>
+                            <div><span class="text-[#F4D06F]">intext:</span><span class="text-white">"password"</span> <span class="text-slate-400">→ 본문에 password 포함</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#2.</span> 실전 도킹 쿼리 예시</h2>
+                <div class="space-y-8">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">위험한 도킹 쿼리들</h3>
+                        <div class="terminal-bg p-4 rounded-lg text-xs space-y-2">
+                            <div class="text-[#F4D06F]"># 노출된 관리자 페이지 검색</div>
+                            <div class="text-white">site:company.com inurl:admin OR inurl:login</div>
+                            <div class="text-[#F4D06F] mt-2"># 설정 파일 노출 검색</div>
+                            <div class="text-white">site:company.com filetype:env OR filetype:ini OR filetype:conf</div>
+                            <div class="text-[#F4D06F] mt-2"># 백업 파일 검색</div>
+                            <div class="text-white">site:company.com filetype:sql OR filetype:bak</div>
+                            <div class="text-[#F4D06F] mt-2"># 디렉토리 리스팅 검색</div>
+                            <div class="text-white">site:company.com intitle:"index of" "parent directory"</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-3 hl-teal">방어 전략</h3>
+                        <ul class="space-y-2 text-sm text-cgray dark:text-slate-300">
+                            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">●</span> robots.txt로 민감한 경로 크롤링 차단</li>
+                            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">●</span> 정기적으로 자사 도메인에 대한 도킹 검사 수행</li>
+                            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">●</span> 민감한 파일을 웹 접근 가능 경로에 두지 않기</li>
+                            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5">●</span> 관리자 페이지에 IP 화이트리스트 적용</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="quiz-container" class="space-y-6">
+                        <div><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q. 구글 도킹으로 발견될 수 있는 가장 위험한 정보는?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> 회사 대표 전화번호</label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> .env 파일에 노출된 데이터베이스 비밀번호와 API 키</label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> 회사 로고 이미지</label>
+                            </div>
+                        </div>
+                        <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                </div>
+            </section>
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16"><button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] dark:from-[#9DD9D2] dark:to-[#F4D06F] text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl"><span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span></button></div>
+        </div>
+    </main>
+    </div>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='☀️';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='🌙';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+        function checkQuiz(){var q1=document.querySelector('input[name="q1"]:checked');if(!q1){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]','bg-red-100','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');if(q1.value==='2'){r.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');r.innerHTML='정답입니다!<br><span class="text-xs mt-1 block font-normal">.env 파일에는 데이터베이스 비밀번호, API 키, 비밀 토큰 등이 포함되어 있어 직접적인 시스템 침해로 이어질 수 있습니다.</span>';}else{r.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');r.innerHTML='오답입니다. 검색 엔진에 노출될 수 있는 가장 민감한 정보를 생각해 보세요.';}}
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

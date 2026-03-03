@@ -1,0 +1,193 @@
+{
+  "id": "T1036.007",
+  "title": "Double File Extension 시뮬레이션",
+  "titleEn": "Double File Extension Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "🎭 위장 파일 생성", "labelEn": "🎭 Disguised File Creation", "steps": [0] },
+    { "label": "📧 전달 및 실행", "labelEn": "📧 Delivery and Execution", "steps": [1, 2] },
+    { "label": "🔍 탐지 분석", "labelEn": "🔍 Detection Analysis", "steps": [3] },
+    { "label": "🛡️ 방어 강화", "labelEn": "🛡️ Defense Hardening", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Payload)", "x": 50, "y": 80 },
+    { "id": "disguise", "label": "Double\nExtension", "x": 200, "y": 30 },
+    { "id": "email", "label": "Phishing\nEmail", "x": 200, "y": 130 },
+    { "id": "victim", "label": "Victim\n(Clicks)", "x": 380, "y": 80 },
+    { "id": "exec", "label": "Malware\nExecution", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "disguise", "minStep": 0 },
+    { "from": "disguise", "to": "email", "minStep": 1 },
+    { "from": "email", "to": "victim", "minStep": 1 },
+    { "from": "victim", "to": "exec", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "Terminal", "icon": "🖥️" },
+    { "name": "invoice.pdf", "icon": "📄" },
+    { "name": "Email Client", "icon": "📧" },
+    { "name": "File Explorer", "icon": "📁" },
+    { "name": "Sysmon", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "copy payload.exe \"invoice_march2026.pdf.exe\"\n# PDF 아이콘 리소스 삽입\nResourceHacker -open invoice_march2026.pdf.exe -save invoice_march2026.pdf.exe -action addoverwrite -res pdf_icon.ico -mask ICONGROUP,1,",
+      "out": "[*] File copied: payload.exe → invoice_march2026.pdf.exe\n[*] Icon resource embedded: PDF icon applied\n[*] File properties:\n    Name: invoice_march2026.pdf.exe\n    Type: Application (.exe)\n    Size: 245 KB\n    Icon: PDF document icon\n\n[Windows Explorer에서 표시]\n    📄 invoice_march2026.pdf     (확장자 숨김 시)\n    📄 invoice_march2026.pdf.exe (확장자 표시 시)",
+      "def": "[Email Gateway] Executable with double extension detected in outbound attachment",
+      "defAction": "Tool: File masquerading (double extension + icon swap)\nOriginal: payload.exe (malware)\nDisguised: invoice_march2026.pdf.exe\nIcon: PDF document icon embedded\nRisk Level: High\nAction: Block double-extension executables at email gateway",
+      "desc": "공격자가 악성 실행 파일의 이름을 invoice_march2026.pdf.exe로 변경하고, PDF 아이콘을 삽입합니다. Windows의 '확장자 숨기기' 기본 설정에서 invoice_march2026.pdf로 보입니다.",
+      "descEn": "The attacker renames the malicious executable to invoice_march2026.pdf.exe and embeds a PDF icon. With Windows' default 'hide extensions' setting, it appears as invoice_march2026.pdf.",
+      "stepTitle": "이중 확장자와 아이콘 위장으로 악성 파일 생성",
+      "stepTitleEn": "Create Malicious File with Double Extension and Icon Disguise",
+      "feynman": "악성코드라는 '폭탄'에 PDF 문서 가면을 씌우고, PDF 옷(아이콘)까지 입히는 것입니다. Windows의 기본 설정은 마지막 확장자(.exe)를 숨기므로, 사용자에게는 평범한 청구서 PDF로 보입니다.",
+      "feynmanEn": "Putting a PDF mask on a 'bomb' (malware) and dressing it in PDF clothes (icon). Windows' default setting hides the last extension (.exe), making it look like a normal invoice PDF to users.",
+      "expert": "Windows Explorer는 HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced의 HideFileExt=1(기본값)일 때 마지막 확장자를 숨깁니다. ResourceHacker로 PE 파일의 RT_ICON/RT_GROUP_ICON 리소스를 교체하면 아이콘도 위장됩니다. NTFS에서 파일 이름의 마지막 .이후가 실제 확장자로 취급됩니다.",
+      "expertEn": "Windows Explorer hides the last extension when HideFileExt=1 (default). ResourceHacker replaces PE file's RT_ICON/RT_GROUP_ICON resources for icon disguise. NTFS treats the portion after the last dot as the actual extension.",
+      "defTooltip": "🔐 이중 확장자! invoice.pdf.exe가 invoice.pdf로 표시됨!",
+      "defTooltipEn": "🔐 Double extension! invoice.pdf.exe displays as invoice.pdf!",
+      "hackerLog": {
+        "title": "disguise.log",
+        "lines": [
+          "[10:00:00] 이중 확장자 적용: .pdf.exe",
+          "[10:00:02] PDF 아이콘 리소스 삽입 완료",
+          "[10:00:03] Explorer 표시 확인: invoice_march2026.pdf",
+          "[10:00:05] 위장 완료, 피싱 이메일 준비"
+        ]
+      },
+      "terms": [
+        { "term": "Double Extension", "def": "파일명에 두 개의 확장자를 사용하여 실제 확장자를 숨기는 기법" },
+        { "term": "ResourceHacker", "def": "PE 파일의 리소스(아이콘, 문자열 등)를 편집하는 도구" }
+      ]
+    },
+    {
+      "cmd": "# RLO (Right-to-Left Override) Unicode 트릭\npython3 -c \"import os; rlo='\\u202e'; os.rename('payload.exe', f'financial_report_{rlo}fdp.exe')\"",
+      "out": "[*] RLO Unicode trick applied\n[*] Actual filename: financial_report_\\u202Efdp.exe\n[*] Displayed as:    financial_report_exe.pdf\n\n[유니코드 분석]\nCharacter breakdown:\n  f-i-n-a-n-c-i-a-l-_-r-e-p-o-r-t-_-[U+202E]-f-d-p-.-e-x-e\n                                      ↑ RLO 삽입점\n  RLO 이후 문자열 'fdp.exe'가 반전 → 'exe.pdf'로 표시\n\n[결과] 파일 탐색기에서 financial_report_exe.pdf로 표시됨!\n실제 확장자는 .exe (실행 파일)",
+      "def": "[Email Gateway] Unicode control character (U+202E RLO) detected in filename",
+      "defAction": "Tool: RLO Unicode trick\nActual: financial_report_[RLO]fdp.exe\nDisplayed: financial_report_exe.pdf\nUnicode: U+202E (Right-to-Left Override)\nRisk Level: Critical\nAction: Strip Unicode control characters from filenames",
+      "desc": "RLO(Right-to-Left Override) 유니코드 문자(U+202E)를 파일명에 삽입하여 확장자를 시각적으로 반전시킵니다. fdp.exe가 exe.pdf로 보이는 더 정교한 위장 기법입니다.",
+      "descEn": "RLO (Right-to-Left Override) Unicode character (U+202E) is inserted into the filename to visually reverse the extension. fdp.exe appears as exe.pdf - a more sophisticated disguise.",
+      "stepTitle": "RLO 유니코드 트릭으로 확장자 시각적 반전",
+      "stepTitleEn": "Visual Extension Reversal via RLO Unicode Trick",
+      "feynman": "파일 이름에 '마법의 거울'(RLO 문자)을 넣으면, 거울 이후의 글자가 좌우반전됩니다. 'fdp.exe'가 거울에 비치면 'exe.pdf'로 보입니다. 이중 확장자보다 훨씬 정교하여 탐지하기 어렵습니다.",
+      "feynmanEn": "Inserting a 'magic mirror' (RLO character) in the filename reverses characters after it. 'fdp.exe' reflected in the mirror appears as 'exe.pdf.' More sophisticated than double extensions, harder to detect.",
+      "expert": "U+202E (Right-to-Left Override)는 양방향 텍스트 알고리즘의 제어 문자입니다. 이 문자 이후의 텍스트가 RTL(Right-to-Left)로 렌더링됩니다. Windows Explorer, Outlook 등 대부분의 UI가 영향을 받습니다. 이메일 게이트웨이에서 U+202E, U+200F 등 BiDi 제어 문자를 필터링해야 합니다.",
+      "expertEn": "U+202E (Right-to-Left Override) is a bidirectional text algorithm control character. Text after this character renders RTL. Most UIs including Explorer and Outlook are affected. Email gateways should filter BiDi control characters.",
+      "defTooltip": "🔐 RLO 유니코드 트릭! .exe가 .pdf로 보임!",
+      "defTooltipEn": "🔐 RLO Unicode trick! .exe appears as .pdf!",
+      "hackerLog": {
+        "title": "rlo_trick.log",
+        "lines": [
+          "[10:10:00] U+202E RLO 문자 삽입",
+          "[10:10:02] 실제: fdp.exe → 표시: exe.pdf",
+          "[10:10:03] Explorer 표시 확인 완료",
+          "[10:10:05] 피싱 이메일 첨부 준비"
+        ]
+      },
+      "terms": [
+        { "term": "RLO", "def": "Right-to-Left Override, 텍스트 방향을 오른쪽에서 왼쪽으로 변경하는 유니코드 제어 문자" },
+        { "term": "BiDi", "def": "Bidirectional Text, 유니코드의 양방향 텍스트 렌더링 알고리즘" }
+      ]
+    },
+    {
+      "cmd": "# 피해자가 'invoice_march2026.pdf'를 더블클릭\nGet-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational';Id=1} -MaxEvents 5 | Where-Object { $_.Message -match 'invoice|financial' }",
+      "out": "TimeCreated  : 2026-01-20 10:15:30\nId           : 1 (Process Create)\nMessage      :\n  Process: C:\\Users\\victim\\Downloads\\invoice_march2026.pdf.exe\n  ParentProcess: C:\\Windows\\explorer.exe\n  CommandLine: \"C:\\Users\\victim\\Downloads\\invoice_march2026.pdf.exe\"\n  Hashes: SHA256=a1b2c3d4...\n  User: CORP\\jsmith\n\n[실행 후 행위]\n- C2 연결: 185.xxx.xxx.xxx:443\n- PowerShell 다운로드 크래들 실행\n- 지속성: HKCU\\...\\Run에 등록\n- 사용자에게는 가짜 PDF 에러 메시지 표시",
+      "def": "[EDR] Executable launched from Downloads folder with double extension - user tricked",
+      "defAction": "Tool: Double extension social engineering\nVictim: CORP\\jsmith\nFile: invoice_march2026.pdf.exe\nLaunched from: Downloads folder via Explorer\nPost-Execution: C2 connection, persistence\nRisk Level: Critical\nAction: Kill process, remove persistence, block C2",
+      "desc": "피해자가 PDF로 착각하고 더블클릭하면 악성코드가 실행됩니다. explorer.exe에서 직접 실행되었으므로 사용자의 의도적 행위로 보입니다. 실행 후 C2 연결, 지속성 확보가 이루어집니다.",
+      "descEn": "The victim double-clicks thinking it's a PDF, executing the malware. Launched directly from explorer.exe, it appears as intentional user action. Post-execution includes C2 connection and persistence.",
+      "stepTitle": "피해자 더블클릭으로 악성코드 실행",
+      "stepTitleEn": "Malware Execution via Victim Double-Click",
+      "feynman": "가면 무도회의 참석자(피해자)가 PDF 가면을 쓴 악성코드와 춤을 추는(더블클릭) 것입니다. 춤이 시작되면(실행) 가면 뒤의 진짜 얼굴이 드러나고, 범인은 빠르게 비밀 통로(C2)를 설치하고 열쇠를 복제(지속성)합니다.",
+      "feynmanEn": "A masquerade ball guest (victim) dances with (double-clicks) malware wearing a PDF mask. Once the dance begins (execution), the true face behind the mask is revealed, and the criminal quickly installs a secret passage (C2) and copies keys (persistence).",
+      "expert": "explorer.exe가 부모 프로세스인 Sysmon Event ID 1은 사용자의 직접 실행을 나타냅니다. 악성코드는 가짜 에러 메시지('이 PDF를 열 수 없습니다')를 표시하여 의심을 줄입니다. Downloads 폴더에서의 실행은 Mark-of-the-Web(MotW) 체크가 적용되지만, Zone.Identifier ADS를 제거하면 우회 가능합니다.",
+      "expertEn": "Sysmon Event ID 1 with explorer.exe as parent indicates direct user execution. Malware displays a fake error ('Cannot open this PDF') to reduce suspicion. Downloads folder execution triggers MotW check, but removing Zone.Identifier ADS bypasses it.",
+      "defTooltip": "🔐 피해자가 위장 파일 실행! C2 연결 시작!",
+      "defTooltipEn": "🔐 Victim executed disguised file! C2 connection initiated!",
+      "hackerLog": {
+        "title": "execution.log",
+        "lines": [
+          "[10:15:30] 피해자 더블클릭 감지",
+          "[10:15:31] explorer.exe → invoice_march2026.pdf.exe",
+          "[10:15:35] C2 연결: 185.xxx.xxx.xxx:443",
+          "[10:15:40] 지속성 등록: HKCU\\...\\Run"
+        ]
+      },
+      "terms": [
+        { "term": "Mark-of-the-Web", "def": "인터넷에서 다운로드한 파일에 Zone Identifier를 표시하는 Windows 보안 기능" },
+        { "term": "Download Cradle", "def": "원격에서 악성코드를 다운로드하고 실행하는 한 줄 명령" }
+      ]
+    },
+    {
+      "cmd": "Get-ChildItem -Path C:\\Users -Recurse -Include *.*.exe,*.*.scr,*.*.bat,*.*.cmd,*.*.ps1,*.*.vbs,*.*.js -ErrorAction SilentlyContinue | Select-Object FullName,Length,CreationTime",
+      "out": "FullName                                                    Length CreationTime\n--------                                                    ------ ------------\nC:\\Users\\victim\\Downloads\\invoice_march2026.pdf.exe        245760 1/20/2026 10:10\nC:\\Users\\victim\\Downloads\\photo_team.jpg.scr                89088 1/20/2026 09:45\nC:\\Users\\admin\\Desktop\\report.docx.bat                       4096 1/19/2026 23:30\nC:\\Users\\shared\\Documents\\setup_v2.msi.exe                 156672 1/18/2026 14:20\n\n[Unicode 제어 문자 탐지]\nC:\\Users\\victim\\Downloads\\financial_report_\\u202Efdp.exe   245760 1/20/2026 10:10\n  → RLO 문자 탐지! 위험도: Critical\n\n[총 결과] 이중 확장자 파일 4개 + RLO 위장 1개 = 5개 위험 파일",
+      "def": "[EDR] 5 files with double extensions or Unicode tricks detected",
+      "defAction": "Tool: Double extension hunt\nDouble Extension Files: 4 (.pdf.exe, .jpg.scr, .docx.bat, .msi.exe)\nRLO Unicode Files: 1 (financial_report with U+202E)\nTotal Suspicious: 5\nAction: Quarantine all, deploy email attachment filter",
+      "desc": "전체 사용자 폴더에서 이중 확장자 패턴(*.*.exe 등)과 유니코드 제어 문자가 포함된 파일을 검색합니다. 4개의 이중 확장자 파일과 1개의 RLO 위장 파일이 발견됩니다.",
+      "descEn": "Search all user folders for double extension patterns (*.*.exe etc.) and Unicode control characters. 4 double extension files and 1 RLO trick file are found.",
+      "stepTitle": "조직 전체 이중 확장자 및 RLO 위장 파일 검색",
+      "stepTitleEn": "Hunt Double Extension and RLO Disguised Files Organization-Wide",
+      "feynman": "건물 전체를 돌며 가면을 쓴 참석자를 찾습니다. 두 개의 이름표를 달고 있는(이중 확장자) 4명과 마법의 거울(RLO) 뒤에 숨은 1명을 발견합니다. 모두 실제 신원(실행 파일)을 숨기고 있어 즉시 퇴장시킵니다.",
+      "feynmanEn": "Searching the entire building for masked attendees. Finding 4 with double name tags (double extensions) and 1 hiding behind a magic mirror (RLO). All concealing their true identity (executable), immediately removed.",
+      "expert": "PowerShell에서 -Include *.*.exe 패턴은 이중 확장자를 매칭합니다. 유니코드 제어 문자 탐지는 [char]::GetUnicodeCategory()로 Control 카테고리 문자를 필터링합니다. YARA 규칙으로 PE 헤더가 있지만 확장자가 .exe가 아닌 파일도 탐지해야 합니다. 이메일 게이트웨이에서 Content-Disposition의 filename 파라미터에 이중 확장자 필터를 적용합니다.",
+      "expertEn": "PowerShell -Include *.*.exe pattern matches double extensions. Unicode control character detection filters Control category characters. YARA rules should also detect files with PE headers but non-.exe extensions. Email gateways should filter double extensions in Content-Disposition filename.",
+      "defTooltip": "🔐 5개 위장 파일 탐지! 이중 확장자 + RLO 트릭!",
+      "defTooltipEn": "🔐 5 disguised files detected! Double extension + RLO trick!",
+      "hackerLog": {
+        "title": "hunt_results.log",
+        "lines": [
+          "[10:30:00] 이중 확장자 패턴 스캔 시작",
+          "[10:30:15] 이중 확장자 4개 발견",
+          "[10:30:20] RLO 유니코드 트릭 1개 탐지",
+          "[10:30:25] 총 5개 위험 파일 격리 완료"
+        ]
+      },
+      "terms": [
+        { "term": "Content-Disposition", "def": "HTTP/이메일에서 첨부파일의 파일명과 처리 방식을 지정하는 헤더" },
+        { "term": "File Extension Filter", "def": "파일 확장자를 기반으로 위험한 파일을 차단하는 보안 정책" }
+      ]
+    },
+    {
+      "cmd": "# GPO 방어 설정 적용\nSet-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced' -Name 'HideFileExt' -Value 0\n# AppLocker 이중 확장자 차단 규칙\nNew-AppLockerPolicy -RuleType Path -Action Deny -Path '%USERPROFILE%\\Downloads\\*.*.exe'",
+      "out": "[*] Registry updated: HideFileExt = 0 (확장자 항상 표시)\n[*] AppLocker rule created:\n    Rule: Deny execution of double-extension files\n    Path: %USERPROFILE%\\Downloads\\*.*.exe\n    Action: Deny\n    Applies to: All Users\n\n[추가 방어 조치]\n1. Email Gateway: 실행 파일 확장자 차단 (.exe, .scr, .bat, .cmd, .vbs, .js)\n2. Unicode Filter: U+202E, U+200F 등 BiDi 제어 문자 제거\n3. Group Policy: '알려진 확장자 숨기기' 조직 전체 비활성화\n4. User Training: 이중 확장자 인식 교육 배포",
+      "def": "[GPO] Defense hardening applied - file extension visibility and AppLocker rules",
+      "defAction": "Tool: GPO + AppLocker defense\nActions Applied:\n  1. HideFileExt=0 (extensions always visible)\n  2. AppLocker deny rule for *.*.exe in Downloads\n  3. Email gateway executable filter\n  4. Unicode BiDi character filter\nRisk Reduction: Critical → Low",
+      "desc": "레지스트리에서 HideFileExt를 0으로 설정하여 확장자를 항상 표시하고, AppLocker로 Downloads 폴더의 이중 확장자 실행을 차단합니다. 이메일 게이트웨이와 유니코드 필터도 함께 적용합니다.",
+      "descEn": "Set HideFileExt to 0 to always show extensions, and create AppLocker rule blocking double-extension execution from Downloads. Email gateway and Unicode filters are also applied.",
+      "stepTitle": "방어 강화: 확장자 표시 + AppLocker + 이메일 필터",
+      "stepTitleEn": "Defense Hardening: Extension Display + AppLocker + Email Filter",
+      "feynman": "무도회장(조직)의 규칙을 변경합니다. 모든 참석자는 가면을 벗어야 하고(확장자 표시), 입구에서 이중 이름표 소지자를 차단하며(AppLocker), 초대장(이메일)에 위조된 신분증이 있으면 입장을 거부합니다(이메일 필터).",
+      "feynmanEn": "Changing the masquerade ball rules. All attendees must remove masks (show extensions), double name tag holders are blocked at the door (AppLocker), and invitations (emails) with forged IDs are rejected (email filter).",
+      "expert": "HideFileExt=0은 GPO(User Configuration > Preferences > Windows Settings > Registry)로 조직 전체 배포합니다. AppLocker는 Publisher/Path/Hash 규칙으로 세밀한 실행 제어가 가능합니다. Exchange Online의 Transport Rule에서 Content-Type이 application/x-msdownload이고 filename에 이중 확장자가 있는 첨부를 차단합니다.",
+      "expertEn": "HideFileExt=0 is deployed organization-wide via GPO. AppLocker offers granular execution control with Publisher/Path/Hash rules. Exchange Online Transport Rules block attachments with application/x-msdownload content type and double-extension filenames.",
+      "defTooltip": "🔐 방어 강화 완료! 확장자 표시 + AppLocker + 이메일 필터!",
+      "defTooltipEn": "🔐 Defense hardening complete! Extension display + AppLocker + email filter!",
+      "hackerLog": {
+        "title": "defense.log",
+        "lines": [
+          "[10:45:00] HideFileExt=0 설정 완료",
+          "[10:45:05] AppLocker 이중 확장자 차단 규칙 적용",
+          "[10:45:10] 이메일 게이트웨이 필터 업데이트",
+          "[10:45:15] 전체 방어 강화 완료"
+        ]
+      },
+      "terms": [
+        { "term": "AppLocker", "def": "Windows의 응용 프로그램 실행 제어 정책 도구" },
+        { "term": "GPO", "def": "Group Policy Object, Active Directory에서 정책을 배포하는 메커니즘" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "explorer.exe",
+    "pid": 2104,
+    "children": [
+      {
+        "name": "invoice_march2026.pdf.exe",
+        "pid": 5847,
+        "children": [
+          { "name": "powershell.exe", "pid": 5848, "children": [] },
+          { "name": "cmd.exe", "pid": 5849, "children": [] }
+        ]
+      }
+    ]
+  }
+}

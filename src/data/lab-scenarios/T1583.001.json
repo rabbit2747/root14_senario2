@@ -1,0 +1,238 @@
+{
+  "id": "T1583.001",
+  "title": "피싱용 도메인 등록 시뮬레이션",
+  "titleEn": "Phishing Domain Registration Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 도메인 탐색", "labelEn": "🔍 Domain Research", "steps": [0, 1] },
+    { "label": "⚡ 인프라 구축", "labelEn": "⚡ Infra Setup", "steps": [2, 3] },
+    { "label": "🔓 피싱 사이트 배포", "labelEn": "🔓 Phishing Deploy", "steps": [4, 5] },
+    { "label": "✅ 캠페인 테스트", "labelEn": "✅ Campaign Test", "steps": [6] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "registrar", "label": "Domain Registrar", "x": 200, "y": 30 },
+    { "id": "phish", "label": "Phishing Site", "x": 200, "y": 90 },
+    { "id": "email", "label": "Email Server", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "registrar", "minStep": 1 },
+    { "from": "registrar", "to": "phish", "minStep": 2 },
+    { "from": "phish", "to": "email", "minStep": 3 },
+    { "from": "email", "to": "victim", "minStep": 6 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "phishing_site", "icon": "🌐", "alert": true },
+    { "name": "SSL Certificate", "icon": "🔐" }
+  ],
+  "steps": [
+    {
+      "cmd": "dnstwist -r {companyName}.com --format json",
+      "out": "[\n  {\"fuzzer\": \"homoglyph\", \"domain\": \"{companyName}e.com\", \"available\": true},\n  {\"fuzzer\": \"bitsquatting\", \"domain\": \"{companyName}c.com\", \"available\": true},\n  {\"fuzzer\": \"typo\", \"domain\": \"{companyName}n.com\", \"available\": true},\n  {\"fuzzer\": \"subdomain\", \"domain\": \"{companyName}.security.com\", \"available\": true},\n  {\"fuzzer\": \"insertion\", \"domain\": \"{companyName}-corp.com\", \"available\": true},\n  {\"fuzzer\": \"homoglyph\", \"domain\": \"{companyName}.co\", \"available\": true}\n]",
+      "def": "[Domain Monitoring] dnstwist scan detected - typosquatting domain enumeration for {companyName}.com",
+      "defAction": "Source: Threat intelligence feed\nTarget: {companyName}.com variations\nAction: Brand protection monitoring initiated",
+      "desc": "dnstwist를 사용하여 대상 기업과 유사한 피싱용 도메인 후보를 생성합니다.",
+      "descEn": "The attacker uses dnstwist to generate lookalike domain candidates for phishing against the target organization.",
+      "stepTitle": "유사 도메인 후보 생성",
+      "stepTitleEn": "Lookalike Domain Generation",
+      "feynman": "dnstwist는 원래 도메인과 비슷한 '가짜 이름'을 만드는 도구입니다. 철자를 바꾸거나(typo), 비슷한 문자로 교체하거나(homoglyph), 단어를 추가하여(insertion) 진짜와 구분하기 어려운 도메인을 생성합니다. 사람들이 URL을 자세히 보지 않는 점을 이용하는 것입니다.",
+      "feynmanEn": "dnstwist generates 'fake names' that look similar to the real domain. It swaps letters (typo), uses similar-looking characters (homoglyph), or adds words (insertion) to create domains that are hard to distinguish from the real one. It exploits the fact that people don't carefully read URLs.",
+      "expert": "dnstwist는 도메인 변형 생성 도구로, homoglyph(유니코드 유사 문자), bitsquatting(비트 플립), typo(키보드 인접 키) 등의 퍼징 기법을 사용합니다. -r 플래그로 DNS 해석을 수행하여 이미 등록된 유사 도메인도 탐지합니다.",
+      "expertEn": "dnstwist is a domain permutation tool using fuzzing techniques including homoglyph (Unicode lookalikes), bitsquatting (bit flips), and typo (adjacent keyboard keys). The -r flag resolves DNS to detect already-registered lookalike domains.",
+      "defTooltip": "🔤 도메인 모니터링: 타이포스쿼팅 도메인 열거가 감지되었습니다",
+      "defTooltipEn": "🔤 Domain Monitoring: Typosquatting domain enumeration detected",
+      "hackerLog": {
+        "title": "dnstwist_results.json",
+        "lines": [
+          { "log": "{\"fuzzer\": \"homoglyph\", \"domain\": \"{companyName}e.com\"}", "desc": "💡 비슷한 문자로 교체 - 사람 눈으로는 구분이 거의 불가능합니다" },
+          { "log": "{\"fuzzer\": \"insertion\", \"domain\": \"{companyName}-corp.com\"}", "desc": "💡 '-corp'을 추가하면 더 공식적으로 보여서 피싱에 효과적입니다" },
+          { "log": "\"available\": true", "desc": "💡 등록 가능한 도메인 - 공격자가 바로 구매할 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "dnstwist", "desc": "도메인 이름의 변형을 자동 생성하는 도구. 피싱에 사용될 수 있는 유사 도메인을 탐지하거나 생성하는 데 사용됩니다" },
+        { "name": "Typosquatting", "desc": "유명 도메인의 오타를 이용한 사기 기법. gooogle.com처럼 실수로 방문하는 사용자를 노리는 공격입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 domain_register.py --domain {companyName}-corp.com --registrar namecheap --whois-privacy on",
+      "out": "[+] Registering domain: {companyName}-corp.com\n[+] Registrar: Namecheap\n[+] WHOIS Privacy: Enabled\n[+] Registration period: 1 year\n[+] Payment: Cryptocurrency (Monero)\n[+] Status: REGISTERED\n[+] Nameservers: ns1.freedns.afraid.org, ns2.freedns.afraid.org\n\nDomain registered successfully.\nWHOIS contact: Redacted for Privacy",
+      "def": "[Brand Protection] New lookalike domain registered: {companyName}-corp.com",
+      "defAction": "Source: Domain monitoring service\nTarget: {companyName}-corp.com\nAction: Brand abuse alert generated, legal team notified",
+      "desc": "WHOIS 프라이버시와 암호화폐 결제를 사용하여 익명으로 유사 도메인을 등록합니다.",
+      "descEn": "The attacker registers a lookalike domain anonymously using WHOIS privacy and cryptocurrency payment.",
+      "stepTitle": "익명 도메인 등록",
+      "stepTitleEn": "Anonymous Domain Registration",
+      "feynman": "가짜 도메인을 등록할 때 공격자는 자신의 신원을 숨깁니다. WHOIS 프라이버시로 등록자 정보를 가리고, 추적이 어려운 암호화폐(Monero)로 결제합니다. 마치 편의점에서 선불 휴대폰을 현금으로 사는 것처럼, 추적할 수 없는 방법을 사용합니다.",
+      "feynmanEn": "When registering a fake domain, the attacker hides their identity. WHOIS privacy masks registrant info, and untraceable cryptocurrency (Monero) is used for payment. Like buying a prepaid phone with cash at a convenience store - methods designed to be untraceable.",
+      "expert": "WHOIS 프라이버시 서비스는 등록자 PII를 프록시 서비스로 대체합니다. Monero(XMR)는 프라이버시 코인으로 거래 추적이 사실상 불가능합니다. FreeDNS 네임서버 사용은 추가적인 익명성을 제공합니다.",
+      "expertEn": "WHOIS privacy service replaces registrant PII with proxy service information. Monero (XMR) is a privacy coin making transaction tracing virtually impossible. FreeDNS nameservers provide additional anonymity.",
+      "defTooltip": "🏷️ 브랜드 보호: 유사 도메인 신규 등록 감지 - 법무팀 통보",
+      "defTooltipEn": "🏷️ Brand Protection: New lookalike domain registration detected - legal team notified",
+      "hackerLog": {
+        "title": "domain_register.log",
+        "lines": [
+          { "log": "[+] WHOIS Privacy: Enabled", "desc": "💡 등록자 정보가 숨겨져 누가 등록했는지 추적이 어렵습니다" },
+          { "log": "[+] Payment: Cryptocurrency (Monero)", "desc": "💡 Monero는 비트코인보다 추적이 어려운 프라이버시 암호화폐입니다" },
+          { "log": "WHOIS contact: Redacted for Privacy", "desc": "💡 WHOIS 조회를 해도 실제 소유자 정보가 나오지 않습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "WHOIS Privacy", "desc": "도메인 등록자의 개인정보(이름, 주소, 전화번호)를 숨기는 서비스. 정당한 프라이버시 목적으로도 사용되지만 공격자도 악용합니다" },
+        { "name": "Monero (XMR)", "desc": "프라이버시 중심의 암호화폐. 거래 내역이 완전히 숨겨져 추적이 사실상 불가능하여 사이버 범죄에 악용됩니다" }
+      ]
+    },
+    {
+      "cmd": "certbot certonly --manual --preferred-challenges dns -d {companyName}-corp.com -d mail.{companyName}-corp.com",
+      "out": "Saving debug log to /var/log/letsencrypt/letsencrypt.log\nRequesting a certificate for {companyName}-corp.com and mail.{companyName}-corp.com\n\nSuccessfully received certificate.\nCertificate is saved at: /etc/letsencrypt/live/{companyName}-corp.com/fullchain.pem\nKey is saved at:         /etc/letsencrypt/live/{companyName}-corp.com/privkey.pem\nThis certificate expires on 2024-06-15.\n\nNOTE: Certificate for phishing domain now has valid HTTPS lock icon.",
+      "def": "[Certificate Transparency] New SSL certificate issued for {companyName}-corp.com via Let's Encrypt",
+      "defAction": "Source: CT log monitoring\nTarget: {companyName}-corp.com\nAction: Certificate flagged as suspicious lookalike, added to watchlist",
+      "desc": "Let's Encrypt로 무료 SSL 인증서를 발급하여 피싱 사이트에 HTTPS 자물쇠 아이콘을 표시합니다.",
+      "descEn": "The attacker obtains a free SSL certificate from Let's Encrypt to display the HTTPS lock icon on the phishing site.",
+      "stepTitle": "SSL 인증서 발급",
+      "stepTitleEn": "SSL Certificate Issuance",
+      "feynman": "HTTPS 자물쇠 아이콘은 많은 사람들이 '안전한 사이트'라고 믿는 표시입니다. Let's Encrypt에서 무료로 인증서를 받으면 가짜 사이트에도 자물쇠가 표시됩니다. 이것은 '양 가죽을 쓴 늑대'와 같습니다 - 보안 표시가 있다고 해서 사이트가 안전한 것은 아닙니다.",
+      "feynmanEn": "The HTTPS lock icon is what many people trust as a sign of a 'safe site.' Getting a free certificate from Let's Encrypt puts this lock on fake sites too. It's like a wolf in sheep's clothing - having a security badge doesn't mean the site is safe.",
+      "expert": "Let's Encrypt은 도메인 소유권만 검증하는 DV(Domain Validation) 인증서를 발급합니다. 피싱 도메인이라도 DNS 챌린지를 통과하면 유효한 TLS 인증서를 획득할 수 있으며, Certificate Transparency 로그에 기록됩니다.",
+      "expertEn": "Let's Encrypt issues DV (Domain Validation) certificates that only verify domain ownership. Phishing domains can obtain valid TLS certificates by passing DNS challenges, and these are recorded in Certificate Transparency logs.",
+      "defTooltip": "🔐 CT 모니터: 유사 도메인에 대한 새 SSL 인증서 발급 감지",
+      "defTooltipEn": "🔐 CT Monitor: New SSL certificate issued for lookalike domain detected",
+      "hackerLog": {
+        "title": "certbot.log",
+        "lines": [
+          { "log": "Successfully received certificate.", "desc": "💡 가짜 사이트에 '진짜' SSL 인증서가 발급되었습니다" },
+          { "log": "Certificate for phishing domain now has valid HTTPS lock icon.", "desc": "💡 이제 브라우저에서 자물쇠 아이콘이 표시되어 사용자가 신뢰하기 쉽습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Let's Encrypt", "desc": "무료 SSL 인증서를 제공하는 비영리 인증기관. 인터넷 보안 향상에 기여하지만, 피싱에도 악용될 수 있습니다" },
+        { "name": "SSL/TLS 인증서", "desc": "웹사이트의 신원을 인증하고 통신을 암호화하는 디지털 인증서. HTTPS 자물쇠 아이콘의 근거이지만, 사이트의 '선의'를 보장하지는 않습니다" }
+      ]
+    },
+    {
+      "cmd": "gophish-cli setup --landing-page login.html --smtp-server mail.{companyName}-corp.com --template corporate",
+      "out": "[*] GoPhish Campaign Setup\n[*] Landing Page: Corporate login clone\n[*] SMTP Server: mail.{companyName}-corp.com:587\n[*] SPF Record: v=spf1 ip4:185.220.101.34 -all (configured)\n[*] DKIM: Enabled (selector: gophish._domainkey)\n[*] DMARC: v=DMARC1; p=none\n\n[+] Phishing infrastructure ready:\n    URL: https://{companyName}-corp.com/login\n    SMTP: mail.{companyName}-corp.com\n    Tracking: pixel + link click tracking enabled",
+      "def": "[Email Security] New mail server detected for lookalike domain with SPF/DKIM configured",
+      "defAction": "Source: Email threat intelligence\nTarget: mail.{companyName}-corp.com\nAction: Domain added to email gateway blocklist",
+      "desc": "GoPhish로 피싱 인프라를 구축하고 SPF/DKIM 레코드를 설정하여 이메일 필터를 우회합니다.",
+      "descEn": "The attacker sets up GoPhish infrastructure with SPF/DKIM records to bypass email filters.",
+      "stepTitle": "GoPhish 피싱 인프라 구축",
+      "stepTitleEn": "GoPhish Phishing Infrastructure Setup",
+      "feynman": "GoPhish는 피싱 캠페인을 관리하는 도구입니다. 가짜 로그인 페이지와 메일 서버를 설정합니다. SPF와 DKIM은 이메일의 '신분증'인데, 이것을 설정하면 피싱 이메일이 스팸함이 아닌 받은편지함에 도착합니다. 가짜 편지에 진짜 우체국 도장을 찍는 것과 같습니다.",
+      "feynmanEn": "GoPhish manages phishing campaigns. It sets up a fake login page and mail server. SPF and DKIM are email 'ID cards' - configuring these makes phishing emails land in the inbox instead of spam. It's like stamping a fake letter with a real post office seal.",
+      "expert": "GoPhish는 오픈소스 피싱 프레임워크로, SPF(ip4 인가), DKIM(도메인 키 서명), DMARC(p=none으로 모니터링 모드)를 설정하여 이메일 인증 검사를 통과합니다. 이로써 피싱 이메일이 스팸 필터를 우회할 수 있습니다.",
+      "expertEn": "GoPhish is an open-source phishing framework. It configures SPF (IP authorization), DKIM (domain key signing), and DMARC (p=none for monitoring mode) to pass email authentication checks, enabling phishing emails to bypass spam filters.",
+      "defTooltip": "📧 이메일 보안: 유사 도메인에 SPF/DKIM이 설정된 새 메일 서버 감지",
+      "defTooltipEn": "📧 Email Security: New mail server with SPF/DKIM detected for lookalike domain",
+      "hackerLog": {
+        "title": "gophish_setup.log",
+        "lines": [
+          { "log": "[*] SPF Record: v=spf1 ip4:185.220.101.34 -all (configured)", "desc": "💡 SPF를 설정하면 이 서버에서 보낸 이메일이 '인증된' 것으로 인정됩니다" },
+          { "log": "[*] DKIM: Enabled", "desc": "💡 DKIM 서명이 있으면 이메일이 변조되지 않았음을 증명합니다" },
+          { "log": "Tracking: pixel + link click tracking enabled", "desc": "💡 누가 이메일을 열었는지, 링크를 클릭했는지 실시간 추적이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "GoPhish", "desc": "오픈소스 피싱 시뮬레이션 도구. 보안 교육용으로 만들어졌지만, 실제 공격에도 악용될 수 있는 피싱 캠페인 관리 프레임워크입니다" },
+        { "name": "SPF/DKIM/DMARC", "desc": "이메일 인증 기술 3종 세트. SPF는 발신 서버를, DKIM은 이메일 무결성을, DMARC는 정책을 검증합니다. 이 모든 것을 통과하면 '정상' 이메일로 인정됩니다" }
+      ]
+    },
+    {
+      "cmd": "httrack https://www.{companyName}.com -O /var/www/phishing/ --mirror --depth=2",
+      "out": "HTTrack Website Copier 3.49-2\nMirroring: https://www.{companyName}.com\n\nDownloading: index.html (45KB)\nDownloading: login.html (23KB)\nDownloading: css/main.css (12KB)\nDownloading: img/logo.png (8KB)\nDownloading: js/app.js (34KB)\n\n[+] Mirror complete: 87 files, 2.3MB\n[+] Modifying login form action → https://{companyName}-corp.com/harvest\n[+] Adding credential harvesting script\n[+] Phishing site deployed at https://{companyName}-corp.com/",
+      "def": "[Web Security] Website cloning detected - HTTrack user-agent accessing {companyName}.com",
+      "defAction": "Source: Web application firewall\nTarget: www.{companyName}.com\nAction: Scraping source IP blocked, security team alerted about potential phishing setup",
+      "desc": "HTTrack으로 실제 기업 웹사이트를 복제하고 로그인 폼을 자격증명 수집용으로 수정합니다.",
+      "descEn": "The attacker clones the legitimate website using HTTrack and modifies the login form for credential harvesting.",
+      "stepTitle": "웹사이트 복제 및 피싱 페이지 배포",
+      "stepTitleEn": "Website Cloning and Phishing Page Deployment",
+      "feynman": "HTTrack은 웹사이트를 통째로 복사하는 '복사기'입니다. 원본 사이트의 디자인, 로고, CSS를 그대로 가져와서 구분이 거의 불가능한 복제 사이트를 만듭니다. 그리고 로그인 폼만 살짝 수정해서 입력된 비밀번호가 공격자에게 전송되게 합니다. 눈으로는 진짜와 가짜를 구분할 수 없습니다.",
+      "feynmanEn": "HTTrack is a 'photocopier' for websites. It copies the original site's design, logos, and CSS to create an almost indistinguishable clone. Then it tweaks the login form so entered passwords are sent to the attacker. Visually, real and fake are indistinguishable.",
+      "expert": "HTTrack은 웹사이트 미러링 도구로, --depth=2로 2단계 깊이까지 재귀적으로 다운로드합니다. form action을 공격자 서버(/harvest)로 변경하고, JavaScript 기반 크리덴셜 하베스팅 스크립트를 주입합니다.",
+      "expertEn": "HTTrack is a website mirroring tool that recursively downloads to 2 levels deep with --depth=2. The form action is changed to the attacker's server (/harvest), and a JavaScript-based credential harvesting script is injected.",
+      "defTooltip": "🕸️ 웹 보안: HTTrack 에이전트의 웹사이트 복제 시도가 감지되었습니다",
+      "defTooltipEn": "🕸️ Web Security: Website cloning via HTTrack user-agent detected",
+      "hackerLog": {
+        "title": "httrack_mirror.log",
+        "lines": [
+          { "log": "[+] Mirror complete: 87 files, 2.3MB", "desc": "💡 87개 파일을 복사해서 원본과 동일한 사이트를 만들었습니다" },
+          { "log": "[+] Modifying login form action → .../harvest", "desc": "💡 로그인 폼의 목적지만 바꿔서 비밀번호가 공격자에게 전송됩니다" },
+          { "log": "[+] Adding credential harvesting script", "desc": "💡 입력된 자격증명을 수집하는 스크립트가 추가되었습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "HTTrack", "desc": "웹사이트를 통째로 다운로드하는 미러링 도구. 오프라인 열람용으로 만들어졌지만 피싱 사이트 제작에 악용됩니다" },
+        { "name": "Credential Harvesting", "desc": "가짜 로그인 페이지로 사용자의 아이디/비밀번호를 수집하는 기법. 피싱 공격의 핵심 목적입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 redirect_setup.py --domain {companyName}-corp.com --evasion cloudflare-workers",
+      "out": "[+] Setting up evasion infrastructure...\n[+] Cloudflare Workers proxy: CONFIGURED\n[+] Geofencing: Block security researchers (Tor, known scanners)\n[+] User-Agent filtering: Redirect bots to legitimate site\n[+] Cloaking rules:\n    - Crawlers → {companyName}.com (legitimate)\n    - Humans → {companyName}-corp.com/login (phishing)\n    - Security tools → 404 Not Found\n[+] URL shortener: bit.ly/3xK9mPq → {companyName}-corp.com/login",
+      "def": "[Threat Intel] Cloaking infrastructure detected on {companyName}-corp.com - selective content serving",
+      "defAction": "Source: Automated phishing analysis\nTarget: {companyName}-corp.com\nAction: Domain reported to Google Safe Browsing and PhishTank",
+      "desc": "클라우드플레어 워커를 사용하여 보안 분석 도구를 우회하고 실제 사용자만 피싱 페이지로 유도합니다.",
+      "descEn": "Cloudflare Workers are used to cloak the phishing site, redirecting security tools while targeting real users.",
+      "stepTitle": "클로킹 및 탐지 우회 설정",
+      "stepTitleEn": "Cloaking and Detection Evasion Setup",
+      "feynman": "클로킹은 '누가 방문하느냐에 따라 다른 것을 보여주는' 기술입니다. 보안 연구자나 검색엔진 크롤러가 방문하면 정상 사이트를 보여주고, 일반 사용자가 방문하면 피싱 페이지를 보여줍니다. 마치 경찰이 올 때만 문 닫는 불법 가게와 같습니다.",
+      "feynmanEn": "Cloaking shows different content depending on who visits. Security researchers and search crawlers see the legitimate site, while regular users see the phishing page. It's like an illegal shop that closes its doors only when police come by.",
+      "expert": "Cloudflare Workers를 리버스 프록시로 사용하여 User-Agent, IP 평판, Geolocation 기반 조건부 라우팅을 구현합니다. Tor 출구 노드와 알려진 보안 스캐너 IP는 차단하고, 일반 사용자만 피싱 페이지로 전달합니다.",
+      "expertEn": "Cloudflare Workers serve as a reverse proxy implementing conditional routing based on User-Agent, IP reputation, and geolocation. Tor exit nodes and known security scanner IPs are blocked while normal users are directed to the phishing page.",
+      "defTooltip": "🎭 위협 인텔: 클로킹 인프라 감지 - 선택적 콘텐츠 제공",
+      "defTooltipEn": "🎭 Threat Intel: Cloaking infrastructure detected - selective content serving",
+      "hackerLog": {
+        "title": "cloaking_setup.log",
+        "lines": [
+          { "log": "Crawlers → {companyName}.com (legitimate)", "desc": "💡 검색엔진 봇에는 진짜 사이트를 보여줘서 피싱 탐지를 피합니다" },
+          { "log": "Security tools → 404 Not Found", "desc": "💡 보안 분석 도구는 아예 페이지를 찾을 수 없다고 속입니다" },
+          { "log": "URL shortener: bit.ly/3xK9mPq", "desc": "💡 짧은 URL로 원래 주소를 숨기면 사용자가 의심하기 어렵습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Cloaking (클로킹)", "desc": "방문자의 종류에 따라 다른 콘텐츠를 보여주는 기법. 보안 도구를 속이기 위해 피싱에서 자주 사용됩니다" },
+        { "name": "Cloudflare Workers", "desc": "Cloudflare의 서버리스 실행 환경. CDN 에지에서 코드를 실행하여 요청을 조건부로 처리할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 campaign_test.py --target test@{companyName}.com --verify-delivery --check-rendering",
+      "out": "[+] Sending test phishing email...\n[+] From: it-security@{companyName}-corp.com\n[+] Subject: [긴급] 비밀번호 만료 안내 - 24시간 내 변경 필요\n\n[+] Delivery test:\n    SPF: PASS\n    DKIM: PASS\n    DMARC: PASS\n    Spam Score: 2.1/10 (DELIVERED to inbox)\n\n[+] Landing page test:\n    SSL Valid: ✓\n    Visual match: 98.7% (vs original)\n    Credential capture: Working\n    Redirect after submit: → real {companyName}.com/login\n\n[+] Campaign infrastructure READY for deployment",
+      "def": "[Email Gateway] Test phishing email detected with high visual similarity to {companyName}.com",
+      "defAction": "Source: Email analysis engine\nTarget: test@{companyName}.com\nAction: Email quarantined, phishing campaign infrastructure mapped for takedown",
+      "desc": "테스트 이메일을 발송하여 SPF/DKIM 통과 여부, 스팸 점수, 랜딩 페이지 정상 동작을 확인합니다.",
+      "descEn": "The attacker sends test emails to verify SPF/DKIM pass rates, spam scores, and landing page functionality.",
+      "stepTitle": "피싱 캠페인 최종 테스트",
+      "stepTitleEn": "Phishing Campaign Final Test",
+      "feynman": "실전 투입 전 마지막 점검입니다. 테스트 이메일을 보내서 스팸함에 빠지지 않는지(스팸 점수 2.1/10으로 합격), 피싱 페이지가 원본과 98.7% 일치하는지, 비밀번호 수집이 정상 작동하는지 확인합니다. 비밀번호 입력 후에는 진짜 사이트로 보내서 피해자가 의심하지 않게 합니다.",
+      "feynmanEn": "This is the final check before going live. A test email verifies it doesn't land in spam (score 2.1/10 passes), the phishing page matches 98.7% visually, and credential capture works. After entering a password, victims are redirected to the real site so they don't suspect anything.",
+      "expert": "캠페인 QA 단계로, SPF/DKIM/DMARC 인증 통과율, SpamAssassin 점수(2.1/10, 5.0 미만이면 인박스 도달), 시각적 유사도(98.7%), 크리덴셜 하베스팅 기능, 포스트-서밋 리다이렉트를 검증합니다.",
+      "expertEn": "Campaign QA phase verifying SPF/DKIM/DMARC authentication pass rates, SpamAssassin score (2.1/10, below 5.0 for inbox delivery), visual similarity (98.7%), credential harvesting functionality, and post-submit redirect.",
+      "defTooltip": "📩 이메일 게이트웨이: 원본과 높은 유사도의 피싱 이메일이 감지되었습니다",
+      "defTooltipEn": "📩 Email Gateway: Test phishing email with high visual similarity detected",
+      "hackerLog": {
+        "title": "campaign_test.log",
+        "lines": [
+          { "log": "Spam Score: 2.1/10 (DELIVERED to inbox)", "desc": "💡 스팸 점수 2.1로 매우 낮아서 받은편지함에 정상 도착합니다" },
+          { "log": "Visual match: 98.7% (vs original)", "desc": "💡 원본 사이트와 98.7% 일치 - 육안으로 구분이 거의 불가능합니다" },
+          { "log": "Redirect after submit: → real {companyName}.com/login", "desc": "💡 비밀번호 입력 후 진짜 사이트로 이동시켜 피해자가 눈치채지 못하게 합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Spam Score", "desc": "이메일이 스팸일 확률을 나타내는 점수. 보통 5점 이상이면 스팸으로 분류되고, 2.1점은 정상 이메일로 인식됩니다" },
+        { "name": "Credential Harvesting (자격증명 수집)", "desc": "사용자가 가짜 로그인 페이지에 입력한 아이디/비밀번호를 공격자 서버에 저장하는 행위입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "dnstwist (PID: 5101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 domain_register.py (PID: 5178)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "certbot (PID: 5234)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "gophish-cli (PID: 5312)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "httrack (PID: 5389)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "python3 redirect_setup.py (PID: 5445)", "depth": 1, "alert": true, "minStep": 5 },
+    { "name": "python3 campaign_test.py (PID: 5512)", "depth": 1, "alert": true, "minStep": 6 }
+  ]
+}

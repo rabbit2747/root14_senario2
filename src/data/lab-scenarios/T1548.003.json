@@ -1,0 +1,212 @@
+{
+  "id": "T1548.003",
+  "title": "Sudo 권한 악용 시뮬레이션",
+  "titleEn": "Sudo Privilege Abuse Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 권한 정찰", "labelEn": "🔍 Privilege Reconnaissance", "steps": [0, 1] },
+    { "label": "⚡ Sudo 악용", "labelEn": "⚡ Sudo Exploitation", "steps": [2, 3] },
+    { "label": "🔓 Root 획득", "labelEn": "🔓 Root Access", "steps": [4] },
+    { "label": "🧹 흔적 제거", "labelEn": "🧹 Cleanup", "steps": [5] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(webadmin)", "x": 50, "y": 80 },
+    { "id": "sudoers", "label": "/etc/sudoers\n(NOPASSWD)", "x": 230, "y": 30 },
+    { "id": "vim", "label": "sudo vim\n(GTFOBin)", "x": 230, "y": 130 },
+    { "id": "root", "label": "Root Shell\n(uid=0)", "x": 430, "y": 80 },
+    { "id": "shadow", "label": "/etc/shadow\n(credentials)", "x": 430, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "sudoers", "minStep": 0 },
+    { "from": "sudoers", "to": "vim", "minStep": 2 },
+    { "from": "vim", "to": "root", "minStep": 3 },
+    { "from": "root", "to": "shadow", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "Terminal", "icon": "🖥️" },
+    { "name": "File Manager", "icon": "📁" },
+    { "name": "System Monitor", "icon": "📊" },
+    { "name": "{companyName} Web App", "icon": "🌐" },
+    { "name": "Text Editor", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "id && groups",
+      "out": "uid=1001(webadmin) gid=1001(webadmin) groups=1001(webadmin),27(sudo)\nwebadmin sudo",
+      "def": "[SIEM] User identity enumeration detected - webadmin",
+      "defAction": "Process: bash -> id\nUser: webadmin\nRisk Level: Low\nAction: Log & Monitor",
+      "desc": "공격자가 현재 사용자의 UID, GID 및 그룹 멤버십을 확인합니다. sudo 그룹에 속해있는지 확인하는 정찰 단계입니다.",
+      "descEn": "The attacker checks the current user's UID, GID, and group memberships to see if they belong to the sudo group.",
+      "stepTitle": "사용자 ID 및 그룹 확인",
+      "stepTitleEn": "User Identity and Group Check",
+      "feynman": "회사 ID 카드를 확인해서 '나는 어떤 부서 소속이고, 어떤 출입 권한이 있는지' 파악하는 것과 같습니다. sudo 그룹에 속해있다면 관리자 명령을 실행할 수 있는 잠재적 권한이 있다는 뜻입니다.",
+      "feynmanEn": "It's like checking your company ID card to see which department you belong to and what access rights you have. Being in the sudo group means you potentially have the ability to run administrator commands.",
+      "expert": "id 명령은 현재 프로세스의 실제/유효 UID, GID를 반환합니다. groups는 보충 그룹 목록을 표시합니다. sudo(gid=27)는 Debian/Ubuntu 기반 시스템에서 관리자 권한 위임 그룹이며, 이 그룹 멤버십이 sudoers 파일의 %sudo 규칙과 연결됩니다.",
+      "expertEn": "The id command returns the real/effective UID and GID of the current process. groups shows supplementary group lists. sudo (gid=27) is the admin delegation group on Debian/Ubuntu systems, and this membership connects to the %sudo rule in the sudoers file.",
+      "defTooltip": "🔐 사용자 ID 열거 감지! 공격자가 권한 상승 가능 여부를 확인하는 초기 정찰입니다.",
+      "defTooltipEn": "🔐 User identity enumeration detected! Attacker checking for privilege escalation possibilities.",
+      "hackerLog": {
+        "title": "id_check.txt",
+        "lines": [
+          { "log": "uid=1001(webadmin)", "desc": "💡 일반 사용자 계정 - root(uid=0)가 아닌 제한된 계정" },
+          { "log": "groups=1001(webadmin),27(sudo)", "desc": "💡 sudo 그룹 멤버십 확인 = sudo 명령 사용 가능성 존재" }
+        ]
+      },
+      "terms": [
+        { "name": "UID (User ID)", "desc": "Linux에서 각 사용자에게 부여되는 고유 번호. root는 0, 일반 사용자는 1000 이상입니다." },
+        { "name": "sudo 그룹", "desc": "Debian/Ubuntu에서 관리자 권한 위임이 가능한 그룹. /etc/sudoers에서 %sudo ALL=(ALL:ALL) ALL로 정의됩니다." },
+        { "name": "GID (Group ID)", "desc": "사용자가 속한 그룹의 고유 번호. 파일 접근 권한과 sudo 사용 가능 여부를 결정합니다." }
+      ]
+    },
+    {
+      "cmd": "sudo -l",
+      "out": "Matching Defaults entries for webadmin on target:\n    env_reset, mail_badpass, secure_path=/usr/local/sbin\\:/usr/local/bin\\:/usr/sbin\\:/usr/bin\\:/sbin\\:/bin\n\nUser webadmin may run the following commands on target:\n    (ALL) NOPASSWD: /usr/bin/vim\n    (ALL) NOPASSWD: /usr/bin/find\n    (ALL) NOPASSWD: /usr/bin/less",
+      "def": "[EDR] ALERT: sudo -l enumeration by webadmin - NOPASSWD entries found",
+      "defAction": "Process: sudo -> sudoers check\nUser: webadmin\nNOPASSWD entries: vim, find, less\nRisk Level: High\nAction: Alert SOC - GTFOBins risk",
+      "desc": "sudo -l로 현재 사용자가 비밀번호 없이 실행할 수 있는 명령 목록을 확인합니다. vim, find, less 모두 셸 이스케이프가 가능한 위험한 프로그램입니다.",
+      "descEn": "Using sudo -l to list commands the user can run without a password. vim, find, and less are all dangerous programs that allow shell escapes.",
+      "stepTitle": "sudo 권한 목록 조회 (NOPASSWD 탐색)",
+      "stepTitleEn": "Sudo Privilege Listing (NOPASSWD Discovery)",
+      "feynman": "건물의 출입 카드 리더기에 자신의 카드를 대보며 '어떤 방에 비밀번호 없이 들어갈 수 있는지' 확인하는 것입니다. vim, find, less가 NOPASSWD로 허용되었다면, 이 프로그램들 안에서 '비상구(셸 이스케이프)'를 찾아 root 권한으로 탈출할 수 있습니다.",
+      "feynmanEn": "It's like tapping your card on every door reader in the building to see which rooms you can enter without a PIN. If vim, find, and less are allowed with NOPASSWD, you can find 'emergency exits (shell escapes)' within these programs to escape to root privileges.",
+      "expert": "sudo -l은 현재 사용자의 sudoers 규칙을 조회합니다. NOPASSWD가 설정된 바이너리 중 GTFOBins(https://gtfobins.github.io)에 등록된 프로그램은 즉시 권한 상승이 가능합니다. vim(:!bash), find(-exec), less(!bash) 모두 대표적인 sudo 탈출 바이너리입니다.",
+      "expertEn": "sudo -l queries the current user's sudoers rules. Binaries with NOPASSWD that are listed on GTFOBins can be immediately exploited for privilege escalation. vim (:!bash), find (-exec), and less (!bash) are all classic sudo escape binaries.",
+      "defTooltip": "🔐 sudo -l로 NOPASSWD 항목이 발견되었습니다! vim, find, less는 GTFOBins 위험 바이너리입니다.",
+      "defTooltipEn": "🔐 NOPASSWD entries discovered via sudo -l! vim, find, and less are GTFOBins risk binaries.",
+      "hackerLog": {
+        "title": "sudo_list.txt",
+        "lines": [
+          { "log": "(ALL) NOPASSWD: /usr/bin/vim", "desc": "💡 vim은 :!bash 명령으로 셸 탈출 가능 - 가장 많이 악용되는 GTFOBin" },
+          { "log": "(ALL) NOPASSWD: /usr/bin/find", "desc": "💡 find는 -exec /bin/bash ; 으로 root 셸 실행 가능" },
+          { "log": "(ALL) NOPASSWD: /usr/bin/less", "desc": "💡 less에서 !bash 입력으로 셸 탈출 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "sudo -l", "desc": "현재 사용자가 sudo로 실행할 수 있는 명령 목록을 표시합니다. 공격자의 권한 상승 정찰 핵심 명령입니다." },
+        { "name": "NOPASSWD", "desc": "sudoers 파일의 옵션으로, 지정된 명령을 비밀번호 입력 없이 sudo로 실행할 수 있게 허용합니다." },
+        { "name": "GTFOBins", "desc": "Unix 바이너리에서 보안 제한을 우회할 수 있는 기법을 모아놓은 프로젝트. sudo, SUID 등의 탈출 경로를 문서화합니다." }
+      ]
+    },
+    {
+      "cmd": "sudo vim -c ':!bash'",
+      "out": "root@target:~#",
+      "def": "[EDR] CRITICAL: sudo vim spawned interactive shell - GTFOBins exploitation",
+      "defAction": "Process Chain: bash -> sudo -> vim -> bash (root)\nIntegrity: root (uid=0)\nRisk Level: Critical\nAction: KILL PROCESS, isolate endpoint",
+      "desc": "vim 편집기를 sudo로 실행한 후, 내부 명령(:!)을 사용해 root 권한의 bash 셸을 생성합니다. 이것이 GTFOBins sudo escape입니다.",
+      "descEn": "After running vim with sudo, using the internal command (:!) to spawn a root bash shell. This is a GTFOBins sudo escape.",
+      "stepTitle": "vim GTFOBins sudo 탈출 (root 셸 획득)",
+      "stepTitleEn": "vim GTFOBins Sudo Escape (Root Shell Obtained)",
+      "feynman": "허가받은 방(vim)에 정상적으로 들어간 뒤, 그 방 안의 비상구(: 명령)를 통해 제한 구역(root 셸)으로 빠져나가는 것입니다. vim은 텍스트 편집기지만 내부에서 운영체제 명령을 실행하는 기능이 있어, 이를 통해 root 셸을 열 수 있습니다.",
+      "feynmanEn": "It's like entering an authorized room (vim) normally, then using an emergency exit (:command) inside to escape into a restricted area (root shell). vim is a text editor but has the ability to execute OS commands internally, allowing it to open a root shell.",
+      "expert": "vim의 :! 접두사는 외부 셸 명령을 실행합니다. sudo로 실행된 vim은 root 컨텍스트에서 동작하므로, :!bash는 uid=0의 대화형 셸을 생성합니다. -c 옵션은 vim 시작 시 명령을 자동 실행하여 즉시 셸 탈출합니다. 이는 sudoers에서 vim을 허용할 때의 근본적 설계 결함입니다.",
+      "expertEn": "vim's :! prefix executes external shell commands. Since vim runs as root via sudo, :!bash spawns an interactive shell with uid=0. The -c option auto-executes commands at vim startup for immediate shell escape. This is a fundamental design flaw when allowing vim in sudoers.",
+      "defTooltip": "🔐 sudo vim에서 대화형 셸이 생성되었습니다! GTFOBins 기반 권한 상승 - 즉시 프로세스 종료 필요.",
+      "defTooltipEn": "🔐 Interactive shell spawned from sudo vim! GTFOBins-based privilege escalation - immediate process termination required.",
+      "hackerLog": {
+        "title": "vim_escape.txt",
+        "lines": [
+          { "log": "sudo vim -c ':!bash'", "desc": "💡 vim의 -c 옵션으로 시작 즉시 :!bash 명령 실행 - 자동 셸 탈출" },
+          { "log": "root@target:~#", "desc": "💡 root 프롬프트 획득 성공 - 비밀번호 없이 완전한 시스템 제어권 확보" }
+        ]
+      },
+      "terms": [
+        { "name": ":!command (vim)", "desc": "vim 편집기 내에서 외부 셸 명령을 실행하는 기능. sudo vim에서 사용하면 root 권한으로 명령이 실행됩니다." },
+        { "name": "셸 이스케이프 (Shell Escape)", "desc": "프로그램 내부에서 운영체제 셸을 실행하여 프로그램의 제한을 벗어나는 기법입니다." },
+        { "name": "-c (vim option)", "desc": "vim 시작 시 자동으로 실행할 명령을 지정하는 옵션. 대화형 입력 없이 즉시 명령을 실행합니다." }
+      ]
+    },
+    {
+      "cmd": "whoami && id",
+      "out": "root\nuid=0(root) gid=0(root) groups=0(root)",
+      "def": "[EDR] Root identity confirmed via escaped sudo session",
+      "defAction": "Process: bash (root) -> whoami\nUID: 0 (root)\nRisk Level: Critical\nAction: Confirmed privilege escalation successful",
+      "desc": "셸 탈출 후 현재 사용자가 root(uid=0)임을 확인합니다. 완전한 시스템 관리자 권한을 획득했습니다.",
+      "descEn": "After shell escape, confirms the current user is root (uid=0). Full system administrator privileges have been obtained.",
+      "stepTitle": "root 권한 확인 (uid=0)",
+      "stepTitleEn": "Root Privilege Verification (uid=0)",
+      "feynman": "비상구로 나온 후, 자기 ID 카드를 다시 확인해보니 '최고 관리자(root)' 카드로 바뀌어 있는 상황입니다. uid=0은 Linux에서 모든 보안 검사를 통과하는 절대적 권한입니다.",
+      "feynmanEn": "After exiting through the emergency door, checking your ID card again shows it has changed to 'Super Admin (root)'. uid=0 is the absolute authority in Linux that bypasses all security checks.",
+      "expert": "uid=0(root)은 Linux 커널에서 DAC(Discretionary Access Control) 검사를 완전히 우회하는 특수 UID입니다. 파일 접근, 프로세스 제어, 네트워크 설정, 커널 모듈 로드 등 모든 시스템 작업이 제한 없이 가능합니다. capabilities 기반 접근 제어에서도 모든 capability가 부여됩니다.",
+      "expertEn": "uid=0 (root) is a special UID in the Linux kernel that completely bypasses DAC (Discretionary Access Control) checks. All system operations including file access, process control, network configuration, and kernel module loading are unrestricted. All capabilities are also granted.",
+      "defTooltip": "🔐 sudo 세션에서 root 권한 상승이 확인되었습니다! GTFOBins 공격 성공.",
+      "defTooltipEn": "🔐 Root privilege escalation confirmed from sudo session! GTFOBins attack successful.",
+      "hackerLog": {
+        "title": "root_confirm.txt",
+        "lines": [
+          { "log": "uid=0(root)", "desc": "💡 root 권한 획득 완료 - 시스템의 모든 보안 제어를 우회할 수 있는 최고 권한" },
+          { "log": "gid=0(root) groups=0(root)", "desc": "💡 root 그룹에도 속함 - 모든 파일, 프로세스, 네트워크에 제한 없는 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "uid=0 (root)", "desc": "Linux에서 최고 관리자를 나타내는 사용자 ID. 모든 접근 제어를 우회하는 절대적 권한을 가집니다." },
+        { "name": "DAC (Discretionary Access Control)", "desc": "파일 소유자가 접근 권한을 설정하는 Linux의 기본 접근 제어 모델. root는 이를 완전히 우회합니다." },
+        { "name": "capabilities", "desc": "Linux에서 root 권한을 세분화한 단위. CAP_NET_ADMIN, CAP_SYS_PTRACE 등 개별 권한으로 분리됩니다." }
+      ]
+    },
+    {
+      "cmd": "cat /etc/shadow | head -5",
+      "out": "root:$6$rAnDoMsAlT$H4sh3dP4ssw0rd...:19400:0:99999:7:::\ndaemon:*:19400:0:99999:7:::\nbin:*:19400:0:99999:7:::\nsys:*:19400:0:99999:7:::\nwebadmin:$6$w3bS4lt$W3b4dm1nH4sh...:19400:0:99999:7:::",
+      "def": "[EDR] CRITICAL: /etc/shadow accessed by escalated process",
+      "defAction": "Process: bash (root) -> cat /etc/shadow\nFile: /etc/shadow (mode 0640)\nRisk Level: Critical\nAction: Credential theft confirmed, trigger IR",
+      "desc": "root 권한으로 /etc/shadow 파일에 접근하여 모든 사용자의 패스워드 해시를 탈취합니다. 이 해시를 오프라인 크래킹하면 평문 비밀번호를 얻을 수 있습니다.",
+      "descEn": "Accessing /etc/shadow with root privileges to steal all user password hashes. Offline cracking of these hashes can reveal plaintext passwords.",
+      "stepTitle": "/etc/shadow 패스워드 해시 탈취",
+      "stepTitleEn": "/etc/shadow Password Hash Extraction",
+      "feynman": "금고(root 권한)를 열고 나서 그 안에 보관된 모든 직원의 비밀번호 목록(/etc/shadow)을 사진 찍는 것과 같습니다. 이 해시를 해독하면 다른 사용자의 계정으로도 로그인할 수 있게 됩니다.",
+      "feynmanEn": "It's like opening the safe (root privileges) and photographing the list of all employees' passwords (/etc/shadow) stored inside. Cracking these hashes allows logging in as other users.",
+      "expert": "/etc/shadow는 모드 0640(-rw-r-----)으로 root와 shadow 그룹만 읽을 수 있습니다. $6$는 SHA-512 해시 알고리즘을 나타내며, salt 값 이후의 해시를 hashcat이나 john으로 오프라인 크래킹할 수 있습니다. 약한 비밀번호는 수초 내에 해독됩니다.",
+      "expertEn": "/etc/shadow is mode 0640 (-rw-r-----), readable only by root and the shadow group. $6$ indicates the SHA-512 hash algorithm, and the hash after the salt can be cracked offline with hashcat or john. Weak passwords are cracked within seconds.",
+      "defTooltip": "🔐 /etc/shadow 접근 감지! 모든 사용자의 패스워드 해시가 탈취되었습니다.",
+      "defTooltipEn": "🔐 /etc/shadow access detected! All user password hashes have been stolen.",
+      "hackerLog": {
+        "title": "shadow_dump.txt",
+        "lines": [
+          { "log": "root:$6$rAnDoMsAlT$H4sh3dP4ssw0rd...", "desc": "💡 root 계정의 SHA-512 해시 - 오프라인 크래킹으로 평문 비밀번호 해독 가능" },
+          { "log": "webadmin:$6$w3bS4lt$W3b4dm1nH4sh...", "desc": "💡 webadmin 해시도 탈취 - 이 계정으로 정상 로그인하여 흔적 은닉 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "/etc/shadow", "desc": "Linux의 패스워드 해시 저장 파일. root만 읽을 수 있으며, 사용자별 암호화된 비밀번호가 저장됩니다." },
+        { "name": "$6$ (SHA-512)", "desc": "/etc/shadow에서 사용되는 해시 알고리즘 식별자. $6$는 SHA-512, $5$는 SHA-256, $y$는 yescrypt를 의미합니다." },
+        { "name": "오프라인 크래킹", "desc": "탈취한 해시를 로컬에서 대량의 비밀번호 후보와 비교하여 원래 비밀번호를 찾는 기법입니다." }
+      ]
+    },
+    {
+      "cmd": "history -c && unset HISTFILE && exit",
+      "out": "(shell session terminated)",
+      "def": "[EDR] Anti-forensics: bash history cleared and HISTFILE unset",
+      "defAction": "Process: bash (root)\nAction: history -c, HISTFILE unset\nRisk Level: High\nAction: Forensic artifacts preserved in audit log",
+      "desc": "공격자가 bash 히스토리를 삭제하고 HISTFILE 변수를 해제하여 명령 기록을 남기지 않습니다. 포렌식 분석을 어렵게 만드는 안티포렌식 기법입니다.",
+      "descEn": "The attacker clears bash history and unsets HISTFILE to leave no command records. This is an anti-forensics technique to hinder analysis.",
+      "stepTitle": "셸 히스토리 삭제 (안티포렌식)",
+      "stepTitleEn": "Shell History Cleanup (Anti-Forensics)",
+      "feynman": "범행 후 CCTV 녹화 테이프(bash history)를 삭제하고, CCTV 카메라 전원(HISTFILE)까지 끄는 것과 같습니다. 하지만 auditd나 syslog가 별도로 기록하고 있다면 완전한 은닉은 불가능합니다.",
+      "feynmanEn": "It's like deleting the CCTV recordings (bash history) after the crime and even turning off the CCTV cameras (HISTFILE). But if auditd or syslog are recording separately, complete concealment is impossible.",
+      "expert": "history -c는 메모리의 히스토리 버퍼를 지우고, unset HISTFILE은 디스크의 .bash_history 파일에 기록하지 않도록 합니다. 그러나 auditd(syscall 로깅), process accounting, syslog의 sudo 로그, /var/log/auth.log는 별도의 경로로 기록되므로 완전한 은닉은 어렵습니다.",
+      "expertEn": "history -c clears the in-memory history buffer, and unset HISTFILE prevents writing to .bash_history on disk. However, auditd (syscall logging), process accounting, syslog sudo logs, and /var/log/auth.log record through separate paths, making complete concealment difficult.",
+      "defTooltip": "🔐 bash 히스토리 삭제와 HISTFILE 해제 감지! 안티포렌식 활동 - audit 로그를 보존하세요.",
+      "defTooltipEn": "🔐 Bash history clearing and HISTFILE unset detected! Anti-forensics activity - preserve audit logs.",
+      "hackerLog": {
+        "title": "cleanup.txt",
+        "lines": [
+          { "log": "history -c", "desc": "💡 메모리의 명령 히스토리 버퍼 삭제 - 이전 명령 기록 소멸" },
+          { "log": "unset HISTFILE", "desc": "💡 히스토리 파일 경로 해제 - 이후 명령이 .bash_history에 기록되지 않음" }
+        ]
+      },
+      "terms": [
+        { "name": "history -c", "desc": "bash 셸의 메모리에 저장된 명령 히스토리를 모두 삭제하는 명령입니다." },
+        { "name": "HISTFILE", "desc": "bash 히스토리가 저장되는 파일 경로를 지정하는 환경 변수. 기본값은 ~/.bash_history입니다." },
+        { "name": "auditd", "desc": "Linux의 커널 수준 감사 프레임워크. 시스템콜, 파일 접근, 사용자 활동을 상세히 기록합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "sshd (PID: 1200)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "bash (webadmin, PID: 3401)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "id", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "sudo (PID: 3510)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "vim (root, PID: 3511)", "depth": 3, "alert": true, "minStep": 2 },
+    { "name": "bash (root, PID: 3580)", "depth": 4, "alert": true, "minStep": 3 },
+    { "name": "cat /etc/shadow", "depth": 5, "alert": true, "minStep": 4 }
+  ]
+}

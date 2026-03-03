@@ -1,0 +1,189 @@
+{
+  "id": "T1547.011",
+  "title": "macOS Login Items 지속성 시뮬레이션",
+  "titleEn": "macOS Login Items Persistence Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 페이로드 배치", "labelEn": "⚡ Payload Staging", "steps": [1] },
+    { "label": "🔓 Login Items 등록", "labelEn": "🔓 Login Items Registration", "steps": [2, 3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim Mac\nMBP-DEV01", "x": 250, "y": 80 },
+    { "id": "loginitems", "label": "Login Items\n(System Events)", "x": 400, "y": 30 },
+    { "id": "launchagent", "label": "LaunchAgent\n(plist)", "x": 400, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n192.0.2.100", "x": 50, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "loginitems", "minStep": 2 },
+    { "from": "victim", "to": "launchagent", "minStep": 3 },
+    { "from": "loginitems", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Trash", "icon": "🗑️" },
+    { "name": "Terminal", "icon": "💻" },
+    { "name": "System Preferences", "icon": "⚙️" },
+    { "name": "Activity Monitor", "icon": "📊" },
+    { "name": "Finder", "icon": "📁" }
+  ],
+  "steps": [
+    {
+      "cmd": "osascript -e 'tell application \"System Events\" to get the name of every login item'",
+      "out": "Google Chrome, Slack, Dropbox, iTerm\n\n[*] Current Login Items:\n    1. Google Chrome\n    2. Slack\n    3. Dropbox\n    4. iTerm\n\n[*] Login items run at user login\n[*] No admin/root required to add items\n[*] Can be registered with hidden:true flag",
+      "def": "[macOS Security] Login Items enumeration via osascript - potential persistence reconnaissance",
+      "defAction": "Source: Endpoint Security Framework\nTarget: System Events login items query\nAction: AppleScript execution logged, baseline comparison initiated",
+      "desc": "현재 등록된 macOS Login Items를 열거하여 환경을 파악합니다.",
+      "descEn": "The attacker enumerates current macOS Login Items to understand the environment.",
+      "stepTitle": "Login Items 정찰 (현재 등록 항목 확인)",
+      "stepTitleEn": "Login Items Reconnaissance (Current Registration Check)",
+      "feynman": "스마트폰의 자동 시작 앱 목록을 확인하는 것과 같습니다. 어떤 앱들이 로그인할 때 자동으로 시작되는지 파악하면, 비슷한 이름으로 악성 앱을 끼워넣을 수 있습니다.",
+      "feynmanEn": "It's like checking the auto-start app list on your smartphone. Knowing which apps auto-start at login lets you insert a malicious app with a similar name.",
+      "expert": "macOS의 Login Items는 System Events를 통해 프로그래밍 방식으로 관리됩니다. osascript 기반 열거는 사용자 수준에서 실행 가능하며, 기존 항목의 명명 규칙을 파악하여 위장에 활용합니다.",
+      "expertEn": "macOS Login Items are managed programmatically through System Events. osascript-based enumeration runs at user level, and attackers study existing naming conventions for disguise purposes.",
+      "defTooltip": "🔐 osascript를 통한 Login Items 열거 감지! 지속성 정찰의 전형적 패턴입니다.",
+      "defTooltipEn": "🔐 Login Items enumeration via osascript detected! Typical persistence reconnaissance pattern.",
+      "hackerLog": {
+        "title": "login_items_recon.txt",
+        "lines": [
+          { "log": "Current Login Items: Chrome, Slack, Dropbox, iTerm", "desc": "💡 기존 항목 파악 - 합법적 앱 이름과 유사한 이름 사용 계획" },
+          { "log": "No admin/root required to add items", "desc": "💡 일반 사용자 권한으로 Login Items 추가 가능" },
+          { "log": "Can be registered with hidden:true flag", "desc": "💡 hidden 플래그로 사용자에게 보이지 않게 실행 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Login Items", "desc": "macOS에서 사용자 로그인 시 자동으로 실행되는 앱 목록입니다. 시스템 환경설정에서 관리합니다." },
+        { "name": "osascript", "desc": "macOS에서 AppleScript나 JavaScript를 실행하는 명령줄 도구입니다." },
+        { "name": "System Events", "desc": "macOS의 시스템 이벤트를 관리하는 앱. Login Items 등 시스템 설정을 스크립트로 제어합니다." }
+      ]
+    },
+    {
+      "cmd": "mkdir -p /Users/Shared/.hidden && cp /tmp/beacon /Users/Shared/.hidden/SystemUpdater && chmod +x /Users/Shared/.hidden/SystemUpdater",
+      "out": "[*] Payload staged:\n    Path: /Users/Shared/.hidden/SystemUpdater\n    Size: 234KB\n    Permissions: -rwxr-xr-x\n    Owner: user\n\n[*] Location selected:\n    - /Users/Shared is world-writable\n    - .hidden directory (dot prefix = hidden in Finder)\n    - Name mimics legitimate system updater\n    - No code signature (unsigned binary)",
+      "def": "[macOS Security] Unsigned executable created in /Users/Shared hidden directory",
+      "defAction": "Source: Endpoint Security Framework\nTarget: /Users/Shared/.hidden/SystemUpdater\nAction: Unsigned binary flagged, Gatekeeper would block if opened normally",
+      "desc": "악성 페이로드를 /Users/Shared의 숨김 디렉토리에 배치합니다.",
+      "descEn": "The attacker stages the malicious payload in a hidden directory under /Users/Shared.",
+      "stepTitle": "페이로드 배치 (/Users/Shared 숨김 폴더)",
+      "stepTitleEn": "Payload Staging (/Users/Shared Hidden Directory)",
+      "feynman": "공용 사물함 안에 보이지 않는 칸을 만들어 물건을 숨기는 것과 같습니다. /Users/Shared는 모든 사용자가 접근할 수 있는 공용 폴더이고, 점(.)으로 시작하는 폴더 이름은 Finder에서 기본적으로 보이지 않습니다.",
+      "feynmanEn": "It's like creating an invisible compartment inside a shared locker. /Users/Shared is accessible to all users, and folder names starting with a dot (.) are hidden by default in Finder.",
+      "expert": "/Users/Shared는 모든 사용자에게 쓰기 권한이 있는 공용 디렉토리입니다. 도트 프리픽스(.hidden)는 macOS Finder와 ls 기본 출력에서 숨겨집니다. Gatekeeper는 직접 실행 시 서명되지 않은 바이너리를 차단하지만, Login Items나 LaunchAgent를 통한 간접 실행은 우회할 수 있습니다.",
+      "expertEn": "/Users/Shared has write permissions for all users. The dot prefix (.hidden) hides it from macOS Finder and default ls output. Gatekeeper blocks unsigned binaries on direct execution, but indirect execution via Login Items or LaunchAgents can bypass this.",
+      "defTooltip": "🔐 /Users/Shared 숨김 디렉토리에 서명되지 않은 실행 파일 생성!",
+      "defTooltipEn": "🔐 Unsigned executable created in /Users/Shared hidden directory!",
+      "hackerLog": {
+        "title": "payload_stage.txt",
+        "lines": [
+          { "log": "Path: /Users/Shared/.hidden/SystemUpdater", "desc": "💡 공용 폴더의 숨김 하위 디렉토리에 배치" },
+          { "log": ".hidden directory (dot prefix)", "desc": "💡 도트 프리픽스로 Finder에서 숨김" },
+          { "log": "No code signature (unsigned binary)", "desc": "💡 서명 없음 - Gatekeeper 직접 실행 시 차단 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "/Users/Shared", "desc": "macOS에서 모든 사용자가 접근할 수 있는 공유 디렉토리. 공격자가 페이로드 배치에 자주 악용합니다." },
+        { "name": "도트 프리픽스", "desc": "Unix/macOS에서 파일/폴더 이름 앞에 점(.)을 붙이면 기본적으로 숨겨집니다." },
+        { "name": "Gatekeeper", "desc": "macOS의 보안 기능. 서명되지 않거나 공증되지 않은 앱의 실행을 차단합니다." }
+      ]
+    },
+    {
+      "cmd": "osascript -e 'tell application \"System Events\" to make login item at end with properties {path:\"/Users/Shared/.hidden/SystemUpdater\", hidden:true, name:\"SystemUpdater\"}'",
+      "out": "login item SystemUpdater\n\n[*] Login Item registered:\n    Name: SystemUpdater\n    Path: /Users/Shared/.hidden/SystemUpdater\n    Hidden: true\n    Position: end of list\n\n[*] Persistence established:\n    - Executes at every user login\n    - Hidden from dock/window\n    - No admin/root required\n    - Visible in System Preferences > Login Items",
+      "def": "[macOS Security] New Login Item added via osascript with hidden flag",
+      "defAction": "Source: Endpoint Security Framework\nTarget: Login Items list\nAction: New hidden login item flagged, pointing to unsigned binary in /Users/Shared",
+      "desc": "osascript로 악성 바이너리를 Login Items에 숨김 모드로 등록합니다.",
+      "descEn": "The attacker registers the malicious binary as a hidden Login Item using osascript.",
+      "stepTitle": "Login Items 숨김 등록 (osascript)",
+      "stepTitleEn": "Hidden Login Items Registration (osascript)",
+      "feynman": "호텔 체크인 시 자동으로 방 불을 켜주는 센서를 몰래 추가하는 것과 같습니다. 사용자가 로그인하면 SystemUpdater가 자동으로 시작되지만, hidden:true 덕분에 화면에 아무것도 나타나지 않습니다.",
+      "feynmanEn": "It's like secretly adding a motion sensor that automatically turns on room lights at hotel check-in. When the user logs in, SystemUpdater starts automatically, but thanks to hidden:true, nothing appears on screen.",
+      "expert": "osascript를 통한 Login Items 등록은 사용자 권한만으로 가능합니다. hidden:true 플래그는 앱 창이 로그인 시 표시되지 않게 합니다. 그러나 시스템 환경설정의 Login Items 목록에는 여전히 표시되므로, 주의 깊은 사용자는 발견할 수 있습니다.",
+      "expertEn": "Login Items registration via osascript requires only user-level permissions. The hidden:true flag prevents the app window from showing at login. However, it still appears in System Preferences Login Items list, so attentive users can discover it.",
+      "defTooltip": "🔐 osascript로 새 Login Item 등록! hidden 플래그가 설정되어 있습니다.",
+      "defTooltipEn": "🔐 New Login Item registered via osascript! Hidden flag is set.",
+      "hackerLog": {
+        "title": "login_item_add.txt",
+        "lines": [
+          { "log": "Hidden: true", "desc": "💡 로그인 시 창이 표시되지 않음 - 사용자 인지 어려움" },
+          { "log": "No admin/root required", "desc": "💡 일반 사용자 권한으로 등록 가능" },
+          { "log": "Visible in System Preferences", "desc": "💡 시스템 환경설정에서는 확인 가능 - 정기 점검으로 탐지" }
+        ]
+      },
+      "terms": [
+        { "name": "hidden 플래그", "desc": "Login Items의 속성. true로 설정하면 앱이 로그인 시 창을 표시하지 않고 백그라운드에서 실행됩니다." },
+        { "name": "AppleScript", "desc": "macOS의 스크립팅 언어. System Events를 통해 시스템 설정을 프로그래밍 방식으로 제어합니다." },
+        { "name": "Login Items 목록", "desc": "시스템 환경설정 > 사용자 및 그룹 > 로그인 항목에서 확인할 수 있는 자동 실행 앱 목록입니다." }
+      ]
+    },
+    {
+      "cmd": "cat > ~/Library/LaunchAgents/com.apple.systemupdate.plist << 'EOF'\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>Label</key><string>com.apple.systemupdate</string>\n    <key>ProgramArguments</key><array><string>/Users/Shared/.hidden/SystemUpdater</string></array>\n    <key>RunAtLoad</key><true/>\n    <key>KeepAlive</key><true/>\n</dict>\n</plist>\nEOF",
+      "out": "[*] LaunchAgent plist created:\n    Path: ~/Library/LaunchAgents/com.apple.systemupdate.plist\n    Label: com.apple.systemupdate\n    Program: /Users/Shared/.hidden/SystemUpdater\n    RunAtLoad: true\n    KeepAlive: true\n\n[*] Dual persistence:\n    - Login Items: triggers at user login (visible in System Preferences)\n    - LaunchAgent: triggers at user login (persistent daemon)\n    - KeepAlive: auto-restarts if killed\n    - Apple naming convention used for stealth",
+      "def": "[macOS Security] Suspicious LaunchAgent plist created with Apple naming convention",
+      "defAction": "Source: File system monitoring\nTarget: ~/Library/LaunchAgents/com.apple.systemupdate.plist\nAction: Plist analyzed - non-Apple binary, removed and quarantined",
+      "desc": "LaunchAgent plist를 생성하여 이중 지속성을 확보하고 프로세스 자동 재시작을 설정합니다.",
+      "descEn": "The attacker creates a LaunchAgent plist for dual persistence with automatic process restart.",
+      "stepTitle": "LaunchAgent plist 생성 (이중 지속성)",
+      "stepTitleEn": "LaunchAgent Plist Creation (Dual Persistence)",
+      "feynman": "알람 시계를 2개 맞춰놓는 것과 같습니다. 하나가 꺼져도 다른 하나가 울립니다. Login Items는 로그인 시 실행되고, LaunchAgent는 독립적으로 프로세스가 죽으면 자동으로 다시 시작시킵니다(KeepAlive).",
+      "feynmanEn": "It's like setting two alarm clocks. If one is turned off, the other still rings. Login Items executes at login, while LaunchAgent independently auto-restarts the process if it's killed (KeepAlive).",
+      "expert": "LaunchAgent plist의 com.apple 프리픽스는 Apple 자체 서비스와 혼동을 유발합니다. KeepAlive:true는 프로세스가 종료되면 launchd가 자동으로 재시작합니다. 방어자는 ~/Library/LaunchAgents의 모든 plist를 검사하고, com.apple 프리픽스를 사용하는 비Apple 항목을 탐지해야 합니다.",
+      "expertEn": "The com.apple prefix in the LaunchAgent plist creates confusion with Apple's own services. KeepAlive:true causes launchd to auto-restart the process if terminated. Defenders should inspect all plists in ~/Library/LaunchAgents and detect non-Apple entries using the com.apple prefix.",
+      "defTooltip": "🔐 Apple 명명 규칙을 사용한 의심스러운 LaunchAgent plist! 비Apple 바이너리를 실행합니다.",
+      "defTooltipEn": "🔐 Suspicious LaunchAgent plist using Apple naming convention! Executes non-Apple binary.",
+      "hackerLog": {
+        "title": "launchagent_create.txt",
+        "lines": [
+          { "log": "Label: com.apple.systemupdate", "desc": "💡 Apple 공식 서비스처럼 위장한 라벨명" },
+          { "log": "KeepAlive: true", "desc": "💡 프로세스 종료 시 자동 재시작 - kill 명령으로 제거 불가" },
+          { "log": "Apple naming convention used for stealth", "desc": "💡 com.apple 프리픽스 사용 - 정상 서비스와 혼동" }
+        ]
+      },
+      "terms": [
+        { "name": "LaunchAgent", "desc": "macOS에서 사용자 로그인 시 자동 실행되는 서비스를 정의하는 plist 파일. ~/Library/LaunchAgents에 위치합니다." },
+        { "name": "KeepAlive", "desc": "LaunchAgent/LaunchDaemon의 속성. true로 설정하면 프로세스가 종료되어도 자동으로 재시작됩니다." },
+        { "name": "launchd", "desc": "macOS의 init 시스템. 시스템 부팅과 서비스 관리를 담당하며, LaunchAgent/LaunchDaemon을 제어합니다." }
+      ]
+    },
+    {
+      "cmd": "# [Verification] User logout/login and persistence check",
+      "out": "[User Logout/Login - MBP-DEV01]\n\n[Login sequence - persistence triggers]\n1. Login Items → SystemUpdater\n   > /Users/Shared/.hidden/SystemUpdater (PID: 8821)\n   > Hidden mode: no dock icon, no window\n   > C2 beacon: 192.0.2.100:443 ESTABLISHED\n\n2. LaunchAgent → com.apple.systemupdate\n   > launchd loaded plist\n   > SystemUpdater already running (mutex)\n   > KeepAlive active - monitoring process\n\n[+] Login Items persistence: ACTIVE\n[+] LaunchAgent persistence: ACTIVE (redundant + KeepAlive)\n[+] Process kill test: auto-restarted in 2 seconds\n[+] C2 connectivity: ESTABLISHED",
+      "def": "[SIEM] Dual macOS persistence triggered at login - Login Items + LaunchAgent coordination",
+      "defAction": "Source: Endpoint Security Framework + EDR\nTarget: MBP-DEV01 login sequence\nAction: Login Item removed, LaunchAgent plist deleted, binary quarantined",
+      "desc": "사용자 로그아웃/로그인 후 이중 지속성이 정상 동작하고 KeepAlive가 작동하는지 검증합니다.",
+      "descEn": "The attacker verifies dual persistence works after logout/login and KeepAlive functionality.",
+      "stepTitle": "재로그인 후 이중 지속성 + KeepAlive 검증",
+      "stepTitleEn": "Post-Login Dual Persistence + KeepAlive Verification",
+      "feynman": "출근했을 때 두 개의 알람이 모두 울리는지, 그리고 알람을 끄면 다시 울리는지 확인하는 것과 같습니다. Login Items와 LaunchAgent 모두 작동하고, 프로세스를 종료해도 KeepAlive가 2초 만에 다시 시작시킵니다.",
+      "feynmanEn": "It's like checking if both alarms ring when you arrive at work, and whether they ring again after being turned off. Both Login Items and LaunchAgent work, and even if the process is killed, KeepAlive restarts it within 2 seconds.",
+      "expert": "이중 지속성(Login Items + LaunchAgent)은 서로 다른 메커니즘을 사용하므로, 하나를 제거해도 다른 하나가 동작합니다. KeepAlive는 launchd 수준에서 프로세스를 모니터링하므로, 단순 kill로는 제거할 수 없습니다. 완전한 제거를 위해서는 plist 삭제 → launchctl unload → 바이너리 삭제 → Login Items 제거 순서가 필요합니다.",
+      "expertEn": "Dual persistence (Login Items + LaunchAgent) uses different mechanisms, so removing one leaves the other operational. KeepAlive monitors processes at the launchd level, making simple kill insufficient. Complete removal requires: plist deletion → launchctl unload → binary deletion → Login Items removal.",
+      "defTooltip": "🔐 이중 macOS 지속성이 로그인 시 활성화! Login Items + LaunchAgent가 조율되어 동작합니다.",
+      "defTooltipEn": "🔐 Dual macOS persistence triggered at login! Login Items + LaunchAgent coordinated operation.",
+      "hackerLog": {
+        "title": "persistence_verify.txt",
+        "lines": [
+          { "log": "Hidden mode: no dock icon, no window", "desc": "💡 사용자에게 완전히 보이지 않는 상태로 실행" },
+          { "log": "KeepAlive active - monitoring process", "desc": "💡 프로세스 종료 시 launchd가 자동 재시작" },
+          { "log": "Process kill test: auto-restarted in 2 seconds", "desc": "💡 kill 명령으로 제거 불가 - plist 삭제가 필수" }
+        ]
+      },
+      "terms": [
+        { "name": "launchctl", "desc": "macOS에서 launchd 서비스를 관리하는 명령줄 도구. load, unload, list 등의 명령을 지원합니다." },
+        { "name": "Dock 아이콘", "desc": "macOS 화면 하단의 앱 아이콘. 백그라운드 앱은 Dock에 표시되지 않을 수 있습니다." },
+        { "name": "Endpoint Security Framework", "desc": "macOS의 보안 이벤트 모니터링 프레임워크. 파일 생성, 프로세스 실행 등을 감시합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash (attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "osascript (login items enum) (PID: 7001)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "cp (payload staging) (PID: 7101)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "osascript (login item add) (PID: 7201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "bash (plist creation) (PID: 7301)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "[After Re-Login]", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "SystemUpdater (PID: 8821)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "launchd → com.apple.systemupdate", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

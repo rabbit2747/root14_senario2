@@ -1,0 +1,179 @@
+{
+  "id": "T1597.001",
+  "title": "위협 인텔리전스 벤더 정보 수집 시뮬레이션",
+  "titleEn": "Threat Intelligence Vendor Search Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 TI 보고서 수집", "labelEn": "🔍 TI Report Collection", "steps": [0, 1] },
+    { "label": "⚡ 방어 솔루션 파악", "labelEn": "⚡ Defense Solution ID", "steps": [2] },
+    { "label": "🔓 탐지 규칙 분석", "labelEn": "🔓 Detection Rule Analysis", "steps": [3] },
+    { "label": "✅ 우회 전략 수립", "labelEn": "✅ Evasion Strategy", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "ti", "label": "TI Vendor", "x": 200, "y": 30 },
+    { "id": "target", "label": "Target Org", "x": 200, "y": 90 },
+    { "id": "rules", "label": "Detection Rules", "x": 350, "y": 60 },
+    { "id": "evasion", "label": "Evasion Plan", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "ti", "minStep": 0 },
+    { "from": "ext", "to": "target", "minStep": 2 },
+    { "from": "ti", "to": "rules", "minStep": 3 },
+    { "from": "rules", "to": "evasion", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Intel", "icon": "📁" },
+    { "name": "ti_report.pdf", "icon": "📄", "alert": true },
+    { "name": "evasion_plan.md", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 ti_collector.py --vendor \"VirusTotal\" --query \"{companyName}\" --type reports",
+      "out": "[*] Searching VirusTotal for {companyName} intelligence...\n[+] Found 3 related reports:\n  1. APT Campaign targeting {companyName} sector (2025-11)\n  2. Malware samples linked to {companyName} supply chain (2025-09)\n  3. Phishing campaign against {companyName} employees (2025-07)\n[+] Downloading IoC lists...\n[+] 47 IP addresses, 23 domains, 15 file hashes extracted",
+      "def": "[OSINT Monitor] TI vendor API queries detected for organization name",
+      "defAction": "Source: VirusTotal API\nTarget: {companyName} related intelligence\nAction: Brand monitoring alert triggered",
+      "desc": "VirusTotal에서 대상 조직과 관련된 위협 인텔리전스 보고서와 IoC를 수집합니다.",
+      "descEn": "The attacker collects threat intelligence reports and IoCs related to the target organization from VirusTotal.",
+      "stepTitle": "TI 벤더에서 보고서 수집",
+      "stepTitleEn": "Collecting Reports from TI Vendor",
+      "feynman": "VirusTotal은 바이러스를 검사하는 사이트지만, 동시에 어떤 회사를 겨냥한 공격 보고서도 검색할 수 있습니다. 공격자는 이 보고서를 통해 이전에 어떤 공격이 성공했고, 어떤 방어가 작동했는지 파악합니다.",
+      "feynmanEn": "VirusTotal is a virus scanning site, but it also lets you search for attack reports targeting specific companies. Attackers use these reports to understand what attacks succeeded before and what defenses worked.",
+      "expert": "VirusTotal Intelligence API를 통해 대상 조직명, 도메인, 관련 IoC를 검색합니다. 과거 공격 캠페인 보고서에서 사용된 TTP와 탐지된 IoC 패턴을 역분석하여 새로운 공격에 활용합니다.",
+      "expertEn": "Searching VirusTotal Intelligence API for target organization name, domain, and related IoCs. Reverse-engineering TTPs and detected IoC patterns from past campaign reports to use in new attacks.",
+      "defTooltip": "🔍 OSINT 모니터: TI 벤더 API에서 조직명 관련 쿼리 감지",
+      "defTooltipEn": "🔍 OSINT Monitor: TI vendor API queries detected for organization name",
+      "hackerLog": {
+        "title": "vt_reports.log",
+        "lines": [
+          { "log": "APT Campaign targeting {companyName} sector (2025-11)", "desc": "최근 APT 공격 보고서에서 방어 방법이 상세히 기술되어 있습니다" },
+          { "log": "47 IP addresses, 23 domains extracted", "desc": "이전 공격에서 차단된 IoC 목록 - 동일 인프라 재사용을 피해야 합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "IoC (Indicator of Compromise)", "desc": "침해 지표. 악성 IP, 도메인, 파일 해시 등 사이버 공격의 흔적을 나타내는 데이터입니다" },
+        { "name": "VirusTotal", "desc": "70+ 안티바이러스 엔진으로 파일과 URL을 검사하는 서비스. 위협 인텔리전스 검색 기능도 제공합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 ti_collector.py --vendor \"Mandiant\" --query \"{companyName}\" --type apt-profiles",
+      "out": "[*] Searching Mandiant Advantage for {companyName} threat actors...\n[+] Threat actors targeting {companyName} industry:\n  - APT41 (China) - Supply chain attacks, web shells\n  - FIN7 (Russia) - POS malware, social engineering\n  - Lazarus (DPRK) - Crypto theft, destructive malware\n[+] Common TTPs:\n  T1566.001 Spearphishing Attachment\n  T1059.001 PowerShell\n  T1055.001 DLL Injection\n  T1071.001 Web Protocols (C2)\n[+] Recommended detections: 12 YARA rules, 8 Sigma rules",
+      "def": "[Brand Monitor] Mandiant API query for organization-specific threat profiles",
+      "defAction": "Source: Mandiant Advantage API\nTarget: {companyName} threat landscape\nAction: Threat actor tracking updated",
+      "desc": "Mandiant에서 대상 조직의 산업을 겨냥하는 APT 그룹 프로파일과 TTP를 수집합니다.",
+      "descEn": "The attacker collects APT group profiles and TTPs targeting the organization's industry from Mandiant.",
+      "stepTitle": "APT 그룹 프로파일 분석",
+      "stepTitleEn": "APT Group Profile Analysis",
+      "feynman": "Mandiant는 해커 그룹을 추적하는 보안 회사입니다. 공격자는 이 정보를 거꾸로 이용합니다. 어떤 해커 그룹이 비슷한 회사를 공격했는지, 어떤 방법을 썼는지 알면 그 방법을 따라할 수 있습니다. 또한 탐지 규칙도 알 수 있어 우회가 가능합니다.",
+      "feynmanEn": "Mandiant is a security company that tracks hacker groups. Attackers reverse-use this information. Knowing which hacker groups attacked similar companies and their methods allows mimicry. They also learn detection rules to evade them.",
+      "expert": "Mandiant Advantage API에서 대상 산업 섹터별 위협 행위자 프로파일을 조회합니다. APT41의 공급망 공격 TTP, FIN7의 소셜 엔지니어링 패턴을 분석하여 동일 벡터를 활용하되 탐지 시그니처를 변경합니다.",
+      "expertEn": "Querying Mandiant Advantage API for threat actor profiles by target industry sector. Analyzing APT41's supply chain TTPs and FIN7's social engineering patterns to use same vectors while modifying detection signatures.",
+      "defTooltip": "🏢 브랜드 모니터: Mandiant API에서 조직 특화 위협 프로파일 쿼리",
+      "defTooltipEn": "🏢 Brand Monitor: Mandiant API query for organization-specific threat profiles",
+      "hackerLog": {
+        "title": "mandiant_profiles.log",
+        "lines": [
+          { "log": "APT41 - Supply chain attacks, web shells", "desc": "공급망 공격 기법을 참고하여 유사한 벡터를 계획합니다" },
+          { "log": "Recommended detections: 12 YARA rules, 8 Sigma rules", "desc": "탐지 규칙 20개가 공개되어 있어 우회 전략 수립이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "APT (Advanced Persistent Threat)", "desc": "국가 지원 또는 고도로 조직화된 사이버 공격 그룹. 장기간에 걸쳐 특정 대상을 지속적으로 공격합니다" },
+        { "name": "TTP (Tactics, Techniques, Procedures)", "desc": "전술, 기법, 절차. 공격 그룹의 행동 패턴을 체계적으로 분류한 것입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 job_scraper.py --company \"{companyName}\" --keywords \"security,EDR,SIEM,firewall,WAF\"",
+      "out": "[*] Scraping job postings for {companyName}...\n[+] Security-related positions found: 7\n\nPosition: Security Operations Analyst\n  - \"CrowdStrike Falcon 운영 경험 필수\"\n  - \"Splunk Enterprise SIEM 관리 능력\"\n  - \"Palo Alto Networks NGFW 설정 경험\"\n\nPosition: DevSecOps Engineer\n  - \"SonarQube, Snyk 코드 보안 스캔\"\n  - \"AWS GuardDuty, CloudTrail 모니터링\"\n\n[+] Security stack identified:\n  EDR: CrowdStrike Falcon\n  SIEM: Splunk Enterprise\n  Firewall: Palo Alto NGFW\n  Cloud: AWS (GuardDuty, CloudTrail)\n  SAST: SonarQube, Snyk",
+      "def": "[HR Monitor] Automated scraping of security job postings detected",
+      "defAction": "Source: Job posting crawler\nTarget: {companyName} career page\nAction: Security team notified about information exposure",
+      "desc": "채용 공고에서 대상 조직이 사용하는 보안 솔루션(EDR, SIEM, 방화벽)을 파악합니다.",
+      "descEn": "The attacker identifies the target's security solutions (EDR, SIEM, firewall) from job postings.",
+      "stepTitle": "채용 공고에서 보안 스택 식별",
+      "stepTitleEn": "Security Stack Identification from Job Postings",
+      "feynman": "회사가 어떤 보안 제품을 쓰는지 알면 그 제품의 약점을 공략할 수 있습니다. 채용 공고에 'CrowdStrike 운영 경험' 같은 문구가 있으면, 그 회사가 CrowdStrike를 쓴다는 것을 알 수 있습니다. 이것은 공격자에게 '어떤 잠금장치가 달려있는지' 미리 알려주는 셈입니다.",
+      "feynmanEn": "Knowing what security products a company uses lets you exploit their weaknesses. Job postings mentioning 'CrowdStrike experience' reveal the company uses CrowdStrike. This is like telling a burglar what type of lock is on the door.",
+      "expert": "채용 공고 스크래핑으로 보안 스택을 OSINT로 수집합니다. CrowdStrike Falcon EDR의 AMSI 우회, Splunk의 로그 수집 갭, Palo Alto NGFW의 SSL 인스펙션 한계 등 각 솔루션별 우회 벡터를 사전에 연구할 수 있습니다.",
+      "expertEn": "Scraping job postings to OSINT the security stack. This enables pre-researching evasion vectors for each solution: CrowdStrike Falcon's AMSI bypass, Splunk log collection gaps, Palo Alto NGFW SSL inspection limitations.",
+      "defTooltip": "💼 HR 모니터: 보안 관련 채용 공고에 대한 자동 스크래핑 감지",
+      "defTooltipEn": "💼 HR Monitor: Automated scraping of security job postings detected",
+      "hackerLog": {
+        "title": "security_stack.log",
+        "lines": [
+          { "log": "EDR: CrowdStrike Falcon", "desc": "EDR 제품이 확인되어 해당 제품의 우회 기법을 사전 연구합니다" },
+          { "log": "SIEM: Splunk Enterprise", "desc": "Splunk의 로그 수집 범위와 탐지 규칙을 분석합니다" },
+          { "log": "Cloud: AWS (GuardDuty, CloudTrail)", "desc": "클라우드 보안 설정의 일반적인 약점을 조사합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "EDR (Endpoint Detection & Response)", "desc": "엔드포인트(PC, 서버)에서 악성 행위를 탐지하고 대응하는 보안 솔루션. CrowdStrike, Microsoft Defender for Endpoint 등이 있습니다" },
+        { "name": "SIEM (Security Information & Event Management)", "desc": "보안 이벤트를 중앙에서 수집, 분석, 모니터링하는 플랫폼. Splunk, IBM QRadar 등이 대표적입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 rule_analyzer.py --vendor CrowdStrike --rules yara,sigma --output bypass_targets.json",
+      "out": "[*] Downloading public CrowdStrike detection rules...\n[+] YARA rules analyzed: 47\n[+] Sigma rules analyzed: 23\n\n[!] High-confidence bypass opportunities:\n  1. YARA rule 'CrowdStrike_Cobalt_Strike_Beacon':\n     - Triggers on: MZ header + specific shellcode pattern\n     - Bypass: Custom loader with XOR obfuscation\n  2. Sigma rule 'proc_creation_win_susp_powershell':\n     - Triggers on: powershell.exe -enc\n     - Bypass: Use pwsh.exe or .NET assembly\n  3. Sigma rule 'net_connection_win_susp_outbound':\n     - Triggers on: Port 4444, 5555 outbound\n     - Bypass: Use HTTPS 443 for C2\n\n[+] Bypass strategy saved to bypass_targets.json",
+      "def": "[TI Sharing] Public detection rules downloaded and analyzed systematically",
+      "defAction": "Source: GitHub/Public repositories\nTarget: CrowdStrike YARA/Sigma rules\nAction: Counter-intelligence tracking initiated",
+      "desc": "공개된 탐지 규칙(YARA/Sigma)을 분석하여 각 규칙의 트리거 조건과 우회 방법을 파악합니다.",
+      "descEn": "The attacker analyzes public detection rules (YARA/Sigma) to understand trigger conditions and identify bypass methods.",
+      "stepTitle": "탐지 규칙 역분석",
+      "stepTitleEn": "Detection Rule Reverse Analysis",
+      "feynman": "보안 회사들이 공개한 탐지 규칙은 '이런 패턴을 보면 악성코드다'라고 정의한 것입니다. 공격자는 이 규칙을 분석해서 '이 패턴만 피하면 탐지되지 않는다'는 것을 알 수 있습니다. 시험 문제를 미리 보는 것과 비슷합니다.",
+      "feynmanEn": "Detection rules published by security companies define 'if you see this pattern, it's malware.' Attackers analyze these rules to learn 'if I avoid this pattern, I won't be detected.' It's like getting the test answers in advance.",
+      "expert": "YARA/Sigma 규칙의 condition 절을 역분석합니다. Cobalt Strike Beacon의 MZ header + shellcode 패턴을 XOR 난독화로 우회하고, PowerShell 탐지를 .NET Assembly Reflection으로 대체하며, C2 통신을 HTTPS 443으로 터널링합니다.",
+      "expertEn": "Reverse-analyzing YARA/Sigma rule condition clauses. Bypassing Cobalt Strike Beacon's MZ header + shellcode pattern with XOR obfuscation, replacing PowerShell detection with .NET Assembly Reflection, tunneling C2 over HTTPS 443.",
+      "defTooltip": "📋 TI 공유: 공개 탐지 규칙이 체계적으로 다운로드 및 분석되고 있습니다",
+      "defTooltipEn": "📋 TI Sharing: Public detection rules downloaded and analyzed systematically",
+      "hackerLog": {
+        "title": "bypass_analysis.log",
+        "lines": [
+          { "log": "YARA: Cobalt_Strike_Beacon → XOR obfuscation", "desc": "시그니처 기반 탐지를 XOR 난독화로 우회 가능" },
+          { "log": "Sigma: susp_powershell → Use pwsh.exe or .NET", "desc": "PowerShell 탐지를 .NET 어셈블리로 대체" },
+          { "log": "Sigma: susp_outbound → HTTPS 443 for C2", "desc": "비표준 포트 탐지를 HTTPS 443으로 우회" }
+        ]
+      },
+      "terms": [
+        { "name": "YARA", "desc": "패턴 매칭 기반 악성코드 탐지 규칙 언어. 바이너리 패턴, 문자열, 조건을 정의하여 악성코드를 식별합니다" },
+        { "name": "Sigma", "desc": "로그 기반 탐지 규칙의 표준 형식. SIEM에서 의심스러운 활동을 탐지하는 규칙을 정의합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 evasion_planner.py --target \"{companyName}\" --stack bypass_targets.json --output attack_plan.json",
+      "out": "[*] Building evasion-aware attack plan for {companyName}...\n\n[+] Attack Plan Summary:\n  Phase 1: Initial Access\n    - Vector: Spearphishing (T1566.001)\n    - Payload: Custom .NET loader (YARA bypass)\n    - Delivery: HTA → .NET Assembly (PowerShell bypass)\n  Phase 2: C2 Communication\n    - Protocol: HTTPS 443 (Sigma bypass)\n    - Domain: legitimate-looking CDN domain\n    - Beacon: Jitter 30-50% (pattern bypass)\n  Phase 3: Lateral Movement\n    - Method: WMI + PsExec (avoid RDP detection)\n    - Credentials: Kerberoasting (avoid brute force detection)\n  \n[+] Estimated detection probability: 15% (reduced from 78%)\n[+] Plan saved to attack_plan.json",
+      "def": "[SIEM Correlation] TI-informed attack planning activity detected across multiple data sources",
+      "defAction": "Source: Behavioral analytics\nTarget: {companyName} security posture\nAction: Red team assessment recommended, detection gap analysis initiated",
+      "desc": "수집된 모든 TI 정보와 방어 솔루션 분석 결과를 바탕으로 탐지 회피 공격 계획을 수립합니다.",
+      "descEn": "The attacker builds a detection-aware attack plan based on all collected TI and defense solution analysis.",
+      "stepTitle": "탐지 우회 공격 계획 수립",
+      "stepTitleEn": "Building Detection-Aware Attack Plan",
+      "feynman": "마지막으로 모든 정보를 종합하여 '들키지 않는 공격 계획'을 세웁니다. CrowdStrike를 피하려면 이렇게, Splunk 로그를 피하려면 저렇게. 원래 78%의 확률로 탐지될 공격이 15%까지 줄어듭니다. 이것이 TI를 역이용하는 공격의 위험성입니다.",
+      "feynmanEn": "Finally, all information is combined to build an 'undetectable attack plan.' Do this to avoid CrowdStrike, do that to avoid Splunk logs. An attack that would be detected 78% of the time drops to 15%. This is the danger of TI being used against defenders.",
+      "expert": "TI 역분석 결과를 종합하여 탐지 확률을 최소화하는 공격 계획을 수립합니다. YARA 우회를 위한 .NET 커스텀 로더, Sigma 우회를 위한 HTTPS C2, EDR 우회를 위한 WMI 횡이동 등 각 탐지 계층별 우회 전략을 통합합니다.",
+      "expertEn": "Building an attack plan that minimizes detection probability by consolidating TI reverse analysis. Integrating per-layer evasion: .NET custom loader for YARA bypass, HTTPS C2 for Sigma bypass, WMI lateral movement for EDR evasion.",
+      "defTooltip": "🎯 SIEM 상관분석: 다중 데이터 소스에서 TI 기반 공격 계획 활동 감지",
+      "defTooltipEn": "🎯 SIEM Correlation: TI-informed attack planning activity detected across multiple data sources",
+      "hackerLog": {
+        "title": "attack_plan.log",
+        "lines": [
+          { "log": "Estimated detection probability: 15% (reduced from 78%)", "desc": "TI를 역이용하여 탐지 확률을 63%p 낮출 수 있습니다" },
+          { "log": "Custom .NET loader (YARA bypass)", "desc": "공개된 YARA 규칙을 우회하는 맞춤형 로더를 제작합니다" },
+          { "log": "Beacon: Jitter 30-50% (pattern bypass)", "desc": "비콘 간격을 랜덤화하여 주기적 통신 탐지를 우회합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Jitter", "desc": "C2 비콘 신호의 간격을 랜덤하게 변화시키는 기법. 일정한 주기의 통신 패턴을 깨뜨려 탐지를 어렵게 합니다" },
+        { "name": "Detection Probability", "desc": "공격이 탐지될 확률. 공격자는 이 확률을 최소화하기 위해 방어 솔루션의 약점을 분석합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "python3 ti_collector.py → VirusTotal (PID: 3101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 ti_collector.py → Mandiant (PID: 3145)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "python3 job_scraper.py (PID: 3201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 rule_analyzer.py (PID: 3289)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 evasion_planner.py (PID: 3345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

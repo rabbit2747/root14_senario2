@@ -1,0 +1,181 @@
+{
+  "id": "T1591.002",
+  "title": "비즈니스 관계 파악 시뮬레이션",
+  "titleEn": "Business Relationships Discovery Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 파트너사 식별", "labelEn": "🔍 Partner Identification", "steps": [0, 1] },
+    { "label": "⚡ 공급망 분석", "labelEn": "⚡ Supply Chain Analysis", "steps": [2, 3] },
+    { "label": "✅ 공격 경로 수립", "labelEn": "✅ Attack Path Planning", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "osint", "label": "Public Records", "x": 200, "y": 30 },
+    { "id": "linkedin", "label": "LinkedIn", "x": 200, "y": 90 },
+    { "id": "partners", "label": "Partner Orgs", "x": 350, "y": 60 },
+    { "id": "target", "label": "Target Org", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "osint", "minStep": 0 },
+    { "from": "ext", "to": "linkedin", "minStep": 1 },
+    { "from": "osint", "to": "partners", "minStep": 0 },
+    { "from": "linkedin", "to": "partners", "minStep": 1 },
+    { "from": "partners", "to": "target", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Intel", "icon": "📁" },
+    { "name": "supply_chain.json", "icon": "📄", "alert": true },
+    { "name": "partner_list.csv", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 osint_scraper.py --target \"{companyName}\" --source annual_reports,press_releases",
+      "out": "[+] Scanning annual reports and press releases...\n[+] Found 8 business relationships\n\nPartner Organizations:\n1. CloudSecure Inc. (Cloud Security Provider)\n2. DataPipe Corp. (Data Analytics Partner)\n3. NetGuard Solutions (Managed SOC Provider)\n4. TechStaff Agency (IT Staffing)\n5. PayFlow Systems (Payment Processing)\n\nSupply Chain:\n6. ServerMax (Hardware Supplier)\n7. CodeDeploy (CI/CD Platform)\n8. AuditPro (Compliance Auditor)",
+      "def": "[Web Monitor] Automated scraping of company press releases detected",
+      "defAction": "Source: 198.51.100.23\nTarget: {companyName}.com/press\nAction: Rate limiting applied",
+      "desc": "연간 보고서와 보도자료에서 비즈니스 파트너와 공급업체를 식별합니다.",
+      "descEn": "Identifying business partners and suppliers from annual reports and press releases.",
+      "stepTitle": "공개 문서에서 파트너사 식별",
+      "stepTitleEn": "Identify Partners from Public Documents",
+      "feynman": "회사의 연간 보고서나 보도자료에는 '어떤 회사와 협력했다', '어떤 서비스를 사용한다'는 정보가 담겨 있습니다. 이 공개 정보만으로도 회사의 공급망 전체를 그릴 수 있습니다.",
+      "feynmanEn": "Annual reports and press releases contain information about partnerships and service providers. This public information alone can map the entire supply chain.",
+      "expert": "SEC 10-K 파일링, 프레스 릴리즈, 파트너 페이지에서 비즈니스 관계를 추출합니다. NLP을 사용하여 관계 유형(vendor, partner, client)을 자동 분류합니다.",
+      "expertEn": "Business relationships extracted from SEC 10-K filings, press releases, and partner pages. NLP is used to auto-classify relationship types.",
+      "defTooltip": "🌐 웹 모니터: 기업 보도자료 자동 스크래핑 감지",
+      "defTooltipEn": "🌐 Web Monitor: Automated scraping of company press releases",
+      "hackerLog": {
+        "title": "partners_found.txt",
+        "lines": [
+          { "log": "NetGuard Solutions (Managed SOC Provider)", "desc": "💡 SOC 운영을 외주! NetGuard 침해 시 모니터링 무력화 가능" },
+          { "log": "CodeDeploy (CI/CD Platform)", "desc": "💡 CI/CD 플랫폼 파악 - 공급망 공격 벡터" },
+          { "log": "TechStaff Agency (IT Staffing)", "desc": "💡 파견 직원을 통한 내부 침투 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "Supply Chain (공급망)", "desc": "제품이나 서비스가 최종 사용자에게 도달하기까지의 모든 조직과 프로세스의 연결 고리" },
+        { "name": "Third-party Risk", "desc": "조직이 사용하는 외부 서비스 제공자나 협력사로 인해 발생하는 보안 위험" }
+      ]
+    },
+    {
+      "cmd": "python3 linkedin_mapper.py --company \"{companyName}\" --depth 2",
+      "out": "[+] Mapping employee connections...\n[+] Analyzing shared connections between organizations\n\nKey Relationships Discovered:\n- 15 employees previously worked at NetGuard Solutions\n- 8 employees connected to CloudSecure executives\n- CTO has board seat at DataPipe Corp.\n- IT Director previously at PayFlow Systems\n\nShared Technology Stack:\n- Both {companyName} and NetGuard use Jira/Confluence\n- CloudSecure provides SSO integration\n- CodeDeploy has API access to production",
+      "def": "[Social Media Monitor] LinkedIn profile enumeration for {companyName} employees",
+      "defAction": "Source: LinkedIn scraping\nTarget: {companyName} employee profiles\nAction: Activity logged for correlation",
+      "desc": "LinkedIn에서 직원 연결 관계를 분석하여 숨겨진 비즈니스 관계를 발견합니다.",
+      "descEn": "Analyzing employee connections on LinkedIn to discover hidden business relationships.",
+      "stepTitle": "LinkedIn 연결 관계 분석",
+      "stepTitleEn": "LinkedIn Connection Analysis",
+      "feynman": "LinkedIn에서 회사 직원들의 이전 직장과 현재 연결을 분석하면, 공식 발표되지 않은 비즈니스 관계도 파악할 수 있습니다. CTO가 다른 회사의 이사회 멤버라면 그 두 회사 사이에는 깊은 관계가 있을 것입니다.",
+      "feynmanEn": "Analyzing employees' previous employers and current connections on LinkedIn reveals undisclosed business relationships. If a CTO sits on another company's board, there's a deep connection.",
+      "expert": "LinkedIn 2차 연결(depth 2) 분석으로 조직 간 인적 네트워크를 매핑합니다. 공유 기술 스택(Jira/Confluence)은 횡적 이동 시 동일 취약점 악용이 가능함을 시사합니다.",
+      "expertEn": "Second-degree LinkedIn connection analysis maps inter-organizational human networks. Shared technology stacks suggest identical vulnerabilities exploitable during lateral movement.",
+      "defTooltip": "📱 소셜 미디어: LinkedIn 직원 프로필 열거 활동 감지",
+      "defTooltipEn": "📱 Social Media: LinkedIn employee profile enumeration detected",
+      "hackerLog": {
+        "title": "linkedin_relationships.txt",
+        "lines": [
+          { "log": "CloudSecure provides SSO integration", "desc": "💡 SSO 통합! CloudSecure 침해 시 {companyName} 인증 체계 장악 가능" },
+          { "log": "CodeDeploy has API access to production", "desc": "💡 CI/CD 플랫폼이 프로덕션 API 접근 가능 - 최고 위험 경로" },
+          { "log": "15 employees from NetGuard", "desc": "💡 대량 인력 이동으로 내부 지식이 외부에 유출되었을 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "SSO (Single Sign-On)", "desc": "하나의 인증으로 여러 시스템에 접근할 수 있는 인증 방식. SSO 제공자가 침해되면 모든 연동 시스템이 위험해집니다" },
+        { "name": "CI/CD Pipeline", "desc": "코드 변경 사항을 자동으로 빌드, 테스트, 배포하는 파이프라인. 이 파이프라인이 침해되면 악성 코드가 프로덕션에 배포될 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 vendor_security_check.py --targets NetGuard,CloudSecure,CodeDeploy",
+      "out": "[+] Checking vendor security posture...\n\nNetGuard Solutions:\n  - SecurityScorecard: B (780/900)\n  - Open ports: 22, 80, 443, 8080, 9090\n  - SSL: TLS 1.2 (no TLS 1.3)\n  - Known vulnerabilities: 2 medium\n\nCloudSecure Inc.:\n  - SecurityScorecard: A (850/900)\n  - Open ports: 443 only\n  - SSL: TLS 1.3\n  - Known vulnerabilities: 0\n\nCodeDeploy:\n  - SecurityScorecard: C (620/900)\n  - Open ports: 22, 80, 443, 3000, 5432, 8443\n  - SSL: TLS 1.2 (weak ciphers)\n  - Known vulnerabilities: 5 (2 high, 3 medium)\n  ⚠️ WEAKEST LINK IDENTIFIED",
+      "def": "[Threat Intel] External security posture scanning of partner organizations",
+      "defAction": "Source: SecurityScorecard queries\nTarget: Partner organizations\nAction: No direct detection by target org",
+      "desc": "파트너사의 보안 수준을 평가하여 가장 취약한 연결 고리를 식별합니다.",
+      "descEn": "Assessing partner security posture to identify the weakest link in the supply chain.",
+      "stepTitle": "파트너사 보안 수준 평가",
+      "stepTitleEn": "Partner Security Posture Assessment",
+      "feynman": "집의 정문이 아무리 튼튼해도, 뒷문이 열려 있으면 소용없습니다. 마찬가지로 회사 보안이 아무리 좋아도, 연결된 파트너사의 보안이 약하면 그곳을 통해 침입할 수 있습니다. CodeDeploy의 보안 점수가 C등급으로 가장 낮으니, 여기가 침입 경로가 됩니다.",
+      "feynmanEn": "No matter how strong your front door is, if the back door is open, it doesn't matter. Similarly, even with strong security, a weak partner creates an entry point. CodeDeploy's C-grade security makes it the attack path.",
+      "expert": "SecurityScorecard, BitSight 등 외부 보안 등급 서비스로 파트너사의 보안 태세를 비침투적으로 평가합니다. CodeDeploy의 높은 취약점 수(5개, 고위험 2개)와 약한 TLS 설정은 공급망 공격의 최적 진입점입니다.",
+      "expertEn": "External security rating services like SecurityScorecard non-intrusively assess partner security posture. CodeDeploy's high vulnerability count and weak TLS make it the optimal supply chain entry point.",
+      "defTooltip": "🔐 위협 인텔: 파트너 조직의 외부 보안 상태 스캐닝",
+      "defTooltipEn": "🔐 Threat Intel: External security posture scanning of partners",
+      "hackerLog": {
+        "title": "vendor_security.txt",
+        "lines": [
+          { "log": "CodeDeploy: Score C (620/900)", "desc": "💡 가장 약한 고리! 보안 점수가 가장 낮은 파트너" },
+          { "log": "CodeDeploy: 5 vulnerabilities (2 high)", "desc": "💡 고위험 취약점 2개 - 즉시 악용 가능" },
+          { "log": "CodeDeploy: port 5432 open", "desc": "💡 PostgreSQL 포트 외부 노출! 데이터베이스 직접 접근 시도 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "SecurityScorecard", "desc": "기업의 외부 보안 태세를 A-F 등급으로 평가하는 서비스. 외부에서 관찰 가능한 보안 지표를 분석합니다" },
+        { "name": "Weakest Link (가장 약한 고리)", "desc": "보안 체인에서 가장 취약한 요소. 전체 보안 수준은 가장 약한 부분에 의해 결정됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 trust_relationship_mapper.py --target \"{companyName}\" --partner CodeDeploy",
+      "out": "[+] Mapping trust relationships between {companyName} and CodeDeploy...\n\nTrust Relationships:\n1. API Integration:\n   - CodeDeploy → {companyName} Production (deploy access)\n   - OAuth token with repo:write, deploy:trigger scopes\n   - Service account: codedeploy-svc@{companyName}.com\n\n2. Network Access:\n   - VPN tunnel: 10.0.50.0/24 (CodeDeploy) ↔ 10.0.10.0/24 ({companyName})\n   - Firewall rule: ALLOW CodeDeploy_IP → {companyName}:443,8443\n\n3. Personnel:\n   - 3 CodeDeploy engineers have {companyName} Jira access\n   - Shared Slack channel: #deploy-ops",
+      "def": "[Access Audit] Trust relationship mapping for third-party integrations",
+      "defAction": "Source: Configuration analysis\nTarget: {companyName} ↔ CodeDeploy integration\nAction: Third-party access audit recommended",
+      "desc": "대상 조직과 가장 약한 파트너 간의 신뢰 관계와 접근 경로를 분석합니다.",
+      "descEn": "Analyzing trust relationships and access paths between target and the weakest partner.",
+      "stepTitle": "신뢰 관계 및 접근 경로 분석",
+      "stepTitleEn": "Trust Relationship and Access Path Analysis",
+      "feynman": "두 회사가 협력할 때 서로의 시스템에 접근할 수 있는 '다리'를 놓습니다. API 키, VPN 터널, 공유 계정 등이 이 다리입니다. CodeDeploy가 프로덕션에 배포할 수 있는 권한을 가지고 있다면, CodeDeploy를 해킹하면 곧바로 대상 회사의 프로덕션에 악성 코드를 배포할 수 있습니다.",
+      "feynmanEn": "When companies collaborate, they build 'bridges' to access each other's systems - API keys, VPN tunnels, shared accounts. If CodeDeploy has production deploy rights, hacking CodeDeploy means deploying malicious code directly to the target's production.",
+      "expert": "OAuth 토큰의 repo:write, deploy:trigger 스코프는 소스 코드 수정과 배포 트리거가 가능함을 의미합니다. VPN 터널의 /24 서브넷은 254개 호스트에 대한 횡적 이동이 가능합니다.",
+      "expertEn": "OAuth token scopes repo:write and deploy:trigger enable source code modification and deployment triggering. The /24 VPN subnet allows lateral movement across 254 hosts.",
+      "defTooltip": "🔗 접근 감사: 서드파티 통합의 신뢰 관계 매핑",
+      "defTooltipEn": "🔗 Access Audit: Trust relationship mapping for third-party integrations",
+      "hackerLog": {
+        "title": "trust_relationships.txt",
+        "lines": [
+          { "log": "OAuth: repo:write, deploy:trigger", "desc": "💡 코드 수정 + 배포 트리거 권한! 공급망 공격의 완벽한 경로" },
+          { "log": "VPN: 10.0.50.0/24 ↔ 10.0.10.0/24", "desc": "💡 네트워크 직접 연결! CodeDeploy 침해 시 내부 네트워크 접근 가능" },
+          { "log": "3 engineers have Jira access", "desc": "💡 외부 인력의 내부 시스템 접근 - 사회공학 공격 대상" }
+        ]
+      },
+      "terms": [
+        { "name": "OAuth Token", "desc": "제3자 애플리케이션에 제한된 접근 권한을 부여하는 인증 토큰. 토큰이 유출되면 해당 권한이 공격자에게 넘어갑니다" },
+        { "name": "VPN Tunnel", "desc": "인터넷을 통해 두 네트워크를 암호화된 가상 통로로 연결하는 기술. 파트너사와의 안전한 통신에 사용됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 supply_chain_attack_planner.py --target \"{companyName}\" --via CodeDeploy --output supply_chain.json",
+      "out": "[+] Building supply chain attack plan...\n\nAttack Chain:\n═══════════════\nPhase 1: Compromise CodeDeploy\n  → Exploit CVE-2024-XXXX (PostgreSQL, port 5432)\n  → Gain access to CodeDeploy internal network\n\nPhase 2: Pivot to {companyName}\n  → Steal OAuth token (repo:write, deploy:trigger)\n  → OR use VPN tunnel to reach 10.0.10.0/24\n\nPhase 3: Deploy Malicious Code\n  → Inject backdoor into {companyName} codebase\n  → Trigger automated deployment\n  → Backdoor reaches production\n\nRisk Assessment:\n  - Detection difficulty: HIGH (appears as legitimate deploy)\n  - Impact: CRITICAL (production compromise)\n  - Attribution: DIFFICULT (attack via third party)\n\n[+] Plan saved to supply_chain.json",
+      "def": "[SIEM] Complete supply chain reconnaissance campaign correlated",
+      "defAction": "Source: Correlation engine\nTarget: {companyName} supply chain\nAction: Third-party security review initiated",
+      "desc": "가장 약한 파트너를 통한 공급망 공격 계획을 수립합니다.",
+      "descEn": "Developing a supply chain attack plan through the weakest partner.",
+      "stepTitle": "공급망 공격 계획 수립",
+      "stepTitleEn": "Supply Chain Attack Plan",
+      "feynman": "모든 정보를 종합하여 최종 공격 경로를 만듭니다. 정문(직접 공격)이 아닌 뒷문(파트너사)을 통해 침입하는 것입니다. CodeDeploy의 취약점 → OAuth 토큰 탈취 → 악성 코드 배포. 이 과정이 정상 배포처럼 보이기 때문에 탐지가 매우 어렵습니다.",
+      "feynmanEn": "All intelligence is consolidated into a final attack path. Entry through the back door (partner) instead of the front door (direct attack). CodeDeploy vulnerability → OAuth token theft → malicious deployment. This looks like a normal deploy, making detection extremely difficult.",
+      "expert": "공급망 공격의 핵심은 정상 프로세스를 악용하는 것입니다. CI/CD 파이프라인을 통한 배포는 WAF, IDS를 우회하며, 코드 서명이 없으면 악성 코드와 정상 코드를 구분할 수 없습니다.",
+      "expertEn": "The key to supply chain attacks is abusing legitimate processes. Deployment via CI/CD pipelines bypasses WAF and IDS. Without code signing, malicious and legitimate code are indistinguishable.",
+      "defTooltip": "🗺️ SIEM: 완전한 공급망 정찰 캠페인이 식별되었습니다",
+      "defTooltipEn": "🗺️ SIEM: Complete supply chain reconnaissance campaign identified",
+      "hackerLog": {
+        "title": "supply_chain_plan.log",
+        "lines": [
+          { "log": "Detection difficulty: HIGH", "desc": "💡 정상 배포처럼 보이므로 탐지가 극히 어렵습니다" },
+          { "log": "Impact: CRITICAL", "desc": "💡 프로덕션 환경이 직접 침해됩니다" },
+          { "log": "Attribution: DIFFICULT", "desc": "💡 제3자를 통한 공격으로 공격자 추적이 어렵습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Supply Chain Attack", "desc": "대상 조직을 직접 공격하지 않고, 공급망의 약한 고리(파트너사, 소프트웨어 제공자)를 통해 간접적으로 침투하는 공격" },
+        { "name": "Code Signing", "desc": "소프트웨어에 디지털 서명을 추가하여 무결성과 출처를 검증하는 보안 메커니즘" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "python3 osint_scraper.py (PID: 4101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 linkedin_mapper.py (PID: 4134)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "python3 vendor_security_check.py (PID: 4201)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "python3 trust_relationship_mapper.py (PID: 4289)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "python3 supply_chain_attack_planner.py (PID: 4345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

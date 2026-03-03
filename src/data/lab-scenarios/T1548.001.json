@@ -1,0 +1,183 @@
+{
+  "id": "T1548.001",
+  "title": "SUID/SGID 권한 악용 시뮬레이션",
+  "titleEn": "SUID/SGID Privilege Abuse Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 SUID 탐색", "labelEn": "🔍 SUID Discovery", "steps": [0, 1] },
+    { "label": "⚡ SUID 악용", "labelEn": "⚡ SUID Exploitation", "steps": [2, 3] },
+    { "label": "🔓 Root 획득", "labelEn": "🔓 Root Access", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(user)", "x": 50, "y": 80 },
+    { "id": "find", "label": "find -perm\n-4000", "x": 200, "y": 30 },
+    { "id": "suid", "label": "SUID Binary\n(custom-backup)", "x": 200, "y": 130 },
+    { "id": "root", "label": "Root Shell\n(uid=0)", "x": 400, "y": 80 },
+    { "id": "data", "label": "Sensitive Data\n(/etc/shadow)", "x": 400, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "find", "minStep": 0 },
+    { "from": "find", "to": "suid", "minStep": 1 },
+    { "from": "suid", "to": "root", "minStep": 2 },
+    { "from": "root", "to": "data", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "Terminal", "icon": "🖥️" },
+    { "name": "File Manager", "icon": "📁" },
+    { "name": "System Settings", "icon": "⚙️" },
+    { "name": "{companyName} Portal", "icon": "🌐" },
+    { "name": "Backup Tool", "icon": "💾" }
+  ],
+  "steps": [
+    {
+      "cmd": "find / -perm -4000 -type f 2>/dev/null",
+      "out": "/usr/bin/passwd\n/usr/bin/sudo\n/usr/bin/mount\n/usr/bin/umount\n/usr/bin/chfn\n/usr/bin/newgrp\n/usr/local/bin/custom-backup\n/opt/tools/debug-shell",
+      "def": "[SIEM] SUID file enumeration detected - find with -perm -4000",
+      "defAction": "Process: bash -> find\nPattern: SUID binary search\nRisk Level: Medium\nAction: Alert SOC Analyst",
+      "desc": "공격자가 시스템 전체에서 SUID 비트가 설정된 파일을 검색합니다. 비정상적인 SUID 바이너리를 찾는 정찰 단계입니다.",
+      "descEn": "The attacker searches the entire system for files with the SUID bit set, looking for abnormal SUID binaries.",
+      "stepTitle": "SUID 바이너리 전체 검색",
+      "stepTitleEn": "System-wide SUID Binary Search",
+      "feynman": "건물의 모든 문을 열어보며 '관리자 키 없이도 열리는 문(SUID 파일)'을 찾는 것과 같습니다. passwd, sudo 같은 정상적인 문도 있지만, custom-backup이나 debug-shell처럼 관리자가 실수로 열어둔 문이 있으면 그것을 악용합니다.",
+      "feynmanEn": "It's like trying every door in a building to find ones that open without an admin key (SUID files). There are normal doors like passwd and sudo, but if there are doors accidentally left open by admins like custom-backup or debug-shell, those can be exploited.",
+      "expert": "find / -perm -4000은 SUID 비트(4000)가 설정된 파일을 재귀적으로 검색합니다. 2>/dev/null은 접근 거부 에러를 숨깁니다. /usr/bin/의 표준 SUID 바이너리는 정상이지만, /usr/local/bin/이나 /opt/의 비표준 경로에 있는 SUID 파일은 즉각적인 조사가 필요합니다.",
+      "expertEn": "find / -perm -4000 recursively searches for files with the SUID bit (4000) set. 2>/dev/null hides permission denied errors. Standard SUID binaries in /usr/bin/ are normal, but SUID files in non-standard paths like /usr/local/bin/ or /opt/ require immediate investigation.",
+      "defTooltip": "🔐 SUID 파일 열거 감지! 권한 상승 정찰의 전형적인 패턴입니다.",
+      "defTooltipEn": "🔐 SUID file enumeration detected! This is a typical privilege escalation reconnaissance pattern.",
+      "hackerLog": {
+        "title": "suid_search.txt",
+        "lines": [
+          { "log": "/usr/local/bin/custom-backup", "desc": "💡 비표준 경로의 SUID 파일 - 관리자가 잘못 설정한 가능성 높음" },
+          { "log": "/opt/tools/debug-shell", "desc": "💡 debug-shell이라는 이름의 SUID 바이너리 - 셸 실행 가능성 매우 높음" }
+        ]
+      },
+      "terms": [
+        { "name": "SUID (Set User ID)", "desc": "파일 실행 시 실행자의 UID 대신 파일 소유자의 UID로 실행되는 특수 권한 비트입니다." },
+        { "name": "find -perm -4000", "desc": "SUID 비트가 설정된 파일을 검색하는 find 명령 옵션. -4000은 SUID를 의미합니다." },
+        { "name": "2>/dev/null", "desc": "표준 에러(stderr)를 /dev/null로 리다이렉트하여 에러 메시지를 숨기는 셸 기법입니다." }
+      ]
+    },
+    {
+      "cmd": "ls -la /usr/local/bin/custom-backup && file /usr/local/bin/custom-backup",
+      "out": "-rwsr-xr-x 1 root root 16384 Jan 15 2026 /usr/local/bin/custom-backup\n/usr/local/bin/custom-backup: ELF 64-bit LSB executable, x86-64, dynamically linked",
+      "def": "[EDR] SUID binary inspection - custom-backup analyzed",
+      "defAction": "File: /usr/local/bin/custom-backup\nPermissions: -rwsr-xr-x (SUID root)\nRisk Level: High\nAction: Binary analysis initiated",
+      "desc": "비정상 SUID 바이너리의 상세 정보를 확인합니다. root 소유이고 SUID가 설정된 실행 파일임을 확인합니다.",
+      "descEn": "Inspecting the abnormal SUID binary in detail. Confirms it's a root-owned executable with SUID set.",
+      "stepTitle": "비정상 SUID 바이너리 상세 분석",
+      "stepTitleEn": "Abnormal SUID Binary Detailed Analysis",
+      "feynman": "의심스러운 문의 잠금장치를 자세히 살펴보는 것입니다. '-rwsr-xr-x'에서 's'는 SUID 비트를 나타내고, root 소유라는 것은 이 파일을 실행하면 누구나 root 권한으로 동작한다는 의미입니다.",
+      "feynmanEn": "It's like closely examining the lock on a suspicious door. The 's' in '-rwsr-xr-x' indicates the SUID bit, and root ownership means anyone executing this file will run with root privileges.",
+      "expert": "-rwsr-xr-x의 s는 소유자 실행 비트(x)와 SUID 비트가 모두 설정되었음을 나타냅니다. ELF 64-bit LSB executable이므로 컴파일된 바이너리이며, dynamically linked이므로 LD_PRELOAD 공격도 가능할 수 있습니다. strings 명령으로 호출하는 명령이나 system() 사용 여부를 확인해야 합니다.",
+      "expertEn": "The s in -rwsr-xr-x indicates both the owner execute bit (x) and SUID bit are set. As an ELF 64-bit LSB executable, it's a compiled binary, and being dynamically linked means LD_PRELOAD attacks may also be possible.",
+      "defTooltip": "🔐 비표준 경로의 SUID root 바이너리가 분석되고 있습니다!",
+      "defTooltipEn": "🔐 SUID root binary in non-standard path is being analyzed!",
+      "hackerLog": {
+        "title": "binary_analysis.txt",
+        "lines": [
+          { "log": "-rwsr-xr-x 1 root root", "desc": "💡 SUID 비트 + root 소유 = 누구나 실행 시 root 권한 획득" },
+          { "log": "dynamically linked", "desc": "💡 동적 링킹 → LD_PRELOAD 공격이나 라이브러리 하이재킹 가능성" }
+        ]
+      },
+      "terms": [
+        { "name": "-rwsr-xr-x", "desc": "파일 권한 표기. r(읽기), w(쓰기), s(SUID+실행), x(실행). 소유자 위치의 s가 SUID를 나타냅니다." },
+        { "name": "ELF (Executable and Linkable Format)", "desc": "Linux의 표준 실행 파일 형식. 바이너리 분석의 기본 대상입니다." },
+        { "name": "동적 링킹 (Dynamic Linking)", "desc": "실행 시 외부 라이브러리(.so)를 로드하는 방식. LD_PRELOAD로 악성 라이브러리를 주입할 수 있습니다." }
+      ]
+    },
+    {
+      "cmd": "strings /usr/local/bin/custom-backup | grep -i 'system\\|exec\\|bash\\|sh'",
+      "out": "system\n/bin/bash\ntar -czf /backup/daily.tar.gz /var/www",
+      "def": "[EDR] SUID binary contains system() call - potential shell escape vector",
+      "defAction": "Binary: custom-backup\nDangerous functions: system(), /bin/bash reference\nRisk Level: Critical\nAction: Binary quarantine recommended",
+      "desc": "바이너리에서 위험한 함수(system)와 셸 참조(/bin/bash)를 발견합니다. system() 함수는 환경 변수 조작으로 악용 가능합니다.",
+      "descEn": "Discovers dangerous functions (system) and shell references (/bin/bash) in the binary. The system() function can be exploited through environment variable manipulation.",
+      "stepTitle": "바이너리 문자열 분석 (위험 함수 탐색)",
+      "stepTitleEn": "Binary String Analysis (Dangerous Function Search)",
+      "feynman": "프로그램의 설계도(strings)를 읽어보니 'system'이라는 위험한 도구와 '/bin/bash' 경로가 포함되어 있습니다. system() 함수는 운영체제에 직접 명령을 보내는 기능인데, SUID 프로그램에서 사용하면 그 명령이 root 권한으로 실행됩니다.",
+      "feynmanEn": "Reading the program's blueprint (strings) reveals a dangerous tool called 'system' and the path '/bin/bash'. The system() function sends commands directly to the OS, and when used in a SUID program, those commands run with root privileges.",
+      "expert": "strings 명령으로 ELF 바이너리의 가독 문자열을 추출합니다. system() 함수가 있으면 PATH 환경 변수를 조작하여 의도하지 않은 바이너리를 실행시킬 수 있습니다. 특히 상대 경로로 호출하는 경우(system(\"tar ...\")) PATH 하이재킹에 취약합니다.",
+      "expertEn": "The strings command extracts readable strings from ELF binaries. If system() is present, the PATH environment variable can be manipulated to execute unintended binaries. Programs using relative paths (system(\"tar ...\")) are particularly vulnerable to PATH hijacking.",
+      "defTooltip": "🔐 SUID 바이너리에서 system() 호출 발견! PATH 하이재킹을 통한 권한 상승 가능성이 있습니다.",
+      "defTooltipEn": "🔐 system() call found in SUID binary! Potential privilege escalation through PATH hijacking.",
+      "hackerLog": {
+        "title": "strings_output.txt",
+        "lines": [
+          { "log": "system", "desc": "💡 system() 함수 사용 - 셸을 통해 명령을 실행하므로 환경 변수 조작에 취약" },
+          { "log": "/bin/bash", "desc": "💡 bash 셸 참조 - 프로그램이 내부적으로 셸을 호출함" }
+        ]
+      },
+      "terms": [
+        { "name": "strings", "desc": "바이너리 파일에서 읽을 수 있는 문자열을 추출하는 도구. 역공학의 첫 단계입니다." },
+        { "name": "system()", "desc": "C언어의 함수로, 셸을 통해 운영체제 명령을 실행합니다. SUID 프로그램에서 사용하면 보안 위험이 됩니다." },
+        { "name": "PATH 하이재킹", "desc": "PATH 환경 변수를 조작하여 정상 명령 대신 악성 프로그램을 실행시키는 기법입니다." }
+      ]
+    },
+    {
+      "cmd": "echo '/bin/bash -p' > /tmp/tar && chmod +x /tmp/tar && PATH=/tmp:$PATH /usr/local/bin/custom-backup",
+      "out": "bash-5.1# whoami\nroot\nbash-5.1# id\nuid=1001(user) gid=1001(user) euid=0(root)",
+      "def": "[EDR] CRITICAL: PATH hijacking detected on SUID binary - fake tar executed",
+      "defAction": "Process: custom-backup -> /tmp/tar -> bash -p\neuid: 0 (root)\nRisk Level: Critical\nAction: KILL PROCESS, isolate endpoint, quarantine /tmp/tar",
+      "desc": "PATH 환경 변수를 조작하여 custom-backup이 호출하는 tar 대신 악성 스크립트를 실행시킵니다. SUID 컨텍스트에서 root 셸을 획득합니다.",
+      "descEn": "Manipulating the PATH environment variable to execute a malicious script instead of the tar command called by custom-backup. Root shell obtained in the SUID context.",
+      "stepTitle": "PATH 하이재킹으로 root 셸 획득",
+      "stepTitleEn": "Root Shell via PATH Hijacking",
+      "feynman": "교통 표지판(PATH)을 바꿔서 택시(custom-backup)가 원래 목적지(진짜 tar) 대신 공격자가 만든 가짜 목적지(/tmp/tar = bash)로 가게 만드는 것입니다. custom-backup은 SUID 권한(root)으로 실행되므로, 가짜 tar도 root 권한으로 실행됩니다.",
+      "feynmanEn": "It's like changing traffic signs (PATH) so the taxi (custom-backup) goes to the attacker's fake destination (/tmp/tar = bash) instead of the real destination (real tar). Since custom-backup runs with SUID privileges (root), the fake tar also runs with root privileges.",
+      "expert": "custom-backup이 system(\"tar ...\")처럼 상대 경로로 tar를 호출하면, 셸은 PATH 변수의 디렉토리를 순서대로 검색합니다. PATH=/tmp:$PATH로 /tmp를 최우선으로 설정하면, /tmp/tar(= /bin/bash -p)가 /usr/bin/tar보다 먼저 실행됩니다. bash -p는 유효 UID(euid=0)를 유지합니다.",
+      "expertEn": "When custom-backup calls tar with a relative path like system(\"tar ...\"), the shell searches PATH directories in order. Setting PATH=/tmp:$PATH makes /tmp the top priority, so /tmp/tar (= /bin/bash -p) executes before /usr/bin/tar. bash -p preserves the effective UID (euid=0).",
+      "defTooltip": "🔐 SUID 바이너리에서 PATH 하이재킹이 감지되었습니다! /tmp에 가짜 tar가 생성되어 root 셸을 획득했습니다.",
+      "defTooltipEn": "🔐 PATH hijacking detected on SUID binary! Fake tar created in /tmp to obtain root shell.",
+      "hackerLog": {
+        "title": "path_hijack.txt",
+        "lines": [
+          { "log": "echo '/bin/bash -p' > /tmp/tar", "desc": "💡 /tmp에 가짜 tar 스크립트 생성 - 실행 시 bash 셸을 띄우도록 설정" },
+          { "log": "euid=0(root)", "desc": "💡 유효 UID가 root(0) - SUID 비트 덕분에 root 권한으로 셸 실행됨" }
+        ]
+      },
+      "terms": [
+        { "name": "PATH 환경 변수", "desc": "셸이 명령을 찾을 때 검색하는 디렉토리 목록. 앞에 있는 디렉토리가 우선 검색됩니다." },
+        { "name": "bash -p", "desc": "bash의 권한 모드. 유효 UID(euid)가 실제 UID(uid)와 다를 때 euid를 유지합니다." },
+        { "name": "euid (Effective UID)", "desc": "프로세스의 유효 사용자 ID. 접근 제어 결정에 실제로 사용되는 UID입니다." }
+      ]
+    },
+    {
+      "cmd": "cat /etc/shadow | head -3 && rm /tmp/tar",
+      "out": "root:$6$rAnDoMsAlT$H4sh3dP4ssw0rd...:19400:0:99999:7:::\ndaemon:*:19400:0:99999:7:::\nbin:*:19400:0:99999:7:::",
+      "def": "[EDR] Credential theft + anti-forensics: shadow dump and fake binary cleanup",
+      "defAction": "File Access: /etc/shadow (read)\nFile Deleted: /tmp/tar\nRisk Level: Critical\nAction: IR triggered, preserve forensic evidence",
+      "desc": "root 권한으로 /etc/shadow를 읽어 패스워드 해시를 탈취한 후, 공격에 사용한 가짜 tar 스크립트를 삭제합니다.",
+      "descEn": "Reading /etc/shadow with root privileges to steal password hashes, then deleting the fake tar script used in the attack.",
+      "stepTitle": "패스워드 해시 탈취 및 흔적 제거",
+      "stepTitleEn": "Password Hash Theft and Artifact Cleanup",
+      "feynman": "금고를 열어 비밀문서를 복사한 뒤, 사용한 위조 열쇠(/tmp/tar)를 버리는 것과 같습니다. 하지만 보안 카메라(auditd)가 이미 모든 것을 녹화했다면 소용없습니다.",
+      "feynmanEn": "It's like opening a safe to copy secret documents, then throwing away the forged key (/tmp/tar). But if security cameras (auditd) already recorded everything, it's futile.",
+      "expert": "/etc/shadow 읽기는 root(euid=0) 권한에서만 가능합니다. $6$는 SHA-512 해시를 나타내며, hashcat -m 1800으로 크래킹 가능합니다. /tmp/tar 삭제는 기본적인 안티포렌식이지만, auditd의 execve 로그, /proc 파일시스템의 프로세스 정보, inotify 이벤트 등에서 흔적이 남습니다.",
+      "expertEn": "Reading /etc/shadow is only possible with root (euid=0) privileges. $6$ indicates SHA-512 hashes, crackable with hashcat -m 1800. Deleting /tmp/tar is basic anti-forensics, but traces remain in auditd execve logs, /proc filesystem process info, and inotify events.",
+      "defTooltip": "🔐 /etc/shadow 접근과 공격 도구 삭제가 동시에 감지되었습니다!",
+      "defTooltipEn": "🔐 /etc/shadow access and attack tool deletion detected simultaneously!",
+      "hackerLog": {
+        "title": "shadow_theft.txt",
+        "lines": [
+          { "log": "root:$6$rAnDoMsAlT$H4sh3dP4ssw0rd...", "desc": "💡 root 해시 탈취 - hashcat으로 오프라인 크래킹 가능" },
+          { "log": "rm /tmp/tar", "desc": "💡 공격 도구 삭제 - 기본적인 안티포렌식 시도" }
+        ]
+      },
+      "terms": [
+        { "name": "/etc/shadow", "desc": "Linux 패스워드 해시 파일. root만 읽을 수 있으며, 사용자 인증 정보가 저장됩니다." },
+        { "name": "hashcat -m 1800", "desc": "SHA-512 해시($6$)를 크래킹하는 hashcat 모드 번호입니다." },
+        { "name": "안티포렌식 (Anti-Forensics)", "desc": "공격 흔적을 제거하여 사고 조사를 방해하는 기법의 총칭입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "sshd (PID: 1200)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "bash (user, PID: 2100)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "find / -perm -4000", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "strings custom-backup", "depth": 2, "alert": false, "minStep": 2 },
+    { "name": "custom-backup (SUID root)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "/tmp/tar (fake)", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "bash -p (euid=0)", "depth": 4, "alert": true, "minStep": 3 },
+    { "name": "cat /etc/shadow", "depth": 5, "alert": true, "minStep": 4 }
+  ]
+}

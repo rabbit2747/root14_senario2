@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1592.004">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co',K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1592-004-client-configurations&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1592.004 Client Configurations 클라이언트 구성 정보 수집 기법 분석">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1592.004 Client Configurations — (주)갓루트 사이버보안 교육</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
+    <style>body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;}.glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);}.dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);}.hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}.hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700;}.dark .nav-item.active{border-left-color:#F4D06F;color:#F4D06F;}.terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b]">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;">← 매트릭스 대시보드</button>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full hidden md:flex flex-col shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1592.004: Client Configurations</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch1">1. 클라이언트 설정 정보</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch2">2. 브라우저 핑거프린팅</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch3">3. 탐지 및 방어 퀴즈</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Reconnaissance</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Client Configurations</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">사용자의 컴퓨터 환경을 엿보는 공격자 — 클라이언트 구성 정보 수집</p>
+            </header>
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#1.</span> 클라이언트 설정 정보 수집이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">🖥️ ➜ 🔍 ➜ 📊 ➜ 🎯</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"사용자의 디지털 지문을 수집하기"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">공격자는 대상 조직 직원들이 사용하는 <strong>브라우저 종류, OS 버전, 이메일 클라이언트, VPN 소프트웨어, 보안 제품</strong> 등 클라이언트 환경을 수집합니다. 이 정보로 맞춤형 피싱 페이지를 만들거나, 특정 브라우저의 취약점을 공격합니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">"수집 방법"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed"><strong>User-Agent 헤더</strong>에서 브라우저/OS 정보를, <strong>JavaScript API</strong>로 화면 해상도/플러그인/글꼴 목록을, <strong>이메일 헤더</strong>에서 이메일 클라이언트 정보를 수집합니다. 이를 <strong>브라우저 핑거프린팅</strong>이라 합니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4">수집 대상 클라이언트 정보</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-center"><div class="text-3xl mb-2">🌐</div><div class="font-bold text-sm text-blue-700 dark:text-blue-300">Browser/OS</div><div class="text-xs text-cgray mt-1">Chrome, Edge, macOS, Win11</div></div>
+                            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center"><div class="text-3xl mb-2">📧</div><div class="font-bold text-sm text-green-700 dark:text-green-300">Email Client</div><div class="text-xs text-cgray mt-1">Outlook, Thunderbird</div></div>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 text-center"><div class="text-3xl mb-2">🛡️</div><div class="font-bold text-sm text-purple-700 dark:text-purple-300">Security SW</div><div class="text-xs text-cgray mt-1">AV, EDR, VPN Client</div></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#2.</span> 브라우저 핑거프린팅</h2>
+                <div class="space-y-8">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <h3 class="font-bold text-lg mb-3 hl-yel">User-Agent 분석</h3>
+                        <div class="terminal-bg p-4 rounded-lg text-sm overflow-x-auto">
+                            <div class="text-slate-400"># 웹 서버 로그에서 User-Agent 추출</div>
+                            <div class="text-[#9DD9D2] mt-1">Mozilla/5.0 (Windows NT 10.0; Win64; x64)</div>
+                            <div class="text-[#9DD9D2]">AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36</div>
+                            <div class="text-[#F4D06F] mt-2">해석: Windows 10 64bit, Chrome 120</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-3 hl-teal">JavaScript 핑거프린팅</h3>
+                        <div class="terminal-bg p-4 rounded-lg text-sm overflow-x-auto">
+                            <div class="text-slate-400">// 피싱 페이지에 삽입된 핑거프린팅 코드</div>
+                            <div class="text-[#9DD9D2] mt-1">navigator.platform: "Win32"</div>
+                            <div class="text-[#9DD9D2]">screen.width x height: 1920x1080</div>
+                            <div class="text-[#9DD9D2]">navigator.languages: ["ko-KR","en-US"]</div>
+                            <div class="text-[#9DD9D2]">Installed fonts: 245 detected</div>
+                            <div class="text-[#F4D06F]">Canvas fingerprint: 0x3A7F2B1C</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">위험 포인트</h3>
+                        <ul class="space-y-2 text-sm text-cgray dark:text-slate-300">
+                            <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span><strong>맞춤형 공격:</strong> 대상의 브라우저/OS에 맞는 익스플로잇 선택</li>
+                            <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span><strong>보안 제품 우회:</strong> 설치된 AV/EDR 제품에 맞는 우회 기법 적용</li>
+                            <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span><strong>피싱 정밀도:</strong> 사용 환경에 맞는 가짜 로그인 페이지 제작</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2"><span class="hl-teal">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div class="space-y-6">
+                        <div><h3 class="font-bold mb-3">Q. 브라우저 핑거프린팅의 주요 목적은?</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3">웹사이트의 속도를 측정하기 위해</label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3">대상의 클라이언트 환경을 파악하여 맞춤형 공격을 준비하기 위해</label>
+                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3">사용자의 비밀번호를 직접 탈취하기 위해</label>
+                            </div>
+                        </div>
+                        <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold"></div>
+                </div>
+            </section>
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 transition"><span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span></button>
+            </div>
+        </div>
+    </main>
+    </div>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='☀️';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='🌙';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+        function checkQuiz(){var q=document.querySelector('input[name="q1"]:checked');if(!q){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden');if(q.value==='2'){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e]';r.innerHTML='✅ 정답입니다!<br><span class="text-xs mt-1 block font-normal">브라우저 핑거프린팅으로 수집한 정보는 맞춤형 피싱, 브라우저 익스플로잇 선택, 보안 제품 우회에 사용됩니다.</span>';}else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold bg-red-100 border border-red-400 text-red-700';r.innerHTML='❌ 오답입니다. 핑거프린팅의 핵심은 환경 파악을 통한 맞춤형 공격 준비입니다.';}}
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+<script src="/edu/lab-link.js"></script><script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

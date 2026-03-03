@@ -1,0 +1,180 @@
+{
+  "id": "T1593.002",
+  "title": "검색 엔진 정찰(구글 도킹) 시뮬레이션",
+  "titleEn": "Search Engine Reconnaissance (Google Dorking) Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 기본 도킹", "labelEn": "🔍 Basic Dorking", "steps": [0, 1] },
+    { "label": "⚡ 민감 정보 검색", "labelEn": "⚡ Sensitive Info Search", "steps": [2, 3] },
+    { "label": "✅ 취약점 분석", "labelEn": "✅ Vulnerability Analysis", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "google", "label": "Google", "x": 200, "y": 30 },
+    { "id": "shodan", "label": "Shodan", "x": 200, "y": 90 },
+    { "id": "exposed", "label": "Exposed Files", "x": 350, "y": 60 },
+    { "id": "target", "label": "Target System", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "google", "minStep": 0 },
+    { "from": "ext", "to": "shodan", "minStep": 3 },
+    { "from": "google", "to": "exposed", "minStep": 1 },
+    { "from": "shodan", "to": "exposed", "minStep": 3 },
+    { "from": "exposed", "to": "target", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "dork_results/", "icon": "📁" },
+    { "name": "exposed_files.csv", "icon": "📄", "alert": true },
+    { "name": "leaked_creds.txt", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 dorker.py --target {companyName}.com --category basic",
+      "out": "[+] Running basic Google dorks against {companyName}.com\n\n[Dork] site:{companyName}.com\n  Results: 4,523 pages indexed\n\n[Dork] site:{companyName}.com inurl:admin\n  Results: 3 pages\n  1. https://{companyName}.com/admin/login\n  2. https://{companyName}.com/wp-admin/\n  3. https://api.{companyName}.com/admin/dashboard\n\n[Dork] site:{companyName}.com intitle:\"index of\"\n  Results: 2 pages\n  1. https://{companyName}.com/uploads/ (Directory listing)\n  2. https://dev.{companyName}.com/backups/",
+      "def": "[Web Server] Multiple Google bot crawl patterns from single IP",
+      "defAction": "Source: 198.51.100.23 (via Google cache)\nTarget: {companyName}.com\nAction: No direct detection - passive reconnaissance",
+      "desc": "기본 구글 도킹 쿼리로 대상 조직의 관리자 페이지와 디렉토리 리스팅을 검색합니다.",
+      "descEn": "Basic Google dorking to find admin pages and directory listings on the target organization.",
+      "stepTitle": "기본 구글 도킹 검색",
+      "stepTitleEn": "Basic Google Dorking",
+      "feynman": "구글에 'site:company.com inurl:admin'을 입력하면 회사 웹사이트에서 'admin'이 포함된 모든 페이지를 찾아줍니다. 관리자 로그인 페이지가 외부에서 접근 가능한 상태인지, 디렉토리가 파일 목록을 보여주는지 확인하는 것입니다.",
+      "feynmanEn": "Typing 'site:company.com inurl:admin' in Google finds all pages containing 'admin' on the company website. This checks if admin login pages are externally accessible and if directories show file listings.",
+      "expert": "site: 연산자는 특정 도메인으로 제한하고, inurl:/intitle: 으로 URL/제목 패턴을 필터링합니다. 디렉토리 리스팅(index of)은 웹 서버 설정 미비의 전형적 지표입니다.",
+      "expertEn": "site: operator restricts to specific domain, inurl:/intitle: filters URL/title patterns. Directory listing (index of) is a classic indicator of web server misconfiguration.",
+      "defTooltip": "🌐 웹 서버: 패시브 정찰 - 직접 탐지 불가",
+      "defTooltipEn": "🌐 Web Server: Passive recon - no direct detection",
+      "hackerLog": {
+        "title": "basic_dorks.txt",
+        "lines": [
+          { "log": "https://{companyName}.com/admin/login", "desc": "💡 관리자 로그인 페이지가 외부에 노출!" },
+          { "log": "https://dev.{companyName}.com/backups/", "desc": "💡 개발 서버의 백업 디렉토리 리스팅 발견!" },
+          { "log": "4,523 pages indexed", "desc": "💡 4,500개 이상의 페이지가 검색 엔진에 인덱싱됨" }
+        ]
+      },
+      "terms": [
+        { "name": "Google Dorking", "desc": "검색 엔진의 고급 연산자를 사용하여 의도치 않게 노출된 민감한 정보를 찾는 정찰 기법" },
+        { "name": "Directory Listing", "desc": "웹 서버가 폴더의 파일 목록을 표시하는 상태. 설정 실수로 내부 파일이 외부에 노출됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 dorker.py --target {companyName}.com --category files",
+      "out": "[+] Searching for exposed files...\n\n[Dork] site:{companyName}.com filetype:pdf \"confidential\"\n  1. /docs/2024-Q3-Financial-Report-CONFIDENTIAL.pdf\n  2. /hr/employee-handbook-internal.pdf\n\n[Dork] site:{companyName}.com filetype:xlsx\n  1. /finance/budget-2024.xlsx\n  2. /hr/employee-contact-list.xlsx\n\n[Dork] site:{companyName}.com filetype:env OR filetype:config\n  1. dev.{companyName}.com/.env (⚠️ CRITICAL)\n  2. staging.{companyName}.com/config.yaml\n\n[+] Total exposed files: 6\n[+] Critical findings: 1 (.env file with credentials)",
+      "def": "[DLP] Sensitive document exposure detected via search engine indexing",
+      "defAction": "Source: Google search results\nTarget: {companyName}.com documents\nAction: DLP alert generated, document review initiated",
+      "desc": "파일 형식별 도킹으로 기밀 문서, 스프레드시트, 환경 설정 파일을 검색합니다.",
+      "descEn": "File type-specific dorking to find confidential documents, spreadsheets, and config files.",
+      "stepTitle": "파일 유형별 민감 문서 검색",
+      "stepTitleEn": "Sensitive Document Search by File Type",
+      "feynman": "구글에 'filetype:pdf confidential'을 입력하면 PDF 중 'confidential'이 포함된 문서를 찾습니다. 실수로 웹 서버에 올라간 기밀 재무 보고서, 직원 연락처 목록, 심지어 데이터베이스 비밀번호가 담긴 .env 파일까지 발견할 수 있습니다.",
+      "feynmanEn": "Searching 'filetype:pdf confidential' in Google finds PDFs containing 'confidential.' Accidentally uploaded financial reports, employee lists, and even .env files with database passwords can be discovered.",
+      "expert": "filetype: 연산자로 특정 확장자를 검색합니다. .env 파일 노출은 최고 위험도 — DATABASE_URL, API_KEY, SECRET_KEY 등 시스템 인증 정보가 평문으로 저장되어 있습니다.",
+      "expertEn": "filetype: operator searches specific extensions. .env file exposure is critical — DATABASE_URL, API_KEY, SECRET_KEY stored in plaintext.",
+      "defTooltip": "📄 DLP: 검색 엔진 인덱싱을 통한 민감 문서 노출 감지",
+      "defTooltipEn": "📄 DLP: Sensitive document exposure via search engine indexing",
+      "hackerLog": {
+        "title": "file_search.txt",
+        "lines": [
+          { "log": "dev.{companyName}.com/.env (CRITICAL)", "desc": "💡 .env 파일에 DB 비밀번호, API 키가 노출!" },
+          { "log": "employee-contact-list.xlsx", "desc": "💡 직원 연락처 목록 - 스피어 피싱에 활용" },
+          { "log": "2024-Q3-Financial-Report-CONFIDENTIAL.pdf", "desc": "💡 기밀 재무 보고서가 검색 엔진에 노출" }
+        ]
+      },
+      "terms": [
+        { "name": ".env File", "desc": "환경 변수를 저장하는 설정 파일. 데이터베이스 비밀번호, API 키 등 민감한 인증 정보가 포함됩니다" },
+        { "name": "DLP (Data Loss Prevention)", "desc": "민감한 데이터의 무단 유출을 감지하고 방지하는 보안 솔루션" }
+      ]
+    },
+    {
+      "cmd": "curl -s 'https://dev.{companyName}.com/.env'",
+      "out": "# Application Environment\nAPP_NAME={companyName}\nAPP_ENV=development\nAPP_DEBUG=true\nAPP_KEY=base64:kR4nD0mK3yH3r3==\n\n# Database\nDB_CONNECTION=mysql\nDB_HOST=db.{companyName}.com\nDB_PORT=3306\nDB_DATABASE={companyName}_dev\nDB_USERNAME=admin\nDB_PASSWORD=D3v_P@ssw0rd_2024!\n\n# AWS\nAWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE\nAWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\nAWS_DEFAULT_REGION=ap-northeast-2\n\n# Redis\nREDIS_HOST=redis.{companyName}.com\nREDIS_PASSWORD=R3d!s_S3cur3\nREDIS_PORT=6379",
+      "def": "[WAF] Direct access to .env file from external IP - CRITICAL",
+      "defAction": "Source: 198.51.100.23\nTarget: dev.{companyName}.com/.env\nAction: Request blocked, incident created",
+      "desc": "노출된 .env 파일에 직접 접근하여 데이터베이스 비밀번호와 AWS 키를 획득합니다.",
+      "descEn": "Directly accessing the exposed .env file to obtain database passwords and AWS keys.",
+      "stepTitle": ".env 파일에서 인증 정보 획득",
+      "stepTitleEn": "Obtaining Credentials from .env File",
+      "feynman": ".env 파일은 집의 모든 열쇠를 한 곳에 모아놓은 열쇠 보관함과 같습니다. 데이터베이스 비밀번호, AWS 클라우드 키, Redis 캐시 비밀번호가 모두 평문으로 저장되어 있습니다. 이 파일을 다운로드하면 회사의 모든 시스템에 접근할 수 있는 열쇠를 얻게 됩니다.",
+      "feynmanEn": "The .env file is like a key box containing all keys to the house. Database passwords, AWS cloud keys, and Redis cache passwords are stored in plaintext. Downloading this file gives keys to access all company systems.",
+      "expert": ".env 파일에서 DB 크레덴셜(MySQL admin), AWS IAM 키(AKIA 접두사), Redis 인증 정보를 한 번에 획득합니다. AWS 키로는 S3 버킷 접근, EC2 인스턴스 생성 등 클라우드 인프라 전체를 장악할 수 있습니다.",
+      "expertEn": "DB credentials (MySQL admin), AWS IAM keys (AKIA prefix), and Redis auth obtained from .env in one step. AWS keys enable S3 bucket access, EC2 instance creation — full cloud infrastructure takeover.",
+      "defTooltip": "🚨 WAF: 외부 IP에서 .env 파일 직접 접근 - 심각도 CRITICAL",
+      "defTooltipEn": "🚨 WAF: Direct .env file access from external IP - CRITICAL",
+      "hackerLog": {
+        "title": "env_contents.txt",
+        "lines": [
+          { "log": "DB_PASSWORD=D3v_P@ssw0rd_2024!", "desc": "💡 데이터베이스 관리자 비밀번호 획득!" },
+          { "log": "AWS_SECRET_ACCESS_KEY=wJalrX...", "desc": "💡 AWS 키 탈취 - 클라우드 인프라 장악 가능" },
+          { "log": "APP_DEBUG=true", "desc": "💡 디버그 모드 활성화 - 추가 취약점 존재 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "AWS Access Key", "desc": "AWS 서비스에 프로그래밍 방식으로 접근하기 위한 인증 키. AKIAIOSFODNN7EXAMPLE 형태입니다" },
+        { "name": "APP_DEBUG", "desc": "애플리케이션 디버그 모드. 활성화 시 상세 에러 메시지, 스택 트레이스 등 내부 정보가 노출됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 shodan_search.py --org \"{companyName}\" --query 'port:3306 OR port:6379'",
+      "out": "[+] Shodan search for {companyName} exposed services...\n\n[Result 1] 203.0.113.50:3306 - MySQL\n  Banner: 5.7.42-0ubuntu0.18.04.1\n  State: OPEN (no firewall)\n  Auth: Required\n  Vulnerability: CVE-2023-22008 (Medium)\n\n[Result 2] 203.0.113.51:6379 - Redis\n  Banner: Redis server v=7.0.11\n  State: OPEN (no firewall)\n  Auth: Password required\n  Note: Password found in .env file!\n\n[+] Both services externally accessible",
+      "def": "[External Scan] Shodan queries for {companyName} infrastructure",
+      "defAction": "Source: Shodan API\nTarget: {companyName} IP range\nAction: External exposure audit recommended",
+      "desc": "Shodan에서 대상의 MySQL, Redis 포트가 외부에 노출되어 있는지 확인합니다.",
+      "descEn": "Checking Shodan for externally exposed MySQL and Redis ports on the target.",
+      "stepTitle": "Shodan으로 노출된 서비스 확인",
+      "stepTitleEn": "Exposed Service Discovery via Shodan",
+      "feynman": "Shodan은 '인터넷의 CCTV'입니다. 전 세계의 모든 서버를 스캔하여 어떤 포트가 열려 있는지 기록합니다. MySQL(3306)과 Redis(6379) 포트가 외부에서 접근 가능한 상태이고, 앞서 .env에서 얻은 비밀번호로 로그인할 수 있습니다.",
+      "feynmanEn": "Shodan is 'CCTV for the internet.' It scans all servers worldwide recording open ports. MySQL (3306) and Redis (6379) are externally accessible, and passwords from the .env file enable login.",
+      "expert": "Shodan의 org: 필터로 대상 조직의 IP 대역에서 노출된 서비스를 검색합니다. .env 파일의 인증 정보와 결합하면 데이터베이스 직접 접근이 가능합니다.",
+      "expertEn": "Shodan's org: filter searches for exposed services in the target's IP range. Combined with .env credentials, direct database access is possible.",
+      "defTooltip": "🔍 외부 스캔: Shodan에서 {companyName} 인프라 조회",
+      "defTooltipEn": "🔍 External Scan: Shodan queries for {companyName} infrastructure",
+      "hackerLog": {
+        "title": "shodan_results.txt",
+        "lines": [
+          { "log": "MySQL 5.7.42 - OPEN (no firewall)", "desc": "💡 MySQL이 방화벽 없이 외부 노출! .env 비밀번호로 접속 가능" },
+          { "log": "Redis 7.0.11 - OPEN", "desc": "💡 Redis도 외부 노출 - .env의 비밀번호 사용 가능" },
+          { "log": "CVE-2023-22008 (Medium)", "desc": "💡 MySQL에 알려진 취약점 존재" }
+        ]
+      },
+      "terms": [
+        { "name": "Shodan", "desc": "인터넷에 연결된 장치와 서비스를 검색하는 검색 엔진. 노출된 포트, 서비스 버전, 취약점 등을 보여줍니다" },
+        { "name": "CVE (Common Vulnerabilities and Exposures)", "desc": "공개적으로 알려진 보안 취약점의 고유 식별자 시스템" }
+      ]
+    },
+    {
+      "cmd": "mysql -h 203.0.113.50 -u admin -p'D3v_P@ssw0rd_2024!' -e 'SHOW DATABASES; SELECT COUNT(*) FROM {companyName}_dev.users;'",
+      "out": "[+] Connecting to MySQL at 203.0.113.50:3306...\n[+] Authentication: SUCCESS\n\n+--------------------+\n| Database           |\n+--------------------+\n| information_schema |\n| {companyName}_dev  |\n| {companyName}_prod |\n| mysql              |\n+--------------------+\n\n+----------+\n| COUNT(*) |\n+----------+\n|   15,847 |\n+----------+\n\n[+] Full database access achieved\n[+] Production database also accessible!\n[+] 15,847 user records exposed",
+      "def": "[SIEM] External MySQL login with leaked credentials - CRITICAL BREACH",
+      "defAction": "Source: 198.51.100.23\nTarget: 203.0.113.50:3306 (MySQL)\nAction: Connection terminated, credentials rotated, IR initiated",
+      "desc": ".env에서 획득한 크레덴셜로 외부 노출된 MySQL에 접속하여 전체 데이터베이스에 접근합니다.",
+      "descEn": "Accessing the externally exposed MySQL with .env credentials, gaining access to all databases.",
+      "stepTitle": "유출된 크레덴셜로 데이터베이스 접근",
+      "stepTitleEn": "Database Access with Leaked Credentials",
+      "feynman": "구글 검색에서 시작한 정찰이 데이터베이스 접근까지 이어졌습니다. 검색 엔진에 노출된 .env 파일에서 비밀번호를 얻고, 그 비밀번호로 외부에 열려 있는 MySQL에 로그인했습니다. 개발 데이터베이스뿐만 아니라 프로덕션 데이터베이스까지 접근 가능하여 15,847명의 사용자 정보가 위험에 처했습니다.",
+      "feynmanEn": "Reconnaissance starting from a Google search led to database access. The .env file exposed to search engines contained the password, which was used to login to the externally open MySQL. Not just dev but production database accessible — 15,847 user records at risk.",
+      "expert": "구글 도킹 → .env 노출 → 크레덴셜 획득 → Shodan으로 노출 포트 확인 → DB 직접 접속. 이 공격 체인은 단일 설정 실수(.env 노출)에서 시작하여 전체 데이터 침해로 확대됩니다.",
+      "expertEn": "Google dorking → .env exposure → credential acquisition → Shodan port verification → direct DB access. This attack chain starts from a single misconfiguration and escalates to full data breach.",
+      "defTooltip": "🚨 SIEM: 유출된 크레덴셜로 외부 MySQL 로그인 - 심각한 침해",
+      "defTooltipEn": "🚨 SIEM: External MySQL login with leaked credentials - CRITICAL",
+      "hackerLog": {
+        "title": "db_access.log",
+        "lines": [
+          { "log": "{companyName}_prod accessible!", "desc": "💡 프로덕션 DB까지 접근 가능 - 전체 침해!" },
+          { "log": "15,847 user records", "desc": "💡 약 1.6만 명의 사용자 데이터 노출" },
+          { "log": "Authentication: SUCCESS", "desc": "💡 .env에서 얻은 비밀번호로 인증 성공" }
+        ]
+      },
+      "terms": [
+        { "name": "Attack Chain", "desc": "여러 취약점이나 정보를 순차적으로 악용하여 최종 목표에 도달하는 공격 경로" },
+        { "name": "Credential Stuffing", "desc": "유출된 인증 정보를 다른 시스템에 시도하는 공격. 같은 비밀번호를 여러 서비스에서 사용하면 위험합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "python3 dorker.py (PID: 7001)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "curl (PID: 7134)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 shodan_search.py (PID: 7201)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "mysql (PID: 7289)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

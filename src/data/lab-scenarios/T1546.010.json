@@ -1,0 +1,190 @@
+{
+  "id": "T1546.010",
+  "title": "AppInit DLLs 지속성 시뮬레이션",
+  "titleEn": "AppInit DLLs Persistence Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ 페이로드 준비", "labelEn": "⚡ Payload Prep", "steps": [1] },
+    { "label": "🔓 레지스트리 조작", "labelEn": "🔓 Registry Manipulation", "steps": [2, 3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim\nWIN-SRV01", "x": 250, "y": 80 },
+    { "id": "registry", "label": "HKLM\\...\\Windows\nAppInit_DLLs", "x": 450, "y": 30 },
+    { "id": "system32", "label": "C:\\Windows\nSystem32", "x": 450, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n203.0.113.55", "x": 50, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "system32", "minStep": 1 },
+    { "from": "victim", "to": "registry", "minStep": 2 },
+    { "from": "system32", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "PowerShell", "icon": "💻" },
+    { "name": "Registry Editor", "icon": "🗂️" },
+    { "name": "Task Manager", "icon": "📊" },
+    { "name": "Notepad", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\" /v AppInit_DLLs & reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\" /v LoadAppInit_DLLs",
+      "out": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\n    AppInit_DLLs    REG_SZ    (empty)\n    LoadAppInit_DLLs    REG_DWORD    0x0\n    RequireSignedAppInit_DLLs    REG_DWORD    0x0\n\n[*] AppInit_DLLs: empty (no DLLs registered)\n[*] LoadAppInit_DLLs: 0 (disabled)\n[*] RequireSignedAppInit_DLLs: 0 (no signature required)\n[*] Secure Boot: Not Enabled\n[*] Architecture: x64",
+      "def": "[EDR] Registry query on AppInit_DLLs detected - potential persistence reconnaissance",
+      "defAction": "Source: Sysmon Event ID 1 (Process Create)\nTarget: reg.exe querying AppInit_DLLs\nAction: Query logged, alert generated for persistence enumeration",
+      "desc": "AppInit_DLLs 레지스트리 값과 관련 설정을 확인하여 현재 상태를 파악합니다.",
+      "descEn": "The attacker queries AppInit_DLLs registry values to understand current configuration.",
+      "stepTitle": "AppInit DLLs 레지스트리 정찰",
+      "stepTitleEn": "AppInit DLLs Registry Reconnaissance",
+      "feynman": "건물의 정문에 '모든 방문자에게 명찰을 나눠주는 규칙'이 있는지 확인하는 것과 같습니다. AppInit_DLLs가 비어있으면 아직 아무도 이 규칙을 악용하지 않았다는 뜻입니다.",
+      "feynmanEn": "It's like checking if there's a rule at the building entrance to give badges to all visitors. Empty AppInit_DLLs means no one has abused this mechanism yet.",
+      "expert": "AppInit_DLLs는 Windows가 User32.dll을 로드하는 모든 프로세스에 자동으로 DLL을 주입하는 메커니즘입니다. LoadAppInit_DLLs가 0이면 비활성화 상태이고, RequireSignedAppInit_DLLs가 0이면 서명되지 않은 DLL도 허용됩니다. Secure Boot가 활성화되면 이 메커니즘이 자동 비활성화됩니다.",
+      "expertEn": "AppInit_DLLs is a Windows mechanism that automatically injects DLLs into every process loading User32.dll. LoadAppInit_DLLs=0 means it's disabled, RequireSignedAppInit_DLLs=0 allows unsigned DLLs. Secure Boot automatically disables this mechanism.",
+      "defTooltip": "🔐 AppInit_DLLs 레지스트리 조회 감지! 지속성 설정 정찰 패턴입니다.",
+      "defTooltipEn": "🔐 AppInit_DLLs registry query detected! Persistence configuration reconnaissance pattern.",
+      "hackerLog": {
+        "title": "appinit_recon.txt",
+        "lines": [
+          { "log": "AppInit_DLLs: empty (no DLLs registered)", "desc": "💡 아직 등록된 DLL 없음 - 깨끗한 슬레이트" },
+          { "log": "LoadAppInit_DLLs: 0 (disabled)", "desc": "💡 현재 비활성화 - 활성화 필요" },
+          { "log": "Secure Boot: Not Enabled", "desc": "💡 Secure Boot 미활성화 - AppInit DLLs 사용 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "AppInit_DLLs", "desc": "Windows 레지스트리 값. User32.dll 로드 시 자동 주입할 DLL 경로를 지정합니다." },
+        { "name": "User32.dll", "desc": "Windows GUI 기능을 제공하는 핵심 시스템 DLL. 대부분의 GUI 프로세스가 로드합니다." },
+        { "name": "Secure Boot", "desc": "UEFI 보안 기능. 활성화 시 AppInit_DLLs 메커니즘이 자동으로 비활성화됩니다." }
+      ]
+    },
+    {
+      "cmd": "copy C:\\Temp\\payload.dll C:\\Windows\\System32\\msvcrt_extra.dll",
+      "out": "        1 file(s) copied.\n\n[*] DLL staged:\n    Source: C:\\Temp\\payload.dll\n    Target: C:\\Windows\\System32\\msvcrt_extra.dll\n    Size: 45,056 bytes\n    Architecture: x64\n    Exports: DllMain (entry point)\n\n[*] DLL capabilities:\n    - C2 beacon (HTTPS to 203.0.113.55)\n    - Credential harvesting from process memory\n    - Keystroke logging\n    - Screenshot capture",
+      "def": "[EDR] New DLL dropped in System32 - msvcrt_extra.dll (unsigned, no catalog match)",
+      "defAction": "Source: Sysmon Event ID 11 (FileCreate)\nTarget: C:\\Windows\\System32\\msvcrt_extra.dll\nAction: File hash checked against threat intel, quarantined as unknown binary",
+      "desc": "악성 DLL을 System32 디렉토리에 정상 시스템 파일처럼 위장하여 배치합니다.",
+      "descEn": "The attacker stages the malicious DLL in System32 disguised as a legitimate system file.",
+      "stepTitle": "악성 DLL System32에 배치",
+      "stepTitleEn": "Malicious DLL Staging in System32",
+      "feynman": "도서관 서가에 가짜 책을 끼워놓는 것과 같습니다. 'msvcrt_extra.dll'이라는 이름은 Microsoft의 C 런타임 라이브러리(msvcrt)와 비슷하여 관리자가 정상 파일로 착각할 수 있습니다.",
+      "feynmanEn": "It's like inserting a fake book into a library shelf. The name 'msvcrt_extra.dll' resembles Microsoft's C runtime library (msvcrt), potentially fooling administrators into thinking it's legitimate.",
+      "expert": "System32에 DLL을 배치하면 경로를 명시하지 않아도 시스템 검색 순서에 의해 자동으로 찾아집니다. msvcrt와 유사한 이름은 Microsoft Visual C++ Runtime을 연상시켜 탐지를 어렵게 합니다. x64 아키텍처 DLL은 64비트 프로세스에 주입됩니다.",
+      "expertEn": "Placing DLL in System32 ensures it's found through system search order without explicit paths. Names similar to msvcrt evade detection by resembling Microsoft Visual C++ Runtime. x64 architecture DLL injects into 64-bit processes.",
+      "defTooltip": "🔐 System32에 서명되지 않은 새 DLL! 카탈로그 매칭 실패 - 악성 파일 가능성.",
+      "defTooltipEn": "🔐 Unsigned new DLL in System32! Catalog match failed - potential malicious file.",
+      "hackerLog": {
+        "title": "dll_staging.txt",
+        "lines": [
+          { "log": "Target: C:\\Windows\\System32\\msvcrt_extra.dll", "desc": "💡 System32에 배치 - 신뢰 경로 위장" },
+          { "log": "Exports: DllMain (entry point)", "desc": "💡 DllMain에서 악성 코드 실행 - 로드 시 자동 실행" },
+          { "log": "C2 beacon (HTTPS to 203.0.113.55)", "desc": "💡 HTTPS C2 통신 - 암호화로 네트워크 탐지 우회" }
+        ]
+      },
+      "terms": [
+        { "name": "DllMain", "desc": "DLL의 진입점 함수. DLL이 로드/언로드될 때 자동으로 호출됩니다." },
+        { "name": "System32", "desc": "Windows 핵심 시스템 파일이 위치하는 디렉토리. 시스템 DLL 검색 경로의 최상위입니다." },
+        { "name": "msvcrt", "desc": "Microsoft Visual C Runtime Library. 많은 Windows 프로그램이 사용하는 C 표준 라이브러리입니다." }
+      ]
+    },
+    {
+      "cmd": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\" /v AppInit_DLLs /t REG_SZ /d \"C:\\Windows\\System32\\msvcrt_extra.dll\" /f",
+      "out": "The operation completed successfully.\n\n[*] Registry modified:\n    Key: HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\n    Value: AppInit_DLLs\n    Data: C:\\Windows\\System32\\msvcrt_extra.dll\n    Type: REG_SZ\n\n[*] Status: DLL path registered\n[*] Note: LoadAppInit_DLLs still disabled (0)",
+      "def": "[EDR] CRITICAL - AppInit_DLLs registry value modified to include DLL path",
+      "defAction": "Source: Sysmon Event ID 13 (RegistryValueSet)\nTarget: HKLM\\...\\Windows\\AppInit_DLLs\nAction: Registry change blocked by EDR policy, original value restored",
+      "desc": "AppInit_DLLs 레지스트리 값에 악성 DLL 경로를 등록합니다.",
+      "descEn": "The attacker registers the malicious DLL path in the AppInit_DLLs registry value.",
+      "stepTitle": "AppInit_DLLs 레지스트리 값 설정",
+      "stepTitleEn": "Set AppInit_DLLs Registry Value",
+      "feynman": "건물 입구의 안내 데스크에 '모든 방문자에게 이 명찰을 나눠주세요'라는 메모를 남기는 것과 같습니다. 아직 안내 데스크가 운영 중이 아니지만(LoadAppInit_DLLs=0), 메모는 준비되어 있습니다.",
+      "feynmanEn": "It's like leaving a note at the reception desk saying 'give this badge to all visitors'. The desk isn't operating yet (LoadAppInit_DLLs=0), but the note is ready.",
+      "expert": "AppInit_DLLs에 경로를 등록해도 LoadAppInit_DLLs가 0이면 실제로 DLL이 로드되지 않습니다. 이 2단계 접근법은 탐지를 분산시킵니다. REG_SZ 타입은 단일 DLL 경로를 지정하며, 여러 DLL은 공백이나 쉼표로 구분합니다.",
+      "expertEn": "Registering a path in AppInit_DLLs won't load the DLL if LoadAppInit_DLLs is 0. This two-step approach distributes detection. REG_SZ type specifies a single DLL path; multiple DLLs are separated by spaces or commas.",
+      "defTooltip": "🔐 AppInit_DLLs 레지스트리 값 변경! DLL 경로가 등록되었습니다.",
+      "defTooltipEn": "🔐 AppInit_DLLs registry value modified! DLL path registered.",
+      "hackerLog": {
+        "title": "registry_set.txt",
+        "lines": [
+          { "log": "Value: AppInit_DLLs = msvcrt_extra.dll", "desc": "💡 악성 DLL 경로 등록 완료" },
+          { "log": "LoadAppInit_DLLs still disabled (0)", "desc": "💡 아직 비활성화 - 별도 활성화 단계 필요" },
+          { "log": "Two-step approach for detection evasion", "desc": "💡 2단계로 분리하여 탐지 분산" }
+        ]
+      },
+      "terms": [
+        { "name": "REG_SZ", "desc": "Windows 레지스트리의 문자열 데이터 타입. AppInit_DLLs에서 DLL 경로를 저장하는 데 사용됩니다." },
+        { "name": "Sysmon Event ID 13", "desc": "레지스트리 값 변경을 기록하는 Sysmon 이벤트. 레지스트리 기반 공격 탐지의 핵심 소스입니다." },
+        { "name": "HKLM", "desc": "HKEY_LOCAL_MACHINE의 약자. 시스템 전체에 적용되는 설정을 저장하는 레지스트리 하이브입니다." }
+      ]
+    },
+    {
+      "cmd": "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\" /v LoadAppInit_DLLs /t REG_DWORD /d 1 /f",
+      "out": "The operation completed successfully.\n\n[*] Registry modified:\n    Key: HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\n    Value: LoadAppInit_DLLs\n    Data: 0x1 (Enabled)\n    Type: REG_DWORD\n\n[*] AppInit DLLs mechanism: ACTIVATED\n[*] DLL to inject: C:\\Windows\\System32\\msvcrt_extra.dll\n[*] Affected: All processes loading User32.dll\n[*] WARNING: Active after next process creation",
+      "def": "[EDR] CRITICAL - LoadAppInit_DLLs enabled - all User32 processes will load injected DLLs",
+      "defAction": "Source: Sysmon Event ID 13 + Windows Security Event 4657\nTarget: LoadAppInit_DLLs value changed to 1\nAction: CRITICAL ALERT - Registry value reverted to 0, DLL quarantined, incident response initiated",
+      "desc": "LoadAppInit_DLLs를 활성화하여 모든 GUI 프로세스에 DLL 주입을 시작합니다.",
+      "descEn": "The attacker enables LoadAppInit_DLLs to start DLL injection into all GUI processes.",
+      "stepTitle": "LoadAppInit_DLLs 활성화",
+      "stepTitleEn": "Enable LoadAppInit_DLLs",
+      "feynman": "안내 데스크의 운영 스위치를 켜는 것과 같습니다. 이제부터 건물에 들어오는 모든 방문자(GUI 프로세스)에게 자동으로 명찰(악성 DLL)이 부착됩니다.",
+      "feynmanEn": "It's like flipping the switch to activate the reception desk. From now on, every visitor (GUI process) entering the building automatically gets a badge (malicious DLL) attached.",
+      "expert": "LoadAppInit_DLLs=1로 설정하면 User32.dll의 DLL_PROCESS_ATTACH 시점에 AppInit_DLLs에 등록된 모든 DLL이 주입됩니다. 이미 실행 중인 프로세스에는 영향이 없지만, 새로 생성되는 모든 GUI 프로세스에 적용됩니다. Windows Security Event 4657은 감사 정책이 활성화된 경우 레지스트리 값 변경을 기록합니다.",
+      "expertEn": "Setting LoadAppInit_DLLs=1 injects all DLLs in AppInit_DLLs at User32.dll's DLL_PROCESS_ATTACH point. Already running processes are unaffected, but all newly created GUI processes get injected. Windows Security Event 4657 logs registry value changes when audit policy is enabled.",
+      "defTooltip": "🔐 LoadAppInit_DLLs 활성화! 모든 GUI 프로세스에 DLL 주입이 시작됩니다.",
+      "defTooltipEn": "🔐 LoadAppInit_DLLs enabled! DLL injection into all GUI processes begins.",
+      "hackerLog": {
+        "title": "activation.txt",
+        "lines": [
+          { "log": "LoadAppInit_DLLs: 0x1 (Enabled)", "desc": "💡 AppInit DLLs 메커니즘 활성화!" },
+          { "log": "Affected: All processes loading User32.dll", "desc": "💡 모든 GUI 프로세스가 영향을 받음" },
+          { "log": "Active after next process creation", "desc": "💡 다음 프로세스 생성부터 DLL 주입 시작" }
+        ]
+      },
+      "terms": [
+        { "name": "LoadAppInit_DLLs", "desc": "AppInit_DLLs 메커니즘의 활성화/비활성화를 제어하는 DWORD 레지스트리 값입니다." },
+        { "name": "DLL_PROCESS_ATTACH", "desc": "DLL이 프로세스에 로드될 때 호출되는 이벤트. DllMain의 첫 번째 호출 시점입니다." },
+        { "name": "Event 4657", "desc": "Windows 보안 감사 이벤트. 레지스트리 값의 수정을 기록합니다." }
+      ]
+    },
+    {
+      "cmd": ":: [Verification] Launch notepad.exe and check loaded DLLs",
+      "out": "[Notepad.exe launched - PID 4892]\n\n[*] DLLs loaded by notepad.exe:\n    ntdll.dll\n    KERNEL32.DLL\n    KERNELBASE.dll\n    USER32.dll\n    msvcrt_extra.dll    ← INJECTED via AppInit_DLLs\n    GDI32.dll\n    ...\n\n[*] msvcrt_extra.dll activity:\n    - DllMain called (DLL_PROCESS_ATTACH)\n    - C2 beacon initiated: 203.0.113.55:443\n    - Connection: ESTABLISHED\n    - Process context: notepad.exe (PID 4892)\n\n[+] AppInit DLLs persistence: ACTIVE\n[+] DLL injection: CONFIRMED\n[+] C2 connectivity: ESTABLISHED\n[+] Scope: All new GUI processes",
+      "def": "[SIEM] Unknown DLL loaded via AppInit_DLLs across multiple processes - C2 traffic detected",
+      "defAction": "Source: Sysmon Event ID 7 (ImageLoaded) + Network Detection\nTarget: msvcrt_extra.dll in multiple processes\nAction: All instances terminated, DLL removed, AppInit_DLLs cleared, LoadAppInit_DLLs set to 0",
+      "desc": "새 프로세스를 실행하여 AppInit DLLs를 통한 DLL 자동 주입을 검증합니다.",
+      "descEn": "The attacker launches a new process to verify automatic DLL injection via AppInit DLLs.",
+      "stepTitle": "DLL 주입 검증",
+      "stepTitleEn": "DLL Injection Verification",
+      "feynman": "건물에 새로운 방문자(Notepad)가 들어왔을 때, 안내 데스크에서 자동으로 명찰(악성 DLL)을 부착했는지 확인하는 것과 같습니다. Notepad의 DLL 목록에서 우리 DLL이 보이면 성공입니다.",
+      "feynmanEn": "It's like checking if a new visitor (Notepad) entering the building automatically received a badge (malicious DLL) from the reception desk. Seeing our DLL in Notepad's loaded DLL list confirms success.",
+      "expert": "Sysmon Event ID 7 (ImageLoaded)은 프로세스에 로드된 모든 DLL을 기록합니다. AppInit_DLLs를 통해 로드된 DLL은 프로세스의 초기 로딩 단계에서 주입되므로, User32.dll 직후에 로드됩니다. 모든 GUI 프로세스에서 동일한 DLL이 로드되는 패턴은 AppInit_DLLs 남용의 강력한 지표입니다.",
+      "expertEn": "Sysmon Event ID 7 (ImageLoaded) records all DLLs loaded into processes. DLLs loaded via AppInit_DLLs are injected during early loading phase, right after User32.dll. The same DLL loading across all GUI processes is a strong indicator of AppInit_DLLs abuse.",
+      "defTooltip": "🔐 여러 프로세스에서 동일 DLL 로드! AppInit_DLLs 남용이 확인되었습니다.",
+      "defTooltipEn": "🔐 Same DLL loaded across multiple processes! AppInit_DLLs abuse confirmed.",
+      "hackerLog": {
+        "title": "injection_verify.txt",
+        "lines": [
+          { "log": "msvcrt_extra.dll INJECTED via AppInit_DLLs", "desc": "💡 DLL 주입 성공 - 모든 GUI 프로세스에 자동 적용" },
+          { "log": "C2 beacon initiated: 203.0.113.55:443", "desc": "💡 C2 서버 연결 성공 - 원격 제어 가능" },
+          { "log": "Scope: All new GUI processes", "desc": "💡 새로 실행되는 모든 GUI 프로세스에 DLL 주입" }
+        ]
+      },
+      "terms": [
+        { "name": "Sysmon Event ID 7", "desc": "프로세스에 DLL(이미지)이 로드될 때 기록되는 이벤트. DLL 주입 탐지에 핵심적입니다." },
+        { "name": "DLL 인젝션", "desc": "다른 프로세스의 주소 공간에 DLL을 강제로 로드시키는 기법입니다." },
+        { "name": "프로세스 컨텍스트", "desc": "코드가 실행되는 프로세스 환경. 주입된 DLL은 호스트 프로세스의 권한으로 실행됩니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "cmd.exe (attacker)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "reg.exe (query AppInit)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "copy (DLL staging)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "reg.exe (set AppInit_DLLs)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "reg.exe (enable LoadAppInit)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "[After DLL Injection]", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "notepad.exe (PID: 4892)", "depth": 1, "alert": false, "minStep": 4 },
+    { "name": "msvcrt_extra.dll (injected)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "C2 beacon → 203.0.113.55", "depth": 3, "alert": true, "minStep": 4 }
+  ]
+}

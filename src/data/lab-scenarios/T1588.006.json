@@ -1,0 +1,184 @@
+{
+  "id": "T1588.006",
+  "title": "취약점 정보 획득 시뮬레이션",
+  "titleEn": "Obtain Vulnerability Information Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정보 수집", "labelEn": "🔍 Information Gathering", "steps": [0, 1] },
+    { "label": "⚡ 분석/매칭", "labelEn": "⚡ Analysis/Matching", "steps": [2, 3] },
+    { "label": "✅ 공격 계획", "labelEn": "✅ Attack Planning", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "nvd", "label": "NVD/CVE DB", "x": 200, "y": 30 },
+    { "id": "shodan", "label": "Shodan", "x": 200, "y": 90 },
+    { "id": "match", "label": "Vuln Match", "x": 350, "y": 60 },
+    { "id": "target", "label": "Target", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "nvd", "minStep": 0 },
+    { "from": "ext", "to": "shodan", "minStep": 1 },
+    { "from": "nvd", "to": "match", "minStep": 2 },
+    { "from": "shodan", "to": "match", "minStep": 2 },
+    { "from": "match", "to": "target", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "vuln_db.csv", "icon": "📊" },
+    { "name": "target_scan.json", "icon": "📄", "alert": true },
+    { "name": "attack_plan.md", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "curl -s 'https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=exchange+server&cvssV3Severity=CRITICAL&resultsPerPage=5' | jq '.vulnerabilities[].cve | {id, cvss: .metrics.cvssMetricV31[0].cvssData.baseScore, vector: .metrics.cvssMetricV31[0].cvssData.attackVector, description: .descriptions[0].value[0:100]}'",
+      "out": "{\n  \"id\": \"CVE-2026-21893\",\n  \"cvss\": 9.8,\n  \"vector\": \"NETWORK\",\n  \"description\": \"Microsoft Exchange Server Remote Code Execution via deserialization in OWA component allows unaut...\"\n}\n{\n  \"id\": \"CVE-2026-21712\",\n  \"cvss\": 9.1,\n  \"vector\": \"NETWORK\",\n  \"description\": \"Microsoft Exchange Server Server-Side Request Forgery allows unauthenticated attacker to access in...\"\n}\n{\n  \"id\": \"CVE-2025-48291\",\n  \"cvss\": 9.8,\n  \"vector\": \"NETWORK\",\n  \"description\": \"Microsoft Exchange Server elevation of privilege via NTLM relay allows domain compromise from Excha...\"\n}\n\n[+] 3 Critical CVEs found for Exchange Server",
+      "def": "[Threat Intel] Automated CVE query for Exchange Server from suspicious IP — reconnaissance pattern",
+      "defAction": "Source: 203.0.113.50\nTarget: NVD API\nAction: IP flagged for vulnerability research activity, monitoring enhanced",
+      "desc": "NVD(국가취약점 데이터베이스) API로 Exchange Server의 Critical 취약점을 검색합니다.",
+      "descEn": "Querying NVD API for Critical Exchange Server vulnerabilities.",
+      "stepTitle": "NVD CVE 검색",
+      "stepTitleEn": "NVD CVE Search",
+      "feynman": "건물의 '보안 결함 보고서'를 공공 도서관에서 찾는 것과 같습니다. NVD는 전 세계 소프트웨어의 보안 취약점을 공개적으로 기록하는 데이터베이스입니다. 누구나 API로 검색할 수 있어, 공격자도 대상 시스템의 약점을 쉽게 파악합니다.",
+      "feynmanEn": "Like finding a building's security flaw report at a public library. NVD publicly records security vulnerabilities for software worldwide. Anyone can search via API, letting attackers easily identify target system weaknesses.",
+      "expert": "NVD REST API v2.0은 CVSS 심각도, 공격 벡터(NETWORK/LOCAL) 등으로 필터링이 가능합니다. 공격자는 NETWORK 벡터 + CRITICAL 조합으로 원격 공격 가능한 고위험 취약점을 선별합니다.",
+      "expertEn": "NVD REST API v2.0 allows filtering by CVSS severity, attack vector (NETWORK/LOCAL), etc. Attackers filter NETWORK vector + CRITICAL to select high-risk remotely exploitable vulnerabilities.",
+      "defTooltip": "🔗 위협 인텔: Exchange CVE 자동 검색 패턴 감지",
+      "defTooltipEn": "🔗 Threat Intel: Exchange CVE automated search pattern detected",
+      "hackerLog": {
+        "title": "nvd_search.log",
+        "lines": [
+          { "log": "CVE-2026-21893: CVSS 9.8 (RCE)", "desc": "💡 원격 코드 실행 — 가장 위험한 취약점 유형" },
+          { "log": "Vector: NETWORK (Pre-Auth)", "desc": "💡 인터넷에서 인증 없이 공격 가능" },
+          { "log": "Found: 3 Critical CVEs", "desc": "💡 공격에 활용 가능한 고위험 취약점 3개 발견" }
+        ]
+      },
+      "terms": [
+        { "name": "NVD", "desc": "National Vulnerability Database. NIST가 운영하는 미국 국가취약점 데이터베이스. CVSS 점수와 상세 분석 제공." },
+        { "name": "CVSS", "desc": "Common Vulnerability Scoring System. 취약점의 심각도를 0.0~10.0 점수로 수치화하는 표준." }
+      ]
+    },
+    {
+      "cmd": "curl -s 'https://api.shodan.io/shodan/host/search?key=SHODAN_API_KEY&query=product:\"Microsoft Exchange\" org:\"{companyName}\"&facets=version' | jq '{total: .total, matches: [.matches[] | {ip: .ip_str, port: .port, version: .product, os: .os}][:3]}'",
+      "out": "{\n  \"total\": 2,\n  \"matches\": [\n    {\n      \"ip\": \"203.0.113.100\",\n      \"port\": 443,\n      \"version\": \"Microsoft Exchange Server 2019 CU13\",\n      \"os\": \"Windows Server 2022\"\n    },\n    {\n      \"ip\": \"203.0.113.101\",\n      \"port\": 443,\n      \"version\": \"Microsoft Exchange Server 2019 CU12\",\n      \"os\": \"Windows Server 2019\"\n    }\n  ]\n}\n\n[+] 2 Exchange servers found for {companyName}",
+      "def": "[Threat Intel] Shodan query targeting {companyName} Exchange infrastructure detected",
+      "defAction": "Source: Shodan API query\nTarget: {companyName} Exchange servers\nAction: Attack surface exposure alert, firewall rules review initiated",
+      "desc": "Shodan으로 대상 조직의 Exchange 서버 버전을 식별합니다. 취약점 정보와 매칭하기 위한 핑거프린팅입니다.",
+      "descEn": "Using Shodan to identify target organization's Exchange server versions. Fingerprinting for vulnerability matching.",
+      "stepTitle": "Shodan 서버 핑거프린팅",
+      "stepTitleEn": "Shodan Server Fingerprinting",
+      "feynman": "건물의 잠금장치 브랜드와 모델을 밖에서 확인하는 것입니다. Shodan은 인터넷에 연결된 장비를 검색하는 엔진으로, 대상 조직의 서버가 어떤 소프트웨어를 어떤 버전으로 운영하는지 외부에서 파악할 수 있습니다.",
+      "feynmanEn": "Like checking the brand and model of a building's locks from outside. Shodan searches internet-connected devices, allowing external identification of target organization's server software versions.",
+      "expert": "Shodan의 facets 기능으로 버전 분포를 분석합니다. CU13과 CU12는 각각 다른 패치 수준으로, CVE 매칭 시 공격 가능 여부가 달라집니다.",
+      "expertEn": "Shodan's facets feature analyzes version distribution. CU13 and CU12 have different patch levels, affecting CVE matching and exploitability.",
+      "defTooltip": "🔗 위협 인텔: Shodan으로 {companyName} Exchange 인프라 검색 감지",
+      "defTooltipEn": "🔗 Threat Intel: Shodan query targeting {companyName} Exchange infrastructure detected",
+      "hackerLog": {
+        "title": "shodan_recon.log",
+        "lines": [
+          { "log": "Target: 2 Exchange servers found", "desc": "💡 공격 대상 서버 2대 식별" },
+          { "log": "Versions: CU13, CU12", "desc": "💡 서로 다른 패치 수준 — 각각 다른 취약점 노출" },
+          { "log": "Ports: 443 (HTTPS OWA)", "desc": "💡 인터넷에 직접 노출된 OWA 웹 인터페이스" }
+        ]
+      },
+      "terms": [
+        { "name": "Shodan", "desc": "인터넷에 연결된 장비를 검색하는 엔진. 서버 소프트웨어 버전, 열린 포트 등을 식별." },
+        { "name": "핑거프린팅", "desc": "대상 시스템의 소프트웨어 종류와 버전을 원격으로 식별하는 정찰 기법." }
+      ]
+    },
+    {
+      "cmd": "python3 -c \"\ncves = [\n    {'id':'CVE-2026-21893','cvss':9.8,'type':'RCE','affected':'CU13,CU12','patched':'CU14'},\n    {'id':'CVE-2026-21712','cvss':9.1,'type':'SSRF','affected':'CU13,CU12','patched':'CU14'},\n    {'id':'CVE-2025-48291','cvss':9.8,'type':'Priv Esc','affected':'CU12','patched':'CU13'}\n]\ntargets = [{'ip':'203.0.113.100','ver':'CU13'},{'ip':'203.0.113.101','ver':'CU12'}]\nprint('[*] Vulnerability-to-Target Mapping')\nprint('='*60)\nfor t in targets:\n    print(f'\\nTarget: {t[\\\"ip\\\"]} ({t[\\\"ver\\\"]})')\n    for c in cves:\n        if t['ver'] in c['affected']:\n            print(f'  [VULN] {c[\\\"id\\\"]} (CVSS {c[\\\"cvss\\\"]}) - {c[\\\"type\\\"]}')\n\"",
+      "out": "[*] Vulnerability-to-Target Mapping\n============================================================\n\nTarget: 203.0.113.100 (CU13)\n  [VULN] CVE-2026-21893 (CVSS 9.8) - RCE\n  [VULN] CVE-2026-21712 (CVSS 9.1) - SSRF\n\nTarget: 203.0.113.101 (CU12)\n  [VULN] CVE-2026-21893 (CVSS 9.8) - RCE\n  [VULN] CVE-2026-21712 (CVSS 9.1) - SSRF\n  [VULN] CVE-2025-48291 (CVSS 9.8) - Priv Esc",
+      "def": "[Threat Intel] Automated vulnerability mapping against {companyName} infrastructure — attack planning detected",
+      "defAction": "Source: Attacker analysis environment\nTarget: {companyName} Exchange servers\nAction: Vulnerability assessment cross-referenced with attack intel",
+      "desc": "수집한 CVE 정보와 대상 서버 버전을 매칭하여 공격 가능한 취약점을 식별합니다.",
+      "descEn": "Matching collected CVE information with target server versions to identify exploitable vulnerabilities.",
+      "stepTitle": "취약점-대상 매핑",
+      "stepTitleEn": "Vulnerability-Target Mapping",
+      "feynman": "잠금장치 결함 목록과 실제 건물의 잠금장치 모델을 대조하는 것입니다. CU13 서버는 2개의 취약점에 노출되어 있고, CU12 서버는 3개에 노출되어 있습니다. 공격자는 이 매핑을 통해 어떤 서버를 어떤 취약점으로 공격할지 결정합니다.",
+      "feynmanEn": "Like cross-referencing a list of lock defects with the actual lock models in a building. CU13 server is exposed to 2 vulnerabilities, CU12 to 3. Attackers use this mapping to decide which server to attack with which vulnerability.",
+      "expert": "취약점-대상 매핑은 공격 계획의 핵심입니다. CU12 서버가 더 많은 취약점에 노출되어 있으며, 특히 Priv Esc(CVE-2025-48291)까지 가능하므로 우선 공격 대상입니다.",
+      "expertEn": "Vulnerability-target mapping is central to attack planning. CU12 server is exposed to more vulnerabilities including Priv Esc (CVE-2025-48291), making it the priority target.",
+      "defTooltip": "🔗 위협 인텔: 자동화된 취약점 매핑 — 공격 계획 수립 탐지",
+      "defTooltipEn": "🔗 Threat Intel: Automated vulnerability mapping — attack planning detected",
+      "hackerLog": {
+        "title": "vuln_mapping.log",
+        "lines": [
+          { "log": "CU13: 2 vulns (RCE, SSRF)", "desc": "💡 2개 취약점 노출 — 원격 공격 가능" },
+          { "log": "CU12: 3 vulns (RCE, SSRF, PrivEsc)", "desc": "💡 3개 취약점 — 더 취약한 우선 공격 대상" },
+          { "log": "Priority: CU12 server first", "desc": "💡 공격 체인 가능성 높은 대상을 우선 선택" }
+        ]
+      },
+      "terms": [
+        { "name": "취약점 매핑", "desc": "알려진 CVE와 대상 시스템의 소프트웨어 버전을 대조하여 공격 가능한 취약점을 식별하는 과정." },
+        { "name": "공격 체인", "desc": "여러 취약점을 순차적으로 악용하여 최종 목표를 달성하는 다단계 공격 방법." }
+      ]
+    },
+    {
+      "cmd": "curl -s 'https://api.cisa.gov/kev/v1/vulnerabilities?product=exchange' | jq '[.[] | select(.cveID | test(\"2026|2025\"))] | sort_by(.dateAdded) | reverse | .[0:3] | .[] | {cve: .cveID, added: .dateAdded, dueDate: .dueDate, knownRansomware: .knownRansomwareCampaignUse}'",
+      "out": "{\n  \"cve\": \"CVE-2026-21893\",\n  \"added\": \"2026-02-20\",\n  \"dueDate\": \"2026-03-13\",\n  \"knownRansomware\": \"Known\"\n}\n{\n  \"cve\": \"CVE-2026-21712\",\n  \"added\": \"2026-02-25\",\n  \"dueDate\": \"2026-03-18\",\n  \"knownRansomware\": \"Unknown\"\n}\n{\n  \"cve\": \"CVE-2025-48291\",\n  \"added\": \"2025-12-05\",\n  \"dueDate\": \"2025-12-26\",\n  \"knownRansomware\": \"Known\"\n}\n\n[!] 2 of 3 CVEs linked to known ransomware campaigns",
+      "def": "[CISA KEV] Critical Exchange vulnerabilities with ransomware association — urgent patching required",
+      "defAction": "Source: CISA KEV Catalog\nTarget: {companyName} Exchange infrastructure\nAction: Emergency patch deployment ordered, compensating controls activated",
+      "desc": "CISA KEV 카탈로그에서 실제 악용 중인 취약점과 랜섬웨어 연관성을 확인합니다.",
+      "descEn": "Checking CISA KEV catalog for actively exploited vulnerabilities and ransomware associations.",
+      "stepTitle": "CISA KEV 악용 현황 확인",
+      "stepTitleEn": "CISA KEV Exploitation Status Check",
+      "feynman": "경찰이 발표한 '현재 활동 중인 도둑 수법 목록'을 확인하는 것입니다. CISA KEV는 실제로 해커들이 악용하고 있는 취약점 목록입니다. 3개 취약점 중 2개가 랜섬웨어 공격에 사용되고 있다는 것은, 이 취약점이 '돈이 되는' 공격에 활발히 사용 중이라는 의미입니다.",
+      "feynmanEn": "Like checking a police bulletin of 'currently active burglar techniques'. CISA KEV lists vulnerabilities actively exploited by hackers. 2 of 3 vulnerabilities linked to ransomware means they're actively used in profitable attacks.",
+      "expert": "CISA KEV의 knownRansomwareCampaignUse 필드는 취약점이 랜섬웨어에 활용되는지 표시합니다. dueDate는 연방기관 패치 기한이며, 민간에도 지표로 활용됩니다.",
+      "expertEn": "CISA KEV's knownRansomwareCampaignUse field indicates ransomware exploitation. dueDate is the federal patching deadline, also used as an indicator for private sector.",
+      "defTooltip": "🔗 CISA KEV: 랜섬웨어 연관 Exchange 취약점 긴급 패칭 필요",
+      "defTooltipEn": "🔗 CISA KEV: Ransomware-associated Exchange vulnerabilities require urgent patching",
+      "hackerLog": {
+        "title": "kev_check.log",
+        "lines": [
+          { "log": "CVE-2026-21893: Ransomware Known", "desc": "💡 랜섬웨어 캠페인에서 활발히 악용 중" },
+          { "log": "Due Date: 2026-03-13", "desc": "💡 패치 기한 — 기한 경과 시 높은 공격 성공률" },
+          { "log": "2/3 CVEs ransomware-linked", "desc": "💡 대부분의 취약점이 금전 목적 공격에 사용" }
+        ]
+      },
+      "terms": [
+        { "name": "CISA KEV", "desc": "Known Exploited Vulnerabilities. 미국 CISA가 관리하는 실제 악용 중인 취약점 카탈로그." },
+        { "name": "랜섬웨어", "desc": "데이터를 암호화하고 금전을 요구하는 악성코드. 기업 대상 공격에서 가장 큰 금전적 피해 유발." }
+      ]
+    },
+    {
+      "cmd": "cat << 'EOF'\n=== ATTACK PLAN: {companyName} Exchange Infrastructure ===\n\nPrimary Target: 203.0.113.101 (Exchange CU12)\n  Attack Chain: CVE-2026-21712 (SSRF) → CVE-2026-21893 (RCE) → CVE-2025-48291 (PrivEsc)\n  Expected Result: SYSTEM access + Domain Admin escalation\n  Exploit Source: Exploit-DB PoC (weaponized)\n  \nSecondary Target: 203.0.113.100 (Exchange CU13)\n  Attack Chain: CVE-2026-21712 (SSRF) → CVE-2026-21893 (RCE)\n  Expected Result: SYSTEM access on Exchange\n  \nPost-Exploitation:\n  1. Mailbox data exfiltration\n  2. Active Directory credential harvesting\n  3. Lateral movement to domain controllers\n  4. Ransomware deployment (if financially motivated)\n  \nTimeline: Execute within 12 days (before CISA KEV due date)\nEOF",
+      "out": "=== ATTACK PLAN: {companyName} Exchange Infrastructure ===\n\nPrimary Target: 203.0.113.101 (Exchange CU12)\n  Attack Chain: CVE-2026-21712 (SSRF) → CVE-2026-21893 (RCE) → CVE-2025-48291 (PrivEsc)\n  Expected Result: SYSTEM access + Domain Admin escalation\n  Exploit Source: Exploit-DB PoC (weaponized)\n  \nSecondary Target: 203.0.113.100 (Exchange CU13)\n  Attack Chain: CVE-2026-21712 (SSRF) → CVE-2026-21893 (RCE)\n  Expected Result: SYSTEM access on Exchange\n  \nPost-Exploitation:\n  1. Mailbox data exfiltration\n  2. Active Directory credential harvesting\n  3. Lateral movement to domain controllers\n  4. Ransomware deployment (if financially motivated)\n  \nTimeline: Execute within 12 days (before CISA KEV due date)",
+      "def": "[Threat Intel] Complete attack plan generated against {companyName} — all information sourced from public databases",
+      "defAction": "Source: Attacker planning phase\nTarget: {companyName} Exchange infrastructure\nAction: Proactive defense — emergency patching, monitoring enhancement, IR team standby",
+      "desc": "수집한 모든 취약점 정보를 종합하여 구체적인 공격 계획을 수립합니다.",
+      "descEn": "Synthesizing all collected vulnerability information into a concrete attack plan.",
+      "stepTitle": "공격 계획 수립",
+      "stepTitleEn": "Attack Plan Development",
+      "feynman": "수집한 모든 정보를 모아 '작전 계획서'를 만드는 것입니다. 취약한 서버, 사용할 취약점, 공격 순서, 침투 후 목표까지 정리합니다. 모든 정보가 공개 데이터베이스에서 수집되었다는 점이 중요합니다 — 방어자도 같은 정보에 접근할 수 있습니다.",
+      "feynmanEn": "Like compiling all gathered information into an 'operation plan'. Vulnerable servers, exploits to use, attack order, and post-exploitation goals are organized. The key point is all information was gathered from public databases — defenders have access to the same information.",
+      "expert": "SSRF→RCE→PrivEsc 공격 체인은 Exchange 침해의 전형적인 패턴입니다. CISA KEV 기한 전에 공격하면 미패치 확률이 높아 성공률이 극대화됩니다.",
+      "expertEn": "SSRF→RCE→PrivEsc attack chain is the typical Exchange compromise pattern. Attacking before CISA KEV deadline maximizes success probability due to high unpatched rates.",
+      "defTooltip": "🔗 위협 인텔: 공개 데이터 기반 완전 공격 계획 — 사전 방어 필요",
+      "defTooltipEn": "🔗 Threat Intel: Complete attack plan from public data — proactive defense needed",
+      "hackerLog": {
+        "title": "attack_plan.log",
+        "lines": [
+          { "log": "Primary: CU12 (3-vuln chain)", "desc": "💡 가장 취약한 서버를 최우선 공격 대상으로 선정" },
+          { "log": "Chain: SSRF → RCE → PrivEsc", "desc": "💡 3단계 공격 체인 — SYSTEM + Domain Admin 획득" },
+          { "log": "Timeline: 12 days (before KEV due)", "desc": "💡 패치 기한 전 공격 — 미패치 확률 극대화" }
+        ]
+      },
+      "terms": [
+        { "name": "공격 계획", "desc": "수집된 정찰/취약점 정보를 기반으로 구체적인 공격 순서, 도구, 목표를 정리한 계획." },
+        { "name": "포스트 익스플로잇", "desc": "초기 침투 성공 후 수행하는 활동. 자격증명 수집, 측면 이동, 데이터 탈취 등." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "pid": 1, "name": "init", "children": [
+      { "pid": 1200, "name": "bash", "children": [
+        { "pid": 1201, "name": "curl NVD API", "children": [] },
+        { "pid": 1205, "name": "curl Shodan API", "children": [] },
+        { "pid": 1210, "name": "python3 vuln_mapping", "children": [] },
+        { "pid": 1215, "name": "curl CISA KEV", "children": [] },
+        { "pid": 1220, "name": "attack plan generation", "children": [] }
+      ]}
+    ]}
+  ]
+}

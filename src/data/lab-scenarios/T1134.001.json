@@ -1,0 +1,256 @@
+{
+  "id": "T1134.001",
+  "title": "토큰 가장(Impersonation) 시뮬레이션",
+  "titleEn": "Token Impersonation Simulation",
+  "duration": 9,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "target", "label": "Target PC", "x": 280, "y": 150, "type": "server" },
+    { "id": "dc", "label": "DC (AD)", "x": 280, "y": 50, "type": "server" },
+    { "id": "siem", "label": "EDR/SIEM", "x": 480, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "target", "label": "Meterpreter", "activeStep": 0 },
+    { "from": "target", "to": "target", "label": "Token Steal", "activeStep": 3 },
+    { "from": "target", "to": "dc", "label": "Domain Admin", "activeStep": 6 },
+    { "from": "target", "to": "siem", "label": "Alert", "activeStep": 3 }
+  ],
+  "desktopIcons": [
+    { "label": "Incognito", "icon": "🎭", "alertOnStep": 1 },
+    { "label": "SYSTEM Token", "icon": "👑", "alertOnStep": 3 },
+    { "label": "Domain Admin", "icon": "🔓", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "whoami /priv | findstr \"SeImpersonatePrivilege\"",
+      "out": "SeImpersonatePrivilege        Impersonate a client after authentication    Enabled",
+      "def": "[EDR] Privilege check for SeImpersonatePrivilege by {userName}",
+      "defAction": "Process: cmd.exe -> whoami.exe\nUser: {companyName}\\{userName}\nResult: SeImpersonatePrivilege = Enabled\nRisk Level: Low\nAction: Log",
+      "desc": "공격자가 SeImpersonatePrivilege 권한 보유 여부를 확인합니다. 서비스 계정이나 IIS AppPool 계정에 주로 이 권한이 있습니다.",
+      "descEn": "The attacker checks for SeImpersonatePrivilege. Service accounts and IIS AppPool accounts typically have this privilege.",
+      "stepTitle": "권한 확인",
+      "stepTitleEn": "Privilege Check",
+      "feynman": "무대 뒤에서 '변장 세트'가 있는지 확인하는 것과 같습니다. SeImpersonatePrivilege가 있으면 다른 사람인 척할 수 있는 '변장 도구'를 사용할 권한이 있다는 뜻입니다.",
+      "feynmanEn": "It's like checking if a 'disguise kit' is available backstage. Having SeImpersonatePrivilege means you have the right to use 'disguise tools' to pretend to be someone else.",
+      "expert": "SeImpersonatePrivilege는 주로 서비스 계정(IIS, SQL Server, NETWORK SERVICE)에 부여됩니다. Potato 계열 공격(JuicyPotato, PrintSpoofer, GodPotato)은 이 권한을 SYSTEM으로의 권한 상승에 악용합니다. 이 권한은 GPO의 User Rights Assignment에서 관리됩니다.",
+      "expertEn": "SeImpersonatePrivilege is primarily granted to service accounts (IIS, SQL Server, NETWORK SERVICE). Potato family attacks (JuicyPotato, PrintSpoofer, GodPotato) exploit this privilege for SYSTEM escalation. Managed through GPO User Rights Assignment.",
+      "defTooltip": "Windows Security Event ID 4672에서 SeImpersonatePrivilege가 할당된 로그온을 모니터링하세요. 비서비스 계정이 이 권한을 보유한 경우 GPO 설정을 검토합니다.",
+      "defTooltipEn": "Monitor Windows Security Event ID 4672 for logons with SeImpersonatePrivilege assigned. Review GPO settings if non-service accounts hold this privilege.",
+      "hackerLog": {
+        "title": "priv_check.log",
+        "lines": [
+          { "log": "whoami /priv | findstr \"SeImpersonatePrivilege\"", "desc": "💡 토큰 가장 공격의 전제 조건인 SeImpersonatePrivilege 확인" },
+          { "log": "SeImpersonatePrivilege  Enabled", "desc": "💡 권한이 활성화되어 있어 토큰 가장 공격이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "SeImpersonatePrivilege", "desc": "인증 후 클라이언트를 가장할 수 있는 Windows 권한으로, 토큰 조작 공격의 전제 조건입니다" },
+        { "term": "Access Token", "desc": "Windows에서 사용자의 신원과 권한을 나타내는 보안 객체입니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> load incognito",
+      "out": "[*] Loading extension incognito...\n[*] Incognito extension loaded successfully.",
+      "def": "[EDR] Meterpreter incognito module loaded on PC-{userName}",
+      "defAction": "Process: payload.exe (PID: 3200)\nModule: incognito (token manipulation)\nRisk Level: High\nAction: Alert SOC, prepare for token theft",
+      "desc": "Meterpreter의 Incognito 모듈을 로드합니다. 이 모듈은 시스템의 액세스 토큰을 열거하고 가장(impersonate)할 수 있습니다.",
+      "descEn": "Loads Meterpreter's Incognito module. This module can enumerate and impersonate access tokens on the system.",
+      "stepTitle": "Incognito 모듈 로드",
+      "stepTitleEn": "Load Incognito Module",
+      "feynman": "변장 도구 상자를 여는 것과 같습니다. Incognito 모듈은 시스템에 존재하는 모든 사용자의 '신분증'(토큰)을 보고, 원하는 사람으로 변장할 수 있게 해주는 특별한 도구입니다.",
+      "feynmanEn": "It's like opening a disguise toolkit. The Incognito module lets you view all users' 'ID cards' (tokens) on the system and disguise yourself as anyone you want.",
+      "expert": "Incognito는 원래 Luke Jennings가 개발한 독립 도구로, 현재 Meterpreter에 통합되어 있습니다. Windows 토큰은 Delegation(대화형 로그온)과 Impersonation(네트워크 로그온) 두 유형이 있으며, Delegation 토큰이 더 강력합니다. TokenDuplication API를 내부적으로 사용합니다.",
+      "expertEn": "Incognito was originally a standalone tool by Luke Jennings, now integrated into Meterpreter. Windows tokens have two types: Delegation (interactive logon) and Impersonation (network logon), with Delegation tokens being more powerful. Internally uses the TokenDuplication API.",
+      "defTooltip": "EDR에서 Meterpreter와 관련된 프로세스 행위(메모리 내 모듈 로딩, 토큰 관련 API 호출)를 모니터링하세요. 의심스러운 프로세스의 DuplicateTokenEx API 호출을 감시합니다.",
+      "defTooltipEn": "Monitor Meterpreter-related process behavior (in-memory module loading, token-related API calls) in EDR. Watch for DuplicateTokenEx API calls from suspicious processes.",
+      "hackerLog": {
+        "title": "incognito_load.log",
+        "lines": [
+          { "log": "load incognito", "desc": "💡 토큰 열거 및 가장 기능을 제공하는 Incognito 확장 모듈을 로드합니다" },
+          { "log": "Incognito extension loaded successfully", "desc": "💡 모듈이 성공적으로 로드되어 토큰 조작이 가능해졌습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Incognito", "desc": "Windows 액세스 토큰을 열거하고 가장할 수 있는 Meterpreter 확장 모듈입니다" },
+        { "term": "Delegation Token", "desc": "대화형 로그온 시 생성되는 토큰으로, 네트워크 리소스에 대한 완전한 접근 권한을 제공합니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> list_tokens -u",
+      "out": "Delegation Tokens Available\n========================================\n{companyName}\\{userName}\n{companyName}\\svc_backup\nNT AUTHORITY\\SYSTEM\nNT AUTHORITY\\LOCAL SERVICE\nNT AUTHORITY\\NETWORK SERVICE\n\nImpersonation Tokens Available\n========================================\n{companyName}\\admin.jkim\n{companyName}\\DomainAdmin01",
+      "def": "[EDR] ALERT: Token enumeration detected - listing all available delegation/impersonation tokens",
+      "defAction": "Process: payload.exe -> incognito\nTokens Found: 7 (including SYSTEM and Domain Admin)\nRisk Level: Critical\nAction: Alert IR team - potential privilege escalation imminent",
+      "desc": "시스템에서 사용 가능한 위임(Delegation) 토큰과 가장(Impersonation) 토큰을 열거합니다. SYSTEM 토큰과 도메인 관리자 토큰이 발견됩니다.",
+      "descEn": "Enumerates available Delegation and Impersonation tokens on the system. SYSTEM token and Domain Admin tokens are found.",
+      "stepTitle": "토큰 열거",
+      "stepTitleEn": "Token Enumeration",
+      "feynman": "회사 건물에서 바닥에 떨어진 모든 사원증을 주워 확인하는 것과 같습니다. SYSTEM 사원증(최고 권한)과 도메인 관리자 사원증이 발견되었으니, 이 중 하나로 변장하면 건물 전체를 자유롭게 다닐 수 있습니다.",
+      "feynmanEn": "It's like picking up all dropped employee badges in an office building. Finding SYSTEM (highest privilege) and Domain Admin badges means disguising with either grants unrestricted building access.",
+      "expert": "토큰 열거에서 Delegation 토큰은 대화형 로그온(콘솔, RDP)에서 생성되고, Impersonation 토큰은 네트워크 인증에서 생성됩니다. 이전에 로그인했다가 로그아웃한 사용자의 토큰이 메모리에 남아있을 수 있습니다. 특히 서비스 계정의 토큰은 서비스가 실행되는 동안 항상 사용 가능합니다.",
+      "expertEn": "In token enumeration, Delegation tokens are created from interactive logons (console, RDP), and Impersonation tokens from network authentication. Tokens from previously logged-in users may remain in memory. Service account tokens are always available while the service runs.",
+      "defTooltip": "Windows Security Event ID 4624에서 다양한 Logon Type의 세션을 추적하세요. 로그아웃 후에도 토큰이 남을 수 있으므로 Event ID 4634(로그오프)와의 상관분석이 중요합니다.",
+      "defTooltipEn": "Track sessions with various Logon Types in Windows Security Event ID 4624. Tokens may persist after logoff, so correlation with Event ID 4634 (Logoff) is important.",
+      "hackerLog": {
+        "title": "token_enum.log",
+        "lines": [
+          { "log": "list_tokens -u", "desc": "💡 시스템에서 사용 가능한 모든 사용자 토큰을 유형별로 열거합니다" },
+          { "log": "NT AUTHORITY\\SYSTEM / {companyName}\\DomainAdmin01", "desc": "💡 SYSTEM과 도메인 관리자 토큰이 발견되어 권한 상승이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Impersonation Token", "desc": "네트워크 인증 시 생성되는 토큰으로, 로컬 리소스 접근에 제한이 있습니다" },
+        { "term": "Token Enumeration", "desc": "시스템 메모리에 존재하는 모든 액세스 토큰을 목록화하는 정찰 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> impersonate_token \"NT AUTHORITY\\\\SYSTEM\"",
+      "out": "[+] Delegation token available\n[+] Successfully impersonated user NT AUTHORITY\\SYSTEM",
+      "def": "[EDR] CRITICAL: SYSTEM token impersonation - {userName} now running as NT AUTHORITY\\SYSTEM",
+      "defAction": "Process: payload.exe (PID: 3200)\nToken Operation: Impersonation\nOriginal User: {companyName}\\{userName}\nNew Identity: NT AUTHORITY\\SYSTEM\nRisk Level: Critical\nAction: ISOLATE ENDPOINT immediately",
+      "desc": "NT AUTHORITY\\SYSTEM 토큰을 가장합니다. 이제 공격자는 시스템 최고 권한으로 모든 작업을 수행할 수 있습니다.",
+      "descEn": "Impersonates the NT AUTHORITY\\SYSTEM token. The attacker can now perform any action with the highest system privileges.",
+      "stepTitle": "SYSTEM 토큰 가장",
+      "stepTitleEn": "SYSTEM Token Impersonation",
+      "feynman": "건물 경비원장의 사원증을 복제해서 사용하는 것과 같습니다. SYSTEM은 Windows에서 가장 높은 권한을 가진 계정으로, 이 토큰을 가장하면 모든 파일 접근, 모든 프로세스 제어, 모든 설정 변경이 가능합니다.",
+      "feynmanEn": "It's like duplicating the chief security guard's badge. SYSTEM is the highest-privileged account in Windows - impersonating this token grants access to all files, control over all processes, and ability to change any setting.",
+      "expert": "SYSTEM 토큰 가장은 ImpersonateLoggedOnUser API 또는 DuplicateTokenEx + SetThreadToken을 사용합니다. SYSTEM 컨텍스트에서는 PPL(Protected Process Light) 보호가 없는 모든 프로세스에 접근 가능합니다. Credential Guard가 활성화되어 있어도 SYSTEM 토큰 자체는 보호되지 않습니다.",
+      "expertEn": "SYSTEM token impersonation uses ImpersonateLoggedOnUser API or DuplicateTokenEx + SetThreadToken. In SYSTEM context, all processes without PPL (Protected Process Light) protection are accessible. Even with Credential Guard enabled, the SYSTEM token itself is not protected.",
+      "defTooltip": "Windows Security Event ID 4673(특권 서비스 호출)에서 SeTcbPrivilege 사용을 모니터링하세요. Event ID 4648(명시적 자격 증명 로그온)에서 SYSTEM으로의 전환도 탐지합니다.",
+      "defTooltipEn": "Monitor Windows Security Event ID 4673 (Privileged Service Called) for SeTcbPrivilege usage. Also detect transitions to SYSTEM in Event ID 4648 (Explicit Credential Logon).",
+      "hackerLog": {
+        "title": "system_impersonation.log",
+        "lines": [
+          { "log": "impersonate_token \"NT AUTHORITY\\\\SYSTEM\"", "desc": "💡 SYSTEM 토큰을 가장하여 최고 권한을 획득합니다" },
+          { "log": "Successfully impersonated user NT AUTHORITY\\SYSTEM", "desc": "💡 이제 모든 시스템 리소스에 무제한 접근이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "NT AUTHORITY\\SYSTEM", "desc": "Windows 운영체제의 최고 권한 계정으로, 모든 시스템 리소스에 접근할 수 있습니다" },
+        { "term": "Token Impersonation", "desc": "다른 사용자의 보안 토큰을 사용하여 해당 사용자의 권한으로 작업을 수행하는 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> getuid",
+      "out": "Server username: NT AUTHORITY\\SYSTEM",
+      "def": "[SIEM] Confirmed SYSTEM-level access by compromised session on PC-{userName}",
+      "defAction": "Correlation: Token impersonation + SYSTEM access confirmed\nTimeline: 45 seconds from initial access to SYSTEM\nRisk Level: Critical\nAction: Preserve forensic evidence",
+      "desc": "SYSTEM 권한으로 성공적으로 전환되었음을 확인합니다. 모든 방어 메커니즘을 무력화할 수 있는 최고 권한입니다.",
+      "descEn": "Confirms successful transition to SYSTEM privileges. This is the highest privilege level that can neutralize all defense mechanisms.",
+      "stepTitle": "SYSTEM 권한 확인",
+      "stepTitleEn": "SYSTEM Privilege Confirmed",
+      "feynman": "변장이 완벽하게 되었는지 거울로 확인하는 것과 같습니다. getuid 명령으로 현재 '누구로 보이는지' 확인하면, NT AUTHORITY\\SYSTEM으로 표시됩니다. 변장 성공입니다.",
+      "feynmanEn": "It's like checking in a mirror that the disguise is perfect. The getuid command confirms 'who you appear as', showing NT AUTHORITY\\SYSTEM. Disguise successful.",
+      "expert": "SYSTEM 권한 획득 후 공격자는 SAM 하이브 덤프, LSASS 메모리 접근, 서비스 설치, 드라이버 로드 등 거의 모든 작업이 가능합니다. 45초 내 권한 상승이 완료되었다는 것은 자동화된 공격 도구가 사용되었음을 나타냅니다. UEBA(User and Entity Behavior Analytics)로 이상 행위를 탐지해야 합니다.",
+      "expertEn": "After gaining SYSTEM, the attacker can perform nearly any action: SAM hive dumps, LSASS memory access, service installation, driver loading, etc. Privilege escalation completing in 45 seconds indicates automated attack tooling. UEBA (User and Entity Behavior Analytics) should detect anomalous behavior.",
+      "defTooltip": "SIEM에서 단일 호스트에서 짧은 시간 내 권한 상승 이벤트 체인(Event ID 4672 → 4673 → 4624)을 상관분석하세요. 45초 내 SYSTEM 획득은 자동화 공격 지표입니다.",
+      "defTooltipEn": "Correlate privilege escalation event chains (Event ID 4672 → 4673 → 4624) on a single host within short timeframes in SIEM. SYSTEM acquisition within 45 seconds is an automated attack indicator.",
+      "hackerLog": {
+        "title": "uid_check.log",
+        "lines": [
+          { "log": "getuid", "desc": "💡 현재 세션의 사용자 ID를 확인하여 권한 상승 성공 여부를 검증합니다" },
+          { "log": "Server username: NT AUTHORITY\\SYSTEM", "desc": "💡 최고 권한인 SYSTEM으로의 토큰 가장이 성공적으로 확인되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "getuid", "desc": "Meterpreter에서 현재 세션이 어떤 사용자 권한으로 실행되고 있는지 확인하는 명령입니다" },
+        { "term": "Privilege Escalation", "desc": "낮은 권한에서 높은 권한으로 상승하는 공격 기법으로, MITRE ATT&CK의 주요 전술입니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> impersonate_token \"{companyName}\\\\DomainAdmin01\"",
+      "out": "[+] Impersonation token available\n[+] Successfully impersonated user {companyName}\\DomainAdmin01",
+      "def": "[EDR] CRITICAL: Domain Admin token impersonation detected",
+      "defAction": "Token Operation: Impersonation\nNew Identity: {companyName}\\DomainAdmin01\nOriginal Host: PC-{userName}\nRisk Level: Critical\nAction: Disable DomainAdmin01 account, force password reset",
+      "desc": "도메인 관리자 토큰을 가장하여 Active Directory 전체에 대한 관리자 권한을 획득합니다.",
+      "descEn": "Impersonates the Domain Admin token to gain administrative privileges across the entire Active Directory.",
+      "stepTitle": "도메인 관리자 가장",
+      "stepTitleEn": "Domain Admin Impersonation",
+      "feynman": "회사 CEO의 명함과 도장을 복제하는 것과 같습니다. 도메인 관리자 토큰을 가장하면 회사의 모든 컴퓨터, 모든 서버, 모든 사용자 계정을 제어할 수 있습니다. 단 한 대의 컴퓨터에서 전체 네트워크를 장악할 수 있습니다.",
+      "feynmanEn": "It's like duplicating the CEO's business card and stamp. Impersonating the Domain Admin token gives control over every computer, every server, and every user account in the company. The entire network can be controlled from a single computer.",
+      "expert": "도메인 관리자 토큰 가장은 T1134.001의 가장 위험한 시나리오입니다. 이 토큰으로 DCSync(T1003.006), GPO 수정, 사용자 추가/삭제 등이 가능합니다. Tier 0 보호 모델에서 도메인 관리자는 전용 PAW(Privileged Access Workstation)에서만 로그인해야 합니다.",
+      "expertEn": "Domain Admin token impersonation is the most dangerous T1134.001 scenario. This token enables DCSync (T1003.006), GPO modification, user add/delete, etc. In Tier 0 protection models, Domain Admins should only log in from dedicated PAWs (Privileged Access Workstations).",
+      "defTooltip": "도메인 관리자 계정의 로그온을 전용 관리 워크스테이션(PAW)으로 제한하세요. Event ID 4624에서 DA 계정이 비PAW 호스트에서 로그온하면 즉시 알림을 발생시킵니다.",
+      "defTooltipEn": "Restrict Domain Admin account logons to dedicated PAWs. Generate immediate alerts in Event ID 4624 when DA accounts log on from non-PAW hosts.",
+      "hackerLog": {
+        "title": "domain_admin_impersonation.log",
+        "lines": [
+          { "log": "impersonate_token \"{companyName}\\\\DomainAdmin01\"", "desc": "💡 도메인 관리자 토큰을 가장하여 AD 전체 관리 권한을 획득합니다" },
+          { "log": "Successfully impersonated user {companyName}\\DomainAdmin01", "desc": "💡 도메인 관리자로의 가장이 성공하여 전체 도메인 장악이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Domain Admin", "desc": "Active Directory에서 모든 도메인 리소스에 대한 완전한 관리 권한을 가진 계정 그룹입니다" },
+        { "term": "PAW (Privileged Access Workstation)", "desc": "관리자 계정 전용으로 격리된 보안 워크스테이션으로, 토큰 탈취 위험을 줄입니다" }
+      ]
+    },
+    {
+      "cmd": "net group \"Domain Admins\" compromised_user /add /domain",
+      "out": "The request will be processed at a domain controller for domain {companyName}.local.\n\nThe command completed successfully.",
+      "def": "[SIEM] CRITICAL: New member added to Domain Admins group from PC-{userName}",
+      "defAction": "Group: Domain Admins\nAction: Member Added -> compromised_user\nSource: PC-{userName} (impersonated DomainAdmin01)\nRisk Level: Critical\nAction: REMOVE user from group, lock down DC, full IR activation",
+      "desc": "도메인 관리자 권한으로 공격자의 계정을 Domain Admins 그룹에 추가합니다. 도메인 전체를 장악하는 결정적 단계입니다.",
+      "descEn": "Uses Domain Admin privileges to add the attacker's account to the Domain Admins group. This is the decisive step to take over the entire domain.",
+      "stepTitle": "도메인 관리자 그룹 변조",
+      "stepTitleEn": "Domain Admin Group Manipulation",
+      "feynman": "도둑이 자기 이름으로 된 새 마스터키를 만드는 것과 같습니다. 공격자의 계정을 Domain Admins에 추가하면, 더 이상 다른 사람의 토큰을 빌릴 필요 없이 영구적으로 최고 권한을 갖게 됩니다.",
+      "feynmanEn": "It's like a thief making a new master key with their own name on it. Adding the attacker's account to Domain Admins means they no longer need to borrow someone else's token - they permanently have the highest privileges.",
+      "expert": "Domain Admins 그룹 변조는 T1098(Account Manipulation)에 해당합니다. Event ID 4728(보안 그룹 구성원 추가)이 즉시 생성되므로 SIEM에서 실시간 모니터링해야 합니다. AdminSDHolder와 SDProp 메커니즘으로 인해 추가된 계정에 자동으로 보호된 ACL이 적용됩니다.",
+      "expertEn": "Domain Admins group manipulation maps to T1098 (Account Manipulation). Event ID 4728 (Security Group Member Added) is immediately generated and must be monitored in SIEM in real-time. AdminSDHolder and SDProp mechanisms automatically apply protected ACLs to added accounts.",
+      "defTooltip": "Windows Security Event ID 4728(보안 그룹 구성원 추가)에서 Domain Admins, Enterprise Admins 등 특권 그룹 변경을 실시간 모니터링하세요. 이 이벤트는 최우선 알림으로 설정해야 합니다.",
+      "defTooltipEn": "Monitor Windows Security Event ID 4728 (Security Group Member Added) in real-time for changes to privileged groups like Domain Admins and Enterprise Admins. This event should be set as a top-priority alert.",
+      "hackerLog": {
+        "title": "group_manipulation.log",
+        "lines": [
+          { "log": "net group \"Domain Admins\" compromised_user /add /domain", "desc": "💡 공격자 계정을 Domain Admins 그룹에 추가하여 영구적 관리 권한을 확보합니다" },
+          { "log": "The command completed successfully.", "desc": "💡 도메인 관리자 그룹 추가 성공 - 도메인 전체가 침해되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Domain Admins Group", "desc": "Active Directory의 최고 관리자 그룹으로, 구성원은 모든 도메인 리소스에 대한 완전한 제어권을 가집니다" },
+        { "term": "Account Manipulation (T1098)", "desc": "공격자가 계정 속성을 수정하여 지속적 접근을 유지하는 MITRE ATT&CK 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "meterpreter> rev2self",
+      "out": "[*] Reverted to original user: {companyName}\\{userName}\n[*] Token impersonation ended.",
+      "def": "[EDR] Token reverted to original user - anti-forensics behavior",
+      "defAction": "Process: payload.exe (PID: 3200)\nToken Reverted: SYSTEM -> {companyName}\\{userName}\nRisk Level: High\nAction: Damage assessment in progress",
+      "desc": "공격자가 원래 사용자로 복귀합니다. 토큰 가장 흔적을 줄이기 위한 안티포렌식 행위입니다.",
+      "descEn": "The attacker reverts to the original user. This is anti-forensic behavior to reduce traces of token impersonation.",
+      "stepTitle": "원래 사용자로 복귀",
+      "stepTitleEn": "Revert to Original User",
+      "feynman": "변장을 풀고 원래 모습으로 돌아오는 것과 같습니다. 이미 자기 이름의 마스터키(Domain Admin 계정)를 만들었으므로, 변장을 유지할 필요가 없습니다. 원래 모습으로 돌아오면 포렌식 조사에서 의심받을 가능성도 줄어듭니다.",
+      "feynmanEn": "It's like removing the disguise and returning to your original appearance. Since a master key (Domain Admin account) with their own name was already created, there's no need to maintain the disguise. Reverting reduces suspicion in forensic investigations.",
+      "expert": "rev2self는 RevertToSelf API를 호출하여 토큰을 원래 상태로 복원합니다. 그러나 이미 Domain Admins에 추가된 계정은 유지되므로, 토큰 복귀는 순수한 안티포렌식 행위입니다. 포렌식에서는 LSASS 메모리 덤프와 이벤트 로그 상관분석으로 토큰 가장 흔적을 추적할 수 있습니다.",
+      "expertEn": "rev2self calls the RevertToSelf API to restore the token to its original state. However, since the account added to Domain Admins persists, token reversion is purely anti-forensic. Forensics can trace token impersonation through LSASS memory dumps and event log correlation.",
+      "defTooltip": "포렌식 관점에서 토큰 가장 이벤트 체인(Event ID 4624 Type 9 → 4672 → 4728)을 타임라인 분석하세요. 토큰 복귀 후에도 이전 활동의 감사 로그는 유지됩니다.",
+      "defTooltipEn": "From a forensic perspective, analyze the token impersonation event chain timeline (Event ID 4624 Type 9 → 4672 → 4728). Audit logs of previous activities persist even after token reversion.",
+      "hackerLog": {
+        "title": "rev2self.log",
+        "lines": [
+          { "log": "rev2self", "desc": "💡 토큰 가장을 해제하고 원래 사용자 컨텍스트로 복귀합니다" },
+          { "log": "Reverted to original user: {companyName}\\{userName}", "desc": "💡 안티포렌식 목적으로 원래 사용자로 돌아왔지만, 피해는 이미 발생했습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "RevertToSelf", "desc": "가장된 토큰을 해제하고 프로세스의 원래 보안 컨텍스트로 복귀하는 Windows API입니다" },
+        { "term": "Anti-Forensics", "desc": "포렌식 조사를 방해하기 위해 증거를 삭제하거나 흔적을 줄이는 행위입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "payload.exe (PID: 3200)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "incognito module", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "token: NT AUTHORITY\\SYSTEM", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "token: {companyName}\\DomainAdmin01", "depth": 3, "alert": true, "minStep": 5 },
+    { "name": "net.exe (PID: 6100)", "depth": 2, "alert": true, "minStep": 6 },
+    { "name": "[Reverted to {userName}]", "depth": 2, "alert": false, "minStep": 7 }
+  ]
+}

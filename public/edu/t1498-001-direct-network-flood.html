@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1498.001">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1498-001-direct-network-flood&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT 사이버보안 교육 — T1498.001 Direct Network Flood DDoS">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1498.001 DDoS — Direct Network Flood</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s}
+        .glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}
+        .dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+        .hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}
+        .hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F}
+        .terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px}.dark ::-webkit-scrollbar-thumb{background:#F4D06F}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="goToDashboard()" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(187,62,3,.08)'" onmouseout="this.style.background='transparent'">← 매트릭스 대시보드</button><a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:rgba(187,62,3,.5);text-decoration:none;" class="hidden sm:inline">gotroot.co.kr ↗</a></div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2] mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1498.001: Direct Network Flood</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch1">1. DDoS란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch2">2. SYN/UDP/Amplification</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch3">3. DDoS 트래픽 시뮬레이션</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Impact</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">DDoS</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">가게 앞에 수천 명이 줄 서서 진짜 손님 못 들어오게 하기 — DDoS</p>
+            </header>
+
+            <!-- Ch1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> DDoS란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">🏪 ➜ 👥👥👥 ➜ 🚫 ➜ 😱</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"가게 앞에 수천 명이 줄 서서 진짜 손님 못 들어오게 하기"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">작은 빵집에 갑자기 <strong>수천 명의 가짜 손님</strong>이 몰려와 줄을 섭니다. 진짜 손님은 가게에 들어갈 수 없고, 결국 영업을 못 합니다. <strong>DDoS(Distributed Denial of Service)</strong>는 수많은 감염 PC(봇넷)에서 동시에 대량의 트래픽을 보내 서버를 마비시키는 공격입니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">DDoS의 목적</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">서비스를 마비시키는 것 자체가 목적입니다. 경쟁사 방해, 정치적 보복, 협박(DDoS 중단 대가 요구), 다른 공격의 연막 등 다양한 동기가 있습니다.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-panel p-4 rounded-xl text-center">
+                            <div class="text-3xl mb-2">🤖</div>
+                            <div class="text-sm font-bold hl-teal">봇넷 (Botnet)</div>
+                            <div class="text-xs text-cgray dark:text-slate-400 mt-1">수만~수십만 대의 감염 PC/IoT 기기 동원</div>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl text-center">
+                            <div class="text-3xl mb-2">📈</div>
+                            <div class="text-sm font-bold hl-teal">Tbps 규모</div>
+                            <div class="text-xs text-cgray dark:text-slate-400 mt-1">최대 수 Tbps의 공격 트래픽 가능</div>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl text-center">
+                            <div class="text-3xl mb-2">💰</div>
+                            <div class="text-sm font-bold hl-teal">피해 규모</div>
+                            <div class="text-xs text-cgray dark:text-slate-400 mt-1">서비스 중단 시 시간당 수천만원 손실</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> SYN Flood, UDP Flood, Amplification</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-panel p-5 rounded-xl border-t-4 border-t-red-400">
+                            <h3 class="font-bold text-sm text-red-600 dark:text-red-400 mb-2 text-center">SYN Flood</h3>
+                            <p class="text-xs text-cgray dark:text-slate-400">TCP 3-Way Handshake의 SYN만 보내고 ACK를 보내지 않음. 서버의 연결 대기 테이블을 가득 채움</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h3 class="font-bold text-sm hl-yel mb-2 text-center">UDP Flood</h3>
+                            <p class="text-xs text-cgray dark:text-slate-400">랜덤 포트로 대량의 UDP 패킷 전송. 서버가 각 패킷에 ICMP Unreachable 응답 시 과부하</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-t-4 border-t-[#9DD9D2]">
+                            <h3 class="font-bold text-sm hl-teal mb-2 text-center">Amplification</h3>
+                            <p class="text-xs text-cgray dark:text-slate-400">DNS/NTP 서버에 위조된 IP(피해자)로 요청. 작은 요청이 수십 배 큰 응답으로 증폭되어 피해자에게 전달</p>
+                        </div>
+                    </div>
+                    <div class="terminal-bg p-4 rounded-xl text-xs">
+                        <div class="text-slate-500"># SYN Flood 시 서버 상태 (개념)</div>
+                        <div class="text-[#9DD9D2]">netstat -an | grep SYN_RECV</div>
+                        <div class="text-slate-400">tcp 0 0 192.168.1.1:80 10.0.0.1:12345 SYN_RECV</div>
+                        <div class="text-slate-400">tcp 0 0 192.168.1.1:80 10.0.0.2:23456 SYN_RECV</div>
+                        <div class="text-slate-400">tcp 0 0 192.168.1.1:80 10.0.0.3:34567 SYN_RECV</div>
+                        <div class="text-[#F4D06F]">... 수만 개의 SYN_RECV 연결 → 서버 연결 테이블 포화</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> Mini Lab — DDoS 트래픽 그래프 시뮬레이션</h2>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm">
+                            <span class="hl-teal">Mini Lab: 정상 vs 공격 트래픽 그래프</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div>
+                        </div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">트래픽 그래프를 관찰하세요. 정상 트래픽 후 DDoS 공격이 시작됩니다.</p>
+                            <div class="flex justify-center gap-3 mb-4">
+                                <button onclick="startDdos()" id="btn-ddos" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded shadow-sm transition border border-[#7cc2b9]">📊 시뮬레이션 시작</button>
+                                <button onclick="activateWaf()" id="btn-waf" disabled class="opacity-50 cursor-not-allowed bg-[#F4D06F] hover:bg-[#e3c160] text-yellow-900 font-bold py-2 px-4 rounded shadow-sm transition text-sm border border-[#d4b050]">🛡️ WAF + Rate Limiting 적용</button>
+                            </div>
+                            <!-- ASCII-style traffic graph -->
+                            <div class="terminal-bg p-4 rounded-lg">
+                                <div class="flex items-end gap-[2px] h-40 justify-center" id="traffic-graph">
+                                    <!-- bars injected by JS -->
+                                </div>
+                                <div class="flex justify-between mt-2 text-[10px] text-slate-500 px-2">
+                                    <span>00:00</span><span>시간 →</span><span id="graph-time">--:--</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-center gap-4 mt-3 text-xs">
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-[#9DD9D2] inline-block"></span> 정상 트래픽</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-500 inline-block"></span> 공격 트래픽</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-[#F4D06F] inline-block"></span> WAF 차단</span>
+                            </div>
+                            <div id="server-status" class="mt-3 text-center text-sm font-bold text-[#9DD9D2]">서버 상태: 정상 (200 OK)</div>
+                            <div id="ddos-result" class="hidden mt-4 p-4 rounded text-center text-sm font-bold"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl mt-8">
+                        <h3 class="text-xl font-bold mb-4 text-[#1e293b] dark:text-white">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. SYN Flood 공격의 원리는?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> 대용량 파일을 서버에 업로드하여 디스크를 채우는 것</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> TCP 연결의 SYN만 보내 서버의 연결 테이블을 가득 채우는 것</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> 서버의 비밀번호를 무차별 대입하는 것</label>
+                                </div>
+                            </div>
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. DDoS 방어에 효과적인 조합은?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="1" class="mr-3"> 서버 하드웨어를 업그레이드하는 것만으로 충분</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="2" class="mr-3"> CDN + WAF + Rate Limiting + ISP 블랙홀 라우팅</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="3" class="mr-3"> 방화벽에서 모든 외부 접속 차단</label>
+                                </div>
+                            </div>
+                            <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                        </div>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">DDoS 학습 완료!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">DDoS 공격의 원리와 WAF, Rate Limiting 등 방어 전략을 학습했습니다.</p>
+                <button onclick="goToDashboard()" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 hover:shadow-2xl transition">← 매트릭스 대시보드로 돌아가기</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function goToDashboard(){window.location.href='/';}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        var ddosInterval=null, ddosStep=0, wafActive=false, serverDown=false;
+        function startDdos(){
+            var btn=document.getElementById('btn-ddos');btn.disabled=true;btn.classList.add('opacity-50');
+            var graph=document.getElementById('traffic-graph');graph.innerHTML='';
+            ddosStep=0;wafActive=false;serverDown=false;
+            document.getElementById('server-status').textContent='서버 상태: 정상 (200 OK)';
+            document.getElementById('server-status').className='mt-3 text-center text-sm font-bold text-[#9DD9D2]';
+            document.getElementById('ddos-result').classList.add('hidden');
+
+            ddosInterval=setInterval(function(){
+                ddosStep++;
+                var bar=document.createElement('div');
+                bar.className='rounded-t';
+                bar.style.width='6px';
+                bar.style.transition='height 0.3s';
+
+                if(ddosStep<=12){
+                    // Normal traffic
+                    var h=Math.floor(Math.random()*20)+10;
+                    bar.style.height=h+'px';bar.style.background='#9DD9D2';
+                    document.getElementById('graph-time').textContent='00:'+String(ddosStep*5).padStart(2,'0');
+                } else if(ddosStep<=30){
+                    // DDoS attack
+                    if(ddosStep===13){
+                        document.getElementById('btn-waf').disabled=false;
+                        document.getElementById('btn-waf').classList.remove('opacity-50','cursor-not-allowed');
+                    }
+                    if(wafActive){
+                        var h=Math.floor(Math.random()*15)+10;
+                        bar.style.height=h+'px';bar.style.background='#F4D06F';
+                    } else {
+                        var h=Math.floor(Math.random()*40)+100;
+                        bar.style.height=Math.min(h,160)+'px';bar.style.background='#ef4444';
+                        if(!serverDown&&ddosStep>18){
+                            serverDown=true;
+                            document.getElementById('server-status').textContent='서버 상태: 다운! (503 Service Unavailable)';
+                            document.getElementById('server-status').className='mt-3 text-center text-sm font-bold text-red-500';
+                        }
+                    }
+                    document.getElementById('graph-time').textContent='00:'+String(ddosStep*5).padStart(2,'0');
+                } else {
+                    clearInterval(ddosInterval);
+                    var res=document.getElementById('ddos-result');res.classList.remove('hidden');
+                    if(wafActive){
+                        res.className='mt-4 p-4 rounded text-center text-sm font-bold bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';
+                        res.innerHTML='WAF + Rate Limiting 적용으로 DDoS 공격을 성공적으로 방어했습니다!<br><span class="text-xs font-normal block mt-1">비정상 트래픽이 필터링되어 정상 서비스가 유지되었습니다.</span>';
+                        document.getElementById('server-status').textContent='서버 상태: 정상 복구 (200 OK)';
+                        document.getElementById('server-status').className='mt-3 text-center text-sm font-bold text-[#9DD9D2]';
+                    } else {
+                        res.className='mt-4 p-4 rounded text-center text-sm font-bold bg-red-100 border border-red-500 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+                        res.innerHTML='DDoS 공격으로 서버가 마비되었습니다!<br><span class="text-xs font-normal block mt-1">방어 조치 없이는 서비스 중단이 불가피합니다.</span>';
+                    }
+                    btn.disabled=false;btn.classList.remove('opacity-50');
+                    return;
+                }
+                graph.appendChild(bar);
+                if(graph.children.length>50)graph.removeChild(graph.firstChild);
+            },300);
+        }
+
+        function activateWaf(){
+            wafActive=true;serverDown=false;
+            document.getElementById('btn-waf').disabled=true;document.getElementById('btn-waf').classList.add('opacity-50');
+            document.getElementById('server-status').textContent='서버 상태: WAF 활성화 - 복구 중...';
+            document.getElementById('server-status').className='mt-3 text-center text-sm font-bold text-[#F4D06F]';
+            setTimeout(function(){
+                document.getElementById('server-status').textContent='서버 상태: 정상 (WAF 보호 중)';
+                document.getElementById('server-status').className='mt-3 text-center text-sm font-bold text-[#9DD9D2]';
+            },2000);
+        }
+
+        function checkQuiz(){
+            var q1=document.querySelector('input[name="q1"]:checked');
+            var q2=document.querySelector('input[name="q2"]:checked');
+            if(!q1||!q2){alert('모든 문제에 답을 선택해주세요.');return;}
+            var score=0;if(q1.value==='2')score++;if(q2.value==='2')score++;
+            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
+            if(score===2){res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';res.textContent='모두 정답! DDoS 공격 원리와 다층 방어 전략을 잘 이해했습니다.';}
+            else{res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';res.textContent=score+'/2 정답입니다. 틀린 문제를 다시 확인해 보세요.';}
+        }
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+    </div>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

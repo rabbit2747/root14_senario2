@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1547.001" data-level="advanced">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1547-001-registry-run-keys-advanced&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1547.001 고급: CLSID 하이재킹과 포렌식 분석">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1547.001 고급: CLSID 하이재킹과 포렌식 분석 — (주)갓루트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}
+        .glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(239,68,68,0.3);box-shadow:0 8px 32px rgba(30,41,59,0.05);}
+        .dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(239,68,68,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+        .hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}
+        .hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}
+        .hl-red{color:#dc2626;font-weight:700;}.dark .hl-red{color:#f87171;}
+        .nav-item.active{background:linear-gradient(90deg,rgba(239,68,68,0.2) 0%,transparent 100%);border-left:4px solid #ef4444;color:#dc2626;font-weight:700;}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(248,113,113,0.15) 0%,transparent 100%);border-left:4px solid #f87171;color:#f87171;}
+        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#f87171;}
+        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}.drag-item.dragging{opacity:0.5;transform:scale(0.95);}
+        .drop-zone{min-height:48px;border:2px dashed transparent;border-radius:8px;transition:all 0.2s;}.drop-zone.drag-over{border-color:#ef4444;background:rgba(239,68,68,0.1);}
+        .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
+        .step-btn{transition:all 0.3s;}.step-btn.active{border-color:#ef4444!important;background:rgba(239,68,68,0.1)!important;}.step-btn.completed{border-color:#059669!important;background:rgba(5,150,105,0.1)!important;}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-red-200 selection:text-red-900 transition-colors duration-300">
+    <!-- Brand Header Bar -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3">
+            <span style="font-size:8px;color:#ef4444;font-weight:700;background:rgba(239,68,68,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.3);">ADVANCED</span>
+            <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-red-400"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-red-400/50 hover:border-red-400 shadow transition-all">← 대시보드</button>
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel border-r border-red-400/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-red-400/30">
+            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-red tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1547.001: Registry Run Keys / Startup Folder</p>
+            <span class="inline-block mt-2 text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-400/30 px-2 py-0.5 rounded">🔴 고급 (Advanced)</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch1">1. CLSID 하이재킹 (COM Hijacking)</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch2">2. DLL Search Order Hijacking</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch3">3. COM 오브젝트 지속성 심화</button>
+            <button onclick="go('ch4')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch4">4. 포렌식: NTUSER.DAT 분석</button>
+            <button onclick="go('ch5')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch5">5. ShimCache &amp; AmCache 분석</button>
+            <button onclick="go('ch6')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch6">6. YARA 규칙: 지속성 악성코드 탐지</button>
+            <button onclick="go('ch7')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch7">7. 엔터프라이즈 방어: GPO &amp; SIEM</button>
+            <button onclick="go('ch8')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="ch8">8. 사고 대응: 지속성 제거 절차</button>
+            <button onclick="go('minilab-0')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="minilab-0">9. Mini Lab — 사고 대응 절차 순서</button>
+            <button onclick="go('minilab-1')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="minilab-1">10. Mini Lab — COM 하이재킹 탐지</button>
+            <button onclick="go('minilab-2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="minilab-2">11. Mini Lab — 포렌식 아티팩트 매칭</button>
+            <button onclick="go('quiz')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400" data-target="quiz">Q. 종합 퀴즈</button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-red-500/20 border border-red-400 hl-red font-mono text-sm mb-4">Persistence, Privilege Escalation</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Advanced Persistence: CLSID Hijacking &amp; Forensics</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">고급 지속성: CLSID 하이재킹과 포렌식 분석</p>
+                <div class="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500 dark:text-slate-500">
+                    <span>⏱ 약 50분</span><span>·</span><span>📚 8챕터 + 퀴즈</span><span>·</span><span>🧪 3개 미니 랩</span>
+                </div>
+            </header>
+
+            <div class="glass-panel rounded-xl p-8 border-l-4 border-l-red-500 relative overflow-hidden">
+                <div class="absolute -top-6 -right-6 text-[120px] opacity-[0.04] select-none pointer-events-none">⚡</div>
+                <h2 class="text-2xl font-bold mb-4 text-red-700 dark:text-red-400">COM 오브젝트 하이재킹과 레지스트리 포렌식을 수행할 수 있나요?</h2>
+                <p class="text-cgray dark:text-slate-300 leading-relaxed mb-6">고급 과정에서는 CLSID 하이재킹, DLL Search Order Hijacking, COM 오브젝트 지속성 등 고급 레지스트리 기반 지속성 기법을 분석합니다. 또한 NTUSER.DAT, ShimCache 등 포렌식 아티팩트 분석과 YARA 규칙 작성, 엔터프라이즈 방어 전략을 학습합니다.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700 text-center"><div class="text-2xl mb-2">🔬</div><div class="font-bold text-sm text-red-700 dark:text-red-400">고급 지속성 기법 분석</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1">CLSID 하이재킹과 COM 오브젝트 지속성의 코드를 심층 분석합니다</div></div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700 text-center"><div class="text-2xl mb-2">🛡️</div><div class="font-bold text-sm text-red-700 dark:text-red-400">포렌식 아티팩트 분석</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1">NTUSER.DAT, ShimCache, AmCache에서 지속성 증거를 추출합니다</div></div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-300 dark:border-red-700 text-center"><div class="text-2xl mb-2">📊</div><div class="font-bold text-sm text-red-700 dark:text-red-400">엔터프라이즈 방어</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1">GPO, WDAC, SIEM 연동을 통한 조직 수준 방어 전략을 학습합니다</div></div>
+                </div>
+            </div>
+
+            <!-- Chapters -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#1.</span> CLSID 하이재킹 (COM Hijacking)</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">🔩</div><h3 class="font-bold text-lg mb-2 hl-red">COM 오브젝트와 CLSID</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">COM(Component Object Model) 오브젝트는 Windows에서 소프트웨어 컴포넌트 간 통신을 위한 표준 인터페이스입니다. 각 COM 오브젝트는 CLSID(Class Identifier)라는 고유 GUID로 식별됩니다. Windows는 CLSID를 레지스트리에서 검색하여 해당 DLL 또는 EXE를 로드합니다. 공격자는 이 조회 순서를 악용하여 악성 DLL을 로드시킵니다.</p></div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">com_hijack.ps1</span></div><span class="text-[10px] text-slate-500 font-mono">powershell</span></div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — COM 하이재킹 원리 분석</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># COM 오브젝트 조회 순서:</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre"># 1) HKCU\Software\Classes\CLSID\{GUID}  ← 공격자 삽입!</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre"># 2) HKLM\Software\Classes\CLSID\{GUID}  ← 원본 DLL</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># 예: 자주 호출되는 COM 오브젝트 하이재킹</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">$clsid = '{b5f8350b-0548-48b1-a6ee-88bd00b4a5e7}'</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># HKCU에 하이재킹 엔트리 생성</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">$regPath = "HKCU:\Software\Classes\CLSID\$clsid\InProcServer32"</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">New-Item -Path $regPath -Force</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">Set-ItemProperty -Path $regPath -Name '(Default)' `</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    -Value 'C:\Users\Public\malicious.dll'</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">Set-ItemProperty -Path $regPath -Name 'ThreadingModel' `</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    -Value 'Both'</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 bg-red-50/50 dark:bg-red-900/10"><h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">⚠️ COM 하이재킹의 위험성</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">COM 하이재킹은 Run 키와 달리 Autoruns의 기본 필터에 잘 잡히지 않으며, 정상 Windows 프로세스(explorer.exe 등)가 악성 DLL을 로드하므로 행위 기반 탐지도 어렵습니다. EDR이 잡기 어려운 고급 지속성 기법입니다.</p></div>
+                </div>
+            </section>
+
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#2.</span> DLL Search Order Hijacking via Registry</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">📦</div><h3 class="font-bold text-lg mb-2 hl-red">DLL 검색 순서와 레지스트리 악용</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">Windows는 DLL을 로드할 때 특정 순서로 경로를 검색합니다. KnownDLLs 레지스트리 키에 등록되지 않은 DLL은 이 검색 순서를 따릅니다. 공격자는 레지스트리를 수정하여 정상 DLL 대신 악성 DLL이 먼저 로드되도록 조작합니다.</p></div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">dll_hijack_analysis.ps1</span></div><span class="text-[10px] text-slate-500 font-mono">powershell</span></div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — DLL 하이재킹 분석용</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># Windows DLL 검색 순서 분석</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre"># 1. KnownDLLs 레지스트리 확인</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre"># 2. 애플리케이션 디렉토리</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre"># 3. System32 → System → Windows → PATH</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># KnownDLLs에 등록된 DLL 목록 확인</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">$knownDlls = Get-ItemProperty -Path `</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs'</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre"># KnownDLLs에 없는 DLL = 하이재킹 가능 대상</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">$knownDlls.PSObject.Properties | Where-Object {</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    $_.Name -notlike 'PS*'</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">} | ForEach-Object {</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    Write-Host "Protected: $($_.Name) = $($_.Value)"</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#3.</span> COM 오브젝트 지속성 심화</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">🎭</div><h3 class="font-bold text-lg mb-2 hl-red">TreatAs 및 ScriptletURL 하이재킹</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">COM 하이재킹에는 InProcServer32 외에도 여러 변형이 존재합니다: ① TreatAs 키 — CLSID를 다른 CLSID로 리다이렉션. ② ScriptletURL — COM 오브젝트가 로드될 때 원격 URL에서 스크립틀릿을 실행. ③ ProgID 하이재킹 — 애플리케이션이 ProgID로 COM을 호출할 때 CLSID 매핑을 조작.</p></div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">taskscheduler_com_hijack.ps1</span></div><span class="text-[10px] text-slate-500 font-mono">powershell</span></div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 실제 APT가 사용하는 기법</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># Task Scheduler COM 하이재킹</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># 이 CLSID는 Task Scheduler가 정기적으로 호출함</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">$clsid = '{0f87369f-a4e5-4cfc-bd3e-73e6154572dd}'</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">$path = "HKCU:\Software\Classes\CLSID\$clsid\InProcServer32"</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre"># HKCU에 오버라이드 생성 (HKLM보다 우선)</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">New-Item -Path $path -Force | Out-Null</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">Set-ItemProperty -Path $path `</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    -Name '(Default)' -Value 'C:\payload.dll'</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># Task Scheduler가 다음 실행 시 payload.dll 로드</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># explorer.exe가 부모 프로세스 → 정상으로 보임</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">🔍</div><h3 class="font-bold text-lg mb-2 hl-red">COM 하이재킹 자동 검색</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">HKCU\Software\Classes\CLSID에 InProcServer32 키가 존재하면 하이재킹 가능성이 높습니다. 정상적으로 이 위치에 COM 엔트리를 등록하는 소프트웨어는 드물기 때문입니다. Autoruns에서 'Everything' 탭으로 이 위치를 확인할 수 있습니다.</p></div>
+                </div>
+            </section>
+
+            <section id="ch4" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#4.</span> 포렌식 아티팩트: NTUSER.DAT 분석</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">📡</div><h3 class="font-bold text-lg mb-2 hl-red">NTUSER.DAT — 사용자 레지스트리 하이브</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">NTUSER.DAT는 각 사용자의 HKCU 레지스트리 하이브를 디스크에 저장한 파일입니다. 위치: C:\Users\&lt;username&gt;\NTUSER.DAT. 오프라인 포렌식에서 이 파일을 분석하면 Run 키, COM 하이재킹, 최근 실행 기록 등을 확인할 수 있습니다.</p></div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">regripper_analysis.bat</span></div><span class="text-[10px] text-slate-500 font-mono">batch</span></div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 포렌식 분석 도구</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM RegRipper를 이용한 NTUSER.DAT 포렌식 분석</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 1단계: Run 키 분석 플러그인 실행</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">rip.exe -r C:\evidence\NTUSER.DAT -p run</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 2단계: 자동 실행 관련 항목 분석</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">rip.exe -r C:\evidence\NTUSER.DAT -p autorun</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 3단계: COM 하이재킹 흔적 분석</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">rip.exe -r C:\evidence\NTUSER.DAT -p clsid</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 4단계: 전체 프로파일링</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">rip.exe -r C:\evidence\NTUSER.DAT -a &gt; full_report.txt</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch5" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#5.</span> ShimCache &amp; AmCache 분석</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">🕵️</div><h3 class="font-bold text-lg mb-2 hl-red">실행 흔적 추적: ShimCache와 AmCache</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">ShimCache(Application Compatibility Cache)는 실행된 적 있거나 시스템이 인식한 실행 파일의 경로와 타임스탬프를 기록합니다. AmCache는 더 상세한 메타데이터(SHA1 해시, PE 헤더 정보)를 포함합니다. 두 아티팩트를 결합하면 악성코드의 실행 이력을 정확하게 재구성할 수 있습니다.</p></div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-red">포렌식 아티팩트 비교</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead><tr class="bg-red-500/10 dark:bg-red-500/5"><th class="text-left p-3 font-bold border-b border-red-400/30">아티팩트</th><th class="text-left p-3 font-bold border-b border-red-400/30">위치</th><th class="text-left p-3 font-bold border-b border-red-400/30">핵심 정보</th><th class="text-left p-3 font-bold border-b border-red-400/30">분석 도구</th></tr></thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">NTUSER.DAT</td><td class="p-3">C:\Users\&lt;user&gt;\</td><td class="p-3">HKCU 레지스트리 전체</td><td class="p-3">RegRipper</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">ShimCache</td><td class="p-3">SYSTEM 하이브</td><td class="p-3">경로 + 타임스탬프</td><td class="p-3">ShimCacheParser</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">AmCache</td><td class="p-3">Amcache.hve</td><td class="p-3">SHA1 + PE 정보</td><td class="p-3">AmcacheParser</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">Prefetch</td><td class="p-3">C:\Windows\Prefetch</td><td class="p-3">실행 횟수 + 시간</td><td class="p-3">PECmd</td></tr>
+                                    <tr><td class="p-3 font-bold">BAM/DAM</td><td class="p-3">SYSTEM 하이브</td><td class="p-3">백그라운드 활동</td><td class="p-3">RegRipper bam</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch6" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#6.</span> YARA 규칙: 자동 실행 악성코드 탐지</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">🎯</div><h3 class="font-bold text-lg mb-2 hl-red">레지스트리 조작 악성코드 YARA 탐지</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">YARA 규칙으로 Run 키를 조작하는 악성코드 바이너리 자체를 탐지할 수 있습니다. 악성코드 내부에는 'CurrentVersion\Run', 'RegSetValueEx' 등의 문자열이 포함되어 있어 패턴 매칭으로 탐지합니다.</p></div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">detect_registry_persistence.yar</span></div><span class="text-[10px] text-slate-500 font-mono">yara</span></div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — YARA 탐지 규칙</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">rule Registry_Persistence_Malware {</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    meta:</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        author = "GOTROOT EDU"</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        description = "Detects malware modifying Run keys"</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        severity = "high"</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    strings:</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $reg1 = "CurrentVersion\\Run" ascii wide</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $reg2 = "Software\\Classes\\CLSID" ascii wide</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">        $api1 = "RegSetValueEx" ascii</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">        $api2 = "RegCreateKeyEx" ascii</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    condition:</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        uint16(0) == 0x5A4D and  // PE 파일</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        (1 of ($reg*)) and (1 of ($api*))</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch7" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#7.</span> 엔터프라이즈 방어: GPO &amp; SIEM 연동</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">🏢</div><h3 class="font-bold text-lg mb-2 hl-red">그룹 정책(GPO)으로 자동 실행 제한</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">Active Directory 환경에서 GPO를 통해 Run 키 사용을 제한할 수 있습니다. AppLocker와 WDAC을 결합하면 허용된 프로그램만 실행 가능하며, SIEM 연동을 통해 실시간 탐지 체계를 구축합니다.</p></div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">splunk_detection.spl</span></div><span class="text-[10px] text-slate-500 font-mono">splunk</span></div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — SIEM 탐지 규칙</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">| Splunk SPL: 레지스트리 Run 키 변경 탐지 |</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">index=sysmon EventCode=13</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    TargetObject="*\\CurrentVersion\\Run*"</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    NOT Image IN (</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        "C:\\Program Files*",</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        "C:\\Windows\\System32*"</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    )</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">| stats count by Image, TargetObject, Details</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">| COM 하이재킹 탐지 |</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">index=sysmon EventCode=13</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">    TargetObject="*\\Classes\\CLSID\\*InProcServer32*"</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">    TargetObject="HKU\\*"</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">| table _time, Image, TargetObject, Details</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch8" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#8.</span> 사고 대응: 지속성 제거 절차</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><div class="text-2xl mb-2">🔍</div><h3 class="font-bold text-lg mb-2 hl-red">지속성 기법 탐지 시 대응 절차</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">레지스트리 기반 지속성이 탐지되었을 때의 IR 절차: ① 증거 확보 — 레지스트리 하이브 사본, 메모리 덤프, 디스크 이미지. ② 범위 파악 — 동일 IoC가 다른 시스템에도 존재하는지 SIEM 검색. ③ 제거 — 악성 레지스트리 항목 삭제, 파일 격리. ④ 근본 원인 — 초기 침투 경로 식별. ⑤ 강화 — GPO, EDR 규칙 추가로 재발 방지.</p></div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-red">지속성 유형별 제거 방법</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead><tr class="bg-red-500/10 dark:bg-red-500/5"><th class="text-left p-3 font-bold border-b border-red-400/30">지속성 유형</th><th class="text-left p-3 font-bold border-b border-red-400/30">위치</th><th class="text-left p-3 font-bold border-b border-red-400/30">제거 명령</th></tr></thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">Run 키</td><td class="p-3">HKCU/HKLM\...\Run</td><td class="p-3 font-mono text-xs">reg delete ... /v &lt;name&gt; /f</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">Startup 폴더</td><td class="p-3">shell:startup</td><td class="p-3 font-mono text-xs">del &lt;malicious_file&gt;</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">COM 하이재킹</td><td class="p-3">HKCU\Classes\CLSID</td><td class="p-3 font-mono text-xs">reg delete ...\\CLSID\\{GUID} /f</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">스케줄 작업</td><td class="p-3">Task Scheduler</td><td class="p-3 font-mono text-xs">schtasks /delete /tn &lt;name&gt; /f</td></tr>
+                                    <tr><td class="p-3 font-bold">서비스</td><td class="p-3">HKLM\...\Services</td><td class="p-3 font-mono text-xs">sc delete &lt;service&gt;</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mini Labs -->
+            <section id="minilab-0" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#9.</span> Mini Lab — 사고 대응 절차 순서 배열</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-1.sh</span></div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">레지스트리 기반 지속성이 탐지되었을 때 올바른 대응 순서로 배열하세요.</p>
+                        <div id="order-game-0" class="space-y-2"></div>
+                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <button onclick="checkOrderGame_0()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded font-mono text-sm transition cursor-pointer">순서 확인</button>
+                            <button onclick="initOrderGame_0()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
+                        </div>
+                        <div id="order-result-0" class="hidden mt-4 p-4 rounded text-sm font-mono shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="minilab-1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#10.</span> Mini Lab — COM 하이재킹 탐지 시뮬레이션</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-2.sh</span></div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">COM 오브젝트 하이재킹을 탐지하고 제거하는 과정을 단계별로 따라가 보세요.</p>
+                        <div id="step-click-1" class="space-y-3">
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="0" onclick="handleStepClick_1(0)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">🔍</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">HKCU CLSID 엔트리 검색</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">HKCU\Software\Classes\CLSID에 InProcServer32 키가 존재하는지 확인합니다. 정상적으로 이 위치에 COM 엔트리가 있는 경우는 드물므로 존재 자체가 의심 신호입니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="1" onclick="handleStepClick_1(1)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">📋</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">HKLM 원본과 비교</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">동일 CLSID가 HKLM에도 존재하는지 확인합니다. HKCU와 HKLM에 동일 CLSID가 있으면 HKCU가 우선 적용되므로 하이재킹 가능성이 높습니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="2" onclick="handleStepClick_1(2)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">🔬</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">악성 DLL 파일 분석</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">InProcServer32의 Default 값에 지정된 DLL 파일의 디지털 서명, 해시, VirusTotal 결과를 확인합니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="3" onclick="handleStepClick_1(3)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">📡</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">Sysmon 로그 역추적</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">Event ID 13에서 해당 CLSID 레지스트리 경로가 언제, 어떤 프로세스에 의해 생성되었는지 타임라인을 추적합니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="4" onclick="handleStepClick_1(4)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">🗑️</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">악성 엔트리 제거</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">HKCU의 하이재킹 CLSID 레지스트리 키를 삭제하고, 악성 DLL 파일을 격리합니다. reg delete 명령 사용.</div></div>
+                        </div>
+                        <div id="step-result-1" class="hidden mt-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 text-center"><p class="text-sm font-bold text-red-700 dark:text-red-400">🎉 모든 단계를 완료했습니다!</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="minilab-2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#11.</span> Mini Lab — 포렌식 아티팩트와 분석 정보 매칭</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-3.sh</span></div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">각 포렌식 아티팩트에서 얻을 수 있는 핵심 정보를 매칭하세요.</p>
+                        <div id="match-game-2" class="space-y-4"></div>
+                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="font-mono text-sm">점수: <span id="match-score-2" class="hl-red text-lg">0</span> / <span>5</span></div>
+                            <button onclick="initMatchGame_2()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quiz -->
+            <section id="quiz" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-red-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-red">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="final-quiz" class="space-y-8">
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. COM 하이재킹에서 HKCU가 HKLM보다 우선 적용되는 이유는?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq1" value="1" class="mr-3"> HKCU가 더 최근에 업데이트되기 때문</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq1" value="2" class="mr-3"> Windows COM 런타임이 HKCU를 먼저 검색하는 조회 순서 때문</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq1" value="3" class="mr-3"> HKCU가 더 높은 보안 권한을 가지기 때문</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq1" value="4" class="mr-3"> HKLM은 읽기 전용이기 때문</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-red-50 dark:bg-red-900/20 text-xs text-red-700 dark:text-red-300">💡 Windows COM 런타임은 HKCU를 먼저 검색하고, 없으면 HKLM을 확인합니다. 이 조회 순서 덕분에 관리자 권한 없이도 하이재킹이 가능합니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. RegRipper 'run' 플러그인이 확인하는 항목은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq2" value="1" class="mr-3"> 현재 실행 중인 프로세스 목록</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq2" value="2" class="mr-3"> HKCU Run/RunOnce 키에 등록된 자동 실행 항목</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq2" value="3" class="mr-3"> 시스템 서비스 목록</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq2" value="4" class="mr-3"> 네트워크 연결 기록</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-red-50 dark:bg-red-900/20 text-xs text-red-700 dark:text-red-300">💡 RegRipper의 'run' 플러그인은 NTUSER.DAT에서 Run/RunOnce 키의 모든 값을 추출합니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q3. ShimCache와 AmCache의 핵심 차이점은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq3" value="1" class="mr-3"> ShimCache는 네트워크, AmCache는 파일 정보</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq3" value="2" class="mr-3"> ShimCache는 경로/타임스탬프, AmCache는 SHA1 해시와 PE 메타데이터 추가 포함</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq3" value="3" class="mr-3"> ShimCache는 HKCU, AmCache는 HKLM에 저장</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq3" value="4" class="mr-3"> ShimCache는 실시간, AmCache는 주기적 업데이트</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-red-50 dark:bg-red-900/20 text-xs text-red-700 dark:text-red-300">💡 AmCache는 SHA1 해시, PE 헤더 정보 등 더 상세한 메타데이터를 포함하여 포렌식 분석에 더 유용합니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q4. YARA 규칙에서 'uint16(0) == 0x5A4D'의 의미는?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq4" value="1" class="mr-3"> ZIP 압축 파일인지 확인</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq4" value="2" class="mr-3"> 파일 처음 2바이트가 'MZ' (PE 실행 파일)인지 확인</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq4" value="3" class="mr-3"> 파일 크기 확인</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq4" value="4" class="mr-3"> 해시값 일치 확인</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-red-50 dark:bg-red-900/20 text-xs text-red-700 dark:text-red-300">💡 0x5A4D는 'MZ'로 PE 실행 파일의 매직 바이트입니다. 분석 대상이 실행 파일인 경우에만 규칙을 적용합니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q5. COM 하이재킹이 Run 키보다 탐지가 어려운 이유는?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq5" value="1" class="mr-3"> 네트워크를 사용하지 않기 때문</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq5" value="2" class="mr-3"> 정상 프로세스가 악성 DLL을 로드하므로 행위가 정상으로 보이기 때문</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq5" value="3" class="mr-3"> 레지스트리를 사용하지 않기 때문</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq5" value="4" class="mr-3"> 관리자 권한이 필요하기 때문</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-red-50 dark:bg-red-900/20 text-xs text-red-700 dark:text-red-300">💡 explorer.exe 같은 정상 프로세스가 하이재킹된 DLL을 로드하므로 행위 기반 탐지에서 정상으로 보입니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q6. GPO 'Do not process the run once list'의 효과는?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq6" value="1" class="mr-3"> 모든 Run 키 비활성화</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq6" value="2" class="mr-3"> RunOnce 키의 자동 실행 차단</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq6" value="3" class="mr-3"> Startup 폴더 비활성화</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq6" value="4" class="mr-3"> 레지스트리 편집기 차단</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-red-50 dark:bg-red-900/20 text-xs text-red-700 dark:text-red-300">💡 이 정책은 RunOnce 키의 자동 실행을 차단하여 1회성 페이로드 실행을 방지합니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q7. Splunk COM 하이재킹 탐지 핵심 필터 조건은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq7" value="1" class="mr-3"> EventCode=1 AND Image=explorer.exe</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq7" value="2" class="mr-3"> EventCode=13 AND TargetObject=*Classes\CLSID*InProcServer32* AND HKU\*</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq7" value="3" class="mr-3"> EventCode=3 AND DestinationPort=443</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq7" value="4" class="mr-3"> EventCode=7 AND ImageLoaded=*.dll</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-red-50 dark:bg-red-900/20 text-xs text-red-700 dark:text-red-300">💡 Event ID 13에서 Classes\CLSID와 InProcServer32가 포함되고 HKU에 위치하면 COM 하이재킹입니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q8. 근본 원인 분석(Root Cause Analysis)이 중요한 이유는?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq8" value="1" class="mr-3"> 보고서 작성에 필요</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq8" value="2" class="mr-3"> 초기 침투 경로를 막지 않으면 재침투가 가능하기 때문</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq8" value="3" class="mr-3"> 법적 요구사항</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq8" value="4" class="mr-3"> 상급자 보고용</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-red-50 dark:bg-red-900/20 text-xs text-red-700 dark:text-red-300">💡 지속성을 제거해도 초기 침투 경로가 열려 있으면 공격자가 재침투하여 새로운 지속성을 설치합니다.</div></div>
+                        <button onclick="gradeFinalQuiz()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-lg font-mono transition shadow-sm cursor-pointer">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-6 p-4 rounded-lg text-sm font-mono shadow-sm"></div>
+                </div>
+            </section>
+
+            <!-- Final CTA -->
+            <div class="pt-12 pb-8 text-center border-t border-red-400/30 mt-16">
+                <div class="inline-block bg-red-500/20 text-red-700 dark:text-red-400 px-4 py-1 rounded-full font-bold text-sm mb-4 border border-red-400">🎉 학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">Advanced Persistence: CLSID Hijacking &amp; Forensics 고급 과정을 완료했습니다!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">CLSID 하이재킹, COM 오브젝트 지속성, 포렌식 아티팩트 분석 고급 학습을 마쳤습니다.</p>
+                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-600 text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
+                    <span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span>
+                </button>
+            </div>
+
+        </div>
+    </main>
+    </div>
+
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+        function shuffleArray(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+        /* ═══════ Ordering Game 0 ═══════ */
+        var orderCorrect_0=["SIEM 알림 확인 및 이벤트 분석","감염 시스템 레지스트리 하이브 사본 확보","동일 IoC가 다른 시스템에 존재하는지 검색","악성 레지스트리 항목 및 파일 제거","초기 침투 경로 식별 (Root Cause)","GPO/EDR 규칙 추가로 재발 방지","최종 보고서 작성 및 보안 강화 권고"];
+        function initOrderGame_0(){
+            var container=document.getElementById('order-game-0');container.innerHTML='';
+            document.getElementById('order-result-0').classList.add('hidden');
+            var shuffled=shuffleArray(orderCorrect_0);
+            shuffled.forEach(function(item,idx){
+                var div=document.createElement('div');
+                div.className='drag-item bg-white/50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-200 dark:border-slate-700 flex items-center gap-3';
+                div.draggable=true;div.setAttribute('data-label',item);
+                div.innerHTML='<span class="text-xs font-bold text-slate-400 w-6">'+(idx+1)+'</span><span class="text-sm text-[#1e293b] dark:text-white">'+item+'</span>';
+                div.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/plain',idx);div.classList.add('dragging');});
+                div.addEventListener('dragend',function(){div.classList.remove('dragging');});
+                div.addEventListener('dragover',function(e){e.preventDefault();div.classList.add('drag-over');});
+                div.addEventListener('dragleave',function(){div.classList.remove('drag-over');});
+                div.addEventListener('drop',function(e){e.preventDefault();div.classList.remove('drag-over');var fromIdx=parseInt(e.dataTransfer.getData('text/plain'));var items=container.querySelectorAll('.drag-item');var toIdx=Array.from(items).indexOf(div);if(fromIdx!==toIdx){var fromEl=items[fromIdx];if(fromIdx<toIdx)div.after(fromEl);else div.before(fromEl);var newItems=container.querySelectorAll('.drag-item');newItems.forEach(function(el,i){el.querySelector('span:first-child').textContent=i+1;});}});
+                container.appendChild(div);
+            });
+        }
+        function checkOrderGame_0(){
+            var items=document.querySelectorAll('#order-game-0 .drag-item');var correct=0;
+            items.forEach(function(item,idx){
+                var label=item.getAttribute('data-label');
+                if(label===orderCorrect_0[idx]){correct++;item.style.borderColor='#059669';item.style.background='rgba(5,150,105,0.1)';}
+                else{item.style.borderColor='#dc2626';item.style.background='rgba(220,38,38,0.1)';}
+            });
+            var r=document.getElementById('order-result-0');r.classList.remove('hidden');
+            if(correct===orderCorrect_0.length){r.className='mt-4 p-4 rounded text-sm font-mono shadow-sm bg-green-100 border border-green-400 text-green-700 dark:bg-green-900/30 dark:text-green-400';r.textContent='✅ 완벽! 모든 순서가 올바릅니다.';}
+            else{r.className='mt-4 p-4 rounded text-sm font-mono shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';r.textContent='❌ '+correct+'/'+orderCorrect_0.length+' 정답. 빨간 테두리 항목의 위치를 수정하세요.';}
+        }
+
+        /* ═══════ Step Click 1 ═══════ */
+        var stepCurrent_1=0;
+        function handleStepClick_1(idx){
+            if(idx!==stepCurrent_1)return;
+            var container=document.getElementById('step-click-1');var steps=container.querySelectorAll('.step-btn');
+            steps[idx].classList.add('active');steps[idx].querySelector('.step-detail').classList.remove('hidden');
+            if(idx>0)steps[idx-1].classList.remove('active');
+            if(idx>0)steps[idx-1].classList.add('completed');
+            stepCurrent_1=idx+1;
+            if(stepCurrent_1===5){steps[idx].classList.remove('active');steps[idx].classList.add('completed');document.getElementById('step-result-1').classList.remove('hidden');}
+        }
+
+        /* ═══════ Matching Game 2 ═══════ */
+        var matchItems_2=[{"desc":"사용자별 HKCU 레지스트리 하이브 전체","answer":"NTUSER.DAT"},{"desc":"실행된 파일의 SHA1 해시와 PE 메타데이터","answer":"AmCache"},{"desc":"실행 파일의 경로와 최종 수정 타임스탬프","answer":"ShimCache"},{"desc":"프로그램 실행 횟수와 마지막 실행 시간","answer":"Prefetch"},{"desc":"COM 오브젝트 DLL 경로와 CLSID 매핑","answer":"InProcServer32"}];
+        var matchTypes_2=["NTUSER.DAT","AmCache","ShimCache","Prefetch","InProcServer32"];
+        var matchScore_2=0;var matchAnswered_2=[];
+        function initMatchGame_2(){
+            matchScore_2=0;matchAnswered_2=[];document.getElementById('match-score-2').textContent='0';
+            var container=document.getElementById('match-game-2');container.innerHTML='';
+            matchItems_2.forEach(function(item,idx){
+                var row=document.createElement('div');row.className='bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700';row.id='match-row-2-'+idx;
+                var descP=document.createElement('p');descP.className='text-sm text-cgray dark:text-slate-300 mb-3';descP.textContent=(idx+1)+'. '+item.desc;row.appendChild(descP);
+                var btnContainer=document.createElement('div');btnContainer.className='flex flex-wrap gap-2';
+                shuffleArray(matchTypes_2).forEach(function(type){var btn=document.createElement('button');btn.className='match-btn text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-cgray dark:text-slate-300 font-mono cursor-pointer';btn.textContent=type;btn.onclick=function(){handleMatch_2(idx,type,btn);};btnContainer.appendChild(btn);});
+                row.appendChild(btnContainer);
+                var fb=document.createElement('div');fb.id='match-fb-2-'+idx;fb.className='mt-2 text-xs font-mono hidden';row.appendChild(fb);container.appendChild(row);
+            });
+        }
+        function handleMatch_2(idx,sel,btn){if(matchAnswered_2.indexOf(idx)!==-1)return;matchAnswered_2.push(idx);var fb=document.getElementById('match-fb-2-'+idx);fb.classList.remove('hidden');var rw=document.getElementById('match-row-2-'+idx);var bs=rw.querySelectorAll('.match-btn');if(sel===matchItems_2[idx].answer){matchScore_2++;document.getElementById('match-score-2').textContent=matchScore_2;fb.className='mt-2 text-xs font-mono text-green-600 dark:text-green-400';fb.textContent='✅ 정답!';btn.classList.add('correct');}else{fb.className='mt-2 text-xs font-mono text-red-600 dark:text-red-400';fb.textContent='❌ 오답! 정답: '+matchItems_2[idx].answer;btn.classList.add('wrong');bs.forEach(function(b){if(b.textContent===matchItems_2[idx].answer)b.classList.add('correct');});}bs.forEach(function(b){b.onclick=null;b.style.cursor='default';});}
+
+        /* ═══════ Final Quiz ═══════ */
+        function gradeFinalQuiz(){
+            var questions=document.querySelectorAll('#final-quiz .quiz-q');var correct=0;var total=questions.length;var details=[];
+            questions.forEach(function(q,i){var ans=q.getAttribute('data-correct');var sel=q.querySelector('input[name="fq'+(i+1)+'"]:checked');var labels=q.querySelectorAll('label');var explanation=q.querySelector('.quiz-explanation');if(explanation)explanation.classList.remove('hidden');
+            if(sel&&sel.value===ans){correct++;labels.forEach(function(l){if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});details.push('<div class="text-green-600 dark:text-green-400">✅ Q'+(i+1)+' 정답</div>');}
+            else{labels.forEach(function(l){if(sel&&l.querySelector('input').value===sel.value)l.classList.add('bg-red-50','dark:bg-red-900/20','border-red-400');if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});details.push('<div class="text-red-500">❌ Q'+(i+1)+' 오답'+(sel?'':' (미선택)')+'</div>');}});
+            var pct=Math.round((correct/total)*100);var grade=pct>=80?'우수':pct>=60?'양호':'재학습 권장';
+            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
+            res.className='mt-6 p-4 rounded-lg text-sm font-mono shadow-sm '+(pct>=80?'bg-green-100 border border-green-400 text-green-700 dark:bg-green-900/30 dark:text-green-400':pct>=60?'bg-[#F4D06F]/30 border border-[#F4D06F] text-[#b45309] dark:text-[#F4D06F]':'bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400');
+            res.innerHTML='<div class="flex items-center gap-3 mb-3"><div class="text-3xl font-black '+(pct>=80?'text-green-500':pct>=60?'text-yellow-500':'text-red-500')+'">'+pct+'%</div><div><div class="font-bold text-sm">'+grade+' ('+correct+'/'+total+')</div><div class="text-xs opacity-70">고급 과정 종합 평가</div></div></div><div class="space-y-1">'+details.join('')+'</div>';
+        }
+
+        window.onload=function(){
+            initOrderGame_0();
+            initMatchGame_2();
+            setTimeout(function(){go('ch1');},100);
+        };
+    </script>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+    <script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

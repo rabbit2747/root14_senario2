@@ -1,0 +1,102 @@
+{
+  "tacticId": "t12",
+  "tacticName": "Command and Control",
+  "tacticNameKo": "명령 및 제어",
+  "dictionaryTitle": "Command and Control Dictionary",
+  "bgLogo": "/logo/logo-name-dark-nobg.png",
+  "speedStorageKey": "c2_widget_speed",
+
+  "glossary": {
+    "http_c2": {
+      "term": "Web Protocols C2",
+      "fullName": "Application Layer Protocol: Web Protocols",
+      "analogy": "\ud83c\udf10 정상 웹 트래픽에 숨은 비밀 명령",
+      "easyDesc": "해커가 감염된 컴퓨터와 통신할 때, 우리가 매일 쓰는 웹 브라우징(HTTP/HTTPS)과 똑같은 방식으로 명령을 주고받아서 보안 장비가 정상 트래픽으로 착각하게 만듭니다.",
+      "techDesc": "공격자는 C2 통신을 HTTP/HTTPS 프로토콜(포트 80/443)로 위장하여, 웹 프록시 및 방화벽의 허용 정책을 악용합니다. CDN 도메인이나 합법적 클라우드 서비스를 프론팅(Domain Fronting)하여 트래픽 분석 기반 탐지를 회피합니다."
+    },
+    "dns_tunnel": {
+      "term": "DNS Tunneling",
+      "fullName": "Application Layer Protocol: DNS",
+      "analogy": "\ud83d\udce8 편지 봉투에 비밀 메시지 숨기기",
+      "easyDesc": "인터넷 주소를 찾을 때 쓰는 DNS(전화번호부 같은 것)를 악용해서, 질문과 답변 속에 해커의 명령을 몰래 숨겨 보냅니다. 방화벽이 DNS를 차단하는 경우가 거의 없어서 위험합니다.",
+      "techDesc": "DNS 프로토콜(53/UDP)은 대부분의 방화벽에서 허용되므로, 공격자는 DNS 쿼리의 서브도메인 필드나 TXT 레코드에 Base64/Hex 인코딩된 C2 데이터를 삽입합니다. iodine, dnscat2 등의 도구를 사용하여 양방향 터널을 구축합니다."
+    },
+    "encrypted_channel": {
+      "term": "Encrypted Channel",
+      "fullName": "Encrypted Channel: Symmetric Cryptography",
+      "analogy": "\ud83d\udd10 해독 불가능한 암호 편지",
+      "easyDesc": "해커가 감염 컴퓨터와 주고받는 모든 명령과 데이터를 AES 같은 강력한 암호로 잠가서, 중간에서 감시하는 보안 장비가 내용을 전혀 읽을 수 없게 만듭니다.",
+      "techDesc": "C2 페이로드를 AES-256-CBC/GCM 등 대칭키 암호화로 래핑하여, SSL/TLS 복호화 장비(DPI)를 우회합니다. 키 교환은 초기 핸드셰이크 시 비대칭 암호화(RSA/ECDH)로 수행하고, 이후 세션 키로 전환하여 성능을 확보합니다."
+    },
+    "proxy_c2": {
+      "term": "Multi-hop Proxy",
+      "fullName": "Proxy: Multi-hop Proxy",
+      "analogy": "\ud83c\udfad 여러 겹의 가면 뒤에 숨기",
+      "easyDesc": "해커가 명령 서버의 진짜 위치를 숨기기 위해, 감염된 컴퓨터의 통신을 여러 나라의 중계 서버를 거쳐 돌려보냅니다. 마치 택배를 여러 번 환적하면 출발지를 알 수 없는 것과 같습니다.",
+      "techDesc": "Tor 네트워크, VPN 체인, 또는 감염된 호스트를 다단계 프록시(Proxy Chain)로 활용하여 C2 인프라의 실제 IP를 은닉합니다. 각 홉(Hop)에서 트래픽이 재암호화되므로, 단일 노드의 로그만으로는 최종 목적지를 역추적할 수 없습니다."
+    },
+    "beacon": {
+      "term": "Beacon",
+      "fullName": "Beacon / Heartbeat Signal",
+      "analogy": "\u2764\ufe0f 심장 박동처럼 주기적인 신호",
+      "easyDesc": "감염된 컴퓨터가 '저 아직 살아있어요, 할 일 있나요?'라고 해커 서버에 주기적으로 확인 신호를 보내는 것입니다. 해커가 명령을 내리면 다음 비컨 때 받아서 실행합니다.",
+      "techDesc": "임플란트(Implant)가 설정된 간격(Sleep/Jitter)으로 C2 서버에 체크인하여 대기 중인 태스크를 수신합니다. Cobalt Strike의 경우 기본 60초 간격에 ±20% 지터를 적용하며, 비컨 간격이 길수록 네트워크 이상 탐지(NBA)를 회피하기 용이합니다."
+    }
+  },
+
+  "attackCases": [
+    {
+      "id": 1,
+      "subTechniqueId": "T1071.001",
+      "subTechniqueName": "Web Protocols",
+      "tactic": "Command and Control (명령 및 제어)",
+      "technique": "Application Layer Protocol",
+      "log": "[EDR-C2] Cobalt Strike HTTPS beacon detected — callback to cdn-static[.]cloudfront[.]net:443 every 60s ±jitter, mimicking legitimate CDN traffic pattern.",
+      "report": "공격자는 Cobalt Strike 비컨을 CloudFront CDN 도메인으로 위장시켜 HTTPS 443 포트로 C2 통신을 수행했습니다. 60초 간격의 체크인 신호에 20% 지터를 적용하여 정상 CDN 트래픽과 구별하기 어렵게 만들었으며, TLS 1.3으로 페이로드를 암호화하여 DPI 장비의 내용 분석을 무력화했습니다.",
+      "mechanismTitle": "HTTPS 비컨을 이용한 정상 트래픽 위장 C2",
+      "mechanismDesc": "공격자는 합법적인 CDN 서비스(CloudFront, Azure CDN 등)의 도메인을 C2 프론트로 사용합니다. 피해 호스트의 비컨 트래픽은 실제 CDN 요청과 동일한 HTTP 헤더와 TLS 인증서를 사용하므로, 도메인 기반 차단이나 SSL 인스펙션으로도 탐지가 매우 어렵습니다. 비컨은 정해진 간격에 무작위 지터를 더해 규칙적인 패턴 탐지를 회피하며, 대기 명령이 있을 때만 추가 페이로드를 수신합니다.",
+      "animationPreset": "flow",
+      "targets": { "step1": "http_c2", "step2": "beacon", "step3": "encrypted_channel" }
+    },
+    {
+      "id": 2,
+      "subTechniqueId": "T1071.004",
+      "subTechniqueName": "DNS",
+      "tactic": "Command and Control (명령 및 제어)",
+      "technique": "Application Layer Protocol",
+      "log": "[DNS-MON] Anomalous DNS TXT query volume — host WS-PC041 resolving encoded subdomains under c2.malware-dns[.]xyz at 53/UDP, bypassing firewall egress rules.",
+      "report": "공격자는 DNS TXT 레코드를 통해 C2 명령을 수신하는 dnscat2 터널을 구축했습니다. 53/UDP 포트는 대부분의 방화벽에서 기본 허용되므로, 기존의 포트 기반 차단 정책을 완전히 우회했습니다. 명령 데이터는 Base64로 인코딩되어 서브도메인 필드에 분할 삽입되었습니다.",
+      "mechanismTitle": "DNS 프로토콜을 악용한 방화벽 우회 C2 터널",
+      "mechanismDesc": "DNS(53/UDP)는 인터넷의 필수 프로토콜이므로 방화벽에서 거의 항상 허용됩니다. 공격자는 이 점을 악용하여 DNS 쿼리의 서브도메인 필드에 C2 명령을 Base64 인코딩하여 삽입합니다. 응답은 TXT 레코드로 반환되며, 다단계 프록시를 경유하여 실제 C2 서버의 위치를 은닉합니다. 일반적인 DNS 모니터링으로는 쿼리 빈도의 이상만 감지할 수 있으며, 내용 기반 탐지에는 DNS 페이로드 분석(DPI) 장비가 필요합니다.",
+      "animationPreset": "query",
+      "targets": { "step1": "dns_tunnel", "step2": "proxy_c2" }
+    },
+    {
+      "id": 3,
+      "subTechniqueId": "T1573.001",
+      "subTechniqueName": "Symmetric Cryptography",
+      "tactic": "Command and Control (명령 및 제어)",
+      "technique": "Encrypted Channel",
+      "log": "[NDR-ALERT] Encrypted payload anomaly — AES-256-GCM wrapped C2 traffic on port 443 with non-standard TLS handshake, evading deep packet inspection appliance.",
+      "report": "공격자는 C2 페이로드를 AES-256-GCM으로 이중 암호화하여 SSL/TLS 복호화 장비(DPI)를 우회했습니다. 초기 키 교환은 ECDH로 수행되었으며, 세션 키가 주기적으로 로테이션되어 트래픽 복호화 시도를 무력화했습니다. 비컨 체크인마다 새로운 세션 키가 협상되어 과거 트래픽의 소급 복호화도 불가능했습니다.",
+      "mechanismTitle": "대칭키 암호화를 이용한 DPI 장비 우회",
+      "mechanismDesc": "기업 환경에서 SSL 인스펙션 장비가 HTTPS 트래픽을 복호화하여 검사하는 경우가 있습니다. 공격자는 이를 우회하기 위해 TLS 내부에 AES-256 대칭키 암호화 레이어를 추가합니다. SSL 인스펙션으로 TLS를 풀어도 내부 페이로드는 여전히 암호화되어 있으므로, 악성 명령이나 유출 데이터를 식별할 수 없습니다. 키 교환은 비대칭 알고리즘(ECDH)으로 안전하게 수행되며, Perfect Forward Secrecy를 통해 하나의 세션 키 유출이 다른 세션에 영향을 미치지 않습니다.",
+      "animationPreset": "inject",
+      "targets": { "step1": "encrypted_channel", "step2": "http_c2", "step3": "beacon" }
+    }
+  ],
+
+  "stepTimings": {
+    "alert": 3000,
+    "context": 4000,
+    "mechanism": 5000,
+    "identified": 5500
+  },
+
+  "speedOptions": [
+    { "label": "0.5x", "value": 0.5 },
+    { "label": "1x", "value": 1 },
+    { "label": "1.5x", "value": 1.5 },
+    { "label": "2x", "value": 2 }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "id": "T1591.003",
+  "title": "비즈니스 템포 식별 시뮬레이션",
+  "titleEn": "Business Tempo Identification Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 업무 패턴 분석", "labelEn": "🔍 Work Pattern Analysis", "steps": [0, 1] },
+    { "label": "⚡ 취약 시간대 식별", "labelEn": "⚡ Vulnerable Window ID", "steps": [2, 3] },
+    { "label": "✅ 공격 타이밍 결정", "labelEn": "✅ Attack Timing Decision", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "osint", "label": "OSINT Sources", "x": 200, "y": 30 },
+    { "id": "social", "label": "Social Media", "x": 200, "y": 90 },
+    { "id": "pattern", "label": "Business Patterns", "x": 350, "y": 60 },
+    { "id": "timing", "label": "Attack Timing", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "osint", "minStep": 0 },
+    { "from": "ext", "to": "social", "minStep": 1 },
+    { "from": "osint", "to": "pattern", "minStep": 2 },
+    { "from": "social", "to": "pattern", "minStep": 2 },
+    { "from": "pattern", "to": "timing", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Schedule", "icon": "📁" },
+    { "name": "business_tempo.json", "icon": "📄", "alert": true },
+    { "name": "attack_calendar.ics", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 ir_report_analyzer.py --company \"{companyName}\" --source \"press_releases,earnings\" --output fiscal_calendar.json",
+      "out": "[*] Analyzing {companyName} business calendar from public sources...\n[+] Fiscal year: April 1 - March 31\n[+] Earnings reports: Q1(Jul), Q2(Oct), Q3(Jan), Q4(Apr)\n[+] Annual shareholder meeting: June\n[+] Peak business periods:\n  - Q4 closing (Feb-Mar): Maximum workload, minimal security attention\n  - Holiday season (Dec): Reduced staff, automated systems\n  - Summer vacation (Jul-Aug): Skeleton crew operations\n\n[+] Key dates identified:\n  2026-03-31: Fiscal year end (CRITICAL deadline)\n  2026-06-15: Annual shareholder meeting\n  2026-12-23~01-02: Winter holiday shutdown",
+      "def": "[OSINT Monitor] Public financial calendar analysis detected for organization",
+      "defAction": "Source: Public investor relations\nTarget: {companyName} business schedule\nAction: Standard OSINT activity logged",
+      "desc": "공개된 보도자료와 실적 보고서에서 대상 조직의 회계연도, 바쁜 시기, 인력 부족 시기를 파악합니다.",
+      "descEn": "The attacker analyzes press releases and earnings reports to identify the target's fiscal year, busy periods, and staffing gaps.",
+      "stepTitle": "회계 일정 및 업무 주기 분석",
+      "stepTitleEn": "Fiscal Calendar and Business Cycle Analysis",
+      "feynman": "회사의 바쁜 시기를 알면 공격의 최적 타이밍을 알 수 있습니다. 결산 시즌(2-3월)에는 직원들이 본업에 집중하느라 보안에 소홀하고, 연말연시에는 인력이 줄어듭니다. 이런 '틈새'가 공격자에게는 기회입니다.",
+      "feynmanEn": "Knowing a company's busy periods reveals optimal attack timing. During fiscal closing (Feb-Mar), staff focus on core tasks and neglect security. During holidays, staff is reduced. These 'gaps' are opportunities for attackers.",
+      "expert": "공개 IR(Investor Relations) 자료에서 회계연도와 주요 일정을 추출합니다. Q4 결산 시기는 보안팀의 주의력이 분산되어 피싱 성공률이 평상시 대비 2.3배 높다는 연구 결과가 있습니다.",
+      "expertEn": "Extracting fiscal year and key dates from public IR materials. Research shows Q4 closing periods have 2.3x higher phishing success rates due to security team attention being divided.",
+      "defTooltip": "📊 OSINT 모니터: 조직의 공개 재무 일정 분석 감지",
+      "defTooltipEn": "📊 OSINT Monitor: Public financial calendar analysis detected for organization",
+      "hackerLog": {
+        "title": "fiscal_calendar.log",
+        "lines": [
+          { "log": "Q4 closing (Feb-Mar): Maximum workload", "desc": "결산 시즌 - 보안 주의력이 분산되는 최적 공격 시기" },
+          { "log": "2026-12-23~01-02: Winter holiday shutdown", "desc": "연말 휴무 - 보안 인력이 최소한으로 축소됨" }
+        ]
+      },
+      "terms": [
+        { "name": "Business Tempo", "desc": "조직의 업무 리듬과 패턴. 바쁜 시기, 휴식기, 인력 변동 등을 포함합니다" },
+        { "name": "Fiscal Year", "desc": "회계연도. 한국 기업은 보통 1-12월이지만, 일부는 4-3월 등 다른 주기를 사용합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 social_activity_tracker.py --company \"{companyName}\" --platforms linkedin,twitter --analyze-patterns",
+      "out": "[*] Tracking social media activity patterns for {companyName} employees...\n[+] LinkedIn activity analysis (127 employees tracked):\n  Peak posting hours: 09:00-10:00 KST, 14:00-15:00 KST\n  Lowest activity: Friday 16:00+ (weekly wind-down)\n  Conference attendance:\n    - RSA Conference 2026 (May 5-8): 12 security staff attending\n    - AWS re:Invent (Nov 30 - Dec 4): 8 DevOps staff attending\n  \n[+] Twitter/X corporate account:\n  Posting schedule: Mon-Fri 10:00 KST (automated)\n  No weekend posts (no weekend coverage)\n  \n[+] Key insight: Security team significantly depleted during conferences",
+      "def": "[Social Media Monitor] Bulk employee LinkedIn profile tracking detected",
+      "defAction": "Source: LinkedIn API/scraping\nTarget: {companyName} employee profiles\nAction: Employee OPSEC awareness training recommended",
+      "desc": "소셜 미디어 활동 패턴을 분석하여 직원들의 근무 시간, 출장 일정, 인력 공백을 파악합니다.",
+      "descEn": "Analyzing social media activity patterns to identify employee work hours, travel schedules, and staffing gaps.",
+      "stepTitle": "소셜 미디어 활동 패턴 분석",
+      "stepTitleEn": "Social Media Activity Pattern Analysis",
+      "feynman": "LinkedIn에서 직원들의 활동을 추적하면 출퇴근 시간, 보안 컨퍼런스 참석 일정을 알 수 있습니다. RSA 컨퍼런스에 보안팀 12명이 참석하면, 그 기간에 회사의 보안 방어력이 크게 떨어집니다. 금요일 오후에는 활동이 줄어드는 것도 공격 시점 선정에 유용합니다.",
+      "feynmanEn": "Tracking employee LinkedIn activity reveals work hours and security conference attendance. When 12 security staff attend RSA, the company's defense capability drops significantly. Reduced Friday afternoon activity is also useful for attack timing.",
+      "expert": "LinkedIn API/스크래핑으로 127명의 활동 패턴을 분석합니다. RSA Conference 기간 보안팀 12명 부재는 SOC 대응 능력을 50% 이상 감소시키며, 금요일 16:00 이후의 활동 저하는 주말 발동 랜섬웨어의 이상적 배포 시점입니다.",
+      "expertEn": "Analyzing activity patterns of 127 employees via LinkedIn API/scraping. Security team absence during RSA reduces SOC response by 50%+, and Friday 16:00+ activity drop is ideal for weekend-triggered ransomware deployment.",
+      "defTooltip": "📱 소셜 미디어 모니터: 직원 LinkedIn 프로필 대량 추적 감지",
+      "defTooltipEn": "📱 Social Media Monitor: Bulk employee LinkedIn profile tracking detected",
+      "hackerLog": {
+        "title": "social_patterns.log",
+        "lines": [
+          { "log": "RSA Conference: 12 security staff attending", "desc": "보안팀 핵심 인력 부재 기간 - 최적 공격 시점" },
+          { "log": "No weekend posts (no weekend coverage)", "desc": "주말 보안 모니터링 부재 확인" }
+        ]
+      },
+      "terms": [
+        { "name": "OPSEC (Operations Security)", "desc": "작전 보안. 민감한 정보가 적에게 노출되지 않도록 보호하는 활동" },
+        { "name": "SOC (Security Operations Center)", "desc": "보안 운영 센터. 24/7 사이버 위협을 모니터링하고 대응하는 조직" }
+      ]
+    },
+    {
+      "cmd": "python3 email_timing_analyzer.py --domain {companyName}.com --method header-analysis --output email_patterns.json",
+      "out": "[*] Analyzing email delivery patterns for {companyName}.com...\n[+] Method: Email header timestamp analysis from public mailing lists\n\n[+] Email activity heatmap:\n  Mon: ████████████████ (High)\n  Tue: ██████████████████ (Highest)\n  Wed: █████████████████ (High)\n  Thu: ███████████████ (Medium-High)\n  Fri: ████████████ (Medium)\n  Sat: ██ (Very Low)\n  Sun: █ (Minimal)\n\n[+] Response time analysis:\n  Weekday 09-17 KST: avg 23 min response\n  Weekday 17-22 KST: avg 2.5 hour response\n  Weekend: avg 14 hour response (or no response)\n  \n[+] Optimal phishing window: Friday 15:00-17:00 KST\n    (Urgent enough to act, slow enough to miss verification)",
+      "def": "[Email Security] External email header analysis pattern detected",
+      "defAction": "Source: Public mailing list archives\nTarget: {companyName}.com email patterns\nAction: Email timing intelligence gathered",
+      "desc": "이메일 헤더 분석으로 응답 시간 패턴을 파악하여 피싱 이메일의 최적 발송 시간을 결정합니다.",
+      "descEn": "Analyzing email header timestamps to determine optimal phishing email delivery timing based on response patterns.",
+      "stepTitle": "이메일 응답 패턴 분석",
+      "stepTitleEn": "Email Response Pattern Analysis",
+      "feynman": "이메일 응답 시간을 분석하면 피싱의 최적 시간을 알 수 있습니다. 금요일 15-17시에 보내면 '급하니까 빨리 처리해야지'라고 생각하면서도 검증할 시간은 부족합니다. 주말에 보내면 응답이 14시간 후이므로 충분히 확인합니다.",
+      "feynmanEn": "Analyzing email response times reveals optimal phishing timing. Sent Friday 15-17:00, recipients think 'this is urgent' but lack time to verify. Weekend emails get 14-hour delayed responses with more careful review.",
+      "expert": "공개 메일링 리스트에서 {companyName}.com 도메인의 이메일 헤더(Received: 타임스탬프)를 분석합니다. 금요일 15-17시는 피로도가 높고 퇴근 전 급히 처리하려는 심리를 이용한 소셜 엔지니어링 최적 시간대입니다.",
+      "expertEn": "Analyzing email headers (Received: timestamps) from public mailing lists for {companyName}.com. Friday 15-17:00 exploits high fatigue and the psychological pressure to handle tasks quickly before leaving, ideal for social engineering.",
+      "defTooltip": "📧 이메일 보안: 외부 이메일 헤더 분석 패턴 감지",
+      "defTooltipEn": "📧 Email Security: External email header analysis pattern detected",
+      "hackerLog": {
+        "title": "email_patterns.log",
+        "lines": [
+          { "log": "Optimal phishing: Friday 15:00-17:00 KST", "desc": "피싱 최적 시간대 - 급한 마음 + 검증 시간 부족" },
+          { "log": "Weekend: avg 14 hour response", "desc": "주말 대응 지연 - 랜섬웨어 배포 후 확산 시간 확보" }
+        ]
+      },
+      "terms": [
+        { "name": "Email Header", "desc": "이메일의 메타데이터. 발신자, 수신자, 경유 서버, 시간 등의 기술적 정보가 포함됩니다" },
+        { "name": "Social Engineering", "desc": "사람의 심리적 약점(급함, 두려움, 호기심)을 이용하는 공격 기법" }
+      ]
+    },
+    {
+      "cmd": "python3 patch_cycle_analyzer.py --domain {companyName}.com --shodan-history --output patch_windows.json",
+      "out": "[*] Analyzing {companyName} patch cycle from Shodan historical data...\n[+] Version change tracking (last 12 months):\n\nApache updates:\n  2025-04: 2.4.49 → 2.4.51 (14 days after CVE)\n  2025-08: 2.4.51 → 2.4.54 (21 days after CVE)\n  2025-12: No update yet (30+ days since CVE-2025-XXXX)\n\n[+] Patch cycle pattern:\n  Average patch delay: 18.5 days after CVE publication\n  Patch window: Usually 2nd/4th Tuesday of month\n  No patches during: Q4 closing (Feb-Mar), Holidays (Dec)\n\n[+] Vulnerability window:\n  CVE published → Patch applied: 14-30 days gap\n  Best exploitation window: Days 3-14 after CVE\n  Frozen periods: Feb 15 - Mar 31, Dec 20 - Jan 5",
+      "def": "[Vulnerability Management] External patch cycle analysis via version tracking detected",
+      "defAction": "Source: Shodan historical scans\nTarget: {companyName} software versions\nAction: Patch management review triggered",
+      "desc": "Shodan 이력 데이터로 소프트웨어 버전 변경을 추적하여 패치 주기와 취약 기간을 파악합니다.",
+      "descEn": "Tracking software version changes via Shodan historical data to identify patch cycles and vulnerability windows.",
+      "stepTitle": "패치 주기 분석",
+      "stepTitleEn": "Patch Cycle Analysis",
+      "feynman": "Shodan의 과거 스캔 기록을 보면 회사가 보안 패치를 얼마나 빨리 적용하는지 알 수 있습니다. 평균 18.5일이 걸리고, 결산 시즌(2-3월)에는 아예 패치를 안 합니다. CVE가 공개된 후 3-14일 사이가 공격의 황금 시간대입니다.",
+      "feynmanEn": "Shodan historical scans show how quickly a company applies security patches. Average 18.5 days delay, and no patches during fiscal closing (Feb-Mar). Days 3-14 after CVE publication is the golden exploitation window.",
+      "expert": "Shodan의 과거 배너 데이터에서 소프트웨어 버전 변경 타임라인을 추출합니다. 평균 18.5일의 패치 지연은 N-day 익스플로잇 공격에 충분한 시간이며, 결산/휴가 기간의 패치 동결은 예측 가능한 취약 기간을 만듭니다.",
+      "expertEn": "Extracting software version change timelines from Shodan's historical banner data. 18.5-day average patch delay provides sufficient time for N-day exploit attacks, and fiscal/holiday patch freezes create predictable vulnerability windows.",
+      "defTooltip": "🔄 취약점 관리: 버전 추적을 통한 외부 패치 주기 분석 감지",
+      "defTooltipEn": "🔄 Vulnerability Management: External patch cycle analysis via version tracking detected",
+      "hackerLog": {
+        "title": "patch_windows.log",
+        "lines": [
+          { "log": "Average patch delay: 18.5 days", "desc": "CVE 공개 후 약 3주간 취약한 상태로 노출" },
+          { "log": "Frozen: Feb 15 - Mar 31, Dec 20 - Jan 5", "desc": "결산/연말 기간 패치 동결 - 장기 취약 기간" }
+        ]
+      },
+      "terms": [
+        { "name": "Patch Cycle", "desc": "조직이 보안 패치를 테스트하고 적용하는 주기. 짧을수록 안전하며, 긴 주기는 공격 기회를 제공합니다" },
+        { "name": "N-day Exploit", "desc": "CVE가 공개된 후(0-day 이후) 패치가 적용되기 전까지 사용 가능한 공격. 0-day보다 구하기 쉽습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 attack_timer.py --tempo fiscal_calendar.json --patterns email_patterns.json --patches patch_windows.json --output attack_calendar.ics",
+      "out": "[*] Computing optimal attack timing for {companyName}...\n\n[+] ATTACK CALENDAR:\n\n  TIER 1 (Highest success probability):\n  ├─ 2026-05-05 ~ 05-08 (RSA Conference)\n  │  Security team: -12 staff | Phishing window: Tue-Wed 10:00\n  │  Estimated success rate: 73%\n  │  \n  ├─ 2026-03-20 (Q4 closing + Friday)\n  │  Staff focus: fiscal reporting | Patch freeze active\n  │  Estimated success rate: 68%\n  │\n  └─ 2026-12-24 (Holiday + Wednesday)\n     Staff: skeleton crew | 14hr response delay\n     Estimated success rate: 71%\n\n  TIER 2 (Medium-high probability):\n  ├─ Any Friday 15:00-17:00 KST\n  └─ 2nd week after any critical CVE publication\n\n[+] Attack calendar exported to attack_calendar.ics",
+      "def": "[SIEM] Business tempo intelligence correlated for attack timing optimization",
+      "defAction": "Source: Multi-source correlation\nTarget: {companyName} operational patterns\nAction: Security posture review for identified vulnerable periods recommended",
+      "desc": "모든 비즈니스 템포 정보를 종합하여 공격 성공 확률이 가장 높은 최적의 타이밍을 결정합니다.",
+      "descEn": "Consolidating all business tempo intelligence to determine optimal attack timing with highest success probability.",
+      "stepTitle": "최적 공격 타이밍 결정",
+      "stepTitleEn": "Optimal Attack Timing Decision",
+      "feynman": "모든 정보를 합치면 '공격 달력'이 완성됩니다. RSA 컨퍼런스 기간(보안팀 부재), 결산 시즌 금요일(업무 과부하 + 패치 동결), 크리스마스(인력 부족). 각 시기별 성공 확률까지 계산하여 가장 효과적인 공격 시점을 선택합니다.",
+      "feynmanEn": "Combining all information creates an 'attack calendar.' RSA Conference (security team absent), fiscal closing Friday (workload + patch freeze), Christmas (staff shortage). Success probabilities calculated for each period to select the most effective attack timing.",
+      "expert": "다변량 분석으로 공격 성공 확률을 계산합니다. 보안팀 인력(-12명), 패치 동결, 이메일 응답 지연, 업무 과부하를 가중 인자로 사용합니다. RSA Conference 기간은 SOC 대응 능력 50% 감소 + 이메일 확인 빈도 증가로 73% 성공률을 예측합니다.",
+      "expertEn": "Multivariate analysis calculates attack success probability. Security staffing (-12), patch freeze, email response delay, and workload overload are weighted factors. RSA Conference period predicts 73% success rate due to 50% SOC reduction + increased email checking.",
+      "defTooltip": "📅 SIEM: 공격 타이밍 최적화를 위한 비즈니스 템포 인텔리전스 상관 분석",
+      "defTooltipEn": "📅 SIEM: Business tempo intelligence correlated for attack timing optimization",
+      "hackerLog": {
+        "title": "attack_calendar.log",
+        "lines": [
+          { "log": "RSA Conference (May 5-8): 73% success rate", "desc": "보안팀 핵심 인력 부재 - 최고 성공 확률" },
+          { "log": "Q4 closing Friday (Mar 20): 68%", "desc": "업무 과부하 + 패치 동결 + 금요일 효과" }
+        ]
+      },
+      "terms": [
+        { "name": "Attack Timing", "desc": "공격 성공 확률을 극대화하기 위해 방어측의 취약 시점을 선택하는 전략" },
+        { "name": "Skeleton Crew", "desc": "최소 인력 운영. 휴일이나 비상 시 핵심 인력만으로 운영하는 상태" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "python3 ir_report_analyzer.py (PID: 7101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "python3 social_activity_tracker.py (PID: 7156)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "python3 email_timing_analyzer.py (PID: 7201)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "python3 patch_cycle_analyzer.py (PID: 7289)", "depth": 1, "alert": false, "minStep": 3 },
+    { "name": "python3 attack_timer.py (PID: 7345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

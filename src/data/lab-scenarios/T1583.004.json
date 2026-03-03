@@ -1,0 +1,176 @@
+{
+  "id": "T1583.004",
+  "title": "봇넷 인프라 구축 시뮬레이션",
+  "titleEn": "Botnet Infrastructure Acquisition Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 봇넷 탐색", "labelEn": "🔍 Botnet Discovery", "steps": [0] },
+    { "label": "⚡ 봇넷 임대", "labelEn": "⚡ Botnet Rental", "steps": [1, 2] },
+    { "label": "🔓 DDoS 구성", "labelEn": "🔓 DDoS Config", "steps": [3] },
+    { "label": "✅ 공격 실행", "labelEn": "✅ Attack Execution", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "darkweb", "label": "Dark Web", "x": 200, "y": 30 },
+    { "id": "c2", "label": "C2 Server", "x": 200, "y": 90 },
+    { "id": "bots", "label": "Bot Network", "x": 350, "y": 60 },
+    { "id": "target", "label": "Target", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "darkweb", "minStep": 0 },
+    { "from": "darkweb", "to": "c2", "minStep": 1 },
+    { "from": "c2", "to": "bots", "minStep": 2 },
+    { "from": "bots", "to": "target", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "botnet_config", "icon": "📁" },
+    { "name": "c2_panel.url", "icon": "📄", "alert": true },
+    { "name": "ddos_results.log", "icon": "📝" }
+  ],
+  "steps": [
+    {
+      "cmd": "torify python3 botnet_market.py --search \"DDoS service\" --sort rating --output botnet_listings.json",
+      "out": "[*] Searching dark web for DDoS-for-Hire services...\n[+] Found 15 active services:\n\n  #1 StressThem Pro (Rating: 4.9/5)\n    - Capacity: 800 Gbps\n    - Methods: TCP SYN, UDP flood, HTTP/HTTPS, DNS amplification\n    - Pricing: $50/hour, $300/day, $1500/week\n    - Bots: 150,000+ IoT devices (Mirai variant)\n    - Panel: Web-based control panel\n    - Support: 24/7 Telegram\n\n  #2 PowerStresser (Rating: 4.7/5)\n    - Capacity: 500 Gbps\n    - Methods: Layer 4/7, Slowloris, RUDY\n    - Pricing: $30/hour, $200/day\n    - Bots: 80,000+ compromised servers\n\n  #3 AnonymousStress (Rating: 4.5/5)\n    - Capacity: 300 Gbps\n    - Methods: NTP/SSDP amplification\n    - Pricing: $20/hour\n\n[+] 15 listings saved to botnet_listings.json",
+      "def": "[DarkWeb Intelligence] DDoS-for-Hire service research detected",
+      "defAction": "Source: Dark web monitoring\nTarget: DDoS service marketplaces\nAction: Potential DDoS threat intelligence captured",
+      "desc": "다크웹에서 DDoS 공격 서비스(봇넷 임대)를 검색하고 서비스를 비교합니다.",
+      "descEn": "The attacker searches dark web for DDoS-for-Hire services and compares available botnet rental offerings.",
+      "stepTitle": "DDoS 서비스 마켓 탐색",
+      "stepTitleEn": "DDoS Service Market Search",
+      "feynman": "다크웹에는 DDoS 공격을 대행하는 서비스가 있습니다. 시간당 $20~$50만 내면 수십만 대의 좀비 PC가 대상을 공격합니다. 마치 택시를 부르듯 간단하게 이용할 수 있어 기술이 없는 사람도 대규모 공격을 실행할 수 있습니다.",
+      "feynmanEn": "Dark web has services that perform DDoS attacks on demand. For $20-$50/hour, hundreds of thousands of zombie PCs attack your target. As easy as calling a taxi, anyone can execute massive attacks without technical skills.",
+      "expert": "DDoS-as-a-Service(DaaS) 마켓에서 서비스를 비교합니다. StressThem Pro의 800Gbps 용량은 대부분의 기업 인프라를 압도하며, Mirai 변종 기반 IoT 봇넷은 패치되지 않은 공유기/카메라로 구성됩니다.",
+      "expertEn": "Comparing services in DDoS-as-a-Service (DaaS) market. StressThem Pro's 800Gbps capacity overwhelms most enterprise infrastructure, and Mirai variant IoT botnet consists of unpatched routers/cameras.",
+      "defTooltip": "🌑 다크웹 인텔: DDoS-for-Hire 서비스 조사 감지",
+      "defTooltipEn": "🌑 DarkWeb Intel: DDoS-for-Hire service research detected",
+      "hackerLog": {
+        "title": "botnet_market.log",
+        "lines": [
+          { "log": "StressThem Pro: 800 Gbps, $50/hour", "desc": "800Gbps 공격 용량 - 대부분의 기업 대역폭 초과" },
+          { "log": "Bots: 150,000+ IoT devices (Mirai variant)", "desc": "15만 대 IoT 좀비 네트워크 - 패치 안 된 공유기/카메라" }
+        ]
+      },
+      "terms": [
+        { "name": "DDoS-for-Hire (Booter/Stresser)", "desc": "돈을 내면 DDoS 공격을 대신 수행해주는 불법 서비스. 봇넷을 시간 단위로 임대합니다" },
+        { "name": "Mirai", "desc": "IoT 장치(공유기, IP 카메라)를 감염시켜 봇넷을 구축하는 악성코드. 2016년 1.2Tbps DDoS 공격으로 유명합니다" }
+      ]
+    },
+    {
+      "cmd": "torify python3 botnet_rental.py --service \"StressThem Pro\" --plan weekly --payment XMR --output c2_credentials.json",
+      "out": "[*] Connecting to StressThem Pro service...\n[+] Plan selected: Weekly ($1,500)\n[+] Payment: 9.8 XMR sent to escrow\n[+] Payment confirmed!\n\n[+] C2 Panel Credentials:\n  URL: https://stress-c2-panel.onion/dashboard\n  Username: user_0x7f3a\n  Password: R@nd0m$ecure!2026\n  API Key: STR-API-7f3a-9b2c-4d1e\n\n[+] Botnet Statistics:\n  Active bots: 147,832\n  Geographic distribution:\n    Asia: 45% (routers, cameras)\n    Europe: 25% (NAS devices)\n    Americas: 20% (smart TVs, printers)\n    Other: 10%\n  Average bandwidth per bot: 5.4 Mbps\n\n[+] Access valid for 7 days starting now",
+      "def": "[Threat Intel] Botnet rental transaction detected on dark web marketplace",
+      "defAction": "Source: Dark web financial monitoring\nTarget: StressThem Pro botnet service\nAction: 147K bot activation alert to ISP threat exchange",
+      "desc": "DDoS 서비스를 1주일 임대하고 C2 패널 접근 권한과 봇넷 제어 API를 획득합니다.",
+      "descEn": "The attacker rents a DDoS service for one week, obtaining C2 panel access and botnet control API.",
+      "stepTitle": "봇넷 1주일 임대",
+      "stepTitleEn": "One-Week Botnet Rental",
+      "feynman": "약 200만원($1,500)으로 15만 대의 좀비 PC를 1주일간 마음대로 조종할 수 있는 권한을 샀습니다. 웹 대시보드와 API 키가 주어져 컴퓨터에서 편하게 공격을 관리할 수 있습니다. 이 좀비들은 전 세계의 패치 안 된 공유기, 카메라, 프린터입니다.",
+      "feynmanEn": "For ~$1,500, the attacker bought control of 150,000 zombie PCs for one week. A web dashboard and API key allow comfortable attack management. These zombies are unpatched routers, cameras, and printers worldwide.",
+      "expert": "XMR로 1주일 봇넷을 임대하고 C2 패널과 REST API 접근을 획득합니다. 147,832개 봇의 평균 5.4Mbps 대역폭은 이론상 800Gbps의 총 공격 용량을 제공하며, 아시아 집중(45%)은 한국 대상 공격에 유리합니다.",
+      "expertEn": "Renting a one-week botnet via XMR with C2 panel and REST API access. 147,832 bots averaging 5.4Mbps bandwidth provide 800Gbps theoretical capacity, with Asian concentration (45%) favorable for attacking Korean targets.",
+      "defTooltip": "💰 위협 인텔: 다크웹 마켓에서 봇넷 임대 거래 감지",
+      "defTooltipEn": "💰 Threat Intel: Botnet rental transaction detected on dark web marketplace",
+      "hackerLog": {
+        "title": "rental_receipt.log",
+        "lines": [
+          { "log": "Active bots: 147,832", "desc": "15만 대의 좀비 장치 제어권 확보" },
+          { "log": "API Key: STR-API-7f3a-9b2c-4d1e", "desc": "자동화된 공격 관리를 위한 API 접근" }
+        ]
+      },
+      "terms": [
+        { "name": "C2 Panel", "desc": "Command & Control 대시보드. 봇넷을 웹 인터페이스로 관리하며 공격 대상, 방법, 시간을 설정합니다" },
+        { "name": "Bot", "desc": "악성코드에 감염되어 공격자의 명령을 따르는 좀비 장치. 소유자는 감염 사실을 모르는 경우가 대부분입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 botnet_c2.py --api-key STR-API-7f3a-9b2c-4d1e --check-bots --geo Korea",
+      "out": "[*] Querying botnet status via API...\n[+] Total active bots: 147,832\n[+] Korean region bots: 12,456 (8.4%)\n\n  Korean bot breakdown:\n    IP Cameras: 4,200 (Hikvision, Dahua)\n    Home Routers: 3,800 (ipTIME, ASUS)\n    NAS Devices: 2,100 (Synology, QNAP)\n    Smart TVs: 1,200 (Samsung, LG)\n    Printers: 856 (HP, Canon)\n    Other IoT: 300\n\n[+] Bot health check:\n    Online: 11,890 (95.5%)\n    Offline: 566 (4.5%)\n    Average uptime: 72 hours\n\n[+] Korean bots can generate ~67 Gbps domestically",
+      "def": "[ISP Monitor] Botnet C2 communication detected from Korean IP ranges",
+      "defAction": "Source: ISP traffic analysis\nTarget: 12,456 compromised Korean IoT devices\nAction: Botnet takedown coordination initiated with KISA",
+      "desc": "한국 지역의 봇 현황을 확인하고 국내 공격에 활용 가능한 봇 수를 파악합니다.",
+      "descEn": "The attacker checks Korean region bot status and assesses available bots for domestic attacks.",
+      "stepTitle": "한국 지역 봇 현황 점검",
+      "stepTitleEn": "Korean Region Bot Status Check",
+      "feynman": "한국에만 12,456대의 좀비 장치가 있습니다. IP 카메라 4,200대, 가정용 공유기 3,800대, NAS 2,100대 등. 이 장치들의 주인은 감염된 줄 모릅니다. 국내 봇만으로도 67Gbps의 공격이 가능하며, 국내 트래픽이라 해외 차단으로는 막을 수 없습니다.",
+      "feynmanEn": "There are 12,456 zombie devices in Korea alone. 4,200 IP cameras, 3,800 home routers, 2,100 NAS devices. Their owners don't know they're infected. Korean bots alone can generate 67Gbps, and being domestic traffic, it can't be blocked by geo-filtering.",
+      "expert": "한국 리전 봇 12,456대 중 95.5%가 온라인입니다. ipTIME 공유기의 기본 비밀번호 미변경과 Hikvision 카메라의 알려진 취약점(CVE-2021-36260)이 주요 감염 경로입니다. 국내 ISP에서 발생하는 트래픽은 GeoIP 기반 차단이 불가능합니다.",
+      "expertEn": "95.5% of 12,456 Korean region bots are online. ipTIME router default passwords and Hikvision camera vulnerabilities (CVE-2021-36260) are primary infection vectors. Traffic from domestic ISPs cannot be blocked by GeoIP filtering.",
+      "defTooltip": "📡 ISP 모니터: 한국 IP 대역에서 봇넷 C2 통신 감지",
+      "defTooltipEn": "📡 ISP Monitor: Botnet C2 communication detected from Korean IP ranges",
+      "hackerLog": {
+        "title": "korean_bots.log",
+        "lines": [
+          { "log": "Korean bots: 12,456 (67 Gbps capacity)", "desc": "국내 봇만으로 대규모 공격 가능 - GeoIP 차단 우회" },
+          { "log": "IP Cameras: 4,200 (Hikvision, Dahua)", "desc": "IoT 카메라가 최다 - 기본 비밀번호 미변경이 원인" }
+        ]
+      },
+      "terms": [
+        { "name": "IoT Botnet", "desc": "인터넷에 연결된 사물(카메라, 공유기, TV)을 감염시켜 구축한 봇넷. 보안 업데이트가 거의 없어 장기간 유지됩니다" },
+        { "name": "KISA (한국인터넷진흥원)", "desc": "한국의 인터넷 보안 기관. 봇넷 탐지, 악성코드 분석, 사이버 위협 대응을 담당합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 ddos_config.py --target {companyName}.com --method multi-vector --duration 4h --intensity max --output attack_config.json",
+      "out": "[*] Configuring multi-vector DDoS attack for {companyName}.com...\n\n[+] Target resolution:\n  {companyName}.com → 203.0.113.50 (Cloudflare proxied)\n  Direct IP: 203.0.113.50 (origin behind CDN)\n\n[+] Attack configuration:\n  Phase 1 (0-30min): DNS Amplification\n    - 50,000 bots → open resolvers → {companyName} DNS\n    - Expected: 200 Gbps\n  Phase 2 (30-60min): HTTP/S Flood (Layer 7)\n    - 30,000 bots → legitimate-looking GET/POST requests\n    - Target: /api/*, /login, /search\n    - Expected: 500K req/sec\n  Phase 3 (60-240min): Mixed (SYN + HTTP + Slowloris)\n    - All 147,832 bots engaged\n    - Rotate attack vectors every 15 minutes\n    - Expected: 600+ Gbps peak\n\n[+] Anti-mitigation:\n  - Randomized User-Agent headers\n  - Geographic distribution to bypass GeoIP\n  - SSL/TLS encrypted requests (harder to inspect)\n\n[+] Config saved to attack_config.json",
+      "def": "[Pre-Attack Intel] DDoS attack configuration targeting organization detected",
+      "defAction": "Source: Threat intelligence sharing\nTarget: {companyName}.com infrastructure\nAction: EMERGENCY - DDoS mitigation activated, CDN scaling initiated",
+      "desc": "다중 벡터 DDoS 공격을 설정하여 DNS 증폭, HTTP 플러딩, Slowloris를 순차적으로 실행합니다.",
+      "descEn": "Configuring a multi-vector DDoS attack with sequential DNS amplification, HTTP flooding, and Slowloris attacks.",
+      "stepTitle": "다중 벡터 DDoS 공격 설정",
+      "stepTitleEn": "Multi-Vector DDoS Attack Configuration",
+      "feynman": "하나의 공격 방법만 쓰면 방어하기 쉽습니다. 그래서 3단계로 나눕니다. 1단계: DNS 서버를 악용한 대역폭 고갈(200Gbps). 2단계: 정상처럼 보이는 웹 요청 폭주(초당 50만 건). 3단계: 모든 봇을 동원한 복합 공격. 15분마다 공격 방법을 바꿔 방어측이 적응하지 못하게 합니다.",
+      "feynmanEn": "One attack method is easy to defend. So it's split into 3 phases. Phase 1: DNS amplification for bandwidth exhaustion (200Gbps). Phase 2: Legitimate-looking web request flood (500K/sec). Phase 3: All bots with rotating attack vectors every 15 minutes to prevent defense adaptation.",
+      "expert": "다중 벡터 DDoS 설계: DNS amplification(증폭 계수 54x)으로 대역폭 소진 후, Layer 7 HTTP/S flood로 애플리케이션 계층을 공격합니다. Slowloris는 소수 연결로 웹서버를 마비시킵니다. 15분 로테이션은 미티게이션 규칙 적응을 방해합니다.",
+      "expertEn": "Multi-vector DDoS design: DNS amplification (54x amplification factor) for bandwidth exhaustion, followed by Layer 7 HTTP/S flood for application layer attack. Slowloris paralyzes web servers with few connections. 15-minute rotation prevents mitigation rule adaptation.",
+      "defTooltip": "🚨 사전 공격 인텔: 조직을 대상으로 한 DDoS 공격 설정 감지",
+      "defTooltipEn": "🚨 Pre-Attack Intel: DDoS attack configuration targeting organization detected",
+      "hackerLog": {
+        "title": "ddos_config.log",
+        "lines": [
+          { "log": "Phase 3: 600+ Gbps peak, all 147,832 bots", "desc": "전체 봇 동원 시 대부분의 기업 인프라 마비 가능" },
+          { "log": "Anti-mitigation: SSL encrypted requests", "desc": "HTTPS 암호화로 DPI(심층 패킷 검사) 우회" }
+        ]
+      },
+      "terms": [
+        { "name": "DNS Amplification", "desc": "작은 DNS 요청을 보내면 큰 응답이 타겟에게 가는 반사 공격. 증폭 계수 54배까지 가능합니다" },
+        { "name": "Slowloris", "desc": "적은 수의 HTTP 연결을 매우 느리게 유지하여 웹서버의 연결 한도를 소진시키는 L7 DDoS 공격" }
+      ]
+    },
+    {
+      "cmd": "python3 ddos_launcher.py --config attack_config.json --execute --monitor --output ddos_results.log",
+      "out": "[*] Launching multi-vector DDoS attack against {companyName}.com...\n[!] Phase 1: DNS Amplification - ACTIVE\n  ├─ Bots engaged: 50,000\n  ├─ Traffic: 187 Gbps (climbing)\n  └─ Target DNS: responding slowly (3200ms → timeout)\n\n[!] Phase 2: HTTP/S Flood - ACTIVE\n  ├─ Bots engaged: 30,000\n  ├─ Requests: 483,000/sec\n  ├─ Target HTTP: 503 errors (92%)\n  └─ CDN: Cloudflare challenge page active\n\n[!] Phase 3: Full Assault - ACTIVE\n  ├─ All 147,832 bots engaged\n  ├─ Peak traffic: 634 Gbps\n  ├─ Target: OFFLINE (100% packet loss)\n  ├─ Duration: 3h 47min\n  └─ Cloudflare mitigation: Partially effective\n\n[+] Attack completed. Results saved to ddos_results.log\n[+] Target downtime: ~3 hours 12 minutes",
+      "def": "[DDoS Defense] Massive multi-vector DDoS attack in progress - 634 Gbps peak",
+      "defAction": "Source: Network edge sensors\nTarget: {companyName}.com (203.0.113.50)\nAction: Cloudflare Under Attack mode activated, ISP upstream filtering requested, KISA incident report filed",
+      "desc": "설정된 DDoS 공격을 실행하고 실시간으로 공격 효과를 모니터링합니다.",
+      "descEn": "The attacker executes the configured DDoS attack and monitors effectiveness in real-time.",
+      "stepTitle": "DDoS 공격 실행 및 모니터링",
+      "stepTitleEn": "DDoS Attack Execution and Monitoring",
+      "feynman": "공격이 실행되면 대상 사이트가 3시간 이상 다운됩니다. 634Gbps라는 엄청난 트래픽이 서버를 마비시킵니다. Cloudflare CDN이 일부 방어했지만 완전히 막지 못했습니다. 이 모든 것이 약 200만원($1,500)과 몇 번의 클릭으로 가능했습니다.",
+      "feynmanEn": "When the attack executes, the target site goes down for over 3 hours. 634Gbps of traffic paralyzes the servers. Cloudflare CDN partially defended but couldn't fully mitigate. All this was possible with ~$1,500 and a few clicks.",
+      "expert": "3단계 공격 실행 결과: DNS amplification 187Gbps, HTTP/S flood 483K req/s, 전체 봇 동원 634Gbps 피크. Cloudflare의 Under Attack 모드와 Rate Limiting이 L7 공격의 40%를 차단했지만, volumetric 공격은 origin IP에 직접 영향을 미쳤습니다. 총 다운타임 3시간 12분.",
+      "expertEn": "Three-phase attack results: DNS amplification 187Gbps, HTTP/S flood 483K req/s, full bot deployment 634Gbps peak. Cloudflare Under Attack mode and Rate Limiting blocked 40% of L7 attacks, but volumetric attacks directly impacted the origin IP. Total downtime: 3h 12min.",
+      "defTooltip": "🔥 DDoS 방어: 대규모 다중 벡터 DDoS 공격 진행 중 - 634Gbps 피크",
+      "defTooltipEn": "🔥 DDoS Defense: Massive multi-vector DDoS attack in progress - 634 Gbps peak",
+      "hackerLog": {
+        "title": "ddos_results.log",
+        "lines": [
+          { "log": "Peak traffic: 634 Gbps", "desc": "634Gbps - 대부분의 기업 인프라를 압도하는 트래픽" },
+          { "log": "Target downtime: ~3 hours 12 minutes", "desc": "3시간 서비스 중단 - 매출 손실 및 평판 피해" }
+        ]
+      },
+      "terms": [
+        { "name": "Volumetric DDoS", "desc": "대역폭을 고갈시키는 대용량 트래픽 공격. 방어 용량을 초과하는 트래픽으로 네트워크를 마비시킵니다" },
+        { "name": "Under Attack Mode", "desc": "Cloudflare의 DDoS 방어 모드. JavaScript 챌린지로 봇 트래픽을 차단하지만, 정상 사용자 접근도 지연됩니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "torify python3 botnet_market.py (PID: 9101)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "torify python3 botnet_rental.py (PID: 9156)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "python3 botnet_c2.py (PID: 9201)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "python3 ddos_config.py (PID: 9289)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 ddos_launcher.py (PID: 9345)", "depth": 1, "alert": true, "minStep": 4 }
+  ]
+}

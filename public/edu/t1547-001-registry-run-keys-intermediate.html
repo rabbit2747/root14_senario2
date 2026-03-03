@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1547.001" data-level="intermediate">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1547-001-registry-run-keys-intermediate&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1547.001 중급: 레지스트리 Run 키 분석과 탐지">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1547.001 중급: 레지스트리 Run 키 분석과 탐지 — (주)갓루트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}
+        .glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(59,130,246,0.3);box-shadow:0 8px 32px rgba(30,41,59,0.05);}
+        .dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(59,130,246,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+        .hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}
+        .hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}
+        .hl-blue{color:#1d4ed8;font-weight:700;}.dark .hl-blue{color:#60a5fa;}
+        .nav-item.active{background:linear-gradient(90deg,rgba(59,130,246,0.2) 0%,transparent 100%);border-left:4px solid #3b82f6;color:#1d4ed8;font-weight:700;}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(96,165,250,0.15) 0%,transparent 100%);border-left:4px solid #60a5fa;color:#60a5fa;}
+        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#3b82f6;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#60a5fa;}
+        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
+        .drag-item.dragging{opacity:0.5;transform:scale(0.95);}
+        .drop-zone.drag-over{border:2px dashed #3b82f6;background:rgba(59,130,246,0.1);}
+        .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
+        .step-btn{transition:all 0.3s;}.step-btn.active{border-color:#3b82f6!important;background:rgba(59,130,246,0.1)!important;}.step-btn.completed{border-color:#059669!important;background:rgba(5,150,105,0.1)!important;}
+        .code-blank{display:inline-block;min-width:80px;border-bottom:2px dashed #3b82f6;padding:0 4px;text-align:center;color:#3b82f6;font-weight:bold;}
+        .code-blank.correct{border-color:#059669;color:#059669;background:rgba(5,150,105,0.1);}.code-blank.wrong{border-color:#dc2626;color:#dc2626;background:rgba(220,38,38,0.1);}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-blue-200 selection:text-blue-900 transition-colors duration-300">
+    <!-- Brand Header Bar -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3">
+            <span style="font-size:8px;color:#3b82f6;font-weight:700;background:rgba(59,130,246,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(59,130,246,0.3);">INTERMEDIATE</span>
+            <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+    <!-- Theme Toggle -->
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-blue-400"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-blue-400/50 hover:border-blue-400 shadow transition-all">← 대시보드</button>
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-panel border-r border-blue-400/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-blue-400/30">
+            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-blue tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1547.001: Registry Run Keys / Startup Folder</p>
+            <span class="inline-block mt-2 text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/30 px-2 py-0.5 rounded">🔵 중급 (Intermediate)</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch1">1. 레지스트리 Run 키 분석 코드</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch2">2. 공격자의 레지스트리 조작 기법</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch3">3. Autoruns 도구 활용</button>
+            <button onclick="go('ch4')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch4">4. Sysmon Event ID 12/13 분석</button>
+            <button onclick="go('ch5')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch5">5. Sigma 탐지 규칙 작성</button>
+            <button onclick="go('ch6')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch6">6. 탐지 우회 기법 분석</button>
+            <button onclick="go('ch7')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch7">7. PowerShell 기반 탐지 스크립트</button>
+            <button onclick="go('ch8')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch8">8. 방어 아키텍처: 다층 방어</button>
+            <button onclick="go('minilab-0')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-0">9. Mini Lab — 레지스트리 경로 매칭</button>
+            <button onclick="go('minilab-1')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-1">10. Mini Lab — Autoruns 위협 사냥</button>
+            <button onclick="go('minilab-2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-2">11. Mini Lab — Sigma 규칙 빈칸 채우기</button>
+            <button onclick="go('quiz')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="quiz">Q. 종합 퀴즈</button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+
+            <!-- Header -->
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-blue-500/20 border border-blue-400 hl-blue font-mono text-sm mb-4">Persistence, Privilege Escalation</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Registry Run Keys Analysis &amp; Detection</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">레지스트리 Run 키 분석과 탐지</p>
+                <div class="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500 dark:text-slate-500">
+                    <span>⏱ 약 40분</span><span>·</span><span>📚 8챕터 + 퀴즈</span><span>·</span><span>🧪 3개 미니 랩</span>
+                </div>
+            </header>
+
+            <!-- Overview Panel -->
+            <div class="glass-panel rounded-xl p-8 border-l-4 border-l-blue-500 relative overflow-hidden">
+                <div class="absolute -top-6 -right-6 text-[120px] opacity-[0.04] select-none pointer-events-none">🔬</div>
+                <h2 class="text-2xl font-bold mb-4 text-blue-700 dark:text-blue-400">레지스트리 변경을 분석하고 탐지 규칙을 작성할 수 있나요?</h2>
+                <p class="text-cgray dark:text-slate-300 leading-relaxed mb-6">이 중급 과정에서는 레지스트리 Run 키 분석 코드, Autoruns 도구 활용법, Sysmon Event ID 12/13 분석, Sigma 탐지 규칙 작성 방법을 학습합니다. 실제 악성코드가 사용하는 레지스트리 조작 패턴을 코드 수준에서 이해합니다.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
+                        <div class="text-2xl mb-2">💻</div>
+                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">레지스트리 분석 코드</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">PowerShell과 reg.exe를 이용한 자동 실행 항목 분석 방법을 학습합니다</div>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
+                        <div class="text-2xl mb-2">📝</div>
+                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">탐지 규칙 작성</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sigma 규칙과 Sysmon 설정으로 Run 키 변경을 탐지합니다</div>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
+                        <div class="text-2xl mb-2">🔄</div>
+                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">우회 기법 이해</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">공격자의 레지스트리 은닉 기법과 대응 방법을 학습합니다</div>
+                    </div>
+                </div>
+                <div class="mt-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-300 dark:border-blue-700 rounded-lg p-4 text-center">
+                    <p class="text-sm text-blue-700 dark:text-blue-400">💡 <strong>이 과정을 마치면</strong> → 고급 과정에서 CLSID 하이재킹, COM 오브젝트 지속성, NTUSER.DAT 포렌식을 분석합니다</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Chapters -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#1.</span> 레지스트리 Run 키 분석 코드</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🔧</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">PowerShell로 자동 실행 항목 열거</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">PowerShell을 사용하면 모든 자동 실행 레지스트리 키를 프로그래밍 방식으로 열거할 수 있습니다. Get-ItemProperty 명령으로 HKLM과 HKCU의 Run 키 값을 읽고, 등록된 프로그램의 경로, 서명 상태, 파일 해시를 확인하여 의심스러운 항목을 식별합니다.</p>
+                    </div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">enum_autorun.ps1</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">powershell</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 방어 분석용</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># 레지스트리 Run 키 자동 실행 항목 열거</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># HKLM과 HKCU의 Run/RunOnce 키를 모두 확인</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">$runKeys = @(</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run',</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce',</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run',</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce'</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">)</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">foreach ($key in $runKeys) {</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    Write-Host "[*] Checking: $key" -ForegroundColor Cyan</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">    if (Test-Path $key) {</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">        $props = Get-ItemProperty -Path $key</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $props.PSObject.Properties | Where-Object {</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">            $_.Name -notlike 'PS*'</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        } | ForEach-Object {</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">            Write-Host "  Name: $($_.Name)" -ForegroundColor Yellow</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">            Write-Host "  Value: $($_.Value)" -ForegroundColor Red</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        }</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">    }</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#2.</span> 공격자의 레지스트리 조작 기법</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🎭</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">reg.exe와 PowerShell을 이용한 지속성 확보</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">공격자는 시스템 내장 도구를 사용하여 레지스트리를 조작합니다. reg.exe는 명령줄에서 직접 레지스트리를 수정하는 Windows 내장 도구이며, PowerShell의 Set-ItemProperty/New-ItemProperty도 동일한 역할을 합니다. Living-off-the-Land 기법으로 추가 도구 없이 지속성을 확보합니다.</p>
+                    </div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">attacker_persistence.bat</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">batch</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 공격 패턴 분석용</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM 공격자가 사용하는 Run 키 등록 방법들</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM 모두 시스템 내장 도구 사용 (LotL)</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 방법 1: reg.exe (가장 일반적)</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">reg add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run ^</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">    /v "WindowsUpdate" /t REG_SZ ^</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    /d "C:\Users\Public\svchost.exe" /f</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 방법 2: PowerShell (인코딩된 명령)</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">powershell -c "Set-ItemProperty -Path ^</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' ^</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    -Name 'SecurityHealth' -Value 'C:\temp\payload.exe'"</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 방법 3: Startup 폴더에 LNK 파일 생성</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">copy malware.lnk "%APPDATA%\Microsoft\Windows\</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    Start Menu\Programs\Startup\update.lnk"</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 bg-red-50/50 dark:bg-red-900/10">
+                        <h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">⚠️ 정상 프로그램과 악성코드 구별 포인트</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">악성코드는 보통 다음 패턴을 보입니다: ① 정상 Windows 프로세스 이름을 사칭 (svchost.exe, csrss.exe). ② 비정상적 경로에서 실행 (C:\Users\Public, %TEMP%). ③ 디지털 서명이 없거나 유효하지 않음. ④ 파일 생성 시간이 최근이며 원래 시스템에 없던 파일.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#3.</span> Autoruns 도구 활용</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🔌</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">Sysinternals Autoruns — 종합 자동 실행 분석</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">Mark Russinovich가 개발한 Autoruns는 Windows 시스템의 모든 자동 실행 위치를 한눈에 보여주는 도구입니다. 레지스트리 Run 키, Startup 폴더 외에도 서비스, 드라이버, 스케줄 작업, WMI 이벤트, DLL 로드 등 수십 개의 자동 실행 위치를 검사합니다. 비서명 항목을 강조 표시하여 의심스러운 엔트리를 빠르게 식별합니다.</p>
+                    </div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">autoruns_cli.bat</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">batch</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 방어 분석 도구</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM Autoruns CLI: 명령줄로 자동 실행 항목 분석</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">REM Microsoft 서명이 없는 항목만 필터링</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM 기본 스캔: 비서명 항목 필터링</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">autorunsc.exe -accepteula -a * -s -h -vt</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM -a * : 모든 자동 실행 위치 검사</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM -s   : 비서명(unsigned) 항목만 표시</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM -h   : 파일 해시 포함</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM -vt  : VirusTotal 스캔 결과 포함</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">REM CSV 출력: SIEM 연동용</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">autorunsc.exe -accepteula -a * -s -c &gt; autoruns_report.csv</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch4" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#4.</span> Sysmon Event ID 12/13 분석</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">📡</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">Sysmon 레지스트리 이벤트</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">Sysmon은 레지스트리 변경을 세 가지 이벤트 ID로 추적합니다: Event ID 12 — 레지스트리 키/값 생성 및 삭제. Event ID 13 — 레지스트리 값 설정 (값 변경). Event ID 14 — 레지스트리 키/값 이름 변경. Run 키 모니터링에는 특히 Event ID 13(값 설정)이 핵심입니다.</p>
+                    </div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">sysmon-config-runkey.xml</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">xml</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — Sysmon 설정 예시</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">&lt;!-- Sysmon 설정: 레지스트리 Run 키 변경 탐지 --&gt;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">&lt;Sysmon schemaversion=&quot;4.90&quot;&gt;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  &lt;EventFiltering&gt;</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">    &lt;!-- 레지스트리 값 설정 감시 (Event ID 13) --&gt;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    &lt;RegistryEvent onmatch=&quot;include&quot;&gt;</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;TargetObject condition=&quot;contains&quot;&gt;</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        \CurrentVersion\Run</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;/TargetObject&gt;</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;TargetObject condition=&quot;contains&quot;&gt;</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        \CurrentVersion\RunOnce</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;/TargetObject&gt;</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;TargetObject condition=&quot;contains&quot;&gt;</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        \Explorer\Shell Folders</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">      &lt;/TargetObject&gt;</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    &lt;/RegistryEvent&gt;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  &lt;/EventFiltering&gt;</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">&lt;/Sysmon&gt;</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch5" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#5.</span> Sigma 탐지 규칙 작성</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">📋</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">Run 키 변경 Sigma 규칙</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">Sigma 규칙으로 레지스트리 Run 키 변경을 탐지할 수 있습니다. Sysmon Event ID 13(RegistryValueSet)을 기반으로, TargetObject에 Run 키 경로가 포함된 이벤트를 필터링합니다. 정상 소프트웨어의 Run 키 등록을 제외하기 위해 화이트리스트 필터를 추가하는 것이 중요합니다.</p>
+                    </div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">run_key_modification.yml</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">yaml</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — Sigma 탐지 규칙</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">title: Suspicious Registry Run Key Modification</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">id: c7d1e5a2-9f3b-4e8d-a2c1-d5f7e3b4a6c8</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">status: production</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">level: medium</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">logsource:</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  category: registry_set</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  product: windows</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">detection:</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">  selection:</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    TargetObject|contains:</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">      - '\CurrentVersion\Run'</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">      - '\CurrentVersion\RunOnce'</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">  filter_trusted:</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    Image|startswith:</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">      - 'C:\Program Files\'</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">      - 'C:\Windows\System32\'</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">  condition: selection and not filter_trusted</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch6" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#6.</span> 탐지 우회 기법 분석</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400 bg-red-50/50 dark:bg-red-900/10">
+                        <h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">⚠️ 공격자의 탐지 우회 전략</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">공격자는 단순 Run 키 등록 외에도 다양한 우회 기법을 사용합니다. 방어자는 이러한 우회 기법을 이해해야 더 포괄적인 탐지 규칙을 작성할 수 있습니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-blue">주요 탐지 우회 기법과 대응</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead><tr class="bg-blue-500/10 dark:bg-blue-500/5"><th class="text-left p-3 font-bold border-b border-blue-400/30">우회 기법</th><th class="text-left p-3 font-bold border-b border-blue-400/30">원리</th><th class="text-left p-3 font-bold border-b border-blue-400/30">대응 방법</th></tr></thead>
+                                <tbody class="text-cgray dark:text-slate-300">
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">정상 프로세스명 위장</td><td class="p-3 text-center">svchost.exe, csrss.exe 이름 사용</td><td class="p-3 text-center">실행 경로 검증 (System32 외 의심)</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">간접 실행</td><td class="p-3 text-center">rundll32.exe, mshta.exe로 DLL/HTA 실행</td><td class="p-3 text-center">자식 프로세스 관계 분석</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">인코딩된 명령</td><td class="p-3 text-center">Base64 인코딩 PowerShell 페이로드</td><td class="p-3 text-center">스크립트 블록 로깅 (Event 4104)</td></tr>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-3 font-bold">레지스트리 경로 변형</td><td class="p-3 text-center">Wow6432Node, Policies 하위 키 사용</td><td class="p-3 text-center">확장된 경로 패턴 모니터링</td></tr>
+                                    <tr class=""><td class="p-3 font-bold">타이밍 공격</td><td class="p-3 text-center">정상 소프트웨어 설치 시 함께 등록</td><td class="p-3 text-center">베이스라인 비교 분석</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch7" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#7.</span> PowerShell 기반 탐지 스크립트</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🎯</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">자동화된 Run 키 이상 탐지</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">PowerShell 스크립트를 이용하여 레지스트리 Run 키의 베이스라인을 생성하고, 변경 사항을 자동으로 탐지할 수 있습니다. 파일 해시, 디지털 서명, 경로 이상 여부를 자동으로 확인하여 의심스러운 항목을 리포트합니다.</p>
+                    </div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">detect_suspicious_run.ps1</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono">powershell</span>
+                        </div>
+                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 방어 분석 스크립트</div>
+                        <div class="terminal-bg p-4 overflow-x-auto">
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># 의심스러운 Run 키 항목 탐지 스크립트</div>
+                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># 비서명 파일, 비정상 경로 자동 검출</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">$suspiciousPaths = @('%TEMP%', 'C:\Users\Public',</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    'C:\ProgramData', '%APPDATA%')</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">$runPaths = @(</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run',</div>
+                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">)</div>
+                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">foreach ($path in $runPaths) {</div>
+                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    $items = Get-ItemProperty -Path $path -EA SilentlyContinue</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    $items.PSObject.Properties | Where-Object {</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $_.Name -notlike 'PS*'</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    } | ForEach-Object {</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        $sig = Get-AuthenticodeSignature $_.Value 2&gt;$null</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        if ($sig.Status -ne 'Valid') {</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">            Write-Warning "[ALERT] Unsigned: $($_.Name)"</div>
+                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        }</div>
+                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    }</div>
+                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ch8" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#8.</span> 방어 아키텍처: 다층 방어</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
+                        <div class="text-2xl mb-2">🏰</div>
+                        <h3 class="font-bold text-lg mb-2 hl-blue">Defense-in-Depth 전략</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">단일 방어 메커니즘은 언제나 우회될 수 있습니다. 자동 실행 악용을 효과적으로 방어하려면 다층 방어가 필요합니다: 예방 계층(GPO 제한 + AppLocker) → 탐지 계층(Sysmon + Sigma + Autoruns) → 대응 계층(자동화된 격리 + 레지스트리 복원).</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-blue">다층 방어 아키텍처</h3>
+                        <div class="terminal-bg rounded-lg p-4 overflow-x-auto">
+                            <pre class="text-xs leading-relaxed">  ┌─────────────────────────────────────────────┐
+  │            Layer 1: 예방 (Prevention)        │
+  │  GPO 제한   │  AppLocker  │  WDAC           │
+  ├─────────────────────────────────────────────┤
+  │            Layer 2: 탐지 (Detection)         │
+  │  Sysmon 12/13  │  Sigma Rules  │  Autoruns  │
+  ├─────────────────────────────────────────────┤
+  │            Layer 3: 대응 (Response)           │
+  │  SOAR Playbook  │  레지스트리 복원  │  격리  │
+  └─────────────────────────────────────────────┘</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Mini Labs -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="minilab-0" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#9.</span> Mini Lab — 레지스트리 경로와 용도 매칭</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-1.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">각 레지스트리 경로가 어떤 용도로 사용되는지 매칭하세요.</p>
+                        <div id="match-game-0" class="space-y-4"></div>
+                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="font-mono text-sm">점수: <span id="match-score-0" class="hl-blue text-lg">0</span> / <span>5</span></div>
+                            <button onclick="initMatchGame_0()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="minilab-1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#10.</span> Mini Lab — Autoruns를 이용한 위협 사냥</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-2.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">Autoruns 도구를 이용해 의심스러운 자동 실행 항목을 찾아내는 과정을 따라가 보세요.</p>
+                        <div id="step-click-1" class="space-y-3">
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="0" onclick="handleStepClick_1(0)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">1️⃣</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">Autoruns 관리자 권한으로 실행</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">autorunsc.exe를 관리자 권한 CMD에서 실행합니다. 전체 시스템의 자동 실행 항목을 검사하려면 관리자 권한이 필요합니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="1" onclick="handleStepClick_1(1)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">2️⃣</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">비서명 항목 필터링</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">Options &gt; Hide Microsoft Entries를 활성화하고, 비서명(unsigned) 항목만 필터링합니다. 서명되지 않은 실행 파일은 의심 대상입니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="2" onclick="handleStepClick_1(2)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">3️⃣</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">의심스러운 경로 확인</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">%TEMP%, C:\Users\Public, AppData 등 비정상적 경로에서 실행되는 항목을 확인합니다. 정상 소프트웨어는 보통 Program Files에 위치합니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="3" onclick="handleStepClick_1(3)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">4️⃣</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">VirusTotal 스캔</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">의심스러운 파일의 해시를 VirusTotal에 제출합니다. Autoruns는 VT 연동 기능을 내장하고 있어 바로 스캔 결과를 확인할 수 있습니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="4" onclick="handleStepClick_1(4)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">5️⃣</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">타임라인 분석</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">의심 파일의 생성 시간, 수정 시간을 확인합니다. 최근에 생성된 파일이 오래된 것처럼 위장(타임스탬프 변조)되었는지 $MFT와 비교합니다.</div></div>
+                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="5" onclick="handleStepClick_1(5)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">6️⃣</div><div class="font-bold text-sm text-[#1e293b] dark:text-white">보고서 생성 및 대응</div></div><div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">발견된 의심 항목을 CSV로 내보내고, SIEM에 IoC를 등록합니다. 필요 시 해당 레지스트리 항목을 삭제하고 악성 파일을 격리합니다.</div></div>
+                        </div>
+                        <div id="step-result-1" class="hidden mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 text-center">
+                            <p class="text-sm font-bold text-blue-700 dark:text-blue-400">🎉 모든 단계를 완료했습니다!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="minilab-2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#11.</span> Mini Lab — Sigma 규칙 빈칸 채우기</h2>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-3.sh</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">레지스트리 Run 키 변경 탐지 Sigma 규칙의 빈칸을 올바른 값으로 채우세요.</p>
+                        <div class="terminal-bg rounded-lg overflow-hidden">
+                            <div class="px-4 py-2 flex items-center gap-2 border-b border-slate-600">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                <span class="text-xs text-slate-400 ml-2 font-mono">sigma_runkey_fill.yml</span>
+                            </div>
+                            <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드</div>
+                            <div class="p-4 space-y-1" id="code-fill-2">
+                                <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">title: Registry Run Key Modification</div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">status: production</div>
+                                <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">level: medium</div>
+                                <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                                <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">logsource:</div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  category: <input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-24 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank1" data-answer="registry_set" placeholder="카테고리?"></div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  product: windows</div>
+                                <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
+                                <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">detection:</div>
+                                <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">  selection:</div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    TargetObject|contains: '\CurrentVersion\<input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-24 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank2" data-answer="Run" placeholder="키 이름?">'</div>
+                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    EventType: <input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-24 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank3" data-answer="SetValue" placeholder="이벤트?"></div>
+                                <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">  condition: selection</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mt-4">
+                            <button onclick="checkCodeFill_2()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded font-mono text-sm transition cursor-pointer">정답 확인</button>
+                            <button onclick="resetCodeFill_2()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 초기화</button>
+                        </div>
+                        <div id="code-fill-result-2" class="hidden mt-4 p-4 rounded text-sm font-mono shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- Quiz Section -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <section id="quiz" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#Q.</span> 종합 퀴즈</h2>
+                <div class="glass-panel p-6 rounded-xl">
+                    <div id="final-quiz" class="space-y-8">
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. 공격자가 reg.exe를 이용해 Run 키에 값을 추가할 때 사용하는 핵심 명령 구문은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq1" value="1" class="mr-3"> reg delete HKCU\...\Run /v malware</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq1" value="2" class="mr-3"> reg add HKCU\...\Run /v name /t REG_SZ /d path</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq1" value="3" class="mr-3"> reg query HKCU\...\Run</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq1" value="4" class="mr-3"> reg export HKCU\...\Run backup.reg</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 reg add 명령으로 Run 키에 새 값을 추가합니다. /v는 값 이름, /t REG_SZ는 문자열 타입, /d는 실행할 프로그램 경로를 지정합니다.</div></div>
+                        <div class="quiz-q" data-correct="3"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. Sysmon Event ID 13이 탐지하는 레지스트리 이벤트는?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq2" value="1" class="mr-3"> 레지스트리 키 생성</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq2" value="2" class="mr-3"> 레지스트리 키 삭제</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq2" value="3" class="mr-3"> 레지스트리 값 설정 (RegistryValueSet)</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq2" value="4" class="mr-3"> 레지스트리 키 이름 변경</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 Event ID 13은 레지스트리 값이 설정(Set)될 때 발생합니다. Run 키에 새 자동 실행 항목이 추가되면 이 이벤트가 기록됩니다.</div></div>
+                        <div class="quiz-q" data-correct="3"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q3. Autoruns에서 의심 항목을 식별하는 가장 효과적인 방법은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq3" value="1" class="mr-3"> 파일 이름만 확인</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq3" value="2" class="mr-3"> 파일 크기 비교</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq3" value="3" class="mr-3"> 비서명 항목 필터링 + VirusTotal 스캔</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq3" value="4" class="mr-3"> 레지스트리 키 생성 날짜 확인</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 Autoruns의 핵심 기능은 디지털 서명 확인과 VirusTotal 연동입니다. 비서명 항목 필터링 + VT 조회로 악성코드를 빠르게 식별할 수 있습니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q4. 공격자가 svchost.exe를 위장할 때 가장 효과적인 탐지 방법은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq4" value="1" class="mr-3"> 프로세스 이름만으로 판단</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq4" value="2" class="mr-3"> 프로세스의 실행 경로가 System32인지 검증</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq4" value="3" class="mr-3"> 프로세스의 CPU 사용률 확인</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq4" value="4" class="mr-3"> 프로세스의 메모리 사용량 확인</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 정상 svchost.exe는 항상 C:\Windows\System32에서 실행됩니다. 다른 경로에서 실행되는 동일 이름 파일은 악성코드일 가능성이 높습니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q5. Wow6432Node 레지스트리 경로의 목적은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq5" value="1" class="mr-3"> 64비트 전용 프로그램의 설정 저장</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq5" value="2" class="mr-3"> 32비트 프로그램의 레지스트리 리다이렉션</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq5" value="3" class="mr-3"> 임시 레지스트리 값 저장</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq5" value="4" class="mr-3"> 보안 정책 설정 저장</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 64비트 Windows에서 32비트 프로그램의 레지스트리 접근은 Wow6432Node로 리다이렉션됩니다. 공격자는 이 경로를 악용하여 모니터링을 우회하기도 합니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q6. Sigma 규칙에서 Run 키 변경을 탐지할 때 logsource category는?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq6" value="1" class="mr-3"> process_creation</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq6" value="2" class="mr-3"> registry_set</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq6" value="3" class="mr-3"> file_creation</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq6" value="4" class="mr-3"> network_connection</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 registry_set 카테고리는 Sysmon Event ID 13(RegistryValueSet)에 매핑됩니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q7. 인코딩된 PowerShell 명령을 Run 키에 등록할 때 탐지 방법은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq7" value="1" class="mr-3"> 네트워크 트래픽 분석</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq7" value="2" class="mr-3"> PowerShell Script Block Logging (Event ID 4104)</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq7" value="3" class="mr-3"> 파일 시스템 스캔</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq7" value="4" class="mr-3"> 메모리 덤프 분석</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 Script Block Logging은 인코딩된 명령의 디코딩된 원본을 Event ID 4104에 기록합니다.</div></div>
+                        <div class="quiz-q" data-correct="2"><h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q8. Run 키 탐지에서 오탐을 줄이는 가장 효과적인 방법은?</h3><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq8" value="1" class="mr-3"> 모든 Run 키 변경을 차단</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq8" value="2" class="mr-3"> 정상 소프트웨어 경로를 화이트리스트로 필터링</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq8" value="3" class="mr-3"> 관리자 계정만 모니터링</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="fq8" value="4" class="mr-3"> 야간 시간대만 모니터링</label></div><div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 Sigma 규칙에서 filter_trusted 조건으로 Program Files 등 정상 경로를 제외하면 오탐을 크게 줄일 수 있습니다.</div></div>
+                        <button onclick="gradeFinalQuiz()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg font-mono transition shadow-sm cursor-pointer">정답 확인</button>
+                    </div>
+                    <div id="quiz-result" class="hidden mt-6 p-4 rounded-lg text-sm font-mono shadow-sm"></div>
+                </div>
+            </section>
+
+            <!-- Final CTA -->
+            <div class="pt-12 pb-8 text-center border-t border-blue-400/30 mt-16">
+                <div class="inline-block bg-blue-500/20 text-blue-700 dark:text-blue-400 px-4 py-1 rounded-full font-bold text-sm mb-4 border border-blue-400">🎉 학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">Registry Run Keys Analysis &amp; Detection 중급 과정을 완료했습니다!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">레지스트리 Run 키 분석과 탐지 중급 학습을 마쳤습니다. 고급 과정에서 CLSID 하이재킹, COM 지속성, 포렌식 분석을 배워보세요.</p>
+                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-600 text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
+                    <span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span>
+                </button>
+            </div>
+
+        </div>
+    </main>
+    </div>
+
+    <script>
+        /* ─── Navigation ─── */
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+
+        /* ─── Theme Toggle ─── */
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+
+        /* ─── Intersection Observer ─── */
+        var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        /* ─── Utility ─── */
+        function shuffleArray(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+        /* ═══════ Matching Game 0 ═══════ */
+        var matchItems_0=[{"desc":"모든 사용자에게 매번 로그인 시 자동 실행","answer":"HKLM\\...\\Run"},{"desc":"현재 사용자에게만 매번 로그인 시 자동 실행","answer":"HKCU\\...\\Run"},{"desc":"한 번 실행 후 레지스트리에서 자동 삭제","answer":"RunOnce"},{"desc":"32비트 앱의 레지스트리 리다이렉션 경로","answer":"Wow6432Node"},{"desc":"그룹 정책으로 강제 적용되는 자동 실행","answer":"Policies\\Explorer\\Run"}];
+        var matchTypes_0=["HKLM\\...\\Run","HKCU\\...\\Run","RunOnce","Wow6432Node","Policies\\Explorer\\Run"];
+        var matchScore_0=0;var matchAnswered_0=[];
+        function initMatchGame_0(){
+            matchScore_0=0;matchAnswered_0=[];
+            document.getElementById('match-score-0').textContent='0';
+            var container=document.getElementById('match-game-0');container.innerHTML='';
+            matchItems_0.forEach(function(item,idx){
+                var row=document.createElement('div');row.className='bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700';row.id='match-row-0-'+idx;
+                var descP=document.createElement('p');descP.className='text-sm text-cgray dark:text-slate-300 mb-3';descP.textContent=(idx+1)+'. '+item.desc;row.appendChild(descP);
+                var btnContainer=document.createElement('div');btnContainer.className='flex flex-wrap gap-2';
+                shuffleArray(matchTypes_0).forEach(function(type){var btn=document.createElement('button');btn.className='match-btn text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-cgray dark:text-slate-300 font-mono cursor-pointer';btn.textContent=type;btn.onclick=function(){handleMatch_0(idx,type,btn);};btnContainer.appendChild(btn);});
+                row.appendChild(btnContainer);
+                var fb=document.createElement('div');fb.id='match-fb-0-'+idx;fb.className='mt-2 text-xs font-mono hidden';row.appendChild(fb);container.appendChild(row);
+            });
+        }
+        function handleMatch_0(idx,selected,btnEl){
+            if(matchAnswered_0.indexOf(idx)!==-1)return;matchAnswered_0.push(idx);
+            var fb=document.getElementById('match-fb-0-'+idx);fb.classList.remove('hidden');
+            var row=document.getElementById('match-row-0-'+idx);var btns=row.querySelectorAll('.match-btn');
+            if(selected===matchItems_0[idx].answer){matchScore_0++;document.getElementById('match-score-0').textContent=matchScore_0;fb.className='mt-2 text-xs font-mono text-green-600 dark:text-green-400';fb.textContent='✅ 정답! '+matchItems_0[idx].answer;btnEl.classList.add('correct');}
+            else{fb.className='mt-2 text-xs font-mono text-red-600 dark:text-red-400';fb.textContent='❌ 오답! 정답은 '+matchItems_0[idx].answer;btnEl.classList.add('wrong');btns.forEach(function(b){if(b.textContent===matchItems_0[idx].answer)b.classList.add('correct');});}
+            btns.forEach(function(b){b.onclick=null;b.style.cursor='default';});
+        }
+        /* ═══════ Step Click 1 ═══════ */
+        var stepCurrent_1=0;
+        function handleStepClick_1(idx){
+            if(idx!==stepCurrent_1)return;
+            var container=document.getElementById('step-click-1');
+            var steps=container.querySelectorAll('.step-btn');
+            steps[idx].classList.add('active');
+            steps[idx].querySelector('.step-detail').classList.remove('hidden');
+            if(idx>0)steps[idx-1].classList.remove('active');
+            if(idx>0)steps[idx-1].classList.add('completed');
+            stepCurrent_1=idx+1;
+            if(stepCurrent_1===6){
+                steps[idx].classList.remove('active');steps[idx].classList.add('completed');
+                document.getElementById('step-result-1').classList.remove('hidden');
+            }
+        }
+        /* ═══════ Code Fill 2 ═══════ */
+        var codeFillAnswers_2=[{"id":"blank1","answer":"registry_set","alternatives":["registry_event","RegistryEvent"]},{"id":"blank2","answer":"Run","alternatives":["run","RUN"]},{"id":"blank3","answer":"SetValue","alternatives":["setvalue","set_value","RegistryValueSet"]}];
+        function checkCodeFill_2(){
+            var inputs=document.querySelectorAll('#code-fill-2 .code-blank');
+            var correct=0;var total=inputs.length;
+            inputs.forEach(function(inp){
+                var blankId=inp.getAttribute('data-blank-id');
+                var ans=codeFillAnswers_2.find(function(a){return a.id===blankId;});
+                if(!ans)return;
+                var userVal=inp.value.trim().toLowerCase();
+                var correctVal=ans.answer.toLowerCase();
+                var alts=ans.alternatives.map(function(a){return a.toLowerCase();});
+                if(userVal===correctVal||alts.indexOf(userVal)!==-1){correct++;inp.classList.add('correct');inp.classList.remove('wrong');}
+                else{inp.classList.add('wrong');inp.classList.remove('correct');}
+            });
+            var r=document.getElementById('code-fill-result-2');r.classList.remove('hidden');
+            if(correct===total){r.className='mt-4 p-4 rounded text-sm font-mono shadow-sm bg-blue-100 border border-blue-400 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';r.textContent='✅ '+correct+'/'+total+' 정답! 모든 빈칸을 올바르게 채웠습니다.';}
+            else{r.className='mt-4 p-4 rounded text-sm font-mono shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';r.textContent='❌ '+correct+'/'+total+' 정답. 틀린 부분을 확인하고 다시 시도하세요.';}
+        }
+        function resetCodeFill_2(){
+            var inputs=document.querySelectorAll('#code-fill-2 .code-blank');
+            inputs.forEach(function(inp){inp.value='';inp.classList.remove('correct','wrong');});
+            document.getElementById('code-fill-result-2').classList.add('hidden');
+        }
+
+        /* ═══════ Final Quiz ═══════ */
+        function gradeFinalQuiz(){
+            var questions=document.querySelectorAll('#final-quiz .quiz-q');
+            var correct=0;var total=questions.length;var details=[];
+            questions.forEach(function(q,i){
+                var ans=q.getAttribute('data-correct');
+                var sel=q.querySelector('input[name="fq'+(i+1)+'"]:checked');
+                var labels=q.querySelectorAll('label');
+                var explanation=q.querySelector('.quiz-explanation');
+                if(explanation)explanation.classList.remove('hidden');
+                if(sel&&sel.value===ans){correct++;labels.forEach(function(l){if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});details.push('<div class="text-green-600 dark:text-green-400">✅ Q'+(i+1)+' 정답</div>');}
+                else{labels.forEach(function(l){if(sel&&l.querySelector('input').value===sel.value)l.classList.add('bg-red-50','dark:bg-red-900/20','border-red-400');if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});details.push('<div class="text-red-500">❌ Q'+(i+1)+' 오답'+(sel?'':' (미선택)')+'</div>');}
+            });
+            var pct=Math.round((correct/total)*100);
+            var grade=pct>=80?'우수':pct>=60?'양호':'재학습 권장';
+            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
+            res.className='mt-6 p-4 rounded-lg text-sm font-mono shadow-sm '+(pct>=80?'bg-blue-100 border border-blue-400 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':pct>=60?'bg-[#F4D06F]/30 border border-[#F4D06F] text-[#b45309] dark:text-[#F4D06F]':'bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400');
+            res.innerHTML='<div class="flex items-center gap-3 mb-3"><div class="text-3xl font-black '+(pct>=80?'text-green-500':pct>=60?'text-yellow-500':'text-red-500')+'">'+pct+'%</div><div><div class="font-bold text-sm">'+grade+' ('+correct+'/'+total+')</div><div class="text-xs opacity-70">중급 과정 종합 평가</div></div></div><div class="space-y-1">'+details.join('')+'</div>';
+        }
+
+        /* ─── Init ─── */
+        window.onload=function(){
+            initMatchGame_0();
+            setTimeout(function(){go('ch1');},100);
+        };
+    </script>
+    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/progress-tracker.js"></script>
+    <script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

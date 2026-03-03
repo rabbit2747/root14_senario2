@@ -1,0 +1,1143 @@
+{
+  "techniqueId": "T1547.001",
+  "techniqueName": "Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder",
+  "tacticIds": ["t4", "t6"],
+  "tacticName": "Persistence, Privilege Escalation",
+  "levels": {
+    "beginner": {
+      "title": "레지스트리 Run Keys & 시작 프로그램 폴더 기초",
+      "titleEn": "Registry Run Keys & Startup Folder Basics",
+      "estimatedMinutes": 20,
+      "overviewPanel": {
+        "emoji": "🏠",
+        "question": "컴퓨터가 켜질 때마다 자동으로 실행되는 프로그램이 있다면?",
+        "explanation": "Windows 시스템에서는 레지스트리 Run 키나 시작 프로그램 폴더에 등록된 프로그램이 부팅 또는 로그인 시 자동으로 실행됩니다. 공격자는 이 메커니즘을 악용하여 악성코드를 시스템에 지속적으로 유지(Persistence)시킵니다. 마치 아파트 경비실에 자동 출입증을 몰래 등록해두는 것과 같습니다.",
+        "learningGoals": [
+          { "emoji": "🧠", "title": "자동 실행 메커니즘 이해", "desc": "Windows에서 부팅/로그인 시 자동 실행이 어떻게 작동하는지 학습합니다" },
+          { "emoji": "⚔️", "title": "공격 원리 파악", "desc": "공격자가 레지스트리와 시작 폴더를 어떻게 악용하는지 알아봅니다" },
+          { "emoji": "🛡️", "title": "기본 방어 개념", "desc": "Autoruns, GPO 등 핵심 방어 메커니즘의 개념을 이해합니다" }
+        ],
+        "nextLevelTeaser": "중급 과정에서 레지스트리 분석 코드, Autoruns 도구, Sigma 탐지 규칙을 직접 작성합니다"
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "자동 실행이란 무엇인가?",
+          "panels": [
+            {
+              "type": "analogy",
+              "heading": "아파트 경비실의 자동 출입증 등록",
+              "emojis": "🏢🔑",
+              "content": "아파트에 입주하면 경비실에서 출입증을 등록합니다. 이후에는 출입증만 태그하면 자동으로 문이 열리죠. Windows의 자동 실행 메커니즘도 마찬가지입니다. 레지스트리 Run 키나 시작 프로그램 폴더에 프로그램을 등록하면, 사용자가 로그인할 때마다 해당 프로그램이 자동으로 실행됩니다. 공격자는 이 '자동 출입증'을 몰래 등록하여 악성코드가 재부팅 후에도 살아남도록 합니다."
+            },
+            {
+              "type": "concept",
+              "heading": "Windows 자동 실행의 핵심 위치",
+              "emojis": "⚙️",
+              "content": "Windows에서 프로그램이 자동 실행되는 주요 위치: ① 레지스트리 Run 키 — HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run (모든 사용자) 및 HKCU\\...\\Run (현재 사용자). ② 시작 프로그램 폴더 — %APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup (사용자별) 및 C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp (전체). ③ RunOnce 키 — 한 번만 실행 후 자동 삭제."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "주요 자동 실행 위치 비교",
+              "headers": ["위치", "범위", "권한 필요", "위험도"],
+              "rows": [
+                ["HKLM\\...\\Run", "모든 사용자", "관리자", "🔴 높음"],
+                ["HKCU\\...\\Run", "현재 사용자만", "일반 사용자", "🟡 중간"],
+                ["사용자 Startup 폴더", "현재 사용자만", "일반 사용자", "🟡 중간"],
+                ["전체 Startup 폴더", "모든 사용자", "관리자", "🔴 높음"],
+                ["RunOnce 키", "1회 실행 후 삭제", "권한별 상이", "🔴 높음"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "레지스트리 Run 키의 작동 원리",
+          "panels": [
+            {
+              "type": "analogy",
+              "heading": "매일 아침 자동으로 켜지는 커피머신",
+              "emojis": "☕⏰",
+              "content": "매일 아침 7시에 자동으로 커피를 내리도록 타이머를 설정해 두면, 별도의 조작 없이 커피가 준비됩니다. 레지스트리 Run 키도 마찬가지입니다. 한 번 등록해두면 사용자가 로그인할 때마다 Windows가 자동으로 해당 프로그램을 실행합니다. 정상 소프트웨어(백신, 클라우드 동기화)도 이 방식을 사용하므로, 악성코드와 정상 프로그램을 구별하는 것이 중요합니다."
+            },
+            {
+              "type": "concept",
+              "heading": "HKLM vs HKCU: 두 가지 범위",
+              "emojis": "🔀",
+              "content": "HKLM(HKEY_LOCAL_MACHINE) — 시스템 전체에 적용됩니다. 모든 사용자가 로그인할 때 실행됩니다. 변경하려면 관리자 권한이 필요합니다. HKCU(HKEY_CURRENT_USER) — 현재 로그인한 사용자에게만 적용됩니다. 일반 사용자 권한으로도 수정 가능하여, 공격자가 더 쉽게 악용할 수 있습니다."
+            },
+            {
+              "type": "diagram",
+              "heading": "레지스트리 Run 키 실행 흐름",
+              "ascii": "  [시스템 부팅]\n       │\n       ▼\n  [Windows 로그인 화면]\n       │\n       ├── 사용자 로그인\n       │\n       ▼\n  ┌─────────────────────┐\n  │ winlogon.exe         │\n  │ userinit.exe         │\n  │ explorer.exe         │\n  └───────┬─────────────┘\n          │\n    ┌─────┴──────┐\n    ▼            ▼\n [HKLM\\Run]  [HKCU\\Run]\n    │            │\n    ▼            ▼\n 전체 사용자   현재 사용자\n 자동 실행    자동 실행\n    │            │\n    └─────┬──────┘\n          ▼\n  [Startup 폴더 실행]"
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "시작 프로그램 폴더",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Startup 폴더의 역할",
+              "emojis": "📁",
+              "content": "시작 프로그램 폴더는 레지스트리 Run 키와 유사한 기능을 합니다. 이 폴더에 실행 파일이나 바로가기(.lnk)를 넣어두면 로그인 시 자동으로 실행됩니다. 사용자별 경로: %APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup. 전체 사용자 경로: C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp. shell:startup 명령으로 빠르게 접근할 수 있습니다."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "Run 키 vs Startup 폴더",
+              "headers": ["특성", "레지스트리 Run 키", "Startup 폴더"],
+              "rows": [
+                ["설정 방법", "레지스트리 편집기/명령", "파일 복사/바로가기 생성"],
+                ["가시성", "일반 사용자에게 잘 보이지 않음", "파일 탐색기에서 확인 가능"],
+                ["탐지 난이도", "중간 (Autoruns 필요)", "쉬움 (폴더 확인)"],
+                ["공격자 선호도", "높음 (은닉 용이)", "중간 (쉽게 발견됨)"],
+                ["실행 형태", "명령줄/경로 직접 지정", "실행 파일 또는 .lnk 파일"]
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "교육 목적 안내",
+              "content": "이 강의에서 소개하는 기법은 보안 전문가가 방어 전략을 수립하기 위해 '공격 원리를 이해하는 것'이 목적입니다. 허가 없이 타인의 시스템에 이러한 기법을 사용하면 법적 처벌을 받을 수 있습니다."
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "실제 사이버 공격 사례",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "APT41 (Double Dragon) — 글로벌 공급망 공격",
+              "emojis": "🐉",
+              "content": "중국 정부와 연계된 APT41은 레지스트리 Run 키를 핵심 지속성 메커니즘으로 사용했습니다. 정상 소프트웨어의 업데이트 프로세스를 가장한 악성 DLL을 HKCU\\...\\Run에 등록하여, 재부팅 후에도 백도어가 자동으로 실행되도록 했습니다. 이를 통해 수개월간 탐지되지 않고 내부 네트워크에 머물렀습니다."
+            },
+            {
+              "type": "concept",
+              "heading": "Lazarus Group — 금융기관 표적 공격",
+              "emojis": "💰",
+              "content": "북한 정찰총국과 연계된 Lazarus Group은 Startup 폴더에 악성 .lnk 파일을 배치하는 방식을 즐겨 사용했습니다. .lnk 파일은 PowerShell 명령을 은밀하게 실행하여 C2 서버와 통신하는 백도어를 로드했습니다. 특히 한국 금융기관을 대상으로 한 캠페인에서 이 기법이 다수 발견되었습니다."
+            },
+            {
+              "type": "info",
+              "heading": "한국 사례: 국내 기관 대상 APT 공격",
+              "emojis": "🇰🇷",
+              "content": "KISA 침해사고 분석 보고서에 따르면, 국내 공공기관과 방위산업체를 대상으로 한 APT 공격에서 레지스트리 Run 키 악용이 가장 흔한 지속성 기법 중 하나로 분류되었습니다. 특히 HKCU Run 키를 사용하여 일반 사용자 권한으로도 지속성을 확보하는 패턴이 다수 관찰되었습니다."
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "기본 방어 전략",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "핵심 방어 메커니즘",
+              "emojis": "🛡️",
+              "content": "레지스트리 Run 키와 Startup 폴더 악용을 방어하는 핵심 방법: ① Autoruns 도구 — Microsoft Sysinternals의 Autoruns로 모든 자동 실행 항목을 한눈에 확인. ② GPO(그룹 정책) — 허용된 프로그램만 자동 실행되도록 정책 제한. ③ Sysmon 모니터링 — Event ID 12/13으로 레지스트리 변경 실시간 감시. ④ EDR 솔루션 — 자동 실행 위치 변경을 실시간으로 탐지하고 차단."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "방어 수단 비교",
+              "headers": ["방어 수단", "효과", "적용 조건", "비용"],
+              "rows": [
+                ["Autoruns", "자동 실행 항목 전수 조사", "수동 점검", "무료"],
+                ["GPO 제한", "비허가 자동 실행 차단", "Active Directory", "무료"],
+                ["Sysmon 모니터링", "실시간 레지스트리 변경 감시", "Sysmon 설치", "무료"],
+                ["EDR/XDR", "자동 탐지 및 차단", "라이선스 필요", "유료"],
+                ["AppLocker/WDAC", "실행 파일 화이트리스트", "Win 10 Enterprise", "무료"]
+              ]
+            },
+            {
+              "type": "info",
+              "heading": "탐지 관점: 어떤 로그를 봐야 할까?",
+              "emojis": "🔍",
+              "content": "자동 실행 악용을 탐지하는 핵심 로그: ① Sysmon Event ID 12 — 레지스트리 키/값 생성/삭제 이벤트 (Run 키 변경 감시). ② Sysmon Event ID 13 — 레지스트리 값 설정 이벤트 (Run 키에 새 값 추가 탐지). ③ Windows Security Event 4688 — 자동 실행된 프로세스의 부모 프로세스 추적. 이런 로그를 SIEM에서 모니터링하면 초기 단계에서 공격을 탐지할 수 있습니다."
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "자동 실행 관련 개념 매칭",
+          "description": "각 설명에 맞는 올바른 용어를 선택하세요.",
+          "pairs": [
+            { "left": "모든 사용자에게 적용되는 시스템 전체 레지스트리 하이브", "right": "HKLM" },
+            { "left": "현재 로그인한 사용자에게만 적용되는 레지스트리 하이브", "right": "HKCU" },
+            { "left": "모든 자동 실행 항목을 한눈에 확인하는 Microsoft 도구", "right": "Autoruns" },
+            { "left": "레지스트리 키 변경을 실시간 감시하는 Sysmon 이벤트", "right": "Event ID 13" },
+            { "left": "한 번만 실행되고 자동으로 삭제되는 레지스트리 키", "right": "RunOnce" }
+          ]
+        },
+        {
+          "type": "ordering_game",
+          "title": "레지스트리 Run 키 공격 순서 배열",
+          "description": "공격자가 레지스트리 Run 키를 악용하여 지속성을 확보하는 올바른 순서로 배열하세요.",
+          "items": [
+            { "label": "초기 침투 (Initial Access)" },
+            { "label": "악성코드를 디스크에 저장" },
+            { "label": "레지스트리 Run 키에 경로 등록" },
+            { "label": "시스템 재부팅 또는 사용자 재로그인" },
+            { "label": "악성코드 자동 실행 (Persistence)" },
+            { "label": "C2 서버와 통신 재개" }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "HKCU\\...\\Run 키를 공격자가 선호하는 이유는?",
+            "options": [
+              "시스템 전체에 적용되기 때문",
+              "관리자 권한 없이도 수정할 수 있기 때문",
+              "EDR이 모니터링하지 않기 때문",
+              "암호화되어 있기 때문"
+            ],
+            "correct": 1,
+            "explanation": "HKCU(HKEY_CURRENT_USER) Run 키는 현재 사용자의 레지스트리이므로 일반 사용자 권한으로도 수정이 가능합니다. 관리자 권한 상승 없이 지속성을 확보할 수 있어 공격자가 선호합니다."
+          },
+          {
+            "question": "Startup 폴더에 배치된 악성 파일의 가장 일반적인 형태는?",
+            "options": [
+              ".sys 드라이버 파일",
+              ".dll 라이브러리 파일",
+              ".lnk 바로가기 파일",
+              ".reg 레지스트리 파일"
+            ],
+            "correct": 2,
+            "explanation": ".lnk(바로가기) 파일은 실제 실행 명령을 숨기면서 정상적인 프로그램처럼 위장할 수 있습니다. PowerShell이나 cmd 명령을 은밀하게 실행하는 바로가기를 만들어 Startup 폴더에 배치하는 것이 일반적입니다."
+          },
+          {
+            "question": "레지스트리 Run 키 변경을 탐지하는 가장 효과적인 Sysmon 이벤트 ID는?",
+            "options": [
+              "Event ID 1 (프로세스 생성)",
+              "Event ID 3 (네트워크 연결)",
+              "Event ID 10 (프로세스 접근)",
+              "Event ID 13 (레지스트리 값 설정)"
+            ],
+            "correct": 3,
+            "explanation": "Sysmon Event ID 13은 레지스트리 값이 설정(Set)될 때 발생합니다. TargetObject 필드에 Run 키 경로를 필터링하면 자동 실행 항목 추가를 효과적으로 탐지할 수 있습니다."
+          },
+          {
+            "question": "APT41이 레지스트리 Run 키를 악용할 때 사용한 주요 전략은?",
+            "options": [
+              "커널 드라이버를 로드하는 방식",
+              "정상 소프트웨어의 업데이트 프로세스를 가장한 DLL 등록",
+              "부트 섹터를 직접 수정",
+              "BIOS 펌웨어에 백도어 설치"
+            ],
+            "correct": 1,
+            "explanation": "APT41은 정상 소프트웨어의 업데이트 프로세스를 가장한 악성 DLL을 Run 키에 등록했습니다. 이는 정상 프로그램과 구별하기 어려워 장기간 탐지를 회피할 수 있는 전략입니다."
+          },
+          {
+            "question": "RunOnce 키와 Run 키의 핵심 차이점은?",
+            "options": [
+              "RunOnce는 관리자 권한이 필요하고 Run은 불필요",
+              "RunOnce는 한 번 실행 후 자동 삭제되고 Run은 매번 실행",
+              "RunOnce는 부팅 시 실행되고 Run은 로그인 시 실행",
+              "RunOnce는 HKLM에만 존재하고 Run은 HKCU에만 존재"
+            ],
+            "correct": 1,
+            "explanation": "RunOnce 키에 등록된 항목은 한 번 실행된 후 레지스트리에서 자동으로 삭제됩니다. 공격자는 이를 이용해 초기 실행 시에만 특정 설정을 수행하고, 포렌식 분석에서 흔적을 줄일 수 있습니다."
+          }
+        ]
+      }
+    },
+    "intermediate": {
+      "title": "레지스트리 Run 키 분석과 탐지",
+      "titleEn": "Registry Run Keys Analysis & Detection",
+      "estimatedMinutes": 40,
+      "overviewPanel": {
+        "emoji": "🔬",
+        "question": "레지스트리 변경을 분석하고 탐지 규칙을 작성할 수 있나요?",
+        "explanation": "이 중급 과정에서는 레지스트리 Run 키 분석 코드, Autoruns 도구 활용법, Sysmon Event ID 12/13 분석, Sigma 탐지 규칙 작성 방법을 학습합니다. 실제 악성코드가 사용하는 레지스트리 조작 패턴을 코드 수준에서 이해합니다.",
+        "learningGoals": [
+          { "emoji": "💻", "title": "레지스트리 분석 코드", "desc": "PowerShell과 reg.exe를 이용한 자동 실행 항목 분석 방법을 학습합니다" },
+          { "emoji": "📝", "title": "탐지 규칙 작성", "desc": "Sigma 규칙과 Sysmon 설정으로 Run 키 변경을 탐지합니다" },
+          { "emoji": "🔄", "title": "우회 기법 이해", "desc": "공격자의 레지스트리 은닉 기법과 대응 방법을 학습합니다" }
+        ],
+        "nextLevelTeaser": "고급 과정에서 CLSID 하이재킹, COM 오브젝트 지속성, NTUSER.DAT 포렌식을 분석합니다"
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "레지스트리 Run 키 분석 코드",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "PowerShell로 자동 실행 항목 열거",
+              "emojis": "🔧",
+              "content": "PowerShell을 사용하면 모든 자동 실행 레지스트리 키를 프로그래밍 방식으로 열거할 수 있습니다. Get-ItemProperty 명령으로 HKLM과 HKCU의 Run 키 값을 읽고, 등록된 프로그램의 경로, 서명 상태, 파일 해시를 확인하여 의심스러운 항목을 식별합니다."
+            },
+            {
+              "type": "code",
+              "heading": "자동 실행 항목 열거 스크립트",
+              "filename": "enum_autorun.ps1",
+              "language": "powershell",
+              "warning": "교육 목적 스크립트 — 방어 분석용",
+              "lines": [
+                { "text": "# 레지스트리 Run 키 자동 실행 항목 열거", "color": "slate" },
+                { "text": "# HKLM과 HKCU의 Run/RunOnce 키를 모두 확인", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "$runKeys = @(", "color": "cyan" },
+                { "text": "    'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',", "color": "green" },
+                { "text": "    'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce',", "color": "green" },
+                { "text": "    'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',", "color": "yellow" },
+                { "text": "    'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce'", "color": "yellow" },
+                { "text": ")", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "foreach ($key in $runKeys) {", "color": "purple" },
+                { "text": "    Write-Host \"[*] Checking: $key\" -ForegroundColor Cyan", "color": "cyan" },
+                { "text": "    if (Test-Path $key) {", "color": "purple" },
+                { "text": "        $props = Get-ItemProperty -Path $key", "color": "cyan" },
+                { "text": "        $props.PSObject.Properties | Where-Object {", "color": "orange" },
+                { "text": "            $_.Name -notlike 'PS*'", "color": "orange" },
+                { "text": "        } | ForEach-Object {", "color": "orange" },
+                { "text": "            Write-Host \"  Name: $($_.Name)\" -ForegroundColor Yellow", "color": "red" },
+                { "text": "            Write-Host \"  Value: $($_.Value)\" -ForegroundColor Red", "color": "red" },
+                { "text": "        }", "color": "orange" },
+                { "text": "    }", "color": "purple" },
+                { "text": "}", "color": "purple" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "공격자의 레지스트리 조작 기법",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "reg.exe와 PowerShell을 이용한 지속성 확보",
+              "emojis": "🎭",
+              "content": "공격자는 시스템 내장 도구를 사용하여 레지스트리를 조작합니다. reg.exe는 명령줄에서 직접 레지스트리를 수정하는 Windows 내장 도구이며, PowerShell의 Set-ItemProperty/New-ItemProperty도 동일한 역할을 합니다. Living-off-the-Land 기법으로 추가 도구 없이 지속성을 확보합니다."
+            },
+            {
+              "type": "code",
+              "heading": "공격자의 Run 키 등록 명령 (LotL)",
+              "filename": "attacker_persistence.bat",
+              "language": "batch",
+              "warning": "교육 목적 — 공격 패턴 분석용",
+              "lines": [
+                { "text": "REM 공격자가 사용하는 Run 키 등록 방법들", "color": "slate" },
+                { "text": "REM 모두 시스템 내장 도구 사용 (LotL)", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "REM 방법 1: reg.exe (가장 일반적)", "color": "green" },
+                { "text": "reg add HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run ^", "color": "red" },
+                { "text": "    /v \"WindowsUpdate\" /t REG_SZ ^", "color": "red" },
+                { "text": "    /d \"C:\\Users\\Public\\svchost.exe\" /f", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "REM 방법 2: PowerShell (인코딩된 명령)", "color": "green" },
+                { "text": "powershell -c \"Set-ItemProperty -Path ^", "color": "red" },
+                { "text": "    'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' ^", "color": "yellow" },
+                { "text": "    -Name 'SecurityHealth' -Value 'C:\\temp\\payload.exe'\"", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "REM 방법 3: Startup 폴더에 LNK 파일 생성", "color": "green" },
+                { "text": "copy malware.lnk \"%APPDATA%\\Microsoft\\Windows\\", "color": "red" },
+                { "text": "    Start Menu\\Programs\\Startup\\update.lnk\"", "color": "orange" }
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "정상 프로그램과 악성코드 구별 포인트",
+              "content": "악성코드는 보통 다음 패턴을 보입니다: ① 정상 Windows 프로세스 이름을 사칭 (svchost.exe, csrss.exe). ② 비정상적 경로에서 실행 (C:\\Users\\Public, %TEMP%). ③ 디지털 서명이 없거나 유효하지 않음. ④ 파일 생성 시간이 최근이며 원래 시스템에 없던 파일."
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "Autoruns 도구 활용",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Sysinternals Autoruns — 종합 자동 실행 분석",
+              "emojis": "🔌",
+              "content": "Mark Russinovich가 개발한 Autoruns는 Windows 시스템의 모든 자동 실행 위치를 한눈에 보여주는 도구입니다. 레지스트리 Run 키, Startup 폴더 외에도 서비스, 드라이버, 스케줄 작업, WMI 이벤트, DLL 로드 등 수십 개의 자동 실행 위치를 검사합니다. 비서명 항목을 강조 표시하여 의심스러운 엔트리를 빠르게 식별합니다."
+            },
+            {
+              "type": "code",
+              "heading": "autorunsc.exe 명령줄 사용법",
+              "filename": "autoruns_cli.bat",
+              "language": "batch",
+              "warning": "방어 분석 도구 — 허가된 환경에서 실행",
+              "lines": [
+                { "text": "REM Autoruns CLI: 명령줄로 자동 실행 항목 분석", "color": "slate" },
+                { "text": "REM Microsoft 서명이 없는 항목만 필터링", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "REM 기본 스캔: 비서명 항목 필터링", "color": "green" },
+                { "text": "autorunsc.exe -accepteula -a * -s -h -vt", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "REM -a * : 모든 자동 실행 위치 검사", "color": "green" },
+                { "text": "REM -s   : 비서명(unsigned) 항목만 표시", "color": "green" },
+                { "text": "REM -h   : 파일 해시 포함", "color": "green" },
+                { "text": "REM -vt  : VirusTotal 스캔 결과 포함", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "REM CSV 출력: SIEM 연동용", "color": "green" },
+                { "text": "autorunsc.exe -accepteula -a * -s -c > autoruns_report.csv", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "REM Run 키만 검사", "color": "green" },
+                { "text": "autorunsc.exe -accepteula -a l -s -h", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "Sysmon Event ID 12/13 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Sysmon 레지스트리 이벤트",
+              "emojis": "📡",
+              "content": "Sysmon은 레지스트리 변경을 세 가지 이벤트 ID로 추적합니다: Event ID 12 — 레지스트리 키/값 생성 및 삭제. Event ID 13 — 레지스트리 값 설정 (값 변경). Event ID 14 — 레지스트리 키/값 이름 변경. Run 키 모니터링에는 특히 Event ID 13(값 설정)이 핵심입니다."
+            },
+            {
+              "type": "code",
+              "heading": "Sysmon 설정: Run 키 변경 모니터링",
+              "filename": "sysmon-config-runkey.xml",
+              "language": "xml",
+              "lines": [
+                { "text": "<!-- Sysmon 설정: 레지스트리 Run 키 변경 탐지 -->", "color": "slate" },
+                { "text": "<Sysmon schemaversion=\"4.90\">", "color": "cyan" },
+                { "text": "  <EventFiltering>", "color": "cyan" },
+                { "text": "    <!-- 레지스트리 값 설정 감시 (Event ID 13) -->", "color": "slate" },
+                { "text": "    <RegistryEvent onmatch=\"include\">", "color": "green" },
+                { "text": "      <TargetObject condition=\"contains\">", "color": "yellow" },
+                { "text": "        \\CurrentVersion\\Run", "color": "orange" },
+                { "text": "      </TargetObject>", "color": "yellow" },
+                { "text": "      <TargetObject condition=\"contains\">", "color": "yellow" },
+                { "text": "        \\CurrentVersion\\RunOnce", "color": "orange" },
+                { "text": "      </TargetObject>", "color": "yellow" },
+                { "text": "      <TargetObject condition=\"contains\">", "color": "yellow" },
+                { "text": "        \\Explorer\\Shell Folders", "color": "orange" },
+                { "text": "      </TargetObject>", "color": "yellow" },
+                { "text": "    </RegistryEvent>", "color": "green" },
+                { "text": "  </EventFiltering>", "color": "cyan" },
+                { "text": "</Sysmon>", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "Sigma 탐지 규칙 작성",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Run 키 변경 Sigma 규칙",
+              "emojis": "📋",
+              "content": "Sigma 규칙으로 레지스트리 Run 키 변경을 탐지할 수 있습니다. Sysmon Event ID 13(RegistryValueSet)을 기반으로, TargetObject에 Run 키 경로가 포함된 이벤트를 필터링합니다. 정상 소프트웨어의 Run 키 등록을 제외하기 위해 화이트리스트 필터를 추가하는 것이 중요합니다."
+            },
+            {
+              "type": "code",
+              "heading": "레지스트리 Run 키 변경 탐지 Sigma 규칙",
+              "filename": "run_key_modification.yml",
+              "language": "yaml",
+              "lines": [
+                { "text": "title: Suspicious Registry Run Key Modification", "color": "green" },
+                { "text": "id: c7d1e5a2-9f3b-4e8d-a2c1-d5f7e3b4a6c8", "color": "slate" },
+                { "text": "status: production", "color": "cyan" },
+                { "text": "level: medium", "color": "yellow" },
+                { "text": "description: >", "color": "green" },
+                { "text": "  Detects modifications to registry Run keys", "color": "green" },
+                { "text": "  commonly used for persistence", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "logsource:", "color": "yellow" },
+                { "text": "  category: registry_set", "color": "cyan" },
+                { "text": "  product: windows", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "detection:", "color": "yellow" },
+                { "text": "  selection:", "color": "orange" },
+                { "text": "    TargetObject|contains:", "color": "cyan" },
+                { "text": "      - '\\CurrentVersion\\Run'", "color": "purple" },
+                { "text": "      - '\\CurrentVersion\\RunOnce'", "color": "purple" },
+                { "text": "  filter_trusted:", "color": "orange" },
+                { "text": "    Image|startswith:", "color": "cyan" },
+                { "text": "      - 'C:\\Program Files\\'", "color": "green" },
+                { "text": "      - 'C:\\Program Files (x86)\\'", "color": "green" },
+                { "text": "      - 'C:\\Windows\\System32\\'", "color": "green" },
+                { "text": "  condition: selection and not filter_trusted", "color": "yellow" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch6",
+          "title": "탐지 우회 기법 분석",
+          "panels": [
+            {
+              "type": "warning",
+              "heading": "공격자의 탐지 우회 전략",
+              "content": "공격자는 단순 Run 키 등록 외에도 다양한 우회 기법을 사용합니다. 방어자는 이러한 우회 기법을 이해해야 더 포괄적인 탐지 규칙을 작성할 수 있습니다."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "주요 탐지 우회 기법과 대응",
+              "headers": ["우회 기법", "원리", "대응 방법"],
+              "rows": [
+                ["정상 프로세스명 위장", "svchost.exe, csrss.exe 이름 사용", "실행 경로 검증 (System32 외 의심)"],
+                ["간접 실행", "rundll32.exe, mshta.exe로 DLL/HTA 실행", "자식 프로세스 관계 분석"],
+                ["인코딩된 명령", "Base64 인코딩 PowerShell 페이로드", "스크립트 블록 로깅 (Event 4104)"],
+                ["레지스트리 경로 변형", "Wow6432Node, Policies 하위 키 사용", "확장된 경로 패턴 모니터링"],
+                ["타이밍 공격", "정상 소프트웨어 설치 시 함께 등록", "베이스라인 비교 분석"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch7",
+          "title": "PowerShell 기반 탐지 스크립트",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "자동화된 Run 키 이상 탐지",
+              "emojis": "🎯",
+              "content": "PowerShell 스크립트를 이용하여 레지스트리 Run 키의 베이스라인을 생성하고, 변경 사항을 자동으로 탐지할 수 있습니다. 파일 해시, 디지털 서명, 경로 이상 여부를 자동으로 확인하여 의심스러운 항목을 리포트합니다."
+            },
+            {
+              "type": "code",
+              "heading": "Run 키 이상 탐지 스크립트",
+              "filename": "detect_suspicious_run.ps1",
+              "language": "powershell",
+              "warning": "방어 분석 스크립트 — 방어 목적",
+              "lines": [
+                { "text": "# 의심스러운 Run 키 항목 탐지 스크립트", "color": "slate" },
+                { "text": "# 비서명 파일, 비정상 경로 자동 검출", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "$suspiciousPaths = @('%TEMP%', 'C:\\Users\\Public',", "color": "cyan" },
+                { "text": "    'C:\\ProgramData', '%APPDATA%')", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "$runPaths = @(", "color": "cyan" },
+                { "text": "    'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',", "color": "green" },
+                { "text": "    'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run'", "color": "yellow" },
+                { "text": ")", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "foreach ($path in $runPaths) {", "color": "purple" },
+                { "text": "    $items = Get-ItemProperty -Path $path -ErrorAction SilentlyContinue", "color": "cyan" },
+                { "text": "    $items.PSObject.Properties | Where-Object {", "color": "orange" },
+                { "text": "        $_.Name -notlike 'PS*'", "color": "orange" },
+                { "text": "    } | ForEach-Object {", "color": "orange" },
+                { "text": "        $sig = Get-AuthenticodeSignature $_.Value 2>$null", "color": "red" },
+                { "text": "        if ($sig.Status -ne 'Valid') {", "color": "red" },
+                { "text": "            Write-Warning \"[ALERT] Unsigned: $($_.Name) -> $($_.Value)\"", "color": "red" },
+                { "text": "        }", "color": "red" },
+                { "text": "    }", "color": "orange" },
+                { "text": "}", "color": "purple" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch8",
+          "title": "방어 아키텍처: 다층 방어",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "Defense-in-Depth 전략",
+              "emojis": "🏰",
+              "content": "단일 방어 메커니즘은 언제나 우회될 수 있습니다. 자동 실행 악용을 효과적으로 방어하려면 다층 방어가 필요합니다: 예방 계층(GPO 제한 + AppLocker) → 탐지 계층(Sysmon + Sigma + Autoruns) → 대응 계층(자동화된 격리 + 레지스트리 복원)."
+            },
+            {
+              "type": "diagram",
+              "heading": "다층 방어 아키텍처",
+              "ascii": "  ┌─────────────────────────────────────────────┐\n  │            Layer 1: 예방 (Prevention)        │\n  │  GPO 제한   │  AppLocker  │  WDAC           │\n  ├─────────────────────────────────────────────┤\n  │            Layer 2: 탐지 (Detection)         │\n  │  Sysmon 12/13  │  Sigma Rules  │  Autoruns  │\n  ├─────────────────────────────────────────────┤\n  │            Layer 3: 대응 (Response)           │\n  │  SOAR Playbook  │  레지스트리 복원  │  격리  │\n  └─────────────────────────────────────────────┘"
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "matching_game",
+          "title": "레지스트리 경로와 용도 매칭",
+          "description": "각 레지스트리 경로가 어떤 용도로 사용되는지 매칭하세요.",
+          "pairs": [
+            { "left": "모든 사용자에게 매번 로그인 시 자동 실행", "right": "HKLM\\...\\Run" },
+            { "left": "현재 사용자에게만 매번 로그인 시 자동 실행", "right": "HKCU\\...\\Run" },
+            { "left": "한 번 실행 후 레지스트리에서 자동 삭제", "right": "RunOnce" },
+            { "left": "32비트 앱의 레지스트리 리다이렉션 경로", "right": "Wow6432Node" },
+            { "left": "그룹 정책으로 강제 적용되는 자동 실행", "right": "Policies\\Explorer\\Run" }
+          ]
+        },
+        {
+          "type": "step_click",
+          "title": "Autoruns를 이용한 위협 사냥 시뮬레이션",
+          "description": "Autoruns 도구를 이용해 의심스러운 자동 실행 항목을 찾아내는 과정을 따라가 보세요.",
+          "steps": [
+            { "emoji": "1️⃣", "label": "Autoruns 관리자 권한으로 실행", "detail": "autorunsc.exe를 관리자 권한 CMD에서 실행합니다. 전체 시스템의 자동 실행 항목을 검사하려면 관리자 권한이 필요합니다." },
+            { "emoji": "2️⃣", "label": "비서명 항목 필터링", "detail": "Options > Hide Microsoft Entries를 활성화하고, 비서명(unsigned) 항목만 필터링합니다. 서명되지 않은 실행 파일은 의심 대상입니다." },
+            { "emoji": "3️⃣", "label": "의심스러운 경로 확인", "detail": "%TEMP%, C:\\Users\\Public, AppData 등 비정상적 경로에서 실행되는 항목을 확인합니다. 정상 소프트웨어는 보통 Program Files에 위치합니다." },
+            { "emoji": "4️⃣", "label": "VirusTotal 스캔", "detail": "의심스러운 파일의 해시를 VirusTotal에 제출합니다. Autoruns는 VT 연동 기능을 내장하고 있어 바로 스캔 결과를 확인할 수 있습니다." },
+            { "emoji": "5️⃣", "label": "타임라인 분석", "detail": "의심 파일의 생성 시간, 수정 시간을 확인합니다. 최근에 생성된 파일이 오래된 것처럼 위장(타임스탬프 변조)되었는지 $MFT와 비교합니다." },
+            { "emoji": "6️⃣", "label": "보고서 생성 및 대응", "detail": "발견된 의심 항목을 CSV로 내보내고, SIEM에 IoC를 등록합니다. 필요 시 해당 레지스트리 항목을 삭제하고 악성 파일을 격리합니다." }
+          ]
+        },
+        {
+          "type": "code_fill",
+          "title": "Sigma 규칙 빈칸 채우기",
+          "description": "레지스트리 Run 키 변경 탐지 Sigma 규칙의 빈칸을 올바른 값으로 채우세요.",
+          "code": {
+            "filename": "sigma_runkey_fill.yml",
+            "lines": [
+              { "text": "title: Registry Run Key Modification", "color": "green" },
+              { "text": "status: production", "color": "cyan" },
+              { "text": "level: medium", "color": "yellow" },
+              { "text": "", "color": "white" },
+              { "text": "logsource:", "color": "yellow" },
+              { "text": "  category: ___blank1___", "color": "cyan" },
+              { "text": "  product: windows", "color": "cyan" },
+              { "text": "", "color": "white" },
+              { "text": "detection:", "color": "yellow" },
+              { "text": "  selection:", "color": "orange" },
+              { "text": "    TargetObject|contains: '\\CurrentVersion\\___blank2___'", "color": "cyan" },
+              { "text": "    EventType: ___blank3___", "color": "cyan" },
+              { "text": "  condition: selection", "color": "yellow" }
+            ]
+          },
+          "blanks": [
+            { "id": "blank1", "answer": "registry_set", "hint": "로그 카테고리?", "alternatives": ["registry_event", "RegistryEvent"] },
+            { "id": "blank2", "answer": "Run", "hint": "레지스트리 키?", "alternatives": ["run", "RUN"] },
+            { "id": "blank3", "answer": "SetValue", "hint": "이벤트 유형?", "alternatives": ["setvalue", "set_value", "RegistryValueSet"] }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "공격자가 reg.exe를 이용해 Run 키에 값을 추가할 때 사용하는 핵심 명령 구문은?",
+            "options": [
+              "reg delete HKCU\\...\\Run /v malware",
+              "reg add HKCU\\...\\Run /v name /t REG_SZ /d path",
+              "reg query HKCU\\...\\Run",
+              "reg export HKCU\\...\\Run backup.reg"
+            ],
+            "correct": 1,
+            "explanation": "reg add 명령으로 Run 키에 새 값을 추가합니다. /v는 값 이름, /t REG_SZ는 문자열 타입, /d는 실행할 프로그램 경로를 지정합니다. /f 옵션을 추가하면 확인 없이 덮어씁니다."
+          },
+          {
+            "question": "Sysmon Event ID 13이 탐지하는 레지스트리 이벤트는?",
+            "options": [
+              "레지스트리 키 생성",
+              "레지스트리 키 삭제",
+              "레지스트리 값 설정 (RegistryValueSet)",
+              "레지스트리 키 이름 변경"
+            ],
+            "correct": 2,
+            "explanation": "Event ID 13은 레지스트리 값이 설정(Set)될 때 발생합니다. Run 키에 새 자동 실행 항목이 추가되면 이 이벤트가 기록되므로, 지속성 확보 시도를 탐지하는 핵심 이벤트입니다."
+          },
+          {
+            "question": "Autoruns 도구에서 의심스러운 항목을 식별하는 가장 효과적인 방법은?",
+            "options": [
+              "파일 이름만 확인",
+              "파일 크기 비교",
+              "비서명 항목 필터링 + VirusTotal 스캔",
+              "레지스트리 키 생성 날짜 확인"
+            ],
+            "correct": 2,
+            "explanation": "Autoruns의 핵심 기능은 디지털 서명 확인과 VirusTotal 연동입니다. 서명되지 않은(unsigned) 항목을 필터링하고 파일 해시를 VT에 조회하면 알려진 악성코드를 빠르게 식별할 수 있습니다."
+          },
+          {
+            "question": "공격자가 정상 프로세스명(예: svchost.exe)을 위장할 때 가장 효과적인 탐지 방법은?",
+            "options": [
+              "프로세스 이름만으로 판단",
+              "프로세스의 실행 경로가 System32인지 검증",
+              "프로세스의 CPU 사용률 확인",
+              "프로세스의 메모리 사용량 확인"
+            ],
+            "correct": 1,
+            "explanation": "정상 svchost.exe는 항상 C:\\Windows\\System32에서 실행됩니다. 다른 경로(예: C:\\Users\\Public\\svchost.exe)에서 실행되는 동일 이름의 파일은 악성코드일 가능성이 높습니다. 경로 기반 검증이 핵심입니다."
+          },
+          {
+            "question": "Wow6432Node 레지스트리 경로의 목적은?",
+            "options": [
+              "64비트 전용 프로그램의 설정 저장",
+              "32비트 프로그램의 레지스트리 리다이렉션",
+              "임시 레지스트리 값 저장",
+              "보안 정책 설정 저장"
+            ],
+            "correct": 1,
+            "explanation": "64비트 Windows에서 32비트 프로그램의 레지스트리 접근은 Wow6432Node로 리다이렉션됩니다. 공격자는 이 경로에 Run 키를 등록하여 일반적인 모니터링을 우회하기도 합니다."
+          },
+          {
+            "question": "Sigma 규칙에서 Run 키 변경을 탐지할 때 사용하는 logsource category는?",
+            "options": [
+              "process_creation",
+              "registry_set",
+              "file_creation",
+              "network_connection"
+            ],
+            "correct": 1,
+            "explanation": "registry_set 카테고리는 Sysmon Event ID 13(RegistryValueSet)에 매핑됩니다. 이 카테고리를 사용하면 레지스트리 값 설정 이벤트를 SIEM에서 효과적으로 탐지할 수 있습니다."
+          },
+          {
+            "question": "공격자가 인코딩된 PowerShell 명령을 Run 키에 등록할 때 이를 탐지하는 방법은?",
+            "options": [
+              "네트워크 트래픽 분석",
+              "PowerShell Script Block Logging (Event ID 4104)",
+              "파일 시스템 스캔",
+              "메모리 덤프 분석"
+            ],
+            "correct": 1,
+            "explanation": "PowerShell Script Block Logging은 인코딩된 명령이 실행될 때 디코딩된 원본 스크립트 블록을 Event ID 4104에 기록합니다. Base64 인코딩된 페이로드의 실제 내용을 확인할 수 있는 핵심 탐지 방법입니다."
+          },
+          {
+            "question": "레지스트리 Run 키 변경 탐지에서 오탐(False Positive)을 줄이는 가장 효과적인 방법은?",
+            "options": [
+              "모든 Run 키 변경을 차단",
+              "정상 소프트웨어의 경로를 화이트리스트로 필터링",
+              "관리자 계정만 모니터링",
+              "야간 시간대만 모니터링"
+            ],
+            "correct": 1,
+            "explanation": "정상 소프트웨어(예: Program Files 하위)의 Run 키 등록은 합법적입니다. Sigma 규칙에서 filter_trusted 조건으로 정상 경로를 제외하면 오탐을 크게 줄일 수 있습니다."
+          }
+        ]
+      }
+    },
+    "advanced": {
+      "title": "고급 지속성: CLSID 하이재킹과 포렌식 분석",
+      "titleEn": "Advanced Persistence: CLSID Hijacking & Forensic Analysis",
+      "estimatedMinutes": 50,
+      "overviewPanel": {
+        "emoji": "⚡",
+        "question": "COM 오브젝트 하이재킹과 레지스트리 포렌식을 수행할 수 있나요?",
+        "explanation": "고급 과정에서는 CLSID 하이재킹, DLL Search Order Hijacking, COM 오브젝트 지속성 등 고급 레지스트리 기반 지속성 기법을 분석합니다. 또한 NTUSER.DAT, ShimCache 등 포렌식 아티팩트 분석과 YARA 규칙 작성, 엔터프라이즈 방어 전략을 학습합니다.",
+        "learningGoals": [
+          { "emoji": "🔬", "title": "고급 지속성 기법 분석", "desc": "CLSID 하이재킹과 COM 오브젝트 지속성의 코드를 심층 분석합니다" },
+          { "emoji": "🛡️", "title": "포렌식 아티팩트 분석", "desc": "NTUSER.DAT, ShimCache, AmCache에서 지속성 증거를 추출합니다" },
+          { "emoji": "📊", "title": "엔터프라이즈 방어", "desc": "GPO, WDAC, SIEM 연동을 통한 조직 수준 방어 전략을 학습합니다" }
+        ]
+      },
+      "chapters": [
+        {
+          "id": "ch1",
+          "title": "CLSID 하이재킹 (COM Hijacking)",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "COM 오브젝트와 CLSID",
+              "emojis": "🔩",
+              "content": "COM(Component Object Model) 오브젝트는 Windows에서 소프트웨어 컴포넌트 간 통신을 위한 표준 인터페이스입니다. 각 COM 오브젝트는 CLSID(Class Identifier)라는 고유 GUID로 식별됩니다. Windows는 CLSID를 레지스트리에서 검색하여 해당 DLL 또는 EXE를 로드합니다. 공격자는 이 조회 순서를 악용하여 악성 DLL을 로드시킵니다."
+            },
+            {
+              "type": "code",
+              "heading": "COM 하이재킹: HKCU 우선순위 악용",
+              "filename": "com_hijack.ps1",
+              "language": "powershell",
+              "warning": "교육 목적 — COM 하이재킹 원리 분석",
+              "lines": [
+                { "text": "# COM 오브젝트 조회 순서:", "color": "slate" },
+                { "text": "# 1) HKCU\\Software\\Classes\\CLSID\\{GUID}  ← 공격자 삽입!", "color": "red" },
+                { "text": "# 2) HKLM\\Software\\Classes\\CLSID\\{GUID}  ← 원본 DLL", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "# 예: 자주 호출되는 COM 오브젝트 하이재킹", "color": "slate" },
+                { "text": "$clsid = '{b5f8350b-0548-48b1-a6ee-88bd00b4a5e7}'", "color": "purple" },
+                { "text": "# (Explorer CAccPropServicesClass — 정상 CLSID 예시)", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "# HKCU에 하이재킹 엔트리 생성", "color": "slate" },
+                { "text": "$regPath = \"HKCU:\\Software\\Classes\\CLSID\\$clsid\\InProcServer32\"", "color": "cyan" },
+                { "text": "New-Item -Path $regPath -Force", "color": "cyan" },
+                { "text": "Set-ItemProperty -Path $regPath -Name '(Default)' `", "color": "red" },
+                { "text": "    -Value 'C:\\Users\\Public\\malicious.dll'", "color": "orange" },
+                { "text": "Set-ItemProperty -Path $regPath -Name 'ThreadingModel' `", "color": "red" },
+                { "text": "    -Value 'Both'", "color": "orange" }
+              ]
+            },
+            {
+              "type": "warning",
+              "heading": "COM 하이재킹의 위험성",
+              "content": "COM 하이재킹은 Run 키와 달리 Autoruns의 기본 필터에 잘 잡히지 않으며, 정상 Windows 프로세스(explorer.exe 등)가 악성 DLL을 로드하므로 행위 기반 탐지도 어렵습니다. EDR이 잡기 어려운 고급 지속성 기법입니다."
+            }
+          ]
+        },
+        {
+          "id": "ch2",
+          "title": "DLL Search Order Hijacking via Registry",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "DLL 검색 순서와 레지스트리 악용",
+              "emojis": "📦",
+              "content": "Windows는 DLL을 로드할 때 특정 순서로 경로를 검색합니다. KnownDLLs 레지스트리 키(HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\KnownDLLs)에 등록되지 않은 DLL은 이 검색 순서를 따릅니다. 공격자는 레지스트리를 수정하여 정상 DLL 대신 악성 DLL이 먼저 로드되도록 조작합니다."
+            },
+            {
+              "type": "code",
+              "heading": "DLL Search Order Hijacking 분석",
+              "filename": "dll_hijack_analysis.ps1",
+              "language": "powershell",
+              "warning": "교육 목적 — DLL 하이재킹 분석용",
+              "lines": [
+                { "text": "# Windows DLL 검색 순서 분석", "color": "slate" },
+                { "text": "# 1. KnownDLLs 레지스트리 확인", "color": "green" },
+                { "text": "# 2. 애플리케이션 디렉토리", "color": "green" },
+                { "text": "# 3. System32", "color": "green" },
+                { "text": "# 4. System", "color": "green" },
+                { "text": "# 5. Windows 디렉토리", "color": "green" },
+                { "text": "# 6. PATH 환경변수 디렉토리", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "# KnownDLLs에 등록된 DLL 목록 확인", "color": "slate" },
+                { "text": "$knownDlls = Get-ItemProperty -Path `", "color": "cyan" },
+                { "text": "    'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\KnownDLLs'", "color": "yellow" },
+                { "text": "", "color": "white" },
+                { "text": "# KnownDLLs에 없는 DLL = 하이재킹 가능 대상", "color": "red" },
+                { "text": "$knownDlls.PSObject.Properties | Where-Object {", "color": "cyan" },
+                { "text": "    $_.Name -notlike 'PS*'", "color": "orange" },
+                { "text": "} | ForEach-Object {", "color": "cyan" },
+                { "text": "    Write-Host \"Protected: $($_.Name) = $($_.Value)\"", "color": "green" },
+                { "text": "}", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch3",
+          "title": "COM 오브젝트 지속성 심화",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "TreatAs 및 ScriptletURL 하이재킹",
+              "emojis": "🎭",
+              "content": "COM 하이재킹에는 InProcServer32 외에도 여러 변형이 존재합니다: ① TreatAs 키 — CLSID를 다른 CLSID로 리다이렉션. 정상 COM 오브젝트 호출을 악성 오브젝트로 전환. ② ScriptletURL — COM 오브젝트가 로드될 때 원격 URL에서 스크립틀릿을 다운로드하여 실행. ③ ProgID 하이재킹 — 애플리케이션이 ProgID로 COM을 호출할 때 CLSID 매핑을 조작."
+            },
+            {
+              "type": "code",
+              "heading": "Task Scheduler COM 하이재킹 (실제 APT 기법)",
+              "filename": "taskscheduler_com_hijack.ps1",
+              "language": "powershell",
+              "warning": "교육 목적 — 실제 APT가 사용하는 기법",
+              "lines": [
+                { "text": "# Task Scheduler COM 하이재킹", "color": "slate" },
+                { "text": "# CLSID: {0f87369f-a4e5-4cfc-bd3e-73e6154572dd}", "color": "slate" },
+                { "text": "# 이 CLSID는 Task Scheduler가 정기적으로 호출함", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "$clsid = '{0f87369f-a4e5-4cfc-bd3e-73e6154572dd}'", "color": "purple" },
+                { "text": "$path = \"HKCU:\\Software\\Classes\\CLSID\\$clsid\\InProcServer32\"", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "# HKCU에 오버라이드 생성 (HKLM보다 우선)", "color": "red" },
+                { "text": "New-Item -Path $path -Force | Out-Null", "color": "cyan" },
+                { "text": "Set-ItemProperty -Path $path `", "color": "red" },
+                { "text": "    -Name '(Default)' -Value 'C:\\payload.dll'", "color": "orange" },
+                { "text": "", "color": "white" },
+                { "text": "# Task Scheduler가 다음 실행 시 payload.dll 로드", "color": "slate" },
+                { "text": "# explorer.exe가 부모 프로세스 → 정상으로 보임", "color": "slate" }
+              ]
+            },
+            {
+              "type": "info",
+              "heading": "COM 하이재킹 자동 검색",
+              "emojis": "🔍",
+              "content": "HKCU\\Software\\Classes\\CLSID에 InProcServer32 키가 존재하면 하이재킹 가능성이 높습니다. 정상적으로 이 위치에 COM 엔트리를 등록하는 소프트웨어는 드물기 때문입니다. Autoruns에서 'Everything' 탭으로 이 위치를 확인할 수 있습니다."
+            }
+          ]
+        },
+        {
+          "id": "ch4",
+          "title": "포렌식 아티팩트: NTUSER.DAT 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "NTUSER.DAT — 사용자 레지스트리 하이브",
+              "emojis": "📡",
+              "content": "NTUSER.DAT는 각 사용자의 HKCU 레지스트리 하이브를 디스크에 저장한 파일입니다. 위치: C:\\Users\\<username>\\NTUSER.DAT. 오프라인 포렌식에서 이 파일을 분석하면 Run 키, COM 하이재킹, 최근 실행 기록 등을 확인할 수 있습니다. Registry Explorer, RegRipper 등의 도구로 분석합니다."
+            },
+            {
+              "type": "code",
+              "heading": "RegRipper로 NTUSER.DAT 분석",
+              "filename": "regripper_analysis.bat",
+              "language": "batch",
+              "warning": "포렌식 분석 도구 — 방어 목적",
+              "lines": [
+                { "text": "REM RegRipper를 이용한 NTUSER.DAT 포렌식 분석", "color": "slate" },
+                { "text": "REM 오프라인 레지스트리 분석 (사본 필요)", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "REM 1단계: NTUSER.DAT 사본 확보", "color": "green" },
+                { "text": "REM (라이브 시스템에서는 잠겨 있으므로 FTK Imager 사용)", "color": "green" },
+                { "text": "", "color": "white" },
+                { "text": "REM 2단계: Run 키 분석 플러그인 실행", "color": "green" },
+                { "text": "rip.exe -r C:\\evidence\\NTUSER.DAT -p run", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "REM 3단계: 모든 자동 실행 관련 항목 분석", "color": "green" },
+                { "text": "rip.exe -r C:\\evidence\\NTUSER.DAT -p autorun", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "REM 4단계: COM 하이재킹 흔적 분석", "color": "green" },
+                { "text": "rip.exe -r C:\\evidence\\NTUSER.DAT -p clsid", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "REM 5단계: 전체 프로파일링", "color": "green" },
+                { "text": "rip.exe -r C:\\evidence\\NTUSER.DAT -a > full_report.txt", "color": "red" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch5",
+          "title": "ShimCache & AmCache 분석",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "실행 흔적 추적: ShimCache와 AmCache",
+              "emojis": "🕵️",
+              "content": "ShimCache(Application Compatibility Cache)는 HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCompatCache에 저장됩니다. 실행된 적 있거나 시스템이 인식한 실행 파일의 경로와 타임스탬프를 기록합니다. AmCache(C:\\Windows\\AppCompat\\Programs\\Amcache.hve)는 더 상세한 메타데이터(SHA1 해시, PE 헤더 정보)를 포함합니다."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "포렌식 아티팩트 비교",
+              "headers": ["아티팩트", "위치", "핵심 정보", "분석 도구"],
+              "rows": [
+                ["NTUSER.DAT", "C:\\Users\\<user>\\", "HKCU 레지스트리 전체", "RegRipper, Registry Explorer"],
+                ["ShimCache", "SYSTEM 하이브", "실행 파일 경로 + 타임스탬프", "ShimCacheParser"],
+                ["AmCache", "Amcache.hve", "SHA1 해시 + PE 정보", "AmcacheParser"],
+                ["Prefetch", "C:\\Windows\\Prefetch", "실행 횟수 + 마지막 실행 시간", "PECmd"],
+                ["BAM/DAM", "SYSTEM 하이브", "백그라운드 활동 타임스탬프", "RegRipper bam 플러그인"]
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch6",
+          "title": "YARA 규칙: 자동 실행 악성코드 탐지",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "레지스트리 조작 악성코드 YARA 탐지",
+              "emojis": "🎯",
+              "content": "YARA 규칙으로 Run 키를 조작하는 악성코드 바이너리 자체를 탐지할 수 있습니다. 악성코드 내부에는 'CurrentVersion\\Run', 'RegSetValueEx', 'Software\\Microsoft\\Windows' 등의 문자열이 포함되어 있어, 이를 패턴 매칭으로 탐지합니다."
+            },
+            {
+              "type": "code",
+              "heading": "레지스트리 지속성 악성코드 YARA 규칙",
+              "filename": "detect_registry_persistence.yar",
+              "language": "yara",
+              "lines": [
+                { "text": "rule Registry_Persistence_Malware {", "color": "cyan" },
+                { "text": "    meta:", "color": "green" },
+                { "text": "        author = \"GOTROOT EDU\"", "color": "green" },
+                { "text": "        description = \"Detects malware that modifies Run keys\"", "color": "green" },
+                { "text": "        severity = \"high\"", "color": "red" },
+                { "text": "", "color": "white" },
+                { "text": "    strings:", "color": "yellow" },
+                { "text": "        $reg1 = \"CurrentVersion\\\\Run\" ascii wide", "color": "orange" },
+                { "text": "        $reg2 = \"CurrentVersion\\\\RunOnce\" ascii wide", "color": "orange" },
+                { "text": "        $reg3 = \"Software\\\\Classes\\\\CLSID\" ascii wide", "color": "orange" },
+                { "text": "        $api1 = \"RegSetValueEx\" ascii", "color": "purple" },
+                { "text": "        $api2 = \"RegCreateKeyEx\" ascii", "color": "purple" },
+                { "text": "        $api3 = \"RegOpenKeyEx\" ascii", "color": "purple" },
+                { "text": "", "color": "white" },
+                { "text": "    condition:", "color": "yellow" },
+                { "text": "        uint16(0) == 0x5A4D and  // PE 파일", "color": "red" },
+                { "text": "        (1 of ($reg*)) and (1 of ($api*))", "color": "red" },
+                { "text": "}", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch7",
+          "title": "엔터프라이즈 방어: GPO와 SIEM 연동",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "그룹 정책(GPO)으로 자동 실행 제한",
+              "emojis": "🏢",
+              "content": "Active Directory 환경에서는 GPO를 통해 Run 키 사용을 제한할 수 있습니다. ① GPO 경로: Computer Configuration → Administrative Templates → System → Logon → 'Do not process the run once list' 활성화. ② AppLocker: 허용된 프로그램만 Startup 폴더에서 실행 가능. ③ WDAC: 코드 무결성 정책으로 비서명 실행 파일 차단."
+            },
+            {
+              "type": "code",
+              "heading": "SIEM 연동: Splunk 탐지 쿼리",
+              "filename": "splunk_detection.spl",
+              "language": "sql",
+              "warning": "방어 목적 — SIEM 탐지 규칙",
+              "lines": [
+                { "text": "| Splunk SPL: 레지스트리 Run 키 변경 탐지 |", "color": "slate" },
+                { "text": "", "color": "white" },
+                { "text": "index=sysmon EventCode=13", "color": "cyan" },
+                { "text": "    TargetObject=\"*\\\\CurrentVersion\\\\Run*\"", "color": "yellow" },
+                { "text": "    NOT Image IN (", "color": "orange" },
+                { "text": "        \"C:\\\\Program Files*\",", "color": "green" },
+                { "text": "        \"C:\\\\Windows\\\\System32*\"", "color": "green" },
+                { "text": "    )", "color": "orange" },
+                { "text": "| stats count by Image, TargetObject, Details", "color": "cyan" },
+                { "text": "| sort -count", "color": "cyan" },
+                { "text": "", "color": "white" },
+                { "text": "| 추가: COM 하이재킹 탐지 |", "color": "slate" },
+                { "text": "index=sysmon EventCode=13", "color": "cyan" },
+                { "text": "    TargetObject=\"*\\\\Classes\\\\CLSID\\\\*InProcServer32*\"", "color": "red" },
+                { "text": "    TargetObject=\"HKU\\\\*\"", "color": "red" },
+                { "text": "| table _time, Image, TargetObject, Details", "color": "cyan" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ch8",
+          "title": "사고 대응: 지속성 제거 절차",
+          "panels": [
+            {
+              "type": "concept",
+              "heading": "지속성 기법 탐지 시 대응 절차",
+              "emojis": "🔍",
+              "content": "레지스트리 기반 지속성이 탐지되었을 때의 사고 대응(IR) 절차: ① 증거 확보 — 레지스트리 하이브 사본, 메모리 덤프, 디스크 이미지 확보. ② 범위 파악 — 동일 IoC가 다른 시스템에도 존재하는지 SIEM 검색. ③ 제거 — 악성 레지스트리 항목 삭제, 악성 파일 격리. ④ 근본 원인 — 초기 침투 경로 식별 (피싱? 취약점?). ⑤ 강화 — GPO, EDR 규칙 추가로 재발 방지."
+            },
+            {
+              "type": "comparison_table",
+              "heading": "지속성 유형별 제거 방법",
+              "headers": ["지속성 유형", "위치", "제거 명령"],
+              "rows": [
+                ["Run 키", "HKCU/HKLM\\...\\Run", "reg delete ... /v <name> /f"],
+                ["Startup 폴더", "shell:startup", "del <malicious_file>"],
+                ["COM 하이재킹", "HKCU\\Classes\\CLSID", "reg delete HKCU\\...\\CLSID\\{GUID} /f"],
+                ["스케줄 작업", "Task Scheduler", "schtasks /delete /tn <name> /f"],
+                ["서비스", "HKLM\\...\\Services", "sc delete <service_name>"]
+              ]
+            }
+          ]
+        }
+      ],
+      "miniLabs": [
+        {
+          "type": "ordering_game",
+          "title": "지속성 침해 사고 대응 절차",
+          "description": "레지스트리 기반 지속성이 탐지되었을 때 올바른 대응 순서로 배열하세요.",
+          "items": [
+            { "label": "SIEM 알림 확인 및 이벤트 분석" },
+            { "label": "감염 시스템 레지스트리 하이브 사본 확보" },
+            { "label": "동일 IoC가 다른 시스템에 존재하는지 검색" },
+            { "label": "악성 레지스트리 항목 및 파일 제거" },
+            { "label": "초기 침투 경로 식별 (Root Cause)" },
+            { "label": "GPO/EDR 규칙 추가로 재발 방지" },
+            { "label": "최종 보고서 작성 및 보안 강화 권고" }
+          ]
+        },
+        {
+          "type": "step_click",
+          "title": "COM 하이재킹 탐지 시뮬레이션",
+          "description": "COM 오브젝트 하이재킹을 탐지하고 제거하는 과정을 단계별로 따라가 보세요.",
+          "steps": [
+            { "emoji": "🔍", "label": "HKCU CLSID 엔트리 검색", "detail": "HKCU\\Software\\Classes\\CLSID에 InProcServer32 키가 존재하는지 확인합니다. 정상적으로 이 위치에 COM 엔트리가 있는 경우는 드물므로 존재 자체가 의심 신호입니다." },
+            { "emoji": "📋", "label": "HKLM 원본과 비교", "detail": "동일 CLSID가 HKLM\\Software\\Classes\\CLSID에도 존재하는지 확인합니다. HKCU와 HKLM에 동일 CLSID가 있으면 HKCU가 우선 적용되므로 하이재킹 가능성이 높습니다." },
+            { "emoji": "🔬", "label": "악성 DLL 파일 분석", "detail": "InProcServer32의 Default 값에 지정된 DLL 파일의 디지털 서명, 해시, VirusTotal 결과를 확인합니다." },
+            { "emoji": "📡", "label": "Sysmon 로그 역추적", "detail": "Event ID 13에서 해당 CLSID 레지스트리 경로가 언제, 어떤 프로세스에 의해 생성되었는지 타임라인을 추적합니다." },
+            { "emoji": "🗑️", "label": "악성 엔트리 제거", "detail": "HKCU의 하이재킹 CLSID 레지스트리 키를 삭제하고, 악성 DLL 파일을 격리합니다. reg delete 명령 사용." }
+          ]
+        },
+        {
+          "type": "matching_game",
+          "title": "포렌식 아티팩트와 분석 정보 매칭",
+          "description": "각 포렌식 아티팩트에서 얻을 수 있는 핵심 정보를 매칭하세요.",
+          "pairs": [
+            { "left": "사용자별 HKCU 레지스트리 하이브 전체", "right": "NTUSER.DAT" },
+            { "left": "실행된 파일의 SHA1 해시와 PE 메타데이터", "right": "AmCache" },
+            { "left": "실행 파일의 경로와 최종 수정 타임스탬프", "right": "ShimCache" },
+            { "left": "프로그램 실행 횟수와 마지막 실행 시간", "right": "Prefetch" },
+            { "left": "COM 오브젝트 DLL 경로와 CLSID 매핑", "right": "InProcServer32" }
+          ]
+        }
+      ],
+      "quiz": {
+        "questions": [
+          {
+            "question": "COM 하이재킹에서 HKCU가 HKLM보다 우선 적용되는 근본적 이유는?",
+            "options": [
+              "HKCU가 더 최근에 업데이트되기 때문",
+              "Windows COM 런타임이 HKCU를 먼저 검색하는 조회 순서 때문",
+              "HKCU가 더 높은 보안 권한을 가지기 때문",
+              "HKLM은 읽기 전용이기 때문"
+            ],
+            "correct": 1,
+            "explanation": "Windows COM 런타임은 CLSID를 검색할 때 HKCU\\Software\\Classes\\CLSID를 먼저 확인하고, 없으면 HKLM을 확인합니다. 이 조회 순서(lookup order) 덕분에 공격자는 관리자 권한 없이도 COM 오브젝트를 하이재킹할 수 있습니다."
+          },
+          {
+            "question": "NTUSER.DAT 포렌식 분석에서 RegRipper의 'run' 플러그인이 확인하는 항목은?",
+            "options": [
+              "현재 실행 중인 프로세스 목록",
+              "HKCU Run/RunOnce 키에 등록된 자동 실행 항목",
+              "시스템 서비스 목록",
+              "네트워크 연결 기록"
+            ],
+            "correct": 1,
+            "explanation": "RegRipper의 'run' 플러그인은 NTUSER.DAT에서 HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run과 RunOnce 키의 모든 값을 추출합니다. 각 항목의 이름, 경로, 마지막 수정 시간을 확인할 수 있습니다."
+          },
+          {
+            "question": "ShimCache와 AmCache의 핵심 차이점은?",
+            "options": [
+              "ShimCache는 네트워크 정보, AmCache는 파일 정보를 저장",
+              "ShimCache는 경로/타임스탬프, AmCache는 SHA1 해시와 PE 메타데이터를 추가로 포함",
+              "ShimCache는 HKCU, AmCache는 HKLM에 저장",
+              "ShimCache는 실시간, AmCache는 주기적으로 업데이트"
+            ],
+            "correct": 1,
+            "explanation": "ShimCache는 실행 파일의 경로와 최종 수정 타임스탬프를 기록합니다. AmCache는 이에 더해 SHA1 해시, PE 헤더 정보(컴파일 시간, 설명), 파일 크기 등 더 상세한 메타데이터를 포함하여 포렌식 분석에 더 유용합니다."
+          },
+          {
+            "question": "YARA 규칙에서 'uint16(0) == 0x5A4D' 조건의 의미는?",
+            "options": [
+              "파일이 ZIP 압축 파일인지 확인",
+              "파일의 처음 2바이트가 'MZ' (PE 실행 파일 시그니처)인지 확인",
+              "파일 크기가 0x5A4D 바이트 이상인지 확인",
+              "파일의 해시값이 특정 값과 일치하는지 확인"
+            ],
+            "correct": 1,
+            "explanation": "0x5A4D는 ASCII로 'MZ'이며, 이는 Windows PE(Portable Executable) 실행 파일의 매직 바이트입니다. 이 조건은 분석 대상이 실행 파일(.exe, .dll)인 경우에만 규칙을 적용하도록 제한합니다."
+          },
+          {
+            "question": "COM 하이재킹이 일반적인 Run 키 기반 지속성보다 탐지가 어려운 이유는?",
+            "options": [
+              "COM 하이재킹은 네트워크를 사용하지 않기 때문",
+              "정상 Windows 프로세스가 악성 DLL을 로드하므로 행위가 정상으로 보이기 때문",
+              "COM 하이재킹은 레지스트리를 사용하지 않기 때문",
+              "COM 하이재킹은 관리자 권한이 필요하기 때문"
+            ],
+            "correct": 1,
+            "explanation": "COM 하이재킹에서는 explorer.exe나 svchost.exe 같은 정상 Windows 프로세스가 하이재킹된 DLL을 로드합니다. 이로 인해 프로세스 기반 탐지에서 정상으로 판별되며, Autoruns의 기본 필터에서도 잘 잡히지 않습니다."
+          },
+          {
+            "question": "GPO에서 'Do not process the run once list' 정책의 효과는?",
+            "options": [
+              "모든 Run 키를 비활성화",
+              "RunOnce 키에 등록된 항목의 실행을 차단",
+              "Startup 폴더를 비활성화",
+              "레지스트리 편집기 접근을 차단"
+            ],
+            "correct": 1,
+            "explanation": "이 GPO 정책은 RunOnce 키에 등록된 항목의 자동 실행을 차단합니다. 공격자가 RunOnce를 이용한 1회성 페이로드 실행을 시도하는 것을 방지하면서, 일반 Run 키는 정상 소프트웨어를 위해 유지할 수 있습니다."
+          },
+          {
+            "question": "Splunk에서 COM 하이재킹을 탐지할 때 핵심 필터 조건은?",
+            "options": [
+              "EventCode=1 AND Image=explorer.exe",
+              "EventCode=13 AND TargetObject=*Classes\\CLSID*InProcServer32* AND TargetObject=HKU\\*",
+              "EventCode=3 AND DestinationPort=443",
+              "EventCode=7 AND ImageLoaded=*.dll"
+            ],
+            "correct": 1,
+            "explanation": "Sysmon Event ID 13(RegistryValueSet)에서 TargetObject에 'Classes\\CLSID'와 'InProcServer32'가 포함되고, HKU(HKEY_USERS, 즉 HKCU 상위)에 위치하면 COM 하이재킹 시도로 판단합니다."
+          },
+          {
+            "question": "지속성 침해 대응 시 '근본 원인 분석(Root Cause Analysis)'이 중요한 이유는?",
+            "options": [
+              "보고서 작성에 필요하기 때문",
+              "초기 침투 경로를 막지 않으면 동일한 방법으로 재침투가 가능하기 때문",
+              "법적 요구사항이기 때문",
+              "상급자에게 보고하기 위해"
+            ],
+            "correct": 1,
+            "explanation": "지속성 메커니즘을 제거해도 초기 침투 경로(피싱, 취약점 등)가 열려 있으면 공격자가 다시 침투하여 새로운 지속성을 설치합니다. 근본 원인을 파악하고 차단해야 진정한 사고 대응이 완료됩니다."
+          }
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "ctiSources": [
+      { "name": "MITRE ATT&CK", "url": "https://attack.mitre.org/techniques/T1547/001/", "description": "T1547.001 기법 정의 및 Procedure Examples" },
+      { "name": "MITRE CTI GitHub", "url": "https://github.com/mitre/cti", "description": "STIX 2.1 JSON 데이터 — 탐지 방법 및 완화 전략" },
+      { "name": "Microsoft Documentation", "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns", "description": "Autoruns 도구 공식 문서" },
+      { "name": "CISA Advisory", "url": "https://www.cisa.gov/", "description": "레지스트리 기반 지속성 관련 보안 권고" }
+    ],
+    "aptGroups": ["APT41", "Lazarus Group", "APT29", "FIN7", "Kimsuky"],
+    "relatedTechniques": ["T1547.004", "T1547.009", "T1546.015", "T1543.003"],
+    "tags": ["persistence", "registry", "run-keys", "startup-folder", "com-hijacking", "clsid", "autoruns", "sysmon", "forensics"],
+    "lastUpdated": "2026-03-03",
+    "author": "GOTROOT Education Team",
+    "version": "1.0.0"
+  }
+}

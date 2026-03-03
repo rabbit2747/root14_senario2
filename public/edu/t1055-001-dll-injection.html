@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1055.001">
+<head>
+    <script>
+        (function() {
+            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+            try { var key='sb-bnwbybawqrnhznirivfg-auth-token'; var s=sessionStorage.getItem(key); if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));} } catch(e){window.location.replace('/login');}
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded=false;
+        (async function(){try{var SUPA='https://bnwbybawqrnhznirivfg.supabase.co';var KEY='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var res=await fetch(SUPA+'/rest/v1/edu_html_content?page_id=eq.t1055-001-dll-injection&select=content&limit=1',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});if(res.ok){var data=await res.json();if(data&&data.length>0&&data[0].content){_eduDynLoaded=true;document.open();document.write(data[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();
+        setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT EDU — T1055.001 DLL Injection 방어 회피 기법 교육">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <title>GOTROOT EDU | T1055.001 DLL Injection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] }, colors: { cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569' } } } }
+    </script>
+    <style>
+        body { scroll-behavior:smooth; background:#FFF8F0; color:#1e293b; transition:background .3s,color .3s; }
+        .glass-panel { background:rgba(255,255,255,.7); backdrop-filter:blur(16px); border:1px solid rgba(157,217,210,.5); box-shadow:0 8px 32px rgba(30,41,59,.05); }
+        .dark body { background:#0f172a; color:#f8fafc; }
+        .dark .glass-panel { background:rgba(30,41,59,.7); border:1px solid rgba(244,208,111,.2); }
+        .hl-teal { color:#0f766e; font-weight:700; } .dark .hl-teal { color:#9DD9D2; }
+        .hl-yel { color:#b45309; font-weight:700; } .dark .hl-yel { color:#F4D06F; }
+        .nav-item.active { background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%); border-left:4px solid #9DD9D2; color:#0f766e; font-weight:700; }
+        .dark .nav-item.active { background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%); border-left:4px solid #F4D06F; color:#F4D06F; }
+        .terminal-bg { background:#1e293b; color:#9DD9D2; font-family:'JetBrains Mono',monospace; }
+        ::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-thumb { background:#9DD9D2; border-radius:4px; } .dark ::-webkit-scrollbar-thumb { background:#F4D06F; }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2">
+            <span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span>
+            <span style="font-size:8px;color:#94a3b8;">|</span>
+            <span style="font-size:8px;color:#64748b;" class="hidden sm:inline">사이버보안 교육 플랫폼</span>
+        </div>
+        <button onclick="location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full hidden md:flex flex-col shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors"><span>←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1055.001: DLL Injection</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch1">1. DLL 인젝션이란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch2">2. CreateRemoteThread 체인</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch3">3. 실습 & 퀴즈</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Defense Evasion / Privilege Escalation</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 dark:text-white">DLL Injection</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">정상 택배 상자에 몰래 금지 물품을 끼워넣는 기법</p>
+            </header>
+            <!-- Ch1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#1.</span> DLL 인젝션이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"택배 위장" 비유</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">택배 기사(정상 프로세스)가 배달 중입니다. 범인이 기사 몰래 택배 상자 안에 <strong>금지 물품(악성 DLL)</strong>을 끼워 넣습니다. 기사는 자신이 정상 물건만 배달한다고 생각하지만, 실제로는 악성 코드가 기사의 이름으로 실행됩니다. 보안 시스템은 "신뢰할 수 있는 택배 기사(svchost.exe)"의 배달이라 의심하지 않습니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">왜 위험한가?</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                                <div class="text-2xl mb-1">🕵️</div>
+                                <p class="text-xs text-cgray dark:text-slate-400"><strong>은닉</strong>: 정상 프로세스 내부에서 실행되어 탐지 어려움</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                                <div class="text-2xl mb-1">🔓</div>
+                                <p class="text-xs text-cgray dark:text-slate-400"><strong>권한 상속</strong>: 타겟 프로세스의 권한을 그대로 사용</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                                <div class="text-2xl mb-1">🛡️</div>
+                                <p class="text-xs text-cgray dark:text-slate-400"><strong>방화벽 우회</strong>: 허용된 프로세스의 네트워크 접근 이용</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Ch2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#2.</span> CreateRemoteThread + LoadLibrary 체인</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">Classic DLL Injection 4단계</h3>
+                        <div class="space-y-4">
+                            <div class="flex gap-3 items-start"><span class="bg-slate-200 dark:bg-slate-700 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span><div><h4 class="font-bold text-sm">OpenProcess()</h4><p class="text-xs text-cgray dark:text-slate-400">타겟 프로세스(예: explorer.exe)의 핸들을 얻음</p></div></div>
+                            <div class="flex gap-3 items-start"><span class="bg-slate-200 dark:bg-slate-700 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span><div><h4 class="font-bold text-sm">VirtualAllocEx()</h4><p class="text-xs text-cgray dark:text-slate-400">타겟 프로세스 메모리 내에 공간 할당</p></div></div>
+                            <div class="flex gap-3 items-start"><span class="bg-slate-200 dark:bg-slate-700 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span><div><h4 class="font-bold text-sm">WriteProcessMemory()</h4><p class="text-xs text-cgray dark:text-slate-400">악성 DLL 경로 문자열을 할당된 메모리에 쓰기</p></div></div>
+                            <div class="flex gap-3 items-start"><span class="bg-red-200 dark:bg-red-900/40 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-red-800 dark:text-red-300 shrink-0">4</span><div><h4 class="font-bold text-sm text-red-600 dark:text-red-400">CreateRemoteThread(LoadLibrary)</h4><p class="text-xs text-cgray dark:text-slate-400">타겟 프로세스에서 원격 스레드를 생성하여 악성 DLL 로드 실행!</p></div></div>
+                        </div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-sm">
+                        <div class="text-slate-500 mb-2"># 의사 코드 (Pseudocode)</div>
+                        <div><span class="text-[#F4D06F]">hProc</span> = OpenProcess(PROCESS_ALL_ACCESS, pid)</div>
+                        <div><span class="text-[#F4D06F]">addr</span> = VirtualAllocEx(hProc, MEM_COMMIT, PAGE_RW)</div>
+                        <div>WriteProcessMemory(hProc, addr, "C:\\evil.dll")</div>
+                        <div class="text-red-400">CreateRemoteThread(hProc, LoadLibraryA, addr)</div>
+                    </div>
+                </div>
+            </section>
+            <!-- Ch3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#3.</span> Mini Lab & 퀴즈</h2>
+                <div class="space-y-8">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] font-mono text-sm hl-teal">Mini Lab: 프로세스 목록에서 인젝션 탐지</div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">아래 프로세스 중 DLL 인젝션이 의심되는 것을 찾아 클릭하세요.</p>
+                            <div class="space-y-2 max-w-lg mx-auto" id="proc-list">
+                                <div onclick="checkProc(this,false)" class="proc-item cursor-pointer flex items-center justify-between p-3 rounded-lg border-2 border-slate-200 dark:border-slate-700 hover:border-[#9DD9D2] transition bg-white dark:bg-slate-800 text-sm">
+                                    <div><span class="font-mono text-xs text-slate-500 mr-2">PID 4</span><span class="font-bold">System</span></div>
+                                    <span class="text-xs text-slate-400">ntoskrnl.exe, win32k.sys</span>
+                                </div>
+                                <div onclick="checkProc(this,false)" class="proc-item cursor-pointer flex items-center justify-between p-3 rounded-lg border-2 border-slate-200 dark:border-slate-700 hover:border-[#9DD9D2] transition bg-white dark:bg-slate-800 text-sm">
+                                    <div><span class="font-mono text-xs text-slate-500 mr-2">PID 1204</span><span class="font-bold">svchost.exe</span></div>
+                                    <span class="text-xs text-slate-400">kernel32.dll, ntdll.dll</span>
+                                </div>
+                                <div onclick="checkProc(this,true)" class="proc-item cursor-pointer flex items-center justify-between p-3 rounded-lg border-2 border-slate-200 dark:border-slate-700 hover:border-[#9DD9D2] transition bg-white dark:bg-slate-800 text-sm">
+                                    <div><span class="font-mono text-xs text-slate-500 mr-2">PID 3388</span><span class="font-bold">notepad.exe</span></div>
+                                    <span class="text-xs text-red-400 font-bold">kernel32.dll, ntdll.dll, <span class="text-red-500">unknown_C8F2.dll</span></span>
+                                </div>
+                                <div onclick="checkProc(this,false)" class="proc-item cursor-pointer flex items-center justify-between p-3 rounded-lg border-2 border-slate-200 dark:border-slate-700 hover:border-[#9DD9D2] transition bg-white dark:bg-slate-800 text-sm">
+                                    <div><span class="font-mono text-xs text-slate-500 mr-2">PID 5672</span><span class="font-bold">chrome.exe</span></div>
+                                    <span class="text-xs text-slate-400">chrome_elf.dll, v8.dll</span>
+                                </div>
+                            </div>
+                            <div id="proc-result" class="hidden mt-4 p-4 rounded-lg text-sm text-center font-bold"></div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 dark:text-white">종합 퀴즈</h3>
+                        <div class="quiz-q" data-correct="3">
+                            <p class="font-bold mb-3 dark:text-slate-200">Q. DLL Injection을 탐지하는 가장 효과적인 방법은?</p>
+                            <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent mb-2">
+                                <input type="radio" name="q1" value="1" class="mr-3"> 모든 DLL 파일을 삭제한다
+                            </label>
+                            <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent mb-2">
+                                <input type="radio" name="q1" value="2" class="mr-3"> 네트워크 방화벽으로 차단한다
+                            </label>
+                            <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
+                                <input type="radio" name="q1" value="3" class="mr-3"> Sysmon으로 CreateRemoteThread(Event ID 8) 이벤트를 모니터링한다
+                            </label>
+                        </div>
+                        <button onclick="checkQuiz()" class="mt-4 bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded transition">정답 확인</button>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold"></div>
+                    </div>
+                    <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30">
+                        <h2 class="text-2xl font-extrabold dark:text-white mb-4">학습 완료!</h2>
+                        <p class="text-cgray dark:text-slate-400 mb-6">대시보드로 돌아가 다른 기법도 학습해 보세요.</p>
+                        <button onclick="location.href='/'" class="inline-flex items-center gap-2 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 transition">매트릭스 대시보드로 이동</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        function checkProc(el,isInfected){
+            var r=document.getElementById('proc-result');r.classList.remove('hidden');
+            document.querySelectorAll('.proc-item').forEach(function(p){p.style.borderColor='';});
+            if(isInfected){el.style.borderColor='#ef4444';r.className='mt-4 p-4 rounded-lg text-sm text-center font-bold bg-green-50 dark:bg-green-900/20 border border-green-400 text-green-700 dark:text-green-400';r.innerHTML='✅ 정답! notepad.exe에 서명되지 않은 unknown_C8F2.dll이 로드되어 있습니다. 메모장은 이런 DLL을 사용하지 않으므로 인젝션 의심!';}
+            else{el.style.borderColor='#f59e0b';r.className='mt-4 p-4 rounded-lg text-sm text-center font-bold bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-400 text-yellow-700 dark:text-yellow-400';r.innerHTML='⚠️ 이 프로세스는 정상적인 DLL만 로드하고 있습니다. 서명되지 않은 DLL을 찾아보세요.';}
+        }
+        function checkQuiz(){var q=document.querySelector('input[name="q1"]:checked');if(!q){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden');if(q.value==='3'){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';r.innerHTML='✅ 정답! Sysmon Event ID 8(CreateRemoteThread)은 DLL Injection의 핵심 탐지 지표입니다.';}else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';r.innerHTML='❌ 오답. CreateRemoteThread API 호출 모니터링이 가장 효과적인 탐지 방법입니다.';}}
+        var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
+    </script>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1087.002">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1087-002-domain-account&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT 사이버보안 교육 — T1087.002 Domain Account 도메인 계정 열거">
+    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1087.002 Domain Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode:'class', theme:{ extend:{ fontFamily:{ sans:['Inter','sans-serif'], mono:['JetBrains Mono','monospace'] }, colors:{ cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569', slate:{850:'#151e2e',900:'#0f172a',950:'#020617'} } } } }
+    </script>
+    <style>
+        body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s}
+        .glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,0.5);box-shadow:0 8px 32px rgba(30,41,59,0.05)}
+        .dark body{background-color:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(244,208,111,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+        .hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}.hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,0.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,0.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F}
+        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px}.dark ::-webkit-scrollbar-thumb{background:#F4D06F}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="goToDashboard()" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(187,62,3,0.08)'" onmouseout="this.style.background='transparent'">← 매트릭스 대시보드</button></div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">&#x1F319;</span></button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2] mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1087.002: Domain Account</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch1">1. AD 계정 열거란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch2">2. LDAP 쿼리 & PowerView</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400" data-target="ch3">3. Mini Lab & Quiz</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Discovery</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Domain Account</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">"회사 전화번호부에서 VIP 목록 뽑아내기" — AD 계정 열거</p>
+            </header>
+            <!-- Chapter 1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> AD 계정 열거란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"회사 전화번호부에서 VIP 뽑기"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">회사에 입사하면 직원 전화번호부를 받습니다. 여기엔 모든 직원의 이름, 부서, 직급이 적혀 있죠. 공격자는 이 전화번호부(Active Directory)에서 <strong>'관리자', '서버담당', 'DBA'</strong> 같은 높은 권한을 가진 VIP 계정만 골라냅니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">기본 명령어: net user /domain</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed mb-3">AD에 가입된 아무 PC에서 관리자 권한 없이도 실행할 수 있는 기본 Windows 명령어입니다.</p>
+                        <div class="terminal-bg p-4 rounded text-xs space-y-1">
+                            <div><span class="text-slate-500">C:\></span> net user /domain</div>
+                            <div class="text-[#F4D06F] mt-1">사용자 계정</div>
+                            <div>------------------------------------------</div>
+                            <div>Administrator    alice.kim    bob.park</div>
+                            <div>svc_backup       svc_sql      domain.admin</div>
+                            <div class="text-slate-500 mt-1"># svc_ 접두사 = 서비스 계정 → 공격자의 주요 타겟!</div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">왜 위험한가?</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">계정 목록만 확보하면 <strong>Password Spraying</strong>(흔한 비밀번호로 모든 계정에 시도), <strong>Kerberoasting</strong>(서비스 계정 해시 탈취) 등 후속 공격이 가능해집니다.</p>
+                    </div>
+                </div>
+            </section>
+            <!-- Chapter 2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> LDAP 쿼리 & PowerView</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h3 class="font-bold text-lg mb-3 hl-yel text-center">LDAP 쿼리</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 mb-3">LDAP(Lightweight Directory Access Protocol)은 AD의 데이터를 검색하는 표준 프로토콜입니다.</p>
+                            <div class="terminal-bg p-3 rounded text-xs"><code>(&(objectCategory=person)<br>&nbsp;(objectClass=user)<br>&nbsp;(adminCount=1))</code></div>
+                            <p class="text-xs text-slate-500 mt-2">adminCount=1 → 관리자 권한을 가진 계정만 필터링</p>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#9DD9D2]">
+                            <h3 class="font-bold text-lg mb-3 hl-teal text-center">PowerView</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 mb-3">PowerShell 기반의 AD 정보 수집 도구로, 한 줄의 명령어로 강력한 열거가 가능합니다.</p>
+                            <div class="terminal-bg p-3 rounded text-xs space-y-1">
+                                <div><span class="text-slate-500">PS></span> Get-DomainUser -AdminCount</div>
+                                <div><span class="text-slate-500">PS></span> Get-DomainUser -SPN</div>
+                                <div class="text-slate-500 mt-1"># SPN 설정된 계정 = Kerberoasting 대상</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-3 hl-teal">탐지 방법</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 text-center"><div class="font-mono font-bold hl-teal mb-1">Event 4662</div><div class="text-slate-500">AD 객체 접근 감사</div></div>
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 text-center"><div class="font-mono font-bold hl-teal mb-1">Event 4661</div><div class="text-slate-500">SAM 핸들 요청</div></div>
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 text-center"><div class="font-mono font-bold hl-yel mb-1">LDAP 로그</div><div class="text-slate-500">비정상 쿼리 패턴 감지</div></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Chapter 3: Mini Lab + Quiz -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> Mini Lab & Quiz</h2>
+                <div class="space-y-8">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm">
+                            <span class="hl-teal">Mini Lab: LDAP 쿼리 시뮬레이션 — 관리자 계정 찾기</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div>
+                        </div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">아래는 AD에서 가져온 사용자 목록입니다. <strong>관리자 계정</strong>(adminCount=1)을 모두 클릭하세요.</p>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-lg mx-auto" id="ldap-users">
+                                <button onclick="toggleUser(this)" data-admin="0" class="ldap-btn p-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm font-mono hover:border-[#9DD9D2] transition"><div class="font-bold">alice.kim</div><div class="text-xs text-slate-400">Marketing</div></button>
+                                <button onclick="toggleUser(this)" data-admin="1" class="ldap-btn p-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm font-mono hover:border-[#9DD9D2] transition"><div class="font-bold">svc_backup</div><div class="text-xs text-slate-400">Service Acct</div></button>
+                                <button onclick="toggleUser(this)" data-admin="0" class="ldap-btn p-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm font-mono hover:border-[#9DD9D2] transition"><div class="font-bold">bob.park</div><div class="text-xs text-slate-400">Sales</div></button>
+                                <button onclick="toggleUser(this)" data-admin="1" class="ldap-btn p-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm font-mono hover:border-[#9DD9D2] transition"><div class="font-bold">domain.admin</div><div class="text-xs text-slate-400">IT Admin</div></button>
+                                <button onclick="toggleUser(this)" data-admin="0" class="ldap-btn p-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm font-mono hover:border-[#9DD9D2] transition"><div class="font-bold">charlie.lee</div><div class="text-xs text-slate-400">HR</div></button>
+                                <button onclick="toggleUser(this)" data-admin="1" class="ldap-btn p-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm font-mono hover:border-[#9DD9D2] transition"><div class="font-bold">svc_sql</div><div class="text-xs text-slate-400">Service Acct</div></button>
+                            </div>
+                            <div class="text-center mt-4"><button onclick="checkLdap()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">결과 확인</button></div>
+                            <div id="ldap-result" class="mt-4 text-center text-sm font-bold h-8"></div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="font-bold text-lg mb-4 hl-teal">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-q" data-correct="3">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q. AD 계정 열거를 탐지하기 위해 가장 우선적으로 모니터링해야 할 것은?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> CPU 사용률이 높은 서버를 찾는다.</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> 네트워크 대역폭 사용량을 확인한다.</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> Event ID 4662(AD 객체 접근)와 비정상적인 LDAP 쿼리 패턴을 모니터링한다.</label>
+                                </div>
+                            </div>
+                            <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                        </div>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">AD 계정 열거의 원리를 이해했습니다!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">공격자가 어떻게 도메인 내 고가치 계정을 식별하는지 배웠습니다.</p>
+                <button onclick="goToDashboard()" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] dark:from-[#9DD9D2] dark:to-[#F4D06F] text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl"><span>← 매트릭스 대시보드로 돌아가기</span></button>
+            </div>
+        </div>
+    </main>
+    </div>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function goToDashboard(){window.location.href='/';}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='\u2600\uFE0F';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='\uD83C\uDF19';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+        function toggleUser(btn){btn.classList.toggle('selected');btn.classList.toggle('border-[#9DD9D2]');btn.classList.toggle('bg-[#9DD9D2]/10');}
+        function checkLdap(){var btns=document.querySelectorAll('.ldap-btn');var correct=0;var total=3;btns.forEach(function(b){var isAdmin=b.getAttribute('data-admin')==='1';var isSelected=b.classList.contains('selected');if(isAdmin&&isSelected)correct++;else if(!isAdmin&&isSelected)correct--;});var r=document.getElementById('ldap-result');if(correct===total){r.innerHTML='<span class="text-teal-600 dark:text-[#9DD9D2]">정답! svc_backup, domain.admin, svc_sql이 관리자/서비스 계정입니다.</span>';}else{r.innerHTML='<span class="text-red-500">다시 시도하세요. 서비스 계정(svc_)과 관리자 계정을 찾아보세요.</span>';}}
+        function checkQuiz(){var q=document.querySelector('input[name="q1"]:checked');if(!q){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]','bg-red-100','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');if(q.value==='3'){r.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');r.innerHTML='정답! Event ID 4662와 LDAP 쿼리 패턴 모니터링이 계정 열거 탐지의 핵심입니다.';}else{r.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');r.innerHTML='오답입니다. AD 계정 열거는 CPU나 대역폭보다 감사 로그에서 탐지됩니다.';}}
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

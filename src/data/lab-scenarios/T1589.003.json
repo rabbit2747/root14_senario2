@@ -1,0 +1,240 @@
+{
+  "id": "T1589.003",
+  "title": "직원 이름 수집 시뮬레이션",
+  "titleEn": "Employee Names OSINT Gathering Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0, 1] },
+    { "label": "📧 이메일 수집", "labelEn": "📧 Email Harvest", "steps": [2, 3] },
+    { "label": "🔗 정보 연결", "labelEn": "🔗 Intel Linking", "steps": [4, 5] },
+    { "label": "🎯 타겟 선정", "labelEn": "🎯 Target Selection", "steps": [6] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "linkedin", "label": "LinkedIn", "x": 200, "y": 30 },
+    { "id": "hunter", "label": "Hunter.io", "x": 200, "y": 90 },
+    { "id": "target", "label": "Target Org", "x": 350, "y": 60 },
+    { "id": "employees", "label": "Employees", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "linkedin", "minStep": 0 },
+    { "from": "ext", "to": "hunter", "minStep": 2 },
+    { "from": "linkedin", "to": "target", "minStep": 1 },
+    { "from": "hunter", "to": "target", "minStep": 2 },
+    { "from": "target", "to": "employees", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "{companyName} Data", "icon": "📁" },
+    { "name": "employees.csv", "icon": "📄", "alert": true },
+    { "name": "orgchart.html", "icon": "🌐" }
+  ],
+  "steps": [
+    {
+      "cmd": "theHarvester -d {companyName}.com -b linkedin -l 500",
+      "out": "[*] Target: {companyName}.com\n[*] Searching LinkedIn...\n[*] Users found: 47\n---------------------\n{userName}@{companyName}.com\nj.kim@{companyName}.com\ns.park@{companyName}.com\nm.lee@{companyName}.com\nh.choi@{companyName}.com\n[...42 more results...]",
+      "def": "[OSINT Monitor] Automated LinkedIn scraping detected from IP 185.220.101.34",
+      "defAction": "Source: 185.220.101.34\nTarget: linkedin.com/company/{companyName}\nAction: Rate limiting triggered, IP flagged",
+      "desc": "theHarvester를 사용하여 LinkedIn에서 대상 기업의 직원 이메일과 이름을 수집합니다.",
+      "descEn": "The attacker uses theHarvester to collect employee emails and names from LinkedIn.",
+      "stepTitle": "LinkedIn 이메일 수집",
+      "stepTitleEn": "LinkedIn Email Harvesting",
+      "feynman": "전화번호부에서 특정 회사 직원의 이름과 연락처를 찾는 것과 비슷합니다. theHarvester는 LinkedIn이라는 거대한 '직장인 전화번호부'에서 특정 회사 이메일을 자동으로 검색하는 도구입니다. 사람이 하나하나 찾는 대신 프로그램이 빠르게 수백 개를 수집합니다.",
+      "feynmanEn": "Think of it like looking up employees in a phone book. theHarvester automatically searches LinkedIn, which is essentially a massive professional directory, to find email addresses belonging to a specific company. Instead of manually browsing profiles one by one, the tool scrapes hundreds of results in seconds.",
+      "expert": "theHarvester는 OSINT 프레임워크로, LinkedIn API 및 검색 엔진을 통해 대상 도메인의 이메일 주소를 열거합니다. -l 500 옵션은 검색 결과 제한을 500으로 설정하여 대규모 수집을 수행합니다.",
+      "expertEn": "theHarvester is an OSINT framework that enumerates email addresses for a target domain via LinkedIn API and search engines. The -l 500 flag sets the result limit to 500 for large-scale collection.",
+      "defTooltip": "🚨 OSINT 모니터링: LinkedIn에서 자동화된 스크래핑 패턴이 감지되었습니다",
+      "defTooltipEn": "🚨 OSINT Monitor: Automated scraping pattern detected from LinkedIn",
+      "hackerLog": {
+        "title": "theharvester_results.txt",
+        "lines": [
+          { "log": "[*] Users found: 47", "desc": "💡 47명의 직원 이메일을 한 번에 수집했습니다 - 공격자의 첫 번째 정보 수확" },
+          { "log": "{userName}@{companyName}.com", "desc": "💡 이메일 패턴(이름@회사.com)이 노출되면 다른 직원 이메일도 추측 가능합니다" },
+          { "log": "[...42 more results...]", "desc": "💡 실제 공격에서는 수백~수천 개의 이메일이 수집될 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "theHarvester", "desc": "오픈소스 정보 수집 도구로, 검색 엔진과 소셜미디어에서 이메일, 서브도메인, 이름 등을 자동으로 수집합니다" },
+        { "name": "OSINT (Open Source Intelligence)", "desc": "공개된 정보(SNS, 웹사이트, 뉴스 등)를 수집하여 정보를 얻는 기법. 누구나 접근 가능한 정보를 체계적으로 모읍니다" }
+      ]
+    },
+    {
+      "cmd": "python3 linkedin_scraper.py --company \"{companyName}\" --output employees.csv",
+      "out": "[+] Scraping LinkedIn profiles for {companyName}...\n[+] Found 156 employee profiles\n[+] Extracting: Names, Titles, Departments\n[+] Results saved to employees.csv\n\nSample output:\nName,Title,Department\n{userName},Security Engineer,IT Security\nJihye Kim,HR Manager,Human Resources\nMinsu Park,Developer,Engineering",
+      "def": "[DLP] Outbound data collection activity detected - LinkedIn API abuse pattern",
+      "defAction": "Source: 185.220.101.34\nPattern: Automated profile enumeration\nAction: Alert sent to SOC team",
+      "desc": "커스텀 스크래퍼로 직원 프로필 상세 정보(이름, 직함, 부서)를 CSV로 추출합니다.",
+      "descEn": "A custom scraper extracts detailed employee profiles (name, title, department) into CSV format.",
+      "stepTitle": "직원 프로필 상세 수집",
+      "stepTitleEn": "Detailed Employee Profile Scraping",
+      "feynman": "첫 번째 단계에서 이름만 알아냈다면, 이번에는 그 사람이 어떤 부서에서 무슨 일을 하는지까지 알아내는 것입니다. 마치 학교 명부에서 이름뿐 아니라 학년, 반, 담당 선생님까지 알아내는 것과 같습니다.",
+      "feynmanEn": "If the first step found names, this step finds out what department they work in and what their role is. It's like going from a simple class roster to getting each student's grade, homeroom, and teacher information.",
+      "expert": "커스텀 Python 스크래퍼가 LinkedIn 프로필 페이지를 파싱하여 구조화된 데이터(이름, 직함, 부서)를 CSV 형식으로 추출합니다. 이 데이터는 조직도 구축과 사회공학 공격의 기초자료가 됩니다.",
+      "expertEn": "A custom Python scraper parses LinkedIn profile pages to extract structured data (name, title, department) into CSV format. This data forms the foundation for organizational mapping and social engineering attacks.",
+      "defTooltip": "🔍 DLP 경고: LinkedIn API를 악용한 대량 데이터 수집이 탐지되었습니다",
+      "defTooltipEn": "🔍 DLP Alert: Bulk data collection detected via LinkedIn API abuse",
+      "hackerLog": {
+        "title": "employees.csv",
+        "lines": [
+          { "log": "[+] Found 156 employee profiles", "desc": "💡 156명의 상세 정보가 한 파일에 정리되었습니다 - 스피어피싱의 재료입니다" },
+          { "log": "Name,Title,Department", "desc": "💡 CSV 형식으로 정리하면 자동화된 공격 도구에 바로 입력할 수 있습니다" },
+          { "log": "Jihye Kim,HR Manager,Human Resources", "desc": "💡 HR 부서 직원은 채용 관련 피싱에 특히 취약한 고가치 타겟입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Web Scraping", "desc": "웹 페이지의 정보를 프로그램으로 자동 추출하는 기법. 수동으로는 며칠 걸릴 작업을 몇 분 만에 처리합니다" },
+        { "name": "CSV (Comma-Separated Values)", "desc": "데이터를 쉼표로 구분하여 저장하는 파일 형식. 엑셀에서 바로 열 수 있어 공격자가 데이터 정리에 자주 사용합니다" }
+      ]
+    },
+    {
+      "cmd": "curl -s \"https://hunter.io/v2/domain-search?domain={companyName}.com&api_key=API_KEY\" | jq '.data.emails[]'",
+      "out": "{\n  \"value\": \"{userName}@{companyName}.com\",\n  \"type\": \"personal\",\n  \"confidence\": 91,\n  \"first_name\": \"{userName}\",\n  \"department\": \"it\"\n}\n{\n  \"value\": \"j.kim@{companyName}.com\",\n  \"type\": \"personal\",\n  \"confidence\": 87,\n  \"first_name\": \"Jihye\",\n  \"department\": \"hr\"\n}",
+      "def": "[Email Gateway] hunter.io API query detected for company domain",
+      "defAction": "Source: External OSINT service\nTarget: {companyName}.com domain\nAction: Domain monitoring alert raised",
+      "desc": "Hunter.io API를 사용하여 기업 도메인의 이메일 패턴과 직원 이메일을 검증합니다.",
+      "descEn": "The attacker uses Hunter.io API to verify email patterns and employee emails for the target domain.",
+      "stepTitle": "이메일 검증 및 패턴 분석",
+      "stepTitleEn": "Email Verification and Pattern Analysis",
+      "feynman": "Hunter.io는 이메일 주소의 '탐정'입니다. 회사 도메인을 입력하면 그 회사에서 사용하는 이메일 형식(이름.성@회사.com 같은)을 알려주고, 각 이메일이 실제로 존재할 확률까지 알려줍니다. 마치 우체국에서 주소가 실제로 존재하는지 확인해주는 것과 같습니다.",
+      "feynmanEn": "Hunter.io is like an email detective. You give it a company domain, and it reveals the email format used (like firstname.lastname@company.com) along with a confidence score for each email. It's like asking the post office to verify whether an address actually exists.",
+      "expert": "Hunter.io API는 웹 크롤링과 공개 데이터 소스를 기반으로 도메인별 이메일 주소를 인덱싱합니다. confidence 점수는 이메일 존재 확률을 나타내며, 91%는 높은 신뢰도를 의미합니다.",
+      "expertEn": "Hunter.io API indexes email addresses per domain based on web crawling and public data sources. The confidence score indicates the probability of email existence, with 91% representing high reliability.",
+      "defTooltip": "📧 이메일 게이트웨이: 외부 OSINT 서비스에서 회사 도메인 이메일 검색이 감지되었습니다",
+      "defTooltipEn": "📧 Email Gateway: Company domain email search detected from external OSINT service",
+      "hackerLog": {
+        "title": "hunter_results.json",
+        "lines": [
+          { "log": "\"confidence\": 91", "desc": "💡 91%의 확률로 이 이메일이 실제 존재합니다 - 피싱 이메일이 반송되지 않을 가능성이 높습니다" },
+          { "log": "\"type\": \"personal\"", "desc": "💡 개인 이메일(팀 공용이 아닌)이므로 표적 공격에 더 효과적입니다" },
+          { "log": "\"department\": \"hr\"", "desc": "💡 부서 정보까지 파악되면 맞춤형 피싱 이메일 작성이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Hunter.io", "desc": "이메일 찾기 서비스로, 회사 도메인을 입력하면 해당 회사의 이메일 주소와 패턴을 검색할 수 있는 합법적인 마케팅 도구입니다" },
+        { "name": "API (Application Programming Interface)", "desc": "프로그램끼리 데이터를 주고받는 통로. API 키를 사용하면 웹사이트 방문 없이 프로그램으로 직접 데이터를 요청할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 email_permutator.py --names employees.csv --domain {companyName}.com --format first.last",
+      "out": "[+] Generating email permutations...\n[+] Pattern detected: first.last@{companyName}.com\n[+] Generated 156 email addresses\n[+] Verifying via SMTP...\n[+] Valid: 142/156 (91.0%)\n\nValid emails:\n{userName}@{companyName}.com ✓\njihye.kim@{companyName}.com ✓\nminsu.park@{companyName}.com ✓",
+      "def": "[Email Server] Multiple SMTP VRFY/RCPT TO attempts from single source",
+      "defAction": "Source: 185.220.101.34\nTarget: mail.{companyName}.com\nAction: SMTP enumeration blocked, IP banned",
+      "desc": "수집한 이름으로 이메일 주소를 생성하고 SMTP를 통해 유효성을 검증합니다.",
+      "descEn": "The attacker generates email permutations from collected names and validates them via SMTP.",
+      "stepTitle": "이메일 주소 생성 및 SMTP 검증",
+      "stepTitleEn": "Email Permutation and SMTP Validation",
+      "feynman": "이름 목록이 있고 이메일 패턴을 알면, 모든 직원의 이메일을 만들 수 있습니다. '김지혜'의 이메일이 'jihye.kim@회사.com'이라면, '박민수'는 'minsu.park@회사.com'일 것입니다. 그리고 메일 서버에 '이 주소로 편지 보낼 수 있나요?'라고 물어보면 실제 존재하는지 확인할 수 있습니다.",
+      "feynmanEn": "If you have a list of names and know the email pattern, you can generate every employee's email. If 'jihye.kim@company.com' works, then 'minsu.park@company.com' probably does too. Then you ask the mail server 'Can I send mail here?' to verify which ones actually exist.",
+      "expert": "SMTP VRFY/RCPT TO 명령을 사용한 이메일 열거 기법입니다. 메일 서버가 250 응답을 반환하면 해당 사서함이 존재함을 의미합니다. 91% 유효율은 이메일 패턴 추측이 정확했음을 나타냅니다.",
+      "expertEn": "This uses SMTP VRFY/RCPT TO commands for email enumeration. A 250 response from the mail server confirms the mailbox exists. The 91% validation rate indicates the email pattern guess was accurate.",
+      "defTooltip": "📬 메일 서버: 단일 IP에서 대량 SMTP 검증 시도가 탐지되었습니다",
+      "defTooltipEn": "📬 Mail Server: Multiple SMTP verification attempts detected from single source",
+      "hackerLog": {
+        "title": "smtp_validation.log",
+        "lines": [
+          { "log": "[+] Pattern detected: first.last@{companyName}.com", "desc": "💡 이메일 규칙을 알면 이름만으로 이메일 주소를 만들 수 있습니다" },
+          { "log": "[+] Valid: 142/156 (91.0%)", "desc": "💡 142개의 실제 존재하는 이메일 확보 - 대규모 피싱 캠페인 준비 완료" },
+          { "log": "{userName}@{companyName}.com ✓", "desc": "💡 ✓ 표시는 메일 서버가 '이 주소 있어요'라고 확인해준 것입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "SMTP (Simple Mail Transfer Protocol)", "desc": "이메일을 전송하는 프로토콜. VRFY 명령으로 이메일 주소 존재 여부를 확인할 수 있어 공격자가 악용합니다" },
+        { "name": "Email Permutation", "desc": "이름과 성을 조합하여 가능한 이메일 주소 변형을 생성하는 기법 (예: first.last, f.last, firstlast 등)" }
+      ]
+    },
+    {
+      "cmd": "maltego -i employees.csv --transform EmailToPhone --transform EmailToSocialMedia",
+      "out": "[*] Running Maltego transforms...\n[*] EmailToPhone: 23 results\n[*] EmailToSocialMedia: 89 results\n\n{userName}@{companyName}.com:\n  Phone: +82-10-XXXX-3847\n  Twitter: @{userName}_sec\n  GitHub: github.com/{userName}\n  Facebook: fb.com/{userName}.security",
+      "def": "[Threat Intel] Correlation of multiple OSINT sources detected for {companyName} employees",
+      "defAction": "Source: Multiple OSINT platforms\nTarget: {companyName} employee data\nAction: Executive protection alert issued",
+      "desc": "Maltego를 사용하여 이메일 주소에서 전화번호, SNS 계정 등 추가 정보를 연결합니다.",
+      "descEn": "Maltego transforms link email addresses to phone numbers, social media accounts, and other personal data.",
+      "stepTitle": "다중 소스 정보 연결",
+      "stepTitleEn": "Multi-Source Intelligence Correlation",
+      "feynman": "Maltego는 정보의 '거미줄'을 만드는 도구입니다. 이메일 하나에서 시작해서 그 사람의 전화번호, SNS 계정, 깃허브까지 연결합니다. 마치 한 사람의 이름으로 검색하면 인스타그램, 트위터, 페이스북이 모두 나오는 것처럼요. 이렇게 모인 정보로 그 사람에 대해 아주 상세한 프로필을 만들 수 있습니다.",
+      "feynmanEn": "Maltego creates a 'spider web' of information. Starting from a single email, it connects to that person's phone number, social media accounts, and GitHub profile. Just like searching someone's name and finding their Instagram, Twitter, and Facebook all at once. This builds a very detailed profile of the target.",
+      "expert": "Maltego의 Transform 엔진은 이메일 주소를 시드로 사용하여 OSINT 데이터소스를 교차 참조합니다. EmailToPhone은 데이터 브로커와 유출 DB를 검색하고, EmailToSocialMedia는 소셜 플랫폼 API를 쿼리합니다.",
+      "expertEn": "Maltego's Transform engine uses email addresses as seeds to cross-reference OSINT data sources. EmailToPhone queries data brokers and breach databases, while EmailToSocialMedia queries social platform APIs.",
+      "defTooltip": "🕸️ 위협 인텔리전스: 여러 OSINT 소스에서 직원 정보 상관관계 분석이 감지되었습니다",
+      "defTooltipEn": "🕸️ Threat Intel: Multi-source OSINT correlation detected for company employees",
+      "hackerLog": {
+        "title": "maltego_transforms.log",
+        "lines": [
+          { "log": "[*] EmailToPhone: 23 results", "desc": "💡 23명의 전화번호를 확보 - 보이스피싱이나 SMS 피싱에 활용 가능합니다" },
+          { "log": "[*] EmailToSocialMedia: 89 results", "desc": "💡 89개의 SNS 계정 발견 - 직원들의 관심사와 활동 패턴을 파악할 수 있습니다" },
+          { "log": "GitHub: github.com/{userName}", "desc": "💡 GitHub에서 코드를 분석하면 사용하는 기술 스택과 보안 수준을 파악할 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Maltego", "desc": "정보 시각화 및 연결 분석 도구. 한 정보에서 출발하여 관련된 모든 정보를 자동으로 찾아 그래프로 보여줍니다" },
+        { "name": "Transform", "desc": "Maltego에서 한 유형의 데이터를 다른 유형으로 변환하는 기능. 이메일→전화번호, 이메일→SNS 등의 변환을 수행합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 org_chart_builder.py --input employees.csv --output orgchart.html",
+      "out": "[+] Building organizational chart...\n[+] Identified departments: 12\n[+] Key personnel:\n    CEO: Park Joonho\n    CTO: {userName}\n    CISO: Kim Soyeon\n    HR Director: Lee Minjun\n[+] Reporting structure mapped\n[+] Org chart saved to orgchart.html",
+      "def": "[SIEM] Large-scale employee data aggregation pattern detected",
+      "defAction": "Source: Threat intelligence correlation\nTarget: {companyName} organizational data\nAction: Incident case #2024-0847 created",
+      "desc": "수집된 직원 정보를 기반으로 조직도를 구축하여 핵심 인물과 공격 대상을 식별합니다.",
+      "descEn": "The attacker builds an organizational chart to identify key personnel and high-value targets.",
+      "stepTitle": "조직도 구축 및 핵심 인물 식별",
+      "stepTitleEn": "Org Chart Building and Key Personnel ID",
+      "feynman": "수집한 정보를 퍼즐처럼 맞추는 단계입니다. 누가 누구의 상사인지, 어떤 부서에 몇 명이 있는지를 그림으로 그립니다. 회사 안내 책자에 있는 조직도를 외부에서 재구성하는 것과 같습니다. CEO, CISO 같은 중요한 사람을 찾으면 공격의 핵심 타겟을 정할 수 있습니다.",
+      "feynmanEn": "This step is like putting together a puzzle with all the gathered information. It maps out who reports to whom and how many people are in each department. It's like reconstructing a company's internal org chart from the outside. Finding key figures like the CEO and CISO helps identify prime attack targets.",
+      "expert": "수집된 직원 메타데이터(직함, 부서)를 분석하여 계층적 조직 구조를 재구성합니다. 이 정보는 whale phishing(경영진 타겟) 또는 사회공학 공격의 신뢰할 수 있는 구실(pretext) 생성에 활용됩니다.",
+      "expertEn": "Collected employee metadata (titles, departments) is analyzed to reconstruct the hierarchical organizational structure. This information is used for whale phishing (executive targeting) or creating credible pretexts for social engineering attacks.",
+      "defTooltip": "🏢 SIEM: 대규모 직원 데이터 집계 패턴이 감지되었습니다 - 공격 준비 징후",
+      "defTooltipEn": "🏢 SIEM: Large-scale employee data aggregation pattern detected - attack preparation indicators",
+      "hackerLog": {
+        "title": "orgchart_builder.log",
+        "lines": [
+          { "log": "[+] Identified departments: 12", "desc": "💡 12개 부서 구조를 파악 - 회사의 전체 구조가 공격자에게 노출되었습니다" },
+          { "log": "CISO: Kim Soyeon", "desc": "💡 보안 책임자를 파악하면 보안 정책의 수준과 대응 방식을 예측할 수 있습니다" },
+          { "log": "HR Director: Lee Minjun", "desc": "💡 HR 디렉터는 직원 개인정보에 접근 가능하여 고가치 타겟입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Organizational Chart", "desc": "조직의 계층 구조를 시각적으로 보여주는 도표. 공격자는 이를 통해 '누가 중요한 정보에 접근할 수 있는지'를 파악합니다" },
+        { "name": "Key Personnel", "desc": "조직에서 높은 권한이나 중요 정보에 접근할 수 있는 핵심 인물. 이들이 사회공학 공격의 우선 타겟이 됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 spearphish_target_selector.py --orgchart orgchart.html --criteria \"HR,Finance,IT Admin\"",
+      "out": "[+] Analyzing org chart for high-value targets...\n[+] Priority targets selected:\n\n1. Lee Minjun (HR Director) - Access to employee PII\n2. Choi Eunji (Finance Manager) - Wire transfer authority\n3. {userName} (IT Admin) - Domain admin potential\n4. Kim Jihye (HR Manager) - Onboarding access\n\n[+] Target dossiers saved to targets/\n[+] Recommended attack vector: Spearphishing (HR/Finance)",
+      "def": "[Threat Intel Platform] Pre-attack reconnaissance phase indicators matched for {companyName}",
+      "defAction": "Source: Behavioral analysis engine\nTarget: {companyName}\nAction: Threat level elevated to HIGH, security awareness alert sent to all employees",
+      "desc": "수집된 정보를 분석하여 스피어피싱 대상을 선정하고 공격 시나리오를 준비합니다.",
+      "descEn": "The attacker analyzes gathered intelligence to select spearphishing targets and prepare attack scenarios.",
+      "stepTitle": "스피어피싱 타겟 선정",
+      "stepTitleEn": "Spearphishing Target Selection",
+      "feynman": "모든 정보를 모았으니 이제 '누구를 공격할까?'를 결정합니다. 돈을 송금할 수 있는 재무팀, 직원 개인정보를 가진 HR팀, 시스템 관리 권한이 있는 IT 관리자가 가장 가치있는 타겟입니다. 마치 도둑이 집을 털기 전에 어디에 금고가 있는지, 누가 열쇠를 가지고 있는지 파악하는 것과 같습니다.",
+      "feynmanEn": "With all the information gathered, it's time to decide 'who to attack.' Finance staff who can wire money, HR who holds personal data, and IT admins with system access are the highest-value targets. It's like a burglar figuring out where the safe is and who holds the key before breaking in.",
+      "expert": "공격 대상 선정은 접근 가능한 자산(PII, 재무 권한, 도메인 관리)과 사회공학 성공 확률을 기반으로 가중치 점수를 산출합니다. HR/Finance는 BEC(Business Email Compromise) 공격의 주요 벡터입니다.",
+      "expertEn": "Target selection calculates weighted scores based on accessible assets (PII, financial authority, domain admin) and social engineering success probability. HR/Finance are primary vectors for BEC (Business Email Compromise) attacks.",
+      "defTooltip": "🎯 위협 인텔: 사전 공격 정찰 단계 지표가 일치했습니다 - 위협 등급 HIGH",
+      "defTooltipEn": "🎯 Threat Intel: Pre-attack recon phase indicators matched - Threat level HIGH",
+      "hackerLog": {
+        "title": "target_selection.log",
+        "lines": [
+          { "log": "1. Lee Minjun (HR Director) - Access to employee PII", "desc": "💡 HR 디렉터는 전 직원의 개인정보에 접근 가능 - 최우선 공격 대상입니다" },
+          { "log": "2. Choi Eunji (Finance Manager) - Wire transfer authority", "desc": "💡 재무 관리자는 돈을 송금할 권한이 있어 BEC 공격의 핵심 타겟입니다" },
+          { "log": "[+] Recommended attack vector: Spearphishing (HR/Finance)", "desc": "💡 정찰 완료! 수집된 정보로 맞춤형 피싱 이메일을 만들 준비가 되었습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Spearphishing", "desc": "특정 개인을 겨냥한 맞춤형 피싱 공격. 일반 피싱과 달리 타겟의 개인정보를 활용하여 속일 확률이 훨씬 높습니다" },
+        { "name": "BEC (Business Email Compromise)", "desc": "기업 이메일을 사칭하여 자금 이체나 기밀 정보를 탈취하는 공격. FBI 보고에 따르면 가장 큰 금전적 피해를 주는 사이버 공격입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "theHarvester (PID: 4521)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "python3 linkedin_scraper.py (PID: 4587)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "curl → hunter.io API (PID: 4612)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "python3 email_permutator.py (PID: 4701)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "maltego (PID: 4823)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "python3 org_chart_builder.py (PID: 4910)", "depth": 1, "alert": false, "minStep": 5 },
+    { "name": "python3 spearphish_target_selector.py (PID: 4988)", "depth": 1, "alert": true, "minStep": 6 }
+  ]
+}

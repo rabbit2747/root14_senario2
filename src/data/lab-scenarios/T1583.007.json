@@ -1,0 +1,173 @@
+{
+  "id": "T1583.007",
+  "title": "악성 광고 인프라 시뮬레이션",
+  "titleEn": "Malvertising Infrastructure Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 인프라 구축", "labelEn": "🔍 Infrastructure Setup", "steps": [0, 1] },
+    { "label": "⚡ 캠페인 실행", "labelEn": "⚡ Campaign Execution", "steps": [2, 3] },
+    { "label": "✅ 결과 분석", "labelEn": "✅ Result Analysis", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "adnet", "label": "Ad Network", "x": 200, "y": 30 },
+    { "id": "fake-site", "label": "Fake Download Site", "x": 350, "y": 30 },
+    { "id": "tracker", "label": "Click Tracker", "x": 200, "y": 90 },
+    { "id": "victim", "label": "Victim", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "adnet", "minStep": 0 },
+    { "from": "ext", "to": "fake-site", "minStep": 1 },
+    { "from": "adnet", "to": "tracker", "minStep": 2 },
+    { "from": "tracker", "to": "fake-site", "minStep": 3 },
+    { "from": "victim", "to": "fake-site", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "ad_campaign.py", "icon": "🐍", "alert": true },
+    { "name": "landing_page", "icon": "🌐" },
+    { "name": "trojan_installer.exe", "icon": "💀", "alert": true }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 ad_account_setup.py --platform google --identity \"TechSoft Solutions LLC\" --payment stolen_cc_4532xxxx --region US",
+      "out": "[*] Setting up Google Ads advertiser account...\n[*] Identity: TechSoft Solutions LLC (shell company)\n[*] Payment: Visa ending 4532 (prepaid virtual card)\n[*] Region: United States\n\n[+] Account created: ads-customer-ID-847291\n[+] Identity verification: PENDING (submitted fake business docs)\n[+] Daily budget limit: $500\n\n[*] Ad creative preparation:\n  Ad title: \"Slack - Official Download | Free for Teams\"\n  Display URL: slack.com/download\n  Final URL: https://sl4ck-app[.]com/download  (typosquatting)\n  Description: \"Download Slack for Windows. Free team communication.\"\n\n[*] Targeting settings:\n  Keywords: slack download, slack installer, slack for windows\n  Location: United States, South Korea\n  Device: Desktop only\n  Bid strategy: Maximum clicks ($2.50 max CPC)\n\n[+] Ad submitted for review",
+      "def": "[Ad Platform] New advertiser account flagged — payment method linked to fraud database",
+      "defAction": "Source: Google Ads Trust & Safety\nTarget: Account ads-customer-ID-847291\nAction: Account flagged for manual review, ad approval delayed",
+      "desc": "도난 결제 정보와 가짜 사업자로 광고 계정을 생성하고 악성 광고를 등록합니다.",
+      "descEn": "Creating ad account with stolen payment and fake business identity to register malicious ads.",
+      "stepTitle": "광고 계정 생성 및 광고 등록",
+      "stepTitleEn": "Ad Account Creation & Ad Registration",
+      "feynman": "가짜 회사 명함을 만들어 TV 광고 시간을 구매하는 것과 같습니다. 합법적인 소프트웨어 회사처럼 보이는 계정을 만들고, 'Slack 다운로드'를 검색하는 사람에게 노출되는 광고를 구매합니다. 광고는 진짜 Slack 사이트처럼 보이지만 실제로는 가짜 사이트로 연결됩니다.",
+      "feynmanEn": "Like creating a fake company business card to buy TV ad time. Creating an account that looks like a legitimate software company, buying ads shown to people searching 'Slack download'. The ad looks like the real Slack site but links to a fake one.",
+      "expert": "Google Ads는 Display URL과 Final URL이 다를 수 있어 공격에 악용됩니다. 타이포스쿼팅 도메인(sl4ck-app.com)은 시각적으로 원본과 유사합니다. 프리페이드 가상 카드는 추적이 어렵습니다.",
+      "expertEn": "Google Ads allows different Display URLs and Final URLs, which attackers exploit. Typosquatting domains (sl4ck-app.com) look visually similar to the original. Prepaid virtual cards are hard to trace.",
+      "defTooltip": "🔗 광고 플랫폼: 사기 데이터베이스에 연결된 결제 수단 탐지",
+      "defTooltipEn": "🔗 Ad Platform: Payment method linked to fraud database detected",
+      "hackerLog": {
+        "title": "ad_setup.log",
+        "lines": [
+          { "log": "Account: TechSoft Solutions LLC", "desc": "💡 가짜 회사로 광고 계정 생성" },
+          { "log": "Display: slack.com/download", "desc": "💡 공식 URL처럼 보이는 표시 URL" },
+          { "log": "Final: sl4ck-app[.]com/download", "desc": "💡 실제 연결되는 타이포스쿼팅 사이트" }
+        ]
+      },
+      "terms": [
+        { "name": "Malvertising", "desc": "Malicious Advertising. 합법적인 광고 네트워크를 통해 악성코드를 배포하는 기법." },
+        { "name": "Typosquatting", "desc": "유명 도메인과 비슷한 오타 도메인을 등록하여 사용자를 속이는 기법 (예: sl4ck vs slack)." }
+      ]
+    },
+    {
+      "cmd": "python3 fake_download_site.py --template slack --domain sl4ck-app[.]com --payload trojan_slack_setup.exe",
+      "out": "[*] Building fake Slack download page...\n[*] Template: Official Slack website clone\n[*] Domain: sl4ck-app[.]com (registered via Namecheap + privacy)\n\n[+] Page elements cloned:\n  - Logo, favicon, color scheme: ✓ (pixel-perfect copy)\n  - Download button: Modified → serves trojan_slack_setup.exe\n  - Footer links: Point to real slack.com (legitimacy)\n  - HTTPS: Let's Encrypt certificate installed ✓\n\n[*] Trojan preparation:\n  Base: Legitimate Slack installer (v4.38.125)\n  Payload: Raccoon Stealer v3 (injected via DLL sideloading)\n  Packer: Themida (anti-analysis)\n  Signature: Timestamped with stolen code signing cert\n  VirusTotal: 2/72 detections (2.8%)\n\n[+] Fake download site: https://sl4ck-app[.]com\n[+] File: slack-setup-4.38.125.exe (48.2 MB)\n[+] SHA256: a3b2c1d4e5f6...\n[+] Site ready for traffic",
+      "def": "[Threat Intel] New domain sl4ck-app[.]com registered — typosquat of slack.com, hosting suspicious executable",
+      "defAction": "Source: Domain monitoring service\nTarget: sl4ck-app[.]com\nAction: Domain reported to Google Safe Browsing, registrar abuse team notified",
+      "desc": "타이포스쿼팅 도메인에 합법 사이트를 복제하고 트로이 목마를 배치합니다.",
+      "descEn": "Cloning legitimate site on typosquatting domain and deploying trojanized installer.",
+      "stepTitle": "가짜 다운로드 사이트 구축",
+      "stepTitleEn": "Fake Download Site Construction",
+      "feynman": "진짜 가게와 똑같이 생긴 가짜 가게를 옆에 만드는 것입니다. 실제 Slack 웹사이트를 픽셀 단위로 복제하여 sl4ck-app[.]com에 배포합니다. 다운로드 버튼만 진짜 Slack 대신 정보 탈취 악성코드가 주입된 설치 파일을 제공합니다.",
+      "feynmanEn": "Like building a fake store that looks identical to the real one next door. Cloning the actual Slack website pixel-by-pixel to sl4ck-app[.]com, but the download button serves an installer injected with info-stealing malware instead of real Slack.",
+      "expert": "DLL Sideloading을 통해 정상 Slack 설치 과정 중에 Raccoon Stealer가 사이드로드됩니다. Themida 패커와 도난된 코드서명 인증서로 AV 탐지율을 2.8%로 낮춥니다.",
+      "expertEn": "Raccoon Stealer sideloads during normal Slack installation via DLL Sideloading. Themida packer and stolen code signing certificate reduce AV detection to 2.8%.",
+      "defTooltip": "🔗 위협 인텔: slack.com 타이포스쿼팅 도메인 — 의심스러운 실행파일 호스팅",
+      "defTooltipEn": "🔗 Threat Intel: slack.com typosquat domain hosting suspicious executable",
+      "hackerLog": {
+        "title": "fake_site.log",
+        "lines": [
+          { "log": "Clone: slack.com → sl4ck-app[.]com", "desc": "💡 픽셀 단위 정밀 복제" },
+          { "log": "Payload: Slack + Raccoon Stealer v3", "desc": "💡 정상 설치 + 악성코드 번들" },
+          { "log": "VT detection: 2/72 (2.8%)", "desc": "💡 Themida 패커로 탐지 회피" }
+        ]
+      },
+      "terms": [
+        { "name": "DLL Sideloading", "desc": "정상 애플리케이션의 DLL 로딩 순서를 악용하여 악성 DLL을 로드시키는 기법." },
+        { "name": "Raccoon Stealer", "desc": "MaaS 기반 정보 탈취 악성코드. 브라우저 비밀번호, 쿠키, 암호화폐 지갑을 탈취합니다." }
+      ]
+    },
+    {
+      "cmd": "python3 ad_campaign_launch.py --account ads-customer-ID-847291 --campaign slack_download --budget 2000 --status launch",
+      "out": "[*] Launching Google Ads campaign...\n[*] Campaign: Slack Download (ID: camp-39281)\n[*] Status: Ad review passed ✓ (automated review)\n\n[+] Campaign LIVE — Ads serving on Google Search\n\n[*] First 24 hours performance:\n  Impressions:  34,500\n  Clicks:       1,247\n  CTR:          3.61%\n  Avg CPC:      $1.85\n  Cost:         $2,306.95\n\n[*] Search queries triggering ads:\n  \"slack download\"           — Position 1 (above organic results)\n  \"slack for windows\"        — Position 1\n  \"slack desktop app\"        — Position 2\n  \"slack installer free\"     — Position 1\n\n[*] Geographic distribution:\n  US: 62% | KR: 24% | JP: 8% | Other: 6%\n\n[+] 1,247 users redirected to fake download site",
+      "def": "[Google Trust & Safety] Ad campaign flagged — final URL domain mismatch with display URL, automated takedown initiated",
+      "defAction": "Source: Google Ads automated review\nTarget: Campaign camp-39281\nAction: Ad suspended after 24h, account under review, refund blocked",
+      "desc": "악성 광고 캠페인을 실행하여 검색 결과 최상단에 가짜 다운로드 링크를 노출합니다.",
+      "descEn": "Launching malicious ad campaign to show fake download links at the top of search results.",
+      "stepTitle": "악성 광고 캠페인 실행",
+      "stepTitleEn": "Malicious Ad Campaign Launch",
+      "feynman": "가짜 가게 앞에 크고 화려한 간판을 세우는 것입니다. 'Slack 다운로드'를 검색하면 구글 검색 결과 맨 위에 공격자의 광고가 표시됩니다. 진짜 Slack 사이트보다 더 눈에 잘 띄는 위치에 노출되어, 많은 사용자가 가짜 사이트를 클릭합니다.",
+      "feynmanEn": "Like putting up a big flashy sign in front of the fake store. When people search 'Slack download', the attacker's ad appears at the very top of Google results, more visible than the real Slack site, causing many users to click the fake site.",
+      "expert": "Google Ads의 자동 심사는 AI 기반이지만, 초기 24시간 동안은 수동 검토 전에 광고가 게재될 수 있습니다. 이 시간차를 노려 최대한 많은 감염을 시도합니다.",
+      "expertEn": "Google Ads automated review is AI-based, but ads can serve for the first 24 hours before manual review. Attackers exploit this time gap to maximize infections.",
+      "defTooltip": "🔗 Google Trust & Safety: 표시 URL과 최종 URL 불일치 — 자동 중단",
+      "defTooltipEn": "🔗 Google Trust & Safety: Display URL and final URL mismatch — automated takedown",
+      "hackerLog": {
+        "title": "campaign_live.log",
+        "lines": [
+          { "log": "Position: #1 for 'slack download'", "desc": "💡 검색 결과 최상단 노출" },
+          { "log": "Clicks: 1,247 (CTR 3.61%)", "desc": "💡 높은 클릭률 — 광고가 진짜처럼 보임" },
+          { "log": "Cost: $2,306.95", "desc": "💡 감염 1건당 약 $1.85 비용" }
+        ]
+      },
+      "terms": [
+        { "name": "CTR", "desc": "Click-Through Rate. 광고 노출 대비 클릭 비율. 악성 광고의 평균 CTR은 3-5%입니다." },
+        { "name": "CPC", "desc": "Cost Per Click. 클릭당 광고 비용. 공격자는 높은 CPC를 지불하여 상위 노출을 확보합니다." }
+      ]
+    },
+    {
+      "cmd": "python3 infection_tracker.py --campaign camp-39281 --payload raccoon_v3 --c2 report",
+      "out": "[*] Infection tracking for campaign: camp-39281\n[*] Payload: Raccoon Stealer v3\n\n═══════════════════════════════════════════════\n  MALVERTISING INFECTION RESULTS (24h)\n═══════════════════════════════════════════════\n\n  Ad clicks:           1,247\n  Downloaded installer:  834  (66.9%)\n  Executed installer:    512  (61.4% of downloads)\n  Raccoon callback:      489  (95.5% of executions)\n  SmartScreen bypassed:  489  (code-signed binary)\n\n  Data stolen (489 victims):\n    ├── Browser passwords:    12,847 credentials\n    ├── Browser cookies:      8,291 sessions\n    ├── Crypto wallets:       142 wallets ($284K value)\n    ├── Credit cards:         567 cards\n    └── Auth tokens:          2,103 tokens\n\n  Victim breakdown:\n    Enterprise users:     312 (63.8%) — corporate email domains\n    Personal users:       177 (36.2%)\n\n  Estimated stolen value: $847,000\n  Campaign cost:          $2,307\n  ROI:                    36,700%\n\n[!] WARNING: This is a simulation for educational purposes only",
+      "def": "[EDR] Multiple endpoints downloading slack-setup.exe from sl4ck-app[.]com — malware campaign detected",
+      "defAction": "Source: EDR telemetry\nTarget: 489 endpoints\nAction: sl4ck-app[.]com blocked, malicious installer quarantined, credential reset initiated for affected users",
+      "desc": "감염 결과를 추적하고 탈취된 데이터 현황을 확인합니다.",
+      "descEn": "Tracking infection results and reviewing stolen data status.",
+      "stepTitle": "감염 결과 추적",
+      "stepTitleEn": "Infection Result Tracking",
+      "feynman": "가짜 가게의 매출 보고서를 보는 것입니다. 1,247명이 광고를 클릭했고, 834명이 설치 파일을 다운로드했으며, 489명이 실제로 감염되었습니다. 감염된 컴퓨터에서 12,847개의 비밀번호, 142개의 암호화폐 지갑이 탈취되었습니다.",
+      "feynmanEn": "Like reviewing the fake store's sales report. 1,247 clicked the ad, 834 downloaded the installer, and 489 were actually infected. From infected computers, 12,847 passwords and 142 crypto wallets were stolen.",
+      "expert": "66.9%의 다운로드율과 61.4%의 실행률은 사용자가 검색 광고를 높은 신뢰도로 인식함을 보여줍니다. 코드서명된 바이너리는 SmartScreen을 100% 우회했습니다. ROI 36,700%는 malvertising의 높은 수익성을 보여줍니다.",
+      "expertEn": "66.9% download rate and 61.4% execution rate show users trust search ads. Code-signed binaries bypassed SmartScreen 100%. The 36,700% ROI demonstrates malvertising's high profitability.",
+      "defTooltip": "🔗 EDR: 다수 엔드포인트에서 악성 설치파일 다운로드 탐지",
+      "defTooltipEn": "🔗 EDR: Multiple endpoints downloading malicious installer detected",
+      "hackerLog": {
+        "title": "infection_tracker.log",
+        "lines": [
+          { "log": "Clicks→Infected: 1,247→489 (39.2%)", "desc": "💡 높은 감염 전환률" },
+          { "log": "Stolen: 12,847 passwords, 142 wallets", "desc": "💡 대량 자격증명 탈취" },
+          { "log": "ROI: 36,700% ($2,307→$847K)", "desc": "💡 극도로 높은 수익률" }
+        ]
+      },
+      "terms": [
+        { "name": "SmartScreen", "desc": "Windows의 다운로드 파일 평판 검사 시스템. 서명된 파일은 경고 없이 실행됩니다." },
+        { "name": "Infostealer", "desc": "정보 탈취 악성코드. 브라우저 자격증명, 쿠키, 암호화폐 지갑 등을 자동으로 수집합니다." }
+      ]
+    },
+    {
+      "cmd": "python3 ad_evasion.py --strategy rotate --accounts 5 --domains sl4ck-app[.]com,slackk-download[.]com,get-slack-app[.]com --report final",
+      "out": "[*] Ad evasion strategy: Account rotation\n[*] Prepared backup accounts: 5\n[*] Backup domains: 3\n\n═══════════════════════════════════════════════\n  7-DAY CAMPAIGN FINAL REPORT\n═══════════════════════════════════════════════\n\n  Account rotation history:\n    Day 1-2: ads-customer-ID-847291 → Suspended (24h)\n    Day 2-3: ads-customer-ID-903421 → Suspended (18h)\n    Day 3-4: ads-customer-ID-115782 → Suspended (12h)\n    Day 4-5: ads-customer-ID-667234 → Suspended (8h)\n    Day 5-7: ads-customer-ID-992101 → Active (slipped through)\n\n  Total 7-day results:\n    Total impressions:    187,000\n    Total clicks:         6,842\n    Total infections:     2,671\n    Total credentials:    68,400\n    Total crypto wallets: 891 ($1.78M value)\n    Total cost:           $12,650\n    Total stolen value:   $4.2M\n    Final ROI:            33,200%\n\n  Google response time: Avg 16h per account suspension\n  Window of opportunity: ~80h total ad serving time\n\n[!] WARNING: This is a simulation for educational purposes only",
+      "def": "[Google] Pattern detected — multiple accounts from same entity targeting slack-related keywords, all accounts permanently banned",
+      "defAction": "Source: Google Ads Trust & Safety (pattern analysis)\nTarget: 5 related advertiser accounts\nAction: All accounts banned, domains reported to Safe Browsing, law enforcement referral initiated",
+      "desc": "계정 차단에 대응하여 계정 회전 전략으로 캠페인을 지속합니다.",
+      "descEn": "Sustaining campaign with account rotation strategy against account suspensions.",
+      "stepTitle": "회피 전략 및 최종 결과",
+      "stepTitleEn": "Evasion Strategy & Final Results",
+      "feynman": "가짜 가게가 적발되면 즉시 옆에 새 가게를 여는 전략입니다. 5개의 예비 광고 계정을 준비해두고, 하나가 차단되면 즉시 다음 계정으로 전환합니다. 구글이 평균 16시간 만에 차단하지만, 그 사이 80시간의 광고 시간을 확보하여 2,671명을 감염시켰습니다.",
+      "feynmanEn": "Like opening a new fake store immediately after one is shut down. With 5 backup ad accounts, switching to the next when one is banned. Google suspends in avg 16 hours, but the attacker secured 80 hours of ad time, infecting 2,671 people.",
+      "expert": "계정 회전 전략은 Google의 평균 탐지 시간(16h)보다 빠르게 새 계정을 활성화합니다. 시간이 지날수록 Google의 패턴 분석이 빨라져 차단 시간이 24h→8h로 단축되었지만, 공격자는 여전히 충분한 감염을 달성했습니다.",
+      "expertEn": "Account rotation strategy activates new accounts faster than Google's average detection time (16h). Over time, Google's pattern analysis improves (24h→8h suspension), but attackers still achieve sufficient infections.",
+      "defTooltip": "🔗 Google: 동일 엔티티의 패턴 탐지 — 전체 계정 영구 차단",
+      "defTooltipEn": "🔗 Google: Pattern from same entity detected — all accounts permanently banned",
+      "hackerLog": {
+        "title": "final_report.log",
+        "lines": [
+          { "log": "Accounts used: 5 (avg 16h active each)", "desc": "💡 버너 계정 회전 전략" },
+          { "log": "7-day infections: 2,671", "desc": "💡 대규모 감염 달성" },
+          { "log": "Stolen value: $4.2M (cost $12,650)", "desc": "💡 33,200% ROI" }
+        ]
+      },
+      "terms": [
+        { "name": "버너 계정", "desc": "Burner Account. 일회용으로 사용 후 폐기하는 계정. 추적을 어렵게 만듭니다." },
+        { "name": "Ad Fraud", "desc": "광고 사기. 광고 시스템을 악용하여 금전적 이득을 얻거나 악성코드를 배포하는 행위." }
+      ]
+    }
+  ]
+}

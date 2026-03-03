@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1564.002">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var key='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(key);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})()</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var SUPA='https://bnwbybawqrnhznirivfg.supabase.co';var KEY='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var res=await fetch(SUPA+'/rest/v1/edu_html_content?page_id=eq.t1564-002-hidden-users&select=content&limit=1',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});if(res.ok){var data=await res.json();if(data&&data.length>0&&data[0].content){_eduDynLoaded=true;document.open();document.write(data[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="GOTROOT EDU — T1564.002 Hidden Users 숨겨진 사용자 계정 교육">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <title>GOTROOT EDU | T1564.002 Hidden Users</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
+    <style>body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background .3s,color .3s}.glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}.dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2)}.hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}.hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3),transparent);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2),transparent);border-left:4px solid #F4D06F;color:#F4D06F}.terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">사이버보안 교육 플랫폼</span></div><button onclick="location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full hidden md:flex flex-col shrink-0 z-40"><div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors"><span>←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1564.002: Hidden Users</p></div>
+        <nav class="flex-1 overflow-y-auto py-4"><button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch1">1. 숨겨진 사용자란?</button><button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch2">2. 공격 기법</button><button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch3">3. 실습 & 퀴즈</button></nav></aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8"><div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Defense Evasion</div><h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 dark:text-white">Hidden Users</h1><p class="text-cgray dark:text-slate-400 text-lg">로그인 화면과 사용자 관리에서 보이지 않는 숨겨진 계정을 생성</p></header>
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#1.</span> 숨겨진 사용자란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]"><h3 class="font-bold text-lg mb-2 hl-yel">"투명 인간" 비유</h3><p class="text-cgray dark:text-slate-300 leading-relaxed">건물(시스템)에 <strong>출입 가능하지만 명부(사용자 목록)에 이름이 없는 투명 인간</strong>을 만드는 것입니다. Windows에서는 레지스트리로 로그인 화면에서 계정을 숨기고, macOS에서는 UserShell을 /usr/bin/false로 설정하거나 IsHidden 속성을 사용합니다. 관리자가 사용자 목록을 확인해도 숨겨진 계정이 보이지 않습니다.</p></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-red-400"><h4 class="font-bold text-sm text-red-600 dark:text-red-400 mb-2">Windows</h4><ul class="text-xs text-cgray dark:text-slate-400 space-y-1"><li>$ 접미사 계정: user$ (SAM에서 숨김)</li><li>레지스트리: SpecialAccounts\UserList</li><li>net user에서 $ 계정 미표시</li></ul></div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-[#F4D06F]"><h4 class="font-bold text-sm hl-yel mb-2">macOS / Linux</h4><ul class="text-xs text-cgray dark:text-slate-400 space-y-1"><li>macOS: IsHidden=1 (dscl)</li><li>Linux: UID < 1000 (시스템 계정 범위)</li><li>/etc/passwd 직접 편집</li></ul></div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#2.</span> 공격 기법</h2>
+                <div class="space-y-6">
+                    <div class="terminal-bg rounded-xl p-4 text-xs">
+                        <div class="text-[#F4D06F] mb-2"># Windows: $ 접미사로 숨겨진 관리자 계정 생성</div>
+                        <div>net user admin$ P@ssw0rd123! /add</div>
+                        <div>net localgroup administrators admin$ /add</div>
+                        <div class="text-slate-500"># net user 명령으로 조회 시 admin$가 표시되지 않음</div>
+                    </div>
+                    <div class="terminal-bg rounded-xl p-4 text-xs">
+                        <div class="text-[#F4D06F] mb-2"># 레지스트리로 로그인 화면에서 숨기기</div>
+                        <div>reg add "HKLM\SOFTWARE\Microsoft\Windows NT\</div>
+                        <div>  CurrentVersion\Winlogon\SpecialAccounts\UserList"</div>
+                        <div>  /v admin$ /t REG_DWORD /d 0 /f</div>
+                        <div class="text-slate-500"># 값 0 = 로그인 화면에서 숨김</div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-green-400"><h3 class="font-bold text-lg mb-2 text-green-700 dark:text-green-400">방어 방법</h3><ul class="list-disc list-inside text-sm text-cgray dark:text-slate-300 space-y-2"><li><strong>Event ID 4720</strong>: 사용자 계정 생성 이벤트 모니터링</li><li><strong>Event ID 4732</strong>: 관리자 그룹 멤버 추가 모니터링</li><li><strong>SAM 레지스트리 감사</strong>: SpecialAccounts 키 변경 감시</li><li><strong>정기 감사</strong>: WMIC/PowerShell로 전체 계정 열거</li></ul></div>
+                </div>
+            </section>
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#3.</span> 실습 & 퀴즈</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]"><h3 class="font-bold text-lg mb-4 hl-teal">미니 실습: 숨겨진 계정 탐지</h3>
+                        <div class="terminal-bg rounded-lg p-4 text-xs mb-4">
+                            <div class="text-slate-400 mb-2">[ Hidden User Detection Simulation ]</div>
+                            <div id="sim-output" class="space-y-1"><div class="text-[#9DD9D2]">$ 사용자 계정 감사 시작...</div></div>
+                            <button onclick="runSim()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-xs font-mono">▶ 숨겨진 계정 탐지 시뮬레이션</button>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]"><h3 class="font-bold text-lg mb-4 hl-yel">퀴즈</h3><div id="quiz-area" class="space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 font-bold">Q1. Windows에서 net user 명령으로 표시되지 않는 숨겨진 계정의 특징은?</p>
+                        <div class="space-y-2"><button onclick="checkQuiz(this,'correct')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">A. 계정 이름이 $ 기호로 끝남</button><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">B. 계정 이름이 _ 기호로 시작함</button><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">C. 비밀번호가 없음</button><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">D. Guest 그룹에 속함</button></div>
+                        <p id="quiz-result" class="text-sm font-bold mt-2 hidden"></p>
+                    </div></div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+<script>
+function toggleTheme(){document.documentElement.classList.toggle('dark');document.getElementById('theme-icon').textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙';}
+function go(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav-item').forEach(n=>{n.classList.toggle('active',n.dataset.target===id);});}
+document.getElementById('main-scroll')?.addEventListener('scroll',()=>{const sects=['ch1','ch2','ch3'];let cur='ch1';sects.forEach(s=>{const el=document.getElementById(s);if(el&&el.getBoundingClientRect().top<200)cur=s;});document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.target===cur));});
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');}}),{threshold:0.1});document.querySelectorAll('.section-observe').forEach(s=>obs.observe(s));
+function runSim(){const o=document.getElementById('sim-output');const lines=["$ net user → 표시된 사용자: Administrator, jsmith, klee","$ ","$ WMIC useraccount list brief (전체 조회):","$   Administrator  SID: S-1-5-21-...-500 ✅ 정상","$   jsmith         SID: S-1-5-21-...-1001 ✅ 정상","$   klee           SID: S-1-5-21-...-1002 ✅ 정상","$   admin$         SID: S-1-5-21-...-1003 ⚠️ $ 접미사!","$   svc$           SID: S-1-5-21-...-1004 ⚠️ $ 접미사!","$ ","$ 레지스트리 확인: SpecialAccounts\\UserList","$   admin$ = 0 (숨김) ⚠️","$   svc$ = 0 (숨김) ⚠️","$ ","$ ⚠️ 2개 숨겨진 계정 탐지! 관리자 그룹 소속 확인 필요!"];let i=0;const iv=setInterval(()=>{if(i>=lines.length){clearInterval(iv);return;}o.innerHTML+=`<div class="${lines[i].includes('⚠️')?'text-red-400':lines[i].includes('✅')?'text-green-400':'text-[#9DD9D2]'}">${lines[i]}</div>`;i++;},500);}
+function checkQuiz(el,r){const res=document.getElementById('quiz-result');res.classList.remove('hidden');if(r==='correct'){res.textContent='✅ 정답! $ 접미사를 가진 계정은 net user 명령에서 표시되지 않습니다.';res.className='text-sm font-bold mt-2 text-green-600 dark:text-green-400';}else{res.textContent='❌ 오답. Windows SAM에서 $ 접미사를 가진 계정은 net user 출력에서 숨겨집니다.';res.className='text-sm font-bold mt-2 text-red-600 dark:text-red-400';}}
+</script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+{
+  "id": "T1055.004",
+  "title": "APC Injection 시뮬레이션",
+  "titleEn": "APC Injection Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "🔍 타겟 선정", "labelEn": "🔍 Target Selection", "steps": [0] },
+    { "label": "⚡ 메모리 주입", "labelEn": "⚡ Memory Injection", "steps": [1, 2] },
+    { "label": "🔓 코드 실행", "labelEn": "🔓 Code Execution", "steps": [3] },
+    { "label": "🧹 탐지 확인", "labelEn": "🧹 Detection Check", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(injector.exe)", "x": 50, "y": 80 },
+    { "id": "alloc", "label": "VirtualAllocEx\n(RWX Memory)", "x": 200, "y": 30 },
+    { "id": "target", "label": "explorer.exe\n(Target)", "x": 200, "y": 130 },
+    { "id": "apc", "label": "QueueUserAPC\n(Shellcode)", "x": 350, "y": 80 },
+    { "id": "c2", "label": "C2 Server\n(Active)", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "alloc", "minStep": 1 },
+    { "from": "alloc", "to": "target", "minStep": 1 },
+    { "from": "target", "to": "apc", "minStep": 2 },
+    { "from": "apc", "to": "c2", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Task Manager", "icon": "📊" },
+    { "name": "PowerShell", "icon": "🖥️" },
+    { "name": "Process Explorer", "icon": "🔍" },
+    { "name": "{companyName} App", "icon": "🌐" },
+    { "name": "Event Viewer", "icon": "📋" }
+  ],
+  "steps": [
+    {
+      "cmd": "Get-Process explorer | Select-Object Id,ProcessName,Threads",
+      "out": "  Id ProcessName  Threads\n---- -----------  -------\n1000 explorer     {1004, 1008, 1012, 1016, 1020, 1024}",
+      "def": "[SIEM] Process enumeration - explorer.exe thread IDs queried",
+      "defAction": "Process: powershell.exe -> Get-Process\nTarget: explorer.exe threads\nRisk Level: Low\nAction: Log & Monitor",
+      "desc": "공격자가 explorer.exe의 PID와 스레드 ID 목록을 확인합니다. APC Injection에는 타겟 스레드의 핸들이 필요하므로 스레드 ID를 수집합니다.",
+      "descEn": "The attacker checks explorer.exe's PID and thread ID list. APC Injection requires the target thread's handle, so thread IDs are collected.",
+      "stepTitle": "explorer.exe 프로세스 및 스레드 정보 수집",
+      "stepTitleEn": "explorer.exe Process and Thread Information Collection",
+      "feynman": "배달할 우편함(APC Queue)의 주소를 확인하는 것입니다. explorer.exe의 각 스레드(1004, 1008 등)마다 개별 우편함이 있으며, 공격자는 이 중 하나에 악성 편지를 넣을 것입니다.",
+      "feynmanEn": "It's like checking the address of the mailbox (APC Queue) for delivery. Each thread of explorer.exe (1004, 1008, etc.) has an individual mailbox, and the attacker will put a malicious letter in one of them.",
+      "expert": "explorer.exe는 Windows 셸을 관리하는 프로세스로, 다수의 스레드가 Alertable Wait 상태에 진입하는 빈도가 높아 APC Injection의 인기 있는 타겟입니다. Get-Process로 스레드 목록을 확인한 후, OpenThread(THREAD_SET_CONTEXT)로 핸들을 획득합니다.",
+      "expertEn": "explorer.exe manages the Windows shell and has many threads that frequently enter Alertable Wait states, making it a popular APC Injection target.",
+      "defTooltip": "🔐 explorer.exe 스레드 정보 수집 감지! APC Injection 준비 단계일 수 있습니다.",
+      "defTooltipEn": "🔐 explorer.exe thread information collection detected! Could be APC Injection preparation.",
+      "hackerLog": {
+        "title": "thread_enum.txt",
+        "lines": [
+          { "log": "Id: 1000 (explorer.exe)", "desc": "💡 타겟 프로세스 PID 확인 - 메모리 할당의 타겟" },
+          { "log": "Threads: {1004, 1008, 1012...}", "desc": "💡 6개 스레드 확인 - Alertable Wait 상태인 스레드에 APC 등록 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "APC Queue", "desc": "각 스레드에 연결된 비동기 프로시저 호출 대기열. 스레드가 Alertable Wait에 진입하면 큐의 함수를 실행합니다." },
+        { "name": "Thread ID", "desc": "운영 체제에서 각 스레드를 고유하게 식별하는 번호. OpenThread의 인자로 사용됩니다." },
+        { "name": "Alertable Wait", "desc": "스레드가 APC를 처리할 준비가 된 대기 상태. SleepEx(TRUE), WaitForSingleObjectEx(TRUE) 등으로 진입합니다." }
+      ]
+    },
+    {
+      "cmd": "injector.exe --target 1000 --thread 1004 --payload shellcode.bin",
+      "out": "[*] Opening process handle: explorer.exe (PID: 1000)\n[+] Process handle obtained: 0x2A0\n[*] Allocating RWX memory in target process...\n[+] Remote memory allocated: 0x7FFE00400000 (4096 bytes, PAGE_EXECUTE_READWRITE)\n[*] Writing shellcode to remote memory...\n[+] 4,096 bytes written successfully",
+      "def": "[EDR] ALERT: VirtualAllocEx with PAGE_EXECUTE_READWRITE in explorer.exe",
+      "defAction": "Process: injector.exe\nTarget: explorer.exe (PID: 1000)\nAllocation: 0x7FFE00400000 (RWX)\nSize: 4,096 bytes\nRisk Level: Critical\nAction: Monitor for QueueUserAPC call",
+      "desc": "타겟 프로세스(explorer.exe)에 실행 가능한 메모리를 할당하고 셸코드를 주입합니다. PAGE_EXECUTE_READWRITE 권한은 코드 실행을 가능하게 합니다.",
+      "descEn": "Allocating executable memory in the target process (explorer.exe) and injecting shellcode. PAGE_EXECUTE_READWRITE permissions enable code execution.",
+      "stepTitle": "타겟 프로세스에 셸코드 주입",
+      "stepTitleEn": "Shellcode Injection into Target Process",
+      "feynman": "다른 사람의 사무실(explorer.exe)에 작업 공간(메모리)을 마련하고, 그곳에 공격 도구(셸코드)를 배치하는 것입니다. PAGE_EXECUTE_READWRITE는 '이 공간에서 프로그램을 실행할 수 있다'는 권한입니다.",
+      "feynmanEn": "It's like setting up a workspace (memory) in someone else's office (explorer.exe) and placing attack tools (shellcode) there. PAGE_EXECUTE_READWRITE means 'programs can be executed in this space.'",
+      "expert": "VirtualAllocEx로 PAGE_EXECUTE_READWRITE(0x40) 권한의 메모리를 할당하는 것은 일반적인 프로세스에서는 드문 작업이며, 강력한 탐지 지표입니다. 최신 공격자는 VirtualProtectEx로 권한을 단계적으로 변경(RW→RX)하여 탐지를 우회하기도 합니다.",
+      "expertEn": "Allocating PAGE_EXECUTE_READWRITE (0x40) memory via VirtualAllocEx is rare in normal processes and a strong detection indicator. Modern attackers use VirtualProtectEx to change permissions gradually (RW→RX) to evade detection.",
+      "defTooltip": "🔐 explorer.exe에 RWX 메모리 할당 감지! 코드 인젝션의 전형적인 패턴입니다.",
+      "defTooltipEn": "🔐 RWX memory allocation in explorer.exe detected! Typical code injection pattern.",
+      "hackerLog": {
+        "title": "memory_alloc.txt",
+        "lines": [
+          { "log": "PAGE_EXECUTE_READWRITE", "desc": "💡 RWX 메모리 = 읽기+쓰기+실행 가능 - 셸코드 실행에 필수적인 권한" },
+          { "log": "4,096 bytes written", "desc": "💡 셸코드가 explorer.exe 메모리에 주입됨 - 아직 실행 대기 중" }
+        ]
+      },
+      "terms": [
+        { "name": "VirtualAllocEx", "desc": "다른 프로세스의 가상 주소 공간에 메모리를 할당하는 Windows API입니다." },
+        { "name": "PAGE_EXECUTE_READWRITE (RWX)", "desc": "메모리 보호 속성. 읽기, 쓰기, 실행이 모두 가능하여 코드 인젝션에 사용됩니다." },
+        { "name": "셸코드 (Shellcode)", "desc": "위치 독립적(PIC)인 기계어 코드. 어떤 메모리 주소에서도 실행 가능합니다." }
+      ]
+    },
+    {
+      "cmd": "[APC Registration: QueueUserAPC]",
+      "out": "[*] Opening thread handle: Thread ID 1004\n[+] Thread handle obtained: 0x2B4\n[*] Calling QueueUserAPC...\n[+] APC queued successfully!\n[+] Shellcode address 0x7FFE00400000 registered in Thread 1004's APC Queue\n[*] Waiting for thread to enter Alertable Wait state...",
+      "def": "[EDR] CRITICAL: QueueUserAPC called on explorer.exe thread with injected shellcode address",
+      "defAction": "API: QueueUserAPC\nSource: injector.exe\nTarget: explorer.exe Thread 1004\nAPC Function: 0x7FFE00400000 (injected memory)\nRisk Level: Critical\nAction: KILL injector.exe, monitor explorer.exe",
+      "desc": "QueueUserAPC API로 셸코드 주소를 타겟 스레드의 APC Queue에 등록합니다. 스레드가 Alertable Wait 상태에 진입하면 자동으로 실행됩니다.",
+      "descEn": "Registering the shellcode address in the target thread's APC Queue via QueueUserAPC API. It will automatically execute when the thread enters Alertable Wait state.",
+      "stepTitle": "QueueUserAPC로 APC Queue에 셸코드 등록",
+      "stepTitleEn": "Shellcode Registration in APC Queue via QueueUserAPC",
+      "feynman": "우편함(APC Queue)에 악성 편지(셸코드 주소)를 넣어두는 단계입니다. 우편함 주인(Thread 1004)이 우편함을 확인하는 시간(Alertable Wait)이 되면 자동으로 편지를 열고(셸코드 실행) 내용대로 행동합니다.",
+      "feynmanEn": "Putting a malicious letter (shellcode address) in the mailbox (APC Queue). When the mailbox owner (Thread 1004) checks the mailbox (Alertable Wait), they automatically open the letter (execute shellcode) and act on its contents.",
+      "expert": "QueueUserAPC는 KAPC(Kernel APC) 또는 UAPC(User APC)를 스레드의 APC 큐에 등록합니다. User-mode APC는 스레드가 Alertable Wait에 진입해야 실행되지만, Kernel-mode APC는 즉시 실행됩니다. 여기서는 User-mode APC를 사용하며, explorer.exe의 메시지 루프가 빈번히 Alertable Wait에 진입합니다.",
+      "expertEn": "QueueUserAPC registers a KAPC (Kernel APC) or UAPC (User APC) in a thread's APC queue. User-mode APCs require the thread to enter Alertable Wait, while Kernel-mode APCs execute immediately.",
+      "defTooltip": "🔐 QueueUserAPC가 주입된 메모리 주소를 APC 함수로 등록했습니다! APC Injection 확인!",
+      "defTooltipEn": "🔐 QueueUserAPC registered injected memory address as APC function! APC Injection confirmed!",
+      "hackerLog": {
+        "title": "apc_queue.txt",
+        "lines": [
+          { "log": "APC queued successfully!", "desc": "💡 APC Queue에 셸코드가 등록됨 - Alertable Wait 시 자동 실행됨" },
+          { "log": "Thread 1004's APC Queue", "desc": "💡 explorer.exe의 특정 스레드에 타겟팅 - 스레드별 독립 APC 큐" }
+        ]
+      },
+      "terms": [
+        { "name": "QueueUserAPC", "desc": "타겟 스레드의 APC Queue에 함수를 등록하는 Windows API. APC Injection의 핵심 API입니다." },
+        { "name": "User-mode APC", "desc": "사용자 모드의 비동기 프로시저 호출. 스레드가 Alertable Wait 상태일 때만 실행됩니다." },
+        { "name": "Kernel-mode APC", "desc": "커널 모드의 비동기 프로시저 호출. 스레드 상태에 관계없이 즉시 실행됩니다." }
+      ]
+    },
+    {
+      "cmd": "[APC Execution: Alertable Wait Triggered]",
+      "out": "[+] Thread 1004 entered Alertable Wait (WaitForSingleObjectEx)\n[+] APC dispatched - shellcode executing at 0x7FFE00400000\n[+] Cobalt Strike beacon initialized\n[+] Callback established: 185.141.62.47:443 (HTTPS)\n[+] Running in context of explorer.exe (PID: 1000)\n\nC:\\> netstat -an | findstr 443\n  TCP    10.0.1.50:49152    185.141.62.47:443    ESTABLISHED",
+      "def": "[EDR] CRITICAL: APC-injected shellcode executing in explorer.exe - C2 beacon active",
+      "defAction": "Process: explorer.exe (PID: 1000)\nInjected code executing via APC\nC2: 185.141.62.47:443\nRisk Level: Critical\nAction: KILL explorer.exe, block C2, full IR",
+      "desc": "스레드가 Alertable Wait에 진입하자 APC Queue의 셸코드가 자동으로 실행됩니다. explorer.exe의 컨텍스트에서 C2 비콘이 활성화됩니다.",
+      "descEn": "When the thread enters Alertable Wait, the shellcode in the APC Queue automatically executes. A C2 beacon activates in the context of explorer.exe.",
+      "stepTitle": "APC 실행 - C2 비콘 활성화",
+      "stepTitleEn": "APC Execution - C2 Beacon Activation",
+      "feynman": "우편함 주인이 우편함을 확인하자(Alertable Wait), 악성 편지의 지시대로 행동을 시작합니다. explorer.exe가 공격자의 서버(C2)에 전화를 걸어(비콘), '무엇을 할까요?'라고 묻기 시작합니다. 작업 관리자에서는 정상 explorer.exe로 보입니다.",
+      "feynmanEn": "When the mailbox owner checks the mailbox (Alertable Wait), they start acting on the malicious letter's instructions. explorer.exe calls the attacker's server (C2) and asks 'What should I do?' In Task Manager, it still looks like normal explorer.exe.",
+      "expert": "WaitForSingleObjectEx(bAlertable=TRUE)가 호출되면 커널은 스레드의 APC Queue를 확인합니다. 등록된 APC 함수(셸코드)가 스레드의 사용자 모드 컨텍스트에서 실행됩니다. netstat의 ESTABLISHED 연결은 explorer.exe가 C2 서버와 통신 중임을 나타냅니다.",
+      "expertEn": "When WaitForSingleObjectEx(bAlertable=TRUE) is called, the kernel checks the thread's APC Queue. The registered APC function (shellcode) executes in the thread's user-mode context.",
+      "defTooltip": "🔐 APC를 통해 explorer.exe에서 셸코드가 실행되고 C2 비콘이 활성화되었습니다!",
+      "defTooltipEn": "🔐 Shellcode executed in explorer.exe via APC and C2 beacon activated!",
+      "hackerLog": {
+        "title": "apc_execution.txt",
+        "lines": [
+          { "log": "APC dispatched - shellcode executing", "desc": "💡 APC Queue의 셸코드가 explorer.exe 컨텍스트에서 실행됨" },
+          { "log": "TCP 10.0.1.50:49152 → 185.141.62.47:443 ESTABLISHED", "desc": "💡 explorer.exe가 C2 서버와 HTTPS 연결 수립 - 원격 제어 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "WaitForSingleObjectEx", "desc": "객체 대기 함수. bAlertable=TRUE이면 APC Queue를 처리하는 Alertable Wait에 진입합니다." },
+        { "name": "Cobalt Strike Beacon", "desc": "상용 레드팀 도구의 C2 에이전트. 주기적으로 C2 서버에 콜백하여 명령을 수신합니다." },
+        { "name": "HTTPS C2", "desc": "TLS 암호화된 HTTPS를 통한 명령 제어 통신. 일반 웹 트래픽과 구분이 어렵습니다." }
+      ]
+    },
+    {
+      "cmd": "Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational';Id=8} | Select-Object -First 1 | Format-List",
+      "out": "TimeCreated  : 2026-01-20 14:35:22\nId           : 8\nMessage      : CreateRemoteThread detected:\n               SourceProcessId: 2140 (injector.exe)\n               TargetProcessId: 1000 (explorer.exe)\n               StartAddress: 0x7FFE00400000\n               StartFunction: (unknown)",
+      "def": "[EDR] Sysmon Event ID 8 - Cross-process thread creation correlated with APC injection",
+      "defAction": "Event: Sysmon ID 8 (CreateRemoteThread)\nSource: injector.exe (PID: 2140)\nTarget: explorer.exe (PID: 1000)\nRisk Level: Critical\nAction: Forensic evidence preserved",
+      "desc": "Sysmon Event ID 8로 크로스 프로세스 스레드 생성을 탐지합니다. injector.exe에서 explorer.exe로의 원격 스레드 생성이 기록됩니다.",
+      "descEn": "Detecting cross-process thread creation via Sysmon Event ID 8. Remote thread creation from injector.exe to explorer.exe is recorded.",
+      "stepTitle": "Sysmon 이벤트 기반 탐지",
+      "stepTitleEn": "Sysmon Event-based Detection",
+      "feynman": "보안 CCTV(Sysmon)가 '외부인(injector.exe)이 직원의 사무실(explorer.exe)에 몰래 물건을 넣는' 장면을 녹화한 것입니다. Event ID 8은 '다른 프로세스에 스레드를 생성하는' 행위를 기록하며, 이것이 APC Injection의 포렌식 증거가 됩니다.",
+      "feynmanEn": "Security CCTV (Sysmon) recorded an outsider (injector.exe) sneaking things into an employee's office (explorer.exe). Event ID 8 records 'creating a thread in another process,' serving as forensic evidence of APC Injection.",
+      "expert": "Sysmon Event ID 8(CreateRemoteThread)은 크로스 프로세스 스레드 생성을 기록합니다. QueueUserAPC 자체는 Sysmon에 직접 기록되지 않지만, 관련된 OpenProcess/VirtualAllocEx/WriteProcessMemory 호출은 Event ID 10(ProcessAccess)과 함께 탐지 가능합니다. StartAddress가 동적 할당된 메모리인 점이 핵심 IOC입니다.",
+      "expertEn": "Sysmon Event ID 8 (CreateRemoteThread) records cross-process thread creation. QueueUserAPC itself isn't directly recorded in Sysmon, but related OpenProcess/VirtualAllocEx/WriteProcessMemory calls are detectable with Event ID 10 (ProcessAccess).",
+      "defTooltip": "🔐 Sysmon이 injector.exe에서 explorer.exe로의 원격 스레드 생성을 기록했습니다!",
+      "defTooltipEn": "🔐 Sysmon recorded remote thread creation from injector.exe to explorer.exe!",
+      "hackerLog": {
+        "title": "sysmon_event8.txt",
+        "lines": [
+          { "log": "SourceProcessId: 2140 (injector.exe)", "desc": "💡 인젝션의 출발점 - 악성 프로세스가 식별됨" },
+          { "log": "StartAddress: 0x7FFE00400000 (unknown)", "desc": "💡 알 수 없는 시작 주소 = 동적 할당된 셸코드 - 정상 함수가 아님" }
+        ]
+      },
+      "terms": [
+        { "name": "Sysmon Event ID 8", "desc": "CreateRemoteThread 이벤트. 한 프로세스가 다른 프로세스에 스레드를 생성할 때 기록됩니다." },
+        { "name": "Sysmon Event ID 10", "desc": "ProcessAccess 이벤트. 프로세스가 다른 프로세스에 접근(OpenProcess)할 때 기록됩니다." },
+        { "name": "StartFunction: unknown", "desc": "시작 함수가 알려진 모듈에 속하지 않음. 동적 할당된 셸코드를 나타내는 강력한 IOC입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe (PID: 1000)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "injector.exe (PID: 2140)", "depth": 0, "alert": true, "minStep": 1 },
+    { "name": "VirtualAllocEx → explorer.exe", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "QueueUserAPC → Thread 1004", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "explorer.exe [APC: Shellcode]", "depth": 0, "alert": true, "minStep": 3 },
+    { "name": "C2: 185.141.62.47:443", "depth": 1, "alert": true, "minStep": 3 }
+  ]
+}

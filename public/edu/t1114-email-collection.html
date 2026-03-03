@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1114">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1114-email-collection&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT 사이버보안 교육 — T1114 이메일 수집">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1114 Email Collection — 이메일 수집</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s}.glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}.dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2);box-shadow:0 8px 32px rgba(0,0,0,.4)}.hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}.hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F}.terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px}.dark ::-webkit-scrollbar-thumb{background:#F4D06F}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div><div class="flex items-center gap-3"><button onclick="goToDashboard()" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button><a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:rgba(187,62,3,.5);text-decoration:none;" class="hidden sm:inline">gotroot.co.kr ↗</a></div></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2] mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1114: Email Collection</p></div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch1">1. 이메일 수집 개념</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch2">2. 공격 기법 분석</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch3">3. 탐지 및 방어</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Collection</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Email Collection</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">기업 메일함에서 기밀 정보를 대량 수집하는 공격 기법</p>
+            </header>
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> 이메일 수집이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">📧 ➜ 🔍 ➜ 📥 ➜ 💀</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"메일함은 기업의 비밀 일기장"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">이메일에는 <strong>계약서, 비밀번호, 내부 전략, 인사 정보</strong> 등 기업의 핵심 정보가 담겨 있습니다. 공격자는 Exchange Server, Outlook, Gmail 등에서 특정 키워드로 이메일을 검색하고 대량으로 수집합니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">공격 방식의 다양성</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">로컬 Outlook PST 파일을 직접 복사하거나, Exchange Web Services(EWS) API로 원격 접근하거나, 메일 전달 규칙을 설정하여 지속적으로 이메일을 탈취할 수 있습니다.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div class="glass-panel p-4 rounded-xl text-center"><div class="text-3xl mb-2">📂</div><div class="text-sm font-bold hl-teal">로컬 PST 파일</div><div class="text-xs text-cgray dark:text-slate-400 mt-1">Outlook 데이터 파일 직접 복사</div></div>
+                        <div class="glass-panel p-4 rounded-xl text-center"><div class="text-3xl mb-2">🌐</div><div class="text-sm font-bold hl-teal">EWS/Graph API</div><div class="text-xs text-cgray dark:text-slate-400 mt-1">API로 원격 메일 검색/다운로드</div></div>
+                        <div class="glass-panel p-4 rounded-xl text-center"><div class="text-3xl mb-2">📨</div><div class="text-sm font-bold hl-teal">메일 전달 규칙</div><div class="text-xs text-cgray dark:text-slate-400 mt-1">자동 전달로 지속적 탈취</div></div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> 공격 기법 분석</h2>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#F4D06F]">
+                            <h3 class="font-bold text-lg mb-3 hl-yel text-center">PST/OST 파일 탈취</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed">Outlook은 메일을 <strong>PST(개인 저장소) 또는 OST(오프라인 캐시)</strong> 파일에 저장합니다. 공격자는 이 파일을 통째로 복사하면 수년간의 이메일을 한 번에 획득합니다.</p>
+                        </div>
+                        <div class="glass-panel p-6 rounded-xl border-t-4 border-t-[#9DD9D2]">
+                            <h3 class="font-bold text-lg mb-3 hl-teal text-center">Exchange EWS 검색</h3>
+                            <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed">Exchange Web Services API를 이용하면 <strong>"비밀번호", "계약", "VPN"</strong> 같은 키워드로 이메일을 검색하고, 첨부파일까지 한 번에 다운로드할 수 있습니다.</p>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">실전 예시: PowerShell EWS 접근</h3>
+                        <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed mb-3">탈취한 자격증명으로 Exchange Web Services에 접근하여 특정 키워드가 포함된 이메일을 검색합니다.</p>
+                        <div class="terminal-bg p-4 rounded-lg text-xs mt-3">
+                            <div class="text-slate-500"># EWS를 이용한 이메일 검색</div>
+                            <div class="text-[#F4D06F]">$ews = New-Object Microsoft.Exchange.WebServices.Data.ExchangeService</div>
+                            <div class="text-slate-400">$search = "subject:비밀번호 OR subject:VPN OR subject:계약서"</div>
+                            <div class="text-slate-400">$results = $ews.FindItems("Inbox", $search, $view)</div>
+                            <div class="text-slate-500 mt-1"># 검색 결과: 47건의 이메일 발견</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> 탐지 및 방어</h2>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm"><span class="hl-teal">Mini Lab: Exchange 감사 로그 분석</span><div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div></div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">아래 Exchange 감사 로그에서 비정상적인 메일함 접근을 찾아보세요.</p>
+                            <div class="flex justify-center mb-4"><button onclick="startEmailAnalysis()" id="btn-email" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded shadow-sm transition border border-[#7cc2b9]">🔍 분석 시작</button></div>
+                            <div id="traffic-log" class="terminal-bg p-4 rounded-lg text-xs h-48 overflow-y-auto space-y-1"><div class="text-slate-500">Exchange 감사 로그 대기 중...</div></div>
+                            <div class="mt-4 flex gap-3 justify-center flex-wrap"><button onclick="markSuspicious()" id="btn-mark" disabled class="opacity-50 cursor-not-allowed bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition text-sm">🚨 의심 활동 신고</button></div>
+                            <div id="c2-result" class="hidden mt-4 p-4 rounded text-center text-sm font-bold"></div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl mt-8">
+                        <h3 class="text-xl font-bold mb-4 text-[#1e293b] dark:text-white">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-q" data-correct="2"><h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. 공격자가 이메일을 수집하는 대표적인 방법이 아닌 것은?</h4><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> Outlook PST 파일 복사</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> DNS 쿼리를 통한 메일 내용 조회</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> Exchange EWS API를 이용한 키워드 검색</label></div></div>
+                            <div class="quiz-q" data-correct="3"><h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. 이메일 수집 공격에 대한 효과적인 탐지 방법은?</h4><div class="space-y-2 text-sm"><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="1" class="mr-3"> 모든 이메일을 암호화하여 검색 불가능하게 만들기</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="2" class="mr-3"> 메일 서버의 인터넷 연결 완전 차단</label><label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q2" value="3" class="mr-3"> Exchange 감사 로깅으로 비정상적 메일함 접근 및 검색 패턴 모니터링</label></div></div>
+                            <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                        </div>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">이메일 수집 학습 완료!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">이메일 수집 공격의 기법과 방어 방법을 학습했습니다.</p>
+                <button onclick="goToDashboard()" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 hover:shadow-2xl transition"><span>← 매트릭스 대시보드로 돌아가기</span></button>
+            </div>
+        </div>
+    </main>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function goToDashboard(){window.location.href='/';}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+        var emailLines=[
+            {t:'09:00:01',m:'[정상] user01 → MailboxLogin (Outlook Client, IP: 10.10.15.20)',c:false},
+            {t:'09:05:00',m:'[정상] user02 → SearchQuery "프로젝트 회의록" (OWA)',c:false},
+            {t:'09:15:22',m:'[의심] svc_admin → SearchQuery "비밀번호 OR VPN OR 인증서" (EWS API, IP: 185.234.xx.xx)',c:true},
+            {t:'09:15:45',m:'[정상] user01 → ReadMessage (1건)',c:false},
+            {t:'09:16:01',m:'[의심] svc_admin → MailboxExport CEO@{companyName}.com (EWS, 2.3GB)',c:true},
+            {t:'09:17:30',m:'[정상] user03 → SendMessage to vendor@partner.com',c:false},
+            {t:'09:18:00',m:'[의심] svc_admin → NewInboxRule "auto-forward to ext-backup@proton.me"',c:true},
+            {t:'09:20:00',m:'[정상] user02 → ReadMessage with attachment (contract.pdf)',c:false},
+        ];
+        var emailIdx=0,emailInterval=null;
+        function startEmailAnalysis(){var btn=document.getElementById('btn-email');btn.disabled=true;btn.classList.add('opacity-50');var log=document.getElementById('traffic-log');log.innerHTML='';emailIdx=0;emailInterval=setInterval(function(){if(emailIdx>=emailLines.length){clearInterval(emailInterval);document.getElementById('btn-mark').disabled=false;document.getElementById('btn-mark').classList.remove('opacity-50','cursor-not-allowed');return;}var l=emailLines[emailIdx];var div=document.createElement('div');div.className=l.c?'text-[#F4D06F]':'text-slate-400';div.textContent='['+l.t+'] '+l.m;if(l.c)div.setAttribute('data-c2','true');log.appendChild(div);log.scrollTop=log.scrollHeight;emailIdx++;},600);}
+        function markSuspicious(){var res=document.getElementById('c2-result');res.classList.remove('hidden');var c2Count=document.querySelectorAll('[data-c2="true"]').length;if(c2Count>=3){res.className='mt-4 p-4 rounded text-center text-sm font-bold bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';res.innerHTML='정확합니다! svc_admin이 <strong>EWS API로 민감 키워드를 검색</strong>하고, <strong>CEO 메일함을 통째로 내보내기</strong>하며, <strong>외부 메일로 자동 전달 규칙</strong>을 설정했습니다.<br><span class="text-xs font-normal mt-1 block">EWS를 통한 대량 검색, 메일함 내보내기, 외부 전달 규칙이 핵심 탐지 포인트입니다.</span>';document.querySelectorAll('[data-c2="true"]').forEach(function(el){el.classList.add('bg-red-900/30','px-2','rounded');});}else{res.className='mt-4 p-4 rounded text-center text-sm font-bold bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';res.textContent='로그를 다시 살펴보세요. EWS API를 통한 비정상적인 메일 접근 패턴을 찾아보세요.';}}
+        function checkQuiz(){var q1=document.querySelector('input[name="q1"]:checked');var q2=document.querySelector('input[name="q2"]:checked');if(!q1||!q2){alert('모든 문제에 답을 선택해주세요.');return;}var score=0;if(q1.value==='2')score++;if(q2.value==='3')score++;var res=document.getElementById('quiz-result');res.classList.remove('hidden');if(score===2){res.className='hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';res.classList.remove('hidden');res.textContent='모두 정답! 이메일 수집 공격의 원리와 방어 방법을 잘 이해하고 있습니다.';}else{res.className='hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';res.classList.remove('hidden');res.textContent=score+'/2 정답입니다. 틀린 문제를 다시 확인해 보세요.';}}
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+    </div>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

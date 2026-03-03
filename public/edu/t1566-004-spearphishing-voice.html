@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1566.004">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var key='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(key);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})()</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var SUPA='https://bnwbybawqrnhznirivfg.supabase.co';var KEY='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var res=await fetch(SUPA+'/rest/v1/edu_html_content?page_id=eq.t1566-004-spearphishing-voice&select=content&limit=1',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});if(res.ok){var data=await res.json();if(data&&data.length>0&&data[0].content){_eduDynLoaded=true;document.open();document.write(data[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="description" content="GOTROOT EDU — T1566.004 Spearphishing Voice 보이스 피싱(비싱) 교육">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <title>GOTROOT EDU | T1566.004 Spearphishing Voice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
+    <style>body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background .3s,color .3s}.glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}.dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2)}.hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}.hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}.nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3),transparent);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}.dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2),transparent);border-left:4px solid #F4D06F;color:#F4D06F}.terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}</style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;"><div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">사이버보안 교육 플랫폼</span></div><button onclick="location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full hidden md:flex flex-col shrink-0 z-40"><div class="p-6 border-b border-[#9DD9D2]/30"><button onclick="location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-700 mb-4 transition-colors"><span>←</span><span>대시보드로 돌아가기</span></button><h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1><p class="text-xs text-cgray dark:text-slate-400 mt-2">T1566.004: Spearphishing Voice</p></div>
+        <nav class="flex-1 overflow-y-auto py-4"><button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch1">1. 개념과 원리</button><button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch2">2. 공격 기법 분석</button><button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm text-cgray dark:text-slate-400" data-target="ch3">3. 탐지 및 방어</button></nav></aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8"><div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Initial Access</div><h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 dark:text-white">Spearphishing Voice</h1><p class="text-cgray dark:text-slate-400 text-lg">AI 음성 합성 및 전화를 통한 표적형 보이스 피싱(Vishing)</p></header>
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#1.</span> 개념과 원리</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]"><h3 class="font-bold text-lg mb-2 hl-yel">보이스 피싱(Vishing)이란?</h3><p class="text-cgray dark:text-slate-300 leading-relaxed"><strong>전화 통화를 통해 표적을 속여 민감 정보를 탈취하거나 악성 행위를 유도</strong>하는 공격입니다. AI 딥페이크 음성 합성 기술로 상사나 IT 헬프데스크 직원의 목소리를 모방하여 더욱 정교한 공격이 가능합니다. 2024년 이후 AI 기반 비싱 사례가 급증하고 있습니다.</p></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-red-400"><h4 class="font-bold text-sm text-red-600 dark:text-red-400 mb-2">IT 헬프데스크 사칭</h4><p class="text-xs text-cgray dark:text-slate-400">비밀번호 재설정 유도, MFA 코드 탈취</p></div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-yellow-400"><h4 class="font-bold text-sm hl-yel mb-2">경영진 사칭</h4><p class="text-xs text-cgray dark:text-slate-400">긴급 송금 지시, 기밀 자료 요청 (CEO Fraud)</p></div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-purple-400"><h4 class="font-bold text-sm text-purple-600 dark:text-purple-400 mb-2">AI 딥페이크 음성</h4><p class="text-xs text-cgray dark:text-slate-400">실제 상사의 음성을 AI로 복제하여 통화</p></div>
+                    </div>
+                </div>
+            </section>
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#2.</span> 공격 기법 분석</h2>
+                <div class="space-y-6">
+                    <div class="terminal-bg rounded-xl p-4 text-xs">
+                        <div class="text-[#F4D06F] mb-2"># AI 음성 합성을 이용한 CEO Fraud 시나리오</div>
+                        <div>Phase 1: CEO 음성 샘플 수집 (유튜브 인터뷰, 웨비나)</div>
+                        <div>Phase 2: AI 음성 클론 (ElevenLabs/VALL-E 기반)</div>
+                        <div>Phase 3: VoIP로 발신번호 위조 (CEO 내선번호)</div>
+                        <div>Phase 4: CFO에게 긴급 송금 전화</div>
+                        <div class="text-slate-500"># "김 부장, 나 대표야. 지금 해외 출장 중인데 급하게 처리할 건이 있어"</div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400"><h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">공격 프로세스</h3><ul class="list-disc list-inside text-sm text-cgray dark:text-slate-300 space-y-2"><li><strong>음성 수집</strong>: 공개 영상에서 5분 이상의 음성 샘플 확보</li><li><strong>AI 클로닝</strong>: 딥러닝 모델로 실시간 음성 변환</li><li><strong>발신번호 위조</strong>: SIP/VoIP로 내선번호 스푸핑</li><li><strong>사회공학</strong>: 긴급성, 권위, 비밀유지 압박</li></ul></div>
+                </div>
+            </section>
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 dark:text-white"><span class="hl-teal">#3.</span> 탐지 및 방어 + 퀴즈</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-green-400"><h3 class="font-bold text-lg mb-2 text-green-700 dark:text-green-400">방어 전략</h3><ul class="list-disc list-inside text-sm text-cgray dark:text-slate-300 space-y-2"><li><strong>콜백 절차</strong>: 중요 요청 시 공식 번호로 재확인</li><li><strong>코드워드</strong>: 임원 간 사전 합의된 인증 단어 사용</li><li><strong>듀얼 승인</strong>: 송금/권한 변경 시 2인 이상 승인</li><li><strong>AI 음성 탐지</strong>: 딥페이크 음성 분석 솔루션 도입</li><li><strong>발신번호 인증</strong>: STIR/SHAKEN 프로토콜 적용</li></ul></div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]"><h3 class="font-bold text-lg mb-4 hl-teal">미니 실습: 비싱 탐지</h3>
+                        <div class="terminal-bg rounded-lg p-4 text-xs mb-4">
+                            <div class="text-slate-400 mb-2">[ Vishing Call Analysis Simulation ]</div>
+                            <div id="sim-output" class="space-y-1"><div class="text-[#9DD9D2]">$ 의심 통화 분석 시작...</div></div>
+                            <button onclick="runSim()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-xs font-mono">▶ 비싱 분석 시뮬레이션</button>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]"><h3 class="font-bold text-lg mb-4 hl-yel">퀴즈</h3><div id="quiz-area" class="space-y-4">
+                        <p class="text-sm text-cgray dark:text-slate-300 font-bold">Q1. AI 딥페이크 보이스 피싱에 대한 가장 효과적인 방어는?</p>
+                        <div class="space-y-2"><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">A. 발신번호만 확인하면 된다</button><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">B. 목소리가 익숙하면 신뢰해도 된다</button><button onclick="checkQuiz(this,'correct')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">C. 사전 합의된 코드워드로 확인하고 공식 번호로 콜백한다</button><button onclick="checkQuiz(this,'wrong')" class="block w-full text-left px-4 py-2 rounded-lg glass-panel text-sm hover:border-[#F4D06F] transition-colors">D. 이메일로 확인 요청을 보낸다</button></div>
+                        <p id="quiz-result" class="text-sm font-bold mt-2 hidden"></p>
+                    </div></div>
+                </div>
+            </section>
+        </div>
+    </main>
+    </div>
+<script>
+function toggleTheme(){document.documentElement.classList.toggle('dark');document.getElementById('theme-icon').textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙';}
+function go(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});document.querySelectorAll('.nav-item').forEach(n=>{n.classList.toggle('active',n.dataset.target===id);});}
+document.getElementById('main-scroll')?.addEventListener('scroll',()=>{const sects=['ch1','ch2','ch3'];let cur='ch1';sects.forEach(s=>{const el=document.getElementById(s);if(el&&el.getBoundingClientRect().top<200)cur=s;});document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.target===cur));});
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');}}),{threshold:0.1});document.querySelectorAll('.section-observe').forEach(s=>obs.observe(s));
+function runSim(){const o=document.getElementById('sim-output');const lines=["$ 통화 녹음 분석:","$   발신번호: 02-1234-5678 (CEO 내선)","$   ⚠️ VoIP SIP 트렁크 발신 (위조 가능!)","$ ","$ AI 음성 분석:","$   음성 일치율: 94.7% (CEO 음성 데이터)","$   ⚠️ 감정 변화 부자연스러움 탐지","$   ⚠️ 배경 소음 패턴 인공적","$   딥페이크 확률: 87.3% ⚠️","$ ","$ 통화 내용 키워드:","$   '긴급', '비밀', '지금 바로', '아무에게도'","$   ⚠️ 사회공학 압박 패턴 탐지!","$ ","$ ⚠️ AI 딥페이크 비싱 확인!"];let i=0;const iv=setInterval(()=>{if(i>=lines.length){clearInterval(iv);return;}o.innerHTML+=`<div class="${lines[i].includes('⚠️')?'text-red-400':lines[i].includes('87.3')?'text-[#F4D06F]':'text-[#9DD9D2]'}">${lines[i]}</div>`;i++;},500);}
+function checkQuiz(el,r){const res=document.getElementById('quiz-result');res.classList.remove('hidden');if(r==='correct'){res.textContent='✅ 정답! AI가 목소리를 완벽히 모방할 수 있으므로, 사전 합의된 코드워드와 공식 번호 콜백이 가장 안전합니다.';res.className='text-sm font-bold mt-2 text-green-600 dark:text-green-400';}else{res.textContent='❌ 오답. AI 딥페이크로 음성과 발신번호 모두 위조 가능합니다. 코드워드 + 콜백이 필수입니다.';res.className='text-sm font-bold mt-2 text-red-600 dark:text-red-400';}}
+</script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

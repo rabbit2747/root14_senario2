@@ -1,0 +1,187 @@
+{
+  "id": "T1499",
+  "title": "엔드포인트 서비스 거부 시뮬레이션",
+  "titleEn": "Endpoint Denial of Service Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "준비", "labelEn": "Prep", "icon": "🎯" },
+    { "label": "공격", "labelEn": "Attack", "icon": "🌊" },
+    { "label": "마비", "labelEn": "Down", "icon": "💥" },
+    { "label": "완료", "labelEn": "Complete", "icon": "🏁" }
+  ],
+  "topoNodes": [
+    { "id": "botnet", "label": "Botnet (10K)", "icon": "🤖" },
+    { "id": "target", "label": "Web Server", "icon": "🌐" },
+    { "id": "db", "label": "Database", "icon": "🗄️" },
+    { "id": "cdn", "label": "CDN / WAF", "icon": "🛡️" },
+    { "id": "users", "label": "Legitimate Users", "icon": "👥" }
+  ],
+  "topoEdges": [
+    { "from": "botnet", "to": "target", "label": "HTTP Flood", "activeStep": [1, 2, 3] },
+    { "from": "target", "to": "db", "label": "Heavy Queries", "activeStep": [2, 3] },
+    { "from": "users", "to": "cdn", "label": "Blocked", "activeStep": [3, 4] },
+    { "from": "cdn", "to": "target", "label": "Filter", "activeStep": [0, 1, 2, 3, 4] }
+  ],
+  "desktopIcons": [
+    { "name": "botnet_c2", "icon": "🤖", "alertOnStep": 0 },
+    { "name": "http_flood.py", "icon": "🌊", "alertOnStep": 1 },
+    { "name": "slowloris.py", "icon": "🐌", "alertOnStep": 2 },
+    { "name": "503_error", "icon": "💥", "alertOnStep": 3 }
+  ],
+  "steps": [
+    {
+      "cmd": "bash -c \"\necho '=== Botnet Command & Control ===';\necho '';\necho 'Botnet Status:';\necho '  Active bots  : 10,247';\necho '  Countries    : 82';\necho '  Avg bandwidth: 12 Mbps per bot';\necho '  Total capacity: ~120 Gbps';\necho '';\necho 'Target Assessment:';\necho '  URL: https://www.target-corp.com';\necho '  Server: nginx/1.24 (4 vCPU, 16GB RAM)';\necho '  CDN: CloudFront (basic tier)';\necho '  WAF: None';\necho '  Rate Limit: None';\necho '  Estimated saturation: ~5,000 req/s'\"",
+      "out": "=== Botnet Command & Control ===\n\nBotnet Status:\n  Active bots  : 10,247\n  Countries    : 82\n  Avg bandwidth: 12 Mbps per bot\n  Total capacity: ~120 Gbps\n\nTarget Assessment:\n  URL: https://www.target-corp.com\n  Server: nginx/1.24 (4 vCPU, 16GB RAM)\n  CDN: CloudFront (basic tier)\n  WAF: None\n  Rate Limit: None\n  Estimated saturation: ~5,000 req/s",
+      "def": "[Threat Intel] Botnet C2 activity detected — DDoS preparation suspected",
+      "defAction": "Botnet: 10,247 active bots across 82 countries\nCapacity: ~120 Gbps\nTarget: www.target-corp.com\nTarget Defense: CDN basic, no WAF, no rate limit\nRisk: HIGH\nAction: Pre-emptive DDoS mitigation activated",
+      "desc": "10,247대 봇넷을 확인하고 대상 서버를 평가합니다. WAF와 Rate Limiting이 없어 초당 5,000건으로 서비스 거부가 가능합니다.",
+      "descEn": "Confirms 10,247-node botnet and assesses the target server. No WAF or rate limiting means service denial at ~5,000 req/s.",
+      "stepTitle": "봇넷 준비 + 대상 평가",
+      "stepTitleEn": "Botnet Prep + Target Assessment",
+      "feynman": "1만 명의 사람이 동시에 한 가게에 몰려가기로 약속하는 것과 같아요. 가게의 수용 인원(서버 용량)을 미리 파악하고, 경비원(WAF)이 없다는 것도 확인합니다.",
+      "feynmanEn": "Like 10,000 people agreeing to rush a single store simultaneously. The store's capacity (server resources) is assessed, and the absence of security guards (WAF) is confirmed.",
+      "expert": "봇넷 정찰에서 대상의 WAF 유무, Rate Limiting 설정, CDN 티어를 파악합니다. 10K 봇넷의 120Gbps 용량은 기본 CDN 티어를 우회할 수 있습니다. 대상 서버의 nginx 설정, worker_connections, keepalive_timeout이 공격 효율을 결정합니다.",
+      "expertEn": "Botnet recon identifies target's WAF presence, rate limiting, and CDN tier. 10K botnet with 120Gbps capacity can bypass basic CDN tiers. Target nginx config, worker_connections, and keepalive_timeout determine attack efficiency.",
+      "defTooltip": "Threat Intelligence 피드로 봇넷 C2 IP를 사전 차단하세요. WAF와 Rate Limiting이 없는 서비스는 DDoS에 극히 취약합니다.",
+      "defTooltipEn": "Pre-block botnet C2 IPs via Threat Intelligence feeds. Services without WAF and rate limiting are extremely vulnerable to DDoS.",
+      "hackerLog": {
+        "title": "봇넷 동원 및 대상 정찰",
+        "lines": [
+          { "text": "Active bots: 10,247 / 82 countries", "desc": "82개국 1만 대 봇넷 동원" },
+          { "text": "Total capacity: ~120 Gbps", "desc": "봇넷 총 대역폭 120 Gbps" },
+          { "text": "Target: no WAF, no rate limit", "desc": "대상 서버 방어 장치 부재 확인" }
+        ]
+      },
+      "terms": [
+        { "term": "Botnet", "desc": "악성코드에 감염된 컴퓨터 네트워크로, 공격자의 명령에 따라 일제히 동작합니다." },
+        { "term": "Rate Limiting", "desc": "IP당 또는 세션당 요청 횟수를 제한하여 과도한 트래픽을 차단하는 기법입니다." },
+        { "term": "C2 (Command & Control)", "desc": "봇넷을 원격으로 제어하는 공격자의 서버입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\necho '=== HTTP Flood Attack Launched ===';\necho '';\necho 'Attack Parameters:';\necho '  Method: GET (randomized URLs)';\necho '  Rate: 50,000 requests/second';\necho '  User-Agents: 200 unique (mimicking real browsers)';\necho '  Referrers: Randomized (bypassing basic filters)';\necho '';\necho 'Server Impact (T+30 seconds):';\necho '  CPU Usage    : 15% → 78%';\necho '  Memory Usage : 30% → 72%';\necho '  Connections  : 50 → 8,200';\necho '  Response Time: 120ms → 3,400ms';\necho '  Error Rate   : 0% → 12%';\necho '';\necho 'User Experience:';\necho '  Page load time: 0.5s → 8.5s';\necho '  Timeout errors: Increasing'\"",
+      "out": "=== HTTP Flood Attack Launched ===\n\nAttack Parameters:\n  Method: GET (randomized URLs)\n  Rate: 50,000 requests/second\n  User-Agents: 200 unique (mimicking real browsers)\n  Referrers: Randomized (bypassing basic filters)\n\nServer Impact (T+30 seconds):\n  CPU Usage    : 15% → 78%\n  Memory Usage : 30% → 72%\n  Connections  : 50 → 8,200\n  Response Time: 120ms → 3,400ms\n  Error Rate   : 0% → 12%\n\nUser Experience:\n  Page load time: 0.5s → 8.5s\n  Timeout errors: Increasing",
+      "def": "[WAF/CDN] Anomalous traffic spike — 50,000 req/s from distributed sources",
+      "defAction": "Traffic: 50,000 req/s (normal: 200 req/s)\nSources: 10,247 unique IPs across 82 countries\nPattern: Randomized URLs, varied User-Agents\nServer: CPU 78%, Response 3,400ms\nRisk: CRITICAL\nAction: DDoS mitigation mode activated",
+      "desc": "초당 50,000건의 HTTP GET 요청이 시작됩니다. 30초 만에 CPU 78%, 응답 시간 3.4초로 급증합니다.",
+      "descEn": "50,000 HTTP GET requests per second begin. Within 30 seconds, CPU reaches 78% and response time spikes to 3.4 seconds.",
+      "stepTitle": "HTTP Flood 개시",
+      "stepTitleEn": "HTTP Flood Launch",
+      "feynman": "1만 명이 동시에 가게 문을 두드리기 시작합니다. 점원(CPU)이 손님을 처리하느라 정신이 없고, 대기줄(응답 시간)이 계속 길어집니다. 실제 고객은 줄이 너무 길어서 포기합니다.",
+      "feynmanEn": "10,000 people start knocking on the store door simultaneously. Staff (CPU) are overwhelmed processing visitors, and the queue (response time) keeps growing. Real customers give up because the line is too long.",
+      "expert": "HTTP Flood는 T1499.002 (Service Exhaustion Flood)에 해당합니다. 200종의 User-Agent와 랜덤 Referrer를 사용하여 정상 트래픽과 구분이 어렵습니다. L7 DDoS는 IP 기반 차단만으로는 방어가 어려우며, 행동 분석 기반 WAF가 필요합니다.",
+      "expertEn": "HTTP Flood maps to T1499.002 (Service Exhaustion Flood). Using 200 User-Agent variants and random Referrers makes it hard to distinguish from legitimate traffic. L7 DDoS requires behavioral analysis WAF beyond IP-based blocking.",
+      "defTooltip": "트래픽 베이스라인(평상시 200 req/s)을 설정하고, 급증(50,000 req/s) 시 자동 DDoS 완화 모드를 활성화하세요.",
+      "defTooltipEn": "Set traffic baseline (normal: 200 req/s) and activate automatic DDoS mitigation on spikes (50,000 req/s).",
+      "hackerLog": {
+        "title": "HTTP Flood 공격 개시",
+        "lines": [
+          { "text": "50,000 req/s with 200 User-Agents", "desc": "랜덤 UA로 정상 트래픽 위장" },
+          { "text": "CPU: 15% → 78% in 30 seconds", "desc": "30초 만에 CPU 사용률 5배 증가" },
+          { "text": "Response: 120ms → 3,400ms", "desc": "응답 시간 28배 증가" }
+        ]
+      },
+      "terms": [
+        { "term": "HTTP Flood", "desc": "대량의 HTTP 요청을 보내 웹서버를 과부하시키는 L7 DDoS 공격입니다." },
+        { "term": "User-Agent Rotation", "desc": "다양한 브라우저 문자열을 사용하여 봇 탐지를 회피하는 기법입니다." },
+        { "term": "Baseline", "desc": "시스템의 평상시 정상 상태를 나타내는 기준값입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\necho '=== Slowloris Attack Added (L7 Layer) ===';\necho '';\necho 'Slowloris Parameters:';\necho '  Connections held : 5,000 persistent';\necho '  Header send rate : 1 byte / 10 seconds';\necho '  Purpose: Exhaust server connection pool';\necho '';\necho 'Combined Attack Impact (T+2 minutes):';\necho '  CPU Usage    : 78% → 96%';\necho '  Memory Usage : 72% → 94%';\necho '  Connections  : 8,200 → MAX (10,000 limit)';\necho '  Response Time: 3,400ms → TIMEOUT';\necho '  Error Rate   : 12% → 68%';\necho '  HTTP 503     : 68% of requests';\necho '';\necho 'nginx error.log:';\necho '  [error] 10000 worker_connections are not enough';\necho '  [alert] 1024 open files limit reached'\"",
+      "out": "=== Slowloris Attack Added (L7 Layer) ===\n\nSlowloris Parameters:\n  Connections held : 5,000 persistent\n  Header send rate : 1 byte / 10 seconds\n  Purpose: Exhaust server connection pool\n\nCombined Attack Impact (T+2 minutes):\n  CPU Usage    : 78% → 96%\n  Memory Usage : 72% → 94%\n  Connections  : 8,200 → MAX (10,000 limit)\n  Response Time: 3,400ms → TIMEOUT\n  Error Rate   : 12% → 68%\n  HTTP 503     : 68% of requests\n\nnginx error.log:\n  [error] 10000 worker_connections are not enough\n  [alert] 1024 open files limit reached",
+      "def": "[WAF] Slowloris detected — persistent connections with partial headers",
+      "defAction": "Attack: HTTP Flood + Slowloris combined\nConnections: MAX (10,000 limit hit)\nCPU: 96%, Memory: 94%\nHTTP 503 Rate: 68%\nnginx: worker_connections exhausted\nRisk: CRITICAL\nAction: Connection timeout reduced to 10s, idle connections dropped",
+      "desc": "HTTP Flood에 Slowloris를 추가하여 연결 풀을 완전히 소진시킵니다. 68%의 요청이 503 에러를 반환합니다.",
+      "descEn": "Adds Slowloris to HTTP Flood to completely exhaust the connection pool. 68% of requests now return 503 errors.",
+      "stepTitle": "Slowloris 복합 공격",
+      "stepTitleEn": "Combined Slowloris Attack",
+      "feynman": "가게 문 앞에서 들어갈 듯 말 듯 서성이며 자리만 차지하는 사람(Slowloris)이 5,000명 추가됩니다. 이제 대기실이 꽉 차서 진짜 고객은 아예 들어갈 수 없습니다.",
+      "feynmanEn": "5,000 more people stand at the door pretending to enter but blocking the entrance (Slowloris). Now the waiting room is full and real customers cannot enter at all.",
+      "expert": "Slowloris는 T1499.001 (OS Exhaustion Flood)의 변형으로 연결 풀을 소진합니다. HTTP 헤더를 불완전하게 보내 연결을 유지(keep-alive)합니다. nginx의 worker_connections 한도(10,000) 도달 시 새로운 연결이 불가능합니다. client_header_timeout 축소와 req_limit_zone 설정으로 방어합니다.",
+      "expertEn": "Slowloris is a variant of T1499.001 (OS Exhaustion Flood) exhausting connection pools. Sends incomplete HTTP headers to maintain keep-alive. When nginx hits worker_connections limit (10,000), new connections fail. Defend with reduced client_header_timeout and req_limit_zone.",
+      "defTooltip": "nginx의 client_header_timeout을 10초로 줄이고, limit_conn_zone으로 IP당 동시 연결 수를 제한하세요. 불완전한 HTTP 헤더를 보내는 연결을 자동 차단하세요.",
+      "defTooltipEn": "Reduce nginx client_header_timeout to 10s and limit concurrent connections per IP with limit_conn_zone. Auto-block connections sending incomplete HTTP headers.",
+      "hackerLog": {
+        "title": "Slowloris + HTTP Flood 복합 공격",
+        "lines": [
+          { "text": "Slowloris: 5,000 persistent connections", "desc": "5,000개 연결을 불완전 상태로 유지" },
+          { "text": "Connections: MAX (10,000 limit)", "desc": "서버 연결 풀 완전 소진" },
+          { "text": "HTTP 503: 68% of requests", "desc": "68%의 요청이 서비스 거부" }
+        ]
+      },
+      "terms": [
+        { "term": "Slowloris", "desc": "느린 HTTP 요청으로 서버 연결 풀을 소진시키는 저대역폭 DoS 공격입니다." },
+        { "term": "Connection Pool", "desc": "서버가 동시에 처리할 수 있는 네트워크 연결의 풀(집합)입니다." },
+        { "term": "HTTP 503", "desc": "Service Unavailable - 서버가 과부하로 요청을 처리할 수 없을 때 반환되는 상태 코드입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\necho '=== Application Layer Exhaustion ===';\necho '';\necho 'Heavy query targeting:';\necho '  Endpoint: /api/search?q=<random 50-char>';\necho '  DB impact: Full table scan (no index match)';\necho '  Query time: 200ms → 45,000ms (timeout)';\necho '  DB connections: 100/100 (pool exhausted)';\necho '';\necho 'Complete Service Failure (T+5 minutes):';\necho '  CPU Usage    : 100% (all cores)';\necho '  Memory Usage : 98%';\necho '  DB Pool      : EXHAUSTED';\necho '  Response Time: TIMEOUT (60s → no response)';\necho '  Error Rate   : 100%';\necho '  Service Status: COMPLETELY DOWN';\necho '';\necho 'Legitimate user experience:';\necho '  Browser: ERR_CONNECTION_TIMED_OUT';\necho '  API: 503 Service Unavailable';\necho '  Mobile App: Network Error'\"",
+      "out": "=== Application Layer Exhaustion ===\n\nHeavy query targeting:\n  Endpoint: /api/search?q=<random 50-char>\n  DB impact: Full table scan (no index match)\n  Query time: 200ms → 45,000ms (timeout)\n  DB connections: 100/100 (pool exhausted)\n\nComplete Service Failure (T+5 minutes):\n  CPU Usage    : 100% (all cores)\n  Memory Usage : 98%\n  DB Pool      : EXHAUSTED\n  Response Time: TIMEOUT (60s → no response)\n  Error Rate   : 100%\n  Service Status: COMPLETELY DOWN\n\nLegitimate user experience:\n  Browser: ERR_CONNECTION_TIMED_OUT\n  API: 503 Service Unavailable\n  Mobile App: Network Error",
+      "def": "[SIEM] Complete service failure — CPU 100%, DB pool exhausted",
+      "defAction": "Server: 100% CPU, 98% Memory\nDB: Connection pool exhausted (100/100)\nService: COMPLETELY DOWN\nDuration: 5 minutes to total failure\nImpact: All users affected\nRisk: CRITICAL\nResponse: Emergency failover, DDoS mitigation service activated",
+      "desc": "검색 API로 DB에 무거운 쿼리를 유발합니다. 5분 만에 CPU 100%, DB 연결 풀 소진으로 서비스가 완전히 중단됩니다.",
+      "descEn": "Triggers heavy DB queries via search API. CPU hits 100% and DB connection pool is exhausted within 5 minutes, causing complete service failure.",
+      "stepTitle": "서비스 완전 마비",
+      "stepTitleEn": "Complete Service Failure",
+      "feynman": "가게 점원에게 모든 손님이 동시에 '전체 상품 목록을 보여달라'고 요청하는 것과 같아요. 점원(DB)이 모든 상품을 뒤지느라 아무것도 할 수 없게 되고, 가게가 문을 닫아야 합니다.",
+      "feynmanEn": "Like every customer simultaneously asking the store clerk to 'show me your entire inventory.' The clerk (DB) is searching through everything and can't serve anyone, forcing the store to close.",
+      "expert": "검색 API를 통한 DB Full Table Scan 유발은 T1499.003 (Application Exhaustion Flood)에 해당합니다. 인덱스가 없는 랜덤 쿼리는 DB의 CPU와 I/O를 모두 소진시킵니다. 쿼리 복잡도 제한, 결과 캐싱, DB connection pool 모니터링이 필수입니다.",
+      "expertEn": "Triggering DB Full Table Scan via search API maps to T1499.003 (Application Exhaustion Flood). Random queries without index matches exhaust DB CPU and I/O. Query complexity limits, result caching, and DB connection pool monitoring are essential.",
+      "defTooltip": "검색 API에 Rate Limiting(초당 10건)과 쿼리 복잡도 제한을 적용하세요. DB 연결 풀 사용률이 80%를 넘으면 자동 경보를 발생시키세요.",
+      "defTooltipEn": "Apply rate limiting (10/s) and query complexity limits to search APIs. Trigger auto-alerts when DB connection pool usage exceeds 80%.",
+      "hackerLog": {
+        "title": "서비스 완전 마비",
+        "lines": [
+          { "text": "/api/search?q=<random> → Full Table Scan", "desc": "검색 API로 DB 풀테이블 스캔 유발" },
+          { "text": "DB connections: 100/100 (EXHAUSTED)", "desc": "DB 연결 풀 완전 소진" },
+          { "text": "Service Status: COMPLETELY DOWN", "desc": "모든 사용자 접근 불가" }
+        ]
+      },
+      "terms": [
+        { "term": "Full Table Scan", "desc": "인덱스를 사용하지 못하고 테이블 전체를 검색하는 비효율적 DB 쿼리입니다." },
+        { "term": "Connection Pool Exhaustion", "desc": "DB 연결 풀의 모든 연결이 사용 중이어서 새 연결이 불가능한 상태입니다." },
+        { "term": "Auto Scaling", "desc": "트래픽 증가에 따라 서버 인스턴스를 자동으로 추가하는 클라우드 기능입니다." }
+      ]
+    },
+    {
+      "cmd": "bash -c \"\necho '=== DoS ATTACK COMPLETE ===';\necho '';\necho 'Attack Summary:';\necho '  Duration     : 5 minutes to total failure';\necho '  Attack types : HTTP Flood + Slowloris + API Exhaustion';\necho '  Peak traffic : 50,000 req/s (250x normal)';\necho '  Botnet nodes : 10,247';\necho '';\necho 'Impact Summary:';\necho '  Downtime      : 4 hours (attack + recovery)';\necho '  Users affected: ~200,000 (during peak hours)';\necho '  Revenue loss  : ~$80,000 (4 hours e-commerce downtime)';\necho '  SLA violation : 99.9% → 98.2% (monthly)';\necho '  Customer trust: Degraded';\necho '';\necho 'Lessons Learned:';\necho '  1. WAF + Rate Limiting would have mitigated L7 attacks';\necho '  2. CDN DDoS protection (advanced tier) needed';\necho '  3. API query complexity limits were missing';\necho '  4. Auto-scaling could have absorbed initial spike'\"",
+      "out": "=== DoS ATTACK COMPLETE ===\n\nAttack Summary:\n  Duration     : 5 minutes to total failure\n  Attack types : HTTP Flood + Slowloris + API Exhaustion\n  Peak traffic : 50,000 req/s (250x normal)\n  Botnet nodes : 10,247\n\nImpact Summary:\n  Downtime      : 4 hours (attack + recovery)\n  Users affected: ~200,000 (during peak hours)\n  Revenue loss  : ~$80,000 (4 hours e-commerce downtime)\n  SLA violation : 99.9% → 98.2% (monthly)\n  Customer trust: Degraded\n\nLessons Learned:\n  1. WAF + Rate Limiting would have mitigated L7 attacks\n  2. CDN DDoS protection (advanced tier) needed\n  3. API query complexity limits were missing\n  4. Auto-scaling could have absorbed initial spike",
+      "def": "[SIEM] DoS attack lifecycle complete — 4 hours total downtime",
+      "defAction": "Attack: HTTP Flood + Slowloris + API Exhaustion\nDuration: 4 hours downtime\nUsers: 200,000 affected\nRevenue Loss: $80,000\nSLA: Violated\nResponse: DDoS service subscription, WAF deployment",
+      "desc": "공격 전체 요약입니다. 5분 만에 서비스가 마비되고, 복구까지 4시간이 소요됩니다. 총 20만 명이 영향을 받습니다.",
+      "descEn": "Full attack summary. Service fails in 5 minutes, recovery takes 4 hours. 200,000 users affected in total.",
+      "stepTitle": "공격 완료 요약",
+      "stepTitleEn": "Attack Complete Summary",
+      "feynman": "고속도로에 1만 대의 빈 차를 풀어놓으면 5분 만에 전면 정체가 됩니다. 정체를 해소하는 데는 4시간이 걸리고, 그동안 20만 명의 운전자가 목적지에 도착하지 못합니다. 진입로에 차단기(WAF)를 설치했다면 막을 수 있었습니다.",
+      "feynmanEn": "Releasing 10,000 empty cars on a highway causes gridlock in 5 minutes. It takes 4 hours to clear, during which 200,000 drivers can't reach their destination. A barrier (WAF) at the entrance could have prevented this.",
+      "expert": "다중 벡터(HTTP Flood + Slowloris + API Exhaustion) DDoS는 단일 방어 수단으로 대응이 어렵습니다. CDN의 DDoS 방어 서비스(Cloudflare, AWS Shield Advanced), WAF의 L7 필터링, API Gateway의 Rate Limiting, Auto Scaling을 조합한 다층 방어(Defense in Depth)가 필요합니다.",
+      "expertEn": "Multi-vector DDoS (HTTP Flood + Slowloris + API Exhaustion) cannot be countered by a single defense. Defense in Depth combining CDN DDoS protection (Cloudflare, AWS Shield Advanced), WAF L7 filtering, API Gateway rate limiting, and auto scaling is required.",
+      "defTooltip": "CDN DDoS 방어 + WAF + API Rate Limiting + Auto Scaling의 다층 방어 체계를 구축하세요. 특히 검색 API에는 쿼리 복잡도 제한과 결과 캐싱을 반드시 적용하세요.",
+      "defTooltipEn": "Build multi-layer defense with CDN DDoS protection + WAF + API Rate Limiting + Auto Scaling. Apply query complexity limits and result caching to search APIs.",
+      "hackerLog": {
+        "title": "서비스 거부 공격 완료",
+        "lines": [
+          { "text": "5 min to failure, 4 hours downtime", "desc": "5분 만에 마비, 4시간 복구" },
+          { "text": "200,000 users affected, $80K revenue loss", "desc": "20만 명 영향, 8만 달러 매출 손실" },
+          { "text": "Prevention: WAF + Rate Limit + CDN DDoS", "desc": "다층 방어 체계로 예방 가능" }
+        ]
+      },
+      "terms": [
+        { "term": "Defense in Depth", "desc": "여러 보안 계층을 중첩하여 단일 실패 지점을 제거하는 방어 전략입니다." },
+        { "term": "SLA (Service Level Agreement)", "desc": "서비스 제공자와 고객 간 약속된 서비스 가용성 수준입니다." },
+        { "term": "AWS Shield", "desc": "AWS의 관리형 DDoS 방어 서비스입니다." }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "Botnet C2 (10,247 bots)", "depth": 0, "alert": true, "minStep": 0 },
+    { "name": "HTTP Flood (50,000 req/s)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "Slowloris (5,000 persistent)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "API Exhaustion (/api/search)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "nginx → worker_connections MAX", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "DB → connection pool EXHAUSTED", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "Service: COMPLETELY DOWN", "depth": 2, "alert": true, "minStep": 3 }
+  ]
+}

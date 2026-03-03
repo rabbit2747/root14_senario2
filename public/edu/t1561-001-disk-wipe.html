@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1561.001">
+<head>
+    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=localStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1561-001-disk-wipe&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
+    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GOTROOT 사이버보안 교육 — T1561.001 Disk Wipe 디스크 와이핑">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>GOTROOT EDU | T1561.001 Disk Wipe — 디스크 와이핑</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <style>
+        body{scroll-behavior:smooth;background:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s}
+        .glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(157,217,210,.5);box-shadow:0 8px 32px rgba(30,41,59,.05)}
+        .dark body{background:#0f172a;color:#f8fafc}.dark .glass-panel{background:rgba(30,41,59,.7);border:1px solid rgba(244,208,111,.2);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+        .hl-teal{color:#0f766e;font-weight:700}.dark .hl-teal{color:#9DD9D2}
+        .hl-yel{color:#b45309;font-weight:700}.dark .hl-yel{color:#F4D06F}
+        .nav-item.active{background:linear-gradient(90deg,rgba(157,217,210,.3) 0%,transparent 100%);border-left:4px solid #9DD9D2;color:#0f766e;font-weight:700}
+        .dark .nav-item.active{background:linear-gradient(90deg,rgba(244,208,111,.2) 0%,transparent 100%);border-left:4px solid #F4D06F;color:#F4D06F}
+        .terminal-bg{background:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace}
+        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#9DD9D2;border-radius:4px}.dark ::-webkit-scrollbar-thumb{background:#F4D06F}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3"><button onclick="goToDashboard()" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(187,62,3,.08)'" onmouseout="this.style.background='transparent'">← 매트릭스 대시보드</button><a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px;color:rgba(187,62,3,.5);text-decoration:none;" class="hidden sm:inline">gotroot.co.kr ↗</a></div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-[#9DD9D2]"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="goToDashboard()" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-[#9DD9D2]/50 shadow transition-all">← 대시보드</button>
+    <aside class="w-64 glass-panel border-r border-[#9DD9D2]/30 h-full flex-col hidden md:flex shrink-0 z-40">
+        <div class="p-6 border-b border-[#9DD9D2]/30">
+            <button onclick="goToDashboard()" class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-[#9DD9D2] mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
+            <h1 class="text-xl font-bold font-mono hl-teal tracking-tighter">ATT&CK Matrix</h1>
+            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1561.001: Disk Wipe</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch1">1. 디스크 와이핑이란?</button>
+            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch2">2. MBR 덮어쓰기와 Shamoon</button>
+            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-3 text-sm transition-colors text-cgray dark:text-slate-400 hover:text-teal-700" data-target="ch3">3. 와이핑 vs 랜섬웨어 비교</button>
+        </nav>
+    </aside>
+    <main class="flex-1 overflow-y-auto h-full scroll-smooth" id="main-scroll">
+        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+            <header class="text-center pt-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-[#F4D06F]/20 border border-[#F4D06F] hl-yel font-mono text-sm mb-4">Impact</div>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Disk Wipe</h1>
+                <p class="text-cgray dark:text-slate-400 text-lg">증거 인멸을 위해 사무실을 불태우기 — 디스크 와이핑</p>
+            </header>
+
+            <!-- Ch1 -->
+            <section id="ch1" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#1.</span> 디스크 와이핑이란?</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#F4D06F]">
+                        <div class="text-2xl mb-2">🔥 ➜ 💽 ➜ 0️⃣ ➜ 💀</div>
+                        <h3 class="font-bold text-lg mb-2 hl-yel">"증거 인멸을 위해 사무실을 불태우기"</h3>
+                        <p class="text-cgray dark:text-slate-300 leading-relaxed">랜섬웨어는 돈을 요구하기 위해 파일을 암호화합니다. 하지만 <strong>디스크 와이핑(Disk Wipe)</strong>은 복구 자체를 불가능하게 만드는 것이 목적입니다. 해커가 목표를 달성한 후 <strong>증거를 완전히 파괴</strong>하거나, 국가 차원의 사이버 공격에서 상대방의 인프라를 무력화하기 위해 사용합니다.</p>
+                    </div>
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-[#9DD9D2]">
+                        <h3 class="font-bold text-lg mb-2 hl-teal">와이핑의 두 가지 유형</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                            <div class="p-3 rounded border border-slate-200 dark:border-slate-700">
+                                <div class="font-bold text-sm text-red-600 dark:text-red-400 mb-1">MBR/파티션 와이핑</div>
+                                <p class="text-xs text-cgray dark:text-slate-400">디스크의 부팅 영역(MBR)을 0으로 덮어씀. 운영체제 부팅 불가능</p>
+                            </div>
+                            <div class="p-3 rounded border border-slate-200 dark:border-slate-700">
+                                <div class="font-bold text-sm text-red-600 dark:text-red-400 mb-1">전체 디스크 와이핑</div>
+                                <p class="text-xs text-cgray dark:text-slate-400">디스크 전체를 0 또는 랜덤 데이터로 덮어씀. 데이터 완전 파괴</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch2 -->
+            <section id="ch2" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#2.</span> MBR 덮어쓰기, dd, Shamoon</h2>
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
+                        <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">실전 사례: Shamoon (2012/2016)</h3>
+                        <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed mb-3"><strong>Shamoon</strong>은 사우디아라비아 석유 회사 Saudi Aramco를 공격하여 <strong>35,000대 이상의 컴퓨터</strong>를 와이핑한 악성코드입니다. MBR을 덮어쓰고 파일을 파괴하여 회사 운영을 마비시켰습니다.</p>
+                    </div>
+                    <div class="terminal-bg p-4 rounded-xl text-xs">
+                        <div class="text-slate-500"># MBR 덮어쓰기 (Linux)</div>
+                        <div class="text-[#F4D06F]">dd if=/dev/zero of=/dev/sda bs=512 count=1</div>
+                        <div class="text-slate-500 mt-2"># 전체 디스크 와이핑</div>
+                        <div class="text-[#F4D06F]">dd if=/dev/zero of=/dev/sda bs=1M</div>
+                        <div class="text-slate-500 mt-2"># Windows: format + diskpart clean all</div>
+                        <div class="text-[#9DD9D2]">diskpart → select disk 0 → clean all</div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-panel p-5 rounded-xl">
+                            <h3 class="font-bold hl-teal mb-2">국가 차원 공격</h3>
+                            <p class="text-xs text-cgray dark:text-slate-400">Shamoon, NotPetya, WhisperGate 등 국가 지원 APT 그룹이 인프라 파괴 목적으로 사용</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl">
+                            <h3 class="font-bold hl-teal mb-2">증거 파괴</h3>
+                            <p class="text-xs text-cgray dark:text-slate-400">침투 후 포렌식 증거를 제거하기 위해 관련 시스템을 와이핑</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ch3 -->
+            <section id="ch3" class="scroll-mt-12 opacity-0 translate-y-10 transition-all duration-700 section-observe">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-[#9DD9D2] pb-2 text-[#1e293b] dark:text-white"><span class="hl-teal">#3.</span> Mini Lab — 와이핑 vs 랜섬웨어 비교</h2>
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-900 border border-[#9DD9D2] rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-[#FFF8F0] dark:bg-slate-800 px-4 py-3 border-b border-[#9DD9D2] flex justify-between items-center font-mono text-sm">
+                            <span class="hl-teal">Mini Lab: 디스크 와이핑 vs 랜섬웨어</span>
+                            <div class="flex gap-2"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-[#F4D06F]"></span><span class="w-3 h-3 rounded-full bg-[#9DD9D2]"></span></div>
+                        </div>
+                        <div class="p-6 bg-slate-50 dark:bg-slate-800/50">
+                            <p class="text-sm text-cgray dark:text-slate-400 mb-4 text-center">두 시나리오를 실행하여 결과를 비교하세요.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="text-center">
+                                    <h4 class="font-bold text-sm mb-3 hl-yel">랜섬웨어</h4>
+                                    <button onclick="simRansom()" id="btn-r" class="bg-[#F4D06F] hover:bg-[#e3c160] text-yellow-900 font-bold py-2 px-4 rounded shadow-sm transition text-sm mb-3 border border-[#d4b050]">🔐 랜섬웨어 실행</button>
+                                    <div id="sim-ransom" class="terminal-bg p-3 rounded text-xs h-32 overflow-y-auto text-left"><div class="text-slate-500">대기 중...</div></div>
+                                </div>
+                                <div class="text-center">
+                                    <h4 class="font-bold text-sm text-red-600 dark:text-red-400 mb-3">디스크 와이핑</h4>
+                                    <button onclick="simWipe()" id="btn-w" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded shadow-sm transition text-sm mb-3">🔥 와이핑 실행</button>
+                                    <div id="sim-wipe" class="terminal-bg p-3 rounded text-xs h-32 overflow-y-auto text-left"><div class="text-slate-500">대기 중...</div></div>
+                                </div>
+                            </div>
+                            <div id="compare-result" class="hidden mt-4 p-4 rounded text-center text-sm font-bold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl mt-8">
+                        <h3 class="text-xl font-bold mb-4 text-[#1e293b] dark:text-white">종합 퀴즈</h3>
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-q">
+                                <h4 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. 디스크 와이핑과 랜섬웨어의 핵심 차이점은?</h4>
+                                <div class="space-y-2 text-sm">
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="1" class="mr-3"> 와이핑은 느리고 랜섬웨어는 빠르다</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="2" class="mr-3"> 랜섬웨어는 복구 가능성(몸값)이 있지만, 와이핑은 데이터 영구 파괴가 목적</label>
+                                    <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent"><input type="radio" name="q1" value="3" class="mr-3"> 둘 다 같은 기술을 사용한다</label>
+                                </div>
+                            </div>
+                            <button onclick="checkQuiz()" class="bg-[#9DD9D2] hover:bg-[#85c8c1] text-teal-900 font-bold py-2 px-6 rounded font-mono transition shadow-sm border border-[#7cc2b9]">정답 확인</button>
+                        </div>
+                        <div id="quiz-result" class="hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="pt-12 pb-8 text-center border-t border-[#9DD9D2]/30 mt-16">
+                <div class="inline-block bg-[#F4D06F]/20 text-[#b45309] dark:text-[#F4D06F] px-4 py-1 rounded-full font-bold text-sm mb-4 border border-[#F4D06F]">학습 완료</div>
+                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">디스크 와이핑 학습 완료!</h2>
+                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">디스크 파괴 공격의 원리와 랜섬웨어와의 차이를 학습했습니다.</p>
+                <button onclick="goToDashboard()" class="inline-flex items-center gap-3 bg-gradient-to-r from-[#0f766e] to-[#b45309] text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:-translate-y-1 hover:shadow-2xl transition">← 매트릭스 대시보드로 돌아가기</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
+        function goToDashboard(){window.location.href='/';}
+        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
+        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
+
+        var rDone=false,wDone=false;
+        function simRansom(){
+            document.getElementById('btn-r').disabled=true;document.getElementById('btn-r').classList.add('opacity-50');
+            var el=document.getElementById('sim-ransom');el.innerHTML='';
+            var steps=['[*] 파일 탐색 중...','[*] report.docx → AES-256 암호화','[*] budget.xlsx → AES-256 암호화','[*] photo.jpg → AES-256 암호화','[*] 랜섬노트 생성: README_DECRYPT.txt','[!] 복호화 키: 2.5 BTC 요구','[OK] 파일 복구 가능 (키 보유 시)'];
+            var i=0;
+            var iv=setInterval(function(){
+                if(i>=steps.length){clearInterval(iv);rDone=true;checkBothDone();return;}
+                var d=document.createElement('div');d.className=i>=5?'text-[#F4D06F]':'text-[#9DD9D2]';d.textContent=steps[i];el.appendChild(d);el.scrollTop=el.scrollHeight;i++;
+            },400);
+        }
+        function simWipe(){
+            document.getElementById('btn-w').disabled=true;document.getElementById('btn-w').classList.add('opacity-50');
+            var el=document.getElementById('sim-wipe');el.innerHTML='';
+            var steps=['[*] MBR 덮어쓰기 (512 bytes → 0x00)','[*] 파티션 테이블 파괴','[*] dd if=/dev/zero of=/dev/sda bs=1M','[*] 섹터 0-10000: 완전 삭제','[*] 섹터 10001-50000: 완전 삭제','[!] 디스크 완전 파괴 완료','[FATAL] 데이터 복구 불가능'];
+            var i=0;
+            var iv=setInterval(function(){
+                if(i>=steps.length){clearInterval(iv);wDone=true;checkBothDone();return;}
+                var d=document.createElement('div');d.className=i>=5?'text-red-400':'text-[#9DD9D2]';d.textContent=steps[i];el.appendChild(d);el.scrollTop=el.scrollHeight;i++;
+            },400);
+        }
+        function checkBothDone(){
+            if(rDone&&wDone){
+                var r=document.getElementById('compare-result');r.classList.remove('hidden');
+                r.innerHTML='<div class="text-[#1e293b] dark:text-white"><strong>핵심 차이:</strong></div><div class="text-sm mt-2 text-cgray dark:text-slate-400">랜섬웨어 = <span class="text-[#F4D06F] font-bold">암호화 (복구 가능성 O)</span> | 와이핑 = <span class="text-red-500 font-bold">완전 파괴 (복구 불가능)</span></div>';
+            }
+        }
+
+        function checkQuiz(){
+            var q1=document.querySelector('input[name="q1"]:checked');
+            if(!q1){alert('답을 선택해주세요.');return;}
+            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
+            if(q1.value==='2'){res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';res.textContent='정답! 랜섬웨어는 금전 목적(복호화 키 존재), 와이핑은 파괴 목적(복구 불가)이 핵심 차이입니다.';}
+            else{res.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';res.textContent='오답입니다. "복구 가능성"이 두 공격의 가장 큰 차이점입니다.';}
+        }
+        window.onload=function(){setTimeout(function(){go('ch1');},100);};
+    </script>
+    </div>
+<script src="/edu/lab-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+</body>
+</html>

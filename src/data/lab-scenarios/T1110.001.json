@@ -1,0 +1,234 @@
+{
+  "id": "T1110.001",
+  "title": "비밀번호 추측 공격 시뮬레이션",
+  "titleEn": "Password Guessing / Brute Force Simulation",
+  "duration": 9,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "dc", "label": "DC01", "x": 350, "y": 50, "type": "server" },
+    { "id": "target", "label": "SMB/RDP", "x": 350, "y": 150, "type": "server" },
+    { "id": "siem", "label": "SIEM", "x": 500, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "dc", "label": "User Enum", "activeStep": 0 },
+    { "from": "attacker", "to": "target", "label": "Brute Force", "activeStep": 2 },
+    { "from": "target", "to": "dc", "label": "Auth Check", "activeStep": 3 },
+    { "from": "target", "to": "siem", "label": "Alert", "activeStep": 4 }
+  ],
+  "desktopIcons": [
+    { "label": "Terminal", "icon": "💻", "alertOnStep": 0 },
+    { "label": "CrackMapExec", "icon": "🗂️", "alertOnStep": 2 },
+    { "label": "Hydra", "icon": "🔑", "alertOnStep": 4 },
+    { "label": "Credentials", "icon": "📦", "alertOnStep": 5 }
+  ],
+  "steps": [
+    {
+      "cmd": "net user /domain | findstr /v \"---\" | findstr /v \"completed\"",
+      "out": "User accounts for \\\\DC01.{companyName}.local\n\nAdministrator            {userName}               admin.jkim\nDomainAdmin01            guest                    krbtgt\nsqlsvc                   svc_backup               websvc\nhr.park                  it.lee                   ceo.kim\ndev.choi                 sales.jung               intern.han",
+      "def": "[SIEM] Domain user enumeration from PC-{userName}",
+      "defAction": "Process: net.exe -> net1.exe\nCommand: net user /domain\nUser: {companyName}\\{userName}\nAccounts Enumerated: 15\nRisk Level: Medium\nAction: Monitor for subsequent brute force activity",
+      "desc": "도메인 사용자 목록을 열거합니다. 비밀번호 추측 공격을 위한 대상 계정 목록을 수집하는 정찰 단계입니다.",
+      "descEn": "Enumerates the domain user list. This is a reconnaissance phase to collect target account lists for password guessing attacks.",
+      "stepTitle": "도메인 사용자 열거",
+      "stepTitleEn": "Domain User Enumeration",
+      "feynman": "회사 건물 로비의 직원 이름표를 사진 찍는 것과 같습니다. 건물에 누가 일하는지 알면, 각 사람의 사무실 문을 열 열쇠를 추측하기 쉬워집니다. 공격자는 먼저 '누가 있는지'를 파악합니다.",
+      "feynmanEn": "It's like photographing employee name badges in a building lobby. Knowing who works there makes it easier to guess which key opens each office door. The attacker first figures out 'who is there'.",
+      "expert": "net user /domain은 SAMR(Security Account Manager Remote) 프로토콜을 통해 DC에 쿼리합니다. MITRE ATT&CK T1087.002에 해당하며, Sysmon Event ID 1로 프로세스 생성을 추적할 수 있습니다. 대규모 환경에서는 LDAP 쿼리로 대체되기도 합니다.",
+      "expertEn": "net user /domain queries the DC via SAMR (Security Account Manager Remote) protocol. Maps to MITRE ATT&CK T1087.002 and can be tracked via Sysmon Event ID 1 for process creation. In larger environments, LDAP queries are often used instead.",
+      "defTooltip": "Windows Security Event ID 4661 (SAM 객체 액세스) 및 Sysmon Event ID 1 (net.exe 프로세스 생성)을 확인하세요. 짧은 시간 내 다수의 SAM 쿼리는 정찰 활동의 징후입니다.",
+      "defTooltipEn": "Check Windows Security Event ID 4661 (SAM object access) and Sysmon Event ID 1 (net.exe process creation). Multiple SAM queries in a short time indicate reconnaissance activity.",
+      "hackerLog": {
+        "title": "user_enum.log",
+        "lines": [
+          { "log": "net user /domain | findstr /v \"---\"", "desc": "💡 도메인 컨트롤러에 등록된 모든 사용자 계정을 조회하는 명령입니다" },
+          { "log": "Administrator  admin.jkim  intern.han", "desc": "💡 15개의 계정이 발견되었으며, 이 중 admin/svc 접두사가 붙은 고권한 계정이 공격 대상입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Domain Controller", "desc": "Active Directory 도메인의 인증과 정책을 관리하는 중앙 서버입니다" },
+        { "term": "User Enumeration", "desc": "시스템에 존재하는 사용자 계정 목록을 수집하는 정찰 기법입니다" },
+        { "term": "net user /domain", "desc": "도메인에 등록된 모든 사용자 계정을 표시하는 Windows 명령어입니다" }
+      ]
+    },
+    {
+      "cmd": "net accounts /domain",
+      "out": "Force user logoff how long after time expires?:     Never\nMinimum password age (days):                         1\nMaximum password age (days):                         90\nMinimum password length:                             8\nLength of password history maintained:                5\nLockout threshold:                                   5\nLockout duration (minutes):                          30\nLockout observation window (minutes):                30\nComputer role:                                       WORKSTATION\nThe command completed successfully.",
+      "def": "[SIEM] Password policy query - attacker profiling lockout settings",
+      "defAction": "Process: net.exe\nCommand: net accounts /domain\nUser: {companyName}\\{userName}\nKey Finding: Lockout threshold = 5 attempts\nRisk Level: Medium\nAction: Attacker now knows lockout limits - expect careful brute force",
+      "desc": "도메인 비밀번호 정책을 확인합니다. 잠금 임계값(5회), 잠금 기간(30분)을 파악하여 탐지를 피하는 공격 전략을 수립합니다.",
+      "descEn": "Checks domain password policy. Identifies lockout threshold (5 attempts) and lockout duration (30 min) to develop an attack strategy that avoids detection.",
+      "stepTitle": "비밀번호 정책 확인",
+      "stepTitleEn": "Password Policy Check",
+      "feynman": "은행 금고를 털기 전에 '비밀번호를 몇 번 틀리면 잠기는지' 확인하는 것입니다. 5번 틀리면 30분 잠긴다는 규칙을 알면, 공격자는 4번만 시도하고 기다리는 전략을 세울 수 있습니다.",
+      "feynmanEn": "It's like checking how many wrong attempts lock a bank vault before trying to crack it. Knowing the rule '5 wrong tries = 30 min lockout' lets the attacker try only 4 times and wait.",
+      "expert": "Lockout threshold 5, observation window 30분은 Password Spraying에 유리한 환경입니다. 공격자는 계정당 4회 이내로 시도하고, 30분 대기 후 재시도합니다. NIST SP 800-63B는 반복 실패 시 기하급수적 지연을 권장합니다.",
+      "expertEn": "Lockout threshold 5 with 30-min observation window is favorable for password spraying. Attackers attempt under 4 tries per account and wait 30 minutes. NIST SP 800-63B recommends exponential backoff on repeated failures.",
+      "defTooltip": "Event ID 4740 (계정 잠금) 발생 패턴을 모니터링하세요. 동일 소스에서 여러 계정이 순차적으로 잠기면 Password Spraying 공격을 의심해야 합니다.",
+      "defTooltipEn": "Monitor Event ID 4740 (account lockout) patterns. Multiple accounts locked sequentially from the same source indicate a Password Spraying attack.",
+      "hackerLog": {
+        "title": "policy_check.log",
+        "lines": [
+          { "log": "net accounts /domain", "desc": "💡 도메인의 비밀번호 정책과 잠금 설정을 조회하는 명령입니다" },
+          { "log": "Lockout threshold: 5 / Lockout duration: 30", "desc": "💡 5회 실패 시 30분 잠금 → 공격자는 계정당 4회까지만 시도합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Lockout Threshold", "desc": "계정이 잠기기 전 허용되는 최대 로그인 실패 횟수입니다" },
+        { "term": "Password Spraying", "desc": "하나의 비밀번호를 여러 계정에 시도하여 잠금을 피하는 공격 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "crackmapexec smb 192.168.1.10 -u users.txt -p passwords.txt --no-bruteforce",
+      "out": "SMB         192.168.1.10    445    DC01    [*] Windows Server 2019 Build 17763 x64\nSMB         192.168.1.10    445    DC01    [*] Domain: {companyName}.local\nSMB         192.168.1.10    445    DC01    [-] {companyName}\\admin.jkim:Password123 STATUS_LOGON_FAILURE\nSMB         192.168.1.10    445    DC01    [-] {companyName}\\hr.park:Welcome1 STATUS_LOGON_FAILURE\nSMB         192.168.1.10    445    DC01    [-] {companyName}\\it.lee:Summer2025 STATUS_LOGON_FAILURE\nSMB         192.168.1.10    445    DC01    [-] {companyName}\\ceo.kim:Qwerty123 STATUS_LOGON_FAILURE\nSMB         192.168.1.10    445    DC01    [-] {companyName}\\dev.choi:P@ssw0rd STATUS_LOGON_FAILURE",
+      "def": "[SIEM] ALERT: Multiple failed authentication attempts from 192.168.1.105",
+      "defAction": "Source: 192.168.1.105 (PC-{userName})\nTarget: DC01 (192.168.1.10)\nProtocol: SMB (445)\nFailed Logins: 5 different accounts\nPattern: Password spraying (1 password per account)\nRisk Level: High\nAction: Monitor for continued attempts, prepare account lockout",
+      "desc": "CrackMapExec으로 SMB를 통해 비밀번호 스프레이 공격을 수행합니다. 계정 잠금을 피하기 위해 계정당 1개의 비밀번호만 시도합니다.",
+      "descEn": "Performs a password spraying attack via SMB using CrackMapExec. Tries only 1 password per account to avoid account lockout.",
+      "stepTitle": "비밀번호 스프레이 공격",
+      "stepTitleEn": "Password Spray Attack",
+      "feynman": "아파트 복도를 걸어가며 각 방문에 '1234' 하나만 눌러보는 것입니다. 모든 비밀번호를 한 방에 시도하면 잠기지만, 각 방에 한 번씩만 시도하면 잠금이 걸리지 않습니다.",
+      "feynmanEn": "It's like walking down an apartment hallway trying just '1234' on each door. Trying all passwords on one door triggers a lockout, but trying one password per door avoids it.",
+      "expert": "CrackMapExec의 --no-bruteforce 옵션은 사용자-비밀번호 쌍을 1:1로 매칭합니다. SMB 프로토콜(445)을 통한 NTLM 인증을 사용하며, Event ID 4625(로그인 실패)에서 Logon Type 3(Network)으로 기록됩니다. Sigma Rule: win_multiple_failed_logins_from_single_source로 탐지 가능합니다.",
+      "expertEn": "CrackMapExec's --no-bruteforce option matches user-password pairs 1:1. Uses NTLM auth via SMB (445), logged as Event ID 4625 (failed login) with Logon Type 3 (Network). Detectable via Sigma Rule: win_multiple_failed_logins_from_single_source.",
+      "defTooltip": "Event ID 4625 (로그인 실패)를 소스 IP별로 집계하세요. 5분 이내 동일 소스에서 5개 이상 다른 계정의 실패가 발생하면 Password Spraying 경고를 발생시킵니다.",
+      "defTooltipEn": "Aggregate Event ID 4625 (failed login) by source IP. Alert for Password Spraying if 5+ different account failures from the same source within 5 minutes.",
+      "hackerLog": {
+        "title": "spray_attack.log",
+        "lines": [
+          { "log": "crackmapexec smb 192.168.1.10 -u users.txt -p passwords.txt --no-bruteforce", "desc": "💡 계정당 1개 비밀번호만 시도하는 스프레이 모드로 SMB 인증을 시도합니다" },
+          { "log": "[-] admin.jkim:Password123 STATUS_LOGON_FAILURE", "desc": "💡 일반적인 비밀번호로는 실패 - 다음 라운드에서 회사명 기반 비밀번호를 시도합니다" }
+        ]
+      },
+      "terms": [
+        { "term": "CrackMapExec", "desc": "Windows/Active Directory 환경의 네트워크 침투 테스트 자동화 도구입니다" },
+        { "term": "SMB (445)", "desc": "파일 공유 및 인증에 사용되는 Server Message Block 프로토콜과 포트입니다" },
+        { "term": "NTLM Authentication", "desc": "Windows 환경에서 사용되는 챌린지-응답 기반 인증 프로토콜입니다" }
+      ]
+    },
+    {
+      "cmd": "crackmapexec smb 192.168.1.10 -u users.txt -p '{companyName}2026!' --continue-on-success",
+      "out": "SMB         192.168.1.10    445    DC01    [-] {companyName}\\admin.jkim:{companyName}2026! STATUS_LOGON_FAILURE\nSMB         192.168.1.10    445    DC01    [-] {companyName}\\hr.park:{companyName}2026! STATUS_LOGON_FAILURE\nSMB         192.168.1.10    445    DC01    [+] {companyName}\\intern.han:{companyName}2026!\nSMB         192.168.1.10    445    DC01    [-] {companyName}\\dev.choi:{companyName}2026! STATUS_LOGON_FAILURE\nSMB         192.168.1.10    445    DC01    [+] {companyName}\\sales.jung:{companyName}2026!",
+      "def": "[SIEM] ALERT: Successful authentication after password spray - 2 accounts compromised",
+      "defAction": "Source: PC-{userName}\nSuccessful Logins:\n  - intern.han (Password: company name + year)\n  - sales.jung (Password: company name + year)\nPattern: Predictable password based on company name\nRisk Level: Critical\nAction: Disable compromised accounts, force password reset",
+      "desc": "회사명 기반의 비밀번호를 사용한 스프레이 공격으로 2개 계정이 크래킹됩니다. 예측 가능한 비밀번호 패턴의 위험성을 보여줍니다.",
+      "descEn": "A spray attack using company name-based passwords cracks 2 accounts. Demonstrates the risk of predictable password patterns.",
+      "stepTitle": "회사명 비밀번호 크래킹",
+      "stepTitleEn": "Company-Name Password Cracking",
+      "feynman": "회사 이름이 'Samsung'이면 비밀번호를 'Samsung2026!'로 설정하는 직원이 있습니다. 이건 집 주소를 비밀번호로 쓰는 것과 같습니다 - 누구나 추측할 수 있습니다.",
+      "feynmanEn": "If the company is 'Samsung', some employees set their password to 'Samsung2026!'. It's like using your home address as a password - anyone can guess it.",
+      "expert": "회사명 기반 비밀번호는 소셜 엔지니어링과 결합된 Password Spraying의 핵심입니다. --continue-on-success 옵션으로 성공 후에도 계속 시도하여 여러 취약 계정을 발견합니다. NIST SP 800-63B의 비밀번호 블랙리스트에 회사명 패턴을 포함해야 합니다.",
+      "expertEn": "Company name-based passwords are key to social engineering combined with password spraying. --continue-on-success continues after success to find multiple vulnerable accounts. NIST SP 800-63B password blacklists should include company name patterns.",
+      "defTooltip": "Event ID 4624 (성공) 직전에 동일 소스에서 4625 (실패)가 다수 발생했는지 확인하세요. 이 패턴은 성공한 Password Spraying 공격의 전형적인 징후입니다.",
+      "defTooltipEn": "Check if multiple 4625 (failures) from the same source preceded Event ID 4624 (success). This pattern is a classic sign of a successful password spraying attack.",
+      "hackerLog": {
+        "title": "spray_success.log",
+        "lines": [
+          { "log": "crackmapexec smb ... -p '{companyName}2026!' --continue-on-success", "desc": "💡 회사명+연도+특수문자 조합으로 모든 계정에 시도합니다" },
+          { "log": "[+] intern.han:{companyName}2026!", "desc": "💡 [+]는 인증 성공을 의미 - 예측 가능한 비밀번호 패턴에 의한 계정 탈취입니다" }
+        ]
+      },
+      "terms": [
+        { "term": "--continue-on-success", "desc": "하나의 계정 크래킹 후에도 나머지 계정을 계속 시도하는 옵션입니다" },
+        { "term": "Predictable Password", "desc": "회사명, 계절, 연도 등 추측 가능한 패턴으로 만든 비밀번호입니다" }
+      ]
+    },
+    {
+      "cmd": "hydra -l admin.jkim -P top1000.txt 192.168.1.10 rdp -t 4 -w 30",
+      "out": "Hydra v9.5 (c) 2023 by van Hauser/THC\n\n[DATA] max 4 tasks per 1 server, overall 4 tasks, 1000 login tries (l:1/p:1000)\n[DATA] attacking rdp://192.168.1.10:3389/\n[ATTEMPT] target 192.168.1.10 - login \"admin.jkim\" - pass \"123456\" - 1/1000\n[ATTEMPT] target 192.168.1.10 - login \"admin.jkim\" - pass \"password\" - 2/1000\n...\n[STATUS] 120/1000 [12%] - Time: 00:06:00\n[3389][rdp] host: 192.168.1.10   login: admin.jkim   password: Admin@2024\n\n1 of 1 target successfully completed, 1 valid password found",
+      "def": "[EDR] CRITICAL: RDP brute force detected - admin.jkim account compromised",
+      "defAction": "Source: 192.168.1.105\nTarget: DC01 RDP (3389)\nTool: Hydra (4 threads, 30s wait)\nAttempts: 120 before success\nCompromised: admin.jkim:Admin@2024\nRisk Level: Critical\nAction: Lock admin.jkim, block source IP, audit admin privileges",
+      "desc": "Hydra를 사용하여 관리자 계정에 대한 RDP 브루트포스를 수행합니다. 스레드 수를 제한하고 대기 시간을 설정하여 탐지를 회피합니다.",
+      "descEn": "Uses Hydra for RDP brute force against the admin account. Limits thread count and sets wait time to evade detection.",
+      "stepTitle": "RDP 브루트포스 공격",
+      "stepTitleEn": "RDP Brute Force Attack",
+      "feynman": "금고의 자물쇠를 하나씩 돌려보는 것입니다. 4명이 동시에 30초마다 번호를 시도합니다. 1,000개의 비밀번호 중 120번째에서 맞는 번호를 찾았습니다.",
+      "feynmanEn": "It's like spinning a safe's combination lock one number at a time. Four people try simultaneously, each waiting 30 seconds between tries. The right combination was found on the 120th attempt out of 1,000.",
+      "expert": "Hydra의 -t 4 -w 30 설정은 4개 스레드로 30초 대기하며 공격합니다. RDP(3389)는 NLA(Network Level Authentication) 없이는 브루트포스에 취약합니다. Azure AD Password Protection이나 Smart Lockout으로 방어할 수 있습니다.",
+      "expertEn": "Hydra's -t 4 -w 30 uses 4 threads with 30-second waits. RDP (3389) without NLA is vulnerable to brute force. Azure AD Password Protection or Smart Lockout can defend against this.",
+      "defTooltip": "Event ID 4625 (RDP 실패, Logon Type 10)이 단일 소스에서 분당 10회 이상 발생하면 RDP 브루트포스를 탐지합니다. Sysmon Event ID 3 (네트워크 연결)에서 3389 포트 대량 접근도 확인하세요.",
+      "defTooltipEn": "Detect RDP brute force when Event ID 4625 (Logon Type 10) exceeds 10/min from a single source. Also check Sysmon Event ID 3 (network connections) for mass access to port 3389.",
+      "hackerLog": {
+        "title": "hydra_rdp.log",
+        "lines": [
+          { "log": "hydra -l admin.jkim -P top1000.txt 192.168.1.10 rdp -t 4 -w 30", "desc": "💡 top1000 비밀번호 사전으로 RDP를 4스레드, 30초 대기로 공격합니다" },
+          { "log": "[3389][rdp] host: 192.168.1.10  login: admin.jkim  password: Admin@2024", "desc": "💡 120번째 시도에서 관리자 비밀번호가 크래킹되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Hydra", "desc": "다양한 프로토콜에 대한 온라인 비밀번호 크래킹 도구입니다" },
+        { "term": "RDP (3389)", "desc": "원격 데스크톱 프로토콜로, 원격으로 Windows에 접속하는 서비스입니다" },
+        { "term": "Brute Force", "desc": "가능한 모든 비밀번호를 순차적으로 시도하는 공격 방법입니다" }
+      ]
+    },
+    {
+      "cmd": "crackmapexec smb 192.168.1.10 -u admin.jkim -p 'Admin@2024' --shares",
+      "out": "SMB         192.168.1.10    445    DC01    [*] Windows Server 2019 Build 17763 x64\nSMB         192.168.1.10    445    DC01    [+] {companyName}\\admin.jkim:Admin@2024 (Pwn3d!)\nSMB         192.168.1.10    445    DC01    [+] Enumerated shares\nSMB         192.168.1.10    445    DC01    Share         Permissions  Remark\nSMB         192.168.1.10    445    DC01    -----         -----------  ------\nSMB         192.168.1.10    445    DC01    ADMIN$        READ,WRITE   Remote Admin\nSMB         192.168.1.10    445    DC01    C$            READ,WRITE   Default share\nSMB         192.168.1.10    445    DC01    IPC$          READ         Remote IPC\nSMB         192.168.1.10    445    DC01    NETLOGON      READ         Logon server share\nSMB         192.168.1.10    445    DC01    SYSVOL        READ         Logon server share\nSMB         192.168.1.10    445    DC01    HR_Data       READ,WRITE   HR Department",
+      "def": "[SIEM] CRITICAL: Admin share access with compromised credentials - Pwn3d!",
+      "defAction": "Account: admin.jkim (LOCAL ADMIN on DC01)\nAccess: ADMIN$, C$ (Full Control)\nAdditional: HR_Data share accessible\nRisk Level: Critical\nAction: Domain-wide password reset, review admin group membership",
+      "desc": "크래킹된 관리자 계정으로 SMB 공유를 열거합니다. ADMIN$, C$ 접근이 가능하여 원격 코드 실행이 가능합니다.",
+      "descEn": "Enumerates SMB shares with the cracked admin account. Access to ADMIN$ and C$ enables remote code execution.",
+      "stepTitle": "관리자 공유 접근 확인",
+      "stepTitleEn": "Admin Share Access Verification",
+      "feynman": "빌딩의 마스터키를 얻은 것과 같습니다. ADMIN$과 C$ 접근은 서버의 모든 방을 열 수 있다는 뜻입니다. '(Pwn3d!)'는 완전 장악을 의미합니다.",
+      "feynmanEn": "It's like getting the master key to the building. Access to ADMIN$ and C$ means you can open every room on the server. '(Pwn3d!)' means full control.",
+      "expert": "(Pwn3d!)는 CrackMapExec이 로컬 관리자 권한을 감지했음을 의미합니다. ADMIN$와 C$ 접근은 PsExec, WMI 등을 통한 원격 코드 실행(RCE)의 전제조건입니다. MITRE ATT&CK T1021.002 (SMB/Windows Admin Shares)에 해당합니다.",
+      "expertEn": "(Pwn3d!) indicates CrackMapExec detected local admin privileges. ADMIN$ and C$ access is a prerequisite for RCE via PsExec, WMI, etc. Maps to MITRE ATT&CK T1021.002 (SMB/Windows Admin Shares).",
+      "defTooltip": "Event ID 5140 (네트워크 공유 접근)에서 ADMIN$, C$ 접근을 모니터링하세요. 일반 사용자가 관리 공유에 접근하면 즉시 경고해야 합니다.",
+      "defTooltipEn": "Monitor Event ID 5140 (network share access) for ADMIN$ and C$ access. Alert immediately if a non-admin user accesses admin shares.",
+      "hackerLog": {
+        "title": "share_enum.log",
+        "lines": [
+          { "log": "[+] admin.jkim:Admin@2024 (Pwn3d!)", "desc": "💡 (Pwn3d!)는 로컬 관리자 권한이 있다는 의미입니다 - 서버 완전 장악" },
+          { "log": "ADMIN$  READ,WRITE  Remote Admin", "desc": "💡 ADMIN$ 쓰기 권한 = 원격 코드 실행(PsExec) 가능" }
+        ]
+      },
+      "terms": [
+        { "term": "ADMIN$", "desc": "Windows의 관리 공유로, 원격 관리 및 코드 실행에 사용됩니다" },
+        { "term": "Pwn3d", "desc": "시스템을 완전히 장악했음을 나타내는 해커 용어입니다" }
+      ]
+    },
+    {
+      "cmd": "net user admin.jkim /domain | findstr /i \"Last logon Password\"",
+      "out": "Password last set            6/15/2024 2:30:00 PM\nPassword expires             9/13/2024 2:30:00 PM\nPassword changeable          6/16/2024 2:30:00 PM\nLast logon                   3/1/2026 10:42:15 AM",
+      "def": "[SIEM] Password policy violation: admin.jkim password expired 540+ days ago",
+      "defAction": "Account: admin.jkim\nPassword Set: 6/15/2024\nPassword Expired: 9/13/2024 (540+ days ago)\nStill Active: Yes (policy not enforced)\nRisk Level: Critical\nAction: Enforce password expiration policy, audit all admin accounts",
+      "desc": "침해된 계정의 비밀번호 정책을 확인합니다. 비밀번호가 540일 이상 만료 상태인데도 계속 사용 중이며, 이는 정책 집행 실패를 의미합니다.",
+      "descEn": "Checks the password policy of the compromised account. The password has been expired for 540+ days but is still in use, indicating policy enforcement failure.",
+      "stepTitle": "비밀번호 정책 위반 확인",
+      "stepTitleEn": "Password Policy Violation Check",
+      "feynman": "540일 전에 만료된 우유를 냉장고에서 발견한 것과 같습니다. '유통기한이 지나면 버리세요'라는 규칙은 있지만, 아무도 확인하지 않았습니다. 비밀번호도 정기적으로 바꾸지 않으면 위험합니다.",
+      "feynmanEn": "It's like finding milk in the fridge that expired 540 days ago. The rule says 'throw out expired items', but nobody checked. Passwords left unchanged for too long become a risk.",
+      "expert": "비밀번호 만료 정책이 GPO에 설정되어 있지만 강제되지 않는 것은 'password-never-expires' 플래그(UAC 65536)가 설정되었거나 Fine-Grained Password Policy(FGPP)가 예외를 허용한 것일 수 있습니다. CIS Benchmark는 관리자 계정의 비밀번호를 최소 60일마다 변경하도록 권장합니다.",
+      "expertEn": "Password expiry set in GPO but not enforced may indicate 'password-never-expires' flag (UAC 65536) or Fine-Grained Password Policy (FGPP) exceptions. CIS Benchmark recommends changing admin passwords at least every 60 days.",
+      "defTooltip": "AD에서 userAccountControl 속성에 DONT_EXPIRE_PASSWORD(65536) 플래그가 설정된 계정을 정기적으로 감사하세요. 특히 관리자 계정에서 이 플래그는 심각한 보안 위험입니다.",
+      "defTooltipEn": "Regularly audit accounts with DONT_EXPIRE_PASSWORD (65536) flag in userAccountControl. This flag on admin accounts is a severe security risk.",
+      "hackerLog": {
+        "title": "account_audit.log",
+        "lines": [
+          { "log": "Password last set  6/15/2024", "desc": "💡 비밀번호가 2024년 6월에 마지막으로 설정되었습니다 - 540일 이상 변경 안 됨" },
+          { "log": "Password expires   9/13/2024", "desc": "💡 만료일이 이미 지났지만 계정은 여전히 활성 상태 - 정책 강제 실패" }
+        ]
+      },
+      "terms": [
+        { "term": "Password Expiration", "desc": "비밀번호를 정기적으로 변경하도록 강제하는 보안 정책입니다" },
+        { "term": "DONT_EXPIRE_PASSWORD", "desc": "비밀번호 만료를 무시하는 Active Directory 계정 플래그입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 1800)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "net.exe (user enum)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "net.exe (policy query)", "depth": 2, "alert": false, "minStep": 1 },
+    { "name": "crackmapexec (spray)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "hydra (RDP brute force)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "crackmapexec (share enum)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "net.exe (account audit)", "depth": 2, "alert": false, "minStep": 6 }
+  ]
+}

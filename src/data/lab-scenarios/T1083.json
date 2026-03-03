@@ -1,0 +1,232 @@
+{
+  "id": "T1083",
+  "title": "파일 및 디렉터리 탐색 시뮬레이션",
+  "titleEn": "File and Directory Discovery Simulation",
+  "duration": 8,
+  "phases": [
+    { "label": "정찰", "labelEn": "Recon", "icon": "🔍" },
+    { "label": "공격", "labelEn": "Attack", "icon": "⚡" },
+    { "label": "침투", "labelEn": "Breach", "icon": "🔓" },
+    { "label": "완료", "labelEn": "Complete", "icon": "✅" }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker", "x": 80, "y": 150, "type": "attacker" },
+    { "id": "fileserver", "label": "File Server", "x": 350, "y": 50, "type": "server" },
+    { "id": "dc", "label": "DC01 (SYSVOL)", "x": 350, "y": 150, "type": "server" },
+    { "id": "siem", "label": "SIEM/EDR", "x": 500, "y": 150, "type": "defense" }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "attacker", "label": "Local Enum", "activeStep": 0 },
+    { "from": "attacker", "to": "fileserver", "label": "Share Enum", "activeStep": 2 },
+    { "from": "attacker", "to": "dc", "label": "SYSVOL Read", "activeStep": 3 },
+    { "from": "dc", "to": "siem", "label": "GPP Alert", "activeStep": 4 }
+  ],
+  "desktopIcons": [
+    { "label": "Terminal", "icon": "💻", "alertOnStep": 0 },
+    { "label": "File Explorer", "icon": "🗂️", "alertOnStep": 1 },
+    { "label": "Share Map", "icon": "🗺️", "alertOnStep": 2 },
+    { "label": "Credentials", "icon": "🔑", "alertOnStep": 6 }
+  ],
+  "steps": [
+    {
+      "cmd": "dir C:\\Users\\{userName}\\Desktop /s /b",
+      "out": "C:\\Users\\{userName}\\Desktop\\credentials.xlsx\nC:\\Users\\{userName}\\Desktop\\vpn-config.ovpn\nC:\\Users\\{userName}\\Desktop\\project-plan.docx\nC:\\Users\\{userName}\\Desktop\\budget-2026.xlsx\nC:\\Users\\{userName}\\Desktop\\passwords.txt\nC:\\Users\\{userName}\\Desktop\\meeting-notes\\Q1-review.pptx\nC:\\Users\\{userName}\\Desktop\\meeting-notes\\board-strategy.pdf",
+      "def": "[EDR] Recursive directory listing on user Desktop",
+      "defAction": "Process: cmd.exe -> dir /s /b\nTarget: C:\\Users\\{userName}\\Desktop\nFiles Found: 7 (including sensitive file names)\nRisk Level: Low\nAction: Log - normal user activity pattern",
+      "desc": "사용자 바탕화면의 파일을 재귀적으로 열거합니다. credentials.xlsx, passwords.txt 등 민감한 이름의 파일을 발견합니다.",
+      "descEn": "Recursively lists files on the user's desktop. Discovers files with sensitive names like credentials.xlsx and passwords.txt.",
+      "stepTitle": "바탕화면 파일 열거",
+      "stepTitleEn": "Desktop File Enumeration",
+      "feynman": "집에 들어와서 먼저 책상 위를 살펴보는 것입니다. 사람들은 자주 쓰는 중요한 것을 바탕화면에 놓습니다. 'passwords.txt'라는 파일이 바탕화면에 있다면, 그건 현관 문 옆에 열쇠를 두는 것과 같습니다.",
+      "feynmanEn": "Like entering a house and first checking the desk. People put important frequently-used items on their desktop. A 'passwords.txt' file on the desktop is like leaving the house key next to the front door.",
+      "expert": "dir /s /b는 재귀적 bare format 출력으로, 스크립트 파싱에 최적화됩니다. 바탕화면은 사용자가 자주 접근하는 파일을 두는 곳으로, APT 그룹의 초기 파일 탐색 대상입니다. DLP 정책에서 'password', 'credential' 키워드가 포함된 파일명을 모니터링해야 합니다.",
+      "expertEn": "dir /s /b provides recursive bare format output optimized for script parsing. Desktop is where users place frequently accessed files, making it APT groups' initial file discovery target. DLP policies should monitor filenames containing 'password' or 'credential' keywords.",
+      "defTooltip": "Sysmon Event ID 1에서 dir.exe의 /s 플래그 사용을 감시하세요. 사용자 프로필 디렉토리에 대한 재귀 검색은 파일 탐색 활동의 초기 지표입니다.",
+      "defTooltipEn": "Monitor Sysmon Event ID 1 for dir.exe with /s flag. Recursive searches in user profile directories are early indicators of file discovery activity.",
+      "hackerLog": {
+        "title": "desktop_enum.log",
+        "lines": [
+          { "log": "dir C:\\Users\\{userName}\\Desktop /s /b", "desc": "💡 바탕화면의 모든 파일과 하위 폴더를 재귀적으로 나열합니다" },
+          { "log": "passwords.txt / credentials.xlsx", "desc": "💡 민감한 이름의 파일이 바탕화면에 직접 노출되어 있습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "dir /s /b", "desc": "하위 디렉토리를 포함하여(/s) 파일 경로만 출력하는(/b) Windows 명령입니다" },
+        { "term": "File Discovery", "desc": "시스템에서 유용한 파일을 찾아내는 정찰 기법입니다 (MITRE T1083)" }
+      ]
+    },
+    {
+      "cmd": "dir C:\\Users /s /b /a:-d | findstr /i \"password pass cred secret key token config vpn\"",
+      "out": "C:\\Users\\{userName}\\Desktop\\credentials.xlsx\nC:\\Users\\{userName}\\Desktop\\passwords.txt\nC:\\Users\\{userName}\\Desktop\\vpn-config.ovpn\nC:\\Users\\{userName}\\Documents\\aws-secret-key.txt\nC:\\Users\\{userName}\\AppData\\Local\\config.ini\nC:\\Users\\admin.jkim\\Desktop\\domain-passwords.kdbx\nC:\\Users\\admin.jkim\\Documents\\vpn-credentials.txt\nC:\\Users\\hr.park\\Desktop\\employee-passwords-reset.csv",
+      "def": "[SIEM] ALERT: Sensitive file search across all user profiles",
+      "defAction": "Process: cmd.exe -> dir + findstr\nScope: C:\\Users (ALL profiles)\nKeywords: password, cred, secret, key, token, config, vpn\nSensitive Files Found: 8\nRisk Level: High\nAction: Alert - credential harvesting activity",
+      "desc": "모든 사용자 프로필에서 비밀번호, 자격증명, 비밀키 관련 파일을 검색합니다. 여러 사용자의 민감한 파일이 발견됩니다.",
+      "descEn": "Searches all user profiles for files related to passwords, credentials, and secret keys. Sensitive files from multiple users are discovered.",
+      "stepTitle": "전체 프로필 민감 파일 검색",
+      "stepTitleEn": "All-Profile Sensitive File Search",
+      "feynman": "아파트 전체를 돌아다니며 '비밀번호', '열쇠'라고 적힌 물건을 찾는 것입니다. 다른 입주민의 방에서도 비밀번호 파일을 찾았습니다. 공유 컴퓨터에서는 다른 사람의 파일도 접근 가능할 수 있습니다.",
+      "feynmanEn": "Like walking through the entire apartment building looking for items labeled 'password' or 'key'. Password files were found in other residents' rooms too. On shared computers, other users' files may be accessible.",
+      "expert": "C:\\Users 전체를 검색하는 것은 다른 사용자 프로필의 접근 권한에 따라 결과가 달라집니다. admin.jkim의 .kdbx(KeePass)와 hr.park의 CSV 파일은 부적절한 파일 권한을 나타냅니다. MITRE ATT&CK T1552.001 (Credentials in Files)과 연계됩니다.",
+      "expertEn": "Searching all C:\\Users depends on access permissions to other profiles. admin.jkim's .kdbx (KeePass) and hr.park's CSV indicate improper file permissions. Links to MITRE ATT&CK T1552.001 (Credentials in Files).",
+      "defTooltip": "EDR에서 findstr/Select-String으로 'password', 'credential', 'secret' 키워드를 검색하는 행위를 탐지하세요. C:\\Users 전체 범위 검색은 크레덴셜 하베스팅의 지표입니다.",
+      "defTooltipEn": "Detect findstr/Select-String searches for 'password', 'credential', 'secret' keywords via EDR. C:\\Users-wide searches indicate credential harvesting.",
+      "hackerLog": {
+        "title": "sensitive_search.log",
+        "lines": [
+          { "log": "dir C:\\Users /s /b | findstr /i \"password cred secret key\"", "desc": "💡 모든 사용자 프로필에서 민감한 키워드가 포함된 파일을 검색합니다" },
+          { "log": "admin.jkim\\Desktop\\domain-passwords.kdbx", "desc": "💡 다른 관리자의 KeePass 비밀번호 데이터베이스가 발견되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "KeePass (.kdbx)", "desc": "비밀번호를 암호화하여 저장하는 오픈소스 비밀번호 관리자의 데이터베이스 파일입니다" },
+        { "term": "Credential Harvesting", "desc": "시스템에서 인증 정보를 대량으로 수집하는 공격 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "tree C:\\Shares /F /A",
+      "out": "C:\\Shares\n+---HR\n|   +---Payroll\n|   |       salary-2026.xlsx\n|   |       bonus-Q1.xlsx\n|   +---Employees\n|   |       employee-list.csv\n|   |       org-chart.pdf\n|   \\---Policies\n|           acceptable-use.pdf\n|           security-policy.pdf\n+---IT\n|   +---Scripts\n|   |       deploy.ps1\n|   |       backup.bat\n|   +---Configs\n|   |       firewall-rules.txt\n|   |       switch-config.txt\n|   \\---Credentials\n|           service-accounts.xlsx\n|           admin-creds.kdbx\n\\---Finance\n    +---Reports\n    |       annual-2025.pdf\n    \\---Invoices\n            vendor-payments.xlsx",
+      "def": "[SIEM] ALERT: File share structure enumeration - sensitive directories mapped",
+      "defAction": "Process: tree.exe\nTarget: C:\\Shares (network share mount)\nSensitive Dirs: HR/Payroll, IT/Credentials, Finance/Reports\nRisk Level: High\nAction: Review share permissions, restrict access",
+      "desc": "공유 폴더의 전체 디렉터리 구조를 트리 형태로 파악합니다. HR 급여 데이터, IT 자격증명, 재무 보고서 등 민감한 디렉터리를 식별합니다.",
+      "descEn": "Maps the entire directory structure of shared folders in tree format. Identifies sensitive directories including HR payroll, IT credentials, and financial reports.",
+      "stepTitle": "공유 폴더 구조 매핑",
+      "stepTitleEn": "Share Folder Structure Mapping",
+      "feynman": "회사 건물의 모든 방 이름과 위치가 적힌 지도를 만드는 것입니다. '인사팀 - 급여', 'IT팀 - 자격증명' 같은 이름을 보면 가장 가치 있는 방이 어디인지 바로 알 수 있습니다.",
+      "feynmanEn": "Like creating a map showing all room names and locations in a building. Labels like 'HR - Payroll' and 'IT - Credentials' immediately reveal which rooms hold the most value.",
+      "expert": "tree /F /A는 파일명을 포함한 ASCII 트리를 생성합니다. IT\\Credentials 디렉토리에 admin-creds.kdbx가 공유 폴더에 노출된 것은 심각한 보안 위반입니다. NTFS 권한과 공유 권한의 이중 검증이 필요하며, DLP 정책에서 공유 폴더의 자격증명 파일을 감지해야 합니다.",
+      "expertEn": "tree /F /A generates ASCII tree with filenames. admin-creds.kdbx exposed in IT\\Credentials share is a severe security violation. Dual verification of NTFS and share permissions is needed, and DLP should detect credential files in shares.",
+      "defTooltip": "Event ID 5145 (네트워크 공유 객체 접근)에서 공유 폴더 전체 구조 열거를 감시하세요. tree.exe 실행과 연계된 대량 파일 접근은 공유 매핑 활동입니다.",
+      "defTooltipEn": "Monitor Event ID 5145 (network share object access) for full share structure enumeration. tree.exe execution with bulk file access indicates share mapping activity.",
+      "hackerLog": {
+        "title": "share_tree.log",
+        "lines": [
+          { "log": "tree C:\\Shares /F /A", "desc": "💡 공유 폴더의 전체 파일 구조를 트리 형태로 출력합니다" },
+          { "log": "IT\\Credentials\\admin-creds.kdbx", "desc": "💡 IT팀의 관리자 비밀번호 데이터베이스가 공유 폴더에 노출되어 있습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Network Share", "desc": "네트워크를 통해 여러 사용자가 접근할 수 있는 공유 폴더입니다" },
+        { "term": "NTFS Permissions", "desc": "Windows 파일 시스템의 파일/폴더 접근 권한 설정입니다" }
+      ]
+    },
+    {
+      "cmd": "dir \\\\DC01\\SYSVOL\\{companyName}.local\\Policies /s /b | findstr /i \".xml .ini .txt .bat .ps1\"",
+      "out": "\\\\DC01\\SYSVOL\\{companyName}.local\\Policies\\{31B2F340-016D-11D2-945F-00C04FB984F9}\\Machine\\Preferences\\Groups\\Groups.xml\n\\\\DC01\\SYSVOL\\{companyName}.local\\Policies\\{6AC1786C-016F-11D2-945F-00C04fB984F9}\\Machine\\Scripts\\Startup\\logon.bat\n\\\\DC01\\SYSVOL\\{companyName}.local\\Policies\\{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}\\Machine\\Preferences\\ScheduledTasks\\ScheduledTasks.xml",
+      "def": "[SIEM] ALERT: SYSVOL policy file enumeration - GPP password search",
+      "defAction": "Process: cmd.exe -> dir\nTarget: \\\\DC01\\SYSVOL (Group Policy)\nKey File: Groups.xml (may contain GPP passwords)\nRisk Level: Critical\nAction: Check for cpassword attributes in GPP XML files",
+      "desc": "SYSVOL 공유의 그룹 정책 파일을 열거합니다. Groups.xml에는 cpassword로 저장된 비밀번호가 포함될 수 있습니다(GPP 취약점).",
+      "descEn": "Enumerates Group Policy files in the SYSVOL share. Groups.xml may contain passwords stored as cpassword (GPP vulnerability).",
+      "stepTitle": "SYSVOL 정책 파일 검색",
+      "stepTitleEn": "SYSVOL Policy File Search",
+      "feynman": "회사의 '규칙 모음집'이 보관된 공용 서랍장을 뒤지는 것입니다. 이 서랍장(SYSVOL)은 모든 직원이 읽을 수 있는데, 과거에 관리자가 여기에 비밀번호를 적어두는 실수를 했습니다.",
+      "feynmanEn": "Like rummaging through the company's public rulebook cabinet. This cabinet (SYSVOL) is readable by all employees, and administrators mistakenly wrote passwords in it in the past.",
+      "expert": "SYSVOL은 모든 도메인 사용자가 읽을 수 있는 공유입니다. Groups.xml의 cpassword는 MS14-025에서 패치되었지만, 기존 GPP 비밀번호는 자동 제거되지 않습니다. AES-256 키가 Microsoft MSDN에 공개되어 있어 누구나 복호화 가능합니다. PowerSploit의 Get-GPPPassword 모듈이 이를 자동화합니다.",
+      "expertEn": "SYSVOL is readable by all domain users. Groups.xml cpassword was patched in MS14-025, but existing GPP passwords aren't auto-removed. The AES-256 key is published on Microsoft MSDN, allowing anyone to decrypt. PowerSploit's Get-GPPPassword module automates this.",
+      "defTooltip": "Event ID 5145에서 SYSVOL의 Preferences 폴더 접근을 감시하세요. Groups.xml, ScheduledTasks.xml에 대한 읽기 접근은 GPP 비밀번호 탐색의 강력한 지표입니다.",
+      "defTooltipEn": "Monitor Event ID 5145 for access to SYSVOL's Preferences folder. Read access to Groups.xml and ScheduledTasks.xml strongly indicates GPP password hunting.",
+      "hackerLog": {
+        "title": "sysvol_enum.log",
+        "lines": [
+          { "log": "dir \\\\DC01\\SYSVOL\\...\\Policies /s /b", "desc": "💡 SYSVOL 공유의 그룹 정책 파일을 재귀적으로 검색합니다" },
+          { "log": "Groups.xml (GPP cpassword 가능성)", "desc": "💡 Groups.xml에 암호화된 비밀번호가 포함되어 있을 수 있습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "SYSVOL", "desc": "그룹 정책과 로그온 스크립트가 저장되는 도메인 공유 폴더입니다" },
+        { "term": "GPP (Group Policy Preferences)", "desc": "그룹 정책 기본 설정으로, 과거 비밀번호를 평문으로 저장한 취약점이 있습니다" }
+      ]
+    },
+    {
+      "cmd": "type \\\\DC01\\SYSVOL\\{companyName}.local\\Policies\\{31B2F340-016D-11D2-945F-00C04FB984F9}\\Machine\\Preferences\\Groups\\Groups.xml",
+      "out": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Groups>\n  <User clsid=\"{DF5F1855-51E5-4d24-8B1A-D9BDE98BA1D1}\">\n    <Properties\n      userName=\"local_admin\"\n      cpassword=\"edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ\"\n      action=\"U\"\n      newName=\"\"\n      fullName=\"Local Admin\"\n      description=\"Built-in admin\"/>\n  </User>\n</Groups>",
+      "def": "[EDR] CRITICAL: GPP cpassword found in SYSVOL - plaintext credential exposure",
+      "defAction": "File: Groups.xml\nContent: cpassword attribute present\nAccount: local_admin\nVulnerability: MS14-025 (GPP passwords)\nRisk Level: Critical\nAction: Remove GPP passwords, rotate local admin credentials",
+      "desc": "Groups.xml에서 cpassword 속성을 발견합니다. Microsoft는 AES-256으로 암호화했지만 복호화 키를 공개하여 누구나 복호화할 수 있습니다.",
+      "descEn": "Discovers the cpassword attribute in Groups.xml. Microsoft encrypted it with AES-256 but published the decryption key, allowing anyone to decrypt it.",
+      "stepTitle": "GPP 비밀번호 추출",
+      "stepTitleEn": "GPP Password Extraction",
+      "feynman": "보물상자에 자물쇠를 달았지만, 열쇠를 상자 옆에 붙여놓은 것과 같습니다. Microsoft가 비밀번호를 암호화했지만, 복호화 키를 인터넷에 공개했습니다. 누구나 이 '잠긴' 비밀번호를 열 수 있습니다.",
+      "feynmanEn": "Like putting a lock on a treasure chest but taping the key to the side. Microsoft encrypted the password but published the decryption key online. Anyone can open this 'locked' password.",
+      "expert": "MS14-025 (CVE-2014-1812)는 GPP의 cpassword를 32바이트 AES-256 키로 암호화하지만, 이 키는 MSDN에 공개되었습니다. gpp-decrypt 도구나 PowerSploit의 Get-GPPPassword로 즉시 복호화 가능합니다. 2014년 패치 이후 새 GPP에는 비밀번호가 저장되지 않지만, 기존 값은 수동 제거가 필요합니다.",
+      "expertEn": "MS14-025 (CVE-2014-1812) encrypts cpassword with a 32-byte AES-256 key published on MSDN. Instantly decryptable with gpp-decrypt or PowerSploit's Get-GPPPassword. Post-2014 patch prevents new GPP passwords, but existing values require manual removal.",
+      "defTooltip": "SYSVOL 감사에서 Groups.xml, DataSources.xml 파일에 cpassword 속성이 남아있는지 정기적으로 스캔하세요. MS14-025 패치 적용 여부와 관계없이 기존 cpassword는 수동 제거가 필요합니다.",
+      "defTooltipEn": "Regularly scan SYSVOL audit for remaining cpassword attributes in Groups.xml and DataSources.xml. Existing cpassword values need manual removal regardless of MS14-025 patch status.",
+      "hackerLog": {
+        "title": "gpp_password.log",
+        "lines": [
+          { "log": "cpassword=\"edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+...\"", "desc": "💡 AES-256으로 암호화된 비밀번호지만, 복호화 키가 공개되어 있어 즉시 복호화 가능합니다" },
+          { "log": "userName=\"local_admin\"", "desc": "💡 로컬 관리자 계정의 비밀번호가 GPP에 노출되어 있습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "cpassword", "desc": "GPP에서 비밀번호를 저장하는 XML 속성으로, 복호화 키가 공개된 취약점입니다" },
+        { "term": "MS14-025", "desc": "GPP 비밀번호 저장 취약점을 수정한 2014년 Microsoft 보안 패치입니다" }
+      ]
+    },
+    {
+      "cmd": "powershell -c \"Get-ChildItem -Path C:\\ -Include *.kdbx,*.pfx,*.key,*.pem,*.ppk -Recurse -ErrorAction SilentlyContinue | Select FullName,Length,LastWriteTime\"",
+      "out": "FullName                                           Length  LastWriteTime\n--------                                           ------  -------------\nC:\\Users\\admin.jkim\\Desktop\\domain-passwords.kdbx   24576   2/28/2026 5:00 PM\nC:\\Shares\\IT\\Credentials\\admin-creds.kdbx           18432   1/15/2026 3:00 PM\nC:\\Users\\{userName}\\Documents\\server.pfx             4096   12/01/2025 10:00 AM\nC:\\Users\\{userName}\\.ssh\\id_rsa.ppk                   2048   11/15/2025 2:00 PM\nC:\\Shares\\IT\\Configs\\wildcard.pem                    3072   9/01/2025 8:00 AM",
+      "def": "[EDR] ALERT: Sensitive file type search - credential stores and certificates targeted",
+      "defAction": "Process: powershell.exe\nSearch: *.kdbx, *.pfx, *.key, *.pem, *.ppk\nResults: 5 sensitive files (KeePass DBs, certs, SSH keys)\nRisk Level: Critical\nAction: Encrypt sensitive files, restrict access, enable DLP",
+      "desc": "전체 C 드라이브에서 KeePass 데이터베이스, 인증서, SSH 키 등 민감한 파일 형식을 검색합니다. 자격 증명 저장소와 암호화 키가 발견됩니다.",
+      "descEn": "Searches the entire C drive for sensitive file types including KeePass databases, certificates, and SSH keys. Credential stores and encryption keys are found.",
+      "stepTitle": "인증서 및 키 파일 검색",
+      "stepTitleEn": "Certificate and Key File Search",
+      "feynman": "집 전체를 뒤져서 금고(.kdbx), 인감도장(.pfx), 비밀 열쇠(.key, .pem)를 찾는 것입니다. 이것들을 가져가면 모든 자물쇠를 열고, 모든 계약서에 도장을 찍을 수 있습니다.",
+      "feynmanEn": "Like searching the entire house for safes (.kdbx), official seals (.pfx), and secret keys (.key, .pem). Stealing these lets you open every lock and stamp every contract.",
+      "expert": ".kdbx(KeePass)는 마스터 비밀번호나 키 파일로 보호되지만, 메모리 덤프(CVE-2023-32784)로 마스터 비밀번호 추출이 가능합니다. .pfx(PKCS#12)는 SSL 인증서와 개인키를 포함하며, .ppk(PuTTY)는 SSH 접근을 제공합니다. MITRE T1552.004 (Private Keys)에 해당합니다.",
+      "expertEn": ".kdbx (KeePass) is protected by master password/key file, but memory dumps (CVE-2023-32784) can extract master passwords. .pfx (PKCS#12) contains SSL certs and private keys, .ppk (PuTTY) provides SSH access. Maps to MITRE T1552.004 (Private Keys).",
+      "defTooltip": "EDR에서 .kdbx, .pfx, .pem, .ppk 파일에 대한 대량 검색과 접근을 모니터링하세요. Sysmon Event ID 11에서 이러한 확장자의 파일 복사/이동도 추적해야 합니다.",
+      "defTooltipEn": "Monitor EDR for bulk searches and access to .kdbx, .pfx, .pem, .ppk files. Sysmon Event ID 11 should also track copies/moves of these extensions.",
+      "hackerLog": {
+        "title": "key_search.log",
+        "lines": [
+          { "log": "Get-ChildItem -Path C:\\ -Include *.kdbx,*.pfx,*.key,*.pem,*.ppk -Recurse", "desc": "💡 전체 디스크에서 인증서, 키 파일, 비밀번호 저장소를 검색합니다" },
+          { "log": "domain-passwords.kdbx (24576 bytes)", "desc": "💡 도메인 비밀번호가 저장된 KeePass 데이터베이스가 발견되었습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "PFX (PKCS#12)", "desc": "SSL/TLS 인증서와 개인키를 함께 저장하는 암호화된 파일 형식입니다" },
+        { "term": "PPK", "desc": "PuTTY Private Key - SSH 원격 접속에 사용되는 개인키 파일입니다" }
+      ]
+    },
+    {
+      "cmd": "type C:\\Users\\{userName}\\Desktop\\passwords.txt",
+      "out": "=== Server Credentials ===\nDC01: Administrator / D0m@in2024!\nSQL01: sa / Sql$erver2023\nWEB01: webadmin / W3b@dmin!\nBACKUP01: backup_svc / B@ckup2024\n\n=== Cloud Accounts ===\nAWS Console: admin@{companyName}.com / Cl0ud@ccess!\nAzure Portal: it.admin@{companyName}.com / @zur3P@ss!",
+      "def": "[EDR] CRITICAL: Plaintext credential file accessed",
+      "defAction": "File: C:\\Users\\{userName}\\Desktop\\passwords.txt\nContent: Plaintext passwords for 6 servers + 2 cloud accounts\nAccess By: {companyName}\\{userName}\nRisk Level: Critical\nAction: Rotate ALL listed passwords immediately, delete file, investigate data exposure",
+      "desc": "바탕화면에서 발견된 비밀번호 텍스트 파일을 열어 서버와 클라우드 계정의 평문 자격 증명을 획득합니다. 비밀번호의 평문 저장은 가장 기본적이지만 가장 위험한 보안 실수입니다.",
+      "descEn": "Opens a password text file found on the desktop to obtain plaintext credentials for servers and cloud accounts. Storing passwords in plaintext is the most basic yet dangerous security mistake.",
+      "stepTitle": "평문 비밀번호 획득",
+      "stepTitleEn": "Plaintext Password Acquisition",
+      "feynman": "서랍에서 '비밀번호 목록'이라고 적힌 종이를 찾은 것입니다. 모든 문의 열쇠 번호가 적혀 있고, 심지어 클라우드 계정 정보까지 있습니다. 비밀번호를 메모장에 적어두는 것은 가장 흔하고 위험한 보안 습관입니다.",
+      "feynmanEn": "Like finding a paper labeled 'password list' in a drawer. All door codes are written down, even cloud account credentials. Writing passwords in notepad is the most common and dangerous security habit.",
+      "expert": "평문 비밀번호 파일은 MITRE T1552.001의 가장 직접적인 예시입니다. DC01 관리자, SQL SA, 클라우드 계정까지 포함된 것은 '단일 파일 도메인 장악'을 의미합니다. 비밀번호 관리자(KeePass, 1Password, Vault)를 사용하고, 특권 계정은 PAM(Privileged Access Management) 솔루션으로 관리해야 합니다.",
+      "expertEn": "Plaintext password files are the most direct example of MITRE T1552.001. Including DC admin, SQL SA, and cloud accounts means 'single-file domain takeover'. Use password managers and PAM solutions for privileged accounts.",
+      "defTooltip": "DLP 정책에서 'password', 'credential' 키워드가 포함된 .txt/.csv 파일의 생성과 접근을 감시하세요. Windows Defender ATP의 민감한 파일 탐지 규칙도 활용할 수 있습니다.",
+      "defTooltipEn": "Monitor DLP policies for creation and access of .txt/.csv files containing 'password' or 'credential' keywords. Windows Defender ATP's sensitive file detection rules can also be leveraged.",
+      "hackerLog": {
+        "title": "plaintext_creds.log",
+        "lines": [
+          { "log": "type C:\\Users\\{userName}\\Desktop\\passwords.txt", "desc": "💡 바탕화면의 비밀번호 텍스트 파일 내용을 읽습니다" },
+          { "log": "DC01: Administrator / D0m@in2024!", "desc": "💡 도메인 컨트롤러 관리자 비밀번호가 평문으로 저장되어 있습니다" }
+        ]
+      },
+      "terms": [
+        { "term": "Plaintext Credentials", "desc": "암호화 없이 읽을 수 있는 형태로 저장된 비밀번호입니다" },
+        { "term": "PAM", "desc": "Privileged Access Management - 특권 계정의 접근을 중앙에서 관리하는 솔루션입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "explorer.exe", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "cmd.exe (PID: 3100)", "depth": 1, "alert": false, "minStep": 0 },
+    { "name": "dir (desktop enum)", "depth": 2, "alert": false, "minStep": 0 },
+    { "name": "dir + findstr (credential search)", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "tree.exe (share mapping)", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "dir (SYSVOL enum)", "depth": 2, "alert": true, "minStep": 3 },
+    { "name": "type (GPP password read)", "depth": 2, "alert": true, "minStep": 4 },
+    { "name": "powershell.exe (file search)", "depth": 2, "alert": true, "minStep": 5 },
+    { "name": "type (plaintext creds read)", "depth": 2, "alert": true, "minStep": 6 }
+  ]
+}

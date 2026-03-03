@@ -1,0 +1,131 @@
+{
+  "id": "T1078.001",
+  "title": "기본 계정 악용 시뮬레이션",
+  "titleEn": "Default Accounts Exploitation Simulation",
+  "duration": 6,
+  "phases": [
+    { "label": "🔍 장비 스캔", "labelEn": "🔍 Device Scanning", "steps": [0] },
+    { "label": "🔑 기본 계정 접근", "labelEn": "🔑 Default Login", "steps": [1] },
+    { "label": "🎯 장비 장악", "labelEn": "🎯 Device Takeover", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Scanner)", "x": 50, "y": 80 },
+    { "id": "router", "label": "Router\n(admin/admin)", "x": 180, "y": 30 },
+    { "id": "camera", "label": "IP Camera\n(admin/12345)", "x": 180, "y": 130 },
+    { "id": "internal", "label": "Internal\nNetwork", "x": 330, "y": 80 },
+    { "id": "botnet", "label": "Botnet\nC2", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "router", "minStep": 1 },
+    { "from": "attacker", "to": "camera", "minStep": 1 },
+    { "from": "router", "to": "internal", "minStep": 2 },
+    { "from": "camera", "to": "botnet", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "Shodan", "icon": "🔍" },
+    { "name": "Hydra", "icon": "🔑" },
+    { "name": "Telnet", "icon": "💻" },
+    { "name": "Router Admin", "icon": "🌐" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# Shodan으로 기본 계정 장비 검색\nshodan search 'default password' --fields ip_str,port,org\n\n# Nmap 서비스 스캔\nnmap -sV -p 23,80,443,8080 192.168.1.0/24\n\n# 제조사 기본 계정 데이터베이스 참조\ncurl -s https://default-password.info/api/search?vendor=cisco",
+      "out": "[Shodan 검색 결과]\n203.0.113.10 Port:23 Org:ISP-Korea (Telnet open)\n203.0.113.25 Port:80 Org:SmallBiz (HTTP admin)\n203.0.113.50 Port:8080 Org:IoT-Factory\n\n[Nmap 로컬 스캔]\n192.168.1.1 - Cisco IOS (Telnet/HTTP)\n192.168.1.50 - Hikvision Camera (HTTP/RTSP)\n192.168.1.100 - Synology NAS (HTTPS)\n192.168.1.200 - HP Printer (HTTP/JetDirect)\n\n[기본 계정 DB]\n62개 제조사 기본 자격증명 준비\nCisco: admin/admin, cisco/cisco\nHikvision: admin/12345\nSynology: admin/(setup시 설정)\nHP Printer: admin/(empty)",
+      "def": "[Network IDS] Port scanning detected from external IP — Shodan fingerprinting activity",
+      "defAction": "Tool: Shodan + Nmap\nTargets: 4 devices with management interfaces\nPorts: Telnet(23), HTTP(80,8080), HTTPS(443)\nCredential DB: 62 manufacturer defaults\nRisk Level: Reconnaissance\nAction: Block scanning IPs, audit exposed services",
+      "desc": "Shodan과 Nmap으로 관리 인터페이스가 노출된 장비를 검색합니다. 62개 제조사의 기본 계정 데이터베이스를 활용하여 공격을 준비합니다.",
+      "descEn": "Search for devices with exposed management interfaces using Shodan and Nmap. Prepare attack using 62 manufacturer default credential database.",
+      "stepTitle": "장비 스캔 + 기본 계정 DB 준비",
+      "stepTitleEn": "Device Scanning + Default Credential DB Preparation",
+      "feynman": "도둑이 동네를 돌며 문이 열린 집(노출된 관리 인터페이스)을 찾습니다. 각 자물쇠 제조사별 '출고 시 기본 열쇠' 목록을 가지고 다닙니다.",
+      "feynmanEn": "A thief walks the neighborhood looking for unlocked doors (exposed management interfaces), carrying factory default key lists for each lock manufacturer.",
+      "expert": "Shodan은 인터넷 연결 장비의 배너를 수집하는 검색 엔진입니다. Mirai 소스코드에는 62개의 기본 자격증명이 하드코딩되어 있었습니다. NIST SP 800-63B는 기본 비밀번호 변경을 필수로 권고합니다.",
+      "expertEn": "Shodan collects banners from internet-connected devices. Mirai source had 62 hardcoded default credentials. NIST SP 800-63B mandates default password changes.",
+      "defTooltip": "🔐 4대 장비 관리 인터페이스 노출!",
+      "defTooltipEn": "🔐 4 devices with exposed management!",
+      "hackerLog": { "title": "scan.log", "lines": ["[08:00:00] Shodan 검색 시작", "[08:05:00] 4대 장비 발견", "[08:10:00] 관리 인터페이스 확인", "[08:15:00] 기본 계정 DB 준비"] },
+      "terms": [
+        { "term": "Shodan", "def": "인터넷 연결 장비를 검색하는 검색 엔진, 배너/포트/서비스 정보 수집" },
+        { "term": "Mirai", "def": "IoT 기본 계정을 악용하여 DDoS 봇넷을 구축한 악성코드 (2016)" }
+      ]
+    },
+    {
+      "cmd": "# 기본 계정으로 로그인 시도\nhydra -L defaults.txt -P defaults.txt 192.168.1.1 http-get /login\n\n# 텔넷 기본 계정\ntelnet 192.168.1.1\n# Username: admin  Password: admin\n\n# IP 카메라\ncurl -u admin:12345 http://192.168.1.50/api/system/status",
+      "out": "[기본 계정 테스트 결과]\n\n192.168.1.1 (Cisco Router):\n  admin/admin → 성공! ⚠️\n  enable: cisco → 성공! (Level 15)\n\n192.168.1.50 (Hikvision Camera):\n  admin/12345 → 성공! ⚠️\n  권한: Administrator (PTZ, 녹화)\n\n192.168.1.100 (Synology NAS):\n  admin/admin → 실패 ✓ (변경됨)\n\n192.168.1.200 (HP Printer):\n  admin/(빈) → 성공! ⚠️\n  권한: 관리자 (네트워크 설정)\n\n결과: 4대 중 3대 기본 계정 사용",
+      "def": "[SIEM] Multiple default credential logins — 3 devices compromised with factory passwords",
+      "defAction": "Tool: Hydra + Telnet + HTTP\nRouter: admin/admin (Level 15)\nCamera: admin/12345 (full control)\nPrinter: admin/(empty)\nNAS: Secured (changed)\nCompromised: 3/4 devices\nRisk Level: Critical\nAction: Change all default passwords immediately",
+      "desc": "Hydra로 기본 계정을 테스트하여 라우터, IP 카메라, 프린터 3대에 관리자로 접근합니다. NAS만 비밀번호가 변경되어 있었습니다.",
+      "descEn": "Test default credentials with Hydra. Successfully access router, camera, printer as admin. Only NAS had changed passwords.",
+      "stepTitle": "기본 계정 로그인 + 관리자 권한 획득",
+      "stepTitleEn": "Default Credential Login + Admin Access",
+      "feynman": "기본 열쇠(admin/admin)로 3개의 문을 열었습니다. 라우터는 네트워크 전체를 제어하고, 카메라는 모든 것을 녹화하며, 프린터는 네트워크 설정을 변경할 수 있습니다.",
+      "feynmanEn": "Opened 3 doors with factory keys. Router controls the entire network, camera records everything, printer changes network settings.",
+      "expert": "Hydra는 50개 이상의 프로토콜을 지원하는 병렬 네트워크 로그인 크래커입니다. Cisco IOS의 enable 비밀번호 'cisco'는 가장 흔한 기본값입니다. Hikvision은 2017년 이후 초기 비밀번호 변경을 강제하지만 구형 모델은 여전히 12345입니다.",
+      "expertEn": "Hydra is a parallel login cracker supporting 50+ protocols. Cisco IOS 'cisco' is the most common default enable password. Hikvision enforces password change since 2017 but older models still use 12345.",
+      "defTooltip": "🔐 3대 기본 계정 접근 성공!",
+      "defTooltipEn": "🔐 Default credential access on 3 devices!",
+      "hackerLog": { "title": "login.log", "lines": ["[08:20:00] Hydra 테스트 시작", "[08:20:05] 라우터 admin/admin 성공", "[08:20:10] 카메라 admin/12345 성공", "[08:20:15] 프린터 admin/(빈) 성공"] },
+      "terms": [
+        { "term": "Hydra", "def": "병렬 네트워크 로그인 크래커, 50+ 프로토콜 기본 자격증명 테스트" },
+        { "term": "Enable", "def": "Cisco IOS 특권 모드(Level 15) 접근 비밀번호" }
+      ]
+    },
+    {
+      "cmd": "# 장악된 라우터로 네트워크 확장\nshow running-config\nshow ip route\nshow ip arp\n\n# ACL 수정 (외부 접근 허용)\nconf t\naccess-list 101 permit ip any any\ninterface Gi0/1\n ip access-group 101 in\nexit",
+      "out": "[라우터 장악]\nRoutes: 내부 서브넷 5개\nARP: 활성 호스트 127대\nACL: 외부 접근 허용으로 변경 ⚠️\n\n[IP 카메라 장악]\nRTSP 스트리밍 접근 가능\nPTZ 원격 조작 가능\n저장 영상 30일분 접근\n\n[프린터 장악]\n인쇄 기록 1,247건\nSMB 스캔 문서 접근\nLDAP 설정에 AD 자격증명 노출\n\n[피해 범위]\n- 네트워크 구조 전체 노출\n- ACL 우회 외부 접근 허용\n- 127대 호스트 정보 수집\n- 기밀 문서/영상 접근 가능",
+      "def": "[SIEM] Router ACL modified — unauthorized external access, credential exposure from printer LDAP",
+      "defAction": "Tool: Cisco CLI + RTSP + SMB\nRouter: Full network visibility, ACL bypassed\nCamera: Video access + PTZ + 30-day archive\nPrinter: 1,247 jobs + LDAP credentials\nHosts: 127 discovered across 5 subnets\nRisk Level: Critical\nAction: Reset all devices, restore ACLs, rotate credentials",
+      "desc": "라우터 ACL을 수정하여 외부 접근을 허용하고, 전체 네트워크 구조를 파악합니다. IP 카메라 영상과 프린터의 LDAP 자격증명에 접근합니다.",
+      "descEn": "Modify router ACLs for external access, map entire network. Access IP camera footage and printer LDAP credentials.",
+      "stepTitle": "네트워크 장악 + ACL 수정 + 정보 수집",
+      "stepTitleEn": "Network Takeover + ACL Modification + Intelligence",
+      "feynman": "열린 문(기본 계정)으로 들어가 집 관리인(라우터)의 마스터키를 가져옵니다. 모든 방(서브넷)을 열고, CCTV(카메라)를 보고, 서류함(프린터)을 뒤집니다.",
+      "feynmanEn": "Enter through unlocked doors, take the caretaker's master keys. Open all rooms (subnets), watch CCTV (camera), search filing cabinets (printer).",
+      "expert": "Cisco ACL의 'permit ip any any'는 가장 위험한 규칙입니다. RTSP(포트 554)는 기본적으로 암호화 없이 영상을 전송합니다. 프린터의 LDAP 설정에는 AD 바인드 자격증명이 평문으로 저장되는 경우가 많습니다.",
+      "expertEn": "Cisco ACL 'permit ip any any' is the most dangerous rule. RTSP streams video without encryption. Printer LDAP settings often store AD bind credentials in cleartext.",
+      "defTooltip": "🔐 ACL 수정! 127대 호스트 노출!",
+      "defTooltipEn": "🔐 ACL modified! 127 hosts exposed!",
+      "hackerLog": { "title": "takeover.log", "lines": ["[08:30:00] 라우터 설정 확인", "[08:35:00] ACL 수정 (외부 허용)", "[08:40:00] 카메라 RTSP 접근", "[08:45:00] 프린터 LDAP 자격증명 탈취"] },
+      "terms": [
+        { "term": "ACL", "def": "Access Control List, 네트워크 트래픽 허용/차단 규칙 목록" },
+        { "term": "RTSP", "def": "Real Time Streaming Protocol, IP 카메라 실시간 영상 스트리밍" }
+      ]
+    },
+    {
+      "cmd": "# 기본 계정 방어 종합\nnmap --script default-credentials 192.168.1.0/24\n\n# IoT 격리 VLAN\nvlan 100\n name IoT_Isolated\ninterface range Gi0/1-24\n switchport access vlan 100\n\n# 텔넷 비활성화\nline vty 0 4\n transport input ssh\n no transport input telnet",
+      "out": "[기본 계정 방어]\n✅ 모든 장비 초기 비밀번호 변경 강제\n✅ 복잡도: 12자 이상, 대소문자+숫자+특수\n✅ 분기별 기본 계정 스캔 자동화\n\n[네트워크 세분화]\n✅ IoT 전용 VLAN 격리 (VLAN 100)\n✅ IoT → 서버 통신 차단\n✅ 관리 VLAN 별도 분리 (VLAN 999)\n✅ 외부 관리 포트 차단\n\n[접근 제어]\n✅ 텔넷 비활성화, SSH만 허용\n✅ 실패 5회 → 계정 잠금\n✅ 802.1X 포트 인증\n✅ NAC 보안 상태 점검\n\n[모니터링]\n✅ 기본 계정 시도 알림\n✅ 장비 설정 변경 실시간 감지\n✅ CMDB 자산 관리\n✅ 벤더 보안 업데이트 자동 알림",
+      "def": "[SIEM] Default account defense deployed — forced password change, IoT isolation, credential scanning",
+      "defAction": "Tool: Credential scanner + VLAN + SSH + NAC\nPassword: Forced change, 12+ chars\nNetwork: IoT VLAN isolated\nAccess: SSH only, 5-attempt lockout, 802.1X\nScanning: Quarterly automated checks\nAsset: CMDB registration\nRisk Level: Low (with implementation)\nAction: Maintain quarterly scans",
+      "desc": "모든 장비의 기본 비밀번호를 강제 변경하고, IoT를 별도 VLAN으로 격리합니다. 텔넷 비활성화, 802.1X NAC, 분기별 기본 계정 스캔을 적용합니다.",
+      "descEn": "Force default password changes, isolate IoT in VLANs. Disable Telnet, implement 802.1X NAC, quarterly credential scanning.",
+      "stepTitle": "강제 변경 + VLAN 격리 + NAC + 모니터링",
+      "stepTitleEn": "Forced Change + VLAN Isolation + NAC + Monitoring",
+      "feynman": "4가지 대책: 1) 새 장비는 반드시 자물쇠를 바꾼다, 2) IoT를 별도 건물에 격리한다, 3) 분기마다 기본 열쇠로 열리는지 점검한다, 4) 기본 열쇠 시도 시 경보를 울린다.",
+      "feynmanEn": "4 measures: 1) Always change locks on new equipment, 2) Isolate IoT in separate buildings, 3) Quarterly checks for default keys, 4) Alert on factory key attempts.",
+      "expert": "IEEE 802.1X는 포트 기반 네트워크 접근 제어 표준입니다. NAC(Network Access Control)은 장비의 보안 상태(패치, 비밀번호 변경 등)를 확인한 후 접근을 허용합니다. Nmap의 default-credentials NSE 스크립트는 다양한 프로토콜의 기본 자격증명을 자동 테스트합니다.",
+      "expertEn": "IEEE 802.1X is port-based NAC standard. NAC checks device security posture before granting access. Nmap default-credentials NSE script auto-tests credentials across protocols.",
+      "defTooltip": "🔐 기본 계정 방어 + IoT 격리 완성!",
+      "defTooltipEn": "🔐 Default account defense + IoT isolation!",
+      "hackerLog": { "title": "defense.log", "lines": ["[09:00:00] 기본 비밀번호 강제 변경", "[09:05:00] IoT VLAN 격리", "[09:10:00] 텔넷 비활성화", "[09:15:00] 기본 계정 스캐너 배포"] },
+      "terms": [
+        { "term": "NAC", "def": "Network Access Control, 보안 상태 확인 후 네트워크 접근 허용 시스템" },
+        { "term": "802.1X", "def": "포트 기반 네트워크 접근 제어 표준, RADIUS 인증 후 네트워크 접근 허용" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "hydra",
+    "pid": 5000,
+    "children": [
+      {
+        "name": "telnet (admin/admin)",
+        "pid": 5100,
+        "children": [
+          { "name": "cisco_ios_shell (Level 15)", "pid": 5110, "children": [] }
+        ]
+      }
+    ]
+  }
+}

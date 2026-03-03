@@ -1,0 +1,194 @@
+{
+  "id": "T1564.001",
+  "title": "Hidden Files and Directories 시뮬레이션",
+  "titleEn": "Hidden Files and Directories Simulation",
+  "duration": 7,
+  "phases": [
+    { "label": "📁 파일 숨기기", "labelEn": "📁 File Hiding", "steps": [0] },
+    { "label": "🔍 ADS 활용", "labelEn": "🔍 ADS Usage", "steps": [1] },
+    { "label": "🐧 Linux 숨기기", "labelEn": "🐧 Linux Hiding", "steps": [2] },
+    { "label": "🛡️ 탐지 기법", "labelEn": "🛡️ Detection", "steps": [3, 4] }
+  ],
+  "topoNodes": [
+    { "id": "attacker", "label": "Attacker\n(Foothold)", "x": 50, "y": 80 },
+    { "id": "hidden", "label": "Hidden\nFiles", "x": 200, "y": 30 },
+    { "id": "ads", "label": "Alternate\nData Stream", "x": 200, "y": 130 },
+    { "id": "persist", "label": "Persistence\nAchieved", "x": 380, "y": 80 },
+    { "id": "detect", "label": "Detection\n& Response", "x": 480, "y": 80 }
+  ],
+  "topoEdges": [
+    { "from": "attacker", "to": "hidden", "minStep": 0 },
+    { "from": "attacker", "to": "ads", "minStep": 1 },
+    { "from": "hidden", "to": "persist", "minStep": 2 },
+    { "from": "persist", "to": "detect", "minStep": 3 }
+  ],
+  "desktopIcons": [
+    { "name": "Terminal", "icon": "🖥️" },
+    { "name": "File Explorer", "icon": "📁" },
+    { "name": "Sysmon", "icon": "🔍" },
+    { "name": "OSSEC", "icon": "🛡️" },
+    { "name": "PowerShell", "icon": "⚡" }
+  ],
+  "steps": [
+    {
+      "cmd": "attrib +H +S C:\\Users\\victim\\AppData\\Local\\Temp\\payload.exe\nattrib +H +S C:\\Users\\victim\\AppData\\Local\\Temp\\config.dat\ndir /AH C:\\Users\\victim\\AppData\\Local\\Temp\\",
+      "out": " Volume in drive C is Windows\n Directory of C:\\Users\\victim\\AppData\\Local\\Temp\n\n01/20/2026  09:15    <DIR>          .\n01/20/2026  09:15    <DIR>          ..\n01/20/2026  09:15           245,760 payload.exe\n01/20/2026  09:15             4,096 config.dat\n               2 File(s)        249,856 bytes\n\n[확인] 일반 dir 명령:\n C:\\Users\\victim\\AppData\\Local\\Temp>\n (파일 0개 표시 - 숨김 속성으로 보이지 않음)\n\n[속성 확인]\npayload.exe: A  SH  (Archive + System + Hidden)\nconfig.dat:  A  SH  (Archive + System + Hidden)",
+      "def": "[Sysmon Event ID 11] File attribute change - Hidden+System flags set on executable",
+      "defAction": "Tool: attrib command (Windows)\nFiles Hidden: payload.exe, config.dat\nAttributes: Hidden + System\nLocation: %TEMP% directory\nRisk Level: High\nAction: Monitor attrib command usage, scan for hidden executables",
+      "desc": "공격자가 attrib +H +S 명령으로 악성 페이로드와 설정 파일을 숨깁니다. Hidden과 System 속성이 함께 설정되면 '보호된 운영 체제 파일 숨기기' 옵션까지 해제해야 볼 수 있습니다.",
+      "descEn": "The attacker hides malicious payload and config files with attrib +H +S. When both Hidden and System attributes are set, users must disable 'Hide protected OS files' to see them.",
+      "stepTitle": "attrib +H +S로 악성 파일에 숨김/시스템 속성 부여",
+      "stepTitleEn": "Apply Hidden+System Attributes to Malicious Files",
+      "feynman": "건물에 비밀 방을 만들고, 벽지와 같은 색의 문(숨김 속성)을 달고, '관계자 외 출입금지'(시스템 속성) 표지판을 붙이는 것입니다. 일반인은 문이 있는지조차 모르고, 설령 찾더라도 시스템 파일이라 건드리지 않습니다.",
+      "feynmanEn": "Creating a secret room with a door that matches the wallpaper (hidden attribute) and a 'Staff Only' sign (system attribute). Regular people don't even know the door exists, and if found, they leave it alone thinking it's a system file.",
+      "expert": "attrib +H는 FILE_ATTRIBUTE_HIDDEN(0x2), +S는 FILE_ATTRIBUTE_SYSTEM(0x4) 플래그를 설정합니다. Explorer는 기본적으로 H 파일을 숨기며, S+H 조합은 'Hide protected operating system files' 옵션까지 해제해야 표시됩니다. cmd의 dir은 기본적으로 H,S 파일을 제외하며, /AH 플래그로 표시 가능합니다.",
+      "expertEn": "attrib +H sets FILE_ATTRIBUTE_HIDDEN(0x2), +S sets FILE_ATTRIBUTE_SYSTEM(0x4). Explorer hides H files by default; S+H combo requires disabling 'Hide protected OS files.' cmd's dir excludes H,S files by default, visible with /AH.",
+      "defTooltip": "🔐 payload.exe에 Hidden+System 속성! 탐색기에서 보이지 않음!",
+      "defTooltipEn": "🔐 Hidden+System attributes on payload.exe! Invisible in Explorer!",
+      "hackerLog": {
+        "title": "hide_files.log",
+        "lines": [
+          "[09:15:00] attrib +H +S payload.exe 실행",
+          "[09:15:01] attrib +H +S config.dat 실행",
+          "[09:15:02] 숨김 확인: dir에서 0개 파일 표시",
+          "[09:15:03] dir /AH로만 확인 가능"
+        ]
+      },
+      "terms": [
+        { "term": "attrib", "def": "Windows 파일 속성(Hidden, System, ReadOnly 등)을 변경하는 명령" },
+        { "term": "FILE_ATTRIBUTE_HIDDEN", "def": "파일을 일반 디렉터리 목록에서 숨기는 Windows 파일 속성 플래그" }
+      ]
+    },
+    {
+      "cmd": "type C:\\malware\\beacon.exe > C:\\Users\\victim\\Desktop\\readme.txt:hidden.exe\ndir /R C:\\Users\\victim\\Desktop\\readme.txt",
+      "out": " Volume in drive C is Windows\n Directory of C:\\Users\\victim\\Desktop\n\n01/20/2026  09:20              127 readme.txt\n                               245,760 readme.txt:hidden.exe:$DATA\n               1 File(s)            127 bytes\n\n[ADS 분석]\nreadme.txt: 127 bytes (정상 텍스트)\nreadme.txt:hidden.exe: 245,760 bytes (악성 페이로드!)\n\n실행 방법: wmic process call create \"C:\\Users\\victim\\Desktop\\readme.txt:hidden.exe\"",
+      "def": "[Sysmon Event ID 15] Alternate Data Stream created on readme.txt",
+      "defAction": "Tool: NTFS Alternate Data Streams\nHost File: readme.txt (127 bytes)\nADS: readme.txt:hidden.exe (245,760 bytes)\nContent: Malicious executable hidden in ADS\nRisk Level: Critical\nAction: Scan all files for ADS, remove malicious streams",
+      "desc": "NTFS의 Alternate Data Streams(ADS) 기능을 악용하여 정상 텍스트 파일 뒤에 악성 실행 파일을 숨깁니다. readme.txt는 127바이트로 보이지만, ADS에 245KB 악성코드가 숨어 있습니다.",
+      "descEn": "Abusing NTFS Alternate Data Streams (ADS) to hide a malicious executable behind a normal text file. readme.txt appears as 127 bytes, but 245KB of malware is hidden in its ADS.",
+      "stepTitle": "NTFS ADS를 이용한 악성 페이로드 은닉",
+      "stepTitleEn": "Hide Malicious Payload Using NTFS Alternate Data Streams",
+      "feynman": "정상적인 메모장 파일(readme.txt) 뒤에 보이지 않는 비밀 주머니(ADS)를 만들어 악성코드를 넣는 것입니다. 파일 크기도 127바이트로 표시되므로 의심할 수 없습니다. dir /R 명령으로만 비밀 주머니의 존재를 확인할 수 있습니다.",
+      "feynmanEn": "Creating an invisible secret pocket (ADS) behind a normal notepad file (readme.txt) to store malware. File size shows 127 bytes, raising no suspicion. Only dir /R reveals the secret pocket.",
+      "expert": "NTFS ADS는 파일에 여러 데이터 스트림을 저장할 수 있는 기능입니다. 기본 스트림($DATA)은 일반 파일 내용이며, 추가 스트림은 filename:streamname 형식입니다. dir /R 또는 PowerShell Get-Item -Stream *으로 탐지 가능합니다. Sysmon Event ID 15(FileCreateStreamHash)가 ADS 생성을 기록합니다.",
+      "expertEn": "NTFS ADS allows multiple data streams per file. The default stream ($DATA) contains normal content; additional streams use filename:streamname format. Detectable via dir /R or Get-Item -Stream *. Sysmon Event ID 15 logs ADS creation.",
+      "defTooltip": "🔐 readme.txt에 245KB ADS 숨김! 보이지 않는 악성코드!",
+      "defTooltipEn": "🔐 245KB ADS hidden in readme.txt! Invisible malware!",
+      "hackerLog": {
+        "title": "ads_hide.log",
+        "lines": [
+          "[09:20:00] ADS 생성: readme.txt:hidden.exe",
+          "[09:20:02] 페이로드 크기: 245,760 bytes",
+          "[09:20:03] dir로 확인: 127 bytes만 표시",
+          "[09:20:05] dir /R로 ADS 확인 가능"
+        ]
+      },
+      "terms": [
+        { "term": "ADS", "def": "Alternate Data Streams, NTFS 파일에 숨겨진 추가 데이터 스트림" },
+        { "term": "NTFS", "def": "New Technology File System, Windows의 기본 파일 시스템" }
+      ]
+    },
+    {
+      "cmd": "mkdir -p /tmp/.cache/.config\nmv /opt/backdoor /tmp/.cache/.config/.update_svc\nchmod +x /tmp/.cache/.config/.update_svc\nls -la /tmp/.cache/.config/",
+      "out": "total 256\ndrwxr-xr-x 2 root root   4096 Jan 20 09:25 .\ndrwxr-xr-x 3 root root   4096 Jan 20 09:25 ..\n-rwxr-xr-x 1 root root 245760 Jan 20 09:25 .update_svc\n\n[일반 ls 결과]\n$ ls /tmp/.cache/.config/\n(출력 없음 - 도트 파일이므로 보이지 않음)\n\n[추가 은닉]\n$ cp /opt/exfil_data /dev/shm/.tmp_cache\n$ ls /dev/shm/\n(도트 파일이므로 보이지 않음, 재부팅 시 삭제됨)",
+      "def": "[auditd] Hidden file created in /tmp with execute permission",
+      "defAction": "Tool: Linux dot-file hiding + /dev/shm\nHidden Files:\n  /tmp/.cache/.config/.update_svc (245KB, executable)\n  /dev/shm/.tmp_cache (exfiltration data)\nRisk Level: High\nAction: Scan for hidden executables, monitor /dev/shm",
+      "desc": "Linux에서 파일명 앞에 점(.)을 붙여 숨김 파일을 만듭니다. 다중 중첩 숨김 디렉터리(.cache/.config)에 도트 파일(.update_svc)을 배치합니다. /dev/shm은 메모리 파일시스템으로 재부팅 시 흔적이 삭제됩니다.",
+      "descEn": "On Linux, files are hidden by prefixing with a dot (.). Multiple nested hidden directories (.cache/.config) host the dot-file (.update_svc). /dev/shm is a memory filesystem that clears on reboot.",
+      "stepTitle": "Linux 도트 파일과 /dev/shm을 이용한 은닉",
+      "stepTitleEn": "Linux Dot-File and /dev/shm Hiding Techniques",
+      "feynman": "Linux에서는 파일 이름 앞에 점(.)을 붙이면 '보이지 않는 방'이 됩니다. 보이지 않는 복도 안에 보이지 않는 방을 만들어(.cache/.config/.update_svc) 찾기 더 어렵게 합니다. /dev/shm은 '자폭 장치가 달린 방'으로, 전원이 꺼지면 증거가 사라집니다.",
+      "feynmanEn": "On Linux, adding a dot (.) to a filename creates an 'invisible room.' Creating invisible rooms inside invisible hallways (.cache/.config/.update_svc) makes it harder to find. /dev/shm is a 'self-destructing room' that disappears on power off.",
+      "expert": "Linux/UNIX에서 ls는 기본적으로 도트 파일을 제외합니다(-a 플래그 필요). 공격자는 .bash_profile, .cache 등 정상적인 도트 디렉터리 구조를 모방합니다. /dev/shm은 tmpfs(RAM 기반)로 디스크 포렌식에서 발견 불가합니다. auditd의 -w 옵션으로 /dev/shm과 /tmp 디렉터리 감시가 필요합니다.",
+      "expertEn": "Linux/UNIX ls excludes dot files by default (-a flag needed). Attackers mimic normal dot-directory structures like .bash_profile, .cache. /dev/shm is tmpfs (RAM-based), unrecoverable in disk forensics. auditd -w monitoring of /dev/shm and /tmp is needed.",
+      "defTooltip": "🔐 다중 중첩 숨김 디렉터리 + /dev/shm 은닉!",
+      "defTooltipEn": "🔐 Multiple nested hidden directories + /dev/shm hiding!",
+      "hackerLog": {
+        "title": "linux_hide.log",
+        "lines": [
+          "[09:25:00] 숨김 디렉터리 생성: /tmp/.cache/.config/",
+          "[09:25:02] 백도어 이동: .update_svc (도트 파일)",
+          "[09:25:04] 실행 권한 부여: chmod +x",
+          "[09:25:06] /dev/shm에 유출 데이터 은닉"
+        ]
+      },
+      "terms": [
+        { "term": "Dot File", "def": "파일명이 점(.)으로 시작하는 Linux/UNIX 숨김 파일" },
+        { "term": "/dev/shm", "def": "메모리 기반 임시 파일시스템, 재부팅 시 삭제됨" }
+      ]
+    },
+    {
+      "cmd": "Get-ChildItem -Path C:\\ -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { $_.Attributes -match 'Hidden' -and $_.Extension -in '.exe','.dll','.ps1','.bat' } | Select-Object FullName,Length,LastWriteTime,Attributes",
+      "out": "FullName                                          Length LastWriteTime         Attributes\n--------                                          ------ -------------         ----------\nC:\\Users\\victim\\AppData\\Local\\Temp\\payload.exe   245760 1/20/2026 09:15:00    Hidden, System, Archive\nC:\\ProgramData\\.update\\svc32.exe                  89088 1/20/2026 08:45:00    Hidden, System, Archive\nC:\\Windows\\Temp\\debug.dll                        156672 1/19/2026 23:30:00    Hidden, Archive\nC:\\Users\\victim\\AppData\\Roaming\\schtask.bat        2048 1/20/2026 09:10:00    Hidden, Archive\n\n[결과] 4개 의심스러운 숨김 실행 파일 발견\n[위험도] payload.exe, svc32.exe: Hidden+System (최고 위험)",
+      "def": "[EDR] 4 hidden executable files detected across filesystem",
+      "defAction": "Tool: PowerShell recursive hidden file scan\nHidden Executables Found: 4\nHighest Risk: payload.exe, svc32.exe (H+S attributes)\nFile Types: .exe(2), .dll(1), .bat(1)\nAction: Quarantine all 4 files, submit to sandbox",
+      "desc": "PowerShell로 전체 파일시스템에서 숨김 속성이 설정된 실행 파일(.exe, .dll, .ps1, .bat)을 재귀적으로 검색합니다. 4개의 의심스러운 파일이 발견됩니다.",
+      "descEn": "PowerShell recursively searches the entire filesystem for executable files with Hidden attributes. 4 suspicious files are discovered.",
+      "stepTitle": "전체 파일시스템에서 숨김 실행 파일 검색",
+      "stepTitleEn": "Search Entire Filesystem for Hidden Executable Files",
+      "feynman": "건물 전체를 돌며 비밀 방을 찾는 특수 탐지 장비(PowerShell)를 사용합니다. 벽 뒤에 숨겨진 모든 방을 스캔하고, 그 중 위험물(실행 파일)이 있는 방 4개를 발견합니다. 특히 '관계자 외 출입금지' 표지판까지 달린 2개 방이 가장 위험합니다.",
+      "feynmanEn": "Using special detection equipment (PowerShell) to scan the entire building for secret rooms. All rooms hidden behind walls are scanned, finding 4 with dangerous items (executables). The 2 with 'Staff Only' signs are most dangerous.",
+      "expert": "Get-ChildItem -Force는 Hidden/System 파일을 포함하여 열거합니다. Where-Object 필터로 실행 가능한 확장자만 선별합니다. 정상 시스템에서도 일부 Hidden 파일이 존재하므로, 위치(Temp, ProgramData), 서명 상태, 생성 시간을 기준으로 비정상 파일을 구분합니다. Hash 값을 VirusTotal API와 비교하면 정확한 판별이 가능합니다.",
+      "expertEn": "Get-ChildItem -Force enumerates including Hidden/System files. Where-Object filters for executable extensions. Normal systems have some Hidden files, so location (Temp, ProgramData), signature, and creation time distinguish abnormal files.",
+      "defTooltip": "🔐 4개 숨김 실행 파일 탐지! payload.exe가 최고 위험!",
+      "defTooltipEn": "🔐 4 hidden executables detected! payload.exe is highest risk!",
+      "hackerLog": {
+        "title": "hunt_hidden.log",
+        "lines": [
+          "[10:00:00] 전체 파일시스템 숨김 파일 스캔 시작",
+          "[10:02:30] 스캔 완료: 4개 의심 파일 발견",
+          "[10:02:31] 최고 위험: payload.exe (H+S)",
+          "[10:02:35] 모든 파일 해시 수집 완료"
+        ]
+      },
+      "terms": [
+        { "term": "FIM", "def": "File Integrity Monitoring, 파일 변경을 실시간 감시하는 보안 메커니즘" },
+        { "term": "Get-ChildItem -Force", "def": "PowerShell에서 숨김 파일을 포함하여 모든 파일을 나열하는 명령" }
+      ]
+    },
+    {
+      "cmd": "Get-Item -Path C:\\Users\\victim\\Desktop\\*.* -Stream * | Where-Object { $_.Stream -ne ':$DATA' }\nforensic_scan --ads --hidden --output report.json",
+      "out": "PSPath        : C:\\Users\\victim\\Desktop\\readme.txt::hidden.exe:$DATA\nPSParentPath  : C:\\Users\\victim\\Desktop\nFileName      : C:\\Users\\victim\\Desktop\\readme.txt\nStream        : hidden.exe\nLength        : 245760\n\n[Forensic Scan Report]\n{\n  \"hidden_files\": 4,\n  \"ads_streams\": 1,\n  \"linux_dotfiles\": 3,\n  \"devshm_files\": 1,\n  \"total_suspicious\": 9,\n  \"risk_level\": \"CRITICAL\",\n  \"recommendations\": [\n    \"Quarantine all 9 files immediately\",\n    \"Enable Sysmon Event ID 11, 15\",\n    \"Deploy FIM on critical directories\",\n    \"Block attrib.exe for non-admin users\"\n  ]\n}",
+      "def": "[SIEM] Comprehensive hidden artifact scan - 9 suspicious items across Windows and Linux",
+      "defAction": "Tool: ADS scan + comprehensive forensic analysis\nTotal Findings: 9 suspicious items\n  Hidden Files: 4 (Windows)\n  ADS Streams: 1 (NTFS)\n  Dot Files: 3 (Linux)\n  /dev/shm: 1 (Linux)\nRisk Level: Critical\nAction: Full incident response, quarantine all, deploy Sysmon rules",
+      "desc": "ADS 스캔과 종합 포렌식 분석으로 Windows 숨김 파일 4개, ADS 1개, Linux 도트 파일 3개, /dev/shm 1개 등 총 9개 의심 아티팩트를 발견합니다. Sysmon Event ID 11/15 배포와 FIM 적용을 권고합니다.",
+      "descEn": "ADS scan and comprehensive forensic analysis discovers 9 suspicious artifacts: 4 Windows hidden files, 1 ADS, 3 Linux dot files, 1 /dev/shm. Recommends deploying Sysmon Event ID 11/15 and FIM.",
+      "stepTitle": "종합 포렌식 분석: 모든 은닉 아티팩트 발견",
+      "stepTitleEn": "Comprehensive Forensic Analysis: All Hidden Artifacts Discovered",
+      "feynman": "건물(Windows)과 주차장(Linux) 전체를 특수 장비로 완전히 스캔합니다. 비밀 방 4개, 비밀 주머니 1개, 보이지 않는 방 3개, 자폭 장치가 달린 방 1개를 모두 찾아냅니다. 앞으로 비밀 방이 만들어지면 즉시 알림이 오도록 감시 시스템(Sysmon/FIM)을 설치합니다.",
+      "feynmanEn": "Completely scanning the building (Windows) and parking garage (Linux) with special equipment. Finding 4 secret rooms, 1 secret pocket, 3 invisible rooms, and 1 self-destructing room. Installing monitoring (Sysmon/FIM) to alert when new secret rooms are created.",
+      "expert": "Get-Item -Stream *은 모든 ADS를 열거하며, :$DATA가 아닌 스트림이 추가 데이터를 나타냅니다. 종합 포렌식은 FILE_ATTRIBUTE_HIDDEN 플래그, NTFS $MFT의 $DATA 속성, Linux inode 분석을 포함합니다. Sysmon Event ID 11(FileCreate)과 15(FileCreateStreamHash)를 조합하면 실시간 탐지가 가능합니다.",
+      "expertEn": "Get-Item -Stream * enumerates all ADS; non-:$DATA streams indicate additional data. Comprehensive forensics includes FILE_ATTRIBUTE_HIDDEN flags, NTFS $MFT $DATA attributes, and Linux inode analysis. Sysmon Events 11+15 enable real-time detection.",
+      "defTooltip": "🔐 종합 스캔 완료: 9개 은닉 아티팩트 발견!",
+      "defTooltipEn": "🔐 Comprehensive scan complete: 9 hidden artifacts found!",
+      "hackerLog": {
+        "title": "forensic_summary.log",
+        "lines": [
+          "[10:10:00] ADS 스캔: readme.txt:hidden.exe 발견",
+          "[10:10:05] 종합 포렌식 시작: Windows + Linux",
+          "[10:10:30] 총 9개 의심 아티팩트 식별",
+          "[10:10:35] 대응: 격리 + Sysmon 규칙 배포"
+        ]
+      },
+      "terms": [
+        { "term": "Sysmon Event ID 15", "def": "NTFS ADS(Alternate Data Stream) 생성을 기록하는 이벤트" },
+        { "term": "Artifact", "def": "포렌식 분석에서 발견되는 디지털 증거물" }
+      ]
+    }
+  ],
+  "processTree": {
+    "name": "cmd.exe",
+    "pid": 3200,
+    "children": [
+      { "name": "attrib.exe", "pid": 3201, "children": [] },
+      { "name": "type (redirect to ADS)", "pid": 3202, "children": [] },
+      {
+        "name": "powershell.exe",
+        "pid": 3203,
+        "children": [
+          { "name": "Get-ChildItem -Force", "pid": 3204, "children": [] }
+        ]
+      }
+    ]
+  }
+}

