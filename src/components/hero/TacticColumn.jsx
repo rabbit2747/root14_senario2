@@ -17,9 +17,11 @@ export default function TacticColumn({ tactic, isActiveTactic, language = 'ko', 
         <h3 className="text-[10px] md:text-xs font-bold text-white tracking-wide leading-tight">
           {tactic.title}
         </h3>
-        <p className="text-[8px] md:text-[9px] text-white/70 mt-0.5">
-          {tactic.titleKo}
-        </p>
+        {language === 'ko' && (
+          <p className="text-[8px] md:text-[9px] text-white/70 mt-0.5">
+            {tactic.titleKo}
+          </p>
+        )}
       </div>
 
       {/* 카드 컨테이너 — 글래스 모피즘 */}

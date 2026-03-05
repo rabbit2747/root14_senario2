@@ -354,7 +354,7 @@ export default function DetailPanel({
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-                전체 분석 리포트 보기
+                {ht.viewFullReport || '전체 분석 리포트 보기'}
               </motion.button>
             </motion.div>
           </>

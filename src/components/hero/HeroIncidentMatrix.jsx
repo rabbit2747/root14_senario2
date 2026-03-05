@@ -705,7 +705,7 @@ export default function HeroIncidentMatrix({
                       </span>
                     </div>
                     <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                      {currentIncidentObj.description?.[language] || currentIncidentObj.description?.ko}
+                      {currentIncidentObj.description?.[language] || currentIncidentObj.description?.en || currentIncidentObj.description?.ko}
                     </p>
                   </div>
                 </div>

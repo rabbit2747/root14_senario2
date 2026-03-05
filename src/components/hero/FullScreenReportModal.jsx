@@ -143,7 +143,7 @@ export default function FullScreenReportModal({ incident, language, isDark, onCl
             {/* ── 본문 ── */}
             <div className="p-5 space-y-4">
               <p className={`text-sm leading-relaxed ${textSub}`}>
-                {incident.description?.[language] || incident.description?.ko}
+                {incident.description?.[language] || incident.description?.en || incident.description?.ko}
               </p>
               <div className={`border-t ${divider}`} />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
