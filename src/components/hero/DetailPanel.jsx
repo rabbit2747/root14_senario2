@@ -215,7 +215,7 @@ export default function DetailPanel({
                   {activeCardData.attackVector && (
                     <motion.div variants={panelItem}>
                       <div className={`text-[8px] font-bold uppercase tracking-wider mb-0.5 ${textMuted}`}>
-                        Attack Vector
+                        {ht.detailAttackVector || 'Attack Vector'}
                       </div>
                       <p className={`text-[9px] leading-relaxed ${textMain}`}>
                         {activeCardData.attackVector}
@@ -324,7 +324,7 @@ export default function DetailPanel({
               {activeCardData.attackVector && (
                 <div className="mb-3">
                   <div className={`text-[9px] font-bold uppercase tracking-wider mb-1 ${textMuted}`}>
-                    Attack Vector
+                    {ht.detailAttackVector || 'Attack Vector'}
                   </div>
                   <p className={`text-xs leading-relaxed ${textMain}`}>{activeCardData.attackVector}</p>
                 </div>
@@ -334,7 +334,7 @@ export default function DetailPanel({
               {activeCardData.affectedOrgs && (
                 <div className="mb-4">
                   <div className={`text-[9px] font-bold uppercase tracking-wider mb-1 ${textMuted}`}>
-                    Affected
+                    {ht.detailAffected || 'Affected'}
                   </div>
                   <p className={`text-xs leading-relaxed ${textMain}`}>{activeCardData.affectedOrgs}</p>
                 </div>

@@ -103,6 +103,8 @@ export const TACTICS = [
           zh: '俄罗斯APT29组织在SolarWinds Orion软件更新中植入SUNBURST后门，伪装成合法数字签名的更新，渗透了美国财政部、国土安全部等18,000多个组织，持续9个月未被发现。被评为史上最精密的供应链攻击。',
           hi: 'रूसी APT29 ने SolarWinds Orion सॉफ़्टवेयर अपडेट में SUNBURST बैकडोर डाला। वैध डिजिटल हस्ताक्षरों से छिपकर, यह 9 महीने तक 18,000+ संगठनों में अनदेखा रहा — जिसमें अमेरिकी ट्रेज़री, DHS, Microsoft और FireEye शामिल हैं।',
           ja: 'ロシアのAPT29がSolarWinds Orionソフトウェア更新にSUNBURSTバックドアを埋め込みました。正規のデジタル署名で偽装し、米財務省・DHS・Microsoft・FireEyeなど18,000以上の組織に9ヶ月間検知されずに侵入しました。史上最も精巧なサプライチェーン攻撃と評価されています。',
+          vi: 'Nhóm APT29 của Nga (Cozy Bear) đã cài cắm backdoor SUNBURST vào các bản cập nhật phần mềm SolarWinds Orion. Được ngụy trang bằng chữ ký số hợp lệ, phần mềm độc hại này xâm nhập hơn 18.000 tổ chức — bao gồm Bộ Tài chính Mỹ, DHS, Microsoft và FireEye — mà không bị phát hiện trong 9 tháng. Đây được coi là cuộc tấn công chuỗi cung ứng tinh vi nhất trong lịch sử.',
+          ar: 'زرعت مجموعة APT29 الروسية (Cozy Bear) الباب الخلفي SUNBURST في تحديثات برنامج SolarWinds Orion. تنكّرت في هيئة تحديثات موقّعة رقمياً وتسللت إلى أكثر من 18,000 مؤسسة — من بينها وزارة الخزانة الأمريكية وDHS وMicrosoft وFireEye — دون اكتشاف لمدة 9 أشهر. يُعد هذا الهجوم الأكثر تعقيداً في سلسلة التوريد على مر التاريخ.',
         },
         detailedInfo: {
           attackVector: {
@@ -144,6 +146,8 @@ export const TACTICS = [
           zh: '2021年12月发现的Apache Log4j漏洞被称为"史上最严重的单一漏洞"。仅一行字符串即可实现远程代码执行，影响了从Minecraft到iCloud、AWS等数十亿设备。公开48小时内就检测到80万+次攻击，93%的云环境存在漏洞。',
           hi: '2021 में खोजी गई Apache Log4j भेद्यता को "इतिहास की सबसे गंभीर एकल भेद्यता" कहा जाता है। एक स्ट्रिंग से रिमोट कोड एक्ज़ीक्यूशन संभव था, Minecraft से लेकर iCloud, AWS तक अरबों डिवाइस प्रभावित हुए। 48 घंटों में 8 लाख+ हमले हुए।',
           ja: '2021年12月に発見されたApache Log4j脆弱性は「史上最も深刻な単一の脆弱性」と呼ばれています。たった1行の文字列でリモートコード実行が可能で、MinecraftからiCloud、AWS、Cloudflareまで数十億台が影響を受けました。公開48時間で80万件以上の攻撃が検知されました。',
+          vi: 'Lỗ hổng Apache Log4j (CVE-2021-44228) được phát hiện vào tháng 12/2021, được gọi là "lỗ hổng đơn lẻ nghiêm trọng nhất trong lịch sử". Chỉ một chuỗi ký tự duy nhất có thể thực thi mã từ xa, ảnh hưởng đến hàng tỷ thiết bị từ Minecraft đến Apple iCloud, AWS và Steam. Hơn 800.000 cuộc tấn công được phát hiện trong 48 giờ sau khi công bố, với 93% môi trường đám mây có lỗ hổng.',
+          ar: 'اكتُشفت ثغرة Apache Log4j (CVE-2021-44228) في ديسمبر 2021 وتُوصف بأنها "أخطر ثغرة منفردة في التاريخ". أتاحت سلسلة نصية واحدة تنفيذ أكواد عن بُعد، مما أثّر على مليارات الأجهزة من Minecraft إلى Apple iCloud وAWS وSteam. رُصدت أكثر من 800,000 محاولة هجوم خلال 48 ساعة من الإفصاح، مع وجود ثغرة في 93% من بيئات السحابة.',
         },
         detailedInfo: {
           attackVector: {
@@ -191,6 +195,8 @@ export const TACTICS = [
           zh: '2017年5月12日，朝鲜拉撒路组织开发的WannaCry勒索软件利用NSA泄露的EternalBlue漏洞在72小时内感染150个国家23万+台电脑。英国NHS医院系统瘫痪，手术被取消。总损失估计40-80亿美元。',
           hi: '12 मई 2017 को उत्तर कोरिया के Lazarus Group द्वारा विकसित WannaCry रैनसमवेयर ने NSA के लीक EternalBlue एक्सप्लॉइट का उपयोग कर 72 घंटों में 150 देशों के 2.3 लाख+ कंप्यूटर संक्रमित किए। ब्रिटेन के NHS अस्पताल ठप हो गए।',
           ja: '2017年5月12日、北朝鮮のLazarus Groupが開発したWannaCryランサムウェアが、NSAから流出したEternalBlueエクスプロイトを利用して72時間で150カ国23万台以上に感染。英国NHSの病院システムが麻痺し、手術がキャンセルされました。被害額は40〜80億ドルと推定されます。',
+          vi: 'Ngày 12/5/2017, ransomware WannaCry do nhóm Lazarus của Bắc Triều Tiên phát triển đã lây lan toàn cầu qua lỗ hổng EternalBlue rò rỉ từ NSA. Trong 72 giờ, hơn 230.000 máy tính tại 150 quốc gia bị nhiễm. Hệ thống bệnh viện NHS của Anh tê liệt — ca phẫu thuật bị hủy bỏ, bệnh nhân phải chuyển viện. Thiệt hại ước tính từ 4 đến 8 tỷ USD.',
+          ar: 'في 12 مايو 2017، انتشر برنامج الفدية WannaCry الذي طورته مجموعة Lazarus الكورية الشمالية عالمياً عبر ثغرة EternalBlue المسرّبة من NSA. في 72 ساعة فقط، أُصيب أكثر من 230,000 جهاز في 150 دولة. شُلّت أنظمة مستشفيات NHS البريطانية وأُلغيت العمليات الجراحية. تُقدَّر الأضرار بين 4 و8 مليارات دولار.',
         },
         detailedInfo: {
           attackVector: {
@@ -232,6 +238,8 @@ export const TACTICS = [
           zh: '2021年5月，DarkSide勒索组织攻击了美国最大燃油管道公司Colonial Pipeline。从一个泄露的VPN密码开始，导致东海岸45%燃油供应中断5天。加油站排长队，拜登总统宣布国家紧急状态。公司支付了440万美元比特币赎金。',
           hi: 'मई 2021 में DarkSide रैनसमवेयर ने अमेरिका की सबसे बड़ी ईंधन पाइपलाइन Colonial Pipeline पर हमला किया। एक लीक VPN पासवर्ड से शुरू हुआ यह हमला 5 दिन तक पूर्वी तट की 45% ईंधन आपूर्ति बंद कर दिया। राष्ट्रपति बाइडन ने राष्ट्रीय आपातकाल घोषित किया।',
           ja: '2021年5月、DarkSideランサムウェアグループが米国最大の燃料パイプラインColonial Pipelineを攻撃。流出したVPNパスワード1つから始まり、東海岸の燃料供給の45%が5日間停止。バイデン大統領が国家非常事態を宣言しました。440万ドルのビットコイン身代金が支払われました。',
+          vi: 'Tháng 5/2021, nhóm ransomware DarkSide tấn công Colonial Pipeline — đường ống nhiên liệu lớn nhất nước Mỹ. Chỉ từ một mật khẩu VPN bị rò rỉ, cuộc tấn công làm gián đoạn 45% nguồn cung nhiên liệu bờ Đông trong 5 ngày. Tổng thống Biden tuyên bố tình trạng khẩn cấp quốc gia và công ty đã trả 4,4 triệu USD tiền chuộc bằng Bitcoin.',
+          ar: 'في مايو 2021، استهدفت مجموعة DarkSide للفدية شركة Colonial Pipeline — أكبر شبكة أنابيب وقود في الولايات المتحدة. انطلق الهجوم من كلمة مرور VPN مسرّبة، وأدى إلى انقطاع 45% من إمدادات الوقود على الساحل الشرقي لمدة 5 أيام. أعلن الرئيس بايدن حالة الطوارئ الوطنية ودفعت الشركة فدية 4.4 مليون دولار بعملة البيتكوين.',
         },
         detailedInfo: {
           attackVector: {
@@ -279,6 +287,8 @@ export const TACTICS = [
           zh: 'Stuxnet被称为首个真正的网络武器，据称由美国NSA和以色列8200部队联合开发。通过USB渗透物理隔离网络，同时利用4个零日漏洞。摧毁了伊朗纳坦兹核设施984台离心机，将伊朗核计划推迟数年。秘密运行3年后于2010年被发现，开启了网络战时代。',
           hi: 'इतिहास का पहला साइबर हथियार Stuxnet अमेरिकी NSA और इज़राइल की Unit 8200 ने मिलकर बनाया। USB के ज़रिए एयर-गैप नेटवर्क में घुसकर 4 ज़ीरो-डे का एक साथ इस्तेमाल किया। ईरान के 984 सेंट्रीफ्यूज नष्ट किए, परमाणु कार्यक्रम वर्षों पीछे धकेला।',
           ja: '史上初の真のサイバー兵器Stuxnetは、米NSAとイスラエルUnit 8200が共同開発したとされています。USBドライブでエアギャップネットワークに侵入し、前例のない4つのゼロデイ脆弱性を同時使用。イラン・ナタンズ核施設の遠心分離機984台を破壊し、核計画を数年遅延させました。3年間秘密裡に動作し2010年に発見されました。',
+          vi: 'Stuxnet được coi là vũ khí mạng thực sự đầu tiên trong lịch sử, được cho là do NSA của Mỹ và Đơn vị 8200 của Israel cùng phát triển. Nó xâm nhập mạng cách ly không khí qua USB, đồng thời khai thác 4 lỗ hổng zero-day chưa từng có tiền lệ. Stuxnet phá hủy 984 máy ly tâm tại cơ sở hạt nhân Natanz của Iran, trì hoãn chương trình hạt nhân nhiều năm, và hoạt động bí mật 3 năm trước khi bị phát hiện năm 2010.',
+          ar: 'يُعدّ Stuxnet أول سلاح إلكتروني حقيقي في التاريخ، ويُعتقد أنه طُوِّر بالتعاون بين NSA الأمريكية والوحدة 8200 الإسرائيلية. تسلّل عبر محركات USB إلى الشبكات المعزولة مستخدماً 4 ثغرات Zero-Day في آنٍ واحد، ودمّر 984 جهاز طرد مركزي في منشأة نطنز النووية الإيرانية مما أخّر البرنامج النووي سنوات، وعمل سراً لمدة 3 سنوات قبل اكتشافه عام 2010.',
         },
         detailedInfo: {
           attackVector: {
@@ -320,6 +330,8 @@ export const TACTICS = [
           zh: '2017年6月27日，俄罗斯GRU开发的NotPetya伪装成勒索软件，实际是数据擦除恶意软件。通过乌克兰MeDoc税务软件更新传播，一天内扩散全球。Maersk重装45,000台PC（$3B损失），Merck损失$8.7B。总损失超过100亿美元，是史上最具破坏性的网络攻击。',
           hi: '27 जून 2017 को रूस के GRU द्वारा विकसित NotPetya रैनसमवेयर की तरह दिखता था लेकिन असल में डेटा नष्ट करने वाला वाइपर था। यूक्रेन के MeDoc सॉफ़्टवेयर से फैलकर एक दिन में वैश्विक हो गया। Maersk को 45,000 PC दोबारा इंस्टॉल करने पड़े। कुल नुकसान $10B+ — इतिहास का सबसे विनाशकारी साइबर हमला।',
           ja: '2017年6月27日、ロシアGRUが開発したNotPetyaはランサムウェアを装っていましたが、実際はデータ破壊が目的のワイパーマルウェアでした。ウクライナのMeDoc税務ソフトの更新で拡散し、1日で世界中に広がりました。Maerskは45,000台のPCと4,000台のサーバーを再インストール（$3B被害）、Merckは$8.7B、FedExは$4Bの損害。史上最も破壊的なサイバー攻撃で、被害総額は100億ドル超です。',
+          vi: 'Ngày 27/6/2017, NotPetya do GRU Nga phát triển giả dạng ransomware nhưng thực chất là phần mềm xóa dữ liệu. Lây lan qua bản cập nhật phần mềm thuế MeDoc của Ukraine và lan rộng toàn cầu trong một ngày. Maersk phải cài đặt lại 45.000 máy tính (thiệt hại 3 tỷ USD), Merck 8,7 tỷ, FedEx 4 tỷ. Đây là cuộc tấn công mạng tàn khốc nhất lịch sử với tổng thiệt hại vượt 10 tỷ USD.',
+          ar: 'في 27 يونيو 2017، تنكّر NotPetya الذي طورته GRU الروسية في هيئة برنامج فدية، لكنه كان في الواقع برنامج مسح بيانات. انتشر عبر تحديثات برنامج MeDoc الضريبي الأوكراني وامتد عالمياً في يوم واحد. أعادت Maersk تهيئة 45,000 جهاز (خسائر 3 مليارات)، و8.7 مليار لـ Merck، و4 مليارات لـ FedEx. تُعدّ أشد هجمات الفضاء الإلكتروني تدميراً بخسائر تجاوزت 10 مليارات دولار.',
         },
         detailedInfo: {
           attackVector: {
@@ -367,6 +379,8 @@ export const TACTICS = [
           zh: '2017年美国三大信用评估机构之一Equifax泄露1.47亿个人信息，约占美国人口44%。攻击者利用2个月前已修补的Apache Struts漏洞。泄露数据包括SSN、生日、地址、信用卡号。76天未被发现，Equifax支付$7亿和解金。',
           hi: '2017 में अमेरिका की तीन प्रमुख क्रेडिट ब्यूरो में से एक Equifax से 14.7 करोड़ व्यक्तिगत रिकॉर्ड लीक हुए — अमेरिकी आबादी का ~44%। हमलावरों ने 2 महीने पहले पैच की गई Apache Struts भेद्यता का फायदा उठाया। SSN, जन्मतिथि, पते, क्रेडिट कार्ड नंबर लीक। 76 दिन तक अनदेखा, $700M निपटारा।',
           ja: '2017年、米国3大信用調査機関の1つEquifaxで1億4,700万人の個人情報が漏洩しました。米国人口の約44%に相当します。攻撃者は2ヶ月前にパッチが公開されていたApache Strutsの脆弱性を悪用。SSN、生年月日、住所、クレジットカード番号が流出し、76日間検知されませんでした。Equifaxは7億ドルの和解金を支払いました。',
+          vi: 'Năm 2017, dữ liệu cá nhân của 147 triệu người — khoảng 44% dân số Mỹ — bị rò rỉ từ Equifax, một trong ba cơ quan tín dụng lớn nhất Hoa Kỳ. Kẻ tấn công khai thác lỗ hổng Apache Struts đã có bản vá từ 2 tháng trước. Số SSN, ngày sinh, địa chỉ và số thẻ tín dụng bị lộ trong 76 ngày mà không ai biết. Equifax phải trả 700 triệu USD tiền bồi thường.',
+          ar: 'في عام 2017، تسرّبت البيانات الشخصية لـ 147 مليون شخص — ما يعادل 44% من سكان الولايات المتحدة — من شركة Equifax، إحدى أكبر وكالات التصنيف الائتماني. استغل المهاجمون ثغرة Apache Struts رغم توفّر التصحيح منذ شهرين. تعرّضت أرقام الضمان الاجتماعي وتواريخ الميلاد والعناوين وبيانات بطاقات الائتمان للاختراق لـ 76 يوماً دون اكتشاف، ودفعت Equifax 700 مليون دولار تسوية.',
         },
         detailedInfo: {
           attackVector: {
@@ -414,6 +428,8 @@ export const TACTICS = [
           zh: '2023年，俄罗斯Cl0p勒索组织大规模利用MOVEit Transfer的SQL注入零日漏洞，攻击了2,773+个组织，泄露9,500万+条个人信息。受害者包括美国能源部、BBC、英航、Shell、Sony。Cl0p采用不加密文件而窃取数据公开勒索的新策略，成为2023年最大网络安全事件。',
           hi: '2023 में रूस स्थित Cl0p रैनसमवेयर ने MOVEit Transfer की SQL इंजेक्शन ज़ीरो-डे का बड़े पैमाने पर फायदा उठाया। 2,773+ संगठन और 9.5 करोड़+ व्यक्तिगत रिकॉर्ड प्रभावित। अमेरिकी ऊर्जा विभाग, BBC, British Airways, Shell, Sony शामिल। फ़ाइलें एन्क्रिप्ट किए बिना डेटा चोरी — 2023 की सबसे बड़ी साइबर घटना।',
           ja: '2023年、ロシア拠点のCl0pランサムウェアグループがMOVEit TransferのSQLインジェクションゼロデイを大規模に悪用。2,773以上の組織と9,500万人以上の個人情報が流出。米エネルギー省、BBC、British Airways、Shell、Sonyが被害。ファイル暗号化せずデータ窃取・脅迫という新戦略で、2023年最大のサイバーセキュリティ事件となりました。',
+          vi: 'Năm 2023, nhóm ransomware Cl0p có trụ sở tại Nga khai thác lỗ hổng SQL injection zero-day trong MOVEit Transfer quy mô lớn. Dữ liệu của hơn 2.773 tổ chức và 95 triệu cá nhân bị lộ, bao gồm Bộ Năng lượng Mỹ, BBC, British Airways, Shell và Sony. Thay vì mã hóa tệp, nhóm tội phạm đánh cắp dữ liệu và đe dọa công bố — chiến lược mới biến đây thành vụ an ninh mạng lớn nhất năm 2023.',
+          ar: 'في عام 2023، استغلّت مجموعة Cl0p الروسية للفدية ثغرة حقن SQL في MOVEit Transfer على نطاق واسع. تعرّضت بيانات أكثر من 2,773 مؤسسة و95 مليون فرد للاختراق، شملت وزارة الطاقة الأمريكية وBBC وBritish Airways وShell وSony. لجأ المهاجمون إلى سرقة البيانات والتهديد بنشرها بدلاً من التشفير، مما جعل هذه الحادثة أكبر حوادث الأمن السيبراني في عام 2023.',
         },
         detailedInfo: {
           attackVector: {

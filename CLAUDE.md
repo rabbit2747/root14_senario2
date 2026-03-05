@@ -42,7 +42,7 @@ Before writing code, MUST output the following steps using XML tags:
 
 ### 작성 규칙
 1. **기술 용어 최소화**: 사용자가 이해할 수 있는 쉬운 표현 사용
-2. **버전 번호 포함**: `v0.x.x` 형식 (현재 최신: v0.8.0)
+2. **버전 번호 포함**: `v0.x.x` 형식 (현재 최신: v0.8.1)
 3. **변경 내용 요약**: "무엇이 좋아졌는지" 관점으로 작성
 4. **다국어 지원**: 한국어 기본, 필요 시 영어 병기
 5. **카테고리**: 🆕 새 기능 / 🔧 개선 / 🛡️ 보안 / 🐛 버그 수정
@@ -72,6 +72,7 @@ Before writing code, MUST output the following steps using XML tags:
 | v0.7.0 | 2026-03-03 | 히어로 섹션 MITRE ATT&CK 사고 매트릭스 교체, 다크모드+SVG 일러스트, MatrixShowcase 줌/TTP 체인 |
 | v0.7.1 | 2026-03-03 | 히어로 5전술×8사고 축소, 배경영상 opacity 0.28, 투어 무한루프, INTRO 버튼, 로그아웃→히어로 |
 | v0.8.0 | 2026-03-06 | 히어로 무비모드(사용자 인터랙션 제거), 줌 50-200% 슬라이더, 사이드패널 타이핑 제거, 재생속도 10초, 스크롤 버그 수정, 갓루트 로고 삽입, CTA 버튼 상단 배치, subheader/matrixTitle 하단 푸터 이동, 베트남어·아랍어 번역 추가, 아랍어 RTL 지원 |
+| v0.8.1 | 2026-03-06 | 히어로 번역 버그 4건 수정: 모바일 버튼 하드코딩, vi/ar description 한국어 폴백, FullScreenModal 폴백, TacticColumn 비한국어 시 한국어 부제 숨김 |
 
 ---
 
