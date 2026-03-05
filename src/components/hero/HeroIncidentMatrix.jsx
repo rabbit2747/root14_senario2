@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SkipForwardFilled, ArrowRight } from '@carbon/icons-react';
+import { ArrowRight } from '@carbon/icons-react';
 import { storeLang } from '../LangToggle';
 import { TACTICS, TOUR_SEQUENCE, TOTAL_TOUR_STEPS, HERO_TEXT, TACTIC_COLORS } from './incidentData';
 import IncidentCard from './IncidentCard';
 import TacticColumn from './TacticColumn';
-import RobotCharacter from './RobotCharacter';
-import JsonDiagram from './JsonDiagram';
+import DetailPanel from './DetailPanel';
+import FullScreenReportModal from './FullScreenReportModal';
 
 const INTRO_DELAY = 2200;
-const STEP_DURATION = 5000; // 투어 스텝 간격 (5초)
+const STEP_DURATION = 10000; // 투어 스텝 간격 (10초)
 const VIDEO_SWITCH_INTERVAL = 5000; // 배경 영상 교체 간격 (5초)
 
 // 배경 영상 목록 (폴더 기반, 투어와 독립)
@@ -177,130 +177,24 @@ function ThemeToggle({ isDark, onToggle }) {
   );
 }
 
-// ── 위험도 뱃지 ──
-function SeverityBadge({ severity, isDark }) {
-  const styles = {
-    critical: isDark
-      ? 'bg-red-950/60 text-red-400 border-red-800/50'
-      : 'bg-red-100 text-red-700 border-red-200',
-    high: isDark
-      ? 'bg-orange-950/60 text-orange-400 border-orange-800/50'
-      : 'bg-orange-100 text-orange-700 border-orange-200',
-    medium: isDark
-      ? 'bg-amber-950/60 text-amber-400 border-amber-800/50'
-      : 'bg-amber-100 text-amber-700 border-amber-200',
-  };
-  const labels = { critical: 'CRITICAL', high: 'HIGH', medium: 'MEDIUM' };
-
+// ── 투어 진행 바 컴포넌트 ──
+// key={tourStep}로 스텝 변경 시 CSS 애니메이션 리셋, animationPlayState로 hover 시 정지
+function TourProgressBar({ tourStep, isRunning, isDark, accentHex }) {
+  if (tourStep < 0) return null;
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-mono font-bold border ${styles[severity] || styles.medium}`}>
-      {labels[severity] || severity}
-    </span>
-  );
-}
-
-// ── 상세 정보 패널 ──
-function DetailPanel({ incident, language, isDark, onClose }) {
-  const ht = HERO_TEXT[language] || HERO_TEXT.ko;
-  const detail = incident.detailedInfo;
-  const lang = language === 'ko' || language === 'en' ? language : 'en';
-
-  if (!detail) return null;
-
-  const cardBg = isDark ? 'bg-slate-900/95 border-slate-700' : 'bg-white/95 border-slate-200';
-  const textMain = isDark ? 'text-slate-200' : 'text-slate-700';
-  const textSub = isDark ? 'text-slate-400' : 'text-slate-500';
-  const textMuted = isDark ? 'text-slate-500' : 'text-slate-400';
-  const labelBg = isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500';
-  const divider = isDark ? 'border-slate-700/50' : 'border-slate-200';
-
-  const tacticId = TACTICS.find(t => t.incidents.some(inc => inc.id === incident.id))?.id;
-  const colors = TACTIC_COLORS[tacticId];
-  const accentText = isDark ? colors?.dark?.text : colors?.text;
-
-  return (
-    <motion.div
-      key={incident.id}
-      initial={{ opacity: 0, y: 15, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.97 }}
-      className={`mt-4 w-full max-w-2xl mx-auto backdrop-blur-md rounded-xl border shadow-xl p-4 md:p-5 ${cardBg}`}
+    <div className={`w-full h-[2px] rounded-full overflow-hidden mt-2
+      ${isDark ? 'bg-slate-700/40' : 'bg-slate-200/60'}`}
     >
-      {/* 헤더 */}
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className={`text-sm md:text-base font-bold ${textMain}`}>
-            {incident.name}
-            {incident.year && <span className={`font-normal ml-2 ${textMuted}`}>({incident.year})</span>}
-          </h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className={`font-mono text-xs ${accentText || textSub}`}>{incident.techniqueId}</span>
-            <span className={textMuted}>—</span>
-            <span className={`text-xs ${textSub}`}>{incident.technique}</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <SeverityBadge severity={detail.severity} isDark={isDark} />
-          <button
-            onClick={onClose}
-            className={`p-1 rounded hover:bg-slate-500/20 transition-colors ${textMuted}`}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* 설명 */}
-      <p className={`text-xs leading-relaxed mb-3 ${textSub}`}>
-        {incident.description?.[language] || incident.description?.ko}
-      </p>
-
-      <div className={`border-t ${divider} pt-3`}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* 공격 경로 */}
-          <div>
-            <div className={`text-[9px] font-bold uppercase tracking-wider mb-1 ${textMuted}`}>
-              {ht.detailAttackVector}
-            </div>
-            <div className={`text-[11px] leading-relaxed ${textMain}`}>
-              {detail.attackVector[lang] || detail.attackVector.ko}
-            </div>
-          </div>
-
-          {/* 피해 대상 */}
-          <div>
-            <div className={`text-[9px] font-bold uppercase tracking-wider mb-1 ${textMuted}`}>
-              {ht.detailAffected}
-            </div>
-            <div className={`text-[11px] leading-relaxed ${textMain}`}>
-              {detail.affectedOrgs[lang] || detail.affectedOrgs.ko}
-            </div>
-          </div>
-
-          {/* 타임라인 */}
-          <div>
-            <div className={`text-[9px] font-bold uppercase tracking-wider mb-1 ${textMuted}`}>
-              {ht.detailTimeline}
-            </div>
-            <div className={`text-[11px] leading-relaxed font-mono ${textSub}`}>
-              {detail.timeline[lang] || detail.timeline.ko}
-            </div>
-          </div>
-
-          {/* 교훈 */}
-          <div>
-            <div className={`text-[9px] font-bold uppercase tracking-wider mb-1 ${textMuted}`}>
-              {ht.detailLessons}
-            </div>
-            <div className={`text-[11px] leading-relaxed ${textMain}`}>
-              {detail.lessonsLearned[lang] || detail.lessonsLearned.ko}
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
+      <div
+        key={tourStep}
+        className="h-full rounded-full anim-tour-progress"
+        style={{
+          background: accentHex || (isDark ? '#64748b' : '#94a3b8'),
+          animationPlayState: isRunning ? 'running' : 'paused',
+          width: '0%',
+        }}
+      />
+    </div>
   );
 }
 
@@ -316,9 +210,9 @@ export default function HeroIncidentMatrix({
 }) {
   const [tourStep, setTourStep] = useState(-1);
   const [tourPhase, setTourPhase] = useState('intro');
-  const [selectedIncident, setSelectedIncident] = useState(null);
-  const [isDark, setIsDark] = useState(false); // 기본 라이트 모드
-  const isPausedRef = useRef(false);
+  const [fullScreenIncident, setFullScreenIncident] = useState(null);
+  const [isDark, setIsDark] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100); // 50 ~ 200 범위
   const timerRef = useRef(null);
 
   const ht = HERO_TEXT[language] || HERO_TEXT.ko;
@@ -340,6 +234,42 @@ export default function HeroIncidentMatrix({
     const tactic = TACTICS.find(t => t.id === currentTourItem.tacticId);
     return tactic?.incidents.find(i => i.id === currentTourItem.incidentId) || null;
   }, [currentTourItem]);
+
+  // ── 패널에 표시할 활성 인시던트: 투어 현재 항목 (무비모드)
+  const activeIncident = currentIncidentObj;
+
+  // 활성 전술 ID (패널 색상 + panelSide 계산용)
+  const activeTacticId = currentTourItem?.tacticId || null;
+
+  // 패널 위치: 우측 전술(index >= 3)이면 좌측에 패널 표시, 그 외 우측
+  const panelSide = useMemo(() => {
+    const idx = TACTICS.findIndex(t => t.id === activeTacticId);
+    return idx >= 3 ? 'left' : 'right';
+  }, [activeTacticId]);
+
+  // 패널에 전달할 데이터 (DetailPanel.jsx activeCardData 구조)
+  const activeCardData = useMemo(() => {
+    if (!activeIncident) return null;
+    const lang = language === 'ko' || language === 'en' ? language : 'en';
+    return {
+      id:           activeIncident.id,
+      title:        activeIncident.name,
+      year:         activeIncident.year,
+      techniqueId:  activeIncident.techniqueId,
+      technique:    activeIncident.technique,
+      detailDesc:   activeIncident.description?.[language]
+                    || activeIncident.description?.en
+                    || activeIncident.description?.ko
+                    || '',
+      severity:     activeIncident.detailedInfo?.severity,
+      attackVector: activeIncident.detailedInfo?.attackVector?.[lang]
+                    || activeIncident.detailedInfo?.attackVector?.ko
+                    || '',
+      affectedOrgs: activeIncident.detailedInfo?.affectedOrgs?.[lang]
+                    || activeIncident.detailedInfo?.affectedOrgs?.ko
+                    || '',
+    };
+  }, [activeIncident, language]);
 
   const baseActiveColor = currentTourItem
     ? TACTIC_COLORS[currentTourItem.tacticId]
@@ -363,17 +293,10 @@ export default function HeroIncidentMatrix({
     return () => clearTimeout(introTimer);
   }, [heroPhase]);
 
-  // ── 투어 진행 (고정 5초 간격, 무한 반복) ──
+  // ── 투어 진행 (고정 5초 간격, 무한 반복 — 무비모드: 사용자 정지 불가) ──
   const advanceTour = useCallback(() => {
-    if (isPausedRef.current) {
-      timerRef.current = setTimeout(() => advanceTour(), 500);
-      return;
-    }
     setTourStep(prev => {
-      // 마지막 스텝이면 처음으로 돌아감 (무한 루프)
-      if (prev >= TOTAL_TOUR_STEPS - 1) {
-        return 0;
-      }
+      if (prev >= TOTAL_TOUR_STEPS - 1) return 0;
       return prev + 1;
     });
   }, []);
@@ -407,14 +330,10 @@ export default function HeroIncidentMatrix({
     v.play().catch(() => {});
   }, [videoIdx]);
 
-  // 호버 시 일시정지/재개
-  const handlePause = useCallback(() => { isPausedRef.current = true; }, []);
-  const handleResume = useCallback(() => { isPausedRef.current = false; }, []);
-  const handleCardClick = useCallback((incident) => {
-    setSelectedIncident(prev => prev?.id === incident.id ? null : incident);
-  }, []);
+  // 무비모드: 사용자가 재생을 컨트롤할 수 없음 (클릭/호버 인터랙션 없음)
 
   return (
+    <>
     <motion.div
       className="fixed inset-0 z-[200] overflow-hidden"
       initial={{ y: 0 }}
@@ -485,32 +404,63 @@ export default function HeroIncidentMatrix({
         />
       </div>
 
-      {/* 상단 컨트롤 바 */}
+      {/* 상단 컨트롤 바 — 좌: 다크모드 + 확대/축소만 */}
       <motion.div
-        className="absolute top-4 right-4 z-50 flex items-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        <ThemeToggle isDark={isDark} onToggle={() => setIsDark(d => !d)} />
-        <button
-          onClick={skipHero}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-semibold tracking-wider rounded-md border transition-all backdrop-blur-sm
-            ${isDark
-              ? 'text-slate-500 hover:text-slate-300 bg-slate-800/60 hover:bg-slate-700/80 border-slate-700'
-              : 'text-slate-400 hover:text-slate-600 bg-white/50 hover:bg-white/80 border-slate-200'}
-          `}
-        >
-          {ht.skip} <SkipForwardFilled size={12} />
-        </button>
-      </motion.div>
-
-      {/* 언어 선택기 */}
-      <motion.div
-        className="absolute top-4 left-4 z-50 flex gap-1 flex-wrap"
+        className="absolute top-4 left-4 z-50 flex items-center gap-1.5"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
+      >
+        <ThemeToggle isDark={isDark} onToggle={() => setIsDark(d => !d)} />
+        {/* 확대/축소 컨트롤 (50~200%) */}
+        <div className={`flex items-center gap-0.5 rounded-md border overflow-hidden backdrop-blur-sm
+          ${isDark ? 'bg-slate-800/60 border-slate-700' : 'bg-white/50 border-slate-200'}`}
+        >
+          <motion.button
+            onClick={() => setZoomLevel(z => Math.max(50, z - 10))}
+            disabled={zoomLevel <= 50}
+            className={`px-1.5 py-1.5 text-xs transition-colors
+              ${isDark
+                ? 'text-slate-400 hover:bg-slate-700/80 hover:text-slate-200 disabled:opacity-30'
+                : 'text-slate-500 hover:bg-white/80 disabled:opacity-30'}
+            `}
+            whileTap={{ scale: 0.9 }}
+            title="Zoom Out"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </motion.button>
+          <span className={`px-1 text-[9px] font-mono tabular-nums select-none
+            ${isDark ? 'text-slate-300' : 'text-slate-600'}`}
+          >
+            {zoomLevel}%
+          </span>
+          <motion.button
+            onClick={() => setZoomLevel(z => Math.min(200, z + 10))}
+            disabled={zoomLevel >= 200}
+            className={`px-1.5 py-1.5 text-xs transition-colors
+              ${isDark
+                ? 'text-slate-400 hover:bg-slate-700/80 hover:text-slate-200 disabled:opacity-30'
+                : 'text-slate-500 hover:bg-white/80 disabled:opacity-30'}
+            `}
+            whileTap={{ scale: 0.9 }}
+            title="Zoom In"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </motion.button>
+        </div>
+      </motion.div>
+
+
+      {/* 언어 선택기 — 우측 */}
+      <motion.div
+        className="absolute top-4 right-4 z-50 flex gap-1 flex-wrap justify-end"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
       >
         {langOptions.map(opt => (
           <button
@@ -533,296 +483,274 @@ export default function HeroIncidentMatrix({
       </motion.div>
 
       {/* 메인 콘텐츠 */}
-      <div className="relative z-10 flex flex-col items-center justify-start min-h-screen px-3 sm:px-6 pt-14 pb-8 overflow-y-auto">
+      <div className="relative z-10 flex flex-col items-center justify-start h-full px-3 sm:px-6 pt-24 pb-8 overflow-y-auto">
 
-        {/* 타이핑 헤더 — 배경 영상 위에서 가독성 확보 */}
+        {/* ── 줌 스케일 존: h1 타이틀 + 스텝 인디케이터 + 공격흐름 + 매트릭스 전체 ──
+             scale이 이 wrapper에 집중됨으로써 폰트+카드 동시 축소/확대 */}
         <motion.div
-          className={`text-center mb-3 md:mb-5 max-w-3xl rounded-2xl px-6 py-4
-            ${isDark ? 'bg-slate-900/70 backdrop-blur-sm' : 'bg-white/80 backdrop-blur-sm'}
-          `}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
+          className="w-full flex flex-col items-center"
+          animate={{ scale: !typingDone ? 0.97 : zoomLevel / 100 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          style={{ transformOrigin: 'top center' }}
         >
-          <h1 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug mb-2 min-h-[3.5rem] md:min-h-[4.5rem]
-            ${isDark ? 'text-slate-100' : 'text-slate-800'}
-          `}>
-            <span>{typedHeader.slice(0, ht.header.length)}</span>
-            {typedHeader.length > ht.header.length && (
-              <>
-                <br />
-                <span className={isDark ? 'text-blue-400' : 'text-blue-600'}>
-                  {typedHeader.slice(ht.header.length + 1)}
-                </span>
-              </>
-            )}
-            {!typingDone && (
-              <motion.span
-                className={`inline-block w-[2px] h-[1.1em] ml-0.5 align-middle ${isDark ? 'bg-blue-400' : 'bg-blue-600'}`}
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-              />
-            )}
-          </h1>
-
-          <AnimatePresence>
-            {typingDone && (
-              <motion.p
-                className={`text-xs sm:text-sm leading-relaxed max-w-xl mx-auto ${isDark ? 'text-slate-400' : 'text-slate-500'}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                {ht.subheader}
-              </motion.p>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* 매트릭스 타이틀 + 스텝 인디케이터 */}
-        <motion.div
-          className={`text-center mb-2 md:mb-3 flex flex-col items-center rounded-lg px-4 py-2
-            ${isDark ? 'bg-slate-900/60 backdrop-blur-sm' : 'bg-white/70 backdrop-blur-sm'}
-          `}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: typingDone ? 1 : 0, y: typingDone ? 0 : 15 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-        >
-          <h2 className={`text-[11px] sm:text-xs md:text-sm font-semibold tracking-wide
-            ${isDark ? 'text-slate-400' : 'text-slate-600'}
-          `}>
-            {ht.matrixTitle}
-          </h2>
-          <StepIndicator current={tourStep} total={TOTAL_TOUR_STEPS} tourPhase={tourPhase} isDark={isDark} />
-        </motion.div>
-
-        {/* 공격 흐름 화살표 */}
-        <motion.div
-          className="w-full max-w-6xl"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: tourPhase !== 'intro' ? 1 : 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <AttackFlowArrows activeTacticIndex={activeTacticIndex} isDark={isDark} />
-        </motion.div>
-
-        {/* 매트릭스 + 사이드 패널 */}
-        <div className="w-full max-w-7xl flex gap-4 items-start justify-center">
-          {/* 로봇 캐릭터 */}
-          <RobotCharacter
-            position="left"
-            isActive={tourPhase === 'touring'}
-            isDark={isDark}
-          />
-
+          {/* 타이핑 헤더 + CTA 버튼 (h1 바로 아래 배치) */}
           <motion.div
-            className="flex-1 min-w-0"
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: typingDone ? 1 : 0, scale: typingDone ? 1 : 0.97 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2 md:grid-cols-5 md:gap-2">
-              {TACTICS.map((tactic) => (
-                <TacticColumn
-                  key={tactic.id}
-                  tactic={tactic}
-                  isActiveTactic={currentTourItem?.tacticId === tactic.id}
-                  language={language}
-                  isDark={isDark}
-                >
-                  {tactic.incidents.map(incident => (
-                    <IncidentCard
-                      key={incident.id}
-                      incident={incident}
-                      tacticId={tactic.id}
-                      isHighlighted={
-                        currentTourItem?.incidentId === incident.id ||
-                        selectedIncident?.id === incident.id
-                      }
-                      tourComplete={tourPhase === 'complete'}
-                      onClick={handleCardClick}
-                      onMouseEnter={handlePause}
-                      onMouseLeave={handleResume}
-                      language={language}
-                      isDark={isDark}
-                    />
-                  ))}
-                </TacticColumn>
-              ))}
-            </div>
-          </motion.div>
-
-          <JsonDiagram
-            isActive={tourPhase === 'touring'}
-            isDark={isDark}
-            className="!relative !bottom-auto !right-auto shrink-0 self-start mt-8"
-          />
-        </div>
-
-        {/* 활성 사고 인포 배너 (가시성 개선) */}
-        <AnimatePresence mode="wait">
-          {currentIncidentObj && tourPhase === 'touring' ? (
-            <motion.div
-              key={currentIncidentObj.id}
-              className={`mt-3 md:mt-4 w-full max-w-3xl mx-auto rounded-xl border px-4 py-3 md:px-6 md:py-4 backdrop-blur-md shadow-md
-                ${isDark
-                  ? 'bg-slate-900/90 border-slate-700/60'
-                  : 'bg-white/95 border-slate-200/80 shadow-lg'}
-              `}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.35 }}
-            >
-              <div className="flex items-start gap-3">
-                {/* 택틱 색상 바 */}
-                <div
-                  className="w-1 self-stretch rounded-full shrink-0"
-                  style={{
-                    background: isDark
-                      ? TACTIC_COLORS[currentTourItem?.tacticId]?.dark?.hex
-                      : TACTIC_COLORS[currentTourItem?.tacticId]?.hex,
-                  }}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-sm md:text-base font-bold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
-                      {currentIncidentObj.name}
-                    </span>
-                    {currentIncidentObj.year && (
-                      <span className={`text-xs font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                        ({currentIncidentObj.year})
-                      </span>
-                    )}
-                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isDark ? 'bg-slate-800 text-cyan-400' : 'bg-slate-100 text-cyan-700'}`}>
-                      {currentIncidentObj.techniqueId}
-                    </span>
-                  </div>
-                  <p className={`text-xs md:text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                    {currentIncidentObj.description?.[language] || currentIncidentObj.description?.ko}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          ) : tourPhase === 'complete' ? (
-            <motion.div
-              key="complete-text"
-              className="mt-4 md:mt-6 text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className={`text-sm font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                {ht.incidentCases}
-              </p>
-              <p className={`text-[10px] max-w-md mx-auto ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                {ht.incidentDesc}
-              </p>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-
-        {/* 선택된 사고 상세 패널 */}
-        <AnimatePresence>
-          {selectedIncident && (
-            <DetailPanel
-              incident={selectedIncident}
-              language={language}
-              isDark={isDark}
-              onClose={() => setSelectedIncident(null)}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* CTA 버튼 (투어 완료 시) */}
-        <AnimatePresence>
-          {tourPhase === 'complete' && (
-            <motion.div
-              className="mt-6 md:mt-8 flex flex-col items-center gap-3"
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 20, delay: 0.15 }}
-            >
-              <div className="flex flex-wrap justify-center gap-3">
-                <motion.button
-                  onClick={enterMatrix}
-                  className={`flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-lg shadow-lg transition-all active:scale-[0.98]
-                    ${isDark
-                      ? 'bg-blue-500 hover:bg-blue-400 text-white shadow-blue-500/30 hover:shadow-blue-400/40'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25 hover:shadow-blue-500/40'}
-                  `}
-                  whileHover={{ scale: 1.04, y: -1 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  {ht.ctaCurriculum} <ArrowRight size={16} />
-                </motion.button>
-                <motion.button
-                  onClick={enterMatrix}
-                  className={`flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-lg border shadow-sm transition-all active:scale-[0.98]
-                    ${isDark
-                      ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-600 hover:border-slate-500'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 hover:border-slate-400'}
-                  `}
-                  whileHover={{ scale: 1.04, y: -1 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  {ht.ctaLearnMore}
-                </motion.button>
-              </div>
-              {!isLoggedIn && (
-                <button
-                  onClick={() => navigate('/login')}
-                  className={`text-xs underline underline-offset-2 transition-colors
-                    ${isDark ? 'text-slate-500 hover:text-blue-400' : 'text-slate-400 hover:text-blue-600'}
-                  `}
-                >
-                  {ht.login}
-                </button>
-              )}
-              <a
-                href="https://gotroot.co.kr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`text-[10px] transition-colors ${isDark ? 'text-slate-600 hover:text-slate-400' : 'text-slate-400 hover:text-slate-500'}`}
-              >
-                gotroot.co.kr
-              </a>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 투어 완료 전 진입 버튼 */}
-        {tourPhase !== 'complete' && (
-          <motion.div
-            className="mt-auto pt-4 flex flex-col items-center gap-2"
+            className="text-center mb-3 md:mb-5 max-w-3xl px-6 py-4"
+            dir={language === 'ar' ? 'rtl' : 'ltr'}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
+            transition={{ duration: 0.3 }}
           >
-            <button
-              onClick={enterMatrix}
-              className={`flex items-center gap-2 px-5 py-2 text-xs font-semibold rounded-lg border shadow-sm transition-all
-                ${isDark
-                  ? 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-slate-100 border-slate-700'
-                  : 'bg-white/80 hover:bg-white text-slate-600 hover:text-slate-800 border-slate-200'}
-              `}
+            {/* 갓루트 로고 — h1 위, 콘텐츠 흐름 안에 자연스럽게 */}
+            <motion.div
+              className="flex justify-center mb-5"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
             >
-              {ht.ctaCurriculum} <ArrowRight size={14} />
-            </button>
-            {!isLoggedIn && (
-              <button
-                onClick={() => navigate('/login')}
-                className={`text-[10px] underline underline-offset-2 transition-colors
-                  ${isDark ? 'text-slate-600 hover:text-blue-400' : 'text-slate-400 hover:text-blue-600'}
-                `}
-              >
-                {ht.login}
-              </button>
-            )}
+              <img
+                src={isDark ? '/logo/logo-name-white.png' : '/logo/logo-name-dark-nobg.png'}
+                alt="GOTROOT"
+                className="h-14 sm:h-16 md:h-20 w-auto object-contain select-none pointer-events-none"
+                draggable={false}
+                style={{ opacity: isDark ? 0.92 : 0.85 }}
+              />
+            </motion.div>
+
+            <h1 className={`relative text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-snug mb-4
+              ${isDark ? 'text-slate-100' : 'text-slate-800'}
+            `}>
+              {/* Ghost: 전체 텍스트를 invisible로 렌더링해 컨테이너 높이 사전 할당 */}
+              <span aria-hidden="true" className="invisible select-none pointer-events-none">
+                {ht.header}
+                <br />
+                <span className={isDark ? 'text-blue-400' : 'text-blue-600'}>
+                  {ht.headerAccent}
+                </span>
+              </span>
+              {/* 타이핑 텍스트: ghost 위에 absolute 배치 */}
+              <span className="absolute inset-0">
+                <span>{typedHeader.slice(0, ht.header.length)}</span>
+                {typedHeader.length > ht.header.length && (
+                  <>
+                    <br />
+                    <span className={isDark ? 'text-blue-400' : 'text-blue-600'}>
+                      {typedHeader.slice(ht.header.length + 1)}
+                    </span>
+                  </>
+                )}
+                {!typingDone && (
+                  <motion.span
+                    className={`inline-block w-[2px] h-[1.1em] ml-0.5 align-middle ${isDark ? 'bg-blue-400' : 'bg-blue-600'}`}
+                    animate={{ opacity: [1, 0, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                  />
+                )}
+              </span>
+            </h1>
+
+            {/* CTA 버튼 — 타이핑 완료 후 h1 바로 아래 표시 */}
+            <AnimatePresence>
+              {typingDone && (
+                <motion.div
+                  className="flex flex-wrap justify-center gap-2.5"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <motion.button
+                    onClick={enterMatrix}
+                    className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg shadow-md transition-all active:scale-[0.98]
+                      ${isDark
+                        ? 'bg-blue-500 hover:bg-blue-400 text-white shadow-blue-500/30 hover:shadow-blue-400/40'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25 hover:shadow-blue-500/40'}
+                    `}
+                    whileHover={{ scale: 1.04, y: -1 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    {ht.ctaCurriculum} <ArrowRight size={14} />
+                  </motion.button>
+                  <motion.button
+                    onClick={() => navigate('/login')}
+                    className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg border shadow-sm transition-all active:scale-[0.98]
+                      ${isDark
+                        ? 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-slate-600 hover:border-slate-500'
+                        : 'bg-white/80 hover:bg-white text-slate-700 border-slate-300 hover:border-slate-400'}
+                    `}
+                    whileHover={{ scale: 1.04, y: -1 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    {isLoggedIn ? ht.ctaLearnMore : (ht.login || '로그인 / 회원가입')}
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
-        )}
+
+          {/* 스텝 인디케이터 (matrixTitle 텍스트 → 하단 푸터로 이동) */}
+          <motion.div
+            className="text-center mb-2 md:mb-3 flex flex-col items-center px-4 py-1"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: typingDone ? 1 : 0, y: typingDone ? 0 : 15 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+          >
+            <StepIndicator current={tourStep} total={TOTAL_TOUR_STEPS} tourPhase={tourPhase} isDark={isDark} />
+          </motion.div>
+
+          {/* 공격 흐름 화살표 */}
+          <motion.div
+            className="w-full max-w-6xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: tourPhase !== 'intro' ? 1 : 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <AttackFlowArrows activeTacticIndex={activeTacticIndex} isDark={isDark} />
+          </motion.div>
+
+          {/* 매트릭스 + 사이드 패널 (relative 컨테이너: DetailPanel absolute 배치 기준) */}
+          <div className="relative w-full max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: typingDone ? 1 : 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2 md:grid-cols-5 md:gap-2">
+                {TACTICS.map((tactic) => (
+                  <TacticColumn
+                    key={tactic.id}
+                    tactic={tactic}
+                    isActiveTactic={currentTourItem?.tacticId === tactic.id}
+                    language={language}
+                    isDark={isDark}
+                  >
+                    {tactic.incidents.map(incident => (
+                      <IncidentCard
+                        key={incident.id}
+                        incident={incident}
+                        tacticId={tactic.id}
+                        isHighlighted={currentTourItem?.incidentId === incident.id}
+                        tourComplete={tourPhase === 'complete'}
+                        language={language}
+                        isDark={isDark}
+                      />
+                    ))}
+                  </TacticColumn>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* 투어 진행 바 */}
+            <TourProgressBar
+              tourStep={tourStep}
+              isRunning={true}
+              isDark={isDark}
+              accentHex={isDark ? baseActiveColor?.dark?.hex : baseActiveColor?.hex}
+            />
+
+            {/* 상세 패널 (데스크탑: 우/좌 floating, 모바일: 시트 비활성 — 무비모드) */}
+            <DetailPanel
+              isOpen={false}
+              activeCardData={activeCardData}
+              tacticId={activeTacticId}
+              isDark={isDark}
+              language={language}
+              onClose={() => {}}
+              onOpenFullScreen={() => setFullScreenIncident(activeIncident)}
+              panelSide={panelSide}
+              isRunning={true}
+              timerKey={tourStep}
+            />
+          </div>
+        </motion.div>
+        {/* ── 줌 스케일 존 끝 ── */}
+
+        {/* 활성 사고 인포 배너 — 모바일 전용 */}
+        <div className="md:hidden mt-3 w-full max-w-3xl mx-auto" style={{ minHeight: '5rem' }}>
+          <AnimatePresence mode="wait">
+            {currentIncidentObj && tourPhase === 'touring' && (
+              <motion.div
+                key={currentIncidentObj.id}
+                className={`mt-3 w-full rounded-xl border px-4 py-3 backdrop-blur-md shadow-md
+                  ${isDark
+                    ? 'bg-slate-900/90 border-slate-700/60'
+                    : 'bg-white/95 border-slate-200/80 shadow-lg'}
+                `}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.35 }}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-1 self-stretch rounded-full shrink-0"
+                    style={{
+                      background: isDark
+                        ? TACTIC_COLORS[currentTourItem?.tacticId]?.dark?.hex
+                        : TACTIC_COLORS[currentTourItem?.tacticId]?.hex,
+                    }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-sm font-bold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
+                        {currentIncidentObj.name}
+                      </span>
+                      {currentIncidentObj.year && (
+                        <span className={`text-xs font-mono ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                          ({currentIncidentObj.year})
+                        </span>
+                      )}
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isDark ? 'bg-slate-800 text-cyan-400' : 'bg-slate-100 text-cyan-700'}`}>
+                        {currentIncidentObj.techniqueId}
+                      </span>
+                    </div>
+                    <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                      {currentIncidentObj.description?.[language] || currentIncidentObj.description?.ko}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ── 하단 푸터 — 항상 표시, 줌 스케일 미적용 ── */}
+        <motion.div
+          className="mt-auto pt-5 pb-1 w-full max-w-3xl mx-auto flex flex-col items-center gap-2 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: typingDone ? 1 : 0, y: typingDone ? 0 : 20 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+        >
+          {/* 핵심 학습 모델 문구 (기존 matrixTitle) */}
+          <p className={`text-[11px] font-semibold tracking-wide ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+            {ht.matrixTitle}
+          </p>
+          {/* 서브헤더 문구 */}
+          <p className={`text-[10px] sm:text-xs leading-relaxed max-w-md ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+            {ht.subheader}
+          </p>
+
+          <a
+            href="https://gotroot.co.kr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`text-[10px] mt-1 transition-colors ${isDark ? 'text-slate-600 hover:text-slate-400' : 'text-slate-400 hover:text-slate-500'}`}
+          >
+            gotroot.co.kr
+          </a>
+        </motion.div>
       </div>
     </motion.div>
+
+    {/* FullScreenReportModal: 항상 마운트, AnimatePresence는 portal 내부에서 처리
+        videoRef로 모달 열릴 때 배경 영상 자동 일시정지/재개 */}
+    <FullScreenReportModal
+      incident={fullScreenIncident}
+      language={language}
+      isDark={isDark}
+      onClose={() => setFullScreenIncident(null)}
+      videoRef={bgVideoRef}
+    />
+    </>
   );
 }

@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TACTIC_COLORS } from './incidentData';
 import IncidentIllustration from './IncidentIllustration';
@@ -71,33 +70,6 @@ const CardIcon = ({ type, size = 16 }) => {
   return icons[type] || icons.shield;
 };
 
-// 카운트업 애니메이션 훅
-function useCountUp(target, isActive, duration = 1200) {
-  const [count, setCount] = useState(0);
-  const prevActive = useRef(false);
-
-  useEffect(() => {
-    if (!isActive) { setCount(0); prevActive.current = false; return; }
-    if (prevActive.current) return;
-    prevActive.current = true;
-
-    const start = performance.now();
-    const step = (now) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      setCount(Math.floor(eased * target));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [isActive, target, duration]);
-
-  return count;
-}
-
-function formatNumber(n) {
-  return n.toLocaleString();
-}
 
 export default function IncidentCard({
   incident,
@@ -115,25 +87,18 @@ export default function IncidentCard({
   const glowRgb = isDark ? baseColors.dark.glowRgb : baseColors.glowRgb;
   const colorHex = isDark ? baseColors.dark.hex : baseColors.hex;
 
-  const statCount = useCountUp(
-    incident.stat?.value || 0,
-    isHighlighted,
-    1400
-  );
-
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, rotateY: -90, transformPerspective: 800 }}
       animate={{
-        opacity: isHighlighted ? 1 : tourComplete ? 0.92 : 0.35,
+        opacity: isHighlighted ? 1 : tourComplete ? 0.65 : 0.5,
         rotateY: 0,
-        scale: isHighlighted ? 1.06 : 1,
+        scale: isHighlighted ? 1.09 : 0.90,
         transformPerspective: 800,
       }}
       transition={{
         opacity: { duration: 0.35 },
-        scale: { type: 'spring', stiffness: 300, damping: 20 },
+        scale: { type: 'spring', stiffness: 280, damping: 22 },
         rotateY: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
       }}
       onClick={() => onClick?.(incident)}
@@ -245,46 +210,6 @@ export default function IncidentCard({
         )}
       </AnimatePresence>
 
-      {/* 위협 카운터 */}
-      <AnimatePresence>
-        {isHighlighted && incident.stat && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-            className="relative z-10 mt-2 pt-2 border-t border-dashed"
-            style={{ borderColor: `rgba(${glowRgb}, 0.3)` }}
-          >
-            <div className="flex items-baseline gap-1">
-              <span className={`text-lg md:text-xl font-black tabular-nums ${colors.text}`}>
-                {formatNumber(statCount)}
-              </span>
-              <span className={`text-[10px] font-bold ${colors.text} opacity-70`}>
-                {incident.stat.unit}
-              </span>
-            </div>
-            <span className={`text-[8px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {incident.stat.label[language] || incident.stat.label.ko}
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 상세 설명 */}
-      <AnimatePresence>
-        {isHighlighted && incident.description && (
-          <motion.p
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className={`relative z-10 mt-1.5 text-[9px] leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}
-          >
-            {incident.description[language] || incident.description.ko}
-          </motion.p>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }

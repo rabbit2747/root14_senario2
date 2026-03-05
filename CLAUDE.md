@@ -42,7 +42,7 @@ Before writing code, MUST output the following steps using XML tags:
 
 ### 작성 규칙
 1. **기술 용어 최소화**: 사용자가 이해할 수 있는 쉬운 표현 사용
-2. **버전 번호 포함**: `v0.x.x` 형식 (현재 최신: v0.5.0)
+2. **버전 번호 포함**: `v0.x.x` 형식 (현재 최신: v0.8.0)
 3. **변경 내용 요약**: "무엇이 좋아졌는지" 관점으로 작성
 4. **다국어 지원**: 한국어 기본, 필요 시 영어 병기
 5. **카테고리**: 🆕 새 기능 / 🔧 개선 / 🛡️ 보안 / 🐛 버그 수정
@@ -71,6 +71,7 @@ Before writing code, MUST output the following steps using XML tags:
 | v0.5.0 | 2026-03-01 | 실습 에디터, Prism.js 코드 하이라이팅, DOMPurify XSS 필터링, 감사 로깅, 5개 언어 번역 완성 |
 | v0.7.0 | 2026-03-03 | 히어로 섹션 MITRE ATT&CK 사고 매트릭스 교체, 다크모드+SVG 일러스트, MatrixShowcase 줌/TTP 체인 |
 | v0.7.1 | 2026-03-03 | 히어로 5전술×8사고 축소, 배경영상 opacity 0.28, 투어 무한루프, INTRO 버튼, 로그아웃→히어로 |
+| v0.8.0 | 2026-03-06 | 히어로 무비모드(사용자 인터랙션 제거), 줌 50-200% 슬라이더, 사이드패널 타이핑 제거, 재생속도 10초, 스크롤 버그 수정, 갓루트 로고 삽입, CTA 버튼 상단 배치, subheader/matrixTitle 하단 푸터 이동, 베트남어·아랍어 번역 추가, 아랍어 RTL 지원 |
 
 ---
 
@@ -111,3 +112,37 @@ Before writing code, MUST output the following steps using XML tags:
 - **규칙**: 큰 파일 전체를 반복적으로 읽지 말 것. 필요한 부분만 offset/limit으로 읽기
 - **규칙**: Task Agent 실행 전 정말 필요한지 판단. 간단한 검색은 Grep/Glob으로 충분
 - **규칙**: 사용자가 "스탑"이라고 하면 즉시 중단, 진행 중인 Agent도 멈추기
+
+### 8. Worktree 사용 시 .env 파일 동기화
+- **사건**: Worktree에 `.env`가 없어서 Supabase 인증이 무한 pending → `return null` → 흰 화면
+- **규칙**: 새 worktree 생성 또는 dev 서버가 worktree에서 실행될 때, `.env`를 main → worktree로 반드시 복사
+- **확인 방법**: `ls worktree/.env` 로 존재 여부 확인 후 없으면 즉시 복사
+
+### 9. 메인/Worktree 파일 동기화 규칙
+- **사건**: 편집은 main 프로젝트에, dev 서버는 worktree에서 실행 → 변경사항이 반영 안 됨
+- **규칙**: 코드 수정 후 worktree에서 dev 서버가 실행 중이면 반드시 `cp main/file worktree/file` 동기화
+- **확인 방법**: `preview_list`로 server CWD 확인 후 main vs worktree 불일치 시 즉시 동기화
+
+---
+
+## 프론트엔드 상태 관리 및 UI 작업 규칙 (Strict Rules)
+
+### 1. 이벤트 바인딩 필수로 확인 (Event Binding)
+- UI 요소(버튼, 폼 등)를 렌더링할 때 디자인만 만들지 말 것.
+- 반드시 `onClick`, `onChange` 등의 이벤트 핸들러가 상태 변경 함수(e.g., `setIsModalOpen`)와 정상적으로 연결되었는지 확인한다.
+
+### 2. 명확한 초기 상태 설정 (Initial State)
+- 모달, 패널 등의 가시성을 제어할 때는 `useState` 초기값을 명확히 설정한다.
+- 예: `const [isOpen, setIsOpen] = useState(false);`
+
+### 3. 안전한 상태 전달 (Props & State Management)
+- 복잡한 상태 관리 라이브러리(Redux, Zustand 등)는 명시적인 요청이 없을 경우 도입하지 않고, 기본 React Hook(`useState`, `useEffect`)을 우선 사용한다.
+- 부모에서 자식으로 상태와 상태 변경 함수가 끊기지 않고 전달되는지 검증한다.
+
+### 4. 비동기 데이터 렌더링 방어 (Loading State)
+- 외부/비동기 데이터를 불러와 모달이나 패널에 띄울 때는 데이터가 로딩되기 전의 '빈 화면'이나 '에러'를 방지하기 위해 반드시 로딩 상태(Loading Spinner/Skeleton)를 구현한다.
+
+### 5. 렌더링 계층 및 Z-Index 관리
+- 모달이나 오버레이 컴포넌트가 나타날 때 다른 UI(예: 사이드 패널) 밑에 깔리지 않도록 최상단 레이어에 배치한다.
+- Tailwind CSS 사용 시 모달 래퍼에 `z-[100]` 이상의 충분히 높은 z-index를 부여한다.
+- `pointer-events-none` 컨테이너 안에 있는 모달은 반드시 `createPortal(modal, document.body)`로 렌더링한다.

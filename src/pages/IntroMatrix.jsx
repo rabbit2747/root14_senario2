@@ -145,6 +145,36 @@ const uiT = {
     skip:          'SKIP',
     visitors:      '訪問者', finishers: '修了者', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'メイン', completed: '修了',
   },
+  ar: {
+    title:         'ATT&CK Enterprise v14.1',
+    search:        'ابحث عن التقنيات...',
+    subs:          'تبديل الفروع',
+    authenticated: '● موثق',
+    logout:        'تسجيل الخروج',
+    loading:       'جارٍ تهيئة الجلسة...',
+    authRequired:  'المصادقة مطلوبة',
+    tagline:       'اعرف السلاح، أمِّن المستقبل.',
+    enterMatrix:   'دخول المصفوفة',
+    brand:         'GOTROOT',
+    brandSub:      'منصة التدريب على الأمن السيبراني',
+    skip:          'SKIP',
+    visitors:      'زوار', finishers: 'مكتملون', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'الرئيسية', completed: 'مكتمل',
+  },
+  vi: {
+    title:         'ATT&CK Enterprise v14.1',
+    search:        'Tìm kiếm kỹ thuật...',
+    subs:          'Bật/Tắt Nhánh',
+    authenticated: '● ĐÃ XÁC THỰC',
+    logout:        'ĐĂNG XUẤT',
+    loading:       'Đang khởi tạo phiên...',
+    authRequired:  'Yêu cầu xác thực',
+    tagline:       'Biết vũ khí, bảo vệ tương lai.',
+    enterMatrix:   'VÀO MA TRẬN',
+    brand:         'GOTROOT',
+    brandSub:      'Nền Tảng Đào Tạo An Ninh Mạng',
+    skip:          'SKIP',
+    visitors:      'Người dùng', finishers: 'Hoàn thành', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'Trang chủ', completed: 'HOÀN THÀNH',
+  },
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -522,11 +552,13 @@ export default function UltimateCinematicMatrix() {
 
   // langOptions → LangToggle 컴포넌트 내 LANG_OPTIONS로 통일됨
   const langOptions = [
-    { code: 'ko', label: '한국어', flag: '🇰🇷' },
-    { code: 'en', label: 'English', flag: '🇺🇸' },
-    { code: 'zh', label: '中文',    flag: '🇨🇳' },
-    { code: 'hi', label: 'हिंदी',   flag: '🇮🇳' },
-    { code: 'ja', label: '日本語',  flag: '🇯🇵' },
+    { code: 'ko', label: '한국어',      flag: '🇰🇷' },
+    { code: 'en', label: 'English',    flag: '🇺🇸' },
+    { code: 'zh', label: '中文',        flag: '🇨🇳' },
+    { code: 'hi', label: 'हिंदी',       flag: '🇮🇳' },
+    { code: 'ja', label: '日本語',      flag: '🇯🇵' },
+    { code: 'ar', label: 'العربية',    flag: '🇸🇦' },
+    { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
   ];
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
