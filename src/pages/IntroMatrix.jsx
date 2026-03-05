@@ -236,7 +236,7 @@ export default function UltimateCinematicMatrix() {
   useEffect(() => { isLoggedInRef.current = isLoggedIn; }, [isLoggedIn]);
   useEffect(() => { userRef.current = user; }, [user]);
 
-  const t = uiT[language];
+  const t = uiT[language] || uiT.en;
   const dm = darkMode;
 
   // ── 위젯 데이터 로더 제거됨 (v0.7.3: 과정 셀렉터 흐름으로 대체) ──
