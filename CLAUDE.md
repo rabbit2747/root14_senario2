@@ -31,7 +31,17 @@ Before writing code, MUST output the following steps using XML tags:
 - FAILURE_SIGNS: [Triggers for rollback]
 </criteria>
 
-**MANDATORY:** Always append this exact sentence at the very end of your final response:
+**MANDATORY:** Every final response MUST end with ALL THREE of the following sections, in this order:
+
+### 🔁 Self-Refine
+내 응답을 스스로 검토하고, 부족한 점·개선 가능한 점·놓친 것을 솔직하게 서술한다.
+형식: "잘한 점 / 부족한 점 / 다음에 더 잘할 점"
+
+### 🔄 Inverse Prompt
+사용자가 나에게 보낸 질문/요청을 역방향으로 분석해서,
+**"이렇게 물었다면 더 좋은 결과를 얻을 수 있었을 것"** 이라는 최적 프롬프트를 제안한다.
+형식: `💡 최적 프롬프트: "..."`
+
 "왜 그렇게 했는지 설명해줘"
 
 ---
