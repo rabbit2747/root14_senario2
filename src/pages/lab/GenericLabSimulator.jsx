@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { Icons } from './labT1078Data';
@@ -47,6 +47,7 @@ const UI = {
  */
 export default function GenericLabSimulator({ scenario, techniqueId }) {
   const navigate = useNavigate();
+  const { level } = useParams();
   const totalSteps = scenario.steps.length;
   const targetStepDuration = scenario.stepDuration || 8;
   const colors = { bg: '#e2e8f0', surface: '#ffffff', primary: '#9c6644', primaryLight: '#ede0d4', textDark: '#1e293b', border: '#cbd5e1' };
@@ -153,14 +154,35 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
   };
 
   // ── 완료 페이지 네비게이션 ──
-  const navigateToComplete = useCallback(() => {
+  const navigateToComplete = useCallback(async () => {
     window.speechSynthesis?.cancel();
-    // 완료 기록 localStorage
+
+    // [경찰관] 완료 기록 localStorage (오프라인 폴백 유지)
     try {
       const labs = JSON.parse(localStorage.getItem('gotroot_completed_labs') || '[]');
       const entry = { name: `${scenario.id} - ${scenario.titleEn}`, technique: scenario.id, completedAt: new Date().toISOString() };
       if (!labs.some(l => l.technique === entry.technique)) { labs.push(entry); localStorage.setItem('gotroot_completed_labs', JSON.stringify(labs)); }
     } catch {}
+
+    // [CCTV] 수료 기록 Supabase 저장 — localStorage 위조 방어, 서버 측 증빙용
+    // supabase-js v2: upsert + ignoreDuplicates:true → ON CONFLICT DO NOTHING
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase.from('edu_progress').upsert(
+          {
+            user_id: session.user.id,
+            technique_id: techniqueId,
+            chapter_id: 'lab_completed',
+            level: level || 'beginner',
+          },
+          { ignoreDuplicates: true }
+        );
+      }
+    } catch (e) {
+      console.warn('[CCTV] 수료 기록 DB 저장 실패 (localStorage 폴백 유지):', e.message);
+    }
+
     navigate(`/lab/complete/${techniqueId}`, {
       state: {
         userName: uName,
@@ -171,7 +193,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
         duration: scenario.duration || 0,
       },
     });
-  }, [navigate, techniqueId, uName, cName, scenario, totalSteps]);
+  }, [navigate, techniqueId, level, uName, cName, scenario, totalSteps]);
 
   // ── 툴팁 자동 접기 ──
   useEffect(() => {

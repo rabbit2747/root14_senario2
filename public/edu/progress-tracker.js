@@ -118,7 +118,7 @@
       entries.forEach(function(entry) {
         if (entry.intersectionRatio >= 0.75) {
           var id = entry.target.getAttribute('id');
-          if (id && /^ch\d+$/.test(id)) {
+          if (id && /^(ch\d+|quiz|eval)$/.test(id)) {
             markChapterComplete(id);
           }
         }

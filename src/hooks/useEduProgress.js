@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { supabase } from '../lib/supabase';
+// ✅ Phase 0: src/api/ 경유 — supabase 직접 호출 제거
+import { getEduProgress } from '../api/edu';
 import { useAuth } from '../context/AuthContext';
 import eduMeta from '../data/edu-meta.json';
 
@@ -17,7 +18,7 @@ const LOCAL_PROGRESS_KEY = 'gotroot_edu_progress';
  * - completedTechIds: Set<string> — 완료된 기법 ID 집합
  */
 
-const LEVELS = ['beginner', 'intermediate', 'advanced'];
+const LEVELS = ['novice', 'beginner', 'intermediate', 'advanced', 'expert'];
 
 /** 기존 flat 배열 구조를 레벨 구조로 마이그레이션 */
 function migrateToLevelStructure(data) {
@@ -26,13 +27,15 @@ function migrateToLevelStructure(data) {
   Object.entries(data).forEach(([tid, val]) => {
     if (Array.isArray(val)) {
       // 기존 flat 형태 → beginner로 취급
-      result[tid] = { beginner: [...val], intermediate: [], advanced: [] };
+      result[tid] = { novice: [], beginner: [...val], intermediate: [], advanced: [], expert: [] };
     } else if (val && typeof val === 'object' && !Array.isArray(val)) {
       // 이미 레벨 구조
       result[tid] = {
+        novice: val.novice || [],
         beginner: val.beginner || [],
         intermediate: val.intermediate || [],
         advanced: val.advanced || [],
+        expert: val.expert || [],
       };
     }
   });
@@ -62,10 +65,8 @@ export default function useEduProgress() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('edu_progress')
-        .select('technique_id, chapter_id, level')
-        .eq('user_id', user.id);
+      // ✅ api/edu.js 경유 — supabase 직접 호출 없음
+      const { data, error } = await getEduProgress(user.id);
 
       if (error) throw error;
 
@@ -73,7 +74,7 @@ export default function useEduProgress() {
       (data || []).forEach(row => {
         const tid = row.technique_id;
         const lvl = row.level || 'beginner'; // level 컬럼 없으면 beginner 기본
-        if (!grouped[tid]) grouped[tid] = { beginner: [], intermediate: [], advanced: [] };
+        if (!grouped[tid]) grouped[tid] = { novice: [], beginner: [], intermediate: [], advanced: [], expert: [] };
         if (!grouped[tid][lvl]) grouped[tid][lvl] = [];
         if (!grouped[tid][lvl].includes(row.chapter_id)) {
           grouped[tid][lvl].push(row.chapter_id);
@@ -83,7 +84,7 @@ export default function useEduProgress() {
       // localStorage 데이터와 병합 (오프라인 중 기록된 것)
       const local = loadLocal();
       Object.entries(local).forEach(([tid, levels]) => {
-        if (!grouped[tid]) grouped[tid] = { beginner: [], intermediate: [], advanced: [] };
+        if (!grouped[tid]) grouped[tid] = { novice: [], beginner: [], intermediate: [], advanced: [], expert: [] };
         LEVELS.forEach(lvl => {
           const chapters = levels[lvl] || [];
           chapters.forEach(ch => {
@@ -156,11 +157,16 @@ export default function useEduProgress() {
     return prog.completed >= prog.total;
   }, [getProgress]);
 
-  // ── 레벨 잠금 해제 여부 (beginner→intermediate→advanced 순차 해금) ──
+  // ── 레벨 잠금 해제 여부 (novice→beginner→intermediate→advanced→expert 순차 해금) ──
+  // 콘텐츠(url)가 없는 레벨은 잠금 조건에서 건너뜀 → 기존 사용자 진행률 보존
   const isUnlocked = useCallback((techniqueId, level) => {
-    if (level === 'beginner') return true;
-    if (level === 'intermediate') return isLevelComplete(techniqueId, 'beginner');
-    if (level === 'advanced') return isLevelComplete(techniqueId, 'intermediate');
+    const meta = eduMeta.pages[techniqueId];
+    const hasContent = (lvl) => !!(meta?.levels?.[lvl]?.url);
+    if (level === 'novice') return true;
+    if (level === 'beginner') return !hasContent('novice') || isLevelComplete(techniqueId, 'novice');
+    if (level === 'intermediate') return !hasContent('beginner') || isLevelComplete(techniqueId, 'beginner');
+    if (level === 'advanced') return !hasContent('intermediate') || isLevelComplete(techniqueId, 'intermediate');
+    if (level === 'expert') return !hasContent('advanced') || isLevelComplete(techniqueId, 'advanced');
     return false;
   }, [isLevelComplete]);
 

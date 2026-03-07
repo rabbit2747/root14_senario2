@@ -52,7 +52,7 @@ Before writing code, MUST output the following steps using XML tags:
 
 ### 작성 규칙
 1. **기술 용어 최소화**: 사용자가 이해할 수 있는 쉬운 표현 사용
-2. **버전 번호 포함**: `v0.x.x` 형식 (현재 최신: v0.8.3)
+2. **버전 번호 포함**: `v0.x.x` 형식 (현재 최신: v0.9.3)
 3. **변경 내용 요약**: "무엇이 좋아졌는지" 관점으로 작성
 4. **다국어 지원**: 한국어 기본, 필요 시 영어 병기
 5. **카테고리**: 🆕 새 기능 / 🔧 개선 / 🛡️ 보안 / 🐛 버그 수정
@@ -85,6 +85,10 @@ Before writing code, MUST output the following steps using XML tags:
 | v0.8.1 | 2026-03-06 | 히어로 번역 버그 4건 수정: 모바일 버튼 하드코딩, vi/ar description 한국어 폴백, FullScreenModal 폴백, TacticColumn 비한국어 시 한국어 부제 숨김 |
 | v0.8.2 | 2026-03-06 | 번역 누락 전면 수정: DetailPanel 'Attack Vector'/'Affected' 라벨 다국어화, 8개 인시던트 베트남어·아랍어 description 추가 |
 | v0.8.3 | 2026-03-06 | LangToggle LANG_OPTIONS + IntroMatrix langOptions/uiT에 vi/ar 추가, uiT fallback 방어 코드, vi/ar 선택 시 흰 화면 버그 수정 |
+| v0.9.0 | 2026-03-06 | 교육 레벨 3→5단계(novice/beginner/intermediate/advanced/expert), 교육흐름 edu→graphic→scenario→lab 4단계, GraphicExplanationPage/ScenarioExplanationPage 신규, graphic-link.js 생성, 161개 HTML lab-link→graphic-link 교체 |
+| v0.9.1 | 2026-03-06 | 진행률 버그 수정: progress-tracker.js 정규식 /^(ch\d+|quiz|eval)$/ 확장, edu-meta.json chapterIds 접두사(b-/i-/a-) 547개 제거, T1587.001 beginner chapters 11→10(quiz optional화), edu-page-template-guide.md 신규 생성 |
+| v0.9.2 | 2026-03-06 | 그래픽/시나리오/랩 라우트 레벨 독립화: /:techniqueId/:level 파라미터 추가(3개 라우트), beginner HTML 187개 data-level="beginner" 일괄 추가, graphic-link.js data-level 읽기 적용, GraphicExplanationPage/ScenarioExplanationPage 레벨 배지 UI 추가 |
+| v0.9.3 | 2026-03-06 | 시나리오 SCENARIO_COMPONENTS 동적 분기 구조(React.lazy+Suspense), T1587.001-beginner 인터랙티브 게임 별도 파일 분리(lucide-react 설치), 수료 보고서 모달 휠 스크롤 탭 전환, 보고서 모달·인벤토리 크기 버그 수정 |
 
 ---
 
@@ -159,3 +163,394 @@ Before writing code, MUST output the following steps using XML tags:
 - 모달이나 오버레이 컴포넌트가 나타날 때 다른 UI(예: 사이드 패널) 밑에 깔리지 않도록 최상단 레이어에 배치한다.
 - Tailwind CSS 사용 시 모달 래퍼에 `z-[100]` 이상의 충분히 높은 z-index를 부여한다.
 - `pointer-events-none` 컨테이너 안에 있는 모달은 반드시 `createPortal(modal, document.body)`로 렌더링한다.
+
+---
+
+## 📐 프로젝트 구조 & 페이지 흐름도 (코드 기반)
+
+### ① 라우팅 맵 — App.jsx `<Routes>` 완전 기준
+
+```
+Route path                     Component          인증조건          비고
+───────────────────────────────────────────────────────────────────────────────
+/                           → IntroMatrix         없음              히어로+MITRE 매트릭스 메인
+/login                      → Login               없음
+/signup                     → Signup              없음
+/mypage                     → MyPage              없음 (내부 처리)
+/admin                      → AdminPage           AdminGuard        !isLoggedIn→/login, !isAdmin→/
+/announcements              → Announcements       없음
+/community                  → CommunityPage       없음
+/edu/:techniqueId           → CourseSelector           Auth Gate 내부    !isLoggedIn→/login?redirect=...
+/edu/graphic/:techniqueId   → GraphicExplanationPage  Auth Gate 내부    !isLoggedIn→/login?redirect=...
+/edu/scenario/:techniqueId  → ScenarioExplanationPage Auth Gate 내부    !isLoggedIn→/login?redirect=...
+/lab/desktop/:techniqueId   → DesktopLab               Auth Gate 내부    !isLoggedIn→/login?redirect=...
+/lab/t1078                  → LabT1078            없음              T1078.002 전용 하드코딩 랩
+/lab/complete/:techniqueId  → LabCompletionPage   없음
+───────────────────────────────────────────────────────────────────────────────
+· 모든 컴포넌트 lazy() — Suspense fallback: 다크 스피너
+· 감싸는 순서: AuthProvider > BrowserRouter > PageTracker(GA4) > SessionWarningToast > Suspense
+· 세션타임아웃: 비활동 9분30초 → 경고 토스트, 10분 → supabase.auth.signOut() 자동 실행
+```
+
+### ② 유저 흐름 분기 — 비로그인 / 일반 / 관리자
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[A] 비로그인
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  / → 기법 클릭 → 로그인 유도 UI (navigate 없음, 페이지 내 안내)
+  /edu/:id  직접접근 → CourseSelector useEffect → navigate('/login?redirect=/edu/:id')
+  /lab/desktop/:id 직접접근 → DesktopLab useEffect → navigate('/login?redirect=/lab/desktop/:id', {replace:true})
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[B] 로그인 — 일반 유저
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  / (IntroMatrix)
+   ├─ 기법 클릭 (hasEduContent) → navigate('/edu/:techniqueId')
+   │    └─ sessionStorage['gotroot_nav_state'].breadcrumb 업데이트
+   └─ /edu/:techniqueId (CourseSelector)
+        ├─ eduMeta.pages[id] 없음 → "콘텐츠 없음" 404 화면
+        ├─ eduMeta.pages[id] 있음
+        │   └─ 레벨카드 5장 (LEVELS = ['novice','beginner','intermediate','advanced','expert'])
+        │        ├─ 🟡 novice       : 항상 해금
+        │        ├─ 🟢 beginner     : novice 콘텐츠 있으면 완료 후 해금, 없으면 항상 해금
+        │        ├─ 🔵 intermediate : beginner 콘텐츠 있으면 완료 후 해금, 없으면 항상 해금
+        │        ├─ 🔴 advanced     : intermediate 완료 후 해금 (동일 규칙)
+        │        └─ ⭐ expert       : advanced 완료 후 해금 (동일 규칙)
+        │        ※ url 없는 레벨은 "준비중" 상태, 잠금 조건 건너뜀 (기존 진행률 보존)
+        │
+        │   카드 클릭 시 CTA 라벨:
+        │     completed → "복습하기"
+        │     progress.completed > 0 → "이어하기"
+        │     else → "시작하기"
+        │
+        │   이동 방식: window.location.href = card.url   ← React Router 아님!
+        │             (public/edu/*.html은 SPA 외부 별도 HTML)
+        │
+        └─ public/edu/*.html 내 graphic-link.js 클릭  ← (구: lab-link.js)
+             └─ window.location.href = '/edu/graphic/:techniqueId'  (SPA 라우트)
+                  └─ /edu/graphic/:techniqueId (GraphicExplanationPage.jsx)
+                       └─ [시나리오 기반 설명으로] 버튼 → navigate('/edu/scenario/:id')
+                            └─ /edu/scenario/:techniqueId (ScenarioExplanationPage.jsx)
+                                 └─ [실습 랩 시작] 버튼 → navigate('/lab/desktop/:id')
+                                      └─ navigate('/lab/desktop/:techniqueId')
+                  │
+                  ├─ [T1078.002] DEDICATED_LABS 해당
+                  │    └─ navigate('/lab/t1078', {replace:true})  ← LabT1078
+                  │
+                  ├─ SCENARIO_LOADERS[id] 있는 경우 (40개 기법)
+                  │    └─ dynamic import('lab-scenarios/:id.json') → scenario 객체
+                  │         └─ <GenericLabSimulator scenario={...} techniqueId={...} />
+                  │              ① 법적 고지 동의 체크박스
+                  │              ② 설정화면: userName(profiles.name prefill), companyName
+                  │              ③ 실습화면 2분할
+                  │                   viewMode='hacker' → 해커PC (터미널+단계로그+데스크톱아이콘)
+                  │                   viewMode='defender' → 방어자SOC (탐지/대응/체크포인트)
+                  │              ④ 자동재생: stepDuration(기본8초) + TTS 완료 대기 후 진행
+                  │                   TTS: window.speechSynthesis API
+                  │                   음소거 시 TTS 없이 타이머만
+                  │              ⑤ 마지막 스텝 완료
+                  │                   localStorage['gotroot_completed_labs'] 배열에 push
+                  │                   navigate('/lab/complete/:id', { state: { ... } })
+                  │
+                  └─ SCENARIO_LOADERS[id] 없는 경우
+                       └─ 폴백 화면 (scenario=null) — 현실적으로 도달 불가
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[C] 관리자 (isAdmin=true)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  /admin → AdminGuard → AdminContent
+    탭ID          컴포넌트                requestVerify  역할
+    ──────────────────────────────────────────────────────
+    'edu'       → EduFormManager          ✅            edu-meta.json CRUD
+    'matrix'    → MatrixStructureManager  ✅            Supabase tactics/techniques 편집
+    'announce'  → AnnouncementManager     ✅            공지사항 CRUD
+    'users'     → UserManager             ✅            profiles.role 관리
+    'lab'       → EduHtmlEditor           ✅            public/edu/ HTML 직접 편집
+    'labscenario'→LabScenarioManager      ❌            랩 시나리오 JSON 관리
+    'stats'     → EduProgressStats        ✅            edu_progress 통계
+    'audit'     → AuditLogViewer          ✅            audit_logs 조회
+    ──────────────────────────────────────────────────────
+    NotificationBell: useAdminNotifications → 실시간 알림, 탭 전환 연동
+    AdminVerifyModal: useAdminVerify() → requestVerify 시 비밀번호 재확인 모달
+```
+
+### ③ 폴더별 파일 역할 트리
+
+```
+src/
+├── main.jsx          # Vite 진입점. ReactDOM.createRoot(document.getElementById('root'))
+├── App.jsx           # AuthProvider > BrowserRouter > Routes 11개. GA4 PageTracker 포함
+├── index.css         # Tailwind + Paperlogy 폰트 @font-face
+│
+├── context/
+│   └── AuthContext.jsx
+│       ├─ 제공값: user, isAdmin, isLoggedIn, loading, sessionWarning, logout
+│       ├─ profiles.role === 'admin' → isAdmin 판단
+│       └─ 세션타임아웃: IDLE_TIMEOUT=10분, WARN_BEFORE=30초
+│          감지이벤트: mousemove/keydown/scroll/touchstart/click
+│
+├── pages/
+│   ├── IntroMatrix.jsx
+│   │   ├─ HeroIncidentMatrix(히어로 시네마틱) + 전체 MITRE 매트릭스 테이블
+│   │   ├─ 5개국어: LangToggle (ko/en/ja/vi/ar)
+│   │   ├─ TECHNIQUE_URLS: eduMeta.pages 순회로 교육가능 기법 자동 판단
+│   │   ├─ useMatrixData: Supabase tactics/techniques (실패 시 matrix-fallback.json)
+│   │   ├─ useEduProgress: 로그인 시 진행률 배지
+│   │   └─ CommunitySection: lazy() (스크롤 하단)
+│   │
+│   ├── Login.jsx / Signup.jsx     # Supabase Auth (이메일/비밀번호)
+│   ├── MyPage.jsx                 # 진행률, 완료 랩 목록(localStorage)
+│   ├── Announcements.jsx          # useAnnouncements → 공지 목록+페이지네이션
+│   ├── CommunityPage.jsx          # CommunitySection 전체화면 래퍼
+│   │
+│   ├── CourseSelector.jsx         ← /edu/:techniqueId
+│   │   ├─ Auth Gate: !isLoggedIn → navigate('/login?redirect=...')
+│   │   ├─ eduMeta.pages[id] 없으면 → 404 화면
+│   │   ├─ LEVELS = [beginner🟢, intermediate🔵, advanced🔴]
+│   │   │   isUnlocked(id,level) ← useEduProgress ← edu_progress 테이블
+│   │   ├─ CTA: completed→복습하기 / progress>0→이어하기 / else→시작하기
+│   │   ├─ 이동: window.location.href = card.url  (React Router 아님!)
+│   │   └─ 브레드크럼: sessionStorage['gotroot_nav_state'].breadcrumb
+│   │
+│   ├── lab/
+│   │   ├── DesktopLab.jsx         ← /lab/desktop/:techniqueId
+│   │   │   ├─ Auth Gate: !isLoggedIn → navigate('/login?redirect=...', {replace:true})
+│   │   │   ├─ DEDICATED_LABS = { 'T1078.002': '/lab/t1078' }
+│   │   │   │   해당 시 → navigate(dedicatedPath, {replace:true})
+│   │   │   ├─ SCENARIO_LOADERS[id]() → dynamic import('lab-scenarios/:id.json')
+│   │   │   │   성공 → <GenericLabSimulator scenario={mod.default} techniqueId={id} />
+│   │   │   └─ 로더 없으면 → 폴백 화면 (scenario=null)
+│   │   │
+│   │   ├── GenericLabSimulator.jsx    # props: { scenario, techniqueId }
+│   │   │   ├─ scenario 구조:
+│   │   │   │   { id, title, titleEn, duration, stepDuration(기본8초),
+│   │   │   │     steps[], phases[]?, processTree[]?, desktopIcons[]? }
+│   │   │   ├─ ① 법적 고지 동의 (agreed 체크박스)
+│   │   │   ├─ ② 설정화면: userName(profiles.name prefill), companyName
+│   │   │   ├─ ③ 실습화면
+│   │   │   │   viewMode='hacker'   → 해커PC: 데스크톱+터미널+단계로그+processTree
+│   │   │   │   viewMode='defender' → SOC: 탐지분석/대응전략/SOC체크포인트
+│   │   │   ├─ ④ 자동재생: stepDuration초 + TTS(ttsFinished) 둘 다 충족 시 진행
+│   │   │   │   TTS: window.speechSynthesis (음소거 시 건너뜀)
+│   │   │   │   줌: useSimulationZoom({ enabled: isMobile(width<1024) })
+│   │   │   └─ ⑤ 완료:
+│   │   │       localStorage['gotroot_completed_labs'] push
+│   │   │       navigate('/lab/complete/:id', { state: { scenarioTitle, ... } })
+│   │   │
+│   │   ├── LabT1078.jsx             # T1078.002 Domain Accounts 전용 랩
+│   │   ├── labT1078Data.jsx         # T1078 단계 데이터 배열 + Icons export
+│   │   └── LabCompletionPage.jsx    # 완료 화면. navigate state로 시나리오 정보 수신
+│   │
+│   └── admin/                       # AdminGuard 보호 (isAdmin 필수)
+│       ├── AdminGuard.jsx           # !isLoggedIn→/login, !isAdmin→/ Navigate
+│       ├── AdminPage.jsx            # 8탭 레이아웃. NotificationBell, AdminVerifyModal
+│       ├── EduPageManager.jsx       # ⚠️ 현재 탭에서 미사용 (EduHtmlEditor가 대신 담당)
+│       ├── EduProgressStats.jsx     # 탭'stats': 기법별/레벨별 학습 통계
+│       ├── UserManager.jsx          # 탭'users': profiles.role 부여/회수
+│       ├── announcement-manager/AnnouncementManager.jsx  # 탭'announce'
+│       ├── audit-log/AuditLogViewer.jsx                  # 탭'audit'
+│       ├── edu-html-editor/EduHtmlEditor.jsx             # 탭'lab': HTML 직접 편집
+│       ├── edu-html-editor/editor-theme.css
+│       ├── edu-manager/                                   # 탭'edu': edu-meta.json CRUD
+│       │   ├── EduFormManager.jsx / EduMetaForm.jsx
+│       │   ├── ChapterManager.jsx / TagInput.jsx
+│       │   └── EduContentPreview.jsx / useEduFormState.js
+│       ├── lab-scenario-manager/LabScenarioManager.jsx   # 탭'labscenario'
+│       └── matrix-manager/                               # 탭'matrix'
+│           ├── MatrixStructureManager.jsx
+│           ├── TacticListPanel.jsx / TechniquePanel.jsx / TranslationPanel.jsx
+│           └── useMatrixFormState.js
+│
+├── components/
+│   ├── LangToggle.jsx     # ko/en/ja/vi/ar. localStorage 'gotroot_lang'
+│   │                      # export: getStoredLang() / storeLang()
+│   ├── AvatarRoom.jsx     # 유저 아바타
+│   ├── hero/              # IntroMatrix 전용
+│   │   ├── HeroIncidentMatrix.jsx    # 8개 실제 사고 시네마틱 매트릭스
+│   │   ├── TacticColumn.jsx          # 전술 컬럼 렌더링
+│   │   ├── IncidentCard.jsx          # 인시던트 카드 (클릭→DetailPanel)
+│   │   ├── DetailPanel.jsx           # 좌측 사이드패널 (기법+TTP 상세)
+│   │   ├── RightDetailPanel.jsx      # 우측 사이드패널
+│   │   ├── FullScreenReportModal.jsx # 전체화면 침해사고 보고서
+│   │   ├── IncidentIllustration.jsx  # SVG 다크모드 일러스트
+│   │   ├── JsonDiagram.jsx           # 공격체인 JSON 시각화
+│   │   ├── RobotCharacter.jsx / RobotSpeechBubble.jsx
+│   │   └── incidentData.js           # 8개 인시던트 정적 데이터 (다국어 포함)
+│   ├── community/
+│   │   ├── CommunitySection.jsx      # lazy loaded. 피드백+공지 통합
+│   │   ├── FeedbackBoard.jsx         # 이모지 반응/댓글/대댓글
+│   │   ├── AnnouncementPreview.jsx   # 공지 미리보기 카드
+│   │   └── EmojiPicker.jsx
+│   └── admin/
+│       ├── AdminVerifyModal.jsx      # requestVerify 시 비밀번호 재확인 모달
+│       ├── AdminGuideSection.jsx     # 어드민 가이드 텍스트
+│       └── NotificationBell.jsx      # useAdminNotifications → 실시간 알림+탭 연동
+│
+├── hooks/
+│   ├── useMatrixData.js         # tactics+techniques. 실패→matrix-fallback.json
+│   ├── useEduProgress.js        # getProgress/isLevelComplete/isUnlocked 제공
+│   ├── useAnnouncements.js      # announcements CRUD
+│   ├── useFeedback.js           # feedback 테이블 (이모지/댓글/대댓글)
+│   ├── useAdminVerify.js        # { requestVerify, ...modalProps }
+│   ├── useAdminNotifications.js # 어드민 알림 폴링
+│   ├── useAuditLogs.js          # audit_logs 조회
+│   ├── useEduHtmlContent.js     # edu_html_content (어드민 HTML 편집)
+│   └── useSimulationZoom.js     # 줌 50~200% 상태. GenericLabSimulator 사용
+│
+├── lib/
+│   ├── supabase.js       # createClient(VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+│   │                     # + logAccess() → audit_logs insert
+│   ├── i18n.js           # 다국어 헬퍼
+│   ├── sanitize.js       # DOMPurify (React dangerouslySetInnerHTML)
+│   ├── sanitizeHtml.js   # DOMPurify (HTML 문자열 직접 처리)
+│   └── maskUtils.js      # maskEmail() — 관리자 헤더 이메일 마스킹
+│
+└── data/
+    ├── edu-meta.json          # { pages: { [techniqueId]: { title,titleEn,levels,tags,difficulty } } }
+    │                          # CourseSelector + IntroMatrix(TECHNIQUE_URLS) 둘 다 사용
+    ├── matrix-fallback.json   # Supabase 실패 시 폴백 전체 구조
+    ├── attack-simulators/T1078.002.json   # LabT1078 전용 시뮬레이터 데이터
+    ├── edu-datasets/          # 교육용 정적 JSON 5개 (t1003/t1059/t1110/t1547/t1566)
+    └── lab-scenarios/         # ~170개 JSON. DesktopLab SCENARIO_LOADERS 동적 import
+
+public/
+├── edu/ (203개 HTML)      # window.location.href 이동. SPA 밖 별도 환경
+│   ├── breadcrumb.js      # 교육 HTML 내 브레드크럼 UI
+│   ├── lab-link.js        # 실습 시작 → /lab/desktop/:id pushState
+│   └── progress-tracker.js# 챕터 완료 시 Supabase edu_progress upsert
+├── logo/                  # logo-name-dark-nobg / dark / white / logo-white (4종)
+├── fonts/                 # Paperlogy 1Thin~9Black (9종 .ttf)
+└── videos/hero/           # 히어로 배경 영상 5개
+```
+
+### ④ Supabase 테이블 의존성 — 읽기 / 쓰기 분리
+
+```
+테이블               읽기 (SELECT)                         쓰기 (INSERT/UPDATE/UPSERT)
+────────────────────────────────────────────────────────────────────────────────────────
+profiles          AuthContext (role→isAdmin 판단)          UserManager (role 변경)
+                  GenericLabSimulator (name prefill)
+────────────────────────────────────────────────────────────────────────────────────────
+tactics           useMatrixData                            MatrixStructureManager
+techniques        useMatrixData                            MatrixStructureManager
+                                                           TranslationPanel
+────────────────────────────────────────────────────────────────────────────────────────
+announcements     useAnnouncements                         AnnouncementManager
+                  AnnouncementPreview
+────────────────────────────────────────────────────────────────────────────────────────
+feedback          useFeedback                              FeedbackBoard (이모지/댓글/대댓글)
+────────────────────────────────────────────────────────────────────────────────────────
+edu_progress      useEduProgress                           public/edu/progress-tracker.js
+                  (isLevelComplete, isUnlocked,            ⚠️ SPA 밖! HTML이 직접 upsert
+                   getProgress, EduProgressStats)
+────────────────────────────────────────────────────────────────────────────────────────
+audit_logs        useAuditLogs, AuditLogViewer             lib/supabase.logAccess()
+                                                           (관리자 작업 시 자동 기록)
+────────────────────────────────────────────────────────────────────────────────────────
+edu_html_content  useEduHtmlContent                        EduHtmlEditor (어드민 HTML 편집)
+────────────────────────────────────────────────────────────────────────────────────────
+
+핵심 주의사항:
+· tactics/techniques: Supabase 실패 → src/data/matrix-fallback.json 폴백
+· edu_progress 쓰기: React SPA가 아닌 public/edu/progress-tracker.js 가 담당
+  CourseSelector의 isUnlocked/getProgress는 이 테이블을 읽기만 함
+· GenericLabSimulator 완료: edu_progress.upsert(ignoreDuplicates:true) + localStorage 폴백 이중 저장
+  localStorage['gotroot_completed_labs'] = [{ name, technique, completedAt }] (오프라인/폴백)
+  edu_progress: { user_id, technique_id, chapter_id:'lab_completed', level } (서버 측 증빙)
+```
+
+---
+
+## 🗺️ 중장기 마이그레이션 플랜 (Supabase → NestJS + PostgreSQL)
+
+> **목표**: 사용자 100명 도달 시 무중단으로 Supabase → 자체 백엔드 전환
+> **원칙**: Strangler Fig Pattern — 화면 변화 없이 API 레이어만 교체
+
+### 현황 vs 목표
+
+| 항목 | 현재 | 목표 |
+|------|------|------|
+| 구조 | React → Supabase 직접 연결 | React → NestJS API → PostgreSQL |
+| 인증 | Supabase Auth | JWT (NestJS Guard) |
+| 실시간 | Supabase Realtime | NestJS WebSocket Gateway |
+| 외부 HTML | progress-tracker.js (하드코딩) | API 엔드포인트 호출 |
+
+### Phase 0 — 지금 당장 (비용 0, 코드 규칙만)
+
+**금지**: 컴포넌트에서 `supabase.*` 신규 직접 호출 추가 금지
+**허용 예외**:
+- `AuthContext.jsx`: `onAuthStateChange` 실시간 리스너 (Phase 2까지 유지)
+- `public/edu/progress-tracker.js`: SPA 외부 파일, 별도 전환 계획 필요
+- 기존 코드 수정 불요 (신규 쿼리만 `src/api/` 경유)
+
+**신규 쿼리 작성 규칙**:
+```js
+// ❌ 금지 (직접 호출)
+const { data } = await supabase.from('announcements').select('*');
+
+// ✅ 허용 (api 경유)
+import { getAnnouncements } from '../api/announcements';
+const data = await getAnnouncements();
+```
+
+### Phase 1 — 사용자 50명 도달 시 (~3주 풀타임, ~95시간)
+
+```
+1. NestJS + Prisma 프로젝트 생성
+2. prisma db pull  →  Supabase 스키마 자동 추출 (재설계 불필요!)
+3. src/api/_client.js 1파일 교체  →  전체 프론트 전환
+4. 파일 이관 순서 (A→B→C 우선):
+   A (쉬움, 8개):  useMatrixData, useAuditLogs, useAdminNotifications, EduProgressStats
+   B (표준, 11개): useAnnouncements, useFeedback (non-realtime), EduFormManager
+   C (예외, 4개):  AuthContext, progress-tracker.js, GenericLabSimulator, useFeedback Realtime
+```
+
+### Phase 2 — 사용자 100명 이후
+
+- Supabase Realtime → NestJS WebSocket Gateway 교체
+- `progress-tracker.js` → NestJS API 엔드포인트 호출
+- AuthContext → JWT access/refresh token 관리
+
+### src/api/ 껍데기 구조 (Phase 0 준비)
+
+```
+src/api/
+├── _client.js          ← 단일 교체 포인트 (현재: supabase client, 전환 후: axios)
+├── auth.js             ← getSession, signIn, signOut
+├── announcements.js    ← CRUD
+├── matrix.js           ← tactics, techniques
+├── feedback.js         ← 이모지/댓글
+├── edu.js              ← edu_progress, edu_meta
+└── admin.js            ← audit_logs, profiles, edu_html_content
+```
+
+### 기술 선택: NestJS (TypeScript) > Spring Boot
+
+| 이유 | 설명 |
+|------|------|
+| 언어 통일 | TypeScript (React ↔ NestJS) |
+| 스키마 자동화 | `prisma db pull` → Supabase PostgreSQL 즉시 추출 |
+| 실시간 대응 | Supabase Realtime → WebSocket Gateway 1:1 |
+| 팀 규모 | 소규모 + I/O-heavy → NestJS 최적 |
+
+### 🚨 보안 즉시 조치 (Supabase SQL Editor에서 직접 실행)
+
+```sql
+-- 1. access_logs: 이메일·IP 노출 차단 (🔴 CRITICAL)
+ALTER TABLE access_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "access_logs_own_only" ON access_logs
+  FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+-- 2. feedback_likes: user_id 노출 차단
+ALTER TABLE feedback_likes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "feedback_likes_own" ON feedback_likes
+  FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+-- 3. announcements: 로그인 유저만 읽기 (공개 접근 차단)
+DROP POLICY IF EXISTS "announcements_public_read" ON announcements;
+CREATE POLICY "announcements_auth_read" ON announcements
+  FOR SELECT TO authenticated USING (true);
+```
+
+> ⚠️ Claude는 Supabase SQL Editor를 직접 실행할 수 없음. 사용자가 직접 실행 필요.

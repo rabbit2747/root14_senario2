@@ -13,9 +13,11 @@ const MyPage         = lazy(() => import('./pages/MyPage'));
 const AdminPage      = lazy(() => import('./pages/admin/AdminPage'));
 const Announcements  = lazy(() => import('./pages/Announcements'));
 const CommunityPage  = lazy(() => import('./pages/CommunityPage'));
-const CourseSelector = lazy(() => import('./pages/CourseSelector'));
-const DesktopLab     = lazy(() => import('./pages/lab/DesktopLab'));
-const LabCompletion  = lazy(() => import('./pages/lab/LabCompletionPage'));
+const CourseSelector          = lazy(() => import('./pages/CourseSelector'));
+const GraphicExplanationPage  = lazy(() => import('./pages/GraphicExplanationPage'));
+const ScenarioExplanationPage = lazy(() => import('./pages/ScenarioExplanationPage'));
+const DesktopLab              = lazy(() => import('./pages/lab/DesktopLab'));
+const LabCompletion           = lazy(() => import('./pages/lab/LabCompletionPage'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -86,7 +88,9 @@ function App() {
             <Route path="/announcements" element={<Announcements />} />
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/edu/:techniqueId" element={<CourseSelector />} />
-            <Route path="/lab/desktop/:techniqueId" element={<DesktopLab />} />
+            <Route path="/edu/graphic/:techniqueId/:level" element={<GraphicExplanationPage />} />
+            <Route path="/edu/scenario/:techniqueId/:level" element={<ScenarioExplanationPage />} />
+            <Route path="/lab/desktop/:techniqueId/:level" element={<DesktopLab />} />
             <Route path="/lab/complete/:techniqueId" element={<LabCompletion />} />
           </Routes>
         </Suspense>

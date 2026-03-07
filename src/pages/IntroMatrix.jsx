@@ -656,6 +656,10 @@ export default function UltimateCinematicMatrix() {
         .dm-root .dm-header { background: #0d1b2a !important; border-color: #415a77 !important; }
         .dm-tactic { cursor: default !important; user-select: none; pointer-events: none; }
         .dm-tactic h3, .dm-tactic p { cursor: default !important; pointer-events: none; }
+        /* ── Full Matrix 비선택 뷰: 전술 헤더 탭/클릭 활성화 (모바일·태블릿·데스크톱 공통) ── */
+        .matrix-full-grid:not(.matrix-zoomed) .dm-tactic { pointer-events: auto !important; cursor: pointer !important; }
+        .matrix-full-grid:not(.matrix-zoomed) .dm-tactic h3,
+        .matrix-full-grid:not(.matrix-zoomed) .dm-tactic p { pointer-events: auto !important; }
         .dm-root .dm-tactic h3 { color: #e0e1dd !important; }
         .dm-root .dm-tactic p { color: #94a3b8 !important; }
         .dm-root .matrix-tech-card { background: #0d1b2a !important; }

@@ -1,5 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+// ✅ Phase 0: CRUD는 api/ 경유, Realtime 채널·verifyAdmin은 supabase 직접 유지
 import { supabase, logAdminAudit } from '../lib/supabase';
+import {
+  getAnnouncements as apiFetchAnnouncements,
+  createAnnouncement as apiCreateAnnouncement,
+  updateAnnouncement as apiUpdateAnnouncement,
+  deleteAnnouncement as apiDeleteAnnouncement,
+} from '../api/announcements';
 import { stripHtml } from '../lib/sanitize';
 
 /**
@@ -15,12 +22,8 @@ export default function useAnnouncements(limit = 50) {
   const fetchAnnouncements = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error: e } = await supabase
-        .from('announcements')
-        .select('*')
-        .order('is_pinned', { ascending: false })
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      // ✅ api/announcements.js 경유 — supabase 직접 호출 없음
+      const { data, error: e } = await apiFetchAnnouncements(limit);
       if (e) throw e;
       setAnnouncements(data || []);
       setError(null);
@@ -83,7 +86,8 @@ export default function useAnnouncements(limit = 50) {
         setError('제목과 내용을 입력해주세요');
         return { success: false, error: '제목과 내용을 입력해주세요' };
       }
-      const { error: e } = await supabase.from('announcements').insert({
+      // ✅ api/announcements.js 경유
+      const { error: e } = await apiCreateAnnouncement({
         title: safeTitle, content: safeContent, category, is_pinned, author_id: auth.uid,
       });
       if (e) throw e;
@@ -105,10 +109,8 @@ export default function useAnnouncements(limit = 50) {
       const safeUpdates = { ...updates };
       if (safeUpdates.title) safeUpdates.title = stripHtml(safeUpdates.title);
       if (safeUpdates.content) safeUpdates.content = stripHtml(safeUpdates.content);
-      const { error: e } = await supabase
-        .from('announcements')
-        .update({ ...safeUpdates, updated_at: new Date().toISOString() })
-        .eq('id', id);
+      // ✅ api/announcements.js 경유
+      const { error: e } = await apiUpdateAnnouncement(id, safeUpdates);
       if (e) throw e;
       logAdminAudit('announcement_update', `announcement_${id}`, { updated_fields: Object.keys(safeUpdates) });
       await fetchAnnouncements();
@@ -125,10 +127,8 @@ export default function useAnnouncements(limit = 50) {
       const auth = await verifyAdmin();
       if (!auth.ok) { setError(auth.error); return { success: false, error: auth.error }; }
 
-      const { error: e } = await supabase
-        .from('announcements')
-        .delete()
-        .eq('id', id);
+      // ✅ api/announcements.js 경유
+      const { error: e } = await apiDeleteAnnouncement(id);
       if (e) throw e;
       logAdminAudit('announcement_delete', `announcement_${id}`);
       await fetchAnnouncements();

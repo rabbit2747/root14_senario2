@@ -10,20 +10,26 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 const uiText = {
   ko: {
     courseSelect: '과정 선택',
+    novice: '입문',
     beginner: '초급',
     intermediate: '중급',
     advanced: '고급',
+    expert: '전문가',
+    noviceDesc: '사이버보안의 기초 개념을 탐색합니다',
     beginnerDesc: '개념과 원리를 이해합니다',
     intermediateDesc: '공격/방어 기법을 실습합니다',
     advancedDesc: '실전 시뮬레이션으로 마무리합니다',
+    expertDesc: '전문가 수준 심화 실전 훈련',
     chapters: '챕터',
     minutes: '분',
     start: '시작하기',
     resume: '이어하기',
     review: '복습하기',
     locked: '잠김',
+    unlockNovice: '입문 과정을 완료하면 해금됩니다',
     unlockBeginner: '초급 과정을 완료하면 해금됩니다',
     unlockIntermediate: '중급 과정을 완료하면 해금됩니다',
+    unlockAdvanced: '고급 과정을 완료하면 해금됩니다',
     comingSoon: '준비중',
     comingSoonDesc: '콘텐츠가 곧 추가됩니다',
     completed: '완료',
@@ -35,20 +41,26 @@ const uiText = {
   },
   en: {
     courseSelect: 'Select Course',
+    novice: 'Novice',
     beginner: 'Beginner',
     intermediate: 'Intermediate',
     advanced: 'Advanced',
+    expert: 'Expert',
+    noviceDesc: 'Explore the basics of cybersecurity',
     beginnerDesc: 'Understand concepts and principles',
     intermediateDesc: 'Practice attack/defense techniques',
     advancedDesc: 'Complete with real-world simulation',
+    expertDesc: 'Expert-level deep practical training',
     chapters: 'Chapters',
     minutes: 'min',
     start: 'Start',
     resume: 'Resume',
     review: 'Review',
     locked: 'Locked',
+    unlockNovice: 'Complete novice course to unlock',
     unlockBeginner: 'Complete beginner course to unlock',
     unlockIntermediate: 'Complete intermediate course to unlock',
+    unlockAdvanced: 'Complete advanced course to unlock',
     comingSoon: 'Coming Soon',
     comingSoonDesc: 'Content will be added soon',
     completed: 'Completed',
@@ -60,20 +72,26 @@ const uiText = {
   },
   zh: {
     courseSelect: '选择课程',
+    novice: '入门',
     beginner: '初级',
     intermediate: '中级',
     advanced: '高级',
+    expert: '专家',
+    noviceDesc: '探索网络安全基础',
     beginnerDesc: '理解概念和原理',
     intermediateDesc: '练习攻防技术',
     advancedDesc: '通过实战模拟完成',
+    expertDesc: '专家级深度实战训练',
     chapters: '章节',
     minutes: '分钟',
     start: '开始',
     resume: '继续',
     review: '复习',
     locked: '锁定',
+    unlockNovice: '完成入门课程后解锁',
     unlockBeginner: '完成初级课程后解锁',
     unlockIntermediate: '完成中级课程后解锁',
+    unlockAdvanced: '完成高级课程后解锁',
     comingSoon: '即将推出',
     comingSoonDesc: '内容即将添加',
     completed: '完成',
@@ -85,20 +103,26 @@ const uiText = {
   },
   hi: {
     courseSelect: 'कोर्स चुनें',
+    novice: 'नौसिखिया',
     beginner: 'शुरुआती',
     intermediate: 'मध्यवर्ती',
     advanced: 'उन्नत',
+    expert: 'विशेषज्ञ',
+    noviceDesc: 'साइबर सुरक्षा की मूल बातें',
     beginnerDesc: 'अवधारणाओं और सिद्धांतों को समझें',
     intermediateDesc: 'आक्रमण/रक्षा तकनीकों का अभ्यास करें',
     advancedDesc: 'वास्तविक सिमुलेशन के साथ पूर्ण करें',
+    expertDesc: 'विशेषज्ञ स्तर का उन्नत प्रशिक्षण',
     chapters: 'अध्याय',
     minutes: 'मिनट',
     start: 'शुरू',
     resume: 'जारी रखें',
     review: 'समीक्षा',
     locked: 'लॉक',
+    unlockNovice: 'नौसिखिया कोर्स पूरा करें',
     unlockBeginner: 'अनलॉक करने के लिए शुरुआती कोर्स पूरा करें',
     unlockIntermediate: 'अनलॉक करने के लिए मध्यवर्ती कोर्स पूरा करें',
+    unlockAdvanced: 'उन्नत कोर्स पूरा करने पर अनलॉक होगा',
     comingSoon: 'जल्द आ रहा है',
     comingSoonDesc: 'सामग्री जल्द जोड़ी जाएगी',
     completed: 'पूर्ण',
@@ -110,20 +134,26 @@ const uiText = {
   },
   ja: {
     courseSelect: 'コースを選択',
+    novice: '入門',
     beginner: '初級',
     intermediate: '中級',
     advanced: '上級',
+    expert: '専門家',
+    noviceDesc: 'サイバーセキュリティの基礎を探索',
     beginnerDesc: '概念と原理を理解します',
     intermediateDesc: '攻撃/防御テクニックを実習します',
     advancedDesc: '実戦シミュレーションで仕上げます',
+    expertDesc: '専門家レベルの深化実践訓練',
     chapters: 'チャプター',
     minutes: '分',
     start: '開始',
     resume: '続ける',
     review: '復習',
     locked: 'ロック中',
+    unlockNovice: '入門コースを完了するとアンロックされます',
     unlockBeginner: '初級コースを完了するとアンロックされます',
     unlockIntermediate: '中級コースを完了するとアンロックされます',
+    unlockAdvanced: '上級コースを完了するとアンロックされます',
     comingSoon: '準備中',
     comingSoonDesc: 'コンテンツが間もなく追加されます',
     completed: '完了',
@@ -135,11 +165,13 @@ const uiText = {
   },
 };
 
-// ── 레벨 설정 ──
+// ── 레벨 설정 (5단계) ──
 const LEVELS = [
+  { key: 'novice',       color: '#f59e0b', colorLight: '#fef3c7', borderColor: '#fcd34d', emoji: '🟡', gradient: 'from-amber-400 to-yellow-500' },
   { key: 'beginner',     color: '#10b981', colorLight: '#d1fae5', borderColor: '#6ee7b7', emoji: '🟢', gradient: 'from-emerald-500 to-teal-600' },
   { key: 'intermediate', color: '#3b82f6', colorLight: '#dbeafe', borderColor: '#93c5fd', emoji: '🔵', gradient: 'from-blue-500 to-indigo-600' },
   { key: 'advanced',     color: '#ef4444', colorLight: '#fee2e2', borderColor: '#fca5a5', emoji: '🔴', gradient: 'from-red-500 to-rose-600' },
+  { key: 'expert',       color: '#8b5cf6', colorLight: '#ede9fe', borderColor: '#c4b5fd', emoji: '⭐', gradient: 'from-violet-500 to-purple-600' },
 ];
 
 export default function CourseSelector() {
@@ -309,9 +341,9 @@ export default function CourseSelector() {
         </h2>
       </div>
 
-      {/* 레벨 카드 3장 */}
-      <div className="max-w-6xl mx-auto px-4 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* 레벨 카드 5장 */}
+      <div className="max-w-7xl mx-auto px-4 pb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {levelCards.map((card, idx) => {
             const isLocked = !card.unlocked;
             const isComingSoon = !card.hasContent;
@@ -425,7 +457,12 @@ export default function CourseSelector() {
                     <div className="text-center text-xs text-slate-500 py-2 flex items-center justify-center gap-1.5">
                       <span>🔒</span>
                       <span>
-                        {card.key === 'intermediate' ? t.unlockBeginner : t.unlockIntermediate}
+                        {({
+                          beginner: t.unlockNovice,
+                          intermediate: t.unlockBeginner,
+                          advanced: t.unlockIntermediate,
+                          expert: t.unlockAdvanced,
+                        })[card.key] || t.locked}
                       </span>
                     </div>
                   ) : (

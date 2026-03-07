@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="light" data-technique-id="T1070.001">
+<html lang="ko" class="light" data-technique-id="T1070.001" data-level="beginner">
 <head>
     <script>
         (function() {
@@ -187,7 +187,7 @@
         var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
         document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
     </script>
-<script src="/edu/lab-link.js"></script>
+<script src="/edu/graphic-link.js"></script>
 <script src="/edu/progress-tracker.js"></script>
 <script src="/edu/breadcrumb.js"></script>
 </body>

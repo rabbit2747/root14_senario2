@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="light" data-technique-id="T1590.003">
+<html lang="ko" class="light" data-technique-id="T1590.003" data-level="beginner">
 <head>
     <script>
         (function() {
@@ -174,7 +174,7 @@
         document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s)});
         function checkQuiz(){var a={q1:'b',q2:'b',q3:'b'},s=0;for(var k in a){var sel=document.querySelector('input[name="'+k+'"]:checked');if(sel&&sel.value===a[k])s++}var r=document.getElementById('quiz-result');r.classList.remove('hidden');if(s===3){r.textContent='🎉 만점! 네트워크 신뢰 관계에 대한 이해가 완벽합니다!';r.className='text-center p-4 rounded-xl font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'}else{r.textContent='📝 '+s+'/3점 — 틀린 문제를 복습해 보세요!';r.className='text-center p-4 rounded-xl font-bold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'}}
     </script>
-    <script src="/edu/lab-link.js"></script><script src="/edu/progress-tracker.js"></script>
+    <script src="/edu/graphic-link.js"></script><script src="/edu/progress-tracker.js"></script>
 <script src="/edu/breadcrumb.js"></script>
 </body>
 </html>

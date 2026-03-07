@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+// ✅ Phase 0: 알림 CRUD는 api/ 경유, Realtime 채널·verifyAdmin은 supabase 직접 유지
 import { supabase } from '../lib/supabase';
+import {
+  getAdminNotifications as apiFetchNotifications,
+  markNotificationAsRead as apiMarkAsRead,
+  markAllNotificationsAsRead as apiMarkAllAsRead,
+} from '../api/admin';
 
 const FETCH_LIMIT = 20;
 
@@ -16,11 +22,8 @@ export default function useAdminNotifications() {
   // ── 알림 조회 (최근 20개) ──
   const fetchNotifications = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('admin_notifications')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(FETCH_LIMIT);
+      // ✅ api/admin.js 경유 — supabase 직접 호출 없음
+      const { data, error } = await apiFetchNotifications(FETCH_LIMIT);
       if (error) throw error;
 
       const rows = data || [];
@@ -82,10 +85,8 @@ export default function useAdminNotifications() {
         return;
       }
 
-      const { error } = await supabase
-        .from('admin_notifications')
-        .update({ is_read: true })
-        .eq('id', id);
+      // ✅ api/admin.js 경유
+      const { error } = await apiMarkAsRead(id);
       if (error) throw error;
 
       setNotifications(prev =>
@@ -109,10 +110,8 @@ export default function useAdminNotifications() {
       const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
       if (unreadIds.length === 0) return;
 
-      const { error } = await supabase
-        .from('admin_notifications')
-        .update({ is_read: true })
-        .in('id', unreadIds);
+      // ✅ api/admin.js 경유
+      const { error } = await apiMarkAllAsRead(unreadIds);
       if (error) throw error;
 
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));

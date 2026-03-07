@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="light" data-technique-id="T1583.002">
+<html lang="ko" class="light" data-technique-id="T1583.002" data-level="beginner">
 <head>
     <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
     <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1583-002-dns-server&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
@@ -104,7 +104,7 @@
         function checkQuiz(){var q1=document.querySelector('input[name="q1"]:checked');if(!q1){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]','bg-red-100','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');if(q1.value==='2'){r.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');r.innerHTML='정답입니다!<br><span class="text-xs mt-1 block font-normal">DNS(포트 53)는 인터넷 사용에 필수적이므로 대부분의 방화벽에서 기본적으로 허용됩니다. 이를 악용하여 데이터를 DNS 쿼리에 숨겨 전송합니다.</span>';}else{r.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');r.innerHTML='오답입니다. 일반 DNS는 암호화되지 않으며, 방화벽이 처리할 수 없는 것이 아니라 \"허용\"하는 것이 핵심입니다.';}}
         window.onload=function(){setTimeout(function(){go('ch1');},100);};
     </script>
-<script src="/edu/lab-link.js"></script>
+<script src="/edu/graphic-link.js"></script>
 <script src="/edu/progress-tracker.js"></script>
 <script src="/edu/breadcrumb.js"></script>
 </body>
