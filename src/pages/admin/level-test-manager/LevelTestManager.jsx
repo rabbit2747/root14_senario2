@@ -67,6 +67,9 @@ export default function LevelTestManager({ requestVerify }) {
     if (formData.options.some(o => !o.text.trim())) { setError('모든 선택지를 입력해주세요.'); return; }
     if (!formData.options.some(o => o.isCorrect)) { setError('정답을 선택해주세요.'); return; }
 
+    const ok = await requestVerify?.();
+    if (ok === false) return;
+
     try {
       if (editingId) {
         await updateQuestion(editingId, {
@@ -108,6 +111,8 @@ export default function LevelTestManager({ requestVerify }) {
   // 삭제
   const handleDelete = async (id) => {
     if (!window.confirm('이 문제를 비활성화하시겠습니까?')) return;
+    const ok = await requestVerify?.();
+    if (ok === false) return;
     try {
       await deleteQuestion(id);
       setSuccessMsg('문제가 비활성화되었습니다.');
@@ -141,12 +146,12 @@ export default function LevelTestManager({ requestVerify }) {
       const valid = data.filter(q => q.level && q.category && q.question && Array.isArray(q.options));
       if (valid.length === 0) throw new Error('유효한 문제가 없습니다.');
 
-      requestVerify(async () => {
-        await importQuestions(valid);
-        setSuccessMsg(`${valid.length}개 문제가 등록되었습니다.`);
-        loadData();
-        setTimeout(() => setSuccessMsg(''), 3000);
-      });
+      const ok = await requestVerify?.();
+      if (ok === false) { e.target.value = ''; return; }
+      await importQuestions(valid);
+      setSuccessMsg(`${valid.length}개 문제가 등록되었습니다.`);
+      loadData();
+      setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       setError('Import 실패: ' + err.message);
     }
