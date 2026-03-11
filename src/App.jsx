@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import ReactGA from 'react-ga4';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Time } from '@carbon/icons-react';
+import WikiFloatingButton from './components/wiki/WikiFloatingButton';
 
 // ── Route-level 코드 스플리팅 (lazy loading) ──
 const IntroMatrix    = lazy(() => import('./pages/IntroMatrix'));
@@ -18,6 +19,8 @@ const GraphicExplanationPage  = lazy(() => import('./pages/GraphicExplanationPag
 const ScenarioExplanationPage = lazy(() => import('./pages/ScenarioExplanationPage'));
 const DesktopLab              = lazy(() => import('./pages/lab/DesktopLab'));
 const LabCompletion           = lazy(() => import('./pages/lab/LabCompletionPage'));
+const LevelTest               = lazy(() => import('./pages/LevelTest'));
+const BasicsPlaceholder       = lazy(() => import('./pages/BasicsPlaceholder'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -77,11 +80,14 @@ function App() {
       <BrowserRouter>
         <PageTracker />
         <SessionWarningToast />
+        <WikiFloatingButton />
         <Suspense fallback={<RouteLoadingFallback />}>
           <Routes>
             <Route path="/" element={<IntroMatrix />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/level-test" element={<LevelTest />} />
+            <Route path="/basics" element={<BasicsPlaceholder />} />
             <Route path="/lab/t1078" element={<LabT1078 />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/admin" element={<AdminPage />} />

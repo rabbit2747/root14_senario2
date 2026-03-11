@@ -572,7 +572,7 @@ export default function HeroIncidentMatrix({
                     {ht.ctaCurriculum} <ArrowRight size={14} />
                   </motion.button>
                   <motion.button
-                    onClick={() => navigate('/login')}
+                    onClick={() => isLoggedIn ? enterMatrix() : navigate('/level-test')}
                     className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg border shadow-sm transition-all active:scale-[0.98]
                       ${isDark
                         ? 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-slate-600 hover:border-slate-500'
@@ -581,7 +581,7 @@ export default function HeroIncidentMatrix({
                     whileHover={{ scale: 1.04, y: -1 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    {isLoggedIn ? ht.ctaLearnMore : (ht.login || '로그인 / 회원가입')}
+                    {isLoggedIn ? ht.ctaLearnMore : (ht.ctaLevelTest || '레벨 테스트 시작')}
                   </motion.button>
                 </motion.div>
               )}

@@ -113,7 +113,7 @@ export default function Login() {
     // 관리자 승인 여부 확인
     const { data: profile } = await supabase
       .from('profiles')
-      .select('approved')
+      .select('approved, level')
       .eq('id', data.user.id)
       .single();
 
@@ -133,13 +133,24 @@ export default function Login() {
       action: 'login',
     });
 
+    // 서버 측 인증용 쿠키 즉시 설정 (레이스컨디션 방어: onAuthStateChange 보다 먼저)
+    if (data?.session?.access_token) {
+      document.cookie = `gotroot_auth_token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+    }
+
     // 리다이렉트 URL 검증 (Open Redirect 방어: 내부 경로만 허용)
     if (redirectUrl) {
       const decoded = decodeURIComponent(redirectUrl);
       const isSafe = decoded.startsWith('/') && !decoded.startsWith('//') && !/^[a-z]+:/i.test(decoded.replace(/^\/+/, ''));
       window.location.href = isSafe ? decoded : '/';
     } else {
-      navigate('/');
+      // 레벨 기반 분기: beginner/junior → /basics, 나머지 → /
+      const userLevel = profile?.level;
+      if (userLevel === 'beginner' || userLevel === 'junior') {
+        navigate('/basics');
+      } else {
+        navigate('/');
+      }
     }
   };
 

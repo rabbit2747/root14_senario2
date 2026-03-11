@@ -1,9 +1,18 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import LangToggle, { getStoredLang, storeLang } from '../components/LangToggle';
 import { ChevronDown, ChevronUp } from '@carbon/icons-react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+
+const VALID_LEVELS = ['beginner', 'junior', 'intermediate', 'advanced', 'expert'];
+const LEVEL_DISPLAY = {
+  beginner: { ko: '비기너', emoji: '🟡' },
+  junior: { ko: '초급', emoji: '🟢' },
+  intermediate: { ko: '중급', emoji: '🔵' },
+  advanced: { ko: '고급', emoji: '🔴' },
+  expert: { ko: '전문가', emoji: '⭐' },
+};
 
 // ── 다국어 번역 ──
 const signupT = {
@@ -137,8 +146,14 @@ export default function Signup() {
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [lang, setLang] = useState(() => getStoredLang());
+  const [searchParams] = useSearchParams();
 
   const t = signupT[lang] || signupT.ko;
+
+  // URL에서 level 파라미터 수신 + 허용 목록 검증
+  const rawLevel = searchParams.get('level');
+  const validLevel = VALID_LEVELS.includes(rawLevel) ? rawLevel : null;
+  const levelInfo = validLevel ? LEVEL_DISPLAY[validLevel] : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -181,11 +196,13 @@ export default function Signup() {
       return;
     }
 
-    // profiles 테이블에 marketing_consent 반영
+    // profiles 테이블에 marketing_consent + level 반영
     if (data.user) {
+      const profileUpdate = { marketing_consent: marketingConsent };
+      if (validLevel) profileUpdate.level = validLevel;
       await supabase
         .from('profiles')
-        .update({ marketing_consent: marketingConsent })
+        .update(profileUpdate)
         .eq('id', data.user.id);
     }
 
@@ -258,6 +275,19 @@ export default function Signup() {
           onSubmit={handleSubmit}
           className="bg-[#0d1b2a] border border-slate-700 rounded-xl p-5 sm:p-8 shadow-2xl"
         >
+          {/* 레벨 테스트 결과 배지 */}
+          {levelInfo && (
+            <div className="mb-6 p-3 border border-[#415a77]/40 bg-[#415a77]/10 rounded-lg flex items-center gap-3">
+              <span className="text-2xl">{levelInfo.emoji}</span>
+              <div>
+                <p className="font-mono text-[10px] text-slate-500 uppercase tracking-wider">판정 레벨</p>
+                <p className="font-bold text-white text-sm tracking-wide">
+                  {levelInfo.ko} <span className="text-slate-500 font-mono text-xs uppercase">({validLevel})</span>
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* 이름 */}
           <div className="mb-5">
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">

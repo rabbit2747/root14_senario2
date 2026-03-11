@@ -100,21 +100,36 @@ export default function LabCompletionPage() {
   }, [techniqueId, scenarioTitle, scenarioTitleEn]);
 
   // ── PDF 다운로드 ──
+  // html-to-image: SVG foreignObject 기반 렌더링으로 oklch 등 최신 CSS 완전 지원
+  // html2canvas v1.x는 Tailwind v4의 oklch 색상 함수를 파싱 실패 → 교체
   const handleDownloadCert = async () => {
     if (!certificateRef.current) return;
     setIsDownloading(true);
     try {
-      const { default: html2canvas } = await import('html2canvas');
+      const htmlToImage = await import('html-to-image');
       const { jsPDF } = await import('jspdf');
-      const canvas = await html2canvas(certificateRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-      const imgData = canvas.toDataURL('image/png');
+
+      const el = certificateRef.current;
+      // 2x 픽셀 레이시오로 고해상도 PNG 생성 (A4 1122×793px 기준)
+      const dataUrl = await htmlToImage.toPng(el, {
+        width: 1122,
+        height: 793,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        style: { position: 'relative', top: '0', left: '0' },
+      });
+
       const pdf = new jsPDF('l', 'mm', 'a4');
-      const w = pdf.internal.pageSize.getWidth();
-      const h = (canvas.height * w) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, (pdf.internal.pageSize.getHeight() - h) / 2, w, h);
+      const w = pdf.internal.pageSize.getWidth();  // 297mm
+      const h = pdf.internal.pageSize.getHeight(); // 210mm
+      pdf.addImage(dataUrl, 'PNG', 0, 0, w, h);
       pdf.save(`GOTROOT_CERT_${techniqueId}_${userName}.pdf`);
-    } catch { alert('수료증 생성 중 오류가 발생했습니다.'); }
-    finally { setIsDownloading(false); }
+    } catch (e) {
+      console.error('수료증 PDF 생성 오류:', e);
+      alert('수료증 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const displayTitle = lang === 'ko' ? scenarioTitle : (scenarioTitleEn || scenarioTitle);
@@ -193,40 +208,40 @@ export default function LabCompletionPage() {
 
       {/* ===== 수료증 PDF 캡처용 오프스크린 DOM ===== */}
       <div className="absolute top-[-9999px] left-[-9999px]">
-        <div ref={certificateRef} className="w-[1122px] h-[793px] bg-white relative flex flex-col overflow-hidden" style={{ fontFamily: 'Georgia, serif' }}>
+        <div ref={certificateRef} className="w-[1122px] h-[793px] relative flex flex-col overflow-hidden" style={{ fontFamily: 'Georgia, serif', backgroundColor: '#ffffff' }}>
           <div className="absolute inset-0 border-[22px] border-[#9c6644]" />
-          <div className="absolute inset-[32px] border-[2px] border-[#9c6644]/30" />
+          <div className="absolute inset-[32px] border-[2px]" style={{ borderColor: 'rgba(156,102,68,0.3)' }} />
           {[['top-0 left-0','border-t-[6px] border-l-[6px]'],['top-0 right-0','border-t-[6px] border-r-[6px]'],['bottom-0 left-0','border-b-[6px] border-l-[6px]'],['bottom-0 right-0','border-b-[6px] border-r-[6px]']].map(([pos, border], i) => (
-            <div key={i} className={`absolute ${pos} w-20 h-20 ${border} border-[#9c6644]/40 m-10`} />
+            <div key={i} className={`absolute ${pos} w-20 h-20 ${border} m-10`} style={{ borderColor: 'rgba(156,102,68,0.4)' }} />
           ))}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
             <p className="text-[170px] font-black text-[#9c6644] opacity-[0.025] tracking-widest whitespace-nowrap" style={{ fontFamily: 'Georgia, serif' }}>GOTROOT</p>
           </div>
           <div className="text-center pt-12 pb-6 relative z-10 px-16">
             <p className="text-sm font-sans text-[#9c6644] tracking-[0.5em] uppercase mb-3">(주)갓루트(GOTROOT) Cybersecurity Training Institute</p>
-            <h1 className="text-[58px] font-extrabold text-gray-900 tracking-[0.18em] uppercase leading-none">{t.cert?.title || 'Certificate'}</h1>
-            <div className="flex items-center justify-center gap-3 mt-4"><div className="h-px w-32 bg-[#9c6644]/40" /><div className="w-2 h-2 rotate-45 bg-[#9c6644]/50" /><div className="h-px w-32 bg-[#9c6644]/40" /></div>
+            <h1 className="text-[58px] font-extrabold tracking-[0.18em] uppercase leading-none" style={{ color: '#111827' }}>{t.cert?.title || 'Certificate'}</h1>
+            <div className="flex items-center justify-center gap-3 mt-4"><div className="h-px w-32" style={{ backgroundColor: 'rgba(156,102,68,0.4)' }} /><div className="w-2 h-2 rotate-45" style={{ backgroundColor: 'rgba(156,102,68,0.5)' }} /><div className="h-px w-32" style={{ backgroundColor: 'rgba(156,102,68,0.4)' }} /></div>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center text-center relative z-10 px-20">
-            <p className="text-xl text-gray-500 italic mb-5">{t.cert?.subtitle || 'This certifies that'}</p>
+            <p className="text-xl italic mb-5" style={{ color: '#6b7280' }}>{t.cert?.subtitle || 'This certifies that'}</p>
             <h2 className="text-[52px] font-bold text-[#9c6644] pb-3 px-16 mb-6 min-w-[420px]" style={{ borderBottom: '3px solid #e2c9b5' }}>{userName}</h2>
-            <p className="text-[17px] text-gray-600 leading-relaxed max-w-[740px] mb-5">{t.cert?.desc}</p>
+            <p className="text-[17px] leading-relaxed max-w-[740px] mb-5" style={{ color: '#4b5563' }}>{t.cert?.desc}</p>
             <div className="flex items-center gap-4">
-              <div className="h-px w-16 bg-gray-300" />
-              <p className="text-[22px] font-extrabold text-gray-800 tracking-wide font-sans">ATT&amp;CK {techniqueId} : {scenarioTitleEn || scenarioTitle}</p>
-              <div className="h-px w-16 bg-gray-300" />
+              <div className="h-px w-16" style={{ backgroundColor: '#d1d5db' }} />
+              <p className="text-[22px] font-extrabold tracking-wide font-sans" style={{ color: '#1f2937' }}>ATT&amp;CK {techniqueId} : {scenarioTitleEn || scenarioTitle}</p>
+              <div className="h-px w-16" style={{ backgroundColor: '#d1d5db' }} />
             </div>
           </div>
           <div className="pb-10 px-20 flex justify-between items-end relative z-10 font-sans">
             <div className="flex flex-col items-center gap-1">
-              <p className="text-[18px] font-bold text-gray-800">{certDate}</p>
-              <div className="border-t-2 border-gray-300 w-52 pt-2 text-center text-xs text-gray-400 tracking-[0.2em] uppercase">{t.cert?.dateLabel}</div>
+              <p className="text-[18px] font-bold" style={{ color: '#1f2937' }}>{certDate}</p>
+              <div className="border-t-2 w-52 pt-2 text-center text-xs tracking-[0.2em] uppercase" style={{ borderColor: '#d1d5db', color: '#9ca3af' }}>{t.cert?.dateLabel}</div>
             </div>
             <div className="flex flex-col items-center -mt-4"><GotrootSeal /></div>
             <div className="flex flex-col items-center gap-1">
               <p className="text-[22px] text-[#9c6644] italic mb-0.5" style={{ fontFamily: 'Brush Script MT, cursive, Georgia, serif' }}>(주)갓루트 GOTROOT</p>
-              <p className="text-[10px] text-gray-500 mb-1" style={{ fontFamily: 'sans-serif' }}>대표 윤웅</p>
-              <div className="border-t-2 border-gray-300 w-52 pt-2 text-center text-xs text-gray-400 tracking-[0.2em] uppercase">{t.cert?.instructor}</div>
+              <p className="text-[10px] mb-1" style={{ fontFamily: 'sans-serif', color: '#6b7280' }}>대표 윤웅</p>
+              <div className="border-t-2 w-52 pt-2 text-center text-xs tracking-[0.2em] uppercase" style={{ borderColor: '#d1d5db', color: '#9ca3af' }}>{t.cert?.instructor}</div>
             </div>
           </div>
         </div>

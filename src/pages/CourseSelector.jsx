@@ -177,7 +177,7 @@ const LEVELS = [
 export default function CourseSelector() {
   const { techniqueId } = useParams();
   const navigate = useNavigate();
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, user, loading: authLoading } = useAuth();
   const { getProgress, isLevelComplete, isUnlocked, loading } = useEduProgress();
   const [language] = useState(() => getStoredLang());
   const [authChecked, setAuthChecked] = useState(false);
@@ -185,16 +185,38 @@ export default function CourseSelector() {
   const t = uiText[language] || uiText.en;
 
   // ── Auth Gate ──
+  // authLoading이 true일 때는 아직 세션 확인 중이므로 리다이렉트 금지
   useEffect(() => {
+    if (authLoading) return; // 세션 로딩 완료 대기
     if (!isLoggedIn) {
       navigate(`/login?redirect=${encodeURIComponent(`/edu/${techniqueId}`)}`);
       return;
     }
     setAuthChecked(true);
-  }, [isLoggedIn, navigate, techniqueId]);
+  }, [authLoading, isLoggedIn, navigate, techniqueId]);
 
-  // ── 기법 메타데이터 조회 ──
-  const pageMeta = useMemo(() => eduMeta.pages[techniqueId] || null, [techniqueId]);
+  // ── 기법 메타데이터 조회 (slug 역방향 매칭 포함) ──
+  // /edu/t1587-001-malware 같은 슬러그로 접근 시 올바른 기법 ID를 찾아 리다이렉트
+  const canonicalId = useMemo(() => {
+    if (eduMeta.pages[techniqueId]) return techniqueId; // 정확히 일치
+    // slug → URL 역방향 탐색 (/edu/{slug}.html 패턴)
+    const slug = `/edu/${techniqueId}.html`;
+    const found = Object.keys(eduMeta.pages).find(key => {
+      const p = eduMeta.pages[key];
+      if (p.url === slug) return true;
+      return p.levels && Object.values(p.levels).some(l => l.url === slug);
+    });
+    return found || null;
+  }, [techniqueId]);
+
+  useEffect(() => {
+    // slug로 접근 시 정식 URL로 리다이렉트
+    if (canonicalId && canonicalId !== techniqueId) {
+      navigate(`/edu/${canonicalId}`, { replace: true });
+    }
+  }, [canonicalId, techniqueId, navigate]);
+
+  const pageMeta = useMemo(() => (canonicalId ? eduMeta.pages[canonicalId] : null), [canonicalId]);
 
   // ── 레벨별 카드 데이터 구성 ──
   const levelCards = useMemo(() => {
@@ -363,13 +385,16 @@ export default function CourseSelector() {
                 }}
                 onClick={() => {
                   if (isClickable) {
-                    // 브레드크럼에 레벨 추가 후 이동
+                    // 브레드크럼에 레벨 추가 후 이동 (중복 방지)
                     try {
                       const ns = JSON.parse(sessionStorage.getItem(NAV_STATE_KEY) || '{}');
                       const bc = ns.breadcrumb || [];
-                      bc.push({ label: t[card.key], path: card.url });
-                      ns.breadcrumb = bc;
-                      sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(ns));
+                      const last = bc[bc.length - 1];
+                      if (!last || last.path !== card.url) {
+                        bc.push({ label: t[card.key], path: card.url });
+                        ns.breadcrumb = bc;
+                        sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(ns));
+                      }
                     } catch { /* ignore */ }
                     window.location.href = card.url;
                   }
@@ -475,9 +500,12 @@ export default function CourseSelector() {
                           try {
                             const ns = JSON.parse(sessionStorage.getItem(NAV_STATE_KEY) || '{}');
                             const bc = ns.breadcrumb || [];
-                            bc.push({ label: t[card.key], path: card.url });
-                            ns.breadcrumb = bc;
-                            sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(ns));
+                            const last = bc[bc.length - 1];
+                            if (!last || last.path !== card.url) {
+                              bc.push({ label: t[card.key], path: card.url });
+                              ns.breadcrumb = bc;
+                              sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(ns));
+                            }
                           } catch { /* ignore */ }
                           window.location.href = card.url;
                         }

@@ -119,7 +119,7 @@ export default function useEduProgress() {
         completed: completed.length,
         total,
         chapters: completed,
-        percent: total > 0 ? Math.round((completed.length / total) * 100) : 0,
+        percent: total > 0 ? Math.min(100, Math.round((completed.length / total) * 100)) : 0,
       };
     }
 
@@ -141,7 +141,7 @@ export default function useEduProgress() {
       completed: allChapters.length,
       total,
       chapters: allChapters,
-      percent: total > 0 ? Math.round((allChapters.length / total) * 100) : 0,
+      percent: total > 0 ? Math.min(100, Math.round((allChapters.length / total) * 100)) : 0,
     };
   }, [progress]);
 

@@ -20,7 +20,7 @@ const RoseGoldButton = ({ children, onClick, className = '', disabled = false })
     <button
       onClick={handleClick}
       disabled={disabled}
-      className={`relative overflow-hidden inline-flex items-center justify-center font-bold px-6 py-4 rounded-xl transition-all duration-300 shadow-lg tracking-wide text-[15px] md:text-lg border-2 ${
+      className={`relative overflow-hidden inline-flex items-center justify-center font-bold px-4 py-3 md:px-6 md:py-4 rounded-xl transition-all duration-300 shadow-lg tracking-wide text-[13px] md:text-lg border-2 ${
         disabled
           ? 'opacity-50 cursor-not-allowed border-gray-600 bg-[#0A0F1C] text-gray-400'
           : 'border-[#DFB8B6] bg-[#0A0F1C] text-[#DFB8B6] hover:bg-[#DFB8B6] hover:text-[#0A0F1C] hover:shadow-[0_0_20px_rgba(223,184,182,0.4)]'
@@ -519,9 +519,9 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
       />
 
       {/* Sector Progress Bar & Header Info */}
-      <div className="absolute top-4 left-4 right-4 z-40 flex justify-between items-start pointer-events-none">
-        <div className="bg-[#0A0F1C]/80 border border-[#DFB8B6]/50 px-4 py-2 rounded-lg backdrop-blur-sm shadow-lg pointer-events-auto">
-          <span className="text-xs font-bold text-[#DFB8B6] tracking-widest">{currentChapter?.loc}</span>
+      <div className="absolute top-4 left-2 right-2 md:left-4 md:right-4 z-40 flex justify-between items-start pointer-events-none">
+        <div className="bg-[#0A0F1C]/80 border border-[#DFB8B6]/50 px-2 md:px-4 py-1.5 md:py-2 rounded-lg backdrop-blur-sm shadow-lg pointer-events-auto max-w-[45%] md:max-w-none">
+          <span className="text-[10px] md:text-xs font-bold text-[#DFB8B6] tracking-wider md:tracking-widest truncate block">{currentChapter?.loc}</span>
         </div>
         {/* 중앙 Sector 진행바 */}
         <div className="hidden md:flex flex-col w-1/3 max-w-[300px] mx-4 pointer-events-auto">
@@ -548,12 +548,12 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
           </div>
         </div>
         {/* 우측 네비게이션 */}
-        <div className="flex flex-col gap-2 pointer-events-auto">
-          <div className="flex items-center gap-2 bg-[#0A0F1C]/80 border border-[#00E5FF]/50 px-4 py-2 rounded-lg backdrop-blur-sm shadow-lg cursor-pointer hover:bg-white/10" onClick={() => setShowInventory(true)}>
-            <span className="text-xs font-bold text-[#00E5FF]">데이터 확보율</span>
+        <div className="flex flex-col gap-2 pointer-events-auto max-w-[45%] md:max-w-none">
+          <div className="flex items-center gap-1.5 md:gap-2 bg-[#0A0F1C]/80 border border-[#00E5FF]/50 px-2 md:px-4 py-1.5 md:py-2 rounded-lg backdrop-blur-sm shadow-lg cursor-pointer hover:bg-white/10" onClick={() => setShowInventory(true)}>
+            <span className="text-[10px] md:text-xs font-bold text-[#00E5FF] whitespace-nowrap">확보율</span>
             <div className="flex gap-1">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className={`w-4 h-3 rounded-sm border transition-all duration-300 ${i < phaseCount ? 'bg-[#00E5FF] border-[#00E5FF] shadow-[0_0_8px_#00E5FF]' : 'border-[#00E5FF]/30'}`} />
+                <div key={i} className={`w-3 md:w-4 h-2.5 md:h-3 rounded-sm border transition-all duration-300 ${i < phaseCount ? 'bg-[#00E5FF] border-[#00E5FF] shadow-[0_0_8px_#00E5FF]' : 'border-[#00E5FF]/30'}`} />
               ))}
             </div>
           </div>
@@ -728,24 +728,24 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
         {showPuzzle > 0 && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[80] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 pointer-events-auto"
+            className="absolute inset-0 z-[80] bg-black/90 backdrop-blur-md flex items-center justify-center p-2 md:p-4 pointer-events-auto overflow-y-auto"
           >
             <div className={`w-full max-w-2xl bg-[#0A0F1C] border-2 border-[#DFB8B6] rounded-2xl overflow-hidden shadow-2xl ${puzzleStatus === 'wrong' ? 'animate-shake border-red-500 shadow-[0_0_50px_rgba(255,0,0,0.4)]' : ''}`}>
-              <div className="bg-gray-900 border-b border-gray-800 p-6 text-center">
-                <h2 className="text-2xl md:text-3xl font-black text-[#00E5FF] tracking-widest">{PUZZLES[showPuzzle].title}</h2>
+              <div className="bg-gray-900 border-b border-gray-800 p-3 md:p-6 text-center">
+                <h2 className="text-lg md:text-3xl font-black text-[#00E5FF] tracking-widest">{PUZZLES[showPuzzle].title}</h2>
               </div>
-              <div className="p-6 md:p-8">
-                <p className="text-base md:text-lg text-gray-200 mb-8 text-center leading-relaxed break-keep"
+              <div className="p-3 md:p-8">
+                <p className="text-sm md:text-lg text-gray-200 mb-4 md:mb-8 text-center leading-relaxed break-keep"
                   dangerouslySetInnerHTML={{ __html: PUZZLES[showPuzzle].desc }}></p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
                   {PUZZLES[showPuzzle].options.map((opt, idx) => (
                     <RoseGoldButton
                       key={idx}
                       onClick={() => handlePuzzleSelect(idx)}
                       disabled={successMsg !== ""}
-                      className={`!py-4 !px-4 !justify-start text-sm ${puzzleStatus === 'wrong' ? '!border-red-500 !text-red-400' : ''}`}
+                      className={`!py-2.5 md:!py-4 !px-3 md:!px-4 !justify-start !text-xs md:!text-sm ${puzzleStatus === 'wrong' ? '!border-red-500 !text-red-400' : ''}`}
                     >
-                      <span className="font-bold mr-3 text-[#00E5FF] bg-gray-900 px-2 py-1 rounded">{String.fromCharCode(65 + idx)}</span> {opt}
+                      <span className="font-bold mr-2 md:mr-3 text-[#00E5FF] bg-gray-900 px-1.5 md:px-2 py-0.5 md:py-1 rounded text-xs">{String.fromCharCode(65 + idx)}</span> {opt}
                     </RoseGoldButton>
                   ))}
                 </div>

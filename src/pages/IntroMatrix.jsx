@@ -900,6 +900,45 @@ export default function UltimateCinematicMatrix() {
       )}
 
       {/* ══════════════════════════════════════
+          비로그인 매트릭스 차단 오버레이
+      ══════════════════════════════════════ */}
+      {heroPhase === 'done' && !isLoggedIn && (
+        <div className="fixed inset-0 z-[60] bg-[#0d1b2a]/95 flex items-center justify-center px-4"
+          style={{ backdropFilter: 'blur(8px)' }}>
+          <div className="text-center max-w-md">
+            <div className="text-5xl mb-4">🔒</div>
+            <h2 className="text-xl font-black text-white tracking-wider mb-3">
+              매트릭스 열람 권한이 필요합니다
+            </h2>
+            <p className="text-slate-400 text-sm font-mono mb-6 leading-relaxed">
+              MITRE ATT&CK 매트릭스 학습을 시작하려면<br/>
+              레벨 테스트 후 회원가입이 필요합니다.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => navigate('/level-test')}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm tracking-wider rounded-lg transition-all active:scale-[0.98]"
+              >
+                🎯 레벨 테스트 시작
+              </button>
+              <button
+                onClick={() => navigate('/login')}
+                className="px-6 py-3 border border-slate-600 text-slate-300 hover:text-white hover:border-slate-400 font-bold text-sm tracking-wider rounded-lg transition-all"
+              >
+                로그인
+              </button>
+            </div>
+            <button
+              onClick={() => { setHeroPhase('entering'); localStorage.removeItem('gotroot_intro_seen'); window.scrollTo({ top: 0 }); }}
+              className="mt-4 text-slate-600 hover:text-slate-400 text-xs font-mono transition-colors"
+            >
+              ← 인트로 다시 보기
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════
           밝은 테마 ATT&CK 매트릭스
       ══════════════════════════════════════ */}
       <div className={`transition-opacity duration-[800ms] ${heroPhase === 'done' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -1308,12 +1347,11 @@ export default function UltimateCinematicMatrix() {
                           const techEduUrl = TECHNIQUE_URLS[tech.tid] || null;
                           const subsWithEdu = tech.subs?.filter(s => s.sid in TECHNIQUE_URLS) || [];
                           const hasAnyEdu = techEduUrl || subsWithEdu.length > 0;
-                          const goEdu = (url, e) => {
+                          const goEdu = (url, e, subTid = null) => {
                             e.stopPropagation();
-                            // v0.7.3: 과정 셀렉터로 직행
-                            const tid = tech.tid;
-                            if (!isLoggedIn) { navigate(`/login?redirect=${encodeURIComponent(`/edu/${tid}`)}`); return; }
-                            navigate(`/edu/${tid}`);
+                            const targetTid = subTid || tech.tid;
+                            if (!isLoggedIn) { navigate(`/login?redirect=${encodeURIComponent(`/edu/${targetTid}`)}`); return; }
+                            navigate(`/edu/${targetTid}`);
                           };
                           const eduBtnCls = `inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full cursor-pointer transition-all duration-200 ${dm ? 'bg-[#00ff41]/10 text-[#00ff41] border border-[#00ff41]/30 hover:bg-[#00ff41]/20 hover:shadow-[0_0_8px_rgba(0,255,65,0.3)]' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 hover:shadow-sm'}`;
                           const pendingLabel = language === 'ko' ? '준비 중' : language === 'ja' ? '準備中' : language === 'zh' ? '准备中' : language === 'hi' ? 'तैयारी में' : 'Coming Soon';
@@ -1337,7 +1375,7 @@ export default function UltimateCinematicMatrix() {
                                 )}
                                 {/* 서브기법별 교육 (있는 것만 개별 표시) */}
                                 {subsWithEdu.map(sub => (
-                                  <button key={sub.sid} onClick={(e) => goEdu(TECHNIQUE_URLS[sub.sid], e)} className={eduBtnCls}>
+                                  <button key={sub.sid} onClick={(e) => goEdu(TECHNIQUE_URLS[sub.sid], e, sub.sid)} className={eduBtnCls}>
                                     <ChevronRight size={12} /> <span className="font-mono text-[10px] opacity-70">{sub.sid}</span> {sub.name}
                                   </button>
                                 ))}

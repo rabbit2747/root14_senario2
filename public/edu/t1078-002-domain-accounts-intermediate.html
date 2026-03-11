@@ -4,7 +4,6 @@
     <!-- ★ 인증 게이트: 로그인 없이 직접 URL 접근 차단 (Supabase 세션 기반) -->
     <script>
         (function() {
-            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
             try {
                 var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
                 var session = sessionStorage.getItem(key);

@@ -52,7 +52,7 @@ Before writing code, MUST output the following steps using XML tags:
 
 ### 작성 규칙
 1. **기술 용어 최소화**: 사용자가 이해할 수 있는 쉬운 표현 사용
-2. **버전 번호 포함**: `v0.x.x` 형식 (현재 최신: v0.9.3)
+2. **버전 번호 포함**: `v0.x.x` 형식 (현재 최신: v0.9.8)
 3. **변경 내용 요약**: "무엇이 좋아졌는지" 관점으로 작성
 4. **다국어 지원**: 한국어 기본, 필요 시 영어 병기
 5. **카테고리**: 🆕 새 기능 / 🔧 개선 / 🛡️ 보안 / 🐛 버그 수정
@@ -89,6 +89,13 @@ Before writing code, MUST output the following steps using XML tags:
 | v0.9.1 | 2026-03-06 | 진행률 버그 수정: progress-tracker.js 정규식 /^(ch\d+|quiz|eval)$/ 확장, edu-meta.json chapterIds 접두사(b-/i-/a-) 547개 제거, T1587.001 beginner chapters 11→10(quiz optional화), edu-page-template-guide.md 신규 생성 |
 | v0.9.2 | 2026-03-06 | 그래픽/시나리오/랩 라우트 레벨 독립화: /:techniqueId/:level 파라미터 추가(3개 라우트), beginner HTML 187개 data-level="beginner" 일괄 추가, graphic-link.js data-level 읽기 적용, GraphicExplanationPage/ScenarioExplanationPage 레벨 배지 UI 추가 |
 | v0.9.3 | 2026-03-06 | 시나리오 SCENARIO_COMPONENTS 동적 분기 구조(React.lazy+Suspense), T1587.001-beginner 인터랙티브 게임 별도 파일 분리(lucide-react 설치), 수료 보고서 모달 휠 스크롤 탭 전환, 보고서 모달·인벤토리 크기 버그 수정 |
+| v0.9.4 | 2026-03-08 | 보안 패치: Vite dev server host 0.0.0.0→127.0.0.1(소스코드 외부노출 차단), blockExternalSourcePlugin 미들웨어 추가, ?preview=1 인증우회 제거(edu HTML 159개), api.ipify.org 제3자 IP전송 제거, CSP connect-src 정리, SECURITY_REPORT.md 생성 |
+| v0.9.5 | 2026-03-08 | 갓루트 위키 출시: wiki_terms Supabase 테이블, WikiFloatingButton+WikiModal(SPA 인페이지), wiki-popup.html(edu HTML 팝업), 관리자 위키 탭(CRUD+JSON 임포트), scripts/extract-wiki-terms.js(edu HTML 856개 용어 자동 추출), SPA 라우팅 404 버그 수정(serve-prod.sh 래퍼 + serve -s 플래그) |
+| v0.9.6 | 2026-03-09 | 버그 수정 3건: 진행률 100% 초과 표시 버그(Math.min 캡 적용), 브레드크럼 중복 쌓임 버그(마지막 경로 비교 dedup), CourseSelector 인증 레이스컨디션(authLoading 체크 추가); AnnouncementManager DOMPurify XSS 방어 추가 |
+| v0.9.7 | 2026-03-09 | 🛡️ 보안: Express 서버 교체(serve→Express), /edu/*.html 서버 측 JWT 인증(Supabase API 검증+5분 캐시), AuthContext 쿠키 동기화, Login.jsx 레이스컨디션 방어, ?preview=1 잔여 42개 제거, cleanUrls:false 유지, 히어로 CTA 버튼 로그인 분기 수정, docs/security/ 보안 히스토리 문서 체계화 |
+| v0.9.8 | 2026-03-10 | 🛡️ 보안 헤더 강화: CSP 경로 분리(SPA전용 CSP/edu는 자체 meta CSP), CORP edu cross-origin 허용, Permissions-Policy 9개 API 차단; 🐛 모바일 버그 수정: WikiFloatingButton 하단 메뉴 겹침(bottom 4.5rem), 시나리오 페이지 Sector 라벨·데이터 확보율·하단 버튼 1줄 표시, 퍼즐 모달 모바일 크기 축소 |
+| v0.9.9 | 2026-03-10 | 🆕 그래픽 설명 시네마틱 플레이어: CinematicPlayer(1280×720 고정해상도+CSS transform scale), T1587.001-beginner 20슬라이드 그래픽 콘텐츠, 전체화면(Fullscreen API+F키)+모바일 가로회전(Screen Orientation API), 모바일 레이아웃 최적화(헤더·여백·스케일 반응형), FontAwesome CDN→npm(@fortawesome/fontawesome-free v7.2.0, main.jsx 글로벌 import), docs/graphic-content-template-guide.md 콘텐츠 작성 가이드 신규 |
+| v1.0.0 | 2026-03-11 | 🆕 레벨 테스트 시스템: 적응형 7문제 퀴즈(/level-test, 100문제 은행 5레벨×20문제, Radar 차트 결과, canvas-confetti 만점 이스터에그), 비로그인 매트릭스 차단 오버레이(IntroMatrix), 히어로 CTA→레벨테스트 시작, Signup.jsx URL level 파라미터 수신+배지 UI+profiles.level 저장, Login.jsx level 기반 분기(beginner/junior→/basics), BasicsPlaceholder IT기초 랜딩, AuthContext userLevel 노출, 관리자 레벨테스트 문제 CRUD 탭(LevelTestManager, JSON import/export), src/api/levelTest.js Phase 0 API 레이어, level_test_questions Supabase 테이블+RLS, 레벨테스트 재응시 차단(로그인+레벨 보유 시 리다이렉트) |
 
 ---
 
@@ -230,6 +237,12 @@ Route path                     Component          인증조건          비고
         └─ public/edu/*.html 내 graphic-link.js 클릭  ← (구: lab-link.js)
              └─ window.location.href = '/edu/graphic/:techniqueId'  (SPA 라우트)
                   └─ /edu/graphic/:techniqueId (GraphicExplanationPage.jsx)
+                       ├─ CinematicPlayer: 1280×720 고정해상도 + CSS transform scale 반응형
+                       │   ├─ GRAPHIC_DATA_LOADERS[id]() → subtitlesData (자막+타이밍)
+                       │   ├─ GRAPHIC_COMPONENTS[id]() → renderSlides (슬라이드 JSX)
+                       │   ├─ 자동재생: subtitlesData[].duration 기반 슬라이드 전환
+                       │   ├─ 전체화면: Fullscreen API + F키 + 모바일 가로회전(Screen Orientation API)
+                       │   └─ 줌: 모바일 overhead 100px / 데스크톱 overhead 190px
                        └─ [시나리오 기반 설명으로] 버튼 → navigate('/edu/scenario/:id')
                             └─ /edu/scenario/:techniqueId (ScenarioExplanationPage.jsx)
                                  └─ [실습 랩 시작] 버튼 → navigate('/lab/desktop/:id')
@@ -412,6 +425,8 @@ src/
     ├── matrix-fallback.json   # Supabase 실패 시 폴백 전체 구조
     ├── attack-simulators/T1078.002.json   # LabT1078 전용 시뮬레이터 데이터
     ├── edu-datasets/          # 교육용 정적 JSON 5개 (t1003/t1059/t1110/t1547/t1566)
+    ├── graphic-contents/      # 그래픽 슬라이드 JSX. GraphicExplanationPage GRAPHIC_COMPONENTS 동적 import
+    │   └── T1587.001-beginner.jsx  # 20슬라이드+자막. export { subtitlesData, renderSlides }
     └── lab-scenarios/         # ~170개 JSON. DesktopLab SCENARIO_LOADERS 동적 import
 
 public/
@@ -422,6 +437,10 @@ public/
 ├── logo/                  # logo-name-dark-nobg / dark / white / logo-white (4종)
 ├── fonts/                 # Paperlogy 1Thin~9Black (9종 .ttf)
 └── videos/hero/           # 히어로 배경 영상 5개
+
+docs/
+├── security/              # 보안 히스토리 문서 (v0.9.7~)
+└── graphic-content-template-guide.md  # 그래픽 슬라이드 콘텐츠 작성 가이드 (v0.9.9)
 ```
 
 ### ④ Supabase 테이블 의존성 — 읽기 / 쓰기 분리

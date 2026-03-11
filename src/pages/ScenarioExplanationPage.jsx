@@ -259,27 +259,26 @@ export default function ScenarioExplanationPage() {
       </div>
 
       {/* ── 하단 네비게이션 바 ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0f1a]/95 backdrop-blur border-t border-slate-800/60 py-4 px-4 z-50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0f1a]/95 backdrop-blur border-t border-slate-800/60 py-3 md:py-4 px-3 md:px-4 z-50">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 md:gap-4">
           <button
             onClick={() => navigate(`/edu/graphic/${techniqueId}/${level}`)}
-            className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+            className="text-xs md:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1 md:gap-2 cursor-pointer whitespace-nowrap shrink-0"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            {t.backBtn}
+            <span className="hidden sm:inline">{t.backBtn}</span>
+            <span className="sm:hidden">← 돌아가기</span>
           </button>
           <button
             onClick={handleFinish}
-            className="flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-[1.02] hover:brightness-110 cursor-pointer"
+            className="flex items-center gap-1.5 md:gap-3 px-4 md:px-6 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm text-white transition-all hover:scale-[1.02] hover:brightness-110 cursor-pointer whitespace-nowrap shrink-0"
             style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
           >
             <span>🧪</span>
-            <span>{t.nextBtn}</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <span className="hidden sm:inline">{t.nextBtn}</span>
+            <span className="sm:hidden">랩 시작 →</span>
           </button>
         </div>
       </div>

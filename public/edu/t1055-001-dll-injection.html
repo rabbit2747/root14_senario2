@@ -3,7 +3,6 @@
 <head>
     <script>
         (function() {
-            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
             try { var key='sb-bnwbybawqrnhznirivfg-auth-token'; var s=sessionStorage.getItem(key); if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));} } catch(e){window.location.replace('/login');}
         })();
     </script>
