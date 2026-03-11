@@ -8,7 +8,8 @@ import {
 import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
 import { getQuestions } from '../api/levelTest';
-import { QUESTION_BANK, CATEGORIES, LEVEL_NAMES, LEVEL_COLORS } from '../data/level-test-questions';
+import { getStoredLang } from '../components/LangToggle';
+import { QUESTION_BANK, CATEGORIES, CATEGORIES_I18N, LEVEL_NAMES, LEVEL_COLORS } from '../data/level-test-questions';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
 
@@ -17,6 +18,105 @@ const TOTAL_QUESTIONS = 7;
 const BASE_TIME = 15;
 const LONG_Q_BONUS = 3;
 const STORAGE_KEY = 'gotroot_level_test_result';
+
+// ── 다국어 번역 ──
+const levelTestT = {
+  ko: {
+    title: '사이버보안 레벨 테스트',
+    subtitle: '7문제로 당신의 실력을 측정합니다',
+    feat1: '문제당 15~25초 제한시간',
+    feat2: '적응형 난이도 — 실력에 맞춰 변화',
+    feat3: '5단계 레벨 판정 + 레이더 차트',
+    startBtn: '테스트 시작하기',
+    backBtn: '← 메인으로 돌아가기',
+    correct: '✅ 정답입니다!',
+    wrongPrefix: '❌ 오답 — 정답: ',
+    yourLevel: '당신의 레벨:',
+    scoreUnit: '정답',
+    radarLabel: '역량 분석',
+    currTitle: '📋 추천 커리큘럼',
+    currLow: 'IT 기초 학습 과정을 먼저 수강한 후, MITRE ATT&CK 매트릭스 기반 교육을 진행하세요.',
+    currHigh: 'MITRE ATT&CK 매트릭스 기반 교육을 바로 시작할 수 있습니다. 실전 시나리오 랩을 활용해보세요.',
+    signupBtn: '회원가입하고 학습 시작하기',
+    loginLink: '이미 계정이 있으신가요? 로그인',
+  },
+  en: {
+    title: 'Cybersecurity Level Test',
+    subtitle: 'Assess your skills in 7 questions',
+    feat1: '15–25 seconds per question',
+    feat2: 'Adaptive difficulty — adjusts to your level',
+    feat3: '5-tier level assessment + radar chart',
+    startBtn: 'Start Test',
+    backBtn: '← Back to Main',
+    correct: '✅ Correct!',
+    wrongPrefix: '❌ Wrong — Answer: ',
+    yourLevel: 'Your Level:',
+    scoreUnit: 'correct',
+    radarLabel: 'Skill Analysis',
+    currTitle: '📋 Recommended Curriculum',
+    currLow: 'Start with IT fundamentals, then proceed to MITRE ATT&CK matrix-based training.',
+    currHigh: 'You can jump straight into MITRE ATT&CK matrix-based training. Try hands-on scenario labs.',
+    signupBtn: 'Sign Up & Start Learning',
+    loginLink: 'Already have an account? Log In',
+  },
+  ja: {
+    title: 'サイバーセキュリティ レベルテスト',
+    subtitle: '7問であなたの実力を測定します',
+    feat1: '1問あたり15〜25秒の制限時間',
+    feat2: '適応型難易度 — 実力に合わせて変化',
+    feat3: '5段階レベル判定 + レーダーチャート',
+    startBtn: 'テスト開始',
+    backBtn: '← メインに戻る',
+    correct: '✅ 正解です！',
+    wrongPrefix: '❌ 不正解 — 正解: ',
+    yourLevel: 'あなたのレベル:',
+    scoreUnit: '正解',
+    radarLabel: '能力分析',
+    currTitle: '📋 推奨カリキュラム',
+    currLow: 'まずIT基礎学習課程を受講してから、MITRE ATT&CKマトリックス基盤の教育に進んでください。',
+    currHigh: 'MITRE ATT&CKマトリックス基盤の教育をすぐに始められます。実践シナリオラボを活用してください。',
+    signupBtn: '会員登録して学習開始',
+    loginLink: 'すでにアカウントをお持ちですか？ ログイン',
+  },
+  zh: {
+    title: '网络安全等级测试',
+    subtitle: '通过7道题测评您的技能水平',
+    feat1: '每题限时15–25秒',
+    feat2: '自适应难度 — 根据水平调整',
+    feat3: '5级评定 + 雷达图',
+    startBtn: '开始测试',
+    backBtn: '← 返回主页',
+    correct: '✅ 回答正确！',
+    wrongPrefix: '❌ 回答错误 — 正确答案：',
+    yourLevel: '您的等级：',
+    scoreUnit: '正确',
+    radarLabel: '能力分析',
+    currTitle: '📋 推荐课程',
+    currLow: '请先完成IT基础课程，然后进行基于MITRE ATT&CK矩阵的培训。',
+    currHigh: '您可以直接开始基于MITRE ATT&CK矩阵的培训。尝试实战场景实验室。',
+    signupBtn: '注册并开始学习',
+    loginLink: '已有账号？立即登录',
+  },
+  hi: {
+    title: 'साइबर सुरक्षा स्तर परीक्षा',
+    subtitle: '7 प्रश्नों में अपनी क्षमता जानें',
+    feat1: 'प्रत्येक प्रश्न के लिए 15–25 सेकंड',
+    feat2: 'अनुकूली कठिनाई — आपके स्तर के अनुसार',
+    feat3: '5-स्तरीय मूल्यांकन + रडार चार्ट',
+    startBtn: 'परीक्षा शुरू करें',
+    backBtn: '← मुख्य पृष्ठ पर वापस',
+    correct: '✅ सही उत्तर!',
+    wrongPrefix: '❌ गलत — सही उत्तर: ',
+    yourLevel: 'आपका स्तर:',
+    scoreUnit: 'सही',
+    radarLabel: 'क्षमता विश्लेषण',
+    currTitle: '📋 अनुशंसित पाठ्यक्रम',
+    currLow: 'पहले IT मूल पाठ्यक्रम पूरा करें, फिर MITRE ATT&CK मैट्रिक्स प्रशिक्षण शुरू करें।',
+    currHigh: 'आप सीधे MITRE ATT&CK मैट्रिक्स प्रशिक्षण शुरू कर सकते हैं। व्यावहारिक लैब आज़माएं।',
+    signupBtn: 'साइन अप करें और सीखना शुरू करें',
+    loginLink: 'पहले से खाता है? लॉगिन करें',
+  },
+};
 
 // 레벨→점수 매핑 (레이더 차트용)
 const LEVEL_SCORE = { 1: 20, 2: 40, 3: 60, 4: 80, 5: 100 };
@@ -88,7 +188,8 @@ export default function LevelTest() {
   const [timeLeft, setTimeLeft] = useState(BASE_TIME);
   const [finalLevel, setFinalLevel] = useState(savedResult?.level || null);
   const [radarScores, setRadarScores] = useState(savedResult?.radarScores || []);
-  const [isDark, setIsDark] = useState(true);
+  const [lang] = useState(() => getStoredLang());
+  const t = levelTestT[lang] || levelTestT.ko;
   const timerRef = useRef(null);
 
   // Supabase에서 문제 불러오기 (실패 시 정적 데이터 폴백)
@@ -274,20 +375,20 @@ export default function LevelTest() {
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">🎯</div>
                 <h1 className="text-xl font-black text-white tracking-wider mb-2">
-                  사이버보안 레벨 테스트
+                  {t.title}
                 </h1>
                 <p className="text-slate-400 text-sm font-mono">
-                  7문제로 당신의 실력을 측정합니다
+                  {t.subtitle}
                 </p>
               </div>
 
               <div className="space-y-3 mb-6">
                 {[
-                  ['⏱️', '문제당 15~25초 제한시간'],
-                  ['📊', '적응형 난이도 — 실력에 맞춰 변화'],
-                  ['🏆', '5단계 레벨 판정 + 레이더 차트'],
-                ].map(([icon, text]) => (
-                  <div key={text} className="flex items-center gap-3 text-sm text-slate-300">
+                  ['⏱️', t.feat1],
+                  ['📊', t.feat2],
+                  ['🏆', t.feat3],
+                ].map(([icon, text], i) => (
+                  <div key={i} className="flex items-center gap-3 text-sm text-slate-300">
                     <span className="text-lg">{icon}</span>
                     <span className="font-mono">{text}</span>
                   </div>
@@ -298,14 +399,14 @@ export default function LevelTest() {
                 onClick={startQuiz}
                 className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm tracking-wider rounded-lg transition-all active:scale-[0.98]"
               >
-                테스트 시작하기
+                {t.startBtn}
               </button>
 
               <button
                 onClick={() => navigate('/')}
                 className="w-full mt-3 py-2 text-slate-500 hover:text-slate-300 text-xs font-mono transition-colors"
               >
-                ← 메인으로 돌아가기
+                {t.backBtn}
               </button>
             </div>
           </div>
@@ -396,8 +497,8 @@ export default function LevelTest() {
                     : 'bg-red-500/10 text-red-400 border border-red-500/30'
                 }`}>
                   {selected !== null && currentQ.options[selected]?.isCorrect
-                    ? '✅ 정답입니다!'
-                    : `❌ 오답 — 정답: ${currentQ.options[correctIdx]?.text}`}
+                    ? t.correct
+                    : `${t.wrongPrefix}${currentQ.options[correctIdx]?.text}`}
                 </div>
               )}
             </div>
@@ -422,9 +523,9 @@ export default function LevelTest() {
     const scores = result.radarScores || radarScores;
 
     const radarData = {
-      labels: CATEGORIES,
+      labels: CATEGORIES_I18N[lang] || CATEGORIES_I18N.ko,
       datasets: [{
-        label: '역량 분석',
+        label: t.radarLabel,
         data: scores,
         backgroundColor: `${levelColor}33`,
         borderColor: levelColor,
@@ -476,10 +577,10 @@ export default function LevelTest() {
                   </span>
                 </div>
                 <h2 className="text-white text-xl font-bold">
-                  당신의 레벨: <span style={{ color: levelColor }}>{levelInfo.ko}</span>
+                  {t.yourLevel} <span style={{ color: levelColor }}>{levelInfo[lang] || levelInfo.ko}</span>
                 </h2>
                 <p className="text-slate-400 text-sm font-mono mt-1">
-                  {result.correctCount || 0}/{result.totalQuestions || TOTAL_QUESTIONS} 정답
+                  {result.correctCount || 0}/{result.totalQuestions || TOTAL_QUESTIONS} {t.scoreUnit}
                 </p>
               </div>
 
@@ -490,12 +591,9 @@ export default function LevelTest() {
 
               {/* 커리큘럼 추천 */}
               <div className="bg-slate-800/50 rounded-lg p-4 mb-6 border border-slate-700/50">
-                <h3 className="text-sm font-bold text-slate-300 mb-2">📋 추천 커리큘럼</h3>
+                <h3 className="text-sm font-bold text-slate-300 mb-2">{t.currTitle}</h3>
                 <p className="text-xs text-slate-400 font-mono leading-relaxed">
-                  {levelNum <= 2
-                    ? 'IT 기초 학습 과정을 먼저 수강한 후, MITRE ATT&CK 매트릭스 기반 교육을 진행하세요.'
-                    : 'MITRE ATT&CK 매트릭스 기반 교육을 바로 시작할 수 있습니다. 실전 시나리오 랩을 활용해보세요.'
-                  }
+                  {levelNum <= 2 ? t.currLow : t.currHigh}
                 </p>
               </div>
 
@@ -504,14 +602,14 @@ export default function LevelTest() {
                 onClick={() => navigate(`/signup?level=${levelInfo.key}`)}
                 className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm tracking-wider rounded-lg transition-all active:scale-[0.98] mb-3"
               >
-                회원가입하고 학습 시작하기
+                {t.signupBtn}
               </button>
 
               <button
                 onClick={() => navigate('/login')}
                 className="w-full py-2 text-slate-500 hover:text-slate-300 text-xs font-mono transition-colors"
               >
-                이미 계정이 있으신가요? 로그인
+                {t.loginLink}
               </button>
             </div>
           </div>
