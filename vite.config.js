@@ -12,6 +12,17 @@ const blockExternalSourcePlugin = {
   configureServer(server) {
     const BLOCKED = ['/src/', '/@fs/', '/.env', '/node_modules/'];
     server.middlewares.use((req, res, next) => {
+      // /api/ip — 개발 서버에서도 클라이언트 IP 반환 (프로덕션 server.js와 동일)
+      if (req.url === '/api/ip') {
+        const forwarded = req.headers['x-forwarded-for'];
+        const clientIp = forwarded
+          ? forwarded.split(',')[0].trim()
+          : req.socket?.remoteAddress || 'unknown';
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ ip: clientIp }));
+        return;
+      }
+
       const ip = req.socket?.remoteAddress ?? '';
       const isLocal =
         ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';

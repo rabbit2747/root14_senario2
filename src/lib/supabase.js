@@ -10,11 +10,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// 공인 IP 조회
-// ⚠️ 보안: api.ipify.org 제3자 서비스 의존 제거 (사용자 IP가 외부로 전송되는 프라이버시 이슈)
-// Supabase Edge Function 또는 자체 API로 교체 전까지 'unknown' 반환
+// 클라이언트 IP 조회 (자체 서버 엔드포인트 — 제3자 의존 없음)
+// v0.9.4: api.ipify.org 제거 → 'unknown' 반환
+// v1.0.1: Express server.js + Vite dev 서버에 /api/ip 엔드포인트 추가
 export async function getPublicIP() {
-  return 'unknown';
+  try {
+    const res = await fetch('/api/ip');
+    if (res.ok) {
+      const data = await res.json();
+      return data.ip || 'unknown';
+    }
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
 }
 
 // 접속 로그 저장

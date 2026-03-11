@@ -119,3 +119,24 @@ body {
 .glass-gradient-border:hover::after {
   animation: border-rotate 3s linear infinite;
 }
+
+/* ─────────────────────────────────────────────
+   레벨 테스트 페이지 애니메이션
+───────────────────────────────────────────── */
+@keyframes popIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+@keyframes zooFloat {
+  0% { transform: translateY(110dvh) rotate(0deg) scale(0.5); opacity: 1; }
+  50% { transform: translateY(30dvh) rotate(180deg) scale(1.5); }
+  100% { transform: translateY(-20dvh) rotate(360deg) scale(1); opacity: 0; }
+}

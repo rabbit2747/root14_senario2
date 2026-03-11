@@ -149,6 +149,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── /api/ip — 클라이언트 IP 반환 (자체 호스팅, 제3자 의존 없음) ──
+app.get('/api/ip', (req, res) => {
+  // x-forwarded-for: 리버스 프록시(Nginx/Cloudflare) 뒤에서 실제 클라이언트 IP
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = forwarded
+    ? forwarded.split(',')[0].trim()
+    : req.socket?.remoteAddress || 'unknown';
+  res.json({ ip });
+});
+
 // ── /edu/*.html 인증 미들웨어 (express.static 보다 먼저 실행) ──
 app.use(async (req, res, next) => {
   // /edu/*.html 요청만 인증 검사
