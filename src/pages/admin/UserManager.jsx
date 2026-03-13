@@ -5,6 +5,22 @@ import AdminGuideSection from '../../components/admin/AdminGuideSection';
 import { WarningAlt, View } from '@carbon/icons-react';
 
 const ROLE_OPTIONS = ['user', 'admin'];
+const LEVEL_OPTIONS = [
+  { value: '', label: '미설정' },
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'junior', label: 'Junior' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' },
+  { value: 'expert', label: 'Expert' },
+];
+const LEVEL_COLORS = {
+  '': 'text-slate-400',
+  beginner: 'text-gray-500',
+  junior: 'text-emerald-600',
+  intermediate: 'text-blue-600',
+  advanced: 'text-indigo-600',
+  expert: 'text-purple-600',
+};
 
 export default function UserManager({ requestVerify }) {
   const [users, setUsers] = useState([]);
@@ -18,7 +34,7 @@ export default function UserManager({ requestVerify }) {
     setLoading(true);
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, name, approved, role, marketing_consent')
+      .select('id, email, name, approved, role, level, marketing_consent')
       .order('email');
     if (!error) setUsers(data || []);
     setLoading(false);
@@ -79,6 +95,19 @@ export default function UserManager({ requestVerify }) {
     await supabase.from('profiles').update({ role }).eq('id', id);
     setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u));
     logAdminAudit('user_role_change', `user_${id}`, { new_role: role });
+    setSaving(null);
+  };
+
+  const changeLevel = async (id, level) => {
+    if (requestVerify) {
+      const ok = await requestVerify();
+      if (!ok) return;
+    }
+    setSaving(id);
+    const updateVal = level || null; // 빈 문자열 → null (미설정)
+    await supabase.from('profiles').update({ level: updateVal }).eq('id', id);
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, level: updateVal } : u));
+    logAdminAudit('user_level_change', `user_${id}`, { new_level: updateVal || 'none' });
     setSaving(null);
   };
 
@@ -143,13 +172,14 @@ export default function UserManager({ requestVerify }) {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
-        <table className="w-full text-sm min-w-[640px]">
+        <table className="w-full text-sm min-w-[780px]">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
               <th className="text-left px-4 py-3 text-[11px] font-black text-slate-500 uppercase tracking-wider">이메일</th>
               <th className="text-left px-4 py-3 text-[11px] font-black text-slate-500 uppercase tracking-wider">이름</th>
               <th className="text-center px-4 py-3 text-[11px] font-black text-slate-500 uppercase tracking-wider">승인</th>
               <th className="text-center px-4 py-3 text-[11px] font-black text-slate-500 uppercase tracking-wider">역할</th>
+              <th className="text-center px-4 py-3 text-[11px] font-black text-slate-500 uppercase tracking-wider">레벨</th>
               <th className="text-center px-4 py-3 text-[11px] font-black text-slate-500 uppercase tracking-wider">마케팅</th>
             </tr>
           </thead>
@@ -206,6 +236,19 @@ export default function UserManager({ requestVerify }) {
                       {ROLE_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                   </td>
+                  {/* 레벨 */}
+                  <td className="px-4 py-3 text-center">
+                    <select
+                      value={u.level || ''}
+                      onChange={e => changeLevel(u.id, e.target.value)}
+                      disabled={saving === u.id}
+                      className={`text-xs font-bold px-2 py-1 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none ${LEVEL_COLORS[u.level || '']}`}
+                    >
+                      {LEVEL_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </td>
                   {/* 마케팅 */}
                   <td className="px-4 py-3 text-center">
                     <span className={`text-[10px] font-bold ${u.marketing_consent ? 'text-emerald-500' : 'text-slate-400'}`}>
@@ -225,6 +268,7 @@ export default function UserManager({ requestVerify }) {
           '가입 신청한 사용자 목록이 표시됩니다',
           '승인 버튼으로 사용자의 로그인 접근을 허용합니다',
           '역할 드롭다운: user(일반) / admin(관리자) 전환',
+          '레벨 드롭다운: 사용자의 학습 레벨 재설정 (미설정 시 레벨 테스트 재응시 가능)',
           '👁 버튼: 개인정보 원본 열람 (⚠️ 감사 로그 기록, 새로고침 전까지 1회만 가능)',
         ]}
         tips={[

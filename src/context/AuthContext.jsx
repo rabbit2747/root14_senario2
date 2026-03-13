@@ -113,15 +113,16 @@ export function AuthProvider({ children }) {
 
   // ── 세션 복원 + 상태 감지 ──
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       const u = session?.user ?? null;
       setUser(u);
-      fetchRole(u?.id);
+      await fetchRole(u?.id);   // role/level 로딩 완료 후 렌더링 (깜빡임 방지)
       setLoading(false);
       // 서버 측 인증 쿠키 동기화
       if (session?.access_token) setAuthCookie(session.access_token);
       else clearAuthCookie();
-    });
+    })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const u = session?.user ?? null;

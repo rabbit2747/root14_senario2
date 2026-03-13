@@ -20,7 +20,9 @@ const ScenarioExplanationPage = lazy(() => import('./pages/ScenarioExplanationPa
 const DesktopLab              = lazy(() => import('./pages/lab/DesktopLab'));
 const LabCompletion           = lazy(() => import('./pages/lab/LabCompletionPage'));
 const LevelTest               = lazy(() => import('./pages/LevelTest'));
-const BasicsPlaceholder       = lazy(() => import('./pages/BasicsPlaceholder'));
+const BasicsPage              = lazy(() => import('./pages/BasicsPage'));
+const LearningPathChoice      = lazy(() => import('./pages/LearningPathChoice'));
+const RecommendedCoursePage   = lazy(() => import('./pages/RecommendedCoursePage'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -87,7 +89,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/level-test" element={<LevelTest />} />
-            <Route path="/basics" element={<BasicsPlaceholder />} />
+            <Route path="/basics" element={<BasicsPage />} />
+            <Route path="/learning-path" element={<LearningPathChoice />} />
+            <Route path="/recommended/:techniqueId" element={<RecommendedCoursePage />} />
             <Route path="/lab/t1078" element={<LabT1078 />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/admin" element={<AdminPage />} />

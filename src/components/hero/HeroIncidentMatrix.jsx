@@ -560,7 +560,7 @@ export default function HeroIncidentMatrix({
                   transition={{ duration: 0.4 }}
                 >
                   <motion.button
-                    onClick={() => isLoggedIn ? enterMatrix() : navigate('/level-test')}
+                    onClick={() => isLoggedIn ? enterMatrix() : navigate('/login')}
                     className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg shadow-md transition-all active:scale-[0.98]
                       ${isDark
                         ? 'bg-blue-500 hover:bg-blue-400 text-white shadow-blue-500/30 hover:shadow-blue-400/40'

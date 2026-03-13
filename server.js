@@ -33,10 +33,18 @@ const PORT = process.env.PORT || 4173;
 const DIST_DIR = join(__dirname, 'dist');
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+// Service Role Key: RLS 우회 — 서버 측 access_logs insert에 필수
+// .env에 SUPABASE_SERVICE_ROLE_KEY 추가 필요 (Supabase 대시보드 → Settings → API)
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('[gotroot] FATAL: VITE_SUPABASE_URL 또는 VITE_SUPABASE_ANON_KEY가 .env에 없습니다.');
   process.exit(1);
+}
+
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('[gotroot] WARNING: SUPABASE_SERVICE_ROLE_KEY 미설정 — 익명 방문자 IP 수집이 RLS에 의해 차단될 수 있습니다.');
+  console.warn('[gotroot]          Supabase 대시보드 → Settings → API → Service Role Key 복사 후 .env에 추가하세요.');
 }
 
 // ── 토큰 검증 캐시 (5분 TTL) ──
@@ -149,6 +157,102 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── 로그인 브루트포스 방어 (서버 측 — IP 기반) ──
+// 클라이언트 localStorage 방어를 보완 (개발자 도구 우회 불가)
+// IP당 15분 윈도우 내 10회 실패 → 차단
+const loginAttempts = new Map(); // key: ip, value: { failures: number, lockedUntil: number }
+const BF_MAX_FAILURES = 10;
+const BF_LOCKOUT_MS = 15 * 60 * 1000; // 15분
+const BF_WINDOW_MS = 15 * 60 * 1000;  // 15분 윈도우
+const LOGIN_ATTEMPTS_MAX = 50000;
+
+function cleanupLoginAttempts() {
+  const now = Date.now();
+  if (loginAttempts.size > LOGIN_ATTEMPTS_MAX) {
+    for (const [k, v] of loginAttempts) {
+      if (now - v.lastAttempt > BF_WINDOW_MS && now > (v.lockedUntil || 0)) {
+        loginAttempts.delete(k);
+      }
+    }
+  }
+}
+
+// JSON body parser (API 엔드포인트용 — express.static 전에 배치)
+app.use('/api/', express.json({ limit: '1kb' }));
+
+// GET /api/auth/check-rate — 로그인 시도 전 레이트 체크
+app.get('/api/auth/check-rate', (req, res) => {
+  const ip = getClientIP(req);
+  const record = loginAttempts.get(ip);
+
+  if (!record) {
+    return res.json({ allowed: true, remaining: BF_MAX_FAILURES });
+  }
+
+  // 잠금 상태 체크
+  if (record.lockedUntil && Date.now() < record.lockedUntil) {
+    const retryAfterSec = Math.ceil((record.lockedUntil - Date.now()) / 1000);
+    return res.status(429).json({
+      allowed: false,
+      remaining: 0,
+      retryAfter: retryAfterSec,
+      message: `Too many login attempts. Try again in ${Math.ceil(retryAfterSec / 60)} minutes.`,
+    });
+  }
+
+  // 윈도우 만료 → 리셋
+  if (Date.now() - record.lastAttempt > BF_WINDOW_MS) {
+    loginAttempts.delete(ip);
+    return res.json({ allowed: true, remaining: BF_MAX_FAILURES });
+  }
+
+  const remaining = Math.max(0, BF_MAX_FAILURES - record.failures);
+  return res.json({ allowed: remaining > 0, remaining });
+});
+
+// POST /api/auth/report-failure — 로그인 실패 시 서버에 보고
+app.post('/api/auth/report-failure', (req, res) => {
+  const ip = getClientIP(req);
+  const now = Date.now();
+  let record = loginAttempts.get(ip);
+
+  if (!record || (now - record.lastAttempt > BF_WINDOW_MS && now > (record.lockedUntil || 0))) {
+    record = { failures: 0, lastAttempt: now, lockedUntil: 0 };
+  }
+
+  record.failures += 1;
+  record.lastAttempt = now;
+
+  if (record.failures >= BF_MAX_FAILURES) {
+    record.lockedUntil = now + BF_LOCKOUT_MS;
+    loginAttempts.set(ip, record);
+    cleanupLoginAttempts();
+
+    const retryAfterSec = Math.ceil(BF_LOCKOUT_MS / 1000);
+    console.log(`[gotroot] BRUTE FORCE LOCKOUT: IP ${ip} — ${record.failures} failures`);
+    return res.status(429).json({
+      locked: true,
+      retryAfter: retryAfterSec,
+      message: `Account locked for ${Math.ceil(retryAfterSec / 60)} minutes.`,
+    });
+  }
+
+  loginAttempts.set(ip, record);
+  cleanupLoginAttempts();
+
+  return res.json({
+    locked: false,
+    remaining: BF_MAX_FAILURES - record.failures,
+  });
+});
+
+// POST /api/auth/report-success — 로그인 성공 시 실패 카운트 초기화
+app.post('/api/auth/report-success', (req, res) => {
+  const ip = getClientIP(req);
+  loginAttempts.delete(ip);
+  return res.json({ ok: true });
+});
+
 // ── /api/ip — 클라이언트 IP 반환 (자체 호스팅, 제3자 의존 없음) ──
 app.get('/api/ip', (req, res) => {
   // x-forwarded-for: 리버스 프록시(Nginx/Cloudflare) 뒤에서 실제 클라이언트 IP
@@ -157,6 +261,170 @@ app.get('/api/ip', (req, res) => {
     ? forwarded.split(',')[0].trim()
     : req.socket?.remoteAddress || 'unknown';
   res.json({ ip });
+});
+
+// ── IP 지오로케이션 캐시 + 배치 조회 (관리자 대시보드용) ──
+// ip-api.com 무료 플랜: 분당 45요청. 배치(최대 100개) + 24시간 캐시로 충분
+const geoCache = new Map(); // key: ip, value: { country, countryCode, city, ts }
+const GEO_CACHE_TTL = 24 * 60 * 60 * 1000; // 24시간
+const GEO_CACHE_MAX = 5000;
+
+// 로컬/프라이빗 IP 판별
+function isPrivateIP(ip) {
+  return !ip || ip === 'unknown' || ip === '::1' ||
+    ip.startsWith('127.') || ip.startsWith('10.') ||
+    ip.startsWith('192.168.') || ip.startsWith('172.16.') ||
+    ip.startsWith('172.17.') || ip.startsWith('172.18.') ||
+    ip.startsWith('172.19.') || ip.startsWith('172.2') ||
+    ip.startsWith('172.30.') || ip.startsWith('172.31.') ||
+    ip.startsWith('fc') || ip.startsWith('fd') || ip.startsWith('fe80');
+}
+
+// POST /api/geoip — IP 배열 → 지오 정보 배치 반환
+app.post('/api/geoip', async (req, res) => {
+  const { ips } = req.body || {};
+  if (!Array.isArray(ips) || ips.length === 0) {
+    return res.json({});
+  }
+
+  // 최대 100개 제한
+  const uniqueIps = [...new Set(ips)].slice(0, 100);
+  const result = {};
+  const toResolve = [];
+
+  for (const ip of uniqueIps) {
+    // 로컬 IP
+    if (isPrivateIP(ip)) {
+      result[ip] = { country: '로컬', countryCode: 'LOCAL', city: '-' };
+      continue;
+    }
+    // 캐시 히트
+    const cached = geoCache.get(ip);
+    if (cached && (Date.now() - cached.ts) < GEO_CACHE_TTL) {
+      result[ip] = { country: cached.country, countryCode: cached.countryCode, city: cached.city };
+      continue;
+    }
+    toResolve.push(ip);
+  }
+
+  // 캐시 미스 → ip-api.com 배치 조회
+  if (toResolve.length > 0) {
+    try {
+      const batchRes = await fetch('http://ip-api.com/batch?fields=query,country,countryCode,city,status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(toResolve.map(ip => ({ query: ip, fields: 'query,country,countryCode,city,status' }))),
+      });
+      const batchData = await batchRes.json();
+
+      for (const item of batchData) {
+        if (item.status === 'success') {
+          const geo = { country: item.country, countryCode: item.countryCode, city: item.city || '-' };
+          result[item.query] = geo;
+          geoCache.set(item.query, { ...geo, ts: Date.now() });
+        } else {
+          result[item.query] = { country: '알 수 없음', countryCode: '??', city: '-' };
+        }
+      }
+    } catch (err) {
+      console.error('[gotroot] GeoIP batch error:', err.message);
+      // 실패 시 "알 수 없음" 반환
+      for (const ip of toResolve) {
+        if (!result[ip]) result[ip] = { country: '알 수 없음', countryCode: '??', city: '-' };
+      }
+    }
+  }
+
+  // 캐시 정리
+  if (geoCache.size > GEO_CACHE_MAX) {
+    const now = Date.now();
+    for (const [k, v] of geoCache) {
+      if (now - v.ts > GEO_CACHE_TTL) geoCache.delete(k);
+    }
+  }
+
+  return res.json(result);
+});
+
+// ── 방문자 IP 수집 (익명 포함 — 모든 페이지 접속 기록) ──
+// IP당 1시간 1회만 기록 (DB 폭증 방지)
+// Supabase REST API 직접 호출 (fire-and-forget)
+const visitedIPs = new Map(); // key: ip, value: timestamp
+const VISIT_LOG_COOLDOWN = 60 * 60 * 1000; // 1시간 (ms)
+const VISITED_IPS_MAX = 10000;
+
+function getClientIP(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  return forwarded ? forwarded.split(',')[0].trim() : req.socket?.remoteAddress || 'unknown';
+}
+
+async function logVisitorIP(ip, path, userId = null, email = null) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/access_logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`, // service role → RLS 우회
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        email: email || 'anonymous',
+        ip,
+        action: 'page_visit',
+        technique: path,
+      }),
+    });
+  } catch (err) {
+    // fire-and-forget — 방문 로깅 실패가 서비스를 방해하면 안 됨
+    console.error('[gotroot] Visitor IP log error:', err.message);
+  }
+}
+
+app.use((req, res, next) => {
+  // HTML 페이지 요청만 (API, 정적 에셋 제외)
+  const ext = extname(req.path).toLowerCase();
+  const isPageRequest = !ext || ext === '.html';
+  const isApiRequest = req.path.startsWith('/api/');
+
+  if (!isPageRequest || isApiRequest) return next();
+
+  const ip = getClientIP(req);
+  if (ip === 'unknown') return next();
+
+  // 쿨다운 체크: 이미 1시간 내 기록된 IP는 건너뜀
+  const lastVisit = visitedIPs.get(ip);
+  const now = Date.now();
+  if (lastVisit && (now - lastVisit) < VISIT_LOG_COOLDOWN) return next();
+
+  // 기록 + 쿨다운 등록
+  visitedIPs.set(ip, now);
+
+  // 메모리 캐시 크기 제한 (만료 항목 정리)
+  if (visitedIPs.size > VISITED_IPS_MAX) {
+    for (const [k, v] of visitedIPs) {
+      if (now - v > VISIT_LOG_COOLDOWN) visitedIPs.delete(k);
+    }
+  }
+
+  // 인증된 사용자라면 user_id 추출 시도 (쿠키 JWT 디코딩)
+  let userId = null;
+  let email = null;
+  const token = req.cookies?.gotroot_auth_token;
+  if (token) {
+    try {
+      // JWT payload (2nd segment) 디코딩 (검증은 별도 — 여기선 로깅 목적)
+      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+      userId = payload.sub || null;
+      email = payload.email || null;
+    } catch { /* 디코딩 실패 무시 */ }
+  }
+
+  // fire-and-forget (응답 지연 없음)
+  logVisitorIP(ip, req.path, userId, email);
+
+  next();
 });
 
 // ── /edu/*.html 인증 미들웨어 (express.static 보다 먼저 실행) ──

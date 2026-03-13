@@ -978,6 +978,14 @@ export default function UltimateCinematicMatrix() {
                 title={viewMode === 'dashboard' ? '매트릭스 전체 보기' : '대시보드로 돌아가기'}>
                 {viewMode === 'dashboard' ? <><span className="dm-mobile-only">🔳</span><span className="dm-mobile-hide">🔳 MATRIX</span></> : <><span className="dm-mobile-only">📋</span><span className="dm-mobile-hide">📋 DASHBOARD</span></>}
               </span>
+              {isLoggedIn && (
+                <span
+                  onClick={() => navigate('/basics')}
+                  className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-purple-200 text-purple-500 bg-purple-50/50 hover:text-purple-700 hover:border-purple-400 transition-colors"
+                  title={language === 'ko' ? 'IT 기초 학습' : 'IT Basics'}>
+                  📖 <span className="dm-mobile-hide">{language === 'ko' ? 'IT 기초' : 'IT Basics'}</span>
+                </span>
+              )}
               <span
                 onClick={() => navigate('/community')}
                 className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-emerald-200 text-emerald-500 bg-emerald-50/50 hover:text-emerald-700 hover:border-emerald-400 transition-colors"

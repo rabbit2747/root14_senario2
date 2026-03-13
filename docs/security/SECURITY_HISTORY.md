@@ -11,6 +11,8 @@
 | v0.9.7 | 2026-03-09 | 🟡 Medium | ?preview=1 인증 우회 코드 제거 | [v0.9.7-preview-bypass.md](./v0.9.7-preview-bypass.md) |
 | v0.9.7 | 2026-03-09 | 🔴 Critical | Express 서버 교체 — edu HTML 서버 측 JWT 인증 | [v0.9.7-express-auth.md](./v0.9.7-express-auth.md) |
 | v0.9.7 | 2026-03-10 | 🟢 Hardening | 보안 헤더 강화 — CSP 경로 분리, Permissions-Policy, CORP | [v0.9.7-express-auth.md](./v0.9.7-express-auth.md#보안-헤더-강화-2026-03-10-추가) |
+| v1.0.1 | 2026-03-12 | 🔴 Critical | 로그인 브루트포스 방어 (5회/15분 잠금) + 로그인 실패 로깅 | [v1.0.1-bruteforce-ip-collection.md](./v1.0.1-bruteforce-ip-collection.md) |
+| v1.0.1 | 2026-03-12 | 🟡 Medium | 방문자 IP 수집 누락 수정 — 서버 측 미들웨어로 모든 접속 기록 | [v1.0.1-bruteforce-ip-collection.md](./v1.0.1-bruteforce-ip-collection.md#2-방문자-ip-수집-누락-문제) |
 
 ## 미해결 보안 사항
 
@@ -20,6 +22,7 @@
 | React SPA 번들 내 컴포넌트 | 🟡 Low | 미조치 | GraphicExplanation/Scenario 등. NestJS SSR 전환 시 해결 |
 | Supabase RLS (access_logs, feedback_likes) | 🔴 Critical | 미조치 | SQL Editor에서 사용자 직접 실행 필요 |
 | announcements 공개 읽기 | 🟡 Medium | 미조치 | SQL Editor에서 사용자 직접 실행 필요 |
+| 브루트포스 서버 측 Rate Limiting | 🟡 Medium | 대기 | 현재 클라이언트 측만 (localStorage). NestJS 전환 시 서버 측 추가 예정 |
 
 ## 보안 아키텍처 현황
 

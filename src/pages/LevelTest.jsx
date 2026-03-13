@@ -7,6 +7,7 @@ import {
 } from 'chart.js';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import { getQuestions } from '../api/levelTest';
 import { getStoredLang } from '../components/LangToggle';
 import { QUESTION_BANK, CATEGORIES, CATEGORIES_I18N, LEVEL_NAMES, LEVEL_COLORS } from '../data/level-test-questions';
@@ -49,8 +50,8 @@ const levelTestT = {
     yourLevel: '당신의 레벨:',
     scorePrefix: '종합 점수:',
     scoreSuffix: '점',
-    signupBtn: '회원가입하고 학습 시작하기',
-    loginLink: '이미 계정이 있으신가요? 로그인',
+    signupBtn: '학습 시작하기',
+    savingLevel: '레벨 저장 중...',
     reviewBtn: '상세 리포트 및 오답 확인',
     reviewBack: '← 결과로 돌아가기',
     reviewTitle: '상세 리포트',
@@ -88,8 +89,8 @@ const levelTestT = {
     yourLevel: 'Your Level:',
     scorePrefix: 'Score:',
     scoreSuffix: 'pts',
-    signupBtn: 'Sign Up & Start Learning',
-    loginLink: 'Already have an account? Log In',
+    signupBtn: 'Start Learning',
+    savingLevel: 'Saving level...',
     reviewBtn: 'Detailed Report & Review',
     reviewBack: '← Back to Results',
     reviewTitle: 'Detailed Report',
@@ -127,8 +128,8 @@ const levelTestT = {
     yourLevel: 'あなたのレベル:',
     scorePrefix: '総合スコア:',
     scoreSuffix: '点',
-    signupBtn: '会員登録して学習開始',
-    loginLink: 'すでにアカウントをお持ちですか？ ログイン',
+    signupBtn: '学習を始める',
+    savingLevel: 'レベル保存中...',
     reviewBtn: '詳細レポートと誤答確認',
     reviewBack: '← 結果に戻る',
     reviewTitle: '詳細レポート',
@@ -166,8 +167,8 @@ const levelTestT = {
     yourLevel: '您的等级：',
     scorePrefix: '总分：',
     scoreSuffix: '分',
-    signupBtn: '注册并开始学习',
-    loginLink: '已有账号？立即登录',
+    signupBtn: '开始学习',
+    savingLevel: '保存等级中...',
     reviewBtn: '详细报告和错题确认',
     reviewBack: '← 返回结果',
     reviewTitle: '详细报告',
@@ -205,8 +206,8 @@ const levelTestT = {
     yourLevel: 'आपका स्तर:',
     scorePrefix: 'कुल स्कोर:',
     scoreSuffix: 'अंक',
-    signupBtn: 'साइन अप करें और सीखना शुरू करें',
-    loginLink: 'पहले से खाता है? लॉगिन करें',
+    signupBtn: 'सीखना शुरू करें',
+    savingLevel: 'स्तर सहेजा जा रहा है...',
     reviewBtn: 'विस्तृत रिपोर्ट और समीक्षा',
     reviewBack: '← परिणाम पर वापस',
     reviewTitle: 'विस्तृत रिपोर्ट',
@@ -336,22 +337,74 @@ function computeRadarScores(answers) {
 
 // ── 레벨별 커리큘럼 (간단한 한국어 기본값) ──
 const CURRICULUM = {
-  5: { titleKey: 'expert', items: ['AMSI/ETW 우회, Direct Syscalls 분석', 'MITRE Engage 활용 및 Purple Teaming 전략'], wrapClass: 'bg-gray-50 dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700' },
+  5: { titleKey: 'expert', items: ['AMSI/ETW 우회, Direct Syscalls 분석', 'MITRE Engage 활용 및 Purple Teaming 전략'], wrapClass: 'bg-gray-50 dark:bg-[#303038] border-gray-200 dark:border-gray-700' },
   4: { titleKey: 'advanced', items: ['Windows Event ID 및 Sysmon 로우 데이터 분석', 'AD 심화 공격(Kerberoasting 등) 탐지 방안'], wrapClass: 'bg-indigo-50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-800/30' },
   3: { titleKey: 'intermediate', items: ['EDR 로그를 활용한 Technique 탐지 및 Sigma Rule', 'Lateral Movement 주요 기법 파악'], wrapClass: 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800/30' },
   2: { titleKey: 'junior', items: ['ATT&CK Matrix 구조 해부 및 14대 Tactic 이해', '보안 알람을 ATT&CK 기법으로 분류해보기'], wrapClass: 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/30' },
   1: { titleKey: 'beginner', items: ['네트워크 통신 기초 및 리눅스/윈도우 명령어', 'Cyber Kill Chain 프로세스 기초'], wrapClass: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700' },
 };
 
+// ── 공통 래퍼 (컴포넌트 바깥 정의 — 깜빡임 방지) ──
+function PageWrapper({ children, showOutsideText = false, isDark, t, toggleTheme }) {
+  return (
+    <div className={`min-h-[100dvh] flex flex-col justify-center items-center transition-colors duration-300 overflow-hidden ${isDark ? 'bg-[#1a1a1a]' : 'bg-[#F4F1EA]'}`}>
+      {showOutsideText && (
+        <div className="text-center mb-8 px-4 z-0 transition-all duration-500">
+          <h1 className="text-3xl md:text-5xl font-black mb-4 text-gray-800 dark:text-gray-100 tracking-tight drop-shadow-sm">
+            {t.outsideTitle}
+          </h1>
+          <p className="text-[15px] md:text-[18px] leading-relaxed break-keep font-medium text-gray-600 dark:text-gray-300">
+            {t.outsideDesc1} <b className="text-blue-600 dark:text-blue-400">{t.outsideDesc2}</b> {t.outsideDesc3}<br />
+            {t.outsideDesc4} <b className="text-red-500 dark:text-red-400">{t.outsideDesc5}</b>, {t.outsideDesc6} <b className="text-green-500 dark:text-green-400">{t.outsideDesc7}</b>.<br />
+            {t.outsideDesc8} <b className="text-purple-600 dark:text-purple-400">{t.outsideDesc9}</b>{t.outsideDesc10}
+          </p>
+        </div>
+      )}
+      <div className={`w-[95%] max-w-[850px] max-h-[90dvh] flex flex-col rounded-xl z-10 transition-all duration-300 sm:w-[95%] ${isDark ? 'bg-[#242424] shadow-[0_20px_40px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)_inset]' : 'bg-white shadow-[0_20px_40px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.1)_inset]'}`}>
+        {/* 타이틀바 */}
+        <div className={`h-12 flex-shrink-0 flex items-center px-5 relative border-b ${isDark ? 'bg-gradient-to-b from-[#3a3a3a] to-[#2b2b2b] border-[#111]' : 'bg-gradient-to-b from-[#f6f6f6] to-[#e0e0e0] border-[#d1d1d1]'}`}>
+          <div className="flex gap-2">
+            <div className="w-[13px] h-[13px] rounded-full bg-[#ff5f56] border border-[#e0443e]" />
+            <div className="w-[13px] h-[13px] rounded-full bg-[#ffbd2e] border border-[#dea123]" />
+            <div className="w-[13px] h-[13px] rounded-full bg-[#27c93f] border border-[#1aab29]" />
+          </div>
+          <div className={`absolute w-full text-center left-0 text-sm font-semibold pointer-events-none ${isDark ? 'text-[#a1a1aa]' : 'text-[#4d4d4d]'}`}>
+            Adaptive_Assessment.app
+          </div>
+          <button onClick={toggleTheme} className="ml-auto z-10 relative text-gray-500 hover:text-gray-800 dark:text-gray-200 dark:hover:text-gray-200 transition-colors" title="다크 모드 전환">
+            {isDark ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 1.32a1 1 0 011.415 0l.708.707a1 1 0 01-1.414 1.415l-.708-.708a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-1.32 4.22a1 1 0 010 1.415l-.707.708a1 1 0 01-1.415-1.414l.708-.708a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-1.32a1 1 0 01-1.415 0l-.708-.707a1 1 0 011.414-1.415l.708.708a1 1 0 010 1.414zM3 10a1 1 0 011-1h1a1 1 0 110 2H4a1 1 0 01-1-1zm1.32-4.22a1 1 0 010-1.415l.707-.708a1 1 0 011.415 1.414l-.708.708a1 1 0 01-1.414 0zM10 5a5 5 0 100 10 5 5 0 000-10z" clipRule="evenodd" /></svg>
+            ) : (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
+            )}
+          </button>
+        </div>
+        {/* 콘텐츠 영역 */}
+        <div className="p-[30px_20px] sm:p-[50px_60px] min-h-[450px] sm:min-h-[550px] overflow-y-auto flex flex-col relative">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── 메인 컴포넌트 ──
 export default function LevelTest() {
   const navigate = useNavigate();
-  const { isLoggedIn, userLevel } = useAuth();
+  const { isLoggedIn, userLevel, user } = useAuth();
 
-  // 이미 로그인 + 레벨 있는 사용자 → 차단
+  // Auth Gate: 비로그인 → 로그인 페이지로
+  useEffect(() => {
+    if (!isLoggedIn) navigate('/login?redirect=/level-test', { replace: true });
+  }, [isLoggedIn, navigate]);
+
+  // 이미 레벨 있는 사용자 → 재응시 차단
   useEffect(() => {
     if (isLoggedIn && userLevel) navigate('/', { replace: true });
   }, [isLoggedIn, userLevel, navigate]);
+
+  // ── 렌더링 차단: redirect 대상이면 아무것도 표시하지 않음 (깜빡임 방지) ──
+  const shouldBlock = !isLoggedIn || (isLoggedIn && userLevel);
 
   // 이미 완료한 비로그인 사용자 → 결과 화면 직행
   const savedResult = useMemo(() => {
@@ -374,10 +427,11 @@ export default function LevelTest() {
   const [totalTime, setTotalTime] = useState(BASE_TIME);
   const [finalLevel, setFinalLevel] = useState(savedResult?.levelNum || null);
   const [radarScores, setRadarScores] = useState(savedResult?.radarScores || []);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [levelAnim, setLevelAnim] = useState(null);
   const [showReview, setShowReview] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [lang] = useState(() => getStoredLang());
   const t = levelTestT[lang] || levelTestT.ko;
   const timerRef = useRef(null);
@@ -391,12 +445,6 @@ export default function LevelTest() {
       return next;
     });
   };
-
-  // 페이지 진입 시 기존 다크모드 상태 확인
-  useEffect(() => {
-    if (document.documentElement.classList.contains('dark')) setIsDark(true);
-    return () => { /* 페이지 떠날 때 dark 클래스 정리 안 함 (전역 테마 유지) */ };
-  }, []);
 
   // Supabase에서 문제 불러오기
   useEffect(() => {
@@ -556,58 +604,21 @@ export default function LevelTest() {
     }
   };
 
-  // ── 공통 래퍼 ──
-  const PageWrapper = ({ children, showOutsideText = false }) => (
-    <div className={`min-h-[100dvh] flex flex-col justify-center items-center transition-colors duration-300 overflow-hidden ${isDark ? 'bg-[#1a1a1a]' : 'bg-[#F4F1EA]'}`}>
-      {showOutsideText && (
-        <div className="text-center mb-8 px-4 z-0 transition-all duration-500">
-          <h1 className="text-3xl md:text-5xl font-black mb-4 text-gray-800 dark:text-gray-100 tracking-tight drop-shadow-sm">
-            {t.outsideTitle}
-          </h1>
-          <p className="text-[15px] md:text-[18px] leading-relaxed break-keep font-medium text-gray-600 dark:text-gray-300">
-            {t.outsideDesc1} <b className="text-blue-600 dark:text-blue-400">{t.outsideDesc2}</b> {t.outsideDesc3}<br />
-            {t.outsideDesc4} <b className="text-red-500 dark:text-red-400">{t.outsideDesc5}</b>, {t.outsideDesc6} <b className="text-green-500 dark:text-green-400">{t.outsideDesc7}</b>.<br />
-            {t.outsideDesc8} <b className="text-purple-600 dark:text-purple-400">{t.outsideDesc9}</b>{t.outsideDesc10}
-          </p>
-        </div>
-      )}
-      <div className={`w-[95%] max-w-[850px] max-h-[90dvh] flex flex-col rounded-xl z-10 transition-all duration-300 sm:w-[95%] ${isDark ? 'bg-[#242424] shadow-[0_20px_40px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)_inset]' : 'bg-white shadow-[0_20px_40px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.1)_inset]'}`}
-        style={{ animation: 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
-        {/* 타이틀바 */}
-        <div className={`h-12 flex-shrink-0 flex items-center px-5 relative border-b ${isDark ? 'bg-gradient-to-b from-[#3a3a3a] to-[#2b2b2b] border-[#111]' : 'bg-gradient-to-b from-[#f6f6f6] to-[#e0e0e0] border-[#d1d1d1]'}`}>
-          <div className="flex gap-2">
-            <div className="w-[13px] h-[13px] rounded-full bg-[#ff5f56] border border-[#e0443e]" />
-            <div className="w-[13px] h-[13px] rounded-full bg-[#ffbd2e] border border-[#dea123]" />
-            <div className="w-[13px] h-[13px] rounded-full bg-[#27c93f] border border-[#1aab29]" />
-          </div>
-          <div className={`absolute w-full text-center left-0 text-sm font-semibold pointer-events-none ${isDark ? 'text-[#a1a1aa]' : 'text-[#4d4d4d]'}`}>
-            Adaptive_Assessment.app
-          </div>
-          <button onClick={toggleTheme} className="ml-auto z-10 relative text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" title="다크 모드 전환">
-            {isDark ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 1.32a1 1 0 011.415 0l.708.707a1 1 0 01-1.414 1.415l-.708-.708a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-1.32 4.22a1 1 0 010 1.415l-.707.708a1 1 0 01-1.415-1.414l.708-.708a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-1.32a1 1 0 01-1.415 0l-.708-.707a1 1 0 011.414-1.415l.708.708a1 1 0 010 1.414zM3 10a1 1 0 011-1h1a1 1 0 110 2H4a1 1 0 01-1-1zm1.32-4.22a1 1 0 010-1.415l.707-.708a1 1 0 011.415 1.414l-.708.708a1 1 0 01-1.414 0zM10 5a5 5 0 100 10 5 5 0 000-10z" clipRule="evenodd" /></svg>
-            ) : (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
-            )}
-          </button>
-        </div>
-        {/* 콘텐츠 영역 */}
-        <div className="p-[30px_20px] sm:p-[50px_60px] min-h-[450px] sm:min-h-[550px] overflow-y-auto flex flex-col relative">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
+  // ── 리다이렉트 대상이면 빈 화면 (깜빡임 방지) ──
+  if (shouldBlock) return null;
+
+  // ── 공통 래퍼 props ──
+  const wrapperProps = { isDark, t, toggleTheme };
 
   // ── 렌더링: 인트로 ──
   if (phase === 'intro') {
     return (
-      <PageWrapper showOutsideText>
+      <PageWrapper showOutsideText {...wrapperProps}>
         <div className="text-center flex flex-col justify-center items-center h-full relative py-4" style={{ animation: 'fadeIn 0.3s ease-out forwards' }}>
           <div className="text-gray-800 dark:text-gray-200 drop-shadow-md mb-8">
             {SVG_ICONS.intro}
           </div>
-          <span className="text-gray-600 dark:text-gray-400 font-semibold text-sm md:text-base bg-gray-100 dark:bg-gray-800 px-6 py-3 rounded-full mb-10 inline-flex items-center gap-2 border border-gray-200 dark:border-gray-700 shadow-sm tracking-wide">
+          <span className="text-gray-600 dark:text-gray-200 font-semibold text-sm md:text-base bg-gray-100 dark:bg-gray-800 px-6 py-3 rounded-full mb-10 inline-flex items-center gap-2 border border-gray-200 dark:border-gray-700 shadow-sm tracking-wide">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             {t.timerLabel}
           </span>
@@ -630,7 +641,7 @@ export default function LevelTest() {
     const levelBadgeColor = currentLevel === 1 ? 'bg-gray-400' : currentLevel === 2 ? 'bg-green-500' : currentLevel === 3 ? 'bg-blue-500' : currentLevel === 4 ? 'bg-indigo-500' : 'bg-purple-600';
 
     return (
-      <PageWrapper>
+      <PageWrapper {...wrapperProps}>
         <div className="flex flex-col h-full relative" style={{ animation: 'fadeIn 0.3s ease-out forwards' }}>
           {/* 난이도 애니메이션 */}
           {levelAnim && (
@@ -648,18 +659,18 @@ export default function LevelTest() {
           {/* 상단 헤더 */}
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
-              <p className="text-sm md:text-base font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <p className="text-sm md:text-base font-bold text-gray-500 dark:text-gray-200 uppercase tracking-wider">
                 Q {questionIdx + 1} <span className="opacity-50">/ {TOTAL_QUESTIONS}</span>
               </p>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#2a2a2a] shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#303038] shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
                 <div className={`w-2 h-2 rounded-full ${levelBadgeColor}`} />
                 <span className="text-[12px] font-bold text-gray-700 dark:text-gray-300 tracking-wide">Level {currentLevel}</span>
               </div>
-              <span className="text-[11px] md:text-[12px] px-2.5 py-1 rounded-md border bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700 hidden sm:inline-block tracking-wide">
+              <span className="text-[11px] md:text-[12px] px-2.5 py-1 rounded-md border bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700 hidden sm:inline-block tracking-wide">
                 {currentQ.category}
               </span>
             </div>
-            <div className={`text-sm md:text-base font-medium flex items-center transition-colors ${timeLeft <= 3 ? 'text-red-500 font-bold animate-pulse' : 'text-gray-500 dark:text-gray-400'}`}>
+            <div className={`text-sm md:text-base font-medium flex items-center transition-colors ${timeLeft <= 3 ? 'text-red-500 font-bold animate-pulse' : 'text-gray-500 dark:text-gray-200'}`}>
               <svg className={`w-5 h-5 mr-1.5 ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               {timeLeft}{lang === 'ko' || lang === 'ja' ? '초' : 's'}
             </div>
@@ -732,7 +743,7 @@ export default function LevelTest() {
               className={`w-full py-4 md:py-5 text-[16px] md:text-[20px] font-bold text-white rounded-xl transition-all duration-300 transform flex justify-center items-center gap-2
                 ${selected !== null && !showFeedback
                   ? 'bg-[#007aff] hover:bg-[#0056b3] active:scale-[0.98] shadow-[0_4px_14px_0_rgba(0,122,255,0.4)] hover:shadow-[0_6px_20px_rgba(0,122,255,0.5)]'
-                  : 'bg-gray-200 text-gray-400 shadow-none cursor-not-allowed dark:bg-[#2f2f2f] dark:text-gray-500'}`}
+                  : 'bg-gray-200 text-gray-400 shadow-none cursor-not-allowed dark:bg-[#2f2f2f] dark:text-gray-300'}`}
             >
               {t.confirmBtn}
             </button>
@@ -746,9 +757,9 @@ export default function LevelTest() {
   if (phase === 'result' && showReview) {
     const reviewAnswers = answers.length > 0 ? answers : [];
     return (
-      <PageWrapper>
+      <PageWrapper {...wrapperProps}>
         <div style={{ animation: 'fadeIn 0.3s ease-out forwards' }}>
-          <button onClick={() => setShowReview(false)} className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-4 font-semibold">
+          <button onClick={() => setShowReview(false)} className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-200 mb-4 font-semibold">
             {t.reviewBack}
           </button>
           <h2 className="text-xl font-black text-gray-800 dark:text-gray-100 mb-6">{t.reviewTitle}</h2>
@@ -761,8 +772,8 @@ export default function LevelTest() {
               <div key={i} className={`p-4 md:p-6 rounded-xl border mb-5 text-left ${bgClass}`}>
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-sm md:text-base font-black text-gray-400 dark:text-gray-500">0{i + 1}</span>
-                    <span className="text-[11px] md:text-[12px] font-bold px-2.5 py-1 rounded-md border bg-white dark:bg-black text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 shadow-sm">Lv.{record.level}</span>
+                    <span className="text-sm md:text-base font-black text-gray-400 dark:text-gray-300">0{i + 1}</span>
+                    <span className="text-[11px] md:text-[12px] font-bold px-2.5 py-1 rounded-md border bg-white dark:bg-black text-gray-600 dark:text-gray-200 border-gray-200 dark:border-gray-700 shadow-sm">Lv.{record.level}</span>
                   </div>
                   <span className={`font-bold text-sm md:text-base ${record.correct ? 'text-green-500' : 'text-red-500'}`}>
                     {record.isTimeout ? t.timeout : record.correct ? t.correct : t.wrong}
@@ -855,7 +866,7 @@ export default function LevelTest() {
           </div>
         )}
 
-        <PageWrapper>
+        <PageWrapper {...wrapperProps}>
           <div className="text-center flex flex-col h-full" style={{ animation: 'fadeIn 0.3s ease-out forwards' }}>
             {/* 레벨 아이콘 */}
             <div className={`inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-[2rem] shadow-sm border mx-auto mb-5 ${iconWrapClass}`}>
@@ -865,12 +876,12 @@ export default function LevelTest() {
             <h2 className="text-3xl md:text-4xl font-black text-gray-800 dark:text-gray-100 tracking-tight">
               {levelInfo.en}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-[14px] md:text-[16px] mt-3 mb-6 px-2 break-keep">
+            <p className="text-gray-600 dark:text-gray-200 text-[14px] md:text-[16px] mt-3 mb-6 px-2 break-keep">
               {correctCount}/{totalQ} {t.scorePrefix === '종합 점수:' ? '정답' : 'correct'} — {levelInfo[lang] || levelInfo.ko}
             </p>
 
             {/* 레이더 차트 */}
-            <div className="bg-white dark:bg-[#2a2a2a] rounded-xl border border-gray-100 dark:border-gray-700 p-2 mb-6 shadow-inner mx-auto w-full max-w-lg h-56 sm:h-72 relative flex justify-center items-center">
+            <div className="bg-white dark:bg-[#303038] rounded-xl border border-gray-100 dark:border-gray-700 p-2 mb-6 shadow-inner mx-auto w-full max-w-lg h-56 sm:h-72 relative flex justify-center items-center">
               <Radar data={radarData} options={radarOptions} />
             </div>
 
@@ -880,7 +891,7 @@ export default function LevelTest() {
                 <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                 {t.currRecommend}
               </h3>
-              <ul className="text-[14px] md:text-[15px] text-gray-600 dark:text-gray-400 space-y-2 pl-1">
+              <ul className="text-[14px] md:text-[15px] text-gray-600 dark:text-gray-200 space-y-2 pl-1">
                 {curr.items.map((item, i) => (
                   <li key={i} className="flex items-start">
                     <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-current mr-2.5 shrink-0 mt-1.5 md:mt-2" />
@@ -890,13 +901,27 @@ export default function LevelTest() {
               </ul>
             </div>
 
-            {/* CTA */}
-            <button onClick={() => navigate(`/signup?level=${levelInfo.key}`)} className="w-full py-4 md:py-5 text-[16px] md:text-[18px] font-bold transition-all duration-300 rounded-xl shadow-sm mb-3 bg-[#1c1c1e] text-white dark:bg-white dark:text-[#1c1c1e] hover:bg-[#2c2c2e] dark:hover:bg-gray-200">
-              {t.signupBtn}
-            </button>
-
-            <button onClick={() => navigate('/login')} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm font-medium transition-colors mb-4">
-              {t.loginLink}
+            {/* CTA — 로그인 상태이므로 직접 profiles.level 저장 후 분기 */}
+            <button
+              disabled={isSaving}
+              onClick={async () => {
+                if (!user?.id || !levelInfo?.key) return;
+                setIsSaving(true);
+                try {
+                  await supabase.from('profiles').update({ level: levelInfo.key }).eq('id', user.id);
+                  sessionStorage.removeItem(STORAGE_KEY);
+                  if (levelInfo.key === 'beginner' || levelInfo.key === 'junior') {
+                    navigate('/learning-path', { replace: true });
+                  } else {
+                    navigate('/', { replace: true });
+                  }
+                } catch {
+                  setIsSaving(false);
+                }
+              }}
+              className="w-full py-4 md:py-5 text-[16px] md:text-[18px] font-bold transition-all duration-300 rounded-xl shadow-sm mb-3 bg-[#1c1c1e] text-white dark:bg-white dark:text-[#1c1c1e] hover:bg-[#2c2c2e] dark:hover:bg-gray-200 disabled:opacity-60"
+            >
+              {isSaving ? t.savingLevel : t.signupBtn}
             </button>
 
             {/* 상세 리포트 */}

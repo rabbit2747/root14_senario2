@@ -3,7 +3,38 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { viteObfuscateFile } from 'vite-plugin-obfuscator'
 
-// ── Dev 보안 플러그인: 외부 IP에서 소스 파일 직접 접근 차단 ──
+// ── Dev 방문자 IP 수집 (server.js 프로덕션 미들웨어와 동일 로직) ──
+// Supabase REST API 직접 호출. IP당 1시간 1회 제한.
+const devVisitedIPs = new Map();
+const DEV_VISIT_COOLDOWN = 60 * 60 * 1000; // 1시간
+
+async function devLogVisitorIP(ip, path) {
+  try {
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseKey;
+    if (!supabaseUrl || !supabaseKey) return;
+
+    await fetch(`${supabaseUrl}/rest/v1/access_logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${serviceKey}`, // service role → RLS 우회
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        user_id: null,
+        email: 'anonymous',
+        ip,
+        action: 'page_visit',
+        technique: path,
+      }),
+    });
+  } catch { /* fire-and-forget */ }
+}
+
+// ── Dev 보안 플러그인: 외부 IP에서 소스 파일 직접 접근 차단 + IP 수집 ──
 // host: '127.0.0.1' 바인딩이 1차 방어선. 이 미들웨어는 심층방어(defense-in-depth)
 // /@vite/ 는 Vite 내부 HMR 엔드포인트이므로 제외 (차단 시 서버 404 발생)
 const blockExternalSourcePlugin = {
@@ -21,6 +52,28 @@ const blockExternalSourcePlugin = {
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ ip: clientIp }));
         return;
+      }
+
+      // ── Dev 방문자 IP 수집 (HTML 페이지 요청만) ──
+      const url = req.url?.split('?')[0] || '';
+      const hasExt = url.lastIndexOf('.') > url.lastIndexOf('/');
+      const isPage = !hasExt || url.endsWith('.html');
+      const isInternal = url.startsWith('/@') || url.startsWith('/__') || url.startsWith('/node_modules/') || url.startsWith('/src/');
+      if (isPage && !isInternal) {
+        const forwarded = req.headers['x-forwarded-for'];
+        const clientIp = forwarded ? forwarded.split(',')[0].trim() : req.socket?.remoteAddress || 'unknown';
+        if (clientIp !== 'unknown') {
+          const now = Date.now();
+          const lastVisit = devVisitedIPs.get(clientIp);
+          if (!lastVisit || (now - lastVisit) >= DEV_VISIT_COOLDOWN) {
+            devVisitedIPs.set(clientIp, now);
+            devLogVisitorIP(clientIp, url);
+            // 캐시 크기 제한
+            if (devVisitedIPs.size > 5000) {
+              for (const [k, v] of devVisitedIPs) { if (now - v > DEV_VISIT_COOLDOWN) devVisitedIPs.delete(k); }
+            }
+          }
+        }
       }
 
       const ip = req.socket?.remoteAddress ?? '';

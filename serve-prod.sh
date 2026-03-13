@@ -1,5 +1,6 @@
 #!/bin/bash
 source /Users/db/.nvm/nvm.sh
+cd /Users/db/Desktop/Gotroot_Edu
 
 # v0.9.7: Express 서버로 교체 (/edu/*.html 서버 측 JWT 인증)
 # 롤백: 아래 줄을 주석하고, 그 아래 serve 줄 주석 해제

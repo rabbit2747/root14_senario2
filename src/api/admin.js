@@ -84,3 +84,51 @@ export const getAccessLogs = (limit = 200) =>
     .select('*')
     .order('created_at', { ascending: false })
     .limit(limit);
+
+/** access_logs 페이지네이션+필터 조회 */
+export function queryAccessLogs({ page = 0, pageSize = 50, action = null, dateFrom = null, dateTo = null, searchIp = null, searchEmail = null } = {}) {
+  let q = client
+    .from('access_logs')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(page * pageSize, (page + 1) * pageSize - 1);
+
+  if (action) q = q.eq('action', action);
+  if (dateFrom) q = q.gte('created_at', dateFrom);
+  if (dateTo) q = q.lte('created_at', dateTo);
+  if (searchIp) q = q.ilike('ip', `%${searchIp}%`);
+  if (searchEmail) q = q.ilike('email', `%${searchEmail}%`);
+
+  return q;
+}
+
+/** 특정 IP의 전체 접속 이력 조회 (타임라인 모달용) */
+export const getAccessLogsByIp = (ip, limit = 500) =>
+  client
+    .from('access_logs')
+    .select('*')
+    .eq('ip', ip)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+/** access_logs 오늘 통계 (서버 시간 기준) */
+export const getAccessLogsToday = () => {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  return client
+    .from('access_logs')
+    .select('action, ip, created_at')
+    .gte('created_at', todayStart.toISOString());
+}
+
+/** access_logs 최근 7일 일별 카운트 */
+export const getAccessLogsWeek = () => {
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  weekAgo.setHours(0, 0, 0, 0);
+  return client
+    .from('access_logs')
+    .select('created_at, action')
+    .gte('created_at', weekAgo.toISOString())
+    .order('created_at', { ascending: true });
+}

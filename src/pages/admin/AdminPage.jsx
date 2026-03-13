@@ -12,13 +12,14 @@ import LabScenarioManager from './lab-scenario-manager/LabScenarioManager';
 import EduProgressStats from './EduProgressStats';
 import WikiTermManager from './wiki-manager/WikiTermManager';
 import LevelTestManager from './level-test-manager/LevelTestManager';
+import AccessLogsDashboard from './access-logs/AccessLogsDashboard';
 import useAdminVerify from '../../hooks/useAdminVerify';
 import AdminVerifyModal from '../../components/admin/AdminVerifyModal';
 import NotificationBell from '../../components/admin/NotificationBell';
 import { maskEmail } from '../../lib/maskUtils';
 import {
   Book, Grid, Bullhorn,
-  User, Chemistry, Screen, ChartBar, Task, Catalog, Education
+  User, Chemistry, Screen, ChartBar, Task, Catalog, Education, Activity
 } from '@carbon/icons-react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
@@ -32,6 +33,7 @@ const TABS = [
   { id: 'wiki',    label: '위키 관리',  Icon: Catalog },
   { id: 'leveltest', label: '레벨테스트', Icon: Education },
   { id: 'stats',   label: '교육 통계',  Icon: ChartBar },
+  { id: 'accesslogs', label: '접속 로그', Icon: Activity },
   { id: 'audit',   label: '감사 로그',  Icon: Task },
 ];
 
@@ -92,6 +94,7 @@ function AdminContent() {
         {activeTab === 'wiki' && <WikiTermManager requestVerify={verify.requestVerify} />}
         {activeTab === 'leveltest' && <LevelTestManager requestVerify={verify.requestVerify} />}
         {activeTab === 'stats' && <EduProgressStats requestVerify={verify.requestVerify} />}
+        {activeTab === 'accesslogs' && <AccessLogsDashboard requestVerify={verify.requestVerify} />}
         {activeTab === 'audit' && <AuditLogViewer requestVerify={verify.requestVerify} />}
       </div>
 
