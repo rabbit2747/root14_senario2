@@ -317,13 +317,13 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
       {/* ── 회사 브랜드 배너 ── */}
       <div className="w-full px-4 py-2 flex items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-[60]">
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-black text-[#bb3e03] font-mono tracking-widest">GOTROOT</span>
+          <span className="text-[9px] font-black text-[#bb3e03] font-mono tracking-widest">ROOT14</span>
           <span className="text-[8px] text-slate-400 font-mono">|</span>
-          <span className="text-[8px] text-slate-500 font-mono hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span>
+          <span className="text-[8px] text-slate-500 font-mono hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[8px] text-slate-400 font-mono hidden md:inline">글로벌 정보보안 선두기업</span>
-          <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" className="text-[8px] font-mono text-[#bb3e03]/60 hover:text-[#bb3e03] transition-colors hidden sm:inline">gotroot.co.kr ↗</a>
+          <span className="text-[8px] text-slate-400 font-mono hidden md:inline">Decode ATT&CK. Grow with ROOT14</span>
+          <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer" className="text-[8px] font-mono text-[#bb3e03]/60 hover:text-[#bb3e03] transition-colors hidden sm:inline">root14.co.kr ↗</a>
         </div>
       </div>
 
@@ -554,7 +554,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                       <div className="h-10 md:h-12 bg-[#1e293b] flex items-center justify-between px-3 md:px-5 border-b border-slate-700 shrink-0">
                         <div className="flex items-center gap-2 md:gap-3">
                           <div className="text-blue-400 scale-90 md:scale-100"><Icons.Shield /></div>
-                          <span className="font-black tracking-widest text-slate-100 uppercase text-[10px] md:text-xs">GOTROOT EDR</span>
+                          <span className="font-black tracking-widest text-slate-100 uppercase text-[10px] md:text-xs">ROOT14 EDR</span>
                         </div>
                         <div className="flex items-center gap-2 md:gap-3 text-[9px] md:text-xs font-bold px-2 py-1 md:px-3 md:py-1.5 rounded bg-slate-900 border border-slate-700">
                           Status: <span className="text-green-500 animate-pulse">Monitoring</span>
@@ -929,16 +929,16 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
       <div className="w-full mt-4 px-4 py-3 border-t border-slate-200 bg-white/80">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-1 max-w-full mx-auto px-4 lg:px-6 2xl:px-8">
           <div className="text-center sm:text-left">
-            <p className="text-[9px] font-black text-[#bb3e03] font-mono tracking-[0.25em]">GOTROOT</p>
-            <p className="text-[8px] text-slate-400 font-mono">(주)갓루트 · 사이버보안 · 모의해킹 · 교육</p>
+            <p className="text-[9px] font-black text-[#bb3e03] font-mono tracking-[0.25em]">ROOT14</p>
+            <p className="text-[8px] text-slate-400 font-mono">ROOT14 Academy · 사이버보안 · 모의해킹 · 교육</p>
           </div>
           <div className="text-center text-[8px] font-mono text-slate-400 leading-relaxed">
-            <p>© 2026 (주)갓루트(GOTROOT) — ALL RIGHTS RESERVED</p>
+            <p>© 2026 ROOT14 Academy — ALL RIGHTS RESERVED</p>
             <p>사업자등록번호 391-69-00617 | 대표 윤웅</p>
           </div>
           <div className="text-center sm:text-right text-[8px] font-mono text-slate-400">
-            <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" className="text-[#bb3e03]/60 hover:text-[#bb3e03] transition-colors">gotroot.co.kr ↗</a>
-            <p>ericyoon@gotroot.co.kr</p>
+            <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer" className="text-[#bb3e03]/60 hover:text-[#bb3e03] transition-colors">root14.co.kr ↗</a>
+            <p>ericyoon@root14.co.kr</p>
           </div>
         </div>
       </div>

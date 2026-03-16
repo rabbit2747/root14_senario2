@@ -22,6 +22,9 @@ const TACTIC_META = {
   t14: { emoji: '💥', ko: '영향',           en: 'Impact' },
 };
 
+// ── 유도 학습 콘텐츠 존재 여부 (CHAPTER_LOADERS 키와 동기화) ──
+const GUIDED_AVAILABLE = new Set(['T1566.001']);
+
 // ── 학습 단계 정의 ──
 const STEPS = [
   { key: 'edu',      emoji: '📖', label: '기초 교육',     labelEn: 'Education',      desc: '핵심 개념과 이론을 챕터별로 학습합니다' },
@@ -320,6 +323,35 @@ export default function RecommendedCoursePage() {
             );
           })}
         </div>
+
+        {/* 유도 학습 시작 버튼 */}
+        {GUIDED_AVAILABLE.has(techniqueId) && (
+          <div className={`mt-6 p-5 rounded-xl border-2 border-dashed transition-all ${isDark ? 'border-purple-500/30 bg-purple-900/10' : 'border-purple-300 bg-purple-50/50'}`}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🧭</span>
+                  <h3 className={`text-sm font-bold ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+                    유도 학습 모드
+                  </h3>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isDark ? 'bg-purple-800/40 text-purple-300' : 'bg-purple-100 text-purple-600'}`}>
+                    NEW
+                  </span>
+                </div>
+                <p className={`text-xs leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  일본식 유도 학습법으로 14챕터를 단계별로 탐구합니다. 코드 조립, 모의 터미널, 퀴즈 등 인터랙티브 학습이 포함되어 있습니다.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate(`/guided/${techniqueId}`)}
+                className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.03] active:scale-[0.97] ${isDark ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-900/30' : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-200'}`}
+              >
+                🧭 유도 학습 시작
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* 하단 정보 */}
         <div className={`mt-6 p-4 rounded-lg text-xs ${isDark ? 'bg-[#1e1e1e] text-gray-400' : 'bg-gray-50 text-gray-500'}`}>

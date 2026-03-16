@@ -98,6 +98,64 @@ Before writing code, MUST output the following steps using XML tags:
 | v1.0.0 | 2026-03-11 | 🆕 레벨 테스트 시스템: 적응형 7문제 퀴즈(/level-test, 100문제 은행 5레벨×20문제, Radar 차트 결과, canvas-confetti 만점 이스터에그), 비로그인 매트릭스 차단 오버레이(IntroMatrix), 히어로 CTA→레벨테스트 시작, Signup.jsx URL level 파라미터 수신+배지 UI+profiles.level 저장, Login.jsx level 기반 분기(beginner/junior→/basics), BasicsPlaceholder IT기초 랜딩, AuthContext userLevel 노출, 관리자 레벨테스트 문제 CRUD 탭(LevelTestManager, JSON import/export), src/api/levelTest.js Phase 0 API 레이어, level_test_questions Supabase 테이블+RLS, 레벨테스트 재응시 차단(로그인+레벨 보유 시 리다이렉트) |
 | v1.0.1 | 2026-03-12 | 🛡️ 보안: 클라이언트 측 로그인 브루트포스 방어(5회 실패→15분 잠금, localStorage), 서버 측 브루트포스 방어(/api/auth/check-rate IP 기반 레이트리밋, 10회/15분), 익명 방문자 IP 수집 서버 미들웨어(IP당 1시간 쿨다운, access_logs fire-and-forget); 🆕 새 기능: 학습 경로 선택 페이지(/learning-path, beginner/junior 로그인→추천학습 vs 자율학습 선택, 14개 택틱 그리드→서브테크닉 목록→/edu/:id 이동, macOS 윈도우 PageWrapper 디자인), 관리자 접속 로그 대시보드(AccessLogViewer, IP·이메일·경로 검색+필터+페이지네이션) |
 | v1.0.2 | 2026-03-13 | 🆕 추천 학습 로드맵: RecommendedCoursePage(/recommended/:techniqueId, 4단계 edu→graphic→scenario→lab, macOS 윈도우 디자인, 진행률 바, 택틱 배지), LearningPathChoice→/recommended 이동 연결; 🔧 관리자 접속 로그 강화: 30초 자동 갱신 토글(Play/Pause+카운트다운), IP 지오로케이션 표시(🌍 국가 플래그+도시, ip-api.com 배치 조회, 서버 24시간 캐시), CSV에 국가·도시 컬럼 추가, /api/geoip 배치 엔드포인트(server.js), 이메일 검색 필터(ilike 부분 매칭), IP 클릭→타임라인 모달(날짜별 그룹핑, 500건 제한, getAccessLogsByIp API) |
+| v1.1.0 | 2026-03-14 | 🆕 유도 학습 시스템: /guided/:techniqueId 14챕터 유도학습(T1566.001 Spearphishing), CodeSketch DnD 코드빌더, SimTerminal 모의터미널, AnimatedFlow 단계애니메이션, QuizCheckpoint 인라인퀴즈, CompletionCelebration 축하+분기, macOS 윈도우 디자인, localStorage 진행률; AuthContext profiles.name(userName) 추가; v1.1.0 공지사항 등록 |
+| v1.1.1 | 2026-03-16 | 🆕 AIROOT 서브프로젝트 연동: /airoot/* JWT 인증 서빙(별도 폴더), AIROOT API 9개 엔드포인트(방명록 CRUD+삭제+답글, 회의록 사용자 CRUD, 수료증, 대시보드 통계, 이모지 반응, 실시간 접속자), checkIsAdmin 서버측 관리자 검증, sanitizeHtml 서버측 XSS 방어(CSS injection 포함), 방명록 이모지 반응(인메모리 Map), 방명록 답글(parent_id 트리 구조+들여쓰기 UI), 프로필 십이지신 도트 아바타 12종+resolveAvatar 3단계 폴백, BGM 4곡 플레이어+AudioContext.resume() 효과음 공존, 다크/라이트 테마 토글(CSS변수), 수료증 동적 코스명+PDF 다운로드, 대시보드 코스별 수료율 도넛차트+실시간 접속자+30초 자동갱신, 모바일 반응형 CSS, PWA manifest+sw.js(HTTPS 대비), 도트아트 아이콘 192/512px, IntroMatrix AIROOT 버튼+히어로 소개, AIROOT_PATH 환경변수 |
+
+---
+
+## 🚨 세션 시작 시 필수 상기 — Critical 보안 미조치 항목
+
+> **매 세션 첫 응답에서** 아래 미조치 항목을 사용자에게 상기시킬 것.
+> 조치 완료 시 해당 항목을 ✅로 변경하고 날짜 기록.
+
+| # | 취약점 | 등급 | 조치 방법 | 상태 |
+|---|--------|:----:|-----------|:----:|
+| V-01 | Supabase anon key JS 노출 → RLS 불완전 시 DB 직접 접근 | CRITICAL | RLS 전체 정비 (V-02~V-04 해결로 해소) | ✅ 2026-03-15 |
+| V-02 | 미승인 계정(`approved=false`)의 DB 접근 가능 | CRITICAL | 모든 테이블 RLS에 `approved=true` 조건 추가 | ✅ 2026-03-15 |
+| V-03 | access_logs RLS 미적용 → 전체 사용자 이메일·IP 노출 (436건) | CRITICAL | `ALTER TABLE access_logs ENABLE ROW LEVEL SECURITY` + 정책 생성 | ✅ 2026-03-15 |
+| V-04 | admin 계정의 타인 role 변경 가능 (IDOR) | HIGH | profiles UPDATE 정책에 role 변경 차단 WITH CHECK 추가 | ✅ 2026-03-15 |
+| V-05 | 이메일 인증 없이 즉시 계정 활성화 | HIGH | Supabase Dashboard → Auth Settings → Enable email confirmations | ✅ 2026-03-15 |
+| V-06 | X-Forwarded-For IP 스푸핑 | MEDIUM | ✅ 수정 완료 (2026-03-15, getClientIP → socket IP only) | ✅ |
+| V-07 | HSTS 미적용 | LOW | HTTPS 도입 후 활성화 (현재 HTTP → 의도적 비활성화) | 🔜 |
+
+### 즉시 실행 SQL (Supabase SQL Editor에서 사용자가 직접 실행)
+
+```sql
+-- V-03: access_logs RLS
+ALTER TABLE access_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "access_logs_own_only" ON access_logs;
+CREATE POLICY "access_logs_approved_own_only" ON access_logs
+  FOR SELECT TO authenticated
+  USING (auth.uid() = user_id AND EXISTS (
+    SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.approved = true
+  ));
+
+-- V-02: wiki_terms RLS (approved 조건)
+ALTER TABLE wiki_terms ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "wiki_terms_public_read" ON wiki_terms;
+CREATE POLICY "wiki_terms_approved_read" ON wiki_terms
+  FOR SELECT TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.approved = true
+  ));
+
+-- V-02: announcements RLS (approved 조건)
+ALTER TABLE announcements ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "announcements_public_read" ON announcements;
+DROP POLICY IF EXISTS "announcements_auth_read" ON announcements;
+CREATE POLICY "announcements_approved_read" ON announcements
+  FOR SELECT TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.approved = true
+  ));
+
+-- V-04: profiles role 변경 차단
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+CREATE POLICY "Users update own non-role fields" ON profiles
+  FOR UPDATE TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id AND role = (SELECT role FROM profiles WHERE id = auth.uid()));
+```
 
 ---
 
@@ -442,6 +500,7 @@ public/
 
 docs/
 ├── security/              # 보안 히스토리 문서 (v0.9.7~)
+├── 설명/                  # 작업 완료 후 그래픽 레코딩 스타일 요약 (SVG)
 └── graphic-content-template-guide.md  # 그래픽 슬라이드 콘텐츠 작성 가이드 (v0.9.9)
 ```
 

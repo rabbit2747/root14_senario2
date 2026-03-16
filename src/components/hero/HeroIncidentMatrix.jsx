@@ -509,8 +509,8 @@ export default function HeroIncidentMatrix({
               transition={{ duration: 0.5, ease: 'easeOut' }}
             >
               <img
-                src={isDark ? '/logo/logo-name-white.png' : '/logo/logo-name-dark-nobg.png'}
-                alt="GOTROOT"
+                src={isDark ? '/logo/root14-logo-white.svg' : '/logo/root14-logo.svg'}
+                alt="ROOT14 Academy"
                 className="h-14 sm:h-16 md:h-20 w-auto object-contain select-none pointer-events-none"
                 draggable={false}
                 style={{ opacity: isDark ? 0.92 : 0.85 }}
@@ -719,12 +719,12 @@ export default function HeroIncidentMatrix({
           </p>
 
           <a
-            href="https://gotroot.co.kr"
+            href="https://root14.co.kr"
             target="_blank"
             rel="noopener noreferrer"
             className={`text-[10px] mt-1 transition-colors ${isDark ? 'text-slate-600 hover:text-slate-400' : 'text-slate-400 hover:text-slate-500'}`}
           >
-            gotroot.co.kr
+            root14.co.kr
           </a>
         </motion.div>
       </div>

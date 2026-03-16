@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 100" fill="none">
+  <!-- ROOT14 Academy Logo — 라이트모드 (전체 path 아웃라인, 폰트 독립) -->
+
+  <!-- R -->
+  <path d="M10 10 h24 q14 0 14 14 v3 q0 11 -9 13 l13 25 h-13 l-11 -23 h-6 v23 h-12z M22 20 v14 h10 q5 0 5 -5 v-4 q0 -5 -5 -5z" fill="#1e2d3d"/>
+
+  <!-- O (첫번째) — 열쇠구멍 포함 -->
+  <path d="M62 10 h22 q14 0 14 14 v12 q0 14 -14 14 h-22 q-14 0 -14 -14 v-12 q0 -14 14 -14z M62 24 v12 q0 5 5 5 h12 q5 0 5 -5 v-12 q0 -5 -5 -5 h-12 q-5 0 -5 5z" fill="#1e2d3d" fill-rule="evenodd"/>
+  <!-- 열쇠구멍 장식 -->
+  <circle cx="73" cy="32" r="3.5" fill="#1e2d3d"/>
+  <path d="M71 34 h4 l-0.6 10 h-2.8z" fill="#1e2d3d"/>
+
+  <!-- O (두번째) -->
+  <path d="M110 10 h22 q14 0 14 14 v12 q0 14 -14 14 h-22 q-14 0 -14 -14 v-12 q0 -14 14 -14z M110 24 v12 q0 5 5 5 h12 q5 0 5 -5 v-12 q0 -5 -5 -5 h-12 q-5 0 -5 5z" fill="#1e2d3d" fill-rule="evenodd"/>
+
+  <!-- T -->
+  <path d="M156 10 h38 v10 h-13 v45 h-12 v-45 h-13z" fill="#1e2d3d"/>
+
+  <!-- 1 -->
+  <path d="M212 10 h12 v55 h-12 v-42 l-7 5 v-13z" fill="#5a7d9a"/>
+
+  <!-- 4 -->
+  <path d="M244 10 h12 v28 h9 v10 h-9 v17 h-12 v-17 h-18 v-10z M244 27 l-10 11 h10z" fill="#5a7d9a"/>
+
+  <!-- 구분선 좌 -->
+  <line x1="52" y1="78" x2="122" y2="78" stroke="#5a7d9a" stroke-width="0.8" opacity="0.6"/>
+  <!-- 구분선 우 -->
+  <line x1="218" y1="78" x2="288" y2="78" stroke="#5a7d9a" stroke-width="0.8" opacity="0.6"/>
+
+  <!-- A C A D E M Y — all paths -->
+  <!-- A -->
+  <path d="M132 74 l4.5 14 h-2.5 l-1 -3 h-5 l-1 3 h-2.5 l4.5 -14z M130 83 l-1.5 3 h5 l-1.5 -3z" fill="#5a7d9a" fill-rule="evenodd"/>
+  <!-- C -->
+  <path d="M143 74 h8 v2.5 h-5.5 v9 h5.5 v2.5 h-8z" fill="#5a7d9a"/>
+  <!-- A -->
+  <path d="M157 74 l4.5 14 h-2.5 l-1 -3 h-5 l-1 3 h-2.5 l4.5 -14z M155 83 l-1.5 3 h5 l-1.5 -3z" fill="#5a7d9a" fill-rule="evenodd"/>
+  <!-- D -->
+  <path d="M168 74 h6 q5 0 5 5 v4 q0 5 -5 5 h-6z M170.5 76.5 v9 h3.5 q2.5 0 2.5 -2.5 v-4 q0 -2.5 -2.5 -2.5z" fill="#5a7d9a" fill-rule="evenodd"/>
+  <!-- E -->
+  <path d="M184 74 h8 v2.5 h-5.5 v3 h4 v2.5 h-4 v3.5 h5.5 v2.5 h-8z" fill="#5a7d9a"/>
+  <!-- M -->
+  <path d="M197 74 h2.5 l3.5 7 3.5 -7 h2.5 v14 h-2.5 v-9 l-3.5 7 -3.5 -7 v9 h-2.5z" fill="#5a7d9a"/>
+  <!-- Y -->
+  <path d="M214 74 l4 6.5 4 -6.5 h2.8 l-5.5 9 v5 h-2.5 v-5 l-5.5 -9z" fill="#5a7d9a"/>
+</svg>

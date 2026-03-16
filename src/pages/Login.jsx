@@ -8,11 +8,11 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 const loginT = {
   ko: {
     title: 'ACCESS REQUIRED',
-    sub1: '(주)갓루트 사이버보안 교육 플랫폼',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 Academy 사이버보안 교육 플랫폼',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     redirectMsg: '> 인증 후 교육 컨텐츠로 이동됩니다',
     emailLabel: 'EMAIL', pwLabel: 'PASSWORD',
-    emailPH: 'operator@gotroot.com', pwPH: '••••••••',
+    emailPH: 'operator@root14.co.kr', pwPH: '••••••••',
     btnLoading: 'AUTHENTICATING...', btnText: 'AUTHENTICATE',
     errEmpty: '이메일과 비밀번호를 입력해주세요.',
     errWrong: '이메일 또는 비밀번호가 올바르지 않습니다.',
@@ -25,11 +25,11 @@ const loginT = {
   },
   en: {
     title: 'ACCESS REQUIRED',
-    sub1: 'GOTROOT Cybersecurity Education Platform',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 Cybersecurity Education Platform',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     redirectMsg: '> Authenticated → Redirecting to content',
     emailLabel: 'EMAIL', pwLabel: 'PASSWORD',
-    emailPH: 'operator@gotroot.com', pwPH: '••••••••',
+    emailPH: 'operator@root14.co.kr', pwPH: '••••••••',
     btnLoading: 'AUTHENTICATING...', btnText: 'AUTHENTICATE',
     errEmpty: 'Please enter your email and password.',
     errWrong: 'Invalid email or password.',
@@ -42,11 +42,11 @@ const loginT = {
   },
   zh: {
     title: 'ACCESS REQUIRED',
-    sub1: 'GOTROOT 网络安全教育平台',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 网络安全教育平台',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     redirectMsg: '> 认证后将跳转至教育内容',
     emailLabel: '邮箱', pwLabel: '密码',
-    emailPH: 'operator@gotroot.com', pwPH: '••••••••',
+    emailPH: 'operator@root14.co.kr', pwPH: '••••••••',
     btnLoading: '认证中...', btnText: '登 录',
     errEmpty: '请输入邮箱和密码。',
     errWrong: '邮箱或密码不正确。',
@@ -59,11 +59,11 @@ const loginT = {
   },
   hi: {
     title: 'ACCESS REQUIRED',
-    sub1: 'GOTROOT साइबर सुरक्षा शिक्षा प्लेटफ़ॉर्म',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 साइबर सुरक्षा शिक्षा प्लेटफ़ॉर्म',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     redirectMsg: '> प्रमाणीकरण के बाद सामग्री पर जाएंगे',
     emailLabel: 'ईमेल', pwLabel: 'पासवर्ड',
-    emailPH: 'operator@gotroot.com', pwPH: '••••••••',
+    emailPH: 'operator@root14.co.kr', pwPH: '••••••••',
     btnLoading: 'प्रमाणीकरण...', btnText: 'लॉगिन करें',
     errEmpty: 'कृपया ईमेल और पासवर्ड दर्ज करें।',
     errWrong: 'ईमेल या पासवर्ड गलत है।',
@@ -76,11 +76,11 @@ const loginT = {
   },
   ja: {
     title: 'ACCESS REQUIRED',
-    sub1: 'GOTROOT サイバーセキュリティ教育プラットフォーム',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 サイバーセキュリティ教育プラットフォーム',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     redirectMsg: '> 認証後、教育コンテンツへ移動します',
     emailLabel: 'メール', pwLabel: 'パスワード',
-    emailPH: 'operator@gotroot.com', pwPH: '••••••••',
+    emailPH: 'operator@root14.co.kr', pwPH: '••••••••',
     btnLoading: '認証中...', btnText: 'ログイン',
     errEmpty: 'メールとパスワードを入力してください。',
     errWrong: 'メールまたはパスワードが正しくありません。',
@@ -368,8 +368,8 @@ export default function Login() {
         </p>
 
         <div className="text-center font-mono mt-4 space-y-1">
-          <p className="text-slate-500 text-[10px]">© 2026 (주)갓루트(GOTROOT) — ALL RIGHTS RESERVED</p>
-          <p className="text-slate-700 text-[9px]">사업자등록번호 391-69-00617 | 대표 윤웅 | <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">gotroot.co.kr</a></p>
+          <p className="text-slate-500 text-[10px]">© 2026 ROOT14 Academy — ALL RIGHTS RESERVED</p>
+          <p className="text-slate-700 text-[9px]">사업자등록번호 391-69-00617 | 대표 윤웅 | <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">root14.co.kr</a></p>
           <p className="text-slate-800 text-[9px]">서울 구로구 디지털로33길 48, 대륭포스트타워 7차 305-P136호</p>
         </div>
       </div>

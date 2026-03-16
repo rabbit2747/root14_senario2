@@ -46,7 +46,7 @@ export default function WikiFloatingButton() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        title="갓루트 위키 열기"
+        title="ROOT14 위키 열기"
         style={{
           position: 'fixed',
           bottom: isMobile ? '4.5rem' : '1.5rem',  // 모바일: 하단 네비(~56px) 위로 이동

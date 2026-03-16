@@ -155,18 +155,17 @@ export default function BasicsPage() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
-        {/* Logo — GOTROOT */}
+        {/* Logo — ROOT14 */}
         <div className="h-16 flex items-center px-5 border-b border-gray-200 dark:border-gray-800/60 shrink-0">
           <Link to="/" className="flex items-center gap-2.5 w-full group">
             <img
-              src="/logo/logo-white.png"
-              alt="GR"
-              className="w-8 h-8 object-contain dark:brightness-100"
-              style={{ filter: isDark ? 'none' : 'brightness(0)' }}
+              src="/logo/root14-logo.svg"
+              alt="ROOT14"
+              className="w-8 h-8 object-contain"
               draggable={false}
             />
             <div className="flex flex-col leading-none">
-              <span className="text-[12px] font-black tracking-[0.2em] text-gray-800 dark:text-gray-100 group-hover:text-[#7c3aed] dark:group-hover:text-white transition-colors">GOTROOT</span>
+              <span className="text-[12px] font-black tracking-[0.2em] text-gray-800 dark:text-gray-100 group-hover:text-[#7c3aed] dark:group-hover:text-white transition-colors">ROOT14</span>
               <span className="text-[8px] tracking-[0.1em] uppercase text-gray-400 dark:text-gray-500">IT Basics Course</span>
             </div>
           </Link>

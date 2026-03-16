@@ -50,8 +50,8 @@ export default function WikiModal({ isOpen, onClose, techniqueId = null }) {
           <div className="flex items-center gap-2">
             <span className="text-lg">📖</span>
             <h2 className="text-white font-black tracking-wider text-sm">
-              갓루트 위키
-              <span className="text-blue-400 ml-1 font-normal text-xs">Gotroot Wiki</span>
+              ROOT14 위키
+              <span className="text-blue-400 ml-1 font-normal text-xs">ROOT14 Wiki</span>
             </h2>
           </div>
           {techniqueId && (

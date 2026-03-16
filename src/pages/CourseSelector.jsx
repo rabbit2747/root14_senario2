@@ -532,7 +532,7 @@ export default function CourseSelector() {
       {/* 푸터 */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#0a0f1a]/90 backdrop-blur border-t border-slate-800/40 py-3 px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-xs text-slate-500">
-          <span>GOTROOT Education Platform</span>
+          <span>ROOT14 Education Platform</span>
           <span>{techniqueId} · {pageMeta.difficulty}</span>
         </div>
       </div>

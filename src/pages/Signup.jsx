@@ -9,10 +9,10 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 const signupT = {
   ko: {
     title: 'REGISTER',
-    sub1: '(주)갓루트 사이버보안 교육 플랫폼',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 Academy 사이버보안 교육 플랫폼',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     nameLabel: 'NAME', emailLabel: 'EMAIL', pwLabel: 'PASSWORD', pwConfirmLabel: 'CONFIRM PASSWORD',
-    namePH: '홍길동', emailPH: 'operator@gotroot.com', pwPH: '6자 이상', pwConfirmPH: '비밀번호 재입력',
+    namePH: '홍길동', emailPH: 'operator@root14.co.kr', pwPH: '6자 이상', pwConfirmPH: '비밀번호 재입력',
     privacyLabel: '[필수] 개인정보 수집·이용에 동의합니다',
     marketingLabel: '[선택] 광고·마케팅 수신에 동의합니다',
     viewContent: '내용 보기', hideContent: '접기',
@@ -32,10 +32,10 @@ const signupT = {
   },
   en: {
     title: 'REGISTER',
-    sub1: 'GOTROOT Cybersecurity Education Platform',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 Cybersecurity Education Platform',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     nameLabel: 'NAME', emailLabel: 'EMAIL', pwLabel: 'PASSWORD', pwConfirmLabel: 'CONFIRM PASSWORD',
-    namePH: 'John Doe', emailPH: 'operator@gotroot.com', pwPH: 'At least 6 characters', pwConfirmPH: 'Re-enter password',
+    namePH: 'John Doe', emailPH: 'operator@root14.co.kr', pwPH: 'At least 6 characters', pwConfirmPH: 'Re-enter password',
     privacyLabel: '[Required] I agree to the Privacy & Data Collection Policy',
     marketingLabel: '[Optional] I agree to receive marketing communications',
     viewContent: 'View Details', hideContent: 'Collapse',
@@ -55,10 +55,10 @@ const signupT = {
   },
   zh: {
     title: 'REGISTER',
-    sub1: 'GOTROOT 网络安全教育平台',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 网络安全教育平台',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     nameLabel: '姓名', emailLabel: '邮箱', pwLabel: '密码', pwConfirmLabel: '确认密码',
-    namePH: '张三', emailPH: 'operator@gotroot.com', pwPH: '至少6个字符', pwConfirmPH: '重新输入密码',
+    namePH: '张三', emailPH: 'operator@root14.co.kr', pwPH: '至少6个字符', pwConfirmPH: '重新输入密码',
     privacyLabel: '[必填] 我同意个人信息收集和使用政策',
     marketingLabel: '[可选] 我同意接收营销信息',
     viewContent: '查看详情', hideContent: '收起',
@@ -78,10 +78,10 @@ const signupT = {
   },
   hi: {
     title: 'REGISTER',
-    sub1: 'GOTROOT साइबर सुरक्षा शिक्षा प्लेटफ़ॉर्म',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 साइबर सुरक्षा शिक्षा प्लेटफ़ॉर्म',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     nameLabel: 'नाम', emailLabel: 'ईमेल', pwLabel: 'पासवर्ड', pwConfirmLabel: 'पासवर्ड पुनः दर्ज',
-    namePH: 'नाम दर्ज करें', emailPH: 'operator@gotroot.com', pwPH: 'कम से कम 6 अक्षर', pwConfirmPH: 'पासवर्ड पुनः दर्ज',
+    namePH: 'नाम दर्ज करें', emailPH: 'operator@root14.co.kr', pwPH: 'कम से कम 6 अक्षर', pwConfirmPH: 'पासवर्ड पुनः दर्ज',
     privacyLabel: '[आवश्यक] मैं व्यक्तिगत जानकारी संग्रह नीति से सहमत हूँ',
     marketingLabel: '[वैकल्पिक] मैं मार्केटिंग संचार प्राप्त करने के लिए सहमत हूँ',
     viewContent: 'विवरण देखें', hideContent: 'छुपाएं',
@@ -101,10 +101,10 @@ const signupT = {
   },
   ja: {
     title: 'REGISTER',
-    sub1: 'GOTROOT サイバーセキュリティ教育プラットフォーム',
-    sub2: 'GOTROOT CYBERSECURITY TRAINING PLATFORM',
+    sub1: 'ROOT14 サイバーセキュリティ教育プラットフォーム',
+    sub2: 'Decode ATT&CK. Grow with ROOT14',
     nameLabel: '名前', emailLabel: 'メール', pwLabel: 'パスワード', pwConfirmLabel: 'パスワード確認',
-    namePH: '山田太郎', emailPH: 'operator@gotroot.com', pwPH: '6文字以上', pwConfirmPH: 'パスワード再入力',
+    namePH: '山田太郎', emailPH: 'operator@root14.co.kr', pwPH: '6文字以上', pwConfirmPH: 'パスワード再入力',
     privacyLabel: '[必須] 個人情報収集・利用に同意します',
     marketingLabel: '[任意] マーケティング情報の受信に同意します',
     viewContent: '内容を見る', hideContent: '折り畳む',
@@ -385,7 +385,7 @@ export default function Signup() {
                 <p><span className="text-slate-300">수집 목적:</span> 신규 교육 과정 안내, 이벤트·프로모션 정보 제공, 서비스 업데이트 알림</p>
                 <p><span className="text-slate-300">발송 방법:</span> 이메일</p>
                 <p><span className="text-slate-300">보유 기간:</span> 수신 동의 철회 시 또는 회원 탈퇴 시까지</p>
-                <p className="mt-2"><span className="text-slate-300">동의 철회 방법:</span> 수신된 이메일 하단의 수신거부 링크 클릭 또는 고객센터(contact@gotroot.co.kr) 요청</p>
+                <p className="mt-2"><span className="text-slate-300">동의 철회 방법:</span> 수신된 이메일 하단의 수신거부 링크 클릭 또는 고객센터(contact@root14.co.kr) 요청</p>
                 <p className="mt-2 text-slate-600">본 동의는 선택 사항이며, 동의하지 않으셔도 서비스 이용에 제한이 없습니다.</p>
               </div>
             )}
@@ -416,8 +416,8 @@ export default function Signup() {
         </form>
 
         <div className="text-center font-mono mt-6 space-y-1">
-          <p className="text-slate-500 text-[10px]">© 2026 (주)갓루트(GOTROOT) — ALL RIGHTS RESERVED</p>
-          <p className="text-slate-700 text-[9px]">사업자등록번호 391-69-00617 | 대표 윤웅 | <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">gotroot.co.kr</a></p>
+          <p className="text-slate-500 text-[10px]">© 2026 ROOT14 Academy — ALL RIGHTS RESERVED</p>
+          <p className="text-slate-700 text-[9px]">사업자등록번호 391-69-00617 | 대표 윤웅 | <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">root14.co.kr</a></p>
           <p className="text-slate-800 text-[9px]">서울 구로구 디지털로33길 48, 대륭포스트타워 7차 305-P136호</p>
         </div>
       </div>

@@ -1,0 +1,217 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" font-family="'Segoe UI', 'Apple SD Gothic Neo', sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a4a"/>
+      <stop offset="100%" stop-color="#1e1e3a"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="900" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="600" y="55" text-anchor="middle" fill="#e0e7ff" font-size="28" font-weight="bold">🧭 유도 학습 시스템 (Guided Learning) — v1.1.0</text>
+  <text x="600" y="80" text-anchor="middle" fill="#818cf8" font-size="14">2026-03-14 | 일본식 유도 학습법 (誘導学習) 기반 인터랙티브 교육</text>
+
+  <!-- Architecture Overview (Left) -->
+  <rect x="30" y="100" width="370" height="380" rx="16" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="215" y="130" text-anchor="middle" fill="#c4b5fd" font-size="16" font-weight="bold">📁 파일 구조 (12 신규 파일)</text>
+
+  <text x="50" y="160" fill="#a5b4fc" font-size="12" font-weight="bold">src/pages/guided/</text>
+  <text x="60" y="182" fill="#d1d5db" font-size="11">├── GuidedLearning.jsx (라우트 진입점)</text>
+  <text x="60" y="200" fill="#d1d5db" font-size="11">└── components/</text>
+  <text x="80" y="218" fill="#86efac" font-size="11">├── PageWrapper.jsx (macOS 윈도우)</text>
+  <text x="80" y="236" fill="#86efac" font-size="11">├── ChapterNav.jsx (사이드바)</text>
+  <text x="80" y="254" fill="#86efac" font-size="11">├── ChapterRenderer.jsx (동적 렌더러)</text>
+  <text x="80" y="272" fill="#93c5fd" font-size="11">├── GuidedText.jsx (텍스트+힌트)</text>
+  <text x="80" y="290" fill="#93c5fd" font-size="11">├── AnimatedFlow.jsx (단계 애니메이션)</text>
+  <text x="80" y="308" fill="#fbbf24" font-size="11">├── QuizCheckpoint.jsx (인라인 퀴즈)</text>
+  <text x="80" y="326" fill="#fbbf24" font-size="11">├── CodeSketch.jsx (DnD 코드 빌더)</text>
+  <text x="80" y="344" fill="#f87171" font-size="11">├── SimTerminal.jsx (모의 터미널)</text>
+  <text x="80" y="362" fill="#f87171" font-size="11">└── CompletionCelebration.jsx</text>
+
+  <text x="50" y="392" fill="#a5b4fc" font-size="12" font-weight="bold">src/data/guided-chapters/</text>
+  <text x="60" y="412" fill="#d1d5db" font-size="11">└── T1566.001.js (14챕터 데이터)</text>
+
+  <text x="50" y="442" fill="#a5b4fc" font-size="12" font-weight="bold">기존 파일 수정: 단 2줄</text>
+  <text x="60" y="462" fill="#86efac" font-size="11">App.jsx: lazy import + Route 추가</text>
+
+  <!-- Chapter Flow (Center) -->
+  <rect x="420" y="100" width="360" height="380" rx="16" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="600" y="130" text-anchor="middle" fill="#fbbf24" font-size="16" font-weight="bold">🗡️🛡️ 14챕터 구성</text>
+
+  <!-- Attack chapters -->
+  <rect x="440" y="145" width="150" height="25" rx="6" fill="url(#purple)" opacity="0.8"/>
+  <text x="515" y="162" text-anchor="middle" fill="white" font-size="11" font-weight="bold">🗡️ 공격 파트 (Ch.1-9)</text>
+
+  <text x="450" y="185" fill="#d1d5db" font-size="10">Ch.1 도구와 원리 탐구</text>
+  <text x="450" y="200" fill="#d1d5db" font-size="10">Ch.2 프로토콜 작동 원리</text>
+  <text x="450" y="215" fill="#d1d5db" font-size="10">Ch.3 킬체인 추적</text>
+  <text x="450" y="230" fill="#d1d5db" font-size="10">Ch.4 🧩 코드 스케치 (DnD)</text>
+  <text x="450" y="245" fill="#d1d5db" font-size="10">Ch.5 도구 조립</text>
+  <text x="450" y="260" fill="#d1d5db" font-size="10">Ch.6 💻 공격 시뮬레이션 (터미널)</text>
+  <text x="450" y="275" fill="#d1d5db" font-size="10">Ch.7 공격 해부</text>
+  <text x="450" y="290" fill="#d1d5db" font-size="10">Ch.8 실전 비교</text>
+  <text x="450" y="305" fill="#fbbf24" font-size="10" font-weight="bold">Ch.9 🎉 분기점 (계속 or 종료)</text>
+
+  <!-- Defense chapters -->
+  <rect x="440" y="320" width="150" height="25" rx="6" fill="url(#blue)" opacity="0.8"/>
+  <text x="515" y="337" text-anchor="middle" fill="white" font-size="11" font-weight="bold">🛡️ 방어 파트 (Ch.10-14)</text>
+
+  <text x="450" y="360" fill="#d1d5db" font-size="10">Ch.10 이메일 방어체계</text>
+  <text x="450" y="375" fill="#d1d5db" font-size="10">Ch.11 회피 원리</text>
+  <text x="450" y="390" fill="#d1d5db" font-size="10">Ch.12 💻 회피 실습 (터미널)</text>
+  <text x="450" y="405" fill="#d1d5db" font-size="10">Ch.13 Sigma/YARA 룰 작성</text>
+  <text x="450" y="420" fill="#fbbf24" font-size="10" font-weight="bold">Ch.14 🏆 Red vs Blue 종합</text>
+
+  <!-- Arrow from Ch.9 to defense -->
+  <line x1="625" y1="305" x2="625" y2="320" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4"/>
+  <text x="645" y="315" fill="#fbbf24" font-size="9">선택시</text>
+
+  <!-- Sample Content Label -->
+  <rect x="620" y="145" width="140" height="25" rx="6" fill="url(#orange)" opacity="0.8"/>
+  <text x="690" y="162" text-anchor="middle" fill="white" font-size="11" font-weight="bold">📄 T1566.001</text>
+  <text x="690" y="185" text-anchor="middle" fill="#d1d5db" font-size="10">Spearphishing</text>
+  <text x="690" y="200" text-anchor="middle" fill="#d1d5db" font-size="10">Attachment</text>
+
+  <!-- Rollback info -->
+  <rect x="620" y="430" width="140" height="40" rx="8" fill="#991b1b" opacity="0.4" stroke="#f87171" stroke-width="1"/>
+  <text x="690" y="448" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="bold">🔄 완전 원복 가능</text>
+  <text x="690" y="462" text-anchor="middle" fill="#fca5a5" font-size="9">rm -rf 2개 폴더 + 2줄</text>
+
+  <!-- Interactive Components (Right) -->
+  <rect x="800" y="100" width="370" height="380" rx="16" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="985" y="130" text-anchor="middle" fill="#34d399" font-size="16" font-weight="bold">🎮 인터랙티브 컴포넌트</text>
+
+  <!-- Component cards -->
+  <rect x="820" y="148" width="160" height="55" rx="8" fill="#1e1e3a" stroke="#6366f1" stroke-width="1"/>
+  <text x="900" y="168" text-anchor="middle" fill="#a5b4fc" font-size="11" font-weight="bold">📝 GuidedText</text>
+  <text x="900" y="185" text-anchor="middle" fill="#9ca3af" font-size="9">유도질문+힌트 토글</text>
+  <text x="900" y="197" text-anchor="middle" fill="#9ca3af" font-size="9">**bold** `code` 파서</text>
+
+  <rect x="1000" y="148" width="160" height="55" rx="8" fill="#1e1e3a" stroke="#3b82f6" stroke-width="1"/>
+  <text x="1080" y="168" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="bold">🔄 AnimatedFlow</text>
+  <text x="1080" y="185" text-anchor="middle" fill="#9ca3af" font-size="9">framer-motion 단계</text>
+  <text x="1080" y="197" text-anchor="middle" fill="#9ca3af" font-size="9">자동재생+컨트롤</text>
+
+  <rect x="820" y="215" width="160" height="55" rx="8" fill="#1e1e3a" stroke="#f59e0b" stroke-width="1"/>
+  <text x="900" y="235" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="bold">❓ QuizCheckpoint</text>
+  <text x="900" y="252" text-anchor="middle" fill="#9ca3af" font-size="9">다중 문제 인라인 퀴즈</text>
+  <text x="900" y="264" text-anchor="middle" fill="#9ca3af" font-size="9">점수+결과 설명</text>
+
+  <rect x="1000" y="215" width="160" height="55" rx="8" fill="#1e1e3a" stroke="#a855f7" stroke-width="1"/>
+  <text x="1080" y="235" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="bold">🧩 CodeSketch</text>
+  <text x="1080" y="252" text-anchor="middle" fill="#9ca3af" font-size="9">DnD 코드 빌더</text>
+  <text x="1080" y="264" text-anchor="middle" fill="#9ca3af" font-size="9">Reorder.Group 드래그</text>
+
+  <rect x="820" y="282" width="160" height="55" rx="8" fill="#1e1e3a" stroke="#ef4444" stroke-width="1"/>
+  <text x="900" y="302" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="bold">💻 SimTerminal</text>
+  <text x="900" y="319" text-anchor="middle" fill="#9ca3af" font-size="9">시나리오/자유 모드</text>
+  <text x="900" y="331" text-anchor="middle" fill="#9ca3af" font-size="9">타이핑 이펙트 출력</text>
+
+  <rect x="1000" y="282" width="160" height="55" rx="8" fill="#1e1e3a" stroke="#10b981" stroke-width="1"/>
+  <text x="1080" y="302" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="bold">🎉 Celebration</text>
+  <text x="1080" y="319" text-anchor="middle" fill="#9ca3af" font-size="9">midpoint(Ch.9)/final(14)</text>
+  <text x="1080" y="331" text-anchor="middle" fill="#9ca3af" font-size="9">분기 선택 카드</text>
+
+  <!-- Data Flow -->
+  <text x="985" y="365" text-anchor="middle" fill="#818cf8" font-size="13" font-weight="bold">📊 데이터 흐름</text>
+  <rect x="820" y="375" width="340" height="90" rx="8" fill="#111827" stroke="#4b5563" stroke-width="1"/>
+  <text x="840" y="395" fill="#86efac" font-size="10">✅ localStorage (오프라인 폴백)</text>
+  <text x="840" y="413" fill="#93c5fd" font-size="10">✅ Supabase edu_progress (서버 저장)</text>
+  <text x="840" y="431" fill="#fbbf24" font-size="10">   chapter_id = 'guided_ch{N}', level = 'guided'</text>
+  <text x="840" y="449" fill="#d1d5db" font-size="10">   src/api/edu.js 경유 (Phase 0 준수)</text>
+
+  <!-- Bottom: User Flow -->
+  <rect x="30" y="500" width="1140" height="130" rx="16" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="600" y="530" text-anchor="middle" fill="#e0e7ff" font-size="16" font-weight="bold">🚀 유저 흐름 (User Flow)</text>
+
+  <!-- Flow boxes -->
+  <rect x="50" y="545" width="130" height="55" rx="8" fill="url(#purple)"/>
+  <text x="115" y="568" text-anchor="middle" fill="white" font-size="11" font-weight="bold">추천 코스 페이지</text>
+  <text x="115" y="584" text-anchor="middle" fill="#e0e7ff" font-size="9">/recommended/:id</text>
+
+  <text x="200" y="575" fill="#fbbf24" font-size="20">→</text>
+
+  <rect x="220" y="545" width="130" height="55" rx="8" fill="url(#blue)"/>
+  <text x="285" y="568" text-anchor="middle" fill="white" font-size="11" font-weight="bold">🧭 유도 학습 시작</text>
+  <text x="285" y="584" text-anchor="middle" fill="#e0e7ff" font-size="9">NEW 버튼 클릭</text>
+
+  <text x="370" y="575" fill="#fbbf24" font-size="20">→</text>
+
+  <rect x="390" y="545" width="130" height="55" rx="8" fill="url(#green)"/>
+  <text x="455" y="568" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Auth Gate</text>
+  <text x="455" y="584" text-anchor="middle" fill="#e0e7ff" font-size="9">로그인 확인</text>
+
+  <text x="540" y="575" fill="#fbbf24" font-size="20">→</text>
+
+  <rect x="560" y="545" width="130" height="55" rx="8" fill="url(#orange)"/>
+  <text x="625" y="568" text-anchor="middle" fill="white" font-size="11" font-weight="bold">챕터 로딩</text>
+  <text x="625" y="584" text-anchor="middle" fill="#fef3c7" font-size="9">T1566.001 dynamic</text>
+
+  <text x="710" y="575" fill="#fbbf24" font-size="20">→</text>
+
+  <rect x="730" y="545" width="130" height="55" rx="8" fill="#7c3aed"/>
+  <text x="795" y="568" text-anchor="middle" fill="white" font-size="11" font-weight="bold">14챕터 학습</text>
+  <text x="795" y="584" text-anchor="middle" fill="#e0e7ff" font-size="9">섹션별 인터랙션</text>
+
+  <text x="880" y="575" fill="#fbbf24" font-size="20">→</text>
+
+  <rect x="900" y="545" width="130" height="55" rx="8" fill="#dc2626"/>
+  <text x="965" y="568" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Ch.9 분기</text>
+  <text x="965" y="584" text-anchor="middle" fill="#fee2e2" font-size="9">계속 or 종료</text>
+
+  <text x="1050" y="575" fill="#fbbf24" font-size="20">→</text>
+
+  <rect x="1060" y="545" width="100" height="55" rx="8" fill="url(#green)"/>
+  <text x="1110" y="568" text-anchor="middle" fill="white" font-size="11" font-weight="bold">🏆 수료</text>
+  <text x="1110" y="584" text-anchor="middle" fill="#e0e7ff" font-size="9">Ch.14 완료</text>
+
+  <!-- Bottom: Tech Stack & Stats -->
+  <rect x="30" y="650" width="555" height="130" rx="16" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="307" y="680" text-anchor="middle" fill="#34d399" font-size="16" font-weight="bold">🛠️ 기술 스택</text>
+  <text x="50" y="705" fill="#d1d5db" font-size="11">• React (lazy/Suspense) + React Router v6</text>
+  <text x="50" y="723" fill="#d1d5db" font-size="11">• framer-motion (Reorder.Group DnD + AnimatePresence)</text>
+  <text x="50" y="741" fill="#d1d5db" font-size="11">• lucide-react (아이콘) + Tailwind CSS (다크모드)</text>
+  <text x="50" y="759" fill="#d1d5db" font-size="11">• Supabase edu_progress (서버) + localStorage (폴백)</text>
+  <text x="350" y="705" fill="#86efac" font-size="11">✅ 신규 npm 패키지 0개</text>
+  <text x="350" y="723" fill="#86efac" font-size="11">✅ 기존 파일 수정 2줄만</text>
+  <text x="350" y="741" fill="#86efac" font-size="11">✅ 완전 원복 가능</text>
+  <text x="350" y="759" fill="#86efac" font-size="11">✅ Phase 0 API 규칙 준수</text>
+
+  <rect x="615" y="650" width="555" height="130" rx="16" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="892" y="680" text-anchor="middle" fill="#fbbf24" font-size="16" font-weight="bold">📈 작업 통계</text>
+  <text x="635" y="705" fill="#d1d5db" font-size="11">• 신규 파일: 12개 (컴포넌트 10 + 데이터 1 + API 확장 1)</text>
+  <text x="635" y="723" fill="#d1d5db" font-size="11">• 코드 약 2,500줄 (컴포넌트) + 1,500줄 (챕터 데이터)</text>
+  <text x="635" y="741" fill="#d1d5db" font-size="11">• 인터랙티브 요소: 6종 (텍스트/애니메이션/퀴즈/코드/터미널/축하)</text>
+  <text x="635" y="759" fill="#d1d5db" font-size="11">• 빌드 시간: 9.93초 (에러 0개)</text>
+
+  <!-- Footer -->
+  <rect x="30" y="800" width="1140" height="80" rx="16" fill="#111827" stroke="#374151" stroke-width="1"/>
+  <text x="600" y="830" text-anchor="middle" fill="#6b7280" font-size="12">Gotroot Edu Platform | v1.1.0 유도 학습 시스템 | 2026-03-14</text>
+  <text x="600" y="855" text-anchor="middle" fill="#4b5563" font-size="11">🧭 일본식 유도 학습법 → 단계별 발견(Scaffolded Discovery) → 코드 조립 → 모의 터미널 → 퀴즈 → 수료</text>
+  <text x="600" y="873" text-anchor="middle" fill="#374151" font-size="10">Generated by Claude Code | Graphic Recording Style Summary</text>
+</svg>

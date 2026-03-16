@@ -47,7 +47,7 @@ function GotrootSeal() {
         <path id="gs-bot2" d="M 110,110 m -82,0 a 82,82 0 0,0 164,0"/>
       </defs>
       <text fontSize="12" fill="#9c6644" fontFamily="Arial, sans-serif" fontWeight="bold" letterSpacing="3">
-        <textPath href="#gs-top2" startOffset="4%">(주)갓루트 · GOTROOT</textPath>
+        <textPath href="#gs-top2" startOffset="8%">ROOT14 · ACADEMY</textPath>
       </text>
       <text fontSize="11" fill="#9c6644" fontFamily="Arial, sans-serif" fontWeight="bold" letterSpacing="3">
         <textPath href="#gs-bot2" startOffset="12%">CYBERSECURITY EDU</textPath>
@@ -123,7 +123,7 @@ export default function LabCompletionPage() {
       const w = pdf.internal.pageSize.getWidth();  // 297mm
       const h = pdf.internal.pageSize.getHeight(); // 210mm
       pdf.addImage(dataUrl, 'PNG', 0, 0, w, h);
-      pdf.save(`GOTROOT_CERT_${techniqueId}_${userName}.pdf`);
+      pdf.save(`ROOT14_CERT_${techniqueId}_${userName}.pdf`);
     } catch (e) {
       console.error('수료증 PDF 생성 오류:', e);
       alert('수료증 생성 중 오류가 발생했습니다.');
@@ -140,9 +140,9 @@ export default function LabCompletionPage() {
       {/* 헤더 */}
       <div className="w-full px-4 py-2 flex items-center justify-between border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-black text-[#bb3e03] font-mono tracking-widest">GOTROOT</span>
+          <span className="text-[9px] font-black text-[#bb3e03] font-mono tracking-widest">ROOT14</span>
           <span className="text-[8px] text-slate-600 font-mono">|</span>
-          <span className="text-[8px] text-slate-500 font-mono">(주)갓루트 · 사이버보안 교육 플랫폼</span>
+          <span className="text-[8px] text-slate-500 font-mono">ROOT14 Academy · 사이버보안 교육 플랫폼</span>
         </div>
         <LangToggle lang={lang} theme="dark" onChange={(code) => { storeLang(code); setLang(code); }} />
       </div>
@@ -215,10 +215,10 @@ export default function LabCompletionPage() {
             <div key={i} className={`absolute ${pos} w-20 h-20 ${border} m-10`} style={{ borderColor: 'rgba(156,102,68,0.4)' }} />
           ))}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-            <p className="text-[170px] font-black text-[#9c6644] opacity-[0.025] tracking-widest whitespace-nowrap" style={{ fontFamily: 'Georgia, serif' }}>GOTROOT</p>
+            <p className="text-[170px] font-black text-[#9c6644] opacity-[0.025] tracking-widest whitespace-nowrap" style={{ fontFamily: 'Georgia, serif' }}>ROOT14</p>
           </div>
           <div className="text-center pt-12 pb-6 relative z-10 px-16">
-            <p className="text-sm font-sans text-[#9c6644] tracking-[0.5em] uppercase mb-3">(주)갓루트(GOTROOT) Cybersecurity Training Institute</p>
+            <p className="text-sm font-sans text-[#9c6644] tracking-[0.5em] uppercase mb-3">ROOT14 Academy — Cybersecurity Training Institute</p>
             <h1 className="text-[58px] font-extrabold tracking-[0.18em] uppercase leading-none" style={{ color: '#111827' }}>{t.cert?.title || 'Certificate'}</h1>
             <div className="flex items-center justify-center gap-3 mt-4"><div className="h-px w-32" style={{ backgroundColor: 'rgba(156,102,68,0.4)' }} /><div className="w-2 h-2 rotate-45" style={{ backgroundColor: 'rgba(156,102,68,0.5)' }} /><div className="h-px w-32" style={{ backgroundColor: 'rgba(156,102,68,0.4)' }} /></div>
           </div>
@@ -239,7 +239,7 @@ export default function LabCompletionPage() {
             </div>
             <div className="flex flex-col items-center -mt-4"><GotrootSeal /></div>
             <div className="flex flex-col items-center gap-1">
-              <p className="text-[22px] text-[#9c6644] italic mb-0.5" style={{ fontFamily: 'Brush Script MT, cursive, Georgia, serif' }}>(주)갓루트 GOTROOT</p>
+              <p className="text-[22px] text-[#9c6644] italic mb-0.5" style={{ fontFamily: 'Brush Script MT, cursive, Georgia, serif' }}>ROOT14 Academy</p>
               <p className="text-[10px] mb-1" style={{ fontFamily: 'sans-serif', color: '#6b7280' }}>대표 윤웅</p>
               <div className="border-t-2 w-52 pt-2 text-center text-xs tracking-[0.2em] uppercase" style={{ borderColor: '#d1d5db', color: '#9ca3af' }}>{t.cert?.instructor}</div>
             </div>
@@ -250,9 +250,9 @@ export default function LabCompletionPage() {
       {/* 푸터 */}
       <div className="w-full px-4 py-3 border-t border-slate-700/50 bg-slate-900/50">
         <div className="flex items-center justify-center gap-4 text-[8px] font-mono text-slate-600">
-          <span>© 2026 (주)갓루트(GOTROOT)</span>
+          <span>© 2026 ROOT14 Academy</span>
           <span>·</span>
-          <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" className="text-[#bb3e03]/40 hover:text-[#bb3e03] transition-colors">gotroot.co.kr ↗</a>
+          <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer" className="text-[#bb3e03]/40 hover:text-[#bb3e03] transition-colors">root14.co.kr ↗</a>
         </div>
       </div>
     </div>

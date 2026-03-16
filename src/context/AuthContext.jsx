@@ -21,6 +21,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userLevel, setUserLevel] = useState(null);
+  const [userName, setUserName] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sessionWarning, setSessionWarning] = useState(null);
 
@@ -30,25 +31,32 @@ export function AuthProvider({ children }) {
   const userRef = useRef(null);
   userRef.current = user;
 
-  // 프로필에서 role 조회
+  // 프로필에서 role, level, name 조회
   const fetchRole = async (uid) => {
-    if (!uid) { setIsAdmin(false); setUserLevel(null); return; }
+    if (!uid) { setIsAdmin(false); setUserLevel(null); setUserName(null); return; }
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('role, level')
+        .select('role, level, name')
         .eq('id', uid)
         .single();
-      setIsAdmin(data?.role === 'admin');
+      const admin = data?.role === 'admin';
+      setIsAdmin(admin);
       setUserLevel(data?.level || null);
+      setUserName(data?.name || null);
+      // AIROOT 연동: admin 힌트를 localStorage에 저장 (같은 도메인 HTML 페이지에서 참조)
+      try { localStorage.setItem('gotroot_is_admin', String(admin)); } catch {}
     } catch {
       setIsAdmin(false);
       setUserLevel(null);
+      setUserName(null);
+      try { localStorage.setItem('gotroot_is_admin', 'false'); } catch {}
     }
   };
 
   const logout = useCallback(async () => {
     clearAuthCookie();
+    try { localStorage.removeItem('gotroot_is_admin'); } catch {}
     await supabase.auth.signOut();
     setUser(null);
     setIsAdmin(false);
@@ -150,7 +158,7 @@ export function AuthProvider({ children }) {
   if (loading) return null;
 
   return (
-    <AuthContext.Provider value={{ user, logout, isLoggedIn: !!user, isAdmin, userLevel, sessionWarning }}>
+    <AuthContext.Provider value={{ user, logout, isLoggedIn: !!user, isAdmin, userLevel, userName, sessionWarning }}>
       {children}
     </AuthContext.Provider>
   );

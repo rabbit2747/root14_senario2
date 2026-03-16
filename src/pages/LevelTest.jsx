@@ -57,7 +57,7 @@ const levelTestT = {
     reviewTitle: '상세 리포트',
     myChoice: '내 선택:',
     correctAnswer: '정답:',
-    easterEggTitle: '만점 달성!\n갓루트의 총애를 받았습니다.',
+    easterEggTitle: '만점 달성!\nROOT14의 총애를 받았습니다.',
     easterEggBtn: '결과 확인하기',
     currRecommend: '추천 코스',
   },

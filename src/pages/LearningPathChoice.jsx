@@ -126,7 +126,7 @@ function ChoicePhase({ onSelect, isDark }) {
         >
           <div className="text-4xl mb-4">🎯</div>
           <h3 className={`text-lg sm:text-xl font-black mb-2 ${isDark ? 'text-white' : 'text-[#1c1c1e]'}`}>
-            갓루트만의 추천 학습
+            ROOT14 추천 학습
           </h3>
           <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             전술(Tactic)별로 추천하는 기법을 단계별로 학습합니다.

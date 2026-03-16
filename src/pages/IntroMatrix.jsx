@@ -70,7 +70,7 @@ const uiT = {
     authRequired:  'Authentication Required',
     tagline:       'Know the weapon. Secure the future.',
     enterMatrix:   'ENTER MATRIX',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      'CYBERSECURITY TRAINING',
     skip:          'SKIP',
     visitors:      'Visitors',
@@ -90,7 +90,7 @@ const uiT = {
     authRequired:  '로그인이 필요합니다',
     tagline:       '무기를 알아야 미래를 지킨다.',
     enterMatrix:   '매트릭스 진입',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      '사이버보안 교육 플랫폼',
     skip:          'SKIP',
     visitors:      '방문자',
@@ -110,7 +110,7 @@ const uiT = {
     authRequired:  '需要身份验证',
     tagline:       '知己知彼，百战不殆。',
     enterMatrix:   '进入矩阵',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      '网络安全培训平台',
     skip:          'SKIP',
     visitors:      '访客', finishers: '完成者', mypage: 'MY', marketing: 'AI ROOT', mainSite: '主页', completed: '通过',
@@ -125,7 +125,7 @@ const uiT = {
     authRequired:  'प्रमाणीकरण आवश्यक',
     tagline:       'हथियार को समझो, भविष्य सुरक्षित करो।',
     enterMatrix:   'मैट्रिक्स में प्रवेश',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      'साइबर सुरक्षा प्रशिक्षण',
     skip:          'SKIP',
     visitors:      'आगंतुक', finishers: 'पूरा', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'मुख्य', completed: 'पूर्ण',
@@ -140,7 +140,7 @@ const uiT = {
     authRequired:  '認証が必要です',
     tagline:       '武器を知り、未来を守れ。',
     enterMatrix:   'マトリクスへ進む',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      'サイバーセキュリティ教育',
     skip:          'SKIP',
     visitors:      '訪問者', finishers: '修了者', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'メイン', completed: '修了',
@@ -155,7 +155,7 @@ const uiT = {
     authRequired:  'المصادقة مطلوبة',
     tagline:       'اعرف السلاح، أمِّن المستقبل.',
     enterMatrix:   'دخول المصفوفة',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      'منصة التدريب على الأمن السيبراني',
     skip:          'SKIP',
     visitors:      'زوار', finishers: 'مكتملون', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'الرئيسية', completed: 'مكتمل',
@@ -170,7 +170,7 @@ const uiT = {
     authRequired:  'Yêu cầu xác thực',
     tagline:       'Biết vũ khí, bảo vệ tương lai.',
     enterMatrix:   'VÀO MA TRẬN',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      'Nền Tảng Đào Tạo An Ninh Mạng',
     skip:          'SKIP',
     visitors:      'Người dùng', finishers: 'Hoàn thành', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'Trang chủ', completed: 'HOÀN THÀNH',
@@ -488,7 +488,7 @@ export default function UltimateCinematicMatrix() {
       const tacticTitle = langMapping?.[language]?.[tactic.title] || tactic.title;
       ns.lastVisitedTechnique = lookupKey;
       ns.breadcrumb = [
-        { label: 'GOTROOT', path: '/', state: { viewMode: 'dashboard' } },
+        { label: 'ROOT14', path: '/', state: { viewMode: 'dashboard' } },
         ...(selectedTactic ? [{
           label: tacticTitle,
           tacticId: tactic.id,
@@ -928,6 +928,18 @@ export default function UltimateCinematicMatrix() {
                 로그인
               </button>
             </div>
+            {/* AIROOT 소개 */}
+            <div className="mt-6 pt-5 border-t border-slate-700/50">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="text-lg">🤖</span>
+                <span className="text-cyan-400 font-black text-xs tracking-widest">AIROOT ZERO</span>
+              </div>
+              <p className="text-slate-500 text-[11px] font-mono mb-3">
+                AI 학습 · 회의록 · 커뮤니티<br/>
+                ROOT14 회원 전용 공간
+              </p>
+            </div>
+
             <button
               onClick={() => { setHeroPhase('entering'); localStorage.removeItem('gotroot_intro_seen'); window.scrollTo({ top: 0 }); }}
               className="mt-4 text-slate-600 hover:text-slate-400 text-xs font-mono transition-colors"
@@ -945,20 +957,16 @@ export default function UltimateCinematicMatrix() {
 
         {/* 헤더 */}
         <div className="dm-header w-full h-14 flex items-center justify-between px-2 sm:px-4 2xl:px-6 border-b shadow-sm gap-2 bg-white border-slate-200 sticky top-0 z-50">
-          {/* 좌측: GOTROOT 심볼 로고 + 글로벌 내비 */}
+          {/* 좌측: ROOT14 심볼 로고 + 글로벌 내비 */}
           <div className="flex items-center gap-3 shrink-0">
             <a href="#" onClick={e => { e.preventDefault(); window.location.reload(); }}
               className="gotroot-logo-symbol flex items-center gap-1.5 no-underline" title="페이지 새로고침">
               <img
-                src="/logo/logo-white.png"
-                alt="GR"
-                style={{ width: 38, height: 38, objectFit: 'contain', filter: 'brightness(0)' }}
+                src="/logo/root14-logo.svg"
+                alt="ROOT14"
+                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
                 draggable={false}
               />
-              <span className="gotroot-logo-text hidden sm:flex flex-col leading-none">
-                <span className="text-[11px] font-black tracking-[0.25em] text-[#0d1b2a]">GOTROOT</span>
-                <span className="text-[6px] tracking-[0.15em] uppercase text-slate-400">Cybersec Matrix</span>
-              </span>
             </a>
             {/* 글로벌 내비 아이콘 */}
             <div className="flex items-center gap-1.5">
@@ -984,6 +992,14 @@ export default function UltimateCinematicMatrix() {
                   className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-purple-200 text-purple-500 bg-purple-50/50 hover:text-purple-700 hover:border-purple-400 transition-colors"
                   title={language === 'ko' ? 'IT 기초 학습' : 'IT Basics'}>
                   📖 <span className="dm-mobile-hide">{language === 'ko' ? 'IT 기초' : 'IT Basics'}</span>
+                </span>
+              )}
+              {isLoggedIn && (
+                <span
+                  onClick={() => { window.location.href = '/airoot'; }}
+                  className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-cyan-200 text-cyan-500 bg-cyan-50/50 hover:text-cyan-700 hover:border-cyan-400 transition-colors"
+                  title="AIROOT ZERO">
+                  🤖 <span className="dm-mobile-hide">AIROOT</span>
                 </span>
               )}
               <span
@@ -1428,25 +1444,25 @@ export default function UltimateCinematicMatrix() {
         <div className={`dm-footer w-full mt-6 px-0 py-5 border-t ${dm ? 'bg-[#0d1b2a] border-slate-700' : 'bg-white border-slate-200'}`}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 max-w-full mx-auto px-4 lg:px-6 2xl:px-8">
             <div className="text-center sm:text-left flex items-center gap-2">
-              <img src="/logo/logo-white.png" alt="GR"
-                style={{ width: 28, height: 28, objectFit: 'contain', filter: dm ? 'none' : 'brightness(0)' }}
+              <img src={dm ? '/logo/root14-logo-white.svg' : '/logo/root14-logo.svg'} alt="ROOT14"
+                style={{ height: 22, width: 'auto', objectFit: 'contain' }}
                 draggable={false} />
               <div>
-                <p className={`text-[10px] font-black tracking-[0.25em] ${dm ? 'text-[#00ff41]' : 'text-[#0d1b2a]'}`}>GOTROOT</p>
+                <p className={`text-[10px] font-black tracking-[0.25em] ${dm ? 'text-[#00ff41]' : 'text-[#0d1b2a]'}`}>ROOT14</p>
                 <p className={`text-[8px] mt-0.5 tracking-wide ${dm ? 'text-slate-500' : 'text-[#415a77]'}`}>
-                  (주)갓루트 · 사이버보안 · 모의해킹 · 디지털포렌식 · 교육</p>
+                  ROOT14 Academy · 사이버보안 · 모의해킹 · 디지털포렌식 · 교육</p>
               </div>
             </div>
             <div className={`text-center text-[9px] leading-relaxed ${dm ? 'text-slate-500' : 'text-[#415a77]/70'}`}>
-              <p>© 2026 (주)갓루트(GOTROOT) — ALL RIGHTS RESERVED</p>
+              <p>© 2026 ROOT14 Academy — ALL RIGHTS RESERVED</p>
               <p>사업자등록번호 391-69-00617 | 대표 윤웅</p>
               <p>서울 구로구 디지털로33길 48, 대륭포스트타워 7차 305-P136호</p>
             </div>
             <div className={`text-center sm:text-right text-[9px] ${dm ? 'text-slate-500' : 'text-[#415a77]/70'}`}>
-              <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer"
+              <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer"
                 className={`transition-colors block font-bold ${dm ? 'text-[#00ff41]/50 hover:text-[#00ff41]' : 'text-[#0d1b2a] hover:text-[#415a77]'}`}>
-                gotroot.co.kr ↗</a>
-              <p className="mt-1">ericyoon@gotroot.co.kr</p>
+                root14.co.kr ↗</a>
+              <p className="mt-1">ericyoon@root14.co.kr</p>
               <p>0507-1386-9106</p>
             </div>
           </div>

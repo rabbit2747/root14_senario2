@@ -810,7 +810,7 @@ export default function MyPage({ darkMode: darkModeProp }) {
           color: theme.textDim,
           letterSpacing: '0.05em',
         }}>
-          GOTROOT CYBERSECURITY TRAINING PLATFORM
+          Decode ATT&CK. Grow with ROOT14
         </div>
       </div>
     </div>

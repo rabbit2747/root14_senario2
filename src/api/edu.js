@@ -32,6 +32,30 @@ export const upsertEduProgress = (payload) =>
 export const getAllEduProgress = () =>
   client.from('edu_progress').select('*');
 
+// ── guided_progress (유도 학습 챕터 완료 기록) ──
+// edu_progress 테이블 재사용: chapter_id = 'guided_ch{N}', level = 'guided'
+
+/** 유도 학습 챕터 완료 저장 */
+export const upsertGuidedProgress = (userId, techniqueId, chapterId) =>
+  client.from('edu_progress').upsert(
+    {
+      user_id: userId,
+      technique_id: techniqueId,
+      chapter_id: `guided_ch${chapterId}`,
+      level: 'guided',
+    },
+    { ignoreDuplicates: true }
+  );
+
+/** 유도 학습 진행률 조회 (특정 기법) */
+export const getGuidedProgress = (userId, techniqueId) =>
+  client
+    .from('edu_progress')
+    .select('chapter_id')
+    .eq('user_id', userId)
+    .eq('technique_id', techniqueId)
+    .eq('level', 'guided');
+
 // ── edu_html_content ──
 
 /**

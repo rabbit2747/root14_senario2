@@ -28,13 +28,13 @@ export default function CommunityPage() {
         <div className="flex items-center gap-3">
           <a href="/" className="flex items-center gap-1.5 no-underline" title="홈으로">
             <img
-              src="/logo/logo-white.png"
-              alt="GR"
-              style={{ width: 38, height: 38, objectFit: 'contain', filter: 'brightness(0)' }}
+              src="/logo/root14-logo.svg"
+              alt="ROOT14"
+              style={{ width: 38, height: 38, objectFit: 'contain' }}
               draggable={false}
             />
             <span className="hidden sm:flex flex-col leading-none">
-              <span className="text-[11px] font-black tracking-[0.25em] text-[#0d1b2a]">GOTROOT</span>
+              <span className="text-[11px] font-black tracking-[0.25em] text-[#0d1b2a]">ROOT14</span>
               <span className="text-[6px] tracking-[0.15em] uppercase text-slate-400">Community</span>
             </span>
           </a>

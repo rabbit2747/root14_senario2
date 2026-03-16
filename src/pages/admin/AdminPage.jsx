@@ -54,7 +54,7 @@ function AdminContent() {
             </button>
             <span className="text-slate-600">|</span>
             <h1 className="text-sm font-black tracking-wider uppercase">
-              <span className="text-emerald-400">GOTROOT</span> Admin
+              <span className="text-emerald-400">ROOT14</span> Admin
             </h1>
           </div>
           <div className="flex items-center gap-3">
