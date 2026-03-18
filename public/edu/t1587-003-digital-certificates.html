@@ -155,5 +155,6 @@
     var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var id=e.target.id;document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),threshold:0.3});
     document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
     </script>
+    <script src="/wiki-button.js"></script>
 </body>
 </html>

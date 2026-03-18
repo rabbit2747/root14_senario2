@@ -100,62 +100,143 @@ Before writing code, MUST output the following steps using XML tags:
 | v1.0.2 | 2026-03-13 | 🆕 추천 학습 로드맵: RecommendedCoursePage(/recommended/:techniqueId, 4단계 edu→graphic→scenario→lab, macOS 윈도우 디자인, 진행률 바, 택틱 배지), LearningPathChoice→/recommended 이동 연결; 🔧 관리자 접속 로그 강화: 30초 자동 갱신 토글(Play/Pause+카운트다운), IP 지오로케이션 표시(🌍 국가 플래그+도시, ip-api.com 배치 조회, 서버 24시간 캐시), CSV에 국가·도시 컬럼 추가, /api/geoip 배치 엔드포인트(server.js), 이메일 검색 필터(ilike 부분 매칭), IP 클릭→타임라인 모달(날짜별 그룹핑, 500건 제한, getAccessLogsByIp API) |
 | v1.1.0 | 2026-03-14 | 🆕 유도 학습 시스템: /guided/:techniqueId 14챕터 유도학습(T1566.001 Spearphishing), CodeSketch DnD 코드빌더, SimTerminal 모의터미널, AnimatedFlow 단계애니메이션, QuizCheckpoint 인라인퀴즈, CompletionCelebration 축하+분기, macOS 윈도우 디자인, localStorage 진행률; AuthContext profiles.name(userName) 추가; v1.1.0 공지사항 등록 |
 | v1.1.1 | 2026-03-16 | 🆕 AIROOT 서브프로젝트 연동: /airoot/* JWT 인증 서빙(별도 폴더), AIROOT API 9개 엔드포인트(방명록 CRUD+삭제+답글, 회의록 사용자 CRUD, 수료증, 대시보드 통계, 이모지 반응, 실시간 접속자), checkIsAdmin 서버측 관리자 검증, sanitizeHtml 서버측 XSS 방어(CSS injection 포함), 방명록 이모지 반응(인메모리 Map), 방명록 답글(parent_id 트리 구조+들여쓰기 UI), 프로필 십이지신 도트 아바타 12종+resolveAvatar 3단계 폴백, BGM 4곡 플레이어+AudioContext.resume() 효과음 공존, 다크/라이트 테마 토글(CSS변수), 수료증 동적 코스명+PDF 다운로드, 대시보드 코스별 수료율 도넛차트+실시간 접속자+30초 자동갱신, 모바일 반응형 CSS, PWA manifest+sw.js(HTTPS 대비), 도트아트 아이콘 192/512px, IntroMatrix AIROOT 버튼+히어로 소개, AIROOT_PATH 환경변수 |
+| v1.2.0 | 2026-03-18 | 🛡️ 보안: 레벨테스트 문제은행 서버사이드 이관(server-data/, GET /api/level-test/questions 정답 미포함, POST /api/level-test/check 서버 채점, src/data/level-test-questions.js→UI 메타만), SB_HEADERS 상수 추출(8개 인라인→3개 상수), 전 엔드포인트 r.ok 에러 체크(12개소); 🔧 개선: 공통 LoadingScreen 컴포넌트(src/components/LoadingScreen.jsx, steps props, VerifyingOverlay), LevelTest/CourseSelector/RecommendedCoursePage/App.jsx Suspense 적용, 앱 전체 기본 라이트 테마, GraphicExplanationPage dark 하드코딩→localStorage; 📄 교육 데이터셋 문서(docs/edu-datasets/ 17개 파일, T1587.001 풀 파이프라인 포함) |
 
 ---
 
-## 🚨 세션 시작 시 필수 상기 — Critical 보안 미조치 항목
+## 🚨🚨🚨 보안 필수 검증 프로토콜 — 매 세션 반드시 실행 🚨🚨🚨
 
-> **매 세션 첫 응답에서** 아래 미조치 항목을 사용자에게 상기시킬 것.
-> 조치 완료 시 해당 항목을 ✅로 변경하고 날짜 기록.
+> **⛔ BLOCKING REQUIREMENT**: Claude는 매 세션 시작 시 아래 체크리스트를 사용자에게 보여줘야 한다.
+> "대기" 상태는 없다. 미조치 항목이 있으면 작업 시작 전에 반드시 사용자에게 경고한다.
+> 새 테이블/RLS 변경이 포함된 작업 완료 후에도 이 섹션을 업데이트한다.
 
-| # | 취약점 | 등급 | 조치 방법 | 상태 |
+### 매 세션 시작 시 출력할 보안 체크리스트
+
+```
+🔒 보안 체크리스트 (2026-03-16 취약점 진단 기반)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[✅] V-01: profiles UPDATE에서 role+approved 변경 차단 — 2026-03-16 SQL 실행 완료
+[✅] V-02: access_logs RLS — 관리자만 SELECT — 2026-03-16 SQL 실행 완료
+[✅] V-03: wiki_terms RLS — approved READ + admin WRITE — 2026-03-16 SQL 실행 완료
+[✅] V-04: announcements RLS — approved READ — 2026-03-16 SQL 실행 완료
+[✅] V-05: feedback_likes RLS — 자기 것만 SELECT — 2026-03-16 SQL 실행 완료
+[✅] V-06: 이메일 인증 활성화 — 2026-03-16 Dashboard Confirm email ON
+[✅] V-07: 회원가입 Rate Limiting — 서버 10회/15분 + Supabase 기본 제한
+[🔜] V-08: HSTS — HTTPS 도입 후 활성화 (현재 HTTP → 의도적 비활성화)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ 2026-03-16 전면 보안 패치 완료. 새 테이블 추가 시 RLS 필수 확인.
+```
+
+### 취약점 상세 및 조치 이력
+
+| # | 취약점 | 등급 | 공격 벡터 | 상태 |
 |---|--------|:----:|-----------|:----:|
-| V-01 | Supabase anon key JS 노출 → RLS 불완전 시 DB 직접 접근 | CRITICAL | RLS 전체 정비 (V-02~V-04 해결로 해소) | ✅ 2026-03-15 |
-| V-02 | 미승인 계정(`approved=false`)의 DB 접근 가능 | CRITICAL | 모든 테이블 RLS에 `approved=true` 조건 추가 | ✅ 2026-03-15 |
-| V-03 | access_logs RLS 미적용 → 전체 사용자 이메일·IP 노출 (436건) | CRITICAL | `ALTER TABLE access_logs ENABLE ROW LEVEL SECURITY` + 정책 생성 | ✅ 2026-03-15 |
-| V-04 | admin 계정의 타인 role 변경 가능 (IDOR) | HIGH | profiles UPDATE 정책에 role 변경 차단 WITH CHECK 추가 | ✅ 2026-03-15 |
-| V-05 | 이메일 인증 없이 즉시 계정 활성화 | HIGH | Supabase Dashboard → Auth Settings → Enable email confirmations | ✅ 2026-03-15 |
-| V-06 | X-Forwarded-For IP 스푸핑 | MEDIUM | ✅ 수정 완료 (2026-03-15, getClientIP → socket IP only) | ✅ |
-| V-07 | HSTS 미적용 | LOW | HTTPS 도입 후 활성화 (현재 HTTP → 의도적 비활성화) | 🔜 |
+| V-01 | profiles UPDATE IDOR — 사용자가 자기 role/approved를 admin/true로 변경 가능 | 🔴 CRITICAL | `PATCH /rest/v1/profiles → {"role":"admin","approved":true}` | ✅ 2026-03-16 |
+| V-02 | access_logs 전체 노출 — 비인증/일반 사용자가 이메일·IP·활동내역 조회 가능 | 🔴 CRITICAL | `GET /rest/v1/access_logs?select=email,user_id` (anon key) | ✅ 2026-03-16 |
+| V-03 | wiki_terms 무단 CRUD — admin 우회 후 교육 콘텐츠 변조/삭제 가능 | 🔴 CRITICAL | profiles 권한상승 → `POST /rest/v1/wiki_terms` | ✅ 2026-03-16 |
+| V-04 | announcements 비인증 노출 — anon key만으로 공지사항 전체 조회 | 🟡 HIGH | `GET /rest/v1/announcements` (anon key) | ✅ 2026-03-16 |
+| V-05 | feedback_likes user_id 노출 | 🟡 HIGH | `GET /rest/v1/feedback_likes` | ✅ 2026-03-16 |
+| V-06 | 이메일 인증 없이 계정 즉시 활성화 | 🟡 HIGH | `POST /auth/v1/signup` → 즉시 access_token | ✅ 2026-03-16 |
+| V-07 | 회원가입 Rate Limiting 부재 → 무제한 계정 생성 | 🟠 MEDIUM | 연속 signup 요청 | ✅ 2026-03-16 |
+| V-08 | HSTS 미적용 | 🟢 LOW | HTTPS 도입 전까지 의도적 비활성화 | 🔜 HTTPS 도입 시 |
+| V-09 | user_metadata 조작 (is_admin 주입) | 🟢 INFO | `PUT /auth/v1/user → {"data":{"is_admin":true}}` — AuthContext가 profiles.role 기반이라 실제 영향 제한적. V-01 해결 시 무력화 | V-01 종속 |
+| V-10 | X-Forwarded-For IP 스푸핑 | ✅ | getClientIP → socket IP only | ✅ 2026-03-15 |
+| V-11 | CSP 헤더에 Supabase URL 노출 | 🟢 INFO | connect-src에 프로젝트 ID 포함 — JS 분석 없이 백엔드 식별 가능 | 수용 (아키텍처상 불가피) |
 
-### 즉시 실행 SQL (Supabase SQL Editor에서 사용자가 직접 실행)
+### 보안 패치 SQL v2 (2026-03-16 — 멱등성 보장, 반복 실행 안전)
+
+> Claude는 이 SQL이 Supabase에서 실행되었는지 **매번 사용자에게 확인**해야 한다.
+> "대기" 상태로 방치하지 말 것. 실행 안 했으면 즉시 실행을 요청할 것.
 
 ```sql
--- V-03: access_logs RLS
+-- ══════════════════════════════════════════════════════════════
+-- GOTROOT EDU 보안 패치 v2 (2026-03-16)
+-- 취약점 진단 보고서 기반 전면 RLS 정비
+-- DROP IF EXISTS로 멱등성 보장 — 여러 번 실행해도 안전
+-- ══════════════════════════════════════════════════════════════
+
+-- ━━━ V-01: profiles role + approved 변경 완전 차단 ━━━
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users update own non-role fields" ON profiles;
+DROP POLICY IF EXISTS "Users update own non-sensitive fields" ON profiles;
+CREATE POLICY "Users update own non-sensitive fields" ON profiles
+  FOR UPDATE TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (
+    auth.uid() = id
+    AND role = (SELECT role FROM profiles WHERE id = auth.uid())
+    AND approved = (SELECT approved FROM profiles WHERE id = auth.uid())
+  );
+
+-- ━━━ V-02: access_logs 관리자만 조회 ━━━
 ALTER TABLE access_logs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "access_logs_own_only" ON access_logs;
-CREATE POLICY "access_logs_approved_own_only" ON access_logs
+DROP POLICY IF EXISTS "access_logs_approved_own_only" ON access_logs;
+DROP POLICY IF EXISTS "access_logs_admin_only" ON access_logs;
+CREATE POLICY "access_logs_admin_only" ON access_logs
   FOR SELECT TO authenticated
-  USING (auth.uid() = user_id AND EXISTS (
-    SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.approved = true
+  USING (EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.approved = true
   ));
 
--- V-02: wiki_terms RLS (approved 조건)
+-- ━━━ V-03: wiki_terms 승인 사용자 읽기 + 관리자만 쓰기 ━━━
 ALTER TABLE wiki_terms ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "wiki_terms_public_read" ON wiki_terms;
+DROP POLICY IF EXISTS "wiki_terms_approved_read" ON wiki_terms;
 CREATE POLICY "wiki_terms_approved_read" ON wiki_terms
   FOR SELECT TO authenticated
   USING (EXISTS (
-    SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.approved = true
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid() AND profiles.approved = true
+  ));
+DROP POLICY IF EXISTS "wiki_terms_admin_write" ON wiki_terms;
+CREATE POLICY "wiki_terms_admin_write" ON wiki_terms
+  FOR ALL TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.approved = true
   ));
 
--- V-02: announcements RLS (approved 조건)
+-- ━━━ V-04: announcements 승인 사용자만 읽기 ━━━
 ALTER TABLE announcements ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "announcements_public_read" ON announcements;
 DROP POLICY IF EXISTS "announcements_auth_read" ON announcements;
+DROP POLICY IF EXISTS "announcements_approved_read" ON announcements;
 CREATE POLICY "announcements_approved_read" ON announcements
   FOR SELECT TO authenticated
   USING (EXISTS (
-    SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.approved = true
+    SELECT 1 FROM profiles
+    WHERE profiles.id = auth.uid() AND profiles.approved = true
   ));
 
--- V-04: profiles role 변경 차단
-DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
-CREATE POLICY "Users update own non-role fields" ON profiles
-  FOR UPDATE TO authenticated
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id AND role = (SELECT role FROM profiles WHERE id = auth.uid()));
+-- ━━━ V-05: feedback_likes 자기 것만 ━━━
+ALTER TABLE feedback_likes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "feedback_likes_own" ON feedback_likes;
+CREATE POLICY "feedback_likes_own" ON feedback_likes
+  FOR SELECT TO authenticated
+  USING (auth.uid() = user_id);
 ```
+
+### Supabase Dashboard 설정 (SQL로 불가 — 수동 확인 필수)
+
+1. **Auth → Settings → Enable email confirmations**: ✅ ON 확인
+2. **Auth → Rate Limits**: 회원가입 제한 활성화 확인
+3. **Auth → Users**: 테스트 계정(ratelimit_test_*, rjsdn1578@test.com) 삭제
+
+### 공격 시나리오 (V-01 미조치 시 5분 내 전체 탈취 가능)
+
+```
+비인증 → JS에서 anon key 추출 → signup(인증 없이 즉시) →
+PATCH profiles(role:admin, approved:true) → wiki_terms INSERT(피싱 콘텐츠) →
+access_logs SELECT(전체 이메일+IP) → 완전 탈취
+```
+
+**V-01(profiles UPDATE 차단)이 가장 중요한 방어선.** 이것만 막으면 체인이 끊김.
 
 ---
 

@@ -8,9 +8,9 @@ import {
 import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { getQuestions } from '../api/levelTest';
 import { getStoredLang } from '../components/LangToggle';
-import { QUESTION_BANK, CATEGORIES, CATEGORIES_I18N, LEVEL_NAMES, LEVEL_COLORS } from '../data/level-test-questions';
+import { CATEGORIES, CATEGORIES_I18N, LEVEL_NAMES, LEVEL_COLORS } from '../data/level-test-questions';
+import LoadingScreen, { VerifyingOverlay } from '../components/LoadingScreen';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
 
@@ -229,6 +229,26 @@ const SVG_ICONS = {
   intro: <svg className="w-24 h-24 md:w-32 md:h-32" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" /></svg>,
 };
 
+// ── 레벨 테스트 로딩 스텝 (다국어) ──
+const LEVEL_TEST_LOADING_STEPS = {
+  ko: [
+    { label: '보안 채널 연결', status: 'ENCRYPTED' },
+    { label: '문제 은행 복호화', status: 'DECRYPTING' },
+    { label: '적응형 엔진 초기화', status: 'LOADING' },
+    { label: '난이도 알고리즘 준비', status: 'CALIBRATING' },
+    { label: '위협 시나리오 구성', status: 'BUILDING' },
+    { label: 'ATT&CK 매트릭스 동기화', status: 'SYNCING' },
+  ],
+  en: [
+    { label: 'Secure channel connection', status: 'ENCRYPTED' },
+    { label: 'Question bank decryption', status: 'DECRYPTING' },
+    { label: 'Adaptive engine init', status: 'LOADING' },
+    { label: 'Difficulty algorithm prep', status: 'CALIBRATING' },
+    { label: 'Threat scenario setup', status: 'BUILDING' },
+    { label: 'ATT&CK matrix sync', status: 'SYNCING' },
+  ],
+};
+
 const ICON_WRAPPER_CLASSES = {
   5: 'bg-zinc-900 text-white border-zinc-700 dark:bg-white dark:text-zinc-900 dark:border-gray-200',
   4: 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800/50',
@@ -415,7 +435,9 @@ export default function LevelTest() {
   }, []);
 
   const [phase, setPhase] = useState(savedResult ? 'result' : 'intro');
-  const [bank, setBank] = useState(QUESTION_BANK);
+  const [bank, setBank] = useState({});
+  const [bankLoading, setBankLoading] = useState(true);
+  const [grading, setGrading] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(3);
   const [questionIdx, setQuestionIdx] = useState(0);
   const [currentQ, setCurrentQ] = useState(null);
@@ -449,18 +471,32 @@ export default function LevelTest() {
   // Supabase에서 문제 불러오기
   useEffect(() => {
     (async () => {
+      setBankLoading(true);
       try {
-        const data = await getQuestions();
+        // 서버 API에서 문제 로드 (정답 미포함)
+        const r = await fetch('/api/level-test/questions');
+        if (!r.ok) throw new Error('Server fetch failed');
+        const data = await r.json();
         if (data && data.length >= 20) {
           const grouped = {};
           data.forEach(q => {
             const lv = q.level;
             if (!grouped[lv]) grouped[lv] = [];
-            grouped[lv].push({ level: lv, category: q.category, question: q.question, options: q.options });
+            grouped[lv].push({
+              id: q.id,
+              level: lv,
+              category: q.category,
+              question: q.question,
+              options: q.options.map(text => ({ text, isCorrect: false })), // 정답 모름
+            });
           });
           if (Object.keys(grouped).length >= 3) setBank(grouped);
         }
-      } catch { /* 폴백: 정적 데이터 */ }
+      } catch (err) {
+        console.error('[LevelTest] Failed to load questions:', err.message);
+      } finally {
+        setBankLoading(false);
+      }
     })();
   }, []);
 
@@ -508,12 +544,35 @@ export default function LevelTest() {
   };
 
   // 정답 확인 버튼
-  const handleConfirm = useCallback((isTimeout = false) => {
+  const handleConfirm = useCallback(async (isTimeout = false) => {
     if (showFeedback) return;
     clearInterval(timerRef.current);
 
     const optionIdx = isTimeout ? null : selected;
-    const isCorrect = optionIdx !== null && currentQ?.options[optionIdx]?.isCorrect;
+    setGrading(true);
+
+    // 서버사이드 채점 (정답은 서버만 보유)
+    let isCorrect = false;
+    let serverCorrectIdx = -1;
+    if (optionIdx !== null && currentQ?.id) {
+      try {
+        const r = await fetch('/api/level-test/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionId: currentQ.id, answerIndex: optionIdx }),
+        });
+        if (r.ok) {
+          const result = await r.json();
+          isCorrect = result.correct;
+          serverCorrectIdx = result.correctIndex;
+          // 정답 인덱스를 현재 문제에 반영 (피드백 UI용)
+          if (serverCorrectIdx >= 0 && currentQ.options[serverCorrectIdx]) {
+            currentQ.options[serverCorrectIdx].isCorrect = true;
+          }
+        }
+      } catch { /* 네트워크 실패 시 오답 처리 */ }
+    }
+    setGrading(false);
     setShowFeedback(true);
 
     const newAnswer = {
@@ -612,6 +671,31 @@ export default function LevelTest() {
 
   // ── 렌더링: 인트로 ──
   if (phase === 'intro') {
+    // 문제 로딩 중 → 사이버 보안 테마 로딩 화면
+    if (bankLoading) {
+      return (
+        <PageWrapper {...wrapperProps}>
+          <LoadingScreen
+            steps={LEVEL_TEST_LOADING_STEPS[lang] || LEVEL_TEST_LOADING_STEPS.ko}
+            isDark={isDark}
+            title="Adaptive Assessment"
+            subtitle="MITRE ATT&CK"
+          />
+        </PageWrapper>
+      );
+    }
+    // 문제 로드 실패
+    if (Object.keys(bank).length === 0) {
+      return (
+        <PageWrapper {...wrapperProps}>
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+            <svg className="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">문제를 불러올 수 없습니다</p>
+            <button onClick={() => window.location.reload()} className="text-sm text-indigo-500 hover:text-indigo-400 underline">다시 시도</button>
+          </div>
+        </PageWrapper>
+      );
+    }
     return (
       <PageWrapper showOutsideText {...wrapperProps}>
         <div className="text-center flex flex-col justify-center items-center h-full relative py-4" style={{ animation: 'fadeIn 0.3s ease-out forwards' }}>
@@ -622,7 +706,7 @@ export default function LevelTest() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             {t.timerLabel}
           </span>
-          <button onClick={startQuiz} className="group relative inline-flex items-center justify-center px-12 py-4 text-[16px] md:text-[18px] font-bold text-white transition-all duration-300 bg-[#1c1c1e] dark:bg-white dark:text-[#1c1c1e] rounded-full hover:bg-[#2c2c2e] dark:hover:bg-gray-200 shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] transform hover:-translate-y-0.5">
+          <button onClick={startQuiz} className="group relative inline-flex items-center justify-center px-12 py-4 text-[16px] md:text-[18px] font-bold text-white transition-all duration-300 rounded-full shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] transform hover:-translate-y-0.5 bg-[#1c1c1e] dark:bg-white dark:text-[#1c1c1e] hover:bg-[#2c2c2e] dark:hover:bg-gray-200">
             <span>{t.startBtn}</span>
             <svg className="w-5 h-5 ml-2.5 transition-transform duration-200 group-hover:translate-x-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </button>
@@ -643,6 +727,8 @@ export default function LevelTest() {
     return (
       <PageWrapper {...wrapperProps}>
         <div className="flex flex-col h-full relative" style={{ animation: 'fadeIn 0.3s ease-out forwards' }}>
+          {/* 채점 로딩 오버레이 */}
+          {grading && <VerifyingOverlay isDark={isDark} />}
           {/* 난이도 애니메이션 */}
           {levelAnim && (
             <div className="absolute top-10 left-1/2 transform -translate-x-1/2 z-50">

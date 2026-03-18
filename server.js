@@ -38,6 +38,11 @@ const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 // .env에 SUPABASE_SERVICE_ROLE_KEY 추가 필요 (Supabase 대시보드 → Settings → API)
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
 
+// Supabase REST API 공통 헤더
+const SB_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` };
+const SB_HEADERS_JSON = { ...SB_HEADERS, 'Content-Type': 'application/json' };
+const SB_HEADERS_UPSERT = { ...SB_HEADERS_JSON, 'Prefer': 'return=representation' };
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('[gotroot] FATAL: VITE_SUPABASE_URL 또는 VITE_SUPABASE_ANON_KEY가 .env에 없습니다.');
   process.exit(1);
@@ -366,8 +371,9 @@ async function requireAuth(req, res) {
 async function checkIsAdmin(userId) {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=role&id=eq.${userId}`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!r.ok) return false;
     const data = await r.json();
     return Array.isArray(data) && data.length > 0 && data[0].role === 'admin';
   } catch { return false; }
@@ -425,10 +431,15 @@ app.get('/api/airoot/guestbook', async (req, res) => {
   if (!user) return;
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_guestbook?select=id,user_id,name,message,avatar,parent_id,created_at&order=created_at.desc&limit=100`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!r.ok) {
+      const errBody = await r.text();
+      console.error('[airoot] Guestbook fetch error:', r.status, errBody);
+      return res.status(r.status).json({ error: 'Supabase query failed' });
+    }
     const data = await r.json();
-    res.json(data);
+    res.json(Array.isArray(data) ? data : []);
   } catch (err) {
     console.error('[airoot] Guestbook fetch error:', err.message);
     res.status(500).json({ error: 'Failed to fetch guestbook' });
@@ -445,21 +456,21 @@ app.post('/api/airoot/guestbook', async (req, res) => {
   }
   const name = user.email?.split('@')[0] || 'anonymous';
   const insertData = { user_id: user.id, name: sanitizeHtml(name), message: sanitizeHtml(message.trim()) };
-  // avatar 컬럼이 있으면 저장 (없으면 Supabase가 무시)
+  // avatar 컬럼이 있으면 저장
   if (avatar && typeof avatar === 'string' && avatar.length <= 20) insertData.avatar = avatar;
   // parent_id: 답글인 경우 부모 글 ID
   if (parent_id && Number.isInteger(Number(parent_id)) && Number(parent_id) > 0) insertData.parent_id = Number(parent_id);
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_guestbook`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'return=representation',
-      },
+      headers: SB_HEADERS_UPSERT,
       body: JSON.stringify(insertData),
     });
+    if (!r.ok) {
+      const errBody = await r.text();
+      console.error('[airoot] Guestbook insert error:', r.status, errBody);
+      return res.status(r.status).json({ error: 'Insert failed' });
+    }
     const data = await r.json();
     res.status(201).json(data);
   } catch (err) {
@@ -476,8 +487,12 @@ app.get('/api/airoot/stats', async (req, res) => {
     // 최근 7일 접속 로그 카운트 (날짜별)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const r = await fetch(`${SUPABASE_URL}/rest/v1/access_logs?select=created_at,action&created_at=gte.${sevenDaysAgo}&order=created_at.desc&limit=1000`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!r.ok) {
+      console.error('[airoot] Stats fetch error:', r.status);
+      return res.status(r.status).json({ error: 'Failed to fetch stats' });
+    }
     const logs = await r.json();
 
     // 날짜별 집계
@@ -516,8 +531,12 @@ app.delete('/api/airoot/guestbook/:id', async (req, res) => {
   try {
     // 먼저 해당 메시지 소유자 확인
     const checkR = await fetch(`${SUPABASE_URL}/rest/v1/airoot_guestbook?select=user_id&id=eq.${id}`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!checkR.ok) {
+      console.error('[airoot] Guestbook ownership check error:', checkR.status);
+      return res.status(checkR.status).json({ error: 'Ownership check failed' });
+    }
     const rows = await checkR.json();
     if (!Array.isArray(rows) || rows.length === 0) return res.status(404).json({ error: 'Not found' });
 
@@ -525,10 +544,14 @@ app.delete('/api/airoot/guestbook/:id', async (req, res) => {
     const admin = await checkIsAdmin(user.id);
     if (!isOwner && !admin) return res.status(403).json({ error: 'Forbidden' });
 
-    await fetch(`${SUPABASE_URL}/rest/v1/airoot_guestbook?id=eq.${id}`, {
+    const delR = await fetch(`${SUPABASE_URL}/rest/v1/airoot_guestbook?id=eq.${id}`, {
       method: 'DELETE',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!delR.ok) {
+      console.error('[airoot] Guestbook delete error:', delR.status);
+      return res.status(delR.status).json({ error: 'Delete failed' });
+    }
     res.json({ ok: true });
   } catch (err) {
     console.error('[airoot] Guestbook delete error:', err.message);
@@ -585,8 +608,12 @@ app.get('/api/airoot/meetings', async (req, res) => {
   if (!user) return;
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_meetings?select=id,title,content,date,created_by,created_at&order=created_at.desc&limit=50`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!r.ok) {
+      console.error('[airoot] Meetings fetch error:', r.status);
+      return res.status(r.status).json({ error: 'Failed to fetch meetings' });
+    }
     const data = await r.json();
     res.json(Array.isArray(data) ? data : []);
   } catch (err) {
@@ -609,18 +636,17 @@ app.post('/api/airoot/meetings', async (req, res) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_meetings`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'return=representation',
-      },
+      headers: SB_HEADERS_UPSERT,
       body: JSON.stringify({
         title: safeTitle, content: safeContent,
         date: date || new Date().toISOString().substring(0, 10).replace(/-/g, '.'),
         created_by: user.id,
       }),
     });
+    if (!r.ok) {
+      console.error('[airoot] Meeting create error:', r.status);
+      return res.status(r.status).json({ error: 'Failed to create meeting' });
+    }
     const data = await r.json();
     res.status(201).json(data);
   } catch (err) {
@@ -641,8 +667,12 @@ app.put('/api/airoot/meetings/:id', async (req, res) => {
   // 본인 작성 여부 확인
   try {
     const checkR = await fetch(`${SUPABASE_URL}/rest/v1/airoot_meetings?select=created_by&id=eq.${id}`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!checkR.ok) {
+      console.error('[airoot] Meeting ownership check error:', checkR.status);
+      return res.status(checkR.status).json({ error: 'Ownership check failed' });
+    }
     const rows = await checkR.json();
     const isOwner = Array.isArray(rows) && rows.length > 0 && rows[0].created_by === user.id;
     const admin = await checkIsAdmin(user.id);
@@ -658,14 +688,13 @@ app.put('/api/airoot/meetings/:id', async (req, res) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_meetings?id=eq.${id}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'return=representation',
-      },
+      headers: SB_HEADERS_UPSERT,
       body: JSON.stringify(updates),
     });
+    if (!r.ok) {
+      console.error('[airoot] Meeting update error:', r.status);
+      return res.status(r.status).json({ error: 'Failed to update meeting' });
+    }
     const data = await r.json();
     res.json(data);
   } catch (err) {
@@ -683,8 +712,9 @@ app.delete('/api/airoot/meetings/:id', async (req, res) => {
   // 본인 작성 여부 확인
   try {
     const checkR = await fetch(`${SUPABASE_URL}/rest/v1/airoot_meetings?select=created_by&id=eq.${id}`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!checkR.ok) throw new Error('Ownership query failed');
     const rows = await checkR.json();
     const isOwner = Array.isArray(rows) && rows.length > 0 && rows[0].created_by === user.id;
     const admin = await checkIsAdmin(user.id);
@@ -692,10 +722,11 @@ app.delete('/api/airoot/meetings/:id', async (req, res) => {
   } catch { return res.status(500).json({ error: 'Ownership check failed' }); }
 
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/airoot_meetings?id=eq.${id}`, {
+    const delR = await fetch(`${SUPABASE_URL}/rest/v1/airoot_meetings?id=eq.${id}`, {
       method: 'DELETE',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!delR.ok) throw new Error('Delete failed');
     res.json({ ok: true });
   } catch (err) {
     console.error('[airoot] Meeting delete error:', err.message);
@@ -712,12 +743,7 @@ app.post('/api/airoot/cert', async (req, res) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_certificates`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'return=representation',
-      },
+      headers: SB_HEADERS_UPSERT,
       body: JSON.stringify({
         user_id: user.id,
         email: user.email,
@@ -745,11 +771,7 @@ app.get('/api/airoot/cert/count', async (req, res) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_certificates?select=id`, {
       method: 'HEAD',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'count=exact',
-      },
+      headers: { ...SB_HEADERS, 'Prefer': 'count=exact' },
     });
     const count = parseInt(r.headers.get('content-range')?.split('/')[1] || '0', 10);
     res.json({ count });
@@ -763,8 +785,9 @@ app.get('/api/airoot/cert/count', async (req, res) => {
 app.get('/api/airoot/cert/by-course', async (req, res) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_certificates?select=course_id,course_name`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!r.ok) return res.json([]);
     const data = await r.json();
     if (!Array.isArray(data)) return res.json([]);
     // 그룹핑
@@ -788,11 +811,7 @@ app.get('/api/airoot/active-users', async (req, res) => {
     const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const r = await fetch(`${SUPABASE_URL}/rest/v1/access_logs?select=user_id&created_at=gte.${fiveMinAgo}`, {
       method: 'HEAD',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'count=exact',
-      },
+      headers: { ...SB_HEADERS, 'Prefer': 'count=exact' },
     });
     const count = parseInt(r.headers.get('content-range')?.split('/')[1] || '0', 10);
     res.json({ activeUsers: count });
@@ -808,8 +827,9 @@ app.get('/api/airoot/active-users', async (req, res) => {
 app.get('/api/airoot/courses', async (req, res) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_courses?select=*&order=created_at.asc`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!r.ok) return res.json([]);
     const data = await r.json();
     res.json(Array.isArray(data) ? data : []);
   } catch (err) {
@@ -831,14 +851,10 @@ app.post('/api/airoot/courses', async (req, res) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_courses`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'return=representation',
-      },
+      headers: SB_HEADERS_UPSERT,
       body: JSON.stringify({ title, description: desc || '', file_path: file, created_by: user.id }),
     });
+    if (!r.ok) throw new Error(await r.text());
     const data = await r.json();
     res.status(201).json(data);
   } catch (err) {
@@ -856,10 +872,11 @@ app.delete('/api/airoot/courses/:id', async (req, res) => {
 
   const { id } = req.params;
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/airoot_courses?id=eq.${id}`, {
+    const delR = await fetch(`${SUPABASE_URL}/rest/v1/airoot_courses?id=eq.${id}`, {
       method: 'DELETE',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!delR.ok) throw new Error('Delete failed');
     res.json({ ok: true });
   } catch (err) {
     console.error('[airoot] Course delete error:', err.message);
@@ -874,8 +891,9 @@ app.get('/api/airoot/comments', async (req, res) => {
   const page = req.query.page || 'general';
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_comments?select=id,user_id,email,nickname,content,page_id,created_at&page_id=eq.${encodeURIComponent(page)}&order=created_at.desc&limit=100`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!r.ok) return res.json([]);
     const data = await r.json();
     res.json(Array.isArray(data) ? data : []);
   } catch (err) {
@@ -898,12 +916,7 @@ app.post('/api/airoot/comments', async (req, res) => {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/airoot_comments`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'return=representation',
-      },
+      headers: SB_HEADERS_UPSERT,
       body: JSON.stringify({
         user_id: user.id,
         email: user.email,
@@ -912,6 +925,7 @@ app.post('/api/airoot/comments', async (req, res) => {
         page_id,
       }),
     });
+    if (!r.ok) throw new Error(await r.text());
     const data = await r.json();
     res.status(201).json(data);
   } catch (err) {
@@ -929,8 +943,9 @@ app.delete('/api/airoot/comments/:id', async (req, res) => {
   try {
     // 본인 댓글인지 확인
     const check = await fetch(`${SUPABASE_URL}/rest/v1/airoot_comments?select=user_id&id=eq.${id}`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!check.ok) throw new Error('Comment lookup failed');
     const rows = await check.json();
     if (!Array.isArray(rows) || rows.length === 0) return res.status(404).json({ error: 'Not found' });
 
@@ -938,14 +953,96 @@ app.delete('/api/airoot/comments/:id', async (req, res) => {
     const admin = await checkIsAdmin(user.id);
     if (!isOwner && !admin) return res.status(403).json({ error: 'Forbidden' });
 
-    await fetch(`${SUPABASE_URL}/rest/v1/airoot_comments?id=eq.${id}`, {
+    const delR = await fetch(`${SUPABASE_URL}/rest/v1/airoot_comments?id=eq.${id}`, {
       method: 'DELETE',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+      headers: SB_HEADERS,
     });
+    if (!delR.ok) throw new Error('Comment delete failed');
     res.json({ ok: true });
   } catch (err) {
     console.error('[airoot] Comment delete error:', err.message);
     res.status(500).json({ error: 'Failed to delete comment' });
+  }
+});
+
+// ── 레벨 테스트 API (서버사이드 문제 제공 — 정답은 서버만 보유) ──
+
+// 서버 전용 문제 은행 (Supabase 폴백, dist/에 포함 안 됨)
+import { readFileSync } from 'fs';
+let _serverQuestionBank = null;
+function getServerQuestionBank() {
+  if (!_serverQuestionBank) {
+    try {
+      const raw = readFileSync(join(__dirname, 'server-data', 'level-test-questions.json'), 'utf-8');
+      _serverQuestionBank = JSON.parse(raw);
+    } catch { _serverQuestionBank = []; }
+  }
+  return _serverQuestionBank;
+}
+
+// GET /api/level-test/questions — 문제 목록 (정답 제외)
+app.get('/api/level-test/questions', async (req, res) => {
+  // 비로그인도 접근 가능 (레벨테스트 → 회원가입 흐름)
+  try {
+    let data = [];
+    // 1차: Supabase에서 조회
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/level_test_questions?select=id,level,category,question,options&is_active=eq.true&order=level.asc`, {
+      headers: SB_HEADERS,
+    });
+    if (r.ok) data = await r.json();
+    // 2차: Supabase 비어있으면 서버 파일 폴백
+    if (!Array.isArray(data) || data.length < 20) {
+      data = getServerQuestionBank();
+    }
+    // 정답 인덱스 제거 — 클라이언트에는 선택지 텍스트만 전달
+    const sanitized = (data || []).map((q, idx) => {
+      const opts = Array.isArray(q.options)
+        ? q.options.map(o => typeof o === 'object' ? (o.text || o.label || String(o)) : String(o))
+        : [];
+      return { id: q.id || `local-${idx}`, level: q.level, category: q.category, question: q.question, options: opts };
+    });
+    res.json(sanitized);
+  } catch (err) {
+    console.error('[gotroot] Level test questions error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch questions' });
+  }
+});
+
+// POST /api/level-test/check — 답안 채점 (서버사이드)
+app.post('/api/level-test/check', async (req, res) => {
+  const { questionId, answerIndex } = req.body || {};
+  if (!questionId || answerIndex === undefined) return res.status(400).json({ error: 'questionId and answerIndex required' });
+  try {
+    let opts = null;
+    // 1차: Supabase에서 조회
+    if (!String(questionId).startsWith('local-')) {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/level_test_questions?select=options&id=eq.${encodeURIComponent(questionId)}&is_active=eq.true`, {
+        headers: SB_HEADERS,
+      });
+      if (r.ok) {
+        const data = await r.json();
+        if (Array.isArray(data) && data.length > 0) opts = data[0].options;
+      }
+    }
+    // 2차: 서버 파일 폴백 (local-N 형식 ID)
+    if (!opts) {
+      const localIdx = String(questionId).startsWith('local-') ? parseInt(String(questionId).replace('local-', ''), 10) : -1;
+      if (localIdx >= 0) {
+        const bank = getServerQuestionBank();
+        if (bank[localIdx]) opts = bank[localIdx].options;
+      }
+    }
+    if (!opts) return res.status(404).json({ error: 'Question not found' });
+    // options format: [{text, isCorrect}]
+    let correctIdx = -1;
+    if (Array.isArray(opts)) {
+      correctIdx = opts.findIndex(o => o.isCorrect === true || o.correct === true);
+    }
+    const isCorrect = Number(answerIndex) === correctIdx;
+    res.json({ correct: isCorrect, correctIndex: correctIdx });
+  } catch (err) {
+    console.error('[gotroot] Level test check error:', err.message);
+    res.status(500).json({ error: 'Check failed' });
   }
 });
 
@@ -968,12 +1065,7 @@ async function logVisitorIP(ip, path, userId = null, email = null) {
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/access_logs`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`, // service role → RLS 우회
-        'Prefer': 'return=minimal',
-      },
+      headers: { ...SB_HEADERS_JSON, 'Prefer': 'return=minimal' },
       body: JSON.stringify({
         user_id: userId,
         email: email || 'anonymous',

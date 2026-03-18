@@ -741,7 +741,9 @@ export default function GraphicExplanationPage() {
   const t = uiText[lang] || uiText.ko;
 
   // 다크/라이트 테마
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem('gotroot_theme') || 'light'; } catch { return 'light'; }
+  });
   const isDark = theme === 'dark';
   const levelInfo = LEVEL_LABELS[level] || LEVEL_LABELS.beginner;
 

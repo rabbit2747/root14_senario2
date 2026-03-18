@@ -31,4 +31,5 @@
     function checkQuiz(){var q1=document.querySelector('input[name="q1"]:checked');var q2=document.querySelector('input[name="q2"]:checked');if(!q1||!q2){alert('모든 문제에 답을 선택해주세요.');return;}var s=0;if(q1.value==='2')s++;if(q2.value==='2')s++;var res=document.getElementById('quiz-result');res.classList.remove('hidden');if(s===2){res.className='hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-[#9DD9D2]/30 border border-[#9DD9D2] text-[#0f766e] dark:text-[#9DD9D2]';res.classList.remove('hidden');res.textContent='모두 정답! 클라우드 유출의 원리를 잘 이해하고 있습니다.';}else{res.className='hidden mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';res.classList.remove('hidden');res.textContent=s+'/2 정답입니다.';}}window.onload=function(){setTimeout(function(){go('ch1');},100);};</script></div>
 <script src="/edu/graphic-link.js"></script><script src="/edu/progress-tracker.js"></script>
 <script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
 </body></html>

@@ -5,6 +5,7 @@ import useEduProgress from '../hooks/useEduProgress';
 import eduMeta from '../data/edu-meta.json';
 import { getStoredLang } from '../components/LangToggle';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import LoadingScreen from '../components/LoadingScreen';
 
 // ── 다국어 UI 텍스트 ──
 const uiText = {
@@ -266,8 +267,30 @@ export default function CourseSelector() {
   // ── 로딩/에러 처리 ──
   if (!authChecked || loading) {
     return (
-      <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center">
-        <div className="w-10 h-10 border-3 border-blue-300/30 border-t-blue-500 rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F4F1EA] flex items-center justify-center">
+        <div className="w-[95%] max-w-[850px] flex flex-col rounded-xl bg-white shadow-[0_20px_40px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.1)_inset]">
+          <div className="h-12 flex-shrink-0 flex items-center px-5 relative border-b bg-gradient-to-b from-[#f6f6f6] to-[#e0e0e0] border-[#d1d1d1] rounded-t-xl">
+            <div className="flex gap-2">
+              <div className="w-[13px] h-[13px] rounded-full bg-[#ff5f56] border border-[#e0443e]" />
+              <div className="w-[13px] h-[13px] rounded-full bg-[#ffbd2e] border border-[#dea123]" />
+              <div className="w-[13px] h-[13px] rounded-full bg-[#27c93f] border border-[#1aab29]" />
+            </div>
+            <div className="absolute w-full text-center left-0 text-sm font-semibold text-[#4d4d4d] pointer-events-none">Course_Selector.app</div>
+          </div>
+          <div className="p-[50px_60px] min-h-[450px] flex flex-col">
+            <LoadingScreen
+              steps={[
+                { label: '인증 세션 확인', status: 'VERIFYING' },
+                { label: '학습 진행률 조회', status: 'FETCHING' },
+                { label: '과정 메타데이터 로딩', status: 'PARSING' },
+                { label: '레벨 잠금 상태 계산', status: 'COMPUTING' },
+              ]}
+              isDark={false}
+              title="Course Selector"
+              subtitle="교육 과정 불러오는 중"
+            />
+          </div>
+        </div>
       </div>
     );
   }

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import useEduProgress from '../hooks/useEduProgress';
 import eduMeta from '../data/edu-meta.json';
+import LoadingScreen from '../components/LoadingScreen';
 
 // ── 택틱 메타 (LearningPathChoice와 동일) ──
 const TACTIC_META = {
@@ -132,7 +133,28 @@ export default function RecommendedCoursePage() {
   if (authLoading || !isLoggedIn) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-[#1a1a1a]' : 'bg-[#F4F1EA]'}`}>
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className={`w-[95%] max-w-[850px] flex flex-col rounded-xl ${isDark ? 'bg-[#242424] shadow-[0_20px_40px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)_inset]' : 'bg-white shadow-[0_20px_40px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.1)_inset]'}`}>
+          <div className={`h-12 flex-shrink-0 flex items-center px-5 relative border-b rounded-t-xl ${isDark ? 'bg-gradient-to-b from-[#3a3a3a] to-[#2b2b2b] border-[#111]' : 'bg-gradient-to-b from-[#f6f6f6] to-[#e0e0e0] border-[#d1d1d1]'}`}>
+            <div className="flex gap-2">
+              <div className="w-[13px] h-[13px] rounded-full bg-[#ff5f56] border border-[#e0443e]" />
+              <div className="w-[13px] h-[13px] rounded-full bg-[#ffbd2e] border border-[#dea123]" />
+              <div className="w-[13px] h-[13px] rounded-full bg-[#27c93f] border border-[#1aab29]" />
+            </div>
+            <div className={`absolute w-full text-center left-0 text-sm font-semibold pointer-events-none ${isDark ? 'text-[#a1a1aa]' : 'text-[#4d4d4d]'}`}>Recommended_Course.app</div>
+          </div>
+          <div className="p-[50px_60px] min-h-[450px] flex flex-col">
+            <LoadingScreen
+              steps={[
+                { label: '인증 세션 확인', status: 'VERIFYING' },
+                { label: '추천 학습 경로 분석', status: 'ANALYZING' },
+                { label: '진행률 데이터 동기화', status: 'SYNCING' },
+              ]}
+              isDark={isDark}
+              title="Recommended Course"
+              subtitle="추천 학습 로드맵"
+            />
+          </div>
+        </div>
       </div>
     );
   }
