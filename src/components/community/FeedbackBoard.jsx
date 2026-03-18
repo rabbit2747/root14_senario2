@@ -8,6 +8,10 @@ import { ChevronRight, Close } from '@carbon/icons-react';
 
 const MAX_CHARS = 500;
 
+// ── Bidi Override 공격 방어 (U+202A-202E, U+2066-2069, U+200B-200F, U+FEFF) ──
+// RTL/LTR 강제 제어 문자 제거 → 텍스트 방향 조작 및 UI 깨짐 방지
+const stripBidi = (str) => str.replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '');
+
 // ── Bold 마크다운 렌더링 (**text** → <strong>) ──
 function renderBoldText(text) {
   if (!text) return null;
@@ -207,7 +211,7 @@ function CommentItem({
                     </button>
                     <button
                       onClick={onEditSave}
-                      disabled={!editInput.trim() || editSaving}
+                      disabled={!stripBidi(editInput.trim()) || editSaving}
                       className="px-3 py-1 text-[10px] font-bold rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-40 transition-all"
                     >
                       {editSaving ? '...' : t.editSave}
@@ -365,7 +369,7 @@ export default function FeedbackBoard() {
 
   // ── 최상위 댓글 등록 ──
   const handleSubmit = async () => {
-    const trimmed = input.trim();
+    const trimmed = stripBidi(input.trim());
     if (!trimmed || !user) return;
     setSubmitting(true);
     const result = await addComment(trimmed, user.id);
@@ -375,7 +379,7 @@ export default function FeedbackBoard() {
 
   // ── 답글 등록 ──
   const handleReplySubmit = async () => {
-    const trimmed = replyInput.trim();
+    const trimmed = stripBidi(replyInput.trim());
     if (!trimmed || !user || !replyTo) return;
     setReplySubmitting(true);
     const result = await addComment(trimmed, user.id, replyTo);
@@ -428,9 +432,10 @@ export default function FeedbackBoard() {
 
   // ── 수정 저장 ──
   const handleEditSave = async () => {
-    if (!editInput.trim() || !editingId) return;
+    const trimmedEdit = stripBidi(editInput.trim());
+    if (!trimmedEdit || !editingId) return;
     setEditSaving(true);
-    const result = await updateComment(editingId, editInput.trim());
+    const result = await updateComment(editingId, trimmedEdit);
     setEditSaving(false);
     if (result.success) {
       setEditingId(null);
@@ -524,7 +529,7 @@ export default function FeedbackBoard() {
               </div>
               <button
                 onClick={handleSubmit}
-                disabled={!input.trim() || submitting}
+                disabled={!stripBidi(input.trim()) || submitting}
                 className="px-4 py-1.5 text-[11px] font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
               >
                 {submitting ? t.sending : t.post}
@@ -704,7 +709,7 @@ export default function FeedbackBoard() {
                             </button>
                             <button
                               onClick={handleReplySubmit}
-                              disabled={!replyInput.trim() || replySubmitting}
+                              disabled={!stripBidi(replyInput.trim()) || replySubmitting}
                               className="px-3 py-1 text-[10px] font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 transition-all"
                             >
                               {replySubmitting ? '...' : t.postReply}

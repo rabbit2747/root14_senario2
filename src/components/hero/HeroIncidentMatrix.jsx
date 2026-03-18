@@ -250,7 +250,7 @@ export default function HeroIncidentMatrix({
   // 패널에 전달할 데이터 (DetailPanel.jsx activeCardData 구조)
   const activeCardData = useMemo(() => {
     if (!activeIncident) return null;
-    const lang = language === 'ko' || language === 'en' ? language : 'en';
+    const lang = ['ko', 'en', 'vi', 'ar'].includes(language) ? language : 'en';
     return {
       id:           activeIncident.id,
       title:        activeIncident.name,

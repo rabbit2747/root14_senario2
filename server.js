@@ -422,6 +422,8 @@ function sanitizeHtml(html) {
     }
     return ''; // 태그만 제거, 내용은 유지
   });
+  // 7) Bidi Override 제어 문자 제거 (RTL/LTR 조작 방어)
+  clean = clean.replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '');
   return clean.trim();
 }
 

@@ -79,6 +79,13 @@ const uiT = {
     marketing:     'AI ROOT',
     mainSite:      'Main',
     completed:     'CLEAR',
+    comingSoonHint: 'Training content coming soon',
+    introHint:     'View Intro',
+    itBasics:      'IT Basics', itBasicsHint: 'IT Basics',
+    communityLabel:'Community', communityHint: 'Community',
+    adminHint:     'Admin',
+    resultsCount:  'results', moreResults: 'more...',
+    navBack: 'Back', navHome: 'Home', navAll: 'All', navChat: 'Chat', navMy: 'My',
   },
   ko: {
     title:         'ATT&CK 엔터프라이즈 v14.1',
@@ -99,6 +106,13 @@ const uiT = {
     marketing:     'AI ROOT',
     mainSite:      '메인',
     completed:     '수료',
+    comingSoonHint: '교육 콘텐츠 준비중입니다',
+    introHint:     '인트로 히어로 보기',
+    itBasics:      'IT 기초', itBasicsHint: 'IT 기초 학습',
+    communityLabel:'커뮤니티', communityHint: '커뮤니티 페이지',
+    adminHint:     '관리자 페이지',
+    resultsCount:  '개 결과', moreResults: '개 더...',
+    navBack: '뒤로', navHome: '홈', navAll: '전체', navChat: '커뮤니티', navMy: '마이',
   },
   zh: {
     title:         'ATT&CK 企业版 v14.1',
@@ -114,6 +128,9 @@ const uiT = {
     brandSub:      '网络安全培训平台',
     skip:          'SKIP',
     visitors:      '访客', finishers: '完成者', mypage: 'MY', marketing: 'AI ROOT', mainSite: '主页', completed: '通过',
+    comingSoonHint: '教育内容准备中', introHint: '查看介绍', itBasics: 'IT基础', itBasicsHint: 'IT基础学习', communityLabel: '社区', communityHint: '社区页面', adminHint: '管理页面',
+    resultsCount: '个结果', moreResults: '更多...',
+    navBack: '返回', navHome: '主页', navAll: '全部', navChat: '社区', navMy: '我的',
   },
   hi: {
     title:         'ATT&CK एंटरप्राइज v14.1',
@@ -129,6 +146,9 @@ const uiT = {
     brandSub:      'साइबर सुरक्षा प्रशिक्षण',
     skip:          'SKIP',
     visitors:      'आगंतुक', finishers: 'पूरा', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'मुख्य', completed: 'पूर्ण',
+    comingSoonHint: 'सामग्री तैयार हो रही है', introHint: 'इंट्रो देखें', itBasics: 'IT मूल', itBasicsHint: 'IT मूल सीखें', communityLabel: 'समुदाय', communityHint: 'समुदाय पृष्ठ', adminHint: 'व्यवस्थापक',
+    resultsCount: 'परिणाम', moreResults: 'और...',
+    navBack: 'वापस', navHome: 'होम', navAll: 'सभी', navChat: 'समुदाय', navMy: 'मेरा',
   },
   ja: {
     title:         'ATT&CK エンタープライズ v14.1',
@@ -144,6 +164,9 @@ const uiT = {
     brandSub:      'サイバーセキュリティ教育',
     skip:          'SKIP',
     visitors:      '訪問者', finishers: '修了者', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'メイン', completed: '修了',
+    comingSoonHint: '教育コンテンツ準備中', introHint: 'イントロを見る', itBasics: 'IT基礎', itBasicsHint: 'IT基礎学習', communityLabel: 'コミュニティ', communityHint: 'コミュニティページ', adminHint: '管理者ページ',
+    resultsCount: '件', moreResults: 'もっと見る...',
+    navBack: '戻る', navHome: 'ホーム', navAll: '全て', navChat: 'コミュニティ', navMy: 'マイ',
   },
   ar: {
     title:         'ATT&CK Enterprise v14.1',
@@ -159,6 +182,9 @@ const uiT = {
     brandSub:      'منصة التدريب على الأمن السيبراني',
     skip:          'SKIP',
     visitors:      'زوار', finishers: 'مكتملون', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'الرئيسية', completed: 'مكتمل',
+    comingSoonHint: 'جارٍ تحضير المحتوى', introHint: 'عرض المقدمة', itBasics: 'IT أساسيات', itBasicsHint: 'تعلم أساسيات IT', communityLabel: 'مجتمع', communityHint: 'صفحة المجتمع', adminHint: 'لوحة الإدارة',
+    resultsCount: 'نتائج', moreResults: 'المزيد...',
+    navBack: 'رجوع', navHome: 'الرئيسية', navAll: 'الكل', navChat: 'مجتمع', navMy: 'حسابي',
   },
   vi: {
     title:         'ATT&CK Enterprise v14.1',
@@ -174,6 +200,13 @@ const uiT = {
     brandSub:      'Nền Tảng Đào Tạo An Ninh Mạng',
     skip:          'SKIP',
     visitors:      'Người dùng', finishers: 'Hoàn thành', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'Trang chủ', completed: 'HOÀN THÀNH',
+    comingSoonHint: 'Nội dung đang được chuẩn bị',
+    introHint:     'Xem màn hình giới thiệu',
+    itBasics:      'IT Cơ bản', itBasicsHint: 'Học IT cơ bản',
+    communityLabel:'Cộng đồng', communityHint: 'Trang cộng đồng',
+    adminHint:     'Trang quản trị',
+    resultsCount:  'kết quả', moreResults: 'thêm...',
+    navBack: 'Quay lại', navHome: 'Trang chủ', navAll: 'Tất cả', navChat: 'Cộng đồng', navMy: 'Của tôi',
   },
 };
 
@@ -458,7 +491,7 @@ export default function UltimateCinematicMatrix() {
       nm.textContent = targetName;
       const ds = document.createElement('div');
       ds.style.cssText = 'font-size:11px;color:#94a3b8';
-      ds.textContent = language === 'ko' ? '교육 콘텐츠 준비중입니다' : 'Training content coming soon';
+      ds.textContent = t.comingSoonHint;
       tw.append(nm, ds);
       inner.append(ico, tw);
       toast.appendChild(inner);
@@ -973,7 +1006,7 @@ export default function UltimateCinematicMatrix() {
               <span
                 onClick={() => { setHeroPhase('entering'); localStorage.removeItem('gotroot_intro_seen'); window.scrollTo({ top: 0 }); }}
                 className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none transition-colors border-violet-300 text-violet-500 bg-violet-50/50 hover:text-violet-700 hover:border-violet-400"
-                title={language === 'ko' ? '인트로 히어로 보기' : 'View Intro'}>
+                title={t.introHint}>
                 🎬 <span className="dm-mobile-hide">INTRO</span>
               </span>
               <span
@@ -990,8 +1023,8 @@ export default function UltimateCinematicMatrix() {
                 <span
                   onClick={() => navigate('/basics')}
                   className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-purple-200 text-purple-500 bg-purple-50/50 hover:text-purple-700 hover:border-purple-400 transition-colors"
-                  title={language === 'ko' ? 'IT 기초 학습' : 'IT Basics'}>
-                  📖 <span className="dm-mobile-hide">{language === 'ko' ? 'IT 기초' : 'IT Basics'}</span>
+                  title={t.itBasicsHint}>
+                  📖 <span className="dm-mobile-hide">{t.itBasics}</span>
                 </span>
               )}
               {isLoggedIn && (
@@ -1005,14 +1038,14 @@ export default function UltimateCinematicMatrix() {
               <span
                 onClick={() => navigate('/community')}
                 className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-emerald-200 text-emerald-500 bg-emerald-50/50 hover:text-emerald-700 hover:border-emerald-400 transition-colors"
-                title={language === 'ko' ? '커뮤니티 페이지' : 'Community'}>
-                💬 <span className="dm-mobile-hide">{language === 'ko' ? '커뮤니티' : 'Community'}</span>
+                title={t.communityHint}>
+                💬 <span className="dm-mobile-hide">{t.communityLabel}</span>
               </span>
               {isAdmin && (
                 <span
                   onClick={() => navigate('/admin')}
                   className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-red-200 text-red-500 bg-red-50/50 hover:text-red-700 hover:border-red-400 transition-colors"
-                  title={language === 'ko' ? '관리자 페이지' : 'Admin'}>
+                  title={t.adminHint}>
                   🔒 ADMIN
                 </span>
               )}
@@ -1070,7 +1103,7 @@ export default function UltimateCinematicMatrix() {
                 return (
                   <div className="mobile-search-dropdown fixed right-2 bg-white border border-slate-200 rounded-lg shadow-xl z-[200] max-h-64 overflow-y-auto" style={{ minWidth: 260, top: 58 }}>
                     <div className="px-3 py-1.5 text-[9px] font-bold text-slate-400 bg-slate-50 border-b border-slate-100 sticky top-0">
-                      {results.length} {language === 'ko' ? '개 결과' : 'results'}
+                      {results.length} {t.resultsCount}
                     </div>
                     {results.slice(0, 15).map((r, i) => (
                       <div key={i}
@@ -1096,7 +1129,7 @@ export default function UltimateCinematicMatrix() {
                     ))}
                     {results.length > 15 && (
                       <div className="px-3 py-2 text-[9px] text-slate-400 text-center">
-                        +{results.length - 15} {language === 'ko' ? '개 더...' : 'more...'}
+                        +{results.length - 15} {t.moreResults}
                       </div>
                     )}
                   </div>
@@ -1378,7 +1411,7 @@ export default function UltimateCinematicMatrix() {
                             navigate(`/edu/${targetTid}`);
                           };
                           const eduBtnCls = `inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full cursor-pointer transition-all duration-200 ${dm ? 'bg-[#00ff41]/10 text-[#00ff41] border border-[#00ff41]/30 hover:bg-[#00ff41]/20 hover:shadow-[0_0_8px_rgba(0,255,65,0.3)]' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 hover:shadow-sm'}`;
-                          const pendingLabel = language === 'ko' ? '준비 중' : language === 'ja' ? '準備中' : language === 'zh' ? '准备中' : language === 'hi' ? 'तैयारी में' : 'Coming Soon';
+                          const pendingLabel = language === 'ko' ? '준비 중' : language === 'ja' ? '準備中' : language === 'zh' ? '准备中' : language === 'hi' ? 'तैयारी में' : language === 'vi' ? 'Sắp có' : language === 'ar' ? 'قريباً' : 'Coming Soon';
                           return (
                             <div
                               className={`edu-preview mt-3 pt-3 border-t ${dm ? 'border-slate-700' : 'border-slate-200'}`}
@@ -1483,26 +1516,26 @@ export default function UltimateCinematicMatrix() {
             }
           }}>
             <span className="nav-icon"><ArrowLeftIcon className="w-4 h-4" /></span>
-            <span>{language === 'ko' ? '뒤로' : 'Back'}</span>
+            <span>{t.navBack}</span>
           </button>
           <button onClick={() => { setSelectedTactic(null); setViewMode('matrix'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
             <span className="nav-icon">🏠</span>
-            <span>{language === 'ko' ? '홈' : 'Home'}</span>
+            <span>{t.navHome}</span>
           </button>
           {selectedTactic && (
             <button onClick={() => { setSelectedTactic(null); }}>
               <span className="nav-icon">🔳</span>
-              <span>{language === 'ko' ? '전체' : 'All'}</span>
+              <span>{t.navAll}</span>
             </button>
           )}
           <button onClick={() => setViewMode(v => v === 'dashboard' ? 'matrix' : 'dashboard')}>
             <span className="nav-icon">💬</span>
-            <span>{language === 'ko' ? '커뮤니티' : 'Chat'}</span>
+            <span>{t.navChat}</span>
           </button>
           {isLoggedIn && (
             <button onClick={() => navigate('/mypage')}>
               <span className="nav-icon">👤</span>
-              <span>{language === 'ko' ? '마이' : 'My'}</span>
+              <span>{t.navMy}</span>
             </button>
           )}
         </div>

@@ -87,6 +87,8 @@ export const TACTICS = [
     id: 'initial-access',
     title: 'Initial Access',
     titleKo: '초기 접근',
+    titleVi: 'Truy cập ban đầu',
+    titleAr: 'الوصول الأولي',
     incidents: [
       {
         id: 'solarwinds-2020',
@@ -96,7 +98,7 @@ export const TACTICS = [
         techniqueId: 'T1195.002',
         tourOrder: 0,
         icon: 'globe',
-        stat: { value: 18000, unit: '+', label: { ko: '감염 조직', en: 'Orgs Compromised' } },
+        stat: { value: 18000, unit: '+', label: { ko: '감염 조직', en: 'Orgs Compromised', vi: 'Tổ chức bị nhiễm', ar: 'مؤسسة مصابة' } },
         description: {
           ko: '러시아 APT29(Cozy Bear) 그룹이 SolarWinds Orion IT 모니터링 소프트웨어의 업데이트 과정에 SUNBURST 백도어를 삽입했습니다. 이 악성코드는 정상 디지털 서명이 포함된 업데이트로 위장되어, 미국 재무부·국토안보부·국무부 등 핵심 정부기관과 Microsoft·FireEye·Intel 등 18,000개 이상의 조직에 9개월간 탐지되지 않고 침투했습니다. 역사상 가장 정교한 공급망 공격으로 평가됩니다.',
           en: 'Russian APT29 (Cozy Bear) inserted the SUNBURST backdoor into SolarWinds Orion IT monitoring software updates. Disguised with legitimate digital signatures, it infiltrated 18,000+ organizations including the US Treasury, DHS, State Department, Microsoft, FireEye, and Intel — remaining undetected for 9 months. It is considered the most sophisticated supply chain attack in history.',
@@ -110,19 +112,27 @@ export const TACTICS = [
           attackVector: {
             ko: 'Orion 빌드 서버 침투 → SUNBURST 백도어 삽입 → 정상 서명 업데이트로 배포 → C2 통신',
             en: 'Orion build server infiltration → SUNBURST backdoor injection → distribution via signed update → C2 communication',
+            vi: 'Xâm nhập máy chủ build Orion → chèn backdoor SUNBURST → phân phối qua bản cập nhật đã ký → giao tiếp C2',
+            ar: 'اختراق خادم البناء Orion → زرع backdoor SUNBURST → توزيع عبر تحديث موقّع رقمياً → التواصل مع C2',
           },
           affectedOrgs: {
             ko: '미국 재무부, 국토안보부, Microsoft, FireEye, Intel — 18,000+ 조직 감염',
             en: 'US Treasury, DHS, Microsoft, FireEye, Intel — 18,000+ organizations infected',
+            vi: 'Bộ Tài chính Mỹ, DHS, Microsoft, FireEye, Intel — hơn 18.000 tổ chức bị nhiễm',
+            ar: 'وزارة الخزانة الأمريكية، DHS، Microsoft، FireEye، Intel — أكثر من 18,000 مؤسسة مصابة',
           },
           severity: 'critical',
           timeline: {
             ko: '2020년 3월~12월 — 9개월간 탐지되지 않은 공급망 공격',
             en: 'March-December 2020 — 9 months of undetected supply chain attack',
+            vi: 'Tháng 3–12/2020 — tấn công chuỗi cung ứng không bị phát hiện trong 9 tháng',
+            ar: 'مارس–ديسمبر 2020 — 9 أشهر من الهجوم على سلسلة التوريد دون اكتشاف',
           },
           lessonsLearned: {
             ko: '공급망 보안 강화, 제로 트러스트 아키텍처 도입, 소프트웨어 무결성 검증 필수',
             en: 'Supply chain security, zero-trust architecture, software integrity verification',
+            vi: 'Tăng cường bảo mật chuỗi cung ứng, áp dụng kiến trúc Zero Trust, kiểm tra tính toàn vẹn phần mềm',
+            ar: 'تعزيز أمن سلسلة التوريد، اعتماد بنية Zero Trust، التحقق من سلامة البرمجيات',
           },
         },
         videoFile: '/videos/hero/solarwinds-2020.mp4',
@@ -139,7 +149,7 @@ export const TACTICS = [
         techniqueId: 'T1190',
         tourOrder: 1,
         icon: 'code',
-        stat: { value: 93, unit: '%', label: { ko: '취약 클라우드', en: 'Vulnerable Clouds' } },
+        stat: { value: 93, unit: '%', label: { ko: '취약 클라우드', en: 'Vulnerable Clouds', vi: 'Đám mây dễ bị tấn công', ar: 'سحابة معرّضة للخطر' } },
         description: {
           ko: '2021년 12월 발견된 Apache Log4j 취약점(CVE-2021-44228)은 "역사상 가장 심각한 단일 취약점"으로 불립니다. 단 한 줄의 문자열(${jndi:ldap://...})만으로 원격 코드 실행이 가능했으며, Minecraft부터 Apple iCloud, AWS, Cloudflare, Steam까지 전 세계 수십억 대의 기기가 영향을 받았습니다. 공개 48시간 만에 80만 건 이상의 공격 시도가 탐지되었고, 전 세계 클라우드 환경의 93%가 취약한 것으로 분석되었습니다.',
           en: 'Discovered in December 2021, the Apache Log4j vulnerability (CVE-2021-44228) is called "the single most critical vulnerability in history." A single string (${jndi:ldap://...}) enabled remote code execution, affecting billions of devices from Minecraft to Apple iCloud, AWS, Cloudflare, and Steam. Over 800,000 attack attempts were detected within 48 hours of disclosure, with 93% of cloud environments found vulnerable.',
@@ -153,19 +163,27 @@ export const TACTICS = [
           attackVector: {
             ko: 'Log4j JNDI 룩업 → ${jndi:ldap://악성서버} → 원격 코드 실행 (RCE)',
             en: 'Log4j JNDI lookup → ${jndi:ldap://malicious-server} → Remote Code Execution (RCE)',
+            vi: 'Tra cứu JNDI của Log4j → ${jndi:ldap://máy-chủ-độc-hại} → Thực thi mã từ xa (RCE)',
+            ar: 'بحث JNDI في Log4j → ${jndi:ldap://خادم-خبيث} → تنفيذ كود عن بُعد (RCE)',
           },
           affectedOrgs: {
             ko: 'Apache, Minecraft, Apple iCloud, AWS, Cloudflare, Steam — 전 세계 수십억 기기',
             en: 'Apache, Minecraft, Apple iCloud, AWS, Cloudflare, Steam — billions of devices worldwide',
+            vi: 'Apache, Minecraft, Apple iCloud, AWS, Cloudflare, Steam — hàng tỷ thiết bị toàn cầu',
+            ar: 'Apache، Minecraft، Apple iCloud، AWS، Cloudflare، Steam — مليارات الأجهزة حول العالم',
           },
           severity: 'critical',
           timeline: {
             ko: '2021년 12월 9일 공개 — 48시간 내 80만 건 이상 공격 시도 탐지',
             en: 'Dec 9, 2021 disclosure — 800,000+ attack attempts within 48 hours',
+            vi: 'Công bố ngày 9/12/2021 — phát hiện 800.000+ cuộc tấn công trong 48 giờ',
+            ar: '9 ديسمبر 2021 — رصد أكثر من 800,000 محاولة هجوم خلال 48 ساعة',
           },
           lessonsLearned: {
             ko: '오픈소스 의존성 관리(SBOM), 소프트웨어 구성 분석(SCA), WAF 긴급 규칙 배포',
             en: 'Open source dependency management (SBOM), SCA tools, emergency WAF rule deployment',
+            vi: 'Quản lý phụ thuộc mã nguồn mở (SBOM), công cụ SCA, triển khai quy tắc WAF khẩn cấp',
+            ar: 'إدارة التبعيات مفتوحة المصدر (SBOM)، أدوات SCA، نشر قواعد WAF الطارئة',
           },
         },
         videoFile: null,
@@ -179,6 +197,8 @@ export const TACTICS = [
     id: 'execution',
     title: 'Execution',
     titleKo: '실행',
+    titleVi: 'Thực thi',
+    titleAr: 'التنفيذ',
     incidents: [
       {
         id: 'wannacry-ia',
@@ -188,7 +208,7 @@ export const TACTICS = [
         techniqueId: 'T1204',
         tourOrder: 2,
         icon: 'lock',
-        stat: { value: 230000, unit: '+', label: { ko: '감염 시스템', en: 'Systems Infected' } },
+        stat: { value: 230000, unit: '+', label: { ko: '감염 시스템', en: 'Systems Infected', vi: 'Hệ thống bị nhiễm', ar: 'نظام مصاب' } },
         description: {
           ko: '2017년 5월 12일, 북한 라자루스 그룹이 개발한 WannaCry 랜섬웨어가 NSA에서 유출된 EternalBlue 익스플로잇(MS17-010)을 이용해 전 세계로 확산되었습니다. 불과 72시간 만에 150개국 23만 대 이상의 컴퓨터가 감염되었고, 영국 NHS(국민건강서비스) 병원 시스템이 마비되어 수술이 취소되고 환자가 다른 병원으로 이송되었습니다. Telefónica, FedEx, Renault 등 글로벌 기업도 피해를 입었으며, 총 피해액은 약 40~80억 달러로 추산됩니다.',
           en: 'On May 12, 2017, WannaCry ransomware developed by North Korea\'s Lazarus Group spread globally using the NSA-leaked EternalBlue exploit (MS17-010). Within just 72 hours, 230,000+ computers across 150 countries were infected. The UK\'s NHS hospital systems were paralyzed — surgeries canceled, patients redirected. Telefónica, FedEx, and Renault were also hit, with total damages estimated at $4-8 billion.',
@@ -202,19 +222,27 @@ export const TACTICS = [
           attackVector: {
             ko: 'EternalBlue (MS17-010 SMB 취약점) → 자동 전파 → 파일 암호화 → 비트코인 몸값 요구',
             en: 'EternalBlue (MS17-010 SMB vulnerability) → auto-propagation → file encryption → Bitcoin ransom demand',
+            vi: 'EternalBlue (lỗ hổng SMB MS17-010) → tự động lây lan → mã hóa tệp → đòi tiền chuộc Bitcoin',
+            ar: 'EternalBlue (ثغرة SMB MS17-010) → الانتشار التلقائي → تشفير الملفات → طلب فدية بالبيتكوين',
           },
           affectedOrgs: {
             ko: 'NHS(영국 의료), Telefónica, FedEx, Renault — 150개국 230,000+ 시스템',
             en: 'NHS, Telefónica, FedEx, Renault — 150 countries, 230,000+ systems',
+            vi: 'NHS, Telefónica, FedEx, Renault — 150 quốc gia, 230.000+ hệ thống',
+            ar: 'NHS، Telefónica، FedEx، Renault — 150 دولة، أكثر من 230,000 نظام',
           },
           severity: 'critical',
           timeline: {
             ko: '2017년 5월 12일~15일 — 72시간 만에 전 세계 확산',
             en: 'May 12-15, 2017 — global spread within 72 hours',
+            vi: '12–15/5/2017 — lây lan toàn cầu trong 72 giờ',
+            ar: '12-15 مايو 2017 — انتشار عالمي في غضون 72 ساعة',
           },
           lessonsLearned: {
             ko: '패치 관리 자동화 필수, 백업 전략(3-2-1 규칙), SMB 포트(445) 차단',
             en: 'Automated patch management, backup strategy (3-2-1 rule), SMB port (445) blocking',
+            vi: 'Tự động hóa quản lý bản vá, chiến lược sao lưu (quy tắc 3-2-1), chặn cổng SMB (445)',
+            ar: 'أتمتة إدارة التصحيحات، استراتيجية النسخ الاحتياطي (قاعدة 3-2-1)، حجب منفذ SMB (445)',
           },
         },
         videoFile: '/videos/hero/wannacry-ia.mp4',
@@ -231,7 +259,7 @@ export const TACTICS = [
         techniqueId: 'T1059',
         tourOrder: 3,
         icon: 'explosion',
-        stat: { value: 4.4, unit: 'M$', label: { ko: '랜섬 지불', en: 'Ransom Paid' } },
+        stat: { value: 4.4, unit: 'M$', label: { ko: '랜섬 지불', en: 'Ransom Paid', vi: 'Tiền chuộc đã trả', ar: 'فدية مدفوعة' } },
         description: {
           ko: '2021년 5월, DarkSide 랜섬웨어 그룹이 미국 최대 연료 파이프라인 기업인 Colonial Pipeline을 공격했습니다. 유출된 VPN 비밀번호 하나로 시작된 이 공격은 미국 동부 해안 연료 공급의 45%를 5일간 중단시켰습니다. 주유소에 긴 줄이 생기고 연료 패닉 매수가 발생했으며, 바이든 대통령이 국가 비상사태를 선포했습니다. 회사는 결국 440만 달러의 비트코인 몸값을 지불했고, 이 사건은 사이버 공격이 실물 경제에 직접적 영향을 미칠 수 있음을 보여준 대표적 사례입니다.',
           en: 'In May 2021, the DarkSide ransomware group attacked Colonial Pipeline, the largest US fuel pipeline. Starting from a single leaked VPN password, the attack shut down 45% of East Coast fuel supply for 5 days. Gas stations saw long lines, panic buying erupted, and President Biden declared a national emergency. The company paid a $4.4M Bitcoin ransom. This case demonstrated how cyberattacks can directly impact the physical economy.',
@@ -245,19 +273,27 @@ export const TACTICS = [
           attackVector: {
             ko: '유출 VPN 비밀번호(MFA 미설정) → 내부 네트워크 침투 → 랜섬웨어 배포 → 파이프라인 운영 중단',
             en: 'Leaked VPN password (no MFA) → internal network infiltration → ransomware deployment → pipeline shutdown',
+            vi: 'Mật khẩu VPN bị rò rỉ (không có MFA) → xâm nhập mạng nội bộ → triển khai ransomware → tắt hệ thống đường ống',
+            ar: 'كلمة مرور VPN مسرّبة (بدون MFA) → اختراق الشبكة الداخلية → نشر برنامج الفدية → إيقاف خط الأنابيب',
           },
           affectedOrgs: {
             ko: 'Colonial Pipeline — 미국 동부 연료 45% 공급 중단 (5일간), 17개 주 비상사태',
             en: 'Colonial Pipeline — 45% of US East Coast fuel supply disrupted (5 days), 17 states emergency',
+            vi: 'Colonial Pipeline — gián đoạn 45% nguồn cung nhiên liệu bờ Đông Mỹ (5 ngày), 17 bang khẩn cấp',
+            ar: 'Colonial Pipeline — انقطاع 45% من إمدادات الوقود بالساحل الشرقي (5 أيام)، طوارئ في 17 ولاية',
           },
           severity: 'critical',
           timeline: {
             ko: '2021년 5월 7일~12일 — 미국 국가 비상사태 선포',
             en: 'May 7-12, 2021 — US national emergency declared',
+            vi: '7–12/5/2021 — Mỹ ban bố tình trạng khẩn cấp quốc gia',
+            ar: '7-12 مايو 2021 — إعلان حالة الطوارئ الوطنية الأمريكية',
           },
           lessonsLearned: {
             ko: 'VPN MFA 필수 적용, OT/IT 네트워크 분리, 랜섬웨어 대응 플레이북 수립',
             en: 'Mandatory VPN MFA, OT/IT network segmentation, ransomware response playbook',
+            vi: 'Bắt buộc MFA cho VPN, phân tách mạng OT/IT, lập kế hoạch ứng phó ransomware',
+            ar: 'إلزامية MFA للـ VPN، فصل شبكات OT/IT، وضع خطة استجابة لبرامج الفدية',
           },
         },
         videoFile: null,
@@ -271,6 +307,8 @@ export const TACTICS = [
     id: 'evasion',
     title: 'Defense Evasion',
     titleKo: '방어 회피',
+    titleVi: 'Né tránh phòng thủ',
+    titleAr: 'التهرب الدفاعي',
     incidents: [
       {
         id: 'stuxnet-evasion',
@@ -280,7 +318,7 @@ export const TACTICS = [
         techniqueId: 'T1027',
         tourOrder: 4,
         icon: 'shield',
-        stat: { value: 984, unit: '', label: { ko: '파괴 원심분리기', en: 'Centrifuges Hit' } },
+        stat: { value: 984, unit: '', label: { ko: '파괴 원심분리기', en: 'Centrifuges Hit', vi: 'Máy ly tâm bị phá hủy', ar: 'جهاز طرد مركزي مُدمَّر' } },
         description: {
           ko: '역사상 최초의 사이버 무기로 불리는 Stuxnet은 미국 NSA와 이스라엘 Unit 8200이 공동 개발한 것으로 추정됩니다. USB 드라이브를 통해 에어갭(인터넷 단절) 네트워크에 침투했으며, 당시 알려지지 않은 4개의 제로데이 취약점을 동시에 사용하는 전례 없는 정교함을 보여주었습니다. 이란 나탄즈 핵시설의 원심분리기 984대를 파괴하여 이란 핵 프로그램을 수 년 지연시켰습니다. 3년간 은밀히 작동하다가 2010년에 발견되었고, 사이버 전쟁의 시대를 열었습니다.',
           en: 'Known as the first true cyber weapon, Stuxnet was allegedly co-developed by the US NSA and Israel\'s Unit 8200. It infiltrated air-gapped networks via USB drives, using an unprecedented 4 zero-day exploits simultaneously. It destroyed 984 centrifuges at Iran\'s Natanz nuclear facility, delaying Iran\'s nuclear program by years. Operating covertly for 3 years before discovery in 2010, it opened the era of cyber warfare.',
@@ -294,19 +332,27 @@ export const TACTICS = [
           attackVector: {
             ko: 'USB 감염 → 제로데이 4개 활용 → Siemens STEP 7 PLC 코드 변조 → 원심분리기 과속 회전',
             en: 'USB infection → 4 zero-days → Siemens STEP 7 PLC manipulation → centrifuge over-spinning',
+            vi: 'Lây qua USB → khai thác 4 lỗ hổng zero-day → thao túng PLC Siemens STEP 7 → quay vượt tốc máy ly tâm',
+            ar: 'الإصابة عبر USB → استغلال 4 ثغرات Zero-Day → التلاعب بـ PLC Siemens STEP 7 → تسريع أجهزة الطرد المركزي',
           },
           affectedOrgs: {
             ko: '이란 나탄즈 핵시설 — 원심분리기 984대 파괴, 핵 프로그램 수 년 지연',
             en: 'Iran Natanz — 984 centrifuges destroyed, nuclear program delayed by years',
+            vi: 'Cơ sở hạt nhân Natanz, Iran — 984 máy ly tâm bị phá hủy, chương trình hạt nhân trì hoãn nhiều năm',
+            ar: 'منشأة نطنز النووية في إيران — تدمير 984 جهاز طرد مركزي، تأخير البرنامج النووي لسنوات',
           },
           severity: 'critical',
           timeline: {
             ko: '2007~2010년 (2010년 발견) — 3년간 은밀 작전 수행',
             en: '2007-2010 (discovered 2010) — 3 years of covert operation',
+            vi: '2007–2010 (phát hiện năm 2010) — 3 năm hoạt động bí mật',
+            ar: '2007-2010 (اكتُشف عام 2010) — 3 سنوات من العمل السري',
           },
           lessonsLearned: {
             ko: '에어갭 네트워크도 안전하지 않음, SCADA/ICS 보안 강화, USB 매체 통제 필수',
             en: 'Air-gapped networks are not safe, SCADA/ICS hardening, mandatory USB media control',
+            vi: 'Mạng cách ly không an toàn tuyệt đối, tăng cường bảo mật SCADA/ICS, kiểm soát thiết bị USB bắt buộc',
+            ar: 'الشبكات المعزولة ليست آمنة، تعزيز أمن SCADA/ICS، إلزامية التحكم في وسائط USB',
           },
         },
         videoFile: '/videos/hero/stuxnet-evasion.mp4',
@@ -323,7 +369,7 @@ export const TACTICS = [
         techniqueId: 'T1036',
         tourOrder: 5,
         icon: 'explosion',
-        stat: { value: 10, unit: 'B$', label: { ko: '총 피해액', en: 'Total Damage' } },
+        stat: { value: 10, unit: 'B$', label: { ko: '총 피해액', en: 'Total Damage', vi: 'Tổng thiệt hại', ar: 'إجمالي الأضرار' } },
         description: {
           ko: '2017년 6월 27일, 러시아 군사정보기관(GRU)이 개발한 NotPetya는 랜섬웨어로 위장했지만 실제로는 데이터 파괴가 목적인 와이퍼 맬웨어였습니다. 우크라이나 세무 소프트웨어 MeDoc의 업데이트를 통해 확산되었고, 단 하루 만에 전 세계로 퍼졌습니다. 세계 최대 해운사 Maersk는 45,000대 PC와 4,000대 서버를 재설치해야 했으며($3B 피해), 제약회사 Merck는 $8.7B, FedEx TNT는 $4B의 피해를 입었습니다. 역사상 가장 파괴적인 사이버 공격으로 총 피해액이 100억 달러를 넘습니다.',
           en: 'On June 27, 2017, NotPetya — developed by Russia\'s GRU — masqueraded as ransomware but was actually a wiper designed to destroy data. Spread through Ukraine\'s MeDoc tax software updates, it went global within a single day. Maersk had to reinstall 45,000 PCs and 4,000 servers ($3B damage), Merck suffered $8.7B, and FedEx TNT $4B. The most destructive cyberattack in history, with total damages exceeding $10 billion.',
@@ -337,19 +383,27 @@ export const TACTICS = [
           attackVector: {
             ko: 'MeDoc 업데이트 공급망 공격 → EternalBlue + Mimikatz 자격증명 수집 → 횡적 이동 → 데이터 파괴',
             en: 'MeDoc update supply chain → EternalBlue + Mimikatz credential harvesting → lateral movement → data destruction',
+            vi: 'Tấn công chuỗi cung ứng qua bản cập nhật MeDoc → EternalBlue + thu thập thông tin xác thực Mimikatz → di chuyển ngang → phá hủy dữ liệu',
+            ar: 'هجوم سلسلة التوريد عبر تحديثات MeDoc → EternalBlue + حصاد بيانات Mimikatz → الحركة الأفقية → تدمير البيانات',
           },
           affectedOrgs: {
             ko: 'Maersk($3B), Merck($8.7B), FedEx TNT($4B), Mondelez, 우크라이나 정부기관',
             en: 'Maersk ($3B), Merck ($8.7B), FedEx TNT ($4B), Mondelez, Ukrainian government',
+            vi: 'Maersk (3 tỷ USD), Merck (8,7 tỷ USD), FedEx TNT (4 tỷ USD), Mondelez, cơ quan chính phủ Ukraine',
+            ar: 'Maersk (3 مليار)، Merck (8.7 مليار)، FedEx TNT (4 مليار)، Mondelez، الحكومة الأوكرانية',
           },
           severity: 'critical',
           timeline: {
             ko: '2017년 6월 27일 — 단 하루 만에 전 세계 확산, 총 피해 $10B+',
             en: 'June 27, 2017 — global spread within a single day, $10B+ total damage',
+            vi: '27/6/2017 — lây lan toàn cầu trong một ngày, tổng thiệt hại hơn 10 tỷ USD',
+            ar: '27 يونيو 2017 — انتشار عالمي في يوم واحد، إجمالي الأضرار يتجاوز 10 مليارات دولار',
           },
           lessonsLearned: {
             ko: '공급망 보안 검증, 네트워크 세그먼테이션, 오프라인 백업 필수, 와이퍼 vs 랜섬웨어 구분 능력',
             en: 'Supply chain verification, network segmentation, offline backups mandatory, wiper vs ransomware distinction',
+            vi: 'Xác minh chuỗi cung ứng, phân đoạn mạng, bắt buộc sao lưu ngoại tuyến, phân biệt phần mềm hủy dữ liệu và ransomware',
+            ar: 'التحقق من سلسلة التوريد، تقسيم الشبكة، النسخ الاحتياطي غير المتصل إلزامي، التمييز بين برنامج المسح وبرنامج الفدية',
           },
         },
         videoFile: null,
@@ -363,6 +417,8 @@ export const TACTICS = [
     id: 'credential-access',
     title: 'Credential Access',
     titleKo: '자격 증명',
+    titleVi: 'Truy cập thông tin xác thực',
+    titleAr: 'الوصول إلى بيانات الاعتماد',
     incidents: [
       {
         id: 'equifax-2017',
@@ -372,7 +428,7 @@ export const TACTICS = [
         techniqueId: 'T1003',
         tourOrder: 6,
         icon: 'database',
-        stat: { value: 147, unit: 'M', label: { ko: '유출 개인정보', en: 'Records Leaked' } },
+        stat: { value: 147, unit: 'M', label: { ko: '유출 개인정보', en: 'Records Leaked', vi: 'Hồ sơ bị rò rỉ', ar: 'سجل مُسرَّب' } },
         description: {
           ko: '2017년 미국 3대 신용평가사 중 하나인 Equifax에서 1억 4,700만 명의 개인정보가 유출되었습니다. 이는 미국 전체 인구의 약 44%에 해당하는 규모입니다. 공격자는 Apache Struts 웹 프레임워크의 알려진 취약점(CVE-2017-5638)을 이용했는데, 이 패치는 이미 2개월 전에 공개되어 있었습니다. 유출된 정보에는 사회보장번호(SSN), 생년월일, 주소, 운전면허번호, 신용카드 번호가 포함되어 있어, 피해자들은 평생 신원 도용의 위험에 노출되었습니다. 76일간 탐지되지 않았으며, Equifax는 $7억의 합의금을 지불했습니다.',
           en: 'In 2017, Equifax — one of America\'s three major credit bureaus — suffered a breach exposing 147 million personal records, approximately 44% of the US population. Attackers exploited a known Apache Struts vulnerability (CVE-2017-5638) that had been patched 2 months prior. Leaked data included SSNs, birth dates, addresses, driver\'s licenses, and credit card numbers, exposing victims to lifetime identity theft risk. Undetected for 76 days, Equifax paid a $700M settlement.',
@@ -386,19 +442,27 @@ export const TACTICS = [
           attackVector: {
             ko: 'Apache Struts 취약점(CVE-2017-5638) → 웹 앱 침투 → 76일간 DB에서 개인정보 수집',
             en: 'Apache Struts (CVE-2017-5638) → web app infiltration → 76 days of data exfiltration from DB',
+            vi: 'Apache Struts (CVE-2017-5638) → xâm nhập ứng dụng web → thu thập dữ liệu từ DB trong 76 ngày',
+            ar: 'Apache Struts (CVE-2017-5638) → اختراق تطبيق الويب → سرقة بيانات من قاعدة البيانات لـ 76 يوماً',
           },
           affectedOrgs: {
             ko: 'Equifax — 미국 인구 44%(1.47억 명) SSN/생년월일/주소/카드정보 유출, $700M 합의',
             en: 'Equifax — 44% of US population (147M) SSN/DOB/address/card data, $700M settlement',
+            vi: 'Equifax — 44% dân số Mỹ (147 triệu người) lộ SSN/ngày sinh/địa chỉ/thẻ tín dụng, bồi thường 700 triệu USD',
+            ar: 'Equifax — 44% من سكان أمريكا (147 مليون) تسرّبت بياناتهم، تسوية 700 مليون دولار',
           },
           severity: 'critical',
           timeline: {
             ko: '2017년 5월~7월 — 76일간 탐지되지 않음, 9월 공개 시 주가 35% 폭락',
             en: 'May-July 2017 — undetected for 76 days, stock dropped 35% upon September disclosure',
+            vi: 'Tháng 5–7/2017 — không phát hiện trong 76 ngày, cổ phiếu giảm 35% khi công bố tháng 9',
+            ar: 'مايو–يوليو 2017 — دون اكتشاف لـ 76 يوماً، هبط السهم 35% عند الإفصاح في سبتمبر',
           },
           lessonsLearned: {
             ko: '보안 패치 즉시 적용, 민감 데이터 암호화, 침입 탐지 시스템(IDS) 강화, 사고 공개 의무화',
             en: 'Immediate security patching, sensitive data encryption, IDS enhancement, mandatory breach disclosure',
+            vi: 'Áp dụng bản vá ngay lập tức, mã hóa dữ liệu nhạy cảm, tăng cường IDS, bắt buộc công bố vi phạm',
+            ar: 'التطبيق الفوري للتصحيحات، تشفير البيانات الحساسة، تعزيز IDS، إلزامية الإفصاح عن الخروقات',
           },
         },
         videoFile: null,
@@ -412,6 +476,8 @@ export const TACTICS = [
     id: 'impact',
     title: 'Impact',
     titleKo: '임팩트',
+    titleVi: 'Tác động',
+    titleAr: 'التأثير',
     incidents: [
       {
         id: 'moveit-2023',
@@ -421,7 +487,7 @@ export const TACTICS = [
         techniqueId: 'T1486',
         tourOrder: 7,
         icon: 'database',
-        stat: { value: 2773, unit: '+', label: { ko: '피해 조직', en: 'Orgs Affected' } },
+        stat: { value: 2773, unit: '+', label: { ko: '피해 조직', en: 'Orgs Affected', vi: 'Tổ chức bị ảnh hưởng', ar: 'مؤسسة متضررة' } },
         description: {
           ko: '2023년 러시아 기반 Cl0p 랜섬웨어 그룹이 Progress Software의 파일 전송 솔루션 MOVEit Transfer의 SQL 인젝션 제로데이(CVE-2023-34362)를 대규모로 악용했습니다. 이 공격으로 전 세계 2,773개 이상의 조직과 9,500만 명 이상의 개인정보가 유출되었습니다. 피해 조직에는 미국 에너지부(DOE), 영국 BBC, 브리티시 에어웨이즈, Shell, Sony, 뉴욕시 교육청 등이 포함됩니다. Cl0p은 기존 랜섬웨어와 달리 파일을 암호화하지 않고 데이터를 탈취한 후 공개 협박하는 새로운 전략을 사용했으며, 이는 2023년 최대 규모의 사이버 보안 사건이 되었습니다.',
           en: 'In 2023, Russia-based Cl0p ransomware group mass-exploited a SQL injection zero-day (CVE-2023-34362) in Progress Software\'s MOVEit Transfer file transfer solution. The attack compromised 2,773+ organizations and 95+ million personal records. Victims include the US Department of Energy, BBC, British Airways, Shell, Sony, and NYC Department of Education. Unlike typical ransomware, Cl0p used a data theft + public extortion strategy without encrypting files, making this the largest cybersecurity incident of 2023.',
@@ -435,19 +501,27 @@ export const TACTICS = [
           attackVector: {
             ko: 'MOVEit Transfer SQL 인젝션 제로데이(CVE-2023-34362) → 웹 셸 설치 → 대규모 데이터 탈취',
             en: 'MOVEit Transfer SQL injection zero-day (CVE-2023-34362) → web shell → mass data exfiltration',
+            vi: 'SQL injection zero-day MOVEit Transfer (CVE-2023-34362) → cài web shell → đánh cắp dữ liệu quy mô lớn',
+            ar: 'ثغرة حقن SQL في MOVEit Transfer (CVE-2023-34362) → تثبيت web shell → سرقة بيانات جماعية',
           },
           affectedOrgs: {
             ko: '미국 에너지부(DOE), BBC, 브리티시 에어웨이즈, Shell, Sony, 뉴욕시 교육청 등 2,773+ 조직',
             en: 'US DOE, BBC, British Airways, Shell, Sony, NYC Dept of Education — 2,773+ organizations',
+            vi: 'Bộ Năng lượng Mỹ, BBC, British Airways, Shell, Sony, Sở Giáo dục NYC — hơn 2.773 tổ chức',
+            ar: 'وزارة الطاقة الأمريكية، BBC، British Airways، Shell، Sony، تعليم نيويورك — أكثر من 2,773 مؤسسة',
           },
           severity: 'critical',
           timeline: {
             ko: '2023년 5~6월 대규모 익스플로잇 — 수 개월간 피해 규모 지속 확대',
             en: 'May-June 2023 mass exploitation — impact scope expanded for months',
+            vi: 'Khai thác quy mô lớn tháng 5–6/2023 — phạm vi thiệt hại tiếp tục mở rộng nhiều tháng',
+            ar: 'استغلال جماعي مايو–يونيو 2023 — استمر توسّع نطاق الأضرار لأشهر',
           },
           lessonsLearned: {
             ko: '파일 전송 솔루션 보안 감사, 제로데이 대응 체계, 공급업체 보안 평가, 데이터 최소화 원칙',
             en: 'File transfer solution security audit, zero-day response framework, vendor security assessment, data minimization',
+            vi: 'Kiểm toán bảo mật giải pháp truyền tệp, khung ứng phó zero-day, đánh giá bảo mật nhà cung cấp, nguyên tắc tối thiểu hóa dữ liệu',
+            ar: 'مراجعة أمنية لحلول نقل الملفات، إطار الاستجابة لثغرات Zero-Day، تقييم أمان البائعين، مبدأ تقليص البيانات',
           },
         },
         videoFile: null,
@@ -485,6 +559,7 @@ export const HERO_TEXT = {
     detailLessons: '교훈',
     detailSeverity: '위험도',
     viewFullReport: '전체 분석 리포트 보기',
+    defenseAnalysis: '클릭하면 방어 스킬트리 분석',
   },
   en: {
     header: 'Learn from Real Hacking Incidents',
@@ -505,6 +580,7 @@ export const HERO_TEXT = {
     detailLessons: 'Lessons Learned',
     detailSeverity: 'Severity',
     viewFullReport: 'View Full Analysis Report',
+    defenseAnalysis: 'Defense Skill Tree Analysis',
   },
   zh: {
     header: '从真实黑客事件中学习',
@@ -525,6 +601,7 @@ export const HERO_TEXT = {
     detailLessons: '经验教训',
     detailSeverity: '严重程度',
     viewFullReport: '查看完整分析报告',
+    defenseAnalysis: '防御技能树分析',
   },
   hi: {
     header: 'वास्तविक हैकिंग घटनाओं से सीखें',
@@ -545,6 +622,7 @@ export const HERO_TEXT = {
     detailLessons: 'सीखे गए सबक',
     detailSeverity: 'गंभीरता',
     viewFullReport: 'पूरी विश्लेषण रिपोर्ट देखें',
+    defenseAnalysis: 'रक्षा स्किल ट्री विश्लेषण',
   },
   ja: {
     header: '実際のハッキング事件から学ぶ',
@@ -565,6 +643,7 @@ export const HERO_TEXT = {
     detailLessons: '教訓',
     detailSeverity: '深刻度',
     viewFullReport: '完全分析レポートを見る',
+    defenseAnalysis: '防御スキルツリー分析',
   },
   vi: {
     header: 'Học từ các sự cố hack thực tế',
@@ -585,6 +664,7 @@ export const HERO_TEXT = {
     detailLessons: 'Bài học rút ra',
     detailSeverity: 'Mức độ nghiêm trọng',
     viewFullReport: 'Xem báo cáo phân tích đầy đủ',
+    defenseAnalysis: 'Phân tích cây kỹ năng phòng thủ',
   },
   ar: {
     header: 'تعلم من حوادث القرصنة الحقيقية',
@@ -605,5 +685,6 @@ export const HERO_TEXT = {
     detailLessons: 'الدروس المستفادة',
     detailSeverity: 'مستوى الخطورة',
     viewFullReport: 'عرض تقرير التحليل الكامل',
+    defenseAnalysis: 'تحليل شجرة مهارات الدفاع',
   },
 };

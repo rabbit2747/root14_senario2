@@ -59,7 +59,7 @@ export default function FullScreenReportModal({ incident, language, isDark, onCl
   }, [incident, videoRef]);
 
   const ht = HERO_TEXT[language] || HERO_TEXT.ko;
-  const lang = language === 'ko' || language === 'en' ? language : 'en';
+  const lang = ['ko', 'en', 'vi', 'ar'].includes(language) ? language : 'en';
 
   const detail = incident?.detailedInfo;
   const tacticId = incident

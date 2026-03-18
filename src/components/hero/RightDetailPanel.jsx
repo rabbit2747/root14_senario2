@@ -88,7 +88,7 @@ export default function RightDetailPanel({
   const accentHex  = isDark ? colors.dark?.hex  : colors.hex;
   const accentText = isDark ? colors.dark?.text : colors.text;
   const ht  = HERO_TEXT[language] || HERO_TEXT.ko;
-  const lang = language === 'ko' || language === 'en' ? language : 'en';
+  const lang = ['ko', 'en', 'vi', 'ar'].includes(language) ? language : 'en';
 
   const textMain  = isDark ? 'text-slate-200' : 'text-slate-700';
   const textSub   = isDark ? 'text-slate-400' : 'text-slate-500';
@@ -249,7 +249,7 @@ export default function RightDetailPanel({
                   <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5v14l11-7z" />
                   </svg>
-                  클릭하면 방어 스킬트리 분석
+                  {ht.defenseAnalysis || '클릭하면 방어 스킬트리 분석'}
                 </button>
               </motion.div>
 

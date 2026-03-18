@@ -43,6 +43,24 @@ const uiText = {
     loading: '読み込み中...',
     noContent: 'グラフィックコンテンツはまだ準備中です。',
   },
+  vi: {
+    graphicTitle: 'Giải thích bằng hình ảnh',
+    graphicSubtitle: 'Trực quan hóa luồng kỹ thuật tấn công',
+    nextBtn: 'Giải thích theo kịch bản →',
+    backBtn: 'Quay lại chọn khóa học',
+    shortcutHint: 'Phím tắt: Click trái/phải hoặc [Space], [←][→], [F] Toàn màn hình',
+    loading: 'Đang tải...',
+    noContent: 'Nội dung đồ họa chưa sẵn sàng.',
+  },
+  ar: {
+    graphicTitle: 'الشرح بالرسوم',
+    graphicSubtitle: 'تصوير مرئي لمسار تقنية الهجوم',
+    nextBtn: 'الشرح القائم على السيناريو →',
+    backBtn: 'العودة لاختيار المسار',
+    shortcutHint: 'اختصارات: انقر يساراً/يميناً أو [Space]، [←][→]، [F] ملء الشاشة',
+    loading: 'جارٍ التحميل...',
+    noContent: 'محتوى الرسوم غير متوفر بعد.',
+  },
 };
 
 // ── 그래픽 콘텐츠 동적 로딩 맵 (SCENARIO_COMPONENTS 패턴) ──

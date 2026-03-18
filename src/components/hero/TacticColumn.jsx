@@ -1,9 +1,14 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { TACTIC_COLORS, HERO_TEXT } from './incidentData';
 
-export default function TacticColumn({ tactic, isActiveTactic, language = 'ko', isDark = false, children }) {
+// 언어별 전술 부제 필드 매핑 (module-level 상수 — 렌더마다 재생성 방지)
+const TITLE_FIELD = { ko: 'titleKo', vi: 'titleVi', ar: 'titleAr' };
+
+const TacticColumn = memo(function TacticColumn({ tactic, isActiveTactic, language = 'ko', isDark = false, children }) {
   const colors = TACTIC_COLORS[tactic.id];
   const ht = HERO_TEXT[language] || HERO_TEXT.ko;
+  const sub = tactic[TITLE_FIELD[language]];
 
   return (
     <motion.div
@@ -17,10 +22,8 @@ export default function TacticColumn({ tactic, isActiveTactic, language = 'ko', 
         <h3 className="text-[10px] md:text-xs font-bold text-white tracking-wide leading-tight">
           {tactic.title}
         </h3>
-        {language === 'ko' && (
-          <p className="text-[8px] md:text-[9px] text-white/70 mt-0.5">
-            {tactic.titleKo}
-          </p>
+        {sub && (
+          <p className="text-[8px] md:text-[9px] text-white/70 mt-0.5">{sub}</p>
         )}
       </div>
 
@@ -60,4 +63,6 @@ export default function TacticColumn({ tactic, isActiveTactic, language = 'ko', 
       </div>
     </motion.div>
   );
-}
+});
+
+export default TacticColumn;
