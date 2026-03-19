@@ -71,11 +71,31 @@ const GRAPHIC_COMPONENTS = {
       _slideData: mod,
     }))
   ),
+  'T1566.001-novice': React.lazy(() =>
+    import('../data/graphic-contents/T1566.001-novice').then(mod => ({ default: () => null, _slideData: mod }))
+  ),
+  'T1566.001-beginner': React.lazy(() =>
+    import('../data/graphic-contents/T1566.001-beginner').then(mod => ({ default: () => null, _slideData: mod }))
+  ),
+  'T1566.001-intermediate': React.lazy(() =>
+    import('../data/graphic-contents/T1566.001-intermediate').then(mod => ({ default: () => null, _slideData: mod }))
+  ),
+  'T1566.001-advanced': React.lazy(() =>
+    import('../data/graphic-contents/T1566.001-advanced').then(mod => ({ default: () => null, _slideData: mod }))
+  ),
+  'T1566.001-expert': React.lazy(() =>
+    import('../data/graphic-contents/T1566.001-expert').then(mod => ({ default: () => null, _slideData: mod }))
+  ),
 };
 
 // ── 그래픽 콘텐츠 직접 import 맵 (slide data) ──
 const GRAPHIC_DATA_LOADERS = {
   'T1587.001-beginner': () => import('../data/graphic-contents/T1587.001-beginner'),
+  'T1566.001-novice': () => import('../data/graphic-contents/T1566.001-novice'),
+  'T1566.001-beginner': () => import('../data/graphic-contents/T1566.001-beginner'),
+  'T1566.001-intermediate': () => import('../data/graphic-contents/T1566.001-intermediate'),
+  'T1566.001-advanced': () => import('../data/graphic-contents/T1566.001-advanced'),
+  'T1566.001-expert': () => import('../data/graphic-contents/T1566.001-expert'),
 };
 
 // FontAwesome: CDN 제거 → npm @fortawesome/fontawesome-free 로컬 import (상단)

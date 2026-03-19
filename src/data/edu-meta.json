@@ -536,7 +536,7 @@
       ],
       "techniqueId": "T1566",
       "subTechniqueId": "T1566.001",
-      "chapters": 3,
+      "chapters": 10,
       "chapterTitles": [
         "왕초보: 스피어피싱이란?",
         "중급: 악성 첨부 기법",
@@ -552,33 +552,22 @@
         "Social Engineering"
       ],
       "levels": {
-        "beginner": {
-          "url": "/edu/t1566-001-spearphishing-attachment.html",
-          "chapters": 3,
+        "novice": {
+          "url": "/edu/t1566-001-spearphishing-attachment-novice.html",
+          "chapters": 10,
           "chapterTitles": [
-            "스피어피싱이란?"
+            "스피어피싱이란? (비유: 낚시와 미끼)",
+            "피싱의 종류와 진화 역사",
+            "실제 피싱 메일 사례 분석",
+            "APT28/APT29 스피어피싱 캠페인",
+            "이메일 시스템 기초 (SMTP)",
+            "MIME 구조 이해",
+            "OLE/매크로 기초 개념",
+            "VBA란 무엇인가?",
+            "PowerShell 기초 개념",
+            "종합 퀴즈: 피싱 식별 게임"
           ],
-          "estimatedMinutes": 10,
-          "chapterIds": [
-            "ch1",
-            "ch2",
-            "ch3"
-          ]
-        },
-        "intermediate": {
-          "url": "/edu/t1566-001-spearphishing-attachment-intermediate.html",
-          "chapters": 8,
-          "chapterTitles": [
-            "Office 매크로 코드 분석",
-            "이메일 헤더 포렌식",
-            "첨부파일 동적 분석",
-            "OLE 구조와 oletools",
-            "Sigma 탐지 규칙",
-            "YARA 규칙 기초",
-            "이메일 보안 게이트웨이",
-            "사용자 보안 인식 교육"
-          ],
-          "estimatedMinutes": 30,
+          "estimatedMinutes": 25,
           "chapterIds": [
             "ch1",
             "ch2",
@@ -587,21 +576,25 @@
             "ch5",
             "ch6",
             "ch7",
-            "ch8"
+            "ch8",
+            "ch9",
+            "quiz"
           ]
         },
-        "advanced": {
-          "url": "/edu/t1566-001-spearphishing-attachment-advanced.html",
-          "chapters": 8,
+        "beginner": {
+          "url": "/edu/t1566-001-spearphishing-attachment.html",
+          "chapters": 10,
           "chapterTitles": [
-            "VBA 난독화 해제 기법",
-            "HTML Smuggling 공격 분석",
-            "ISO/IMG 첨부 공격",
-            "RTF 익스플로잇 심층 분석",
-            "메모리 포렌식 분석",
-            "YARA 규칙 고급 작성",
-            "위협 인텔리전스 통합",
-            "제로트러스트 이메일 아키텍처"
+            "GoPhish 피싱 프레임워크 소개",
+            "msfvenom 페이로드 생성",
+            "SET (Social Engineering Toolkit)",
+            "olevba 매크로 분석 도구",
+            "SMTP → MIME 인코딩 원리",
+            "VBA 엔진 → AutoOpen() 실행 흐름",
+            "첨부파일 실행 → C2 연결 흐름",
+            "VBA 매크로 코드 직접 작성",
+            "피싱 이메일 HTML 구성 실습",
+            "종합 실습: GoPhish 캠페인 시뮬레이션"
           ],
           "estimatedMinutes": 40,
           "chapterIds": [
@@ -612,7 +605,96 @@
             "ch5",
             "ch6",
             "ch7",
-            "ch8"
+            "ch8",
+            "ch9",
+            "ch10"
+          ]
+        },
+        "intermediate": {
+          "url": "/edu/t1566-001-spearphishing-attachment-intermediate.html",
+          "chapters": 10,
+          "chapterTitles": [
+            "보안 환경에서 피싱 실패 체감",
+            "이메일 게이트웨이 차단 분석",
+            "ASR Rule 매크로 차단 분석",
+            "Sysmon 이벤트 ID별 탐지 분석",
+            "YARA 규칙으로 피싱 탐지",
+            "Sigma 규칙 기초",
+            "이메일 헤더 포렌식 실습",
+            "관점 전환: 공격자 → 방어자",
+            "GPO/ASR/게이트웨이 방어 설정",
+            "탐지 규칙 종합 퀴즈"
+          ],
+          "estimatedMinutes": 50,
+          "chapterIds": [
+            "ch1",
+            "ch2",
+            "ch3",
+            "ch4",
+            "ch5",
+            "ch6",
+            "ch7",
+            "ch8",
+            "ch9",
+            "quiz"
+          ]
+        },
+        "advanced": {
+          "url": "/edu/t1566-001-spearphishing-attachment-advanced.html",
+          "chapters": 10,
+          "chapterTitles": [
+            "Sigma YAML 탐지 규칙 작성",
+            "YARA 고급 규칙 작성",
+            "행위 기반 탐지 설계",
+            "EDR 우회: 시그니처 변경",
+            "EDR 우회: API 대체 기법",
+            "EDR 우회: 파일리스 공격",
+            "우회된 공격 재탐지 전략",
+            "행위 체인 기반 재탐지",
+            "Detection Engineering 워크플로우",
+            "공격-탐지-우회-재탐지 루프 실습"
+          ],
+          "estimatedMinutes": 60,
+          "chapterIds": [
+            "ch1",
+            "ch2",
+            "ch3",
+            "ch4",
+            "ch5",
+            "ch6",
+            "ch7",
+            "ch8",
+            "ch9",
+            "ch10"
+          ]
+        },
+        "expert": {
+          "url": "/edu/t1566-001-spearphishing-attachment-expert.html",
+          "chapters": 10,
+          "chapterTitles": [
+            "Purple Team 개요와 방법론",
+            "Red Team: 피싱 사전 정찰 Phase",
+            "Red Team: 피싱 실행 & 초기 침투",
+            "Blue Team: 실시간 탐지 & 대응",
+            "Purple Team 시뮬레이션 종합",
+            "CVE-2021-40444 (MSHTML RCE) 분석",
+            "CVE-2022-30190 (Follina) 분석",
+            "CVE-2023-23397 (Outlook NTLM) 분석",
+            "제로데이 연구 방법론",
+            "커스텀 프레임워크 설계 & 자기주도 학습"
+          ],
+          "estimatedMinutes": 70,
+          "chapterIds": [
+            "ch1",
+            "ch2",
+            "ch3",
+            "ch4",
+            "ch5",
+            "ch6",
+            "ch7",
+            "ch8",
+            "ch9",
+            "ch10"
           ]
         }
       }

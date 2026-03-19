@@ -97,9 +97,21 @@ const SCENARIO_COMPONENTS = {
   'T1587.001-beginner': React.lazy(() =>
     import('../data/scenario-contents/T1587.001-beginner')
   ),
-  // 추가 예시:
-  // 'T1059.001-beginner': React.lazy(() => import('../data/scenario-contents/T1059.001-beginner')),
-  // 'T1110.001-intermediate': React.lazy(() => import('../data/scenario-contents/T1110.001-intermediate')),
+  'T1566.001-novice': React.lazy(() =>
+    import('../data/scenario-contents/T1566.001-novice')
+  ),
+  'T1566.001-beginner': React.lazy(() =>
+    import('../data/scenario-contents/T1566.001-beginner')
+  ),
+  'T1566.001-intermediate': React.lazy(() =>
+    import('../data/scenario-contents/T1566.001-intermediate')
+  ),
+  'T1566.001-advanced': React.lazy(() =>
+    import('../data/scenario-contents/T1566.001-advanced')
+  ),
+  'T1566.001-expert': React.lazy(() =>
+    import('../data/scenario-contents/T1566.001-expert')
+  ),
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
