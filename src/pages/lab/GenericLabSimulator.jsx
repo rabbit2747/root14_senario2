@@ -41,6 +41,9 @@ const UI = {
   },
 };
 
+// 다국어 필드 suffix 맵 (ko는 suffix 없음)
+const LANG_SUFFIX = { en: 'En', vi: 'Vi', ar: 'Ar', ja: 'Ja', zh: 'Zh', hi: 'Hi' };
+
 /**
  * GenericLabSimulator — LabT1078 수준의 데스크톱 시뮬레이션
  * @param {{ scenario: Object, techniqueId: string }} props
@@ -102,6 +105,14 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
   const uName = userName || '훈련생';
   const cName = companyName || 'Corp';
   const replaceVars = useCallback((str) => str?.replace(/\{userName\}/g, uName).replace(/\{companyName\}/g, cName) || '', [uName, cName]);
+
+  // obj의 다국어 필드 조회: ko→field, vi→fieldVi, ar→fieldAr, 나머지→fieldEn, 폴백→field
+  const getLangField = useCallback((obj, field) => {
+    if (!obj) return '';
+    if (lang === 'ko') return obj[field] || '';
+    const key = field + (LANG_SUFFIX[lang] ?? 'En');
+    return obj[key] || obj[field + 'En'] || obj[field] || '';
+  }, [lang]);
 
   const safeStep = Math.min(Math.max(step, 0), totalSteps - 1);
   const current = scenario.steps[safeStep] || scenario.steps[0];
@@ -235,10 +246,10 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
       window.speechSynthesis?.cancel();
       if (step === totalSteps - 1 && !isMuted) playWarningSound();
 
-      const feynmanText = lang === 'ko' ? replaceVars(current.desc) : replaceVars(current.descEn || current.desc);
+      const feynmanText = replaceVars(getLangField(current, 'feynman') || getLangField(current, 'desc'));
       if (!isMuted && feynmanText && window.speechSynthesis) {
         const u = new SpeechSynthesisUtterance(feynmanText);
-        u.lang = lang === 'ko' ? 'ko-KR' : lang === 'en' ? 'en-US' : lang === 'zh' ? 'zh-CN' : lang === 'hi' ? 'hi-IN' : 'ja-JP';
+        u.lang = lang === 'ko' ? 'ko-KR' : lang === 'en' ? 'en-US' : lang === 'vi' ? 'vi-VN' : lang === 'ar' ? 'ar-SA' : lang === 'zh' ? 'zh-CN' : lang === 'hi' ? 'hi-IN' : 'ja-JP';
         u.rate = lang === 'en' ? 0.95 : 1.05;
         u.onend = () => setTtsFinished(true);
         u.onerror = () => setTtsFinished(true);
@@ -497,7 +508,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                                 <motion.div key={idx} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + (idx * 0.4) }}>
                                   <p className="mb-2 font-bold opacity-80 whitespace-pre-wrap leading-relaxed">{replaceVars(item.log)}</p>
                                   <div className="bg-[#40798c]/10 border-l-4 border-[#40798c]/40 p-3 md:p-4 rounded-r-lg font-sans text-[11px] md:text-[13px] font-bold leading-relaxed shadow-sm">
-                                    {replaceVars(item.desc)}
+                                    {replaceVars(getLangField(item, 'desc'))}
                                   </div>
                                 </motion.div>
                               ))}
@@ -534,7 +545,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                                 {t.socTitle}
                               </div>
                               <p className="text-[10px] md:text-[13px] font-bold leading-tight truncate md:whitespace-nowrap text-slate-100">
-                                {replaceVars(current.defTooltip || current.def)}
+                                {replaceVars(getLangField(current, 'defTooltip') || current.def)}
                               </p>
                             </div>
                           </motion.div>
@@ -722,7 +733,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
               <div>
                 <div className="text-[10px] md:text-xs font-black tracking-widest mb-1 text-[#9c6644]">ATT&CK {scenario.id}</div>
                 <h1 className="text-xl md:text-2xl font-extrabold text-gray-800 tracking-tight">
-                  {lang === 'ko' ? scenario.title : scenario.titleEn}
+                  {getLangField(scenario, 'title')}
                 </h1>
               </div>
               <button onClick={() => { setIsMuted(!isMuted); window.speechSynthesis?.cancel(); }}
@@ -770,7 +781,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                           <span className={`text-[7px] md:text-[8px] font-bold text-center leading-tight whitespace-nowrap ${
                             isActive ? 'text-[#9c6644]' : isCompleted ? 'text-[#9c6644]/60' : 'text-slate-400'
                           }`}>
-                            {lang === 'ko' ? phase.label : (phase.labelEn || phase.label)}
+                            {getLangField(phase, 'label')}
                           </span>
                         </div>
                       );
@@ -786,9 +797,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                     <div className="flex items-center gap-3 md:gap-4">
                       <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-[#ede0d4] flex items-center justify-center text-lg md:text-xl text-[#9c6644]">📍</div>
                       <h2 className="text-lg md:text-xl font-black text-gray-800 tracking-tight">
-                        {lang === 'ko'
-                          ? (current.stepTitle || `단계 ${safeStep + 1}`)
-                          : (current.stepTitleEn || `Step ${safeStep + 1}`)}
+                        {getLangField(current, 'stepTitle') || (lang === 'ko' ? `단계 ${safeStep + 1}` : `Step ${safeStep + 1}`)}
                       </h2>
                     </div>
 
@@ -799,7 +808,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                         <div className="bg-white rounded-[20px] md:rounded-[24px] p-5 md:p-6 border-2 border-gray-100 shadow-sm relative">
                           <div className="text-[9px] md:text-[10px] font-black text-[#9c6644] tracking-widest uppercase mb-2">{t.what}</div>
                           <p className="text-xs md:text-sm text-gray-700 leading-relaxed font-medium">
-                            {lang === 'ko' ? replaceVars(current.feynman || current.desc) : replaceVars(current.feynmanEn || current.descEn || current.desc)}
+                            {replaceVars(getLangField(current, 'feynman') || getLangField(current, 'desc'))}
                             {!isMuted && isPlaying && !ttsFinished && <span className="inline-block ml-2 w-2 h-2 rounded-full bg-[#9c6644] animate-pulse" />}
                           </p>
                         </div>
@@ -810,7 +819,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                             <div className="absolute -top-[6px] md:-top-[8px] left-6 md:left-8 w-3 h-3 md:w-4 md:h-4 bg-[#1e293b] transform rotate-45 border-t-4 border-l-4 border-[#9c6644]" />
                             <div className="text-[9px] md:text-[10px] font-black tracking-widest text-[#ede0d4] uppercase mb-2">{t.why}</div>
                             <p className="text-[11px] md:text-[12px] leading-relaxed text-gray-300 font-mono">
-                              {lang === 'ko' ? replaceVars(current.expert) : replaceVars(current.expertEn || current.expert)}
+                              {replaceVars(getLangField(current, 'expert'))}
                             </p>
                           </div>
                         )}
@@ -825,9 +834,9 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                               {current.terms.map((term, idx) => (
                                 <div key={idx} className="flex flex-col">
                                   <span className="font-bold text-slate-800 text-[12px] md:text-[13px] mb-1">
-                                    <span className="text-[#9c6644] mr-1.5">◆</span>{term.name}
+                                    <span className="text-[#9c6644] mr-1.5">◆</span>{getLangField(term, 'name') || term.name}
                                   </span>
-                                  <span className="text-slate-600 text-[11px] md:text-[12px] leading-relaxed ml-4">{term.desc}</span>
+                                  <span className="text-slate-600 text-[11px] md:text-[12px] leading-relaxed ml-4">{getLangField(term, 'desc')}</span>
                                 </div>
                               ))}
                             </div>
@@ -849,9 +858,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                             </p>
                           </div>
                           <p className="text-xs md:text-sm text-gray-700 leading-relaxed font-medium">
-                            {lang === 'ko'
-                              ? replaceVars(current.defTooltip || current.desc)
-                              : replaceVars(current.defTooltipEn || current.descEn || current.desc)}
+                            {replaceVars(getLangField(current, 'defTooltip') || getLangField(current, 'desc'))}
                           </p>
                         </div>
 
@@ -872,7 +879,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                               <Icons.Shield /> {t.defCheckpoint}
                             </div>
                             <p className="text-[11px] md:text-[12px] leading-relaxed text-emerald-800 font-medium">
-                              {lang === 'ko' ? replaceVars(current.expert) : replaceVars(current.expertEn || current.expert)}
+                              {replaceVars(getLangField(current, 'expert'))}
                             </p>
                             {/* 용어도 방어자 뷰에서 표시 */}
                             {current.terms && current.terms.length > 0 && (
@@ -883,8 +890,8 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
                                     <div key={idx} className="flex items-start gap-1.5">
                                       <span className="text-emerald-500 text-[10px] mt-0.5">◆</span>
                                       <div>
-                                        <span className="font-bold text-emerald-900 text-[11px]">{term.name}</span>
-                                        <span className="text-emerald-700 text-[10px] ml-1.5">{term.desc}</span>
+                                        <span className="font-bold text-emerald-900 text-[11px]">{getLangField(term, 'name') || term.name}</span>
+                                        <span className="text-emerald-700 text-[10px] ml-1.5">{getLangField(term, 'desc')}</span>
                                       </div>
                                     </div>
                                   ))}
