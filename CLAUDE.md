@@ -315,6 +315,76 @@ access_logs SELECT(전체 이메일+IP) → 완전 탈취
 
 ---
 
+## 🌐 콘텐츠 작성 다국어(i18n) 가이드 — 파일 유형별 구조
+
+> 전체 가이드: `docs/i18n-content-guide.md`
+> **콘텐츠 담당 Claude**: 새 파일 만들 때 아래 구조 반드시 준수
+
+### 파일 소유권 분리 (충돌 방지)
+| 파일 | 담당 |
+|------|------|
+| `src/data/graphic-contents/*.jsx` | 콘텐츠(구조·ko/en) → 번역(나머지 언어) |
+| `src/data/scenario-contents/*.jsx` | 콘텐츠(구조·ko/en) → 번역(나머지 언어) |
+| `src/data/lab-scenarios/*.json` | 콘텐츠(ko/en) → 번역(vi/ar/ja/zh/hi) |
+| `src/lib/i18n.js` | **번역 담당 전용** |
+| `src/components/hero/incidentData.js` | **번역 담당 전용** |
+| `src/pages/lab/GenericLabSimulator.jsx` | **번역 담당 전용** (언어 분기 로직) |
+
+### 1. 그래픽 콘텐츠 필수 구조
+```js
+// subtitlesData — 다국어 객체 배열 (문자열 배열 ❌)
+export const subtitlesData = [
+  { ko: "한국어 자막", en: "English subtitle", vi: "", ar: "", ja: "", zh: "", hi: "" },
+];
+
+// renderSlides — language 파라미터 필수
+export function renderSlides(language = 'ko') {
+  const T = {
+    ko: { title: '...', body: '...' },
+    en: { title: '...', body: '...' },
+    vi: null, ar: null, ja: null, zh: null, hi: null, // 번역 담당이 채움
+  };
+  const t = T[language] || T.ko;
+  return <><h1>{t.title}</h1><p>{t.body}</p></>;
+}
+```
+
+### 2. 시나리오 콘텐츠 필수 구조
+```jsx
+// language prop 필수 수신
+export default function ScenarioComponent({ language = 'ko' }) {
+  const T = {
+    ko: { loc: 'Sector 1: 이메일 수신함', dialogue1: "...", hint: "..." },
+    en: { loc: 'Sector 1: Inbox', dialogue1: "...", hint: "..." },
+    vi: null, ar: null, ja: null, zh: null, hi: null, // 번역 담당이 채움
+  };
+  const t = T[language] || T.ko;
+  // CHAPTERS, dialogues에 t.xxx 사용
+}
+```
+
+### 3. 랩 JSON 필수 구조
+```json
+{
+  "title": "ko", "titleEn": "en", "titleVi": "", "titleAr": "",
+  "phases": [{ "label": "ko", "labelEn": "en", "labelVi": "", "labelAr": "" }],
+  "steps": [{
+    "desc": "ko", "descEn": "en", "descVi": "", "descAr": "",
+    "stepTitle": "ko", "stepTitleEn": "en", "stepTitleVi": "", "stepTitleAr": "",
+    "feynman": "ko", "feynmanEn": "en", "feynmanVi": "", "feynmanAr": "",
+    "expert": "ko", "expertEn": "en", "expertVi": "", "expertAr": "",
+    "defTooltip": "ko", "defTooltipEn": "en", "defTooltipVi": "", "defTooltipAr": "",
+    "terms": [{ "name": "ko", "nameEn": "en", "desc": "ko", "descEn": "en", "descVi": "", "descAr": "" }],
+    "hackerLog": { "lines": [{ "log": "...", "desc": "ko", "descEn": "en", "descVi": "", "descAr": "" }] }
+  }]
+}
+```
+
+### 번역 금지 항목 (언어 공통 유지)
+`phishing / SMTP / YARA / CVE-xxxx / cat / grep / nmap` 등 기술 용어·명령어·브랜드명·수치
+
+---
+
 ## 📐 프로젝트 구조 & 페이지 흐름도 (코드 기반)
 
 ### ① 라우팅 맵 — App.jsx `<Routes>` 완전 기준

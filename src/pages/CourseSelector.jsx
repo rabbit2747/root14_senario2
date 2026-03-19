@@ -240,7 +240,7 @@ const LEVELS = [
 export default function CourseSelector() {
   const { techniqueId } = useParams();
   const navigate = useNavigate();
-  const { isLoggedIn, user, loading: authLoading } = useAuth();
+  const { isLoggedIn, isAdmin, user, loading: authLoading } = useAuth();
   const { getProgress, isLevelComplete, isUnlocked, loading } = useEduProgress();
   const [language] = useState(() => getStoredLang());
   const [authChecked, setAuthChecked] = useState(false);
@@ -288,7 +288,7 @@ export default function CourseSelector() {
       const levelData = pageMeta.levels?.[level.key];
       const hasContent = levelData?.url != null;
       const prog = getProgress(techniqueId, level.key);
-      const unlocked = isUnlocked(techniqueId, level.key);
+      const unlocked = isAdmin || isUnlocked(techniqueId, level.key);
       const completed = isLevelComplete(techniqueId, level.key);
 
       return {
