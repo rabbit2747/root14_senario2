@@ -260,6 +260,7 @@ export default function ScenarioExplanationPage() {
               onFinish={handleFinish}
               userName={userName}
               companyName={companyName}
+              language={lang}
             />
           </Suspense>
         ) : (

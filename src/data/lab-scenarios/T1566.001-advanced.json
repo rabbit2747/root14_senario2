@@ -2,34 +2,125 @@
   "id": "T1566.001-advanced",
   "title": "EDR 우회 탐지와 Threat Hunting",
   "titleEn": "EDR Evasion Detection and Threat Hunting",
+  "titleVi": "",
+  "titleAr": "",
   "duration": 16,
   "phases": [
-    { "label": "🔍 우회 분석", "labelEn": "🔍 Evasion Analysis", "steps": [0, 1, 2] },
-    { "label": "🔧 탐지공학", "labelEn": "🔧 Detection Engineering", "steps": [3] },
-    { "label": "🎯 위협사냥", "labelEn": "🎯 Threat Hunting", "steps": [4, 5] },
-    { "label": "✅ 검증", "labelEn": "✅ Verification", "steps": [6] }
+    {
+      "label": "🔍 우회 분석",
+      "labelEn": "🔍 Evasion Analysis",
+      "labelVi": "",
+      "labelAr": "",
+      "steps": [0, 1, 2]
+    },
+    {
+      "label": "🔧 탐지공학",
+      "labelEn": "🔧 Detection Engineering",
+      "labelVi": "",
+      "labelAr": "",
+      "steps": [3]
+    },
+    {
+      "label": "🎯 위협사냥",
+      "labelEn": "🎯 Threat Hunting",
+      "labelVi": "",
+      "labelAr": "",
+      "steps": [4, 5]
+    },
+    {
+      "label": "✅ 검증",
+      "labelEn": "✅ Verification",
+      "labelVi": "",
+      "labelAr": "",
+      "steps": [6]
+    }
   ],
   "topoNodes": [
-    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
-    { "id": "emailgw", "label": "Email Gateway", "x": 175, "y": 20 },
-    { "id": "edr", "label": "EDR Console", "x": 350, "y": 20 },
-    { "id": "siem", "label": "SIEM", "x": 500, "y": 20 },
-    { "id": "pc", "label": "User PC", "x": 175, "y": 90 },
-    { "id": "tip", "label": "Threat Intel Platform", "x": 500, "y": 90 }
+    {
+      "id": "ext",
+      "label": "Attacker",
+      "x": 50,
+      "y": 60
+    },
+    {
+      "id": "emailgw",
+      "label": "Email Gateway",
+      "x": 175,
+      "y": 20
+    },
+    {
+      "id": "edr",
+      "label": "EDR Console",
+      "x": 350,
+      "y": 20
+    },
+    {
+      "id": "siem",
+      "label": "SIEM",
+      "x": 500,
+      "y": 20
+    },
+    {
+      "id": "pc",
+      "label": "User PC",
+      "x": 175,
+      "y": 90
+    },
+    {
+      "id": "tip",
+      "label": "Threat Intel Platform",
+      "x": 500,
+      "y": 90
+    }
   ],
   "topoEdges": [
-    { "from": "ext", "to": "emailgw", "minStep": 0 },
-    { "from": "emailgw", "to": "pc", "minStep": 0 },
-    { "from": "pc", "to": "edr", "minStep": 0 },
-    { "from": "edr", "to": "siem", "minStep": 3 },
-    { "from": "siem", "to": "tip", "minStep": 5 }
+    {
+      "from": "ext",
+      "to": "emailgw",
+      "minStep": 0
+    },
+    {
+      "from": "emailgw",
+      "to": "pc",
+      "minStep": 0
+    },
+    {
+      "from": "pc",
+      "to": "edr",
+      "minStep": 0
+    },
+    {
+      "from": "edr",
+      "to": "siem",
+      "minStep": 3
+    },
+    {
+      "from": "siem",
+      "to": "tip",
+      "minStep": 5
+    }
   ],
   "desktopIcons": [
-    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
-    { "name": "CrowdStrike Falcon", "icon": "🦅" },
-    { "name": "Volatility", "icon": "🧠" },
-    { "name": "Threat Hunter Console", "icon": "🎯" },
-    { "name": "Atomic Red Team", "icon": "☢️" }
+    {
+      "name": "🗑️ Recycle Bin",
+      "icon": "🗑️"
+    },
+    {
+      "name": "CrowdStrike Falcon",
+      "icon": "🦅"
+    },
+    {
+      "name": "Volatility",
+      "icon": "🧠"
+    },
+    {
+      "name": "Threat Hunter Console",
+      "icon": "🎯"
+    },
+    {
+      "name": "Atomic Red Team",
+      "icon": "☢️"
+    }
   ],
   "steps": [
     {
@@ -39,25 +130,65 @@
       "defAction": "Source: Sysmon EID 8/10 상관 분석\nTarget: PID 1204 (svchost.exe - hollowed), PID 672 (lsass.exe - accessed)\nAction: 프로세스 홀로잉 체인 전체 식별, 메모리 덤프 확보, 영향 PID 3개 격리",
       "desc": "Sysmon 이벤트 ID 8(CreateRemoteThread)과 10(ProcessAccess)을 분석하여 프로세스 홀로잉과 인젝션 패턴을 탐지합니다.",
       "descEn": "Analyze Sysmon Event IDs 8 (CreateRemoteThread) and 10 (ProcessAccess) to detect process hollowing and injection patterns.",
+      "descVi": "",
+      "descAr": "",
       "stepTitle": "EDR 프로세스 인젝션 탐지",
       "stepTitleEn": "EDR Process Injection Detection",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
       "feynman": "프로세스 홀로잉은 '인형극' 공격입니다. 정상 프로그램(svchost.exe)을 실행한 뒤, 그 속을 비우고 악성 코드로 채워 넣습니다. 겉으로는 정상 svchost.exe지만 속은 해커의 코드입니다. Sysmon EID 8은 '다른 프로세스에 스레드를 주입'하는 순간을, EID 10은 '다른 프로세스의 메모리를 읽고 쓰는' 순간을 포착합니다. 이 두 이벤트를 조합하면 홀로잉의 4단계를 완전히 추적할 수 있습니다.",
       "feynmanEn": "Process hollowing is a 'puppet show' attack. A legitimate program (svchost.exe) is launched, then its contents are emptied and replaced with malicious code. It looks like normal svchost.exe, but inside it's the hacker's code. Sysmon EID 8 captures 'thread injection into another process,' and EID 10 captures 'reading/writing another process's memory.' Combining these two events lets us trace all 4 stages of hollowing.",
+      "feynmanVi": "",
+      "feynmanAr": "",
       "expert": "EID 8(CreateRemoteThread)과 EID 10(ProcessAccess)의 상관 분석으로 프로세스 홀로잉을 탐지합니다. PROCESS_VM_WRITE→self-modification→CreateRemoteThread 시퀀스는 hollowing의 전형적 패턴입니다. lsass.exe에 대한 PROCESS_VM_READ는 Mimikatz류 자격증명 덤프를 나타냅니다. 신뢰도 97.3%는 4단계 체인 완전 매칭 기반입니다.",
       "expertEn": "Correlation analysis of EID 8 (CreateRemoteThread) and EID 10 (ProcessAccess) detects process hollowing. The PROCESS_VM_WRITE→self-modification→CreateRemoteThread sequence is the classic hollowing pattern. PROCESS_VM_READ on lsass.exe indicates Mimikatz-style credential dumping. The 97.3% confidence is based on complete 4-stage chain matching.",
+      "expertVi": "",
+      "expertAr": "",
       "defTooltip": "🔴 EDR: 프로세스 홀로잉 4단계 체인 완전 감지 — svchost.exe 피해, lsass.exe 접근 시도",
       "defTooltipEn": "🔴 EDR: Full 4-stage process hollowing chain detected — svchost.exe compromised, lsass.exe access attempted",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
       "hackerLog": {
         "title": "process_injection_analysis.log",
         "lines": [
-          { "log": "Stage 1: powershell.exe wrote to svchost.exe memory (VM_WRITE)", "desc": "💡 PowerShell이 svchost.exe의 메모리를 덮어쓰는 홀로잉 1단계입니다" },
-          { "log": "Stage 2: svchost.exe self-modified (hollowed)", "desc": "💡 원본 코드가 악성 코드로 교체된 '빈 껍데기' 상태입니다" },
-          { "log": "Stage 4: Hollowed process accessed lsass.exe", "desc": "💡 자격증명 탈취를 위해 lsass.exe 메모리에 접근하고 있습니다" }
+          {
+            "log": "Stage 1: powershell.exe wrote to svchost.exe memory (VM_WRITE)",
+            "desc": "💡 PowerShell이 svchost.exe의 메모리를 덮어쓰는 홀로잉 1단계입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Stage 2: svchost.exe self-modified (hollowed)",
+            "desc": "💡 원본 코드가 악성 코드로 교체된 '빈 껍데기' 상태입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Stage 4: Hollowed process accessed lsass.exe",
+            "desc": "💡 자격증명 탈취를 위해 lsass.exe 메모리에 접근하고 있습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
         ]
       },
       "terms": [
-        { "name": "Process Hollowing (프로세스 홀로잉)", "desc": "정상 프로세스를 생성한 뒤 메모리의 원본 코드를 악성 코드로 교체하는 기법. 프로세스 이름은 정상이지만 실제 실행 코드는 악성입니다" },
-        { "name": "CreateRemoteThread", "desc": "다른 프로세스에 스레드를 생성하는 Windows API. 코드 인젝션의 핵심 기법으로, 악성코드가 정상 프로세스 내에서 실행되도록 합니다" }
+        {
+          "name": "Process Hollowing (프로세스 홀로잉)",
+          "desc": "정상 프로세스를 생성한 뒤 메모리의 원본 코드를 악성 코드로 교체하는 기법. 프로세스 이름은 정상이지만 실제 실행 코드는 악성입니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "CreateRemoteThread",
+          "desc": "다른 프로세스에 스레드를 생성하는 Windows API. 코드 인젝션의 핵심 기법으로, 악성코드가 정상 프로세스 내에서 실행되도록 합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
       ]
     },
     {
@@ -67,25 +198,65 @@
       "defAction": "Source: Volatility3 메모리 포렌식 + AMSI 무결성 검증\nTarget: PID 1204 (svchost.exe) 메모리 영역\nAction: 주입된 페이로드 2건 추출(meterpreter, cobalt_strike), AMSI 패칭 증거 보존",
       "desc": "Volatility3으로 메모리 덤프에서 주입된 악성 코드를 식별하고, AMSI 바이패스 흔적을 검증합니다.",
       "descEn": "Use Volatility3 to identify injected malicious code in memory dumps and verify AMSI bypass artifacts.",
+      "descVi": "",
+      "descAr": "",
       "stepTitle": "AMSI 바이패스 흔적 분석",
       "stepTitleEn": "AMSI Bypass Artifact Analysis",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
       "feynman": "메모리 포렌식은 범인이 떠난 뒤 '현장 감식'을 하는 것입니다. Volatility3는 컴퓨터의 RAM을 분석하여 정상 프로세스 안에 숨겨진 악성 코드를 찾습니다. svchost.exe 메모리에서 Meterpreter와 Cobalt Strike 비콘이 발견되었습니다. 또한 AMSI(스크립트 검사 기능)가 '한 줄 패치(RET)'로 무력화되어 있었습니다. 원래 검사 함수의 첫 바이트를 '즉시 리턴(C3)'으로 바꿔서 검사 없이 통과시킨 것입니다.",
       "feynmanEn": "Memory forensics is like 'crime scene investigation' after the perpetrator has left. Volatility3 analyzes the computer's RAM to find malicious code hidden inside legitimate processes. Meterpreter and Cobalt Strike beacon were found in svchost.exe's memory. Additionally, AMSI (script scanning) was disabled with a 'one-byte patch (RET).' The first byte of the scanning function was changed to 'return immediately (C3),' bypassing all scans.",
+      "feynmanVi": "",
+      "feynmanAr": "",
       "expert": "Volatility3 malfind는 PAGE_EXECUTE_RW 보호 속성의 VAD(Virtual Address Descriptor)를 탐지합니다. MZ 헤더와 셸코드 프롤로그(FC 48 83 E4 F0)는 각각 PE 인젝션과 Position-Independent 셸코드를 나타냅니다. 엔트로피 7.8+는 패킹/암호화를 시사합니다. AmsiScanBuffer의 C3(RET) 패치는 Matt Graeber의 AMSI bypass의 변형으로, 단일 바이트 오버라이트로 전체 스크립트 검사를 무력화합니다.",
       "expertEn": "Volatility3 malfind detects VADs (Virtual Address Descriptors) with PAGE_EXECUTE_RW protection. MZ headers and shellcode prologue (FC 48 83 E4 F0) indicate PE injection and position-independent shellcode respectively. Entropy 7.8+ suggests packing/encryption. The AmsiScanBuffer C3 (RET) patch is a variant of Matt Graeber's AMSI bypass, disabling all script scanning with a single-byte overwrite.",
+      "expertVi": "",
+      "expertAr": "",
       "defTooltip": "🧠 메모리 포렌식: 프로세스 내 Meterpreter+CobaltStrike 주입, AMSI 단일바이트 패치 증거 확보",
       "defTooltipEn": "🧠 Memory Forensics: Meterpreter+CobaltStrike injection in process, AMSI single-byte patch evidence secured",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
       "hackerLog": {
         "title": "volatility_malfind.log",
         "lines": [
-          { "log": "Yara Match: meterpreter_reverse_https (16KB)", "desc": "💡 svchost.exe 메모리에서 Meterpreter 리버스 셸이 발견되었습니다" },
-          { "log": "Yara Match: cobalt_strike_beacon (320KB)", "desc": "💡 Cobalt Strike 비콘 — 고급 공격자가 사용하는 상용 공격 프레임워크입니다" },
-          { "log": "PATCHED: First bytes = C3 (RET) instead of 4C 8B DC", "desc": "💡 AMSI 함수의 첫 바이트가 '즉시 리턴'으로 패치되어 검사가 무력화되었습니다" }
+          {
+            "log": "Yara Match: meterpreter_reverse_https (16KB)",
+            "desc": "💡 svchost.exe 메모리에서 Meterpreter 리버스 셸이 발견되었습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Yara Match: cobalt_strike_beacon (320KB)",
+            "desc": "💡 Cobalt Strike 비콘 — 고급 공격자가 사용하는 상용 공격 프레임워크입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "PATCHED: First bytes = C3 (RET) instead of 4C 8B DC",
+            "desc": "💡 AMSI 함수의 첫 바이트가 '즉시 리턴'으로 패치되어 검사가 무력화되었습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
         ]
       },
       "terms": [
-        { "name": "Volatility", "desc": "메모리 포렌식 프레임워크. 실행 중인 프로세스, 네트워크 연결, 레지스트리 등을 RAM 덤프에서 분석합니다. 파일리스 악성코드 탐지에 필수 도구입니다" },
-        { "name": "AMSI Bypass", "desc": "Windows의 Anti-Malware Scan Interface를 무력화하는 기법. AmsiScanBuffer 함수를 패치하여 스크립트 검사 없이 악성 코드를 실행합니다" }
+        {
+          "name": "Volatility",
+          "desc": "메모리 포렌식 프레임워크. 실행 중인 프로세스, 네트워크 연결, 레지스트리 등을 RAM 덤프에서 분석합니다. 파일리스 악성코드 탐지에 필수 도구입니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "AMSI Bypass",
+          "desc": "Windows의 Anti-Malware Scan Interface를 무력화하는 기법. AmsiScanBuffer 함수를 패치하여 스크립트 검사 없이 악성 코드를 실행합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
       ]
     },
     {
@@ -95,25 +266,65 @@
       "defAction": "Source: Sigma 룰 47개 × Sysmon 로그 상관 분석\nTarget: certutil.exe, mshta.exe, rundll32.exe (동일 공격 체인)\nAction: LOLBin 3종 비정상 사용 확인, ATT&CK 3개 기법 매핑 완료",
       "desc": "LOLBins(Living off the Land Binaries)의 비정상 활동을 Sigma 룰로 탐지하여 정상 Windows 도구의 악용 패턴을 식별합니다.",
       "descEn": "Detect abnormal LOLBin (Living off the Land Binaries) activity using Sigma rules to identify abuse patterns of legitimate Windows tools.",
+      "descVi": "",
+      "descAr": "",
       "stepTitle": "LOLBins 활동 추적",
       "stepTitleEn": "LOLBins Activity Tracking",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
       "feynman": "LOLBin은 '도둑이 집에 있는 도구로 금고를 따는 것'과 같습니다. 해커가 자신의 도구를 가져오는 대신, Windows에 이미 설치된 정상 프로그램(certutil, mshta, rundll32)을 악용합니다. certutil은 원래 인증서 관리 도구인데 파일 다운로더로, mshta는 HTML 앱 실행기인데 VBScript 실행기로, rundll32는 DLL 로더인데 JavaScript 실행기로 악용됩니다. 정상 프로그램이라 백신이 차단하지 않습니다.",
       "feynmanEn": "LOLBin is like 'a burglar using tools already in the house to crack the safe.' Instead of bringing their own tools, hackers abuse legitimate Windows programs (certutil, mshta, rundll32). certutil is a certificate manager used as a file downloader, mshta is an HTML app runner used as a VBScript executor, rundll32 is a DLL loader used as a JavaScript executor. Since they're legitimate programs, antivirus doesn't block them.",
+      "feynmanVi": "",
+      "feynmanAr": "",
       "expert": "LOLBin 탐지는 컨텍스트 기반 분석이 핵심입니다. certutil -urlcache -split -f는 다운로드 기능의 악용(T1140), mshta vbscript:Execute는 서명된 바이너리 프록시 실행(T1218.005), rundll32 javascript:는 DLL 사이드로딩 변형(T1218.011)입니다. 47개 Sigma 룰로 12,847개 이벤트를 상관 분석하여 동일 공격 체인에서 파생된 3종 LOLBin을 연결합니다.",
       "expertEn": "LOLBin detection requires context-based analysis. certutil -urlcache -split -f abuses download capability (T1140), mshta vbscript:Execute is signed binary proxy execution (T1218.005), rundll32 javascript: is a DLL sideloading variant (T1218.011). Correlating 12,847 events with 47 Sigma rules links 3 LOLBins to the same attack chain.",
+      "expertVi": "",
+      "expertAr": "",
       "defTooltip": "🔧 LOLBin: certutil/mshta/rundll32 3종 정상 도구의 비정상 악용 패턴 탐지",
       "defTooltipEn": "🔧 LOLBin: Abnormal abuse patterns detected for 3 legitimate tools — certutil/mshta/rundll32",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
       "hackerLog": {
         "title": "lolbin_detection.log",
         "lines": [
-          { "log": "certutil.exe -urlcache -split -f (T1140)", "desc": "💡 인증서 관리 도구를 파일 다운로더로 악용 — 백신 우회용입니다" },
-          { "log": "mshta.exe vbscript:Execute (T1218.005)", "desc": "💡 서명된 Microsoft 바이너리로 VBScript를 실행하여 탐지를 우회합니다" },
-          { "log": "All LOLBins traced to same parent chain", "desc": "💡 3종 LOLBin 모두 동일 공격 체인(WINWORD→powershell)에서 파생되었습니다" }
+          {
+            "log": "certutil.exe -urlcache -split -f (T1140)",
+            "desc": "💡 인증서 관리 도구를 파일 다운로더로 악용 — 백신 우회용입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "mshta.exe vbscript:Execute (T1218.005)",
+            "desc": "💡 서명된 Microsoft 바이너리로 VBScript를 실행하여 탐지를 우회합니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "All LOLBins traced to same parent chain",
+            "desc": "💡 3종 LOLBin 모두 동일 공격 체인(WINWORD→powershell)에서 파생되었습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
         ]
       },
       "terms": [
-        { "name": "LOLBin (Living off the Land Binary)", "desc": "운영체제에 기본 설치된 정상 프로그램을 악용하는 기법. 별도 악성코드 없이 시스템 도구만으로 공격하여 탐지가 어렵습니다" },
-        { "name": "Signed Binary Proxy Execution", "desc": "Microsoft가 서명한 정상 바이너리를 통해 악성 코드를 실행하는 기법. 서명 검증을 통과하므로 Application Whitelisting을 우회합니다" }
+        {
+          "name": "LOLBin (Living off the Land Binary)",
+          "desc": "운영체제에 기본 설치된 정상 프로그램을 악용하는 기법. 별도 악성코드 없이 시스템 도구만으로 공격하여 탐지가 어렵습니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "Signed Binary Proxy Execution",
+          "desc": "Microsoft가 서명한 정상 바이너리를 통해 악성 코드를 실행하는 기법. 서명 검증을 통과하므로 Application Whitelisting을 우회합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
       ]
     },
     {
@@ -123,25 +334,65 @@
       "defAction": "Source: Detection Engineering Lab 자동화 파이프라인\nTarget: SIEM 탐지 엔진 (Splunk + Elastic)\nAction: 복합 탐지 룰 배포, 96% 탐지율/0.4% 오탐률 검증 완료",
       "desc": "프로세스 홀로잉, AMSI 바이패스, LOLBin 활동을 복합적으로 탐지하는 규칙을 생성하고, 테스트 후 SIEM에 배포합니다.",
       "descEn": "Create detection rules that combine process hollowing, AMSI bypass, and LOLBin activity, test them, and deploy to SIEM platforms.",
+      "descVi": "",
+      "descAr": "",
       "stepTitle": "Detection Engineering - 탐지 룰 작성",
       "stepTitleEn": "Detection Engineering - Detection Rule Creation",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
       "feynman": "Detection Engineering은 '보안 경보 시스템을 설계'하는 것입니다. 앞서 분석한 3가지 공격 기법(프로세스 홀로잉 + AMSI 바이패스 + LOLBin)을 하나의 복합 탐지 룰로 묶습니다. 그리고 '모의 시험'을 봅니다: 500개 정상 + 50개 악성 샘플로 테스트한 결과, 96% 탐지율에 0.4% 오탐률. F1 점수 0.96은 매우 우수한 성적입니다. 검증된 룰을 Splunk와 Elastic 두 SIEM에 동시 배포합니다.",
       "feynmanEn": "Detection Engineering is 'designing a security alarm system.' We combine the 3 attack techniques analyzed earlier (process hollowing + AMSI bypass + LOLBin) into a single composite detection rule. Then we run a 'mock exam': testing against 500 benign + 50 malicious samples yields 96% detection rate with 0.4% false positive rate. An F1 score of 0.96 is excellent. The validated rule is deployed simultaneously to Splunk and Elastic SIEMs.",
+      "feynmanVi": "",
+      "feynmanAr": "",
       "expert": "Detection Engineering 라이프사이클: 생성→테스트→배포. 복합 조건(selection_macro_exec AND 1-of [hollowing, amsi_patch, lolbin])은 단일 기법 탐지보다 정밀도를 높입니다. timeframe: 5m으로 시간 상관을 추가하여 관련 없는 이벤트의 우연한 매칭을 방지합니다. F1 0.96은 precision(0.96)과 recall(0.96)의 균형을 나타냅니다.",
       "expertEn": "Detection Engineering lifecycle: create→test→deploy. Composite conditions (selection_macro_exec AND 1-of [hollowing, amsi_patch, lolbin]) improve precision over single-technique detection. timeframe: 5m adds temporal correlation to prevent coincidental matching. F1 0.96 indicates balanced precision (0.96) and recall (0.96).",
+      "expertVi": "",
+      "expertAr": "",
       "defTooltip": "🔧 탐지공학: 복합 탐지 룰 생성(3기법 통합) → 테스트(F1=0.96) → SIEM 이중 배포 완료",
       "defTooltipEn": "🔧 Detection Engineering: Composite rule created (3 techniques) → tested (F1=0.96) → dual SIEM deployment complete",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
       "hackerLog": {
         "title": "detection_rule_lifecycle.log",
         "lines": [
-          { "log": "condition: selection_macro_exec and (1 of selection_*)", "desc": "💡 매크로 실행 + 우회 기법 중 1개 이상 매칭 시 경보를 발생시킵니다" },
-          { "log": "F1 Score: 0.9596 (TP:48, FP:2, FN:2)", "desc": "💡 96% 탐지율에 0.4% 오탐 — 운영 환경에 바로 배포 가능한 수준입니다" },
-          { "log": "Splunk + Elastic: ✅ deployed", "desc": "💡 두 SIEM에 동시 배포하여 단일 장애점을 제거합니다" }
+          {
+            "log": "condition: selection_macro_exec and (1 of selection_*)",
+            "desc": "💡 매크로 실행 + 우회 기법 중 1개 이상 매칭 시 경보를 발생시킵니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "F1 Score: 0.9596 (TP:48, FP:2, FN:2)",
+            "desc": "💡 96% 탐지율에 0.4% 오탐 — 운영 환경에 바로 배포 가능한 수준입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Splunk + Elastic: ✅ deployed",
+            "desc": "💡 두 SIEM에 동시 배포하여 단일 장애점을 제거합니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
         ]
       },
       "terms": [
-        { "name": "Detection Engineering (탐지공학)", "desc": "탐지 규칙의 체계적 생성·테스트·배포·유지보수 프로세스. 소프트웨어 개발처럼 탐지 규칙도 라이프사이클 관리가 필요합니다" },
-        { "name": "F1 Score", "desc": "정밀도(Precision)와 재현율(Recall)의 조화 평균. 1에 가까울수록 오탐과 미탐 모두 적은 우수한 탐지 규칙입니다" }
+        {
+          "name": "Detection Engineering (탐지공학)",
+          "desc": "탐지 규칙의 체계적 생성·테스트·배포·유지보수 프로세스. 소프트웨어 개발처럼 탐지 규칙도 라이프사이클 관리가 필요합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "F1 Score",
+          "desc": "정밀도(Precision)와 재현율(Recall)의 조화 평균. 1에 가까울수록 오탐과 미탐 모두 적은 우수한 탐지 규칙입니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
       ]
     },
     {
@@ -151,25 +402,65 @@
       "defAction": "Source: 가설 기반 Threat Hunting (Sysmon+EDR+Proxy 상관)\nTarget: 15일간 전체 WINWORD.EXE 활동 2,847건\nAction: 미탐지 침해 2건 격리, 영향 받은 2명 계정 비활성화, 탐지 규칙 갭 식별",
       "desc": "가설 기반 Threat Hunting으로 EDR이 놓친 과거 침해를 적극적으로 탐색합니다.",
       "descEn": "Conduct hypothesis-driven threat hunting to proactively search for past compromises missed by EDR.",
+      "descVi": "",
+      "descAr": "",
       "stepTitle": "Threat Hunting 가설 수립 및 탐색",
       "stepTitleEn": "Threat Hunting Hypothesis and Search",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
       "feynman": "Threat Hunting은 '능동적 순찰'입니다. EDR이 '경보가 울리면 출동'하는 방식이라면, Threat Hunting은 '경보가 없어도 직접 찾아다니는' 방식입니다. '매크로로 초기 침입이 있었을 것이다'라는 가설을 세우고 15일간의 모든 Word 활동을 분석했습니다. 결과는 충격적입니다: EDR이 놓친 침해 2건이 발견되었고, 하나는 이미 3일간, 다른 하나는 7일간 잠복해 있었습니다.",
       "feynmanEn": "Threat Hunting is 'proactive patrol.' While EDR works like 'responding when the alarm sounds,' Threat Hunting 'searches even without alarms.' We hypothesized 'macro-based initial access likely occurred' and analyzed all Word activity over 15 days. The results are shocking: 2 compromises missed by EDR were found — one lurking for 3 days, another for 7 days.",
+      "feynmanVi": "",
+      "feynmanAr": "",
       "expert": "가설 기반 헌팅은 베이스라인 수립 → 이상치 탐색 → 심층 분석의 3단계입니다. 2,847건 중 0.42%(12건)만 자식 프로세스를 생성했으며, 그 중 4건이 이상 행동입니다. EDR 탐지 갭은 cmd.exe와 wscript.exe 체인에 있었습니다 — 난독화되지 않은 단순한 체인은 오히려 고급 탐지를 회피합니다. 잠복 기간(Dwell Time) 3일/7일은 탐지 능력의 실질적 한계를 보여줍니다.",
       "expertEn": "Hypothesis-driven hunting follows 3 phases: baseline establishment → anomaly detection → deep-dive analysis. Only 0.42% (12/2,847) of Word executions spawned child processes, with 4 being anomalous. The EDR detection gap was in cmd.exe and wscript.exe chains — simple, unobfuscated chains actually evade advanced detection. Dwell times of 3/7 days reveal practical limits of detection capability.",
+      "expertVi": "",
+      "expertAr": "",
       "defTooltip": "🎯 Threat Hunt: 가설 기반 사냥으로 EDR 미탐지 침해 2건 발견 — 잠복 3일/7일",
       "defTooltipEn": "🎯 Threat Hunt: Hypothesis-driven hunting discovered 2 EDR-missed compromises — 3/7 day dwell time",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
       "hackerLog": {
         "title": "threat_hunt_results.log",
         "lines": [
-          { "log": "Finding 2: WINWORD→cmd.exe→certutil — 3 DAYS undetected", "desc": "💡 EDR이 cmd.exe 체인을 탐지하지 못해 3일간 C2 비콘이 활동했습니다" },
-          { "log": "Finding 3: WINWORD→wscript.exe — 2.3GB data exfiltration", "desc": "💡 wscript.exe가 탐지 규칙에 없어 7일간 2.3GB 데이터가 유출되었습니다" },
-          { "log": "EDR gap: cmd.exe and wscript.exe chains not covered", "desc": "💡 기존 탐지 규칙의 사각지대가 발견되었습니다 — 규칙 업데이트 필요" }
+          {
+            "log": "Finding 2: WINWORD→cmd.exe→certutil — 3 DAYS undetected",
+            "desc": "💡 EDR이 cmd.exe 체인을 탐지하지 못해 3일간 C2 비콘이 활동했습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Finding 3: WINWORD→wscript.exe — 2.3GB data exfiltration",
+            "desc": "💡 wscript.exe가 탐지 규칙에 없어 7일간 2.3GB 데이터가 유출되었습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "EDR gap: cmd.exe and wscript.exe chains not covered",
+            "desc": "💡 기존 탐지 규칙의 사각지대가 발견되었습니다 — 규칙 업데이트 필요",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
         ]
       },
       "terms": [
-        { "name": "Threat Hunting (위협 사냥)", "desc": "자동 탐지 시스템이 놓칠 수 있는 위협을 사람이 직접 가설을 세워 능동적으로 탐색하는 활동. EDR/SIEM의 한계를 보완합니다" },
-        { "name": "Dwell Time (잠복 시간)", "desc": "공격자가 침입 후 탐지되기까지의 시간. 전 세계 평균은 약 16일이며, 짧을수록 피해가 적습니다" }
+        {
+          "name": "Threat Hunting (위협 사냥)",
+          "desc": "자동 탐지 시스템이 놓칠 수 있는 위협을 사람이 직접 가설을 세워 능동적으로 탐색하는 활동. EDR/SIEM의 한계를 보완합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "Dwell Time (잠복 시간)",
+          "desc": "공격자가 침입 후 탐지되기까지의 시간. 전 세계 평균은 약 16일이며, 짧을수록 피해가 적습니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
       ]
     },
     {
@@ -179,25 +470,65 @@
       "defAction": "Source: IOC 추출 + STIX 변환 파이프라인\nTarget: TAXII 피드 → 방화벽, 이메일 게이트웨이, EDR (3개 소비자)\nAction: IP 3개, 도메인 3개, 해시 3개, 이메일 2개, YARA 1개 자동 차단 배포",
       "desc": "발견된 3건의 침해에서 IOC를 추출하고 STIX 2.1 형식으로 변환한 뒤, TAXII 피드를 통해 보안 장비에 자동으로 공유합니다.",
       "descEn": "Extract IOCs from the 3 discovered compromises, convert to STIX 2.1 format, and automatically share with security devices via TAXII feed.",
+      "descVi": "",
+      "descAr": "",
       "stepTitle": "IOC 추출 및 STIX 형식 공유",
       "stepTitleEn": "IOC Extraction and STIX Format Sharing",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
       "feynman": "IOC 추출은 '범인의 인상착의를 정리하여 수배 전단을 만드는 것'입니다. 3건의 침해에서 IP 주소, 도메인, 파일 해시, 이메일 주소를 모두 추출합니다. 이것을 STIX라는 국제 표준 형식으로 변환하고, TAXII라는 배포 채널을 통해 방화벽·이메일 게이트웨이·EDR 3곳에 자동으로 전송합니다. 이제 이 IOC와 일치하는 트래픽은 어디서든 즉시 차단됩니다.",
       "feynmanEn": "IOC extraction is like 'compiling a suspect's description into a wanted poster.' From 3 compromises, we extract all IP addresses, domains, file hashes, and email addresses. These are converted to STIX (international standard format) and distributed via TAXII (sharing channel) to firewall, email gateway, and EDR — all automatically. Now any traffic matching these IOCs is immediately blocked everywhere.",
+      "feynmanVi": "",
+      "feynmanAr": "",
       "expert": "STIX 2.1 번들은 Indicator(12개), Malware(3개), Relationship(5개) 객체로 구성됩니다. TAXII 서버를 통한 자동 배포로 IOC-to-detection 사이클을 분 단위로 단축합니다. 3개 소비자(방화벽 IP 차단, DNS 블랙홀, EDR 해시 차단)에 동시 배포하여 네트워크·이메일·엔드포인트 3축에서 동시 차단을 실현합니다.",
       "expertEn": "The STIX 2.1 bundle comprises Indicator (12), Malware (3), and Relationship (5) objects. Auto-distribution via TAXII server reduces the IOC-to-detection cycle to minutes. Simultaneous deployment to 3 consumers (firewall IP blocking, DNS blackhole, EDR hash blocking) achieves concurrent blocking across network, email, and endpoint axes.",
+      "expertVi": "",
+      "expertAr": "",
       "defTooltip": "📡 Threat Intel: 12개 IOC → STIX 2.1 → TAXII → 방화벽+이메일+EDR 3축 자동 차단",
       "defTooltipEn": "📡 Threat Intel: 12 IOCs → STIX 2.1 → TAXII → Firewall+Email+EDR 3-axis auto-blocking",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
       "hackerLog": {
         "title": "ioc_stix_publish.log",
         "lines": [
-          { "log": "12 indicators, 3 malware objects, 5 relationships", "desc": "💡 STIX 번들에 12개 지표와 공격 도구 간 관계가 구조화되었습니다" },
-          { "log": "Auto-blocking: IOC IPs added to perimeter firewall ✅", "desc": "💡 발견된 공격 IP가 방화벽에서 자동으로 차단됩니다" },
-          { "log": "Subscribed consumers: 3 (Firewall, Email Gateway, EDR)", "desc": "💡 3개 보안 장비가 실시간으로 IOC를 수신하여 즉시 차단합니다" }
+          {
+            "log": "12 indicators, 3 malware objects, 5 relationships",
+            "desc": "💡 STIX 번들에 12개 지표와 공격 도구 간 관계가 구조화되었습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Auto-blocking: IOC IPs added to perimeter firewall ✅",
+            "desc": "💡 발견된 공격 IP가 방화벽에서 자동으로 차단됩니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Subscribed consumers: 3 (Firewall, Email Gateway, EDR)",
+            "desc": "💡 3개 보안 장비가 실시간으로 IOC를 수신하여 즉시 차단합니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
         ]
       },
       "terms": [
-        { "name": "IOC (Indicator of Compromise)", "desc": "침해 지표. IP, 도메인, 파일 해시 등 공격의 흔적을 식별하는 정보입니다. 다른 조직과 공유하면 동일 공격을 사전에 차단할 수 있습니다" },
-        { "name": "STIX/TAXII", "desc": "STIX는 위협 정보의 구조화 표준 형식, TAXII는 그 정보를 교환하는 프로토콜입니다. 보안 장비 간 위협 정보를 자동으로 공유하는 국제 표준입니다" }
+        {
+          "name": "IOC (Indicator of Compromise)",
+          "desc": "침해 지표. IP, 도메인, 파일 해시 등 공격의 흔적을 식별하는 정보입니다. 다른 조직과 공유하면 동일 공격을 사전에 차단할 수 있습니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "STIX/TAXII",
+          "desc": "STIX는 위협 정보의 구조화 표준 형식, TAXII는 그 정보를 교환하는 프로토콜입니다. 보안 장비 간 위협 정보를 자동으로 공유하는 국제 표준입니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
       ]
     },
     {
@@ -207,33 +538,98 @@
       "defAction": "Source: Atomic Red Team + 업데이트된 탐지 규칙\nTarget: 3가지 매크로 공격 변형 (WMI, cmd.exe, wscript.exe)\nAction: 전 변형 탐지+자동격리 확인, 시뮬레이션 아티팩트 정리 완료",
       "desc": "Atomic Red Team으로 3가지 공격 변형을 시뮬레이션하여 업데이트된 탐지 규칙이 모든 변형을 탐지하는지 검증합니다.",
       "descEn": "Simulate 3 attack variations using Atomic Red Team to verify that updated detection rules catch all variants.",
+      "descVi": "",
+      "descAr": "",
       "stepTitle": "재탐지 검증 - Purple Team 시뮬레이션",
       "stepTitleEn": "Re-detection Verification - Purple Team Simulation",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
       "feynman": "Purple Team은 '방화 훈련'입니다. Red Team(공격팀)이 공격하고 Blue Team(방어팀)이 탐지하는 것을 합동으로 수행합니다. Atomic Red Team이라는 도구로 3가지 공격 변형을 재현했습니다. 결과: Threat Hunting 전에는 33%(1/3)만 탐지했지만, 규칙 업데이트 후 100%(3/3) 전수 탐지에 성공했습니다. 평균 잠복시간도 5일에서 4.4초로 극적으로 단축되었습니다.",
       "feynmanEn": "Purple Team is a 'fire drill.' Red Team (attackers) and Blue Team (defenders) work together to test defenses. Using Atomic Red Team, we reproduced 3 attack variations. Results: Before threat hunting, only 33% (1/3) were detected. After rule updates, 100% (3/3) were detected. Average dwell time dropped dramatically from 5 days to 4.4 seconds.",
+      "feynmanVi": "",
+      "feynmanAr": "",
       "expert": "Atomic Red Team은 MITRE ATT&CK 기법별 재현 가능한 테스트를 제공합니다. Purple Team 시뮬레이션으로 탐지율(Detection Rate)을 33%→100%로, MTTD(Mean Time to Detect)를 5일→4.37초로 개선했습니다. --cleanup 플래그로 시뮬레이션 아티팩트를 자동 제거하여 운영 환경 오염을 방지합니다. Before/After 비교로 정량적 개선을 검증합니다.",
       "expertEn": "Atomic Red Team provides reproducible tests per MITRE ATT&CK technique. Purple Team simulation improved detection rate from 33%→100% and MTTD from 5 days→4.37 seconds. The --cleanup flag auto-removes simulation artifacts to prevent operational environment contamination. Before/After comparison provides quantitative improvement validation.",
+      "expertVi": "",
+      "expertAr": "",
       "defTooltip": "✅ Purple Team: 3/3 탐지 성공, 탐지율 33%→100%, 잠복시간 5일→4.4초 — 전체 검증 통과",
       "defTooltipEn": "✅ Purple Team: 3/3 detected, detection rate 33%→100%, dwell time 5d→4.4s — full validation passed",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
       "hackerLog": {
         "title": "purple_team_results.log",
         "lines": [
-          { "log": "Detection Rate: 3/3 (100%) — Previously 1/3 (33%)", "desc": "💡 Threat Hunting과 탐지 규칙 업데이트로 탐지율이 3배 향상되었습니다" },
-          { "log": "Dwell Time: 5 days → 4.4 seconds (99.99% ↓)", "desc": "💡 평균 잠복시간이 5일에서 4.4초로 — 사실상 실시간 탐지를 달성했습니다" },
-          { "log": "Coverage Gap: 2 → 0", "desc": "💡 cmd.exe와 wscript.exe 체인 탐지 갭이 완전히 해소되었습니다" }
+          {
+            "log": "Detection Rate: 3/3 (100%) — Previously 1/3 (33%)",
+            "desc": "💡 Threat Hunting과 탐지 규칙 업데이트로 탐지율이 3배 향상되었습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Dwell Time: 5 days → 4.4 seconds (99.99% ↓)",
+            "desc": "💡 평균 잠복시간이 5일에서 4.4초로 — 사실상 실시간 탐지를 달성했습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Coverage Gap: 2 → 0",
+            "desc": "💡 cmd.exe와 wscript.exe 체인 탐지 갭이 완전히 해소되었습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
         ]
       },
       "terms": [
-        { "name": "Purple Team", "desc": "Red Team(공격)과 Blue Team(방어)이 협력하여 보안 태세를 검증하는 활동. 공격 시뮬레이션 결과를 바탕으로 탐지 규칙을 지속적으로 개선합니다" },
-        { "name": "Atomic Red Team", "desc": "MITRE ATT&CK 프레임워크에 매핑된 공격 시뮬레이션 테스트 라이브러리. 각 기법별 재현 가능한 테스트를 제공하여 탐지 능력을 검증합니다" }
+        {
+          "name": "Purple Team",
+          "desc": "Red Team(공격)과 Blue Team(방어)이 협력하여 보안 태세를 검증하는 활동. 공격 시뮬레이션 결과를 바탕으로 탐지 규칙을 지속적으로 개선합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "Atomic Red Team",
+          "desc": "MITRE ATT&CK 프레임워크에 매핑된 공격 시뮬레이션 테스트 라이브러리. 각 기법별 재현 가능한 테스트를 제공하여 탐지 능력을 검증합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
       ]
     }
   ],
   "processTree": [
-    { "name": "WINWORD.EXE", "depth": 0, "alert": false, "minStep": 0 },
-    { "name": "wmiprvse.exe (PID: 8901)", "depth": 1, "alert": true, "minStep": 0 },
-    { "name": "powershell.exe -hidden (PID: 8934)", "depth": 2, "alert": true, "minStep": 0 },
-    { "name": "meterpreter (in-memory)", "depth": 3, "alert": true, "minStep": 1 },
-    { "name": "lsass.exe (accessed)", "depth": 3, "alert": true, "minStep": 0 }
+    {
+      "name": "WINWORD.EXE",
+      "depth": 0,
+      "alert": false,
+      "minStep": 0
+    },
+    {
+      "name": "wmiprvse.exe (PID: 8901)",
+      "depth": 1,
+      "alert": true,
+      "minStep": 0
+    },
+    {
+      "name": "powershell.exe -hidden (PID: 8934)",
+      "depth": 2,
+      "alert": true,
+      "minStep": 0
+    },
+    {
+      "name": "meterpreter (in-memory)",
+      "depth": 3,
+      "alert": true,
+      "minStep": 1
+    },
+    {
+      "name": "lsass.exe (accessed)",
+      "depth": 3,
+      "alert": true,
+      "minStep": 0
+    }
   ]
 }

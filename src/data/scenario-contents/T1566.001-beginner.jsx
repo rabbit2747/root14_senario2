@@ -208,7 +208,7 @@ const PUZZLES = {
 // ──────────────────────────────────────────────────────────────────────────────
 // [메인 교육 게임 컴포넌트]
 // ──────────────────────────────────────────────────────────────────────────────
-function InteractiveGameCanvas({ onFinish, userName, companyName }) {
+function InteractiveGameCanvas({ onFinish, userName, companyName, language = 'ko' }) {
   const [gameState, setGameState] = useState(() => {
     try {
       const saved = localStorage.getItem('t1566_beginner_state');
