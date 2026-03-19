@@ -1,0 +1,384 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1100" font-family="'Segoe UI', 'Apple SD Gothic Neo', sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a4a"/>
+      <stop offset="100%" stop-color="#1e1e3a"/>
+    </linearGradient>
+    <linearGradient id="novice" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <linearGradient id="beginner" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <linearGradient id="intermediate" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="advanced" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+    <linearGradient id="expert" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="1100" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="700" y="45" text-anchor="middle" fill="#e0e7ff" font-size="26" font-weight="bold">T1566.001 Spearphishing Attachment — 5 Level x 4 Stage Content Plan</text>
+  <text x="700" y="70" text-anchor="middle" fill="#818cf8" font-size="13">2026-03-18 | MITRE ATT&amp;CK TA0001 Initial Access | CS: MIME, OLE, VBA, PowerShell</text>
+
+  <!-- ═══ Left Panel: Level Overview ═══ -->
+  <rect x="20" y="90" width="320" height="500" rx="14" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="180" y="120" text-anchor="middle" fill="#c4b5fd" font-size="15" font-weight="bold">5 Level Mapping (Excel -> Site)</text>
+
+  <!-- Novice -->
+  <rect x="35" y="140" width="290" height="68" rx="8" fill="#1e1e3a" stroke="#eab308" stroke-width="1.5"/>
+  <rect x="35" y="140" width="6" height="68" rx="3" fill="url(#novice)"/>
+  <text x="55" y="162" fill="#eab308" font-size="13" font-weight="bold">Novice (Ch.1~3)</text>
+  <text x="55" y="180" fill="#d1d5db" font-size="10">Sheet5: Beginner(Concept+Analogy)</text>
+  <text x="55" y="195" fill="#9ca3af" font-size="10">Concept Intro + APT Cases + Prerequisites</text>
+
+  <!-- Beginner -->
+  <rect x="35" y="218" width="290" height="68" rx="8" fill="#1e1e3a" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="35" y="218" width="6" height="68" rx="3" fill="url(#beginner)"/>
+  <text x="55" y="240" fill="#22c55e" font-size="13" font-weight="bold">Beginner (Ch.4~6)</text>
+  <text x="55" y="258" fill="#d1d5db" font-size="10">Sheet5: Elementary(Tool+Practice)</text>
+  <text x="55" y="273" fill="#9ca3af" font-size="10">GoPhish/olevba + SMTP/MIME + VBA Coding</text>
+
+  <!-- Intermediate -->
+  <rect x="35" y="296" width="290" height="68" rx="8" fill="#1e1e3a" stroke="#3b82f6" stroke-width="1.5"/>
+  <rect x="35" y="296" width="6" height="68" rx="3" fill="url(#intermediate)"/>
+  <text x="55" y="318" fill="#3b82f6" font-size="13" font-weight="bold">Intermediate (Ch.7~9)</text>
+  <text x="55" y="336" fill="#d1d5db" font-size="10">Sheet5: Intermediate(Detection)</text>
+  <text x="55" y="351" fill="#9ca3af" font-size="10">Sysmon + YARA/Sigma + Attacker->Defender</text>
+
+  <!-- Advanced -->
+  <rect x="35" y="374" width="290" height="68" rx="8" fill="#1e1e3a" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="35" y="374" width="6" height="68" rx="3" fill="url(#advanced)"/>
+  <text x="55" y="396" fill="#ef4444" font-size="13" font-weight="bold">Advanced (Ch.10~12)</text>
+  <text x="55" y="414" fill="#d1d5db" font-size="10">Sheet5: Advanced(Evasion+Custom)</text>
+  <text x="55" y="429" fill="#9ca3af" font-size="10">Sigma YAML + EDR Bypass + Re-detect</text>
+
+  <!-- Expert -->
+  <rect x="35" y="452" width="290" height="68" rx="8" fill="#1e1e3a" stroke="#a855f7" stroke-width="1.5"/>
+  <rect x="35" y="452" width="6" height="68" rx="3" fill="url(#expert)"/>
+  <text x="55" y="474" fill="#a855f7" font-size="13" font-weight="bold">Expert (Ch.13~14)</text>
+  <text x="55" y="492" fill="#d1d5db" font-size="10">Sheet5: Expert(Research+Zero-day)</text>
+  <text x="55" y="507" fill="#9ca3af" font-size="10">Purple Team + CVE-2021-40444/Follina</text>
+
+  <!-- Current status badge -->
+  <rect x="35" y="535" width="290" height="40" rx="8" fill="#1a1a2e" stroke="#4b5563" stroke-width="1"/>
+  <text x="180" y="555" text-anchor="middle" fill="#f87171" font-size="11" font-weight="bold">Current: 2/25 files exist (8%)</text>
+  <text x="180" y="570" text-anchor="middle" fill="#6b7280" font-size="10">beginner HTML + intermediate HTML only</text>
+
+  <!-- ═══ Center: 4-Stage Pipeline Matrix ═══ -->
+  <rect x="355" y="90" width="730" height="500" rx="14" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="720" y="120" text-anchor="middle" fill="#c4b5fd" font-size="15" font-weight="bold">4-Stage Pipeline (edu -> graphic -> scenario -> lab)</text>
+
+  <!-- Column Headers -->
+  <text x="440" y="150" text-anchor="middle" fill="#86efac" font-size="12" font-weight="bold">1. EDU (HTML)</text>
+  <text x="600" y="150" text-anchor="middle" fill="#93c5fd" font-size="12" font-weight="bold">2. GRAPHIC (JSX)</text>
+  <text x="760" y="150" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="bold">3. SCENARIO (JSX)</text>
+  <text x="920" y="150" text-anchor="middle" fill="#f87171" font-size="12" font-weight="bold">4. LAB (JSON)</text>
+
+  <!-- Arrows between columns -->
+  <line x1="510" y1="145" x2="530" y2="145" stroke="#4b5563" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="670" y1="145" x2="690" y2="145" stroke="#4b5563" stroke-width="2"/>
+  <line x1="830" y1="145" x2="850" y2="145" stroke="#4b5563" stroke-width="2"/>
+  <text x="520" y="143" fill="#6b7280" font-size="14">-></text>
+  <text x="680" y="143" fill="#6b7280" font-size="14">-></text>
+  <text x="840" y="143" fill="#6b7280" font-size="14">-></text>
+
+  <!-- Row: Novice -->
+  <rect x="370" y="162" width="150" height="58" rx="6" fill="#2d1f00" stroke="#eab308" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="445" y="182" text-anchor="middle" fill="#eab308" font-size="10" font-weight="bold">NEW</text>
+  <text x="445" y="196" text-anchor="middle" fill="#d1d5db" font-size="9">3ch: Concept+Case</text>
+  <text x="445" y="210" text-anchor="middle" fill="#9ca3af" font-size="8">Analogy-based</text>
+
+  <rect x="530" y="162" width="150" height="58" rx="6" fill="#2d1f00" stroke="#eab308" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="605" y="182" text-anchor="middle" fill="#eab308" font-size="10" font-weight="bold">NEW</text>
+  <text x="605" y="196" text-anchor="middle" fill="#d1d5db" font-size="9">20 slides: Fishing</text>
+  <text x="605" y="210" text-anchor="middle" fill="#9ca3af" font-size="8">Analogy illustrations</text>
+
+  <rect x="690" y="162" width="150" height="58" rx="6" fill="#2d1f00" stroke="#eab308" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="765" y="182" text-anchor="middle" fill="#eab308" font-size="10" font-weight="bold">NEW</text>
+  <text x="765" y="196" text-anchor="middle" fill="#d1d5db" font-size="9">3 Sector RPG</text>
+  <text x="765" y="210" text-anchor="middle" fill="#9ca3af" font-size="8">Phishing email ID</text>
+
+  <rect x="850" y="162" width="150" height="58" rx="6" fill="#2d1f00" stroke="#eab308" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="925" y="182" text-anchor="middle" fill="#eab308" font-size="10" font-weight="bold">NEW</text>
+  <text x="925" y="196" text-anchor="middle" fill="#d1d5db" font-size="9">5 steps</text>
+  <text x="925" y="210" text-anchor="middle" fill="#9ca3af" font-size="8">Email client sim</text>
+
+  <!-- Row: Beginner -->
+  <rect x="370" y="230" width="150" height="58" rx="6" fill="#002d10" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="445" y="250" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="bold">EXISTS (33KB)</text>
+  <text x="445" y="264" text-anchor="middle" fill="#d1d5db" font-size="9">Realign to Ch.4~6</text>
+  <text x="445" y="278" text-anchor="middle" fill="#9ca3af" font-size="8">GoPhish + VBA</text>
+
+  <rect x="530" y="230" width="150" height="58" rx="6" fill="#00102d" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="605" y="250" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">NEW</text>
+  <text x="605" y="264" text-anchor="middle" fill="#d1d5db" font-size="9">20 slides: Tools</text>
+  <text x="605" y="278" text-anchor="middle" fill="#9ca3af" font-size="8">GoPhish UI + Code</text>
+
+  <rect x="690" y="230" width="150" height="58" rx="6" fill="#2d1f00" stroke="#eab308" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="765" y="250" text-anchor="middle" fill="#eab308" font-size="10" font-weight="bold">NEW</text>
+  <text x="765" y="264" text-anchor="middle" fill="#d1d5db" font-size="9">3 Sector RPG</text>
+  <text x="765" y="278" text-anchor="middle" fill="#9ca3af" font-size="8">olevba macro analysis</text>
+
+  <rect x="850" y="230" width="150" height="58" rx="6" fill="#002d10" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="925" y="250" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="bold">EXISTS (236L)</text>
+  <text x="925" y="264" text-anchor="middle" fill="#d1d5db" font-size="9">Rename from T1566.001</text>
+  <text x="925" y="278" text-anchor="middle" fill="#9ca3af" font-size="8">7 steps, GoPhish</text>
+
+  <!-- Row: Intermediate -->
+  <rect x="370" y="298" width="150" height="58" rx="6" fill="#002d10" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="445" y="318" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="bold">EXISTS (90KB)</text>
+  <text x="445" y="332" text-anchor="middle" fill="#d1d5db" font-size="9">Realign to Ch.7~9</text>
+  <text x="445" y="346" text-anchor="middle" fill="#9ca3af" font-size="8">Sysmon + YARA</text>
+
+  <rect x="530" y="298" width="150" height="58" rx="6" fill="#00102d" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="605" y="318" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">NEW</text>
+  <text x="605" y="332" text-anchor="middle" fill="#d1d5db" font-size="9">20 slides: Detection</text>
+  <text x="605" y="346" text-anchor="middle" fill="#9ca3af" font-size="8">Sysmon events + logs</text>
+
+  <rect x="690" y="298" width="150" height="58" rx="6" fill="#2d1f00" stroke="#eab308" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="765" y="318" text-anchor="middle" fill="#eab308" font-size="10" font-weight="bold">NEW</text>
+  <text x="765" y="332" text-anchor="middle" fill="#d1d5db" font-size="9">4 Sector RPG</text>
+  <text x="765" y="346" text-anchor="middle" fill="#9ca3af" font-size="8">SOC analyst mission</text>
+
+  <rect x="850" y="298" width="150" height="58" rx="6" fill="#2d1f00" stroke="#eab308" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="925" y="318" text-anchor="middle" fill="#eab308" font-size="10" font-weight="bold">NEW</text>
+  <text x="925" y="332" text-anchor="middle" fill="#d1d5db" font-size="9">7 steps</text>
+  <text x="925" y="346" text-anchor="middle" fill="#9ca3af" font-size="8">Sysmon + Sigma</text>
+
+  <!-- Row: Advanced -->
+  <rect x="370" y="366" width="150" height="58" rx="6" fill="#2d0000" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="445" y="386" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">NEW</text>
+  <text x="445" y="400" text-anchor="middle" fill="#d1d5db" font-size="9">3ch: Defense+Evasion</text>
+  <text x="445" y="414" text-anchor="middle" fill="#9ca3af" font-size="8">Sigma YAML + EDR</text>
+
+  <rect x="530" y="366" width="150" height="58" rx="6" fill="#2d0000" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="605" y="386" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">NEW</text>
+  <text x="605" y="400" text-anchor="middle" fill="#d1d5db" font-size="9">20 slides: Evasion</text>
+  <text x="605" y="414" text-anchor="middle" fill="#9ca3af" font-size="8">Code + Defense loop</text>
+
+  <rect x="690" y="366" width="150" height="58" rx="6" fill="#2d0000" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="765" y="386" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">NEW</text>
+  <text x="765" y="400" text-anchor="middle" fill="#d1d5db" font-size="9">4 Sector RPG</text>
+  <text x="765" y="414" text-anchor="middle" fill="#9ca3af" font-size="8">Red->Blue rotation</text>
+
+  <rect x="850" y="366" width="150" height="58" rx="6" fill="#2d0000" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="925" y="386" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">NEW</text>
+  <text x="925" y="400" text-anchor="middle" fill="#d1d5db" font-size="9">9 steps</text>
+  <text x="925" y="414" text-anchor="middle" fill="#9ca3af" font-size="8">EDR bypass + re-detect</text>
+
+  <!-- Row: Expert -->
+  <rect x="370" y="434" width="150" height="58" rx="6" fill="#1a002d" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="445" y="454" text-anchor="middle" fill="#a855f7" font-size="10" font-weight="bold">NEW</text>
+  <text x="445" y="468" text-anchor="middle" fill="#d1d5db" font-size="9">2ch: Purple+Research</text>
+  <text x="445" y="482" text-anchor="middle" fill="#9ca3af" font-size="8">CVE analysis</text>
+
+  <rect x="530" y="434" width="150" height="58" rx="6" fill="#1a002d" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="605" y="454" text-anchor="middle" fill="#a855f7" font-size="10" font-weight="bold">NEW</text>
+  <text x="605" y="468" text-anchor="middle" fill="#d1d5db" font-size="9">20 slides: Expert</text>
+  <text x="605" y="482" text-anchor="middle" fill="#9ca3af" font-size="8">Full kill chain</text>
+
+  <rect x="690" y="434" width="150" height="58" rx="6" fill="#1a002d" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="765" y="454" text-anchor="middle" fill="#a855f7" font-size="10" font-weight="bold">NEW</text>
+  <text x="765" y="468" text-anchor="middle" fill="#d1d5db" font-size="9">5 Sector RPG</text>
+  <text x="765" y="482" text-anchor="middle" fill="#9ca3af" font-size="8">Full Purple Team</text>
+
+  <rect x="850" y="434" width="150" height="58" rx="6" fill="#1a002d" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="925" y="454" text-anchor="middle" fill="#a855f7" font-size="10" font-weight="bold">NEW</text>
+  <text x="925" y="468" text-anchor="middle" fill="#d1d5db" font-size="9">10 steps</text>
+  <text x="925" y="482" text-anchor="middle" fill="#9ca3af" font-size="8">Full tool chain</text>
+
+  <!-- Legend -->
+  <rect x="370" y="505" width="120" height="22" rx="4" fill="#002d10" stroke="#22c55e" stroke-width="1"/>
+  <text x="430" y="520" text-anchor="middle" fill="#22c55e" font-size="9">EXISTS (3/20)</text>
+  <rect x="500" y="505" width="120" height="22" rx="4" fill="#1e1e3a" stroke="#eab308" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="560" y="520" text-anchor="middle" fill="#eab308" font-size="9">NEW (17/20)</text>
+  <text x="700" y="520" fill="#6b7280" font-size="9">+ edu-meta.json + DesktopLab.jsx + GraphicPage.jsx = 23 files total</text>
+
+  <!-- ═══ Right Panel: Excel Data Source ═══ -->
+  <rect x="1100" y="90" width="280" height="500" rx="14" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="1240" y="120" text-anchor="middle" fill="#c4b5fd" font-size="15" font-weight="bold">Excel Data Sources</text>
+
+  <rect x="1115" y="138" width="250" height="50" rx="6" fill="#1e1e3a" stroke="#4b5563" stroke-width="1"/>
+  <text x="1125" y="158" fill="#86efac" font-size="11" font-weight="bold">Sheet 9: 14Ch Education</text>
+  <text x="1125" y="175" fill="#9ca3af" font-size="9">14 chapters x 2000+ chars -> edu HTML</text>
+
+  <rect x="1115" y="198" width="250" height="50" rx="6" fill="#1e1e3a" stroke="#4b5563" stroke-width="1"/>
+  <text x="1125" y="218" fill="#93c5fd" font-size="11" font-weight="bold">Sheet 11: Dual-Track</text>
+  <text x="1125" y="235" fill="#9ca3af" font-size="9">7 columns -> 20 graphic slides</text>
+
+  <rect x="1115" y="258" width="250" height="50" rx="6" fill="#1e1e3a" stroke="#4b5563" stroke-width="1"/>
+  <text x="1125" y="278" fill="#fbbf24" font-size="11" font-weight="bold">Sheet 8: Lab Scenarios</text>
+  <text x="1125" y="295" fill="#9ca3af" font-size="9">HTB-style scenario -> lab JSON</text>
+
+  <rect x="1115" y="318" width="250" height="50" rx="6" fill="#1e1e3a" stroke="#4b5563" stroke-width="1"/>
+  <text x="1125" y="338" fill="#f87171" font-size="11" font-weight="bold">Sheet 5: 5-Level Curriculum</text>
+  <text x="1125" y="355" fill="#9ca3af" font-size="9">Level-specific content per technique</text>
+
+  <rect x="1115" y="378" width="250" height="50" rx="6" fill="#1e1e3a" stroke="#4b5563" stroke-width="1"/>
+  <text x="1125" y="398" fill="#c4b5fd" font-size="11" font-weight="bold">Sheet 2: CS Prerequisites</text>
+  <text x="1125" y="415" fill="#9ca3af" font-size="9">MIME, OLE, VBA, PowerShell, Stream</text>
+
+  <!-- CS Prerequisites -->
+  <text x="1125" y="450" fill="#818cf8" font-size="11" font-weight="bold">T1566.001 CS Tags:</text>
+  <rect x="1115" y="458" width="55" height="20" rx="4" fill="#3b3b6b"/>
+  <text x="1142" y="472" text-anchor="middle" fill="#e0e7ff" font-size="9">MIME</text>
+  <rect x="1175" y="458" width="45" height="20" rx="4" fill="#3b3b6b"/>
+  <text x="1197" y="472" text-anchor="middle" fill="#e0e7ff" font-size="9">OLE</text>
+  <rect x="1225" y="458" width="45" height="20" rx="4" fill="#3b3b6b"/>
+  <text x="1247" y="472" text-anchor="middle" fill="#e0e7ff" font-size="9">VBA</text>
+  <rect x="1275" y="458" width="80" height="20" rx="4" fill="#3b3b6b"/>
+  <text x="1315" y="472" text-anchor="middle" fill="#e0e7ff" font-size="9">PowerShell</text>
+  <rect x="1115" y="483" width="65" height="20" rx="4" fill="#3b3b6b"/>
+  <text x="1147" y="497" text-anchor="middle" fill="#e0e7ff" font-size="9">Stream</text>
+  <rect x="1185" y="483" width="60" height="20" rx="4" fill="#3b3b6b"/>
+  <text x="1215" y="497" text-anchor="middle" fill="#e0e7ff" font-size="9">Sector</text>
+  <rect x="1250" y="483" width="100" height="20" rx="4" fill="#3b3b6b"/>
+  <text x="1300" y="497" text-anchor="middle" fill="#e0e7ff" font-size="9">Office Macro</text>
+
+  <text x="1240" y="540" text-anchor="middle" fill="#6b7280" font-size="10">Level: Elementary</text>
+  <text x="1240" y="555" text-anchor="middle" fill="#6b7280" font-size="10">Tactic: TA0001 Initial Access</text>
+
+  <!-- ═══ Bottom: Execution Phases ═══ -->
+  <rect x="20" y="610" width="1360" height="200" rx="14" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="700" y="640" text-anchor="middle" fill="#c4b5fd" font-size="15" font-weight="bold">Execution Phases</text>
+
+  <!-- Phase 1 -->
+  <rect x="40" y="660" width="200" height="110" rx="8" fill="#1e1e3a" stroke="#10b981" stroke-width="2"/>
+  <text x="140" y="685" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold">Phase 1: Meta</text>
+  <text x="140" y="702" text-anchor="middle" fill="#d1d5db" font-size="10">edu-meta.json</text>
+  <text x="140" y="718" text-anchor="middle" fill="#9ca3af" font-size="9">5-level URLs</text>
+  <rect x="80" y="730" width="120" height="22" rx="4" fill="#064e3b"/>
+  <text x="140" y="745" text-anchor="middle" fill="#6ee7b7" font-size="10">~30min</text>
+  <text x="250" y="720" fill="#4b5563" font-size="20">-></text>
+
+  <!-- Phase 2 -->
+  <rect x="280" y="660" width="200" height="110" rx="8" fill="#1e1e3a" stroke="#3b82f6" stroke-width="2"/>
+  <text x="380" y="685" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="bold">Phase 2: EDU HTML</text>
+  <text x="380" y="702" text-anchor="middle" fill="#d1d5db" font-size="10">5 HTML files</text>
+  <text x="380" y="718" text-anchor="middle" fill="#9ca3af" font-size="9">3 new + 2 realign</text>
+  <rect x="320" y="730" width="120" height="22" rx="4" fill="#1e3a5f"/>
+  <text x="380" y="745" text-anchor="middle" fill="#93c5fd" font-size="10">~3-4h</text>
+  <text x="490" y="720" fill="#4b5563" font-size="20">-></text>
+
+  <!-- Phase 3 -->
+  <rect x="520" y="660" width="200" height="110" rx="8" fill="#1e1e3a" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="620" y="685" text-anchor="middle" fill="#8b5cf6" font-size="12" font-weight="bold">Phase 3: GRAPHIC</text>
+  <text x="620" y="702" text-anchor="middle" fill="#d1d5db" font-size="10">5 JSX files</text>
+  <text x="620" y="718" text-anchor="middle" fill="#9ca3af" font-size="9">20 slides each</text>
+  <rect x="560" y="730" width="120" height="22" rx="4" fill="#2e1065"/>
+  <text x="620" y="745" text-anchor="middle" fill="#c4b5fd" font-size="10">~3h</text>
+  <text x="730" y="720" fill="#4b5563" font-size="20">-></text>
+
+  <!-- Phase 4 -->
+  <rect x="760" y="660" width="200" height="110" rx="8" fill="#1e1e3a" stroke="#f59e0b" stroke-width="2"/>
+  <text x="860" y="685" text-anchor="middle" fill="#f59e0b" font-size="12" font-weight="bold">Phase 4: LAB JSON</text>
+  <text x="860" y="702" text-anchor="middle" fill="#d1d5db" font-size="10">5 JSON files</text>
+  <text x="860" y="718" text-anchor="middle" fill="#9ca3af" font-size="9">Split + 4 new</text>
+  <rect x="800" y="730" width="120" height="22" rx="4" fill="#422006"/>
+  <text x="860" y="745" text-anchor="middle" fill="#fbbf24" font-size="10">~2h</text>
+  <text x="970" y="720" fill="#4b5563" font-size="20">-></text>
+
+  <!-- Phase 5 -->
+  <rect x="1000" y="660" width="200" height="110" rx="8" fill="#1e1e3a" stroke="#ef4444" stroke-width="2"/>
+  <text x="1100" y="685" text-anchor="middle" fill="#ef4444" font-size="12" font-weight="bold">Phase 5: SCENARIO</text>
+  <text x="1100" y="702" text-anchor="middle" fill="#d1d5db" font-size="10">5 JSX files</text>
+  <text x="1100" y="718" text-anchor="middle" fill="#9ca3af" font-size="9">RPG interactive game</text>
+  <rect x="1040" y="730" width="120" height="22" rx="4" fill="#450a0a"/>
+  <text x="1100" y="745" text-anchor="middle" fill="#fca5a5" font-size="10">~4h (hardest)</text>
+
+  <!-- Phase 6 -->
+  <rect x="1220" y="660" width="145" height="110" rx="8" fill="#1e1e3a" stroke="#6b7280" stroke-width="2"/>
+  <text x="1292" y="685" text-anchor="middle" fill="#6b7280" font-size="12" font-weight="bold">Phase 6</text>
+  <text x="1292" y="702" text-anchor="middle" fill="#d1d5db" font-size="10">Register Loaders</text>
+  <text x="1292" y="718" text-anchor="middle" fill="#9ca3af" font-size="9">DesktopLab.jsx</text>
+  <text x="1292" y="734" text-anchor="middle" fill="#9ca3af" font-size="9">GraphicPage.jsx</text>
+  <rect x="1232" y="745" width="120" height="22" rx="4" fill="#1f2937"/>
+  <text x="1292" y="760" text-anchor="middle" fill="#9ca3af" font-size="10">~30min</text>
+
+  <!-- ═══ Bottom: File Inventory ═══ -->
+  <rect x="20" y="830" width="660" height="250" rx="14" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="350" y="858" text-anchor="middle" fill="#c4b5fd" font-size="15" font-weight="bold">File Inventory (23 files)</text>
+
+  <text x="40" y="885" fill="#86efac" font-size="11" font-weight="bold">public/edu/ (5 HTML)</text>
+  <text x="50" y="903" fill="#eab308" font-size="10">NEW  t1566-001-spearphishing-attachment-novice.html</text>
+  <text x="50" y="918" fill="#22c55e" font-size="10">EDIT t1566-001-spearphishing-attachment.html (beginner)</text>
+  <text x="50" y="933" fill="#22c55e" font-size="10">EDIT t1566-001-spearphishing-attachment-intermediate.html</text>
+  <text x="50" y="948" fill="#ef4444" font-size="10">NEW  t1566-001-spearphishing-attachment-advanced.html</text>
+  <text x="50" y="963" fill="#a855f7" font-size="10">NEW  t1566-001-spearphishing-attachment-expert.html</text>
+
+  <text x="370" y="885" fill="#93c5fd" font-size="11" font-weight="bold">src/data/graphic-contents/ (5 JSX)</text>
+  <text x="380" y="903" fill="#eab308" font-size="10">NEW T1566.001-novice.jsx</text>
+  <text x="380" y="918" fill="#22c55e" font-size="10">NEW T1566.001-beginner.jsx</text>
+  <text x="380" y="933" fill="#3b82f6" font-size="10">NEW T1566.001-intermediate.jsx</text>
+  <text x="380" y="948" fill="#ef4444" font-size="10">NEW T1566.001-advanced.jsx</text>
+  <text x="380" y="963" fill="#a855f7" font-size="10">NEW T1566.001-expert.jsx</text>
+
+  <text x="40" y="988" fill="#fbbf24" font-size="11" font-weight="bold">src/data/lab-scenarios/ (5 JSON)</text>
+  <text x="50" y="1006" fill="#eab308" font-size="10">NEW T1566.001-novice.json</text>
+  <text x="50" y="1021" fill="#22c55e" font-size="10">RENAME T1566.001.json -> T1566.001-beginner.json</text>
+  <text x="50" y="1036" fill="#3b82f6" font-size="10">NEW T1566.001-intermediate.json</text>
+  <text x="50" y="1051" fill="#ef4444" font-size="10">NEW T1566.001-advanced.json</text>
+  <text x="50" y="1066" fill="#a855f7" font-size="10">NEW T1566.001-expert.json</text>
+
+  <text x="370" y="988" fill="#f87171" font-size="11" font-weight="bold">src/data/scenario-contents/ (5 JSX)</text>
+  <text x="380" y="1006" fill="#eab308" font-size="10">NEW T1566.001-novice.jsx</text>
+  <text x="380" y="1021" fill="#22c55e" font-size="10">NEW T1566.001-beginner.jsx</text>
+  <text x="380" y="1036" fill="#3b82f6" font-size="10">NEW T1566.001-intermediate.jsx</text>
+  <text x="380" y="1051" fill="#ef4444" font-size="10">NEW T1566.001-advanced.jsx</text>
+  <text x="380" y="1066" fill="#a855f7" font-size="10">NEW T1566.001-expert.jsx</text>
+
+  <!-- ═══ Bottom Right: Rollback Strategy ═══ -->
+  <rect x="700" y="830" width="680" height="250" rx="14" fill="url(#card)" filter="url(#shadow)" stroke="#374151" stroke-width="1"/>
+  <text x="1040" y="858" text-anchor="middle" fill="#c4b5fd" font-size="15" font-weight="bold">Rollback + Meta Updates</text>
+
+  <!-- Rollback -->
+  <rect x="720" y="875" width="310" height="90" rx="8" fill="#1e1e3a" stroke="#f87171" stroke-width="1.5"/>
+  <text x="875" y="898" text-anchor="middle" fill="#f87171" font-size="12" font-weight="bold">Rollback Strategy</text>
+  <text x="730" y="918" fill="#d1d5db" font-size="10">1. git tag before-t1566-content</text>
+  <text x="730" y="935" fill="#d1d5db" font-size="10">2. git checkout before-t1566-content -- .</text>
+  <text x="730" y="952" fill="#9ca3af" font-size="10">3. Worktree(confident-margulis) -> main safe</text>
+
+  <!-- Meta updates -->
+  <rect x="1050" y="875" width="310" height="90" rx="8" fill="#1e1e3a" stroke="#10b981" stroke-width="1.5"/>
+  <text x="1205" y="898" text-anchor="middle" fill="#10b981" font-size="12" font-weight="bold">Loader Registration (Phase 6)</text>
+  <text x="1060" y="918" fill="#d1d5db" font-size="10">DesktopLab.jsx: 5 SCENARIO_LOADERS</text>
+  <text x="1060" y="935" fill="#d1d5db" font-size="10">GraphicPage.jsx: 5 GRAPHIC_LOADERS</text>
+  <text x="1060" y="952" fill="#d1d5db" font-size="10">edu-meta.json: 5-level URL registration</text>
+
+  <!-- Stats -->
+  <rect x="720" y="980" width="640" height="85" rx="8" fill="#1a1a2e" stroke="#4b5563" stroke-width="1"/>
+  <text x="1040" y="1005" text-anchor="middle" fill="#e0e7ff" font-size="13" font-weight="bold">T1566.001 Content Plan Summary</text>
+  <text x="740" y="1030" fill="#86efac" font-size="11">Total Files: 23 (19 new + 4 edit)</text>
+  <text x="740" y="1048" fill="#93c5fd" font-size="11">Data Sources: Sheet 5, 8, 9, 11 from MITRE Excel</text>
+  <text x="1100" y="1030" fill="#fbbf24" font-size="11">Estimated: ~13h total</text>
+  <text x="1100" y="1048" fill="#f87171" font-size="11">No design/component changes</text>
+
+</svg>
