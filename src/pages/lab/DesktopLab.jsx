@@ -17,6 +17,11 @@ const SCENARIO_LOADERS = {
   'T1585.001': () => import('../../data/lab-scenarios/T1585.001.json'),
   'T1587.001': () => import('../../data/lab-scenarios/T1587.001.json'),
   'T1566.001': () => import('../../data/lab-scenarios/T1566.001.json'),
+  'T1566.001-novice': () => import('../../data/lab-scenarios/T1566.001-novice.json'),
+  'T1566.001-beginner': () => import('../../data/lab-scenarios/T1566.001-beginner.json'),
+  'T1566.001-intermediate': () => import('../../data/lab-scenarios/T1566.001-intermediate.json'),
+  'T1566.001-advanced': () => import('../../data/lab-scenarios/T1566.001-advanced.json'),
+  'T1566.001-expert': () => import('../../data/lab-scenarios/T1566.001-expert.json'),
   'T1195.002': () => import('../../data/lab-scenarios/T1195.002.json'),
   'T1059.001': () => import('../../data/lab-scenarios/T1059.001.json'),
   'T1047':     () => import('../../data/lab-scenarios/T1047.json'),
@@ -83,7 +88,7 @@ export default function DesktopLab() {
   useEffect(() => {
     if (!authChecked || dedicatedPath) return;
 
-    const loader = SCENARIO_LOADERS[techniqueId];
+    const loader = (level && SCENARIO_LOADERS[`${techniqueId}-${level}`]) || SCENARIO_LOADERS[techniqueId];
     if (loader) {
       loader()
         .then(mod => { setScenario(mod.default || mod); setLoading(false); })

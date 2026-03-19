@@ -1,0 +1,238 @@
+{
+  "id": "T1566.001-intermediate",
+  "title": "Sysmon/YARA/Sigma 기반 스피어피싱 탐지 분석",
+  "titleEn": "Sysmon/YARA/Sigma-based Spearphishing Detection Analysis",
+  "duration": 14,
+  "phases": [
+    { "label": "🔍 탐지", "labelEn": "🔍 Detection", "steps": [0, 1, 2] },
+    { "label": "🔬 분석", "labelEn": "🔬 Analysis", "steps": [3] },
+    { "label": "🛡️ 정책 배포", "labelEn": "🛡️ Policy Deployment", "steps": [4, 5] },
+    { "label": "✅ 검증", "labelEn": "✅ Verification", "steps": [6] }
+  ],
+  "topoNodes": [
+    { "id": "ext", "label": "Attacker", "x": 50, "y": 60 },
+    { "id": "emailgw", "label": "Email Gateway", "x": 175, "y": 30 },
+    { "id": "siem", "label": "SIEM", "x": 350, "y": 30 },
+    { "id": "pc", "label": "User PC", "x": 175, "y": 90 },
+    { "id": "sysmon", "label": "Sysmon Agent", "x": 350, "y": 90 },
+    { "id": "gpo", "label": "GPO Server", "x": 500, "y": 60 }
+  ],
+  "topoEdges": [
+    { "from": "ext", "to": "emailgw", "minStep": 0 },
+    { "from": "emailgw", "to": "pc", "minStep": 0 },
+    { "from": "pc", "to": "sysmon", "minStep": 0 },
+    { "from": "sysmon", "to": "siem", "minStep": 2 },
+    { "from": "gpo", "to": "pc", "minStep": 5 }
+  ],
+  "desktopIcons": [
+    { "name": "🗑️ Recycle Bin", "icon": "🗑️" },
+    { "name": "Event Viewer", "icon": "📋" },
+    { "name": "YARA Scanner", "icon": "🔬" },
+    { "name": "Sigma Editor", "icon": "📝" },
+    { "name": "GPO Console", "icon": "⚙️" }
+  ],
+  "steps": [
+    {
+      "cmd": "Get-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' -FilterXPath \"*[System[EventID=1]]\" -MaxEvents 50 | Select-Object TimeCreated, @{N='Process';E={$_.Properties[4].Value}}, @{N='Parent';E={$_.Properties[20].Value}}, @{N='CommandLine';E={$_.Properties[10].Value}} | Format-Table -AutoSize",
+      "out": "[+] Querying Sysmon Event ID 1 (Process Creation)...\n\nTimeCreated          Process              Parent                CommandLine\n-----------          -------              ------                -----------\n2024-03-15 09:23:41  WINWORD.EXE          explorer.exe          \"C:\\Program Files\\Microsoft Office\\WINWORD.EXE\" CloudSec2024_Slides.docm\n2024-03-15 09:23:44  wmiprvse.exe         svchost.exe           C:\\Windows\\System32\\wbem\\wmiprvse.exe\n2024-03-15 09:23:45  powershell.exe       wmiprvse.exe          powershell.exe -w hidden -enc aQBlAHgAIAAo...\n2024-03-15 09:23:47  conhost.exe          powershell.exe        \\??\\C:\\Windows\\System32\\conhost.exe\n2024-03-15 09:24:01  mshta.exe            powershell.exe        mshta vbscript:Execute(\"CreateObject(\"\"WScript.Shell\"\")...\")\n\n[!] SUSPICIOUS: WINWORD.EXE → wmiprvse.exe → powershell.exe(-hidden) chain detected\n[!] SUSPICIOUS: Base64-encoded PowerShell command line\n[!] Total suspicious process chains found: 3",
+      "def": "[Sysmon] Event ID 1 — 비정상 프로세스 생성 체인 감지: WINWORD→wmiprvse→powershell(-hidden)",
+      "defAction": "Source: Sysmon 프로세스 생성 로그\nTarget: {userName} 워크스테이션 (DESKTOP-SEC01)\nAction: 프로세스 체인 분석 시작, 의심 프로세스 3건 식별",
+      "desc": "Sysmon 이벤트 ID 1(프로세스 생성)을 조회하여 악성 매크로가 실행한 비정상적인 프로세스 체인을 추적합니다.",
+      "descEn": "Query Sysmon Event ID 1 (Process Creation) to trace the abnormal process chain spawned by the malicious macro.",
+      "stepTitle": "Sysmon 이벤트 로그 분석 - 프로세스 생성 추적",
+      "stepTitleEn": "Sysmon Event Log Analysis - Process Creation Tracking",
+      "feynman": "Sysmon은 Windows에 설치하는 '감시 카메라'입니다. Event ID 1은 새 프로세스가 생성될 때마다 기록됩니다. 정상적이라면 Word가 다른 프로그램을 실행할 이유가 없습니다. 그런데 WINWORD.EXE → wmiprvse.exe → powershell.exe(-hidden) 체인이 발견되었습니다. 이것은 마치 사무실 직원이 갑자기 서버실 열쇠를 복사하는 것처럼 비정상적인 행동입니다.",
+      "feynmanEn": "Sysmon is a 'surveillance camera' installed on Windows. Event ID 1 records every new process creation. Normally, Word has no reason to launch other programs. Yet we found a WINWORD.EXE → wmiprvse.exe → powershell.exe(-hidden) chain. This is like an office worker suddenly duplicating server room keys — abnormal behavior.",
+      "expert": "Sysmon EID 1은 프로세스 생성의 풀 컨텍스트(부모 PID, 커맨드라인, 해시, 사용자)를 기록합니다. WINWORD→wmiprvse→powershell 체인은 매크로가 WMI를 통해 cmd.exe를 우회하고 PowerShell을 실행한 전형적인 패턴입니다. -enc 플래그의 Base64 인코딩은 난독화된 페이로드를 나타냅니다.",
+      "expertEn": "Sysmon EID 1 records full context of process creation (parent PID, command line, hash, user). The WINWORD→wmiprvse→powershell chain is a classic pattern where macros use WMI to bypass cmd.exe and launch PowerShell. The -enc flag with Base64 encoding indicates an obfuscated payload.",
+      "defTooltip": "📋 Sysmon: 프로세스 생성 이벤트에서 Office→WMI→PowerShell 비정상 체인 감지",
+      "defTooltipEn": "📋 Sysmon: Abnormal Office→WMI→PowerShell chain detected in process creation events",
+      "hackerLog": {
+        "title": "sysmon_eventid1.log",
+        "lines": [
+          { "log": "WINWORD.EXE → wmiprvse.exe → powershell.exe(-hidden)", "desc": "💡 Word에서 WMI를 거쳐 숨겨진 PowerShell이 실행된 비정상 체인입니다" },
+          { "log": "powershell.exe -w hidden -enc aQBlAHgAIAAo...", "desc": "💡 -w hidden은 창을 숨기고, -enc는 Base64 인코딩된 악성 명령입니다" },
+          { "log": "mshta.exe launched by powershell.exe", "desc": "💡 mshta.exe는 LOLBin으로, 정상 Windows 도구를 악용하여 코드를 실행합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Sysmon (System Monitor)", "desc": "Microsoft Sysinternals의 시스템 모니터링 도구. 프로세스 생성, 네트워크 연결, 파일 변경 등을 상세히 기록하여 보안 분석에 핵심적인 가시성을 제공합니다" },
+        { "name": "Event ID 1 (Process Creation)", "desc": "Sysmon이 기록하는 프로세스 생성 이벤트. 부모 프로세스, 커맨드라인, 해시값 등 프로세스의 전체 컨텍스트를 포함합니다" }
+      ]
+    },
+    {
+      "cmd": "yara -s spearphish_macro.yar CloudSec2024_Slides.docm",
+      "out": "[+] Loading YARA rules from spearphish_macro.yar...\n[+] Scanning: CloudSec2024_Slides.docm\n\nspearphish_macro_obfuscated CloudSec2024_Slides.docm\n0x1a3f:$vba_autoopen: \"Auto_Open\"\n0x1b82:$vba_wmi: \"GetObject(\\\"winmgmts:\\\"\"\n0x1c44:$vba_shell: \"WScript.Shell\"\n0x1d91:$obf_chr: \"Chr(112) & Chr(111) & Chr(119)\"\n0x1e23:$obf_concat: \"p\" & \"o\" & \"w\" & \"e\" & \"r\" & \"s\"\n0x2105:$amsi_bypass: \"AmsiScanBuffer\"\n0x2234:$suspicious_url: \"cdn-static.\"\n\n[+] MATCH: Rule 'spearphish_macro_obfuscated'\n    Severity: CRITICAL\n    Tags: [macro, obfuscation, amsi_bypass, wmi_exec]\n    Matched strings: 7/7\n    Confidence: 100%\n\n[+] YARA scan complete. 1 file scanned, 1 match found.",
+      "def": "[YARA] 7개 시그니처 전매칭 — 난독화된 VBA 매크로(Auto_Open, WMI, AMSI bypass) 확인",
+      "defAction": "Source: YARA 시그니처 스캐너\nTarget: CloudSec2024_Slides.docm\nAction: 파일 격리, 해시 블랙리스트 등록, IOC 추출 완료",
+      "desc": "YARA 룰을 작성하여 첨부파일 내 악성 매크로 패턴(Auto_Open, WMI 실행, AMSI 바이패스)을 시그니처 기반으로 탐지합니다.",
+      "descEn": "Write YARA rules to detect malicious macro patterns (Auto_Open, WMI execution, AMSI bypass) in the attachment using signature-based scanning.",
+      "stepTitle": "YARA 룰 작성 및 첨부파일 스캔",
+      "stepTitleEn": "YARA Rule Creation and Attachment Scanning",
+      "feynman": "YARA는 악성코드의 '지문 감식' 도구입니다. 범죄 현장에서 지문을 채취하듯, 악성 파일에서 특정 패턴(문자열, 바이트 시퀀스)을 찾습니다. 우리가 작성한 룰은 7가지 지문을 동시에 검색합니다: Auto_Open(자동 실행), WMI 호출, AMSI 우회 코드 등. 7개 모두 매칭되면 100% 확신으로 악성 매크로라고 판단합니다.",
+      "feynmanEn": "YARA is a 'fingerprint analysis' tool for malware. Like collecting fingerprints at a crime scene, it searches for specific patterns (strings, byte sequences) in suspicious files. Our rule searches for 7 fingerprints simultaneously: Auto_Open (auto-execution), WMI calls, AMSI bypass code, etc. When all 7 match, we're 100% confident it's a malicious macro.",
+      "expert": "YARA 룰은 문자열 매칭($vba_autoopen 등)과 조건절(all of them)을 조합합니다. Chr() 연결과 문자열 분할은 VBA 난독화의 전형적 기법이며, AmsiScanBuffer 참조는 AMSI 패칭 시도를 나타냅니다. -s 플래그로 매칭된 오프셋을 확인하여 역공학에 활용합니다.",
+      "expertEn": "YARA rules combine string matching ($vba_autoopen etc.) with condition clauses (all of them). Chr() concatenation and string splitting are classic VBA obfuscation techniques, and AmsiScanBuffer references indicate AMSI patching attempts. The -s flag reveals matched offsets for reverse engineering.",
+      "defTooltip": "🔬 YARA: 7개 악성 시그니처 전매칭 — 고도 난독화 VBA 매크로 확정",
+      "defTooltipEn": "🔬 YARA: All 7 malicious signatures matched — highly obfuscated VBA macro confirmed",
+      "hackerLog": {
+        "title": "yara_scan_result.log",
+        "lines": [
+          { "log": "0x1a3f:$vba_autoopen: \"Auto_Open\"", "desc": "💡 문서 열기 시 자동 실행되는 매크로 트리거 발견" },
+          { "log": "0x2105:$amsi_bypass: \"AmsiScanBuffer\"", "desc": "💡 Windows 스크립트 검사(AMSI) 우회 코드가 매크로에 포함되어 있습니다" },
+          { "log": "Matched strings: 7/7, Confidence: 100%", "desc": "💡 7개 시그니처 모두 매칭 — 의심 여지 없는 악성 매크로입니다" }
+        ]
+      },
+      "terms": [
+        { "name": "YARA", "desc": "패턴 매칭 기반 악성코드 분류 도구. 텍스트/바이너리 패턴으로 룰을 작성하여 파일을 스캔합니다. 보안 연구자와 SOC 분석가의 필수 도구입니다" },
+        { "name": "시그니처 (Signature)", "desc": "악성코드를 식별하는 고유한 패턴이나 특징. 지문처럼 특정 악성코드를 정확히 식별할 수 있지만, 변형에는 취약할 수 있습니다" }
+      ]
+    },
+    {
+      "cmd": "sigmac -t splunk -c sysmon spearphish_detection.yml",
+      "out": "[+] Converting Sigma rule to Splunk query...\n\n--- Sigma Rule: spearphish_detection.yml ---\ntitle: Spearphishing Macro Execution via WMI\nid: 8a7b3c4d-5e6f-4a2b-9c1d-0e3f5a6b7c8d\nstatus: production\nlevel: critical\nlogsource:\n    category: process_creation\n    product: windows\ndetection:\n    selection_parent:\n        ParentImage|endswith: '\\WINWORD.EXE'\n    selection_child:\n        Image|endswith:\n            - '\\wmiprvse.exe'\n            - '\\powershell.exe'\n            - '\\mshta.exe'\n    selection_hidden:\n        CommandLine|contains:\n            - '-w hidden'\n            - '-enc '\n            - '-WindowStyle Hidden'\n    condition: selection_parent and (selection_child or selection_hidden)\n\n--- Splunk Query Output ---\n(ParentImage=\"*\\\\WINWORD.EXE\") AND ((Image=\"*\\\\wmiprvse.exe\" OR Image=\"*\\\\powershell.exe\" OR Image=\"*\\\\mshta.exe\") OR (CommandLine=\"*-w hidden*\" OR CommandLine=\"*-enc *\" OR CommandLine=\"*-WindowStyle Hidden*\"))\n\n[+] Rule deployed to Splunk: index=sysmon sourcetype=sysmon\n[+] Alert configured: Priority=CRITICAL, Auto-isolate=ON",
+      "def": "[SIEM] Sigma 룰 배포 완료 — Splunk에 자동 탐지 + 격리 정책 적용",
+      "defAction": "Source: Sigma → Splunk 변환기\nTarget: SIEM 탐지 규칙 엔진\nAction: CRITICAL 우선순위 알림 생성, 자동 격리 정책 활성화",
+      "desc": "Sigma 룰을 작성하여 SIEM 플랫폼(Splunk)에 배포 가능한 탐지 쿼리로 변환합니다. 이후 유사 공격을 자동으로 탐지합니다.",
+      "descEn": "Write a Sigma rule and convert it to a SIEM-deployable detection query for Splunk. This enables automatic detection of similar attacks going forward.",
+      "stepTitle": "Sigma 룰로 SIEM 탐지 규칙 생성",
+      "stepTitleEn": "SIEM Detection Rule via Sigma Rule",
+      "feynman": "Sigma는 탐지 규칙의 '에스페란토어'입니다. 한 번 작성하면 Splunk, Elastic, QRadar 등 어떤 SIEM으로든 변환됩니다. 우리 룰은 'Word가 WMI나 PowerShell을 실행하면 즉시 경보'라는 규칙입니다. 마치 '은행 금고실에서 청소부가 금괴를 만지면 경보'라는 규칙처럼, 정상적이지 않은 행동을 자동으로 감지합니다.",
+      "feynmanEn": "Sigma is the 'Esperanto' of detection rules. Write once, convert to any SIEM — Splunk, Elastic, QRadar. Our rule says 'alert immediately if Word launches WMI or PowerShell.' Like setting an alarm for 'if a janitor touches gold bars in the vault' — automatically detecting abnormal behavior.",
+      "expert": "Sigma는 벤더 중립적 탐지 룰 포맷입니다. sigmac로 Splunk SPL로 변환 후 index=sysmon에 배포합니다. detection 절의 selection_parent+selection_child 조합은 프로세스 트리 기반 탐지로 false positive를 최소화합니다. Auto-isolate=ON으로 탐지 즉시 엔드포인트 격리를 자동화합니다.",
+      "expertEn": "Sigma is a vendor-neutral detection rule format. sigmac converts it to Splunk SPL and deploys to index=sysmon. The detection clause combining selection_parent+selection_child uses process tree-based detection to minimize false positives. Auto-isolate=ON automates endpoint isolation upon detection.",
+      "defTooltip": "📊 SIEM: Sigma 기반 탐지 룰이 Splunk에 배포되어 자동 탐지+격리가 활성화됨",
+      "defTooltipEn": "📊 SIEM: Sigma-based detection rule deployed to Splunk with auto-detection and isolation enabled",
+      "hackerLog": {
+        "title": "sigma_deployment.log",
+        "lines": [
+          { "log": "ParentImage|endswith: '\\WINWORD.EXE'", "desc": "💡 Word에서 시작되는 프로세스 체인을 감지하는 탐지 조건입니다" },
+          { "log": "condition: selection_parent and (selection_child or selection_hidden)", "desc": "💡 부모+자식 프로세스 조합으로 오탐을 최소화합니다" },
+          { "log": "Alert configured: Priority=CRITICAL, Auto-isolate=ON", "desc": "💡 탐지 즉시 해당 PC를 네트워크에서 자동 격리합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Sigma", "desc": "벤더 중립적 SIEM 탐지 룰 형식. YARA가 파일용이라면 Sigma는 로그용입니다. 한 번 작성하면 Splunk, Elastic, QRadar 등 다양한 SIEM으로 변환됩니다" },
+        { "name": "SIEM (Security Information and Event Management)", "desc": "보안 이벤트를 중앙에서 수집·분석·경보하는 플랫폼. 여러 보안 장비의 로그를 통합하여 위협을 탐지하고 대응합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 header_forensics.py --trace-route email_headers.txt",
+      "out": "[+] Parsing email headers from: email_headers.txt\n[+] Tracing Received chain (bottom-up)...\n\n=== Email Route Reconstruction ===\n\nHop  Timestamp             Server                          IP              Country\n───  ─────────             ──────                          ──              ───────\n 1   2024-03-15 09:20:11   mail-out.cloudsec-conf.org      185.220.101.34  🇷🇺 Russia\n 2   2024-03-15 09:20:14   relay-eu.protonmail.ch          185.70.41.18    🇨🇭 Switzerland\n 3   2024-03-15 09:20:16   mx1.{companyName}-corp.com      203.0.113.50    🇰🇷 South Korea\n 4   2024-03-15 09:20:17   internal-gw.{companyName}.local 10.0.1.5        Internal\n\n=== Header Anomaly Analysis ===\n[!] ANOMALY 1: cloudsec-conf.org registered 2024-03-13 (2 days before attack)\n[!] ANOMALY 2: Reply-To differs from From (reply@mail-cdn.cloudsec-conf.org)\n[!] ANOMALY 3: X-Mailer: swaks v20190914.0 (attack tool, not legitimate MUA)\n[!] ANOMALY 4: SPF passed but domain age < 7 days (newly registered)\n[!] ANOMALY 5: Return-Path mismatch with From header\n\n=== IOC Summary ===\nSender IP: 185.220.101.34 (Known Tor exit node)\nDomain: cloudsec-conf.org (typosquat of cloudsec-conference.org)\nRegistrar: Njalla (privacy-focused, often used by threat actors)",
+      "def": "[Email Forensics] 이메일 헤더 역추적 완료 — 5건 이상 비정상 지표 확인, 도메인 타이포스쿼팅 확정",
+      "defAction": "Source: 이메일 헤더 포렌식 분석\nTarget: speaker@cloudsec-conf.org 발송 이메일\nAction: 발신 IP(185.220.101.34) 차단, 도메인 블랙리스트 등록, Tor exit node IP 목록 업데이트",
+      "desc": "이메일 헤더의 Received 체인을 역추적하여 발신 서버 경로, 도메인 등록 이력, Reply-To 불일치 등 이상 지표를 분석합니다.",
+      "descEn": "Trace the Received chain in email headers to analyze sender server routes, domain registration history, Reply-To mismatches, and other anomaly indicators.",
+      "stepTitle": "이메일 헤더 포렌식 - Received 체인 역추적",
+      "stepTitleEn": "Email Header Forensics - Received Chain Traceback",
+      "feynman": "이메일 헤더는 택배의 '운송장'과 같습니다. 어디서 출발했고, 어떤 서버를 거쳤는지 기록됩니다. 역추적 결과, 발신 도메인(cloudsec-conf.org)이 공격 2일 전에 등록되었고, 발신 IP가 러시아의 Tor 출구 노드였습니다. 정상적인 컨퍼런스라면 도메인을 2일 전에 만들지 않습니다. 이것은 결정적인 피싱 증거입니다.",
+      "feynmanEn": "Email headers are like a package's 'shipping label' — they record where it originated and which servers it passed through. The traceback reveals the sender domain (cloudsec-conf.org) was registered just 2 days before the attack, and the sender IP was a Russian Tor exit node. No legitimate conference creates a domain 2 days before. This is conclusive phishing evidence.",
+      "expert": "Received 체인 역추적(bottom-up)으로 실제 발신 서버를 식별합니다. 5가지 이상 지표 — 신규 도메인(2일), Reply-To 불일치, swaks X-Mailer, SPF pass+도메인 age < 7일, Return-Path 불일치 — 가 복합적으로 스피어피싱을 확정합니다. Njalla 레지스트라와 Tor exit node는 위협 행위자의 전형적 인프라입니다.",
+      "expertEn": "Bottom-up Received chain traceback identifies the actual sending server. Five+ indicators — new domain (2 days), Reply-To mismatch, swaks X-Mailer, SPF pass + domain age < 7 days, Return-Path mismatch — collectively confirm spearphishing. Njalla registrar and Tor exit nodes are typical threat actor infrastructure.",
+      "defTooltip": "📧 이메일 포렌식: Received 체인 5개 이상 비정상 지표 확인, 타이포스쿼팅 도메인 확정",
+      "defTooltipEn": "📧 Email Forensics: 5+ anomaly indicators confirmed in Received chain, typosquatting domain confirmed",
+      "hackerLog": {
+        "title": "header_forensics_result.log",
+        "lines": [
+          { "log": "cloudsec-conf.org registered 2024-03-13 (2 days before attack)", "desc": "💡 공격 2일 전에 등록된 도메인 — 정상 컨퍼런스가 아닌 피싱용 도메인입니다" },
+          { "log": "X-Mailer: swaks v20190914.0 (attack tool)", "desc": "💡 정상 이메일 클라이언트가 아닌 해킹 도구(swaks)로 발송된 이메일입니다" },
+          { "log": "Sender IP: 185.220.101.34 (Known Tor exit node)", "desc": "💡 Tor 네트워크를 통해 발신 — 공격자가 신원을 숨기고 있습니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Received 체인", "desc": "이메일이 발신자에서 수신자까지 거친 서버 경로. 각 서버가 자기 정보를 추가하며, 아래에서 위로 읽으면 실제 경로를 역추적할 수 있습니다" },
+        { "name": "Typosquatting (타이포스쿼팅)", "desc": "정상 도메인과 유사한 도메인을 등록하여 사용자를 속이는 기법. cloudsec-conf.org vs cloudsec-conference.org처럼 미세한 차이를 이용합니다" }
+      ]
+    },
+    {
+      "cmd": "Set-MpPreference -AttackSurfaceReductionRules_Ids 92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B -AttackSurfaceReductionRules_Actions Enabled; Set-MpPreference -AttackSurfaceReductionRules_Ids D4F940AB-401B-4EFC-AADC-AD5F3C50688A -AttackSurfaceReductionRules_Actions Enabled; Get-MpPreference | Select-Object -ExpandProperty AttackSurfaceReductionRules_Ids",
+      "out": "[+] Configuring Attack Surface Reduction (ASR) Rules...\n\n=== ASR Rule Deployment ===\n\nRule ID                                  Name                                          Status\n───────                                  ────                                          ──────\n92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B    Block Office apps from creating child proc    ✅ Enabled\nD4F940AB-401B-4EFC-AADC-AD5F3C50688A    Block Office apps from creating executable    ✅ Enabled\n3B576869-A4EC-4529-8536-B80A7769E899    Block execution of potentially obfuscated     ✅ Enabled\n75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84    Block Office from injecting into other proc   ✅ Enabled\nD3E037E1-3EB8-44C8-A917-57927947596D    Block JavaScript/VBScript from launching      ✅ Enabled\n\n[+] 5 ASR rules enabled successfully\n[+] Audit mode logs: C:\\Windows\\System32\\winevt\\Logs\\Microsoft-Windows-Windows Defender%4Operational.evtx\n[+] Test result: WINWORD.EXE → child process creation BLOCKED ✅",
+      "def": "[ASR] Office 매크로 자식 프로세스 생성 차단 룰 5개 활성화 완료",
+      "defAction": "Source: Microsoft Defender ASR\nTarget: 모든 엔드포인트의 Office 프로세스\nAction: Office→자식 프로세스 생성 차단, 난독화 스크립트 차단, VBScript 실행 차단",
+      "desc": "Attack Surface Reduction(ASR) 룰을 활성화하여 Office 애플리케이션이 자식 프로세스를 생성하거나 난독화 스크립트를 실행하는 것을 차단합니다.",
+      "descEn": "Enable Attack Surface Reduction (ASR) rules to block Office applications from creating child processes or executing obfuscated scripts.",
+      "stepTitle": "ASR 룰 배포 - Office 매크로 차단",
+      "stepTitleEn": "ASR Rule Deployment - Office Macro Blocking",
+      "feynman": "ASR은 Windows에 내장된 '행동 차단기'입니다. '매크로가 다른 프로그램을 실행하면 무조건 차단'이라는 규칙을 설정합니다. 이 5가지 규칙을 켜면, 앞서 봤던 WINWORD→wmiprvse→powershell 공격 체인이 첫 단계에서 즉시 차단됩니다. 문서를 열어도 매크로가 PowerShell을 실행할 수 없습니다.",
+      "feynmanEn": "ASR is Windows' built-in 'behavior blocker.' It sets rules like 'block any program launched by a macro unconditionally.' With these 5 rules enabled, the WINWORD→wmiprvse→powershell attack chain we saw earlier gets blocked at the first step. Even if the document is opened, the macro cannot launch PowerShell.",
+      "expert": "ASR Rule 92E97FA1은 Office 앱의 자식 프로세스 생성을 차단하여 매크로→WMI→PowerShell 체인을 원천 차단합니다. D4F940AB는 실행 파일 생성을, 3B576869는 난독화 스크립트 실행을 차단합니다. Audit 모드에서 먼저 테스트 후 Block 모드로 전환하는 것이 운영 권장사항입니다.",
+      "expertEn": "ASR Rule 92E97FA1 blocks Office app child process creation, fundamentally preventing the macro→WMI→PowerShell chain. D4F940AB blocks executable creation, 3B576869 blocks obfuscated script execution. Testing in Audit mode before switching to Block mode is the operational best practice.",
+      "defTooltip": "🛡️ ASR: Office 매크로의 자식 프로세스 생성 및 난독화 스크립트 실행 차단 완료",
+      "defTooltipEn": "🛡️ ASR: Office macro child process creation and obfuscated script execution blocked",
+      "hackerLog": {
+        "title": "asr_deployment.log",
+        "lines": [
+          { "log": "Block Office apps from creating child proc: ✅ Enabled", "desc": "💡 Word/Excel이 다른 프로그램을 실행하는 것을 원천 차단합니다" },
+          { "log": "Block execution of potentially obfuscated: ✅ Enabled", "desc": "💡 난독화된 스크립트(Base64 인코딩 등)의 실행을 차단합니다" },
+          { "log": "Test result: WINWORD.EXE → child process creation BLOCKED", "desc": "💡 테스트 결과 매크로 공격 체인이 첫 단계에서 차단됩니다" }
+        ]
+      },
+      "terms": [
+        { "name": "ASR (Attack Surface Reduction)", "desc": "Microsoft Defender의 공격 표면 축소 기능. 특정 행동 패턴(매크로 실행, 스크립트 다운로드 등)을 사전에 차단하여 공격을 예방합니다" },
+        { "name": "Attack Surface (공격 표면)", "desc": "시스템에서 공격자가 악용할 수 있는 모든 지점의 합. ASR은 이 지점들을 줄여 공격 가능성을 낮춥니다" }
+      ]
+    },
+    {
+      "cmd": "gpupdate /force && gpresult /R /SCOPE:COMPUTER | Select-String -Pattern 'ASR|Macro|Office|Defender'",
+      "out": "[+] Updating Group Policy...\n\nUpdating policy...\nComputer Policy update has completed successfully.\nUser Policy update has completed successfully.\n\n=== GPO Applied Policies ===\n\n  Applied Group Policy Objects:\n    [1] GOTROOT-ASR-Office-Macro-Block (New)\n    [2] GOTROOT-Defender-RealTime-Enhanced\n    [3] GOTROOT-Baseline-Security\n    [4] Default Domain Policy\n\n  Computer Policy Results:\n    Microsoft Defender ASR Rules........... Enforced (5 rules)\n    Office Macro Execution Policy.......... Disabled for Internet-sourced files\n    Protected View......................... Enabled (all external documents)\n    VBA Macro Notification................ Block all without notification\n    Trusted Locations..................... Restricted to approved paths only\n\n[+] GPO replication status:\n    DC01.{companyName}.local ............ Replicated ✅\n    DC02.{companyName}.local ............ Replicated ✅\n    All 247 endpoints .................. Applying (ETA: ~15 minutes)\n\n[+] Policy verification: Test endpoint DESKTOP-TEST01 confirmed ASR enforcement ✅",
+      "def": "[GPO] 조직 전체 247개 엔드포인트에 ASR + 매크로 차단 정책 배포 완료",
+      "defAction": "Source: Active Directory Group Policy\nTarget: {companyName}.LOCAL 도메인 전체 (247 endpoints)\nAction: 5개 ASR 룰 + 매크로 비활성화 + Protected View 강제 적용",
+      "desc": "GPO(Group Policy Object)를 통해 ASR 룰과 매크로 차단 정책을 조직 전체 247개 엔드포인트에 일괄 배포합니다.",
+      "descEn": "Deploy ASR rules and macro blocking policies across all 247 endpoints in the organization via GPO (Group Policy Object).",
+      "stepTitle": "GPO를 통한 조직 전체 정책 배포",
+      "stepTitleEn": "Organization-wide Policy Deployment via GPO",
+      "feynman": "GPO는 회사 전체 컴퓨터에 '보안 규칙'을 한 번에 적용하는 리모컨입니다. 앞서 1대 PC에 설정한 ASR 룰을 이제 247대 전체에 배포합니다. 마치 학교에서 교칙을 모든 교실에 공지하는 것처럼, 도메인 컨트롤러 2대를 통해 전 직원의 PC에 동일한 보안 정책이 적용됩니다.",
+      "feynmanEn": "GPO is a remote control that applies 'security rules' to all company computers at once. The ASR rules set on one PC are now deployed to all 247. Like posting school rules in every classroom, the two domain controllers push identical security policies to every employee's PC.",
+      "expert": "gpupdate /force로 즉시 정책 갱신 후 gpresult /R로 적용 상태를 검증합니다. GPO는 DC01/DC02 이중화 복제로 단일 장애점을 제거합니다. 'Block all without notification'으로 사용자가 매크로를 활성화할 수 없으며, Trusted Locations 제한으로 우회 경로도 차단합니다.",
+      "expertEn": "gpupdate /force triggers immediate policy refresh, and gpresult /R verifies the applied state. GPO replicates through dual DC01/DC02, eliminating single points of failure. 'Block all without notification' prevents users from enabling macros, and Trusted Locations restrictions block bypass paths.",
+      "defTooltip": "⚙️ GPO: 조직 전체 247개 엔드포인트에 보안 정책 강제 배포 완료",
+      "defTooltipEn": "⚙️ GPO: Security policies enforced across all 247 endpoints organization-wide",
+      "hackerLog": {
+        "title": "gpo_deployment.log",
+        "lines": [
+          { "log": "GOTROOT-ASR-Office-Macro-Block (New) — Applied", "desc": "💡 새로운 ASR 정책이 GPO를 통해 전 조직에 배포되었습니다" },
+          { "log": "VBA Macro Notification: Block all without notification", "desc": "💡 사용자가 매크로를 활성화하는 선택지 자체를 제거합니다" },
+          { "log": "All 247 endpoints: Applying (ETA: ~15 minutes)", "desc": "💡 전 직원 PC에 15분 내로 보안 정책이 적용됩니다" }
+        ]
+      },
+      "terms": [
+        { "name": "GPO (Group Policy Object)", "desc": "Active Directory 환경에서 컴퓨터와 사용자 설정을 중앙에서 관리하는 정책. 한 번 설정으로 수백 대의 PC에 동일한 보안 규칙을 배포할 수 있습니다" },
+        { "name": "Domain Controller (도메인 컨트롤러)", "desc": "Active Directory 서비스를 실행하는 서버. 인증, 정책 배포, 사용자 관리를 담당하며, 이중화로 가용성을 보장합니다" }
+      ]
+    },
+    {
+      "cmd": "python3 defense_audit.py --axis email,endpoint,network --report full",
+      "out": "[+] Running 3-Axis Defense Model Verification...\n[+] Testing against MITRE ATT&CK T1566.001 kill chain...\n\n═══════════════════════════════════════════════════════════════\n                    3-AXIS DEFENSE AUDIT REPORT\n═══════════════════════════════════════════════════════════════\n\n📧 AXIS 1: Email Security\n   [✅] SPF/DKIM/DMARC enforcement............. PASS\n   [✅] Macro-enabled attachment blocking....... PASS\n   [✅] Sandbox detonation (30-sec delay)....... PASS\n   [✅] URL rewriting and click tracking........ PASS\n   [⚠️] Domain age check (< 7 days)............ PARTIAL (threshold set to 30 days recommended)\n   Score: 4.5/5\n\n🖥️ AXIS 2: Endpoint Security\n   [✅] ASR rules (5/5 enabled)................ PASS\n   [✅] Sysmon logging (EID 1,3,7,8,11)........ PASS\n   [✅] AMSI enforcement....................... PASS\n   [✅] Protected View for external docs....... PASS\n   [✅] EDR process chain monitoring........... PASS\n   Score: 5/5\n\n🌐 AXIS 3: Network Security\n   [✅] Tor exit node IP blocklist............. PASS\n   [✅] C2 domain reputation filtering......... PASS\n   [✅] SSL inspection for encrypted C2........ PASS\n   [⚠️] DNS sinkholing for new domains........ PARTIAL (24hr delay)\n   [✅] Egress filtering (port 443 only)....... PASS\n   Score: 4.5/5\n\n═══════════════════════════════════════════════════════════════\n OVERALL SCORE: 14/15 (93.3%) — STRONG\n REMAINING GAP: Domain age threshold adjustment recommended\n═══════════════════════════════════════════════════════════════\n\n[+] Kill chain simulation result:\n    Step 1 (Recon)........... Not preventable (OSINT)\n    Step 2 (Weaponize)....... Detected by YARA ✅\n    Step 3 (Deliver)......... Blocked by email gateway ✅\n    Step 4 (Execute)......... Blocked by ASR rules ✅\n    Step 5 (Escalate)........ Blocked by EDR ✅\n    Step 6 (Collect)......... Blocked by credential protection ✅\n\n[+] Defense-in-depth: 5/6 kill chain stages blocked\n[+] Report saved: defense_audit_2024-03-15.pdf",
+      "def": "[Audit] 3축 방어 모델 검증 완료 — 14/15 점, 킬체인 6단계 중 5단계 차단 확인",
+      "defAction": "Source: 자동화 방어 감사 스크립트\nTarget: 이메일·엔드포인트·네트워크 3축 보안 체계\nAction: 도메인 age 임계값 30일 상향 권고, 감사 보고서 생성 완료",
+      "desc": "이메일·엔드포인트·네트워크 3축 방어 모델을 검증하고 킬체인 각 단계에서 차단이 작동하는지 시뮬레이션합니다.",
+      "descEn": "Verify the 3-axis defense model (email, endpoint, network) and simulate whether blocking works at each kill chain stage.",
+      "stepTitle": "3축 방어 모델 검증",
+      "stepTitleEn": "3-Axis Defense Model Verification",
+      "feynman": "방어가 정말 작동하는지 '모의 시험'을 치르는 단계입니다. 이메일·엔드포인트·네트워크 3가지 축에서 각각 방어력을 점검합니다. 킬체인 6단계 중 5단계에서 차단이 확인되었습니다. 93.3점으로 '강력' 등급이지만, 도메인 age 검사 임계값을 7일에서 30일로 올려야 합니다. 완벽한 방어는 없지만, 다층 방어로 공격자의 비용을 극대화합니다.",
+      "feynmanEn": "This is the 'mock exam' to verify defenses actually work. We check defense capability across three axes: email, endpoint, and network. Blocking was confirmed at 5 of 6 kill chain stages. The 93.3% score earns a 'Strong' rating, but domain age threshold should be raised from 7 to 30 days. No defense is perfect, but defense-in-depth maximizes the attacker's cost.",
+      "expert": "3축 방어 감사는 MITRE ATT&CK 킬체인을 기준으로 각 방어 계층의 커버리지를 측정합니다. Defense-in-depth 원칙에 따라 한 축이 실패해도 다른 축이 보완합니다. Domain age 검사의 PARTIAL 평가는 24시간 DNS sinkholing 지연과 연동되며, 즉시 검사 임계값 상향으로 해결 가능합니다.",
+      "expertEn": "The 3-axis defense audit measures coverage at each defense layer against the MITRE ATT&CK kill chain. Following defense-in-depth principles, if one axis fails, others compensate. The PARTIAL rating on domain age check correlates with the 24hr DNS sinkholing delay, resolvable by immediately raising the check threshold.",
+      "defTooltip": "✅ 감사: 3축 방어 14/15점, 킬체인 5/6 단계 차단 — 도메인 age 임계값 상향 필요",
+      "defTooltipEn": "✅ Audit: 3-axis defense 14/15, 5/6 kill chain stages blocked — domain age threshold adjustment needed",
+      "hackerLog": {
+        "title": "defense_audit_report.log",
+        "lines": [
+          { "log": "OVERALL SCORE: 14/15 (93.3%) — STRONG", "desc": "💡 3축 방어 체계가 93.3%의 높은 점수를 달성했습니다" },
+          { "log": "Step 3 (Deliver): Blocked by email gateway ✅", "desc": "💡 이메일 게이트웨이에서 악성 첨부파일이 차단됩니다" },
+          { "log": "Step 4 (Execute): Blocked by ASR rules ✅", "desc": "💡 매크로가 실행되더라도 ASR 룰이 자식 프로세스 생성을 차단합니다" }
+        ]
+      },
+      "terms": [
+        { "name": "Defense-in-Depth (심층 방어)", "desc": "여러 계층의 보안 통제를 배치하여 한 계층이 뚫려도 다음 계층이 방어하는 전략. 성곽의 해자, 성벽, 내성처럼 다중 방어선을 구축합니다" },
+        { "name": "Kill Chain (킬체인)", "desc": "사이버 공격의 단계별 진행 모델. 정찰→무기화→전달→실행→설치→C2→목표달성의 7단계로, 어느 한 단계에서 차단하면 공격이 실패합니다" }
+      ]
+    }
+  ],
+  "processTree": [
+    { "name": "WINWORD.EXE", "depth": 0, "alert": false, "minStep": 0 },
+    { "name": "wmiprvse.exe (PID: 8901)", "depth": 1, "alert": true, "minStep": 0 },
+    { "name": "powershell.exe -hidden (PID: 8934)", "depth": 2, "alert": true, "minStep": 0 },
+    { "name": "sysmon.exe (monitoring)", "depth": 0, "alert": false, "minStep": 0 }
+  ]
+}
