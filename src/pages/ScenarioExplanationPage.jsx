@@ -7,11 +7,11 @@ import { supabase } from '../lib/supabase';
 
 // ── 레벨 표시 라벨 ──
 const LEVEL_LABELS = {
-  novice:       { ko: '입문',   en: 'Novice',       color: '#94a3b8' },
-  beginner:     { ko: '초급',   en: 'Beginner',     color: '#22c55e' },
-  intermediate: { ko: '중급',   en: 'Intermediate', color: '#3b82f6' },
-  advanced:     { ko: '고급',   en: 'Advanced',     color: '#ef4444' },
-  expert:       { ko: '전문가', en: 'Expert',       color: '#a855f7' },
+  novice:       { ko: '입문',   en: 'Novice',       ja: '入門',       vi: 'Nhập môn', ar: 'مبتدئ',   color: '#94a3b8' },
+  beginner:     { ko: '초급',   en: 'Beginner',     ja: '初級',       vi: 'Sơ cấp',   ar: 'مبتدئ',   color: '#22c55e' },
+  intermediate: { ko: '중급',   en: 'Intermediate', ja: '中級',       vi: 'Trung cấp', ar: 'متوسط',  color: '#3b82f6' },
+  advanced:     { ko: '고급',   en: 'Advanced',     ja: '上級',       vi: 'Nâng cao', ar: 'متقدم',   color: '#ef4444' },
+  expert:       { ko: '전문가', en: 'Expert',       ja: 'エキスパート', vi: 'Chuyên gia', ar: 'خبير', color: '#a855f7' },
 };
 
 // ── 다국어 UI ──
@@ -25,6 +25,8 @@ const uiText = {
     comingSoon: '시나리오 준비 중',
     comingSoonDesc: '이 기법의 시나리오 콘텐츠가 준비 중입니다.\n랩으로 바로 이동할 수 있습니다.',
     labDirectBtn: '🧪 실습 랩 바로 시작하기',
+    flowEdu: '1. 교육', flowGraphic: '2. 그래픽', flowScenario: '3. 시나리오', flowLab: '4. 랩',
+    loadingScenario: '시나리오 로딩 중...',
   },
   en: {
     scenarioTitle: 'Scenario-Based Explanation',
@@ -35,6 +37,8 @@ const uiText = {
     comingSoon: 'Scenario Coming Soon',
     comingSoonDesc: 'Scenario content for this technique is being prepared.\nYou can go directly to the lab.',
     labDirectBtn: '🧪 Go to Lab',
+    flowEdu: '1. Education', flowGraphic: '2. Graphic', flowScenario: '3. Scenario', flowLab: '4. Lab',
+    loadingScenario: 'Loading scenario...',
   },
   zh: {
     scenarioTitle: '基于场景的说明',
@@ -45,6 +49,8 @@ const uiText = {
     comingSoon: '场景准备中',
     comingSoonDesc: '该技术的场景内容正在准备中。\n您可以直接进入实验室。',
     labDirectBtn: '🧪 直接进入实验室',
+    flowEdu: '1. 教育', flowGraphic: '2. 图解', flowScenario: '3. 场景', flowLab: '4. 实验室',
+    loadingScenario: '场景加载中...',
   },
   hi: {
     scenarioTitle: 'परिदृश्य-आधारित स्पष्टीकरण',
@@ -55,6 +61,8 @@ const uiText = {
     comingSoon: 'परिदृश्य तैयार हो रहा है',
     comingSoonDesc: 'इस तकनीक के लिए परिदृश्य सामग्री तैयार की जा रही है।',
     labDirectBtn: '🧪 सीधे लैब जाएं',
+    flowEdu: '1. शिक्षा', flowGraphic: '2. ग्राफिक', flowScenario: '3. परिदृश्य', flowLab: '4. लैब',
+    loadingScenario: 'परिदृश्य लोड हो रहा है...',
   },
   ja: {
     scenarioTitle: 'シナリオベース解説',
@@ -65,6 +73,8 @@ const uiText = {
     comingSoon: 'シナリオ準備中',
     comingSoonDesc: 'この技法のシナリオコンテンツを準備中です。\nラボに直接移動できます。',
     labDirectBtn: '🧪 ラボへ直接移動',
+    flowEdu: '1. 教育', flowGraphic: '2. グラフィック', flowScenario: '3. シナリオ', flowLab: '4. ラボ',
+    loadingScenario: 'シナリオ読み込み中...',
   },
   vi: {
     scenarioTitle: 'Giải thích dựa trên kịch bản',
@@ -75,6 +85,8 @@ const uiText = {
     comingSoon: 'Kịch bản đang chuẩn bị',
     comingSoonDesc: 'Nội dung kịch bản cho kỹ thuật này đang được chuẩn bị.',
     labDirectBtn: '🧪 Đến Lab ngay',
+    flowEdu: '1. Giáo dục', flowGraphic: '2. Đồ họa', flowScenario: '3. Kịch bản', flowLab: '4. Lab',
+    loadingScenario: 'Đang tải kịch bản...',
   },
   ar: {
     scenarioTitle: 'شرح قائم على السيناريو',
@@ -85,6 +97,8 @@ const uiText = {
     comingSoon: 'السيناريو قيد الإعداد',
     comingSoonDesc: 'محتوى السيناريو لهذه التقنية قيد الإعداد.',
     labDirectBtn: '🧪 الانتقال إلى المختبر',
+    flowEdu: '1. التعليم', flowGraphic: '2. الرسوم', flowScenario: '3. السيناريو', flowLab: '4. المختبر',
+    loadingScenario: 'جار تحميل السيناريو...',
   },
 };
 
@@ -144,7 +158,7 @@ function ScenarioLoader() {
     <div className="w-full h-[500px] md:h-[650px] flex items-center justify-center rounded-2xl border border-slate-700 bg-[#0A0F1C]">
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 border-2 border-[#DFB8B6]/30 border-t-[#DFB8B6] rounded-full animate-spin" />
-        <p className="text-xs text-slate-500">시나리오 로딩 중...</p>
+        <p className="text-xs text-slate-500">{(uiText[getStoredLang()] || uiText.ko).loadingScenario}</p>
       </div>
     </div>
   );
@@ -219,20 +233,20 @@ export default function ScenarioExplanationPage() {
           </button>
           {/* 플로우 스텝 */}
           <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
-            <span className="px-2 py-1 rounded bg-slate-800 text-slate-400">1. 교육</span>
+            <span className="px-2 py-1 rounded bg-slate-800 text-slate-400">{t.flowEdu}</span>
             <span className="text-slate-600">→</span>
-            <span className="px-2 py-1 rounded bg-slate-800 text-slate-400">2. 그래픽</span>
+            <span className="px-2 py-1 rounded bg-slate-800 text-slate-400">{t.flowGraphic}</span>
             <span className="text-slate-600">→</span>
-            <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold">3. 시나리오</span>
+            <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold">{t.flowScenario}</span>
             <span className="text-slate-600">→</span>
-            <span className="px-2 py-1 rounded bg-slate-800 text-slate-500">4. 랩</span>
+            <span className="px-2 py-1 rounded bg-slate-800 text-slate-500">{t.flowLab}</span>
           </div>
           <div className="flex items-center gap-2">
             <span
               className="text-xs font-bold px-2 py-0.5 rounded-full border"
               style={{ color: levelInfo.color, borderColor: levelInfo.color + '50', backgroundColor: levelInfo.color + '15' }}
             >
-              {lang === 'en' ? levelInfo.en : levelInfo.ko}
+              {levelInfo[lang] || levelInfo.ko}
             </span>
             <span className="text-xs font-mono text-slate-500">{techniqueId}</span>
           </div>
@@ -246,7 +260,7 @@ export default function ScenarioExplanationPage() {
             📋 {t.scenarioTitle}
           </span>
           <h1 className="text-2xl md:text-3xl font-black mb-2">
-            {lang === 'en' ? pageMeta?.titleEn : pageMeta?.title}
+            {lang !== 'ko' && pageMeta?.titleEn ? pageMeta.titleEn : pageMeta?.title}
           </h1>
           <p className="text-slate-400 text-sm">{t.scenarioSubtitle}</p>
         </div>
@@ -260,6 +274,7 @@ export default function ScenarioExplanationPage() {
               onFinish={handleFinish}
               userName={userName}
               companyName={companyName}
+              lang={lang}
             />
           </Suspense>
         ) : (
