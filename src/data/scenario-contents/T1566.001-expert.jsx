@@ -511,6 +511,194 @@ const T = {
     r6_grade: "التصنيف النهائي:", r6_labBtn: "→ إلى المختبر 🚀",
     r6_freeHint: "(أغلق النافذة لاستكشاف كل قطاع بحرية)",
   },
+  zh: {
+    loc1: 'Sector 1: 紫队指挥室', loc2: 'Sector 2: CVE 分析室', loc3: 'Sector 3: 零日研究所', loc4: 'Sector 4: CTI 中心', loc5: 'Sector 5: 战略整合室',
+    d1_1: "注意！{AGENT} 特工，今天的任务是最高级别。检查 Purple Team 运营体系，分析 Red Team 和 Blue Team 的协作结构。",
+    d1_2: "是的，队长！我看到 Red Team 正在复现真实攻击者的 TTP，而 Blue Team 在验证检测与响应能力。",
+    d1_3: "很好。Purple Team 整合双方结果以弥补安全缺口。从指挥室收集 3 个关键线索！",
+    d2_1: "确认完毕！已获取 Red Team 攻击模拟结果、Blue Team 检测日志以及综合分析报告。",
+    d2_2: "干得好。说出这两个团队协作强化安全的运营模型名称。",
+    d3_1: "现在分析鱼叉式钓鱼附件中利用的 CVE。CVE-2021-40444 是通过 Office 文档滥用 MSHTML 引擎的严重零日漏洞。",
+    d3_2: "仅仅打开 Word 文档就能通过 ActiveX 控件实现远程代码执行！CAB 文件用于传递载荷。",
+    d3_3: "没错。从分析室提取此攻击链的每个组件。获取 MSHTML exploit、ActiveX 控件和 CAB 载荷！",
+    d4_1: "攻击链分析完成！已重建完整流程：打开文档 → MSHTML 渲染 → ActiveX 加载 → CAB 下载 → DLL 执行。",
+    d4_2: "出色。说出此攻击中被关键利用的 Internet Explorer 引擎组件的准确名称。",
+    d5_1: "欢迎来到零日研究所。这里我们同时分析 CVE-2022-30190（Follina）和 CVE-2023-23397（Outlook 权限提升）。",
+    d5_2: "Follina 滥用 ms-msdt: 协议处理程序触发 MSDT，Outlook CVE 在无用户交互的情况下窃取 NTLM 哈希！",
+    d5_3: "两个漏洞都被武器化用于鱼叉式钓鱼附件。从研究所获取 Follina MSDT、Outlook NTLM 和零日链证据！",
+    d6_1: "两个 CVE 分析完毕！Follina 利用诊断工具，Outlook CVE 仅通过预览即可实现 NTLM 中继——极其严重的漏洞。",
+    d6_2: "正确。说出 CVE-2022-30190（即 Follina）利用的 Windows 诊断工具的缩写。",
+    d7_1: "这里是网络威胁情报（CTI）中心。我们收集 IOC（入侵指标）并基于 TTP 构建攻击者画像。",
+    d7_2: "STIX/TAXII 协议自动接收威胁情报源，并将攻击模式映射到 MITRE ATT&CK 矩阵！",
+    d7_3: "好。获取 CTI 的三大核心资产——实时威胁情报源、IOC 数据库和 MITRE 映射体系！",
+    d8_1: "CTI 资产获取完毕！已从威胁情报源提取最新 IOC，并将 T1566.001 鱼叉式钓鱼 TTP 精确映射到 ATT&CK 矩阵。",
+    d8_2: "完美。说出将攻击者行为模式分类为战术、技术和程序的框架名称。",
+    d9_1: "所有分析已完成，{LEADER}！现在需要将零日响应策略与组织网络弹性整合。",
+    d9_2: "没错。加强补丁管理、建立事件响应计划、确保组织网络弹性是最终目标！",
+    d10_1: "用于预先验证组织事件响应流程的训练体系已建立完毕！",
+    d10_2: "最后一个问题。说出在实际部署前预先验证组织安全事件响应能力的演练名称。",
+    d11_1: "战略整合完成！Purple Team 运营、CVE 分析、CTI 体系、组织弹性——所有系统正常运行。",
+    d11_2: "辛苦了，{AGENT}。今天学习的内容已记录在最终案例手册中，请仔细复习。",
+    h1: "找到 Red Team 的攻击武器（准星）、Blue Team 的盾牌、<br>以及 Purple Team 的综合报告。",
+    h2: "收集 MSHTML 引擎漏洞（bug）、ActiveX 代码控件、<br>以及 CAB 载荷包。",
+    h3: "收集 Follina 的 MSDT 终端、Outlook NTLM 密钥、<br>以及零日攻击链链接。",
+    h4: "找到实时威胁情报源（RSS）、IOC 数据库、<br>以及 MITRE ATT&CK 映射图。",
+    h5: "启动补丁管理系统（刷新）、事件响应计划书（剪贴板）、<br>以及弹性防护盾！",
+    c_red_t: "Red Team 攻击", c_red_m: "模拟真实攻击者 TTP（战术·技术·程序）来实际测试组织防御体系的攻击模拟团队。",
+    c_blue_t: "Blue Team 防御", c_blue_m: "利用 SIEM/EDR 等防御工具实时检测、分析和响应 Red Team 攻击的安全运营团队。",
+    c_purple_t: "Purple Team 报告", c_purple_m: "整合 Red Team 攻击结果与 Blue Team 检测结果，识别安全缺口并制定改进方案的协作报告。",
+    c_mshtml_t: "MSHTML Exploit", c_mshtml_m: "CVE-2021-40444：Office 文档中的 OLE 对象调用 MSHTML（Trident）引擎渲染远程 HTML，并通过 ActiveX 执行任意代码。",
+    c_activex_t: "ActiveX 控件", c_activex_m: "由 MSHTML 加载的远程 HTML 页面实例化 ActiveX 控件，访问本地文件系统并执行恶意 DLL。",
+    c_cab_t: "CAB 载荷", c_cab_m: "攻击者在远程服务器上托管的 CAB（Cabinet）归档文件，内含恶意 DLL，通过 ActiveX 提取并执行。",
+    c_follina_t: "Follina MSDT", c_follina_m: "CVE-2022-30190：Word 文档中的远程模板调用 ms-msdt: URI 方案触发 MSDT 并执行 PowerShell 代码——零日漏洞利用。",
+    c_outlook_t: "Outlook NTLM", c_outlook_m: "CVE-2023-23397：特制的日历邀请邮件在 Outlook 中自动处理，将 NTLM 认证哈希泄露到攻击者的 SMB 服务器。",
+    c_zeroday_t: "零日链", c_zeroday_m: "将多个零日漏洞链式组合，实现单一漏洞无法达成的完整系统控制的高级攻击技术。",
+    c_feed_t: "威胁情报源", c_feed_m: "通过 STIX/TAXII 协议全球共享的实时威胁信息流，自动收集 IOC、恶意 IP 和哈希值。",
+    c_ioc_t: "IOC 数据库", c_ioc_m: "入侵指标（Indicators of Compromise）——系统化存储和查询恶意文件哈希、C2 域名、IP 地址和注册表键的威胁情报数据库。",
+    c_mitre_t: "MITRE 映射", c_mitre_m: "将收集到的 IOC 和攻击行为精确映射到 MITRE ATT&CK 矩阵的战术、技术和程序，构建攻击者画像。",
+    c_patch_t: "补丁管理", c_patch_m: "自动化的补丁管理和虚拟补丁系统，最大程度缩短零日披露与厂商补丁发布之间的暴露窗口期。",
+    c_incident_t: "响应计划", c_incident_m: "基于 NIST SP 800-61 的事件响应计划，定义检测、分析、遏制、恢复、事后分析 5 阶段流程和 RACI 矩阵。",
+    c_resilience_t: "弹性强化", c_resilience_m: "组织网络弹性（Cyber Resilience），确保遭受网络攻击后仍能维持核心业务，包括 BCP/DRP 和桌面推演。",
+    p1_title: "协作运营模型", p1_desc: '攻击团队（Red）和防御团队（Blue）协作强化安全的<b>集成团队运营模型</b>是什么？', p1_opts: ["Red Team", "Blue Team", "Purple Team", "SOC Team"],
+    p2_title: "MSHTML 漏洞", p2_desc: 'CVE-2021-40444 中被利用的 <b>Internet Explorer 引擎组件</b>是什么？', p2_opts: ["MSHTML", "VBScript", "JScript", "Chakra"],
+    p3_title: "Follina 诊断工具", p3_desc: 'CVE-2022-30190（Follina）利用的 <b>Windows 诊断工具</b>是什么？', p3_opts: ["MSBuild", "MSDT", "MSHTA", "MSIExec"],
+    p4_title: "威胁分类框架", p4_desc: '在威胁情报中将攻击者行为分类为<b>战术·技术·程序（TTP）的框架</b>是什么？', p4_opts: ["NIST CSF", "ISO 27001", "MITRE ATT&CK", "CIS Controls"],
+    p5_title: "事件响应预先验证", p5_desc: '在实际部署前<b>预先验证组织安全事件响应能力的演练</b>是什么？', p5_opts: ["渗透测试", "桌面推演", "安全审计", "合规审查"],
+    teamLeader: '队长', agent: '特工', secRate: '确保率', certReport: '结业报告',
+    analysisReport: '分析报告', freeMode: '(自由探索模式)',
+    proceed: '继续', next: '下一步', closeWindow: '关闭', saveData: '保存数据',
+    inventory: '收集数据 (Inventory)', noClues: '尚未收集到任何线索。',
+    prevTab: '◀ 上一页', nextTab: '下一页 ▶',
+    rTab1: "1. Purple Team 运营", rTab2: "2. CVE-2021-40444", rTab3: "3. Follina 与 Outlook",
+    rTab4: "4. 网络威胁情报", rTab5: "5. 战略安全整合", rTab6: "6. 训练结业",
+    r1_h: "Purple Team 运营",
+    r1_ch1: "Ch 1. Red/Blue Team 角色分工",
+    r1_ch1_p: '<span class="text-white bg-white/10 px-1 rounded">Red Team</span> 复现真实 APT 组织的 TTP 攻击组织防御体系，<span class="text-white bg-white/10 px-1 rounded">Blue Team</span> 利用 SIEM、EDR、NDR 进行实时检测和响应。',
+    r1_ch2: "Ch 2. Purple Team 协作报告",
+    r1_ch2_l1: 'Purple Team <span class="text-white bg-white/10 px-1 rounded">综合分析</span> Red Team 攻击成功/失败结果与 Blue Team 检测率。',
+    r1_ch2_l2: '识别检测缺口并量化 MITRE ATT&CK 覆盖率，制定改进路线图。',
+    r2_h: "CVE-2021-40444 分析",
+    r2_ch3: "Ch 3. MSHTML 漏洞机制",
+    r2_ch3_p: 'Office 文档中的 OLE 对象调用 <span class="text-white bg-white/10 px-1 rounded">MSHTML（Trident）引擎</span>渲染远程 HTML，并通过 ActiveX 控件在本地系统执行任意代码。',
+    r2_ch4: "Ch 4. ActiveX 利用链",
+    r2_ch4_l1: "打开恶意 .docx 文档（鱼叉式钓鱼附件）", r2_ch4_l2: "MSHTML 引擎加载远程 HTML", r2_ch4_l3: "ActiveX 控件下载 CAB 归档", r2_ch4_l4: "从 CAB 中提取并执行恶意 DLL",
+    r3_h: "Follina 与 Outlook CVE",
+    r3_ch5: "Ch 5. CVE-2022-30190 MSDT 利用",
+    r3_ch5_p: 'Word 文档中的远程模板调用 <span class="text-white bg-white/10 px-1 rounded">ms-msdt:</span> URI 方案触发 Microsoft Support Diagnostic Tool 并执行 PowerShell 代码——零日攻击。',
+    r3_ch6: "Ch 6. CVE-2023-23397 NTLM 中继",
+    r3_ch6_l1: '特制的日历邀请在 Outlook 中<span class="text-white bg-white/10 px-1 rounded">无需用户交互即自动处理</span>。',
+    r3_ch6_l2: 'NTLM 认证哈希泄露到攻击者的 SMB 服务器，实现权限提升和横向移动。',
+    r4_h: "网络威胁情报",
+    r4_ch7: "Ch 7. IOC 收集与共享",
+    r4_ch7_p: '通过 <span class="text-white bg-white/10 px-1 rounded">STIX/TAXII</span> 协议自动收集 IOC（恶意哈希、C2 域名、IP），并与安全社区实时共享。',
+    r4_ch8: "Ch 8. 基于 TTP 的攻击者画像",
+    r4_ch8_l1: '将收集到的 IOC 映射到 <span class="text-white bg-white/10 px-1 rounded">MITRE ATT&CK</span> 矩阵，分类攻击者的战术、技术和程序。',
+    r4_ch8_l2: '结合 Diamond Model 和 Kill Chain 分析，构建 APT 组织行为画像。',
+    r5_h: "战略安全整合",
+    r5_ch9: "Ch 9. 零日响应策略",
+    r5_ch9_p: '在厂商发布补丁前应用 <span class="text-white bg-white/10 px-1 rounded">虚拟补丁（Virtual Patching）</span>和微分段，最大程度缩短暴露窗口期。',
+    r5_ch10: "Ch 10. 组织网络弹性",
+    r5_ch10_l1: '通过 <span class="text-white bg-white/10 px-1 rounded">桌面推演</span>预先验证事件响应流程并审查 RACI 矩阵。',
+    r5_ch10_l2: '建立 BCP/DRP 体系，确保遭受网络攻击后核心业务连续性。',
+    r6_complete: "训练结业完成！",
+    r6_desc: "从 Purple Team 运营到 CVE 分析、<br/>CTI 体系和组织弹性——<br/>您已出色完成 Expert 课程。",
+    r6_grade: "最终等级:", r6_labBtn: "前往实验室 🚀",
+    r6_freeHint: "(关闭此窗口可自由重新探索各区域)",
+  },
+  hi: {
+    loc1: 'Sector 1: Purple Team कमांड रूम', loc2: 'Sector 2: CVE विश्लेषण प्रयोगशाला', loc3: 'Sector 3: Zero-Day अनुसंधान प्रयोगशाला', loc4: 'Sector 4: CTI केंद्र', loc5: 'Sector 5: रणनीतिक एकीकरण कक्ष',
+    d1_1: "ध्यान दें! एजेंट {AGENT}, आज का मिशन सर्वोच्च स्तर का है। Purple Team की परिचालन प्रणाली का निरीक्षण करें और Red Team तथा Blue Team के सहयोग ढांचे का विश्लेषण करें।",
+    d1_2: "जी, टीम लीडर! मैं देख सकता हूँ कि Red Team वास्तविक हमलावरों के TTP को दोहरा रही है, जबकि Blue Team पहचान और प्रतिक्रिया को सत्यापित कर रही है।",
+    d1_3: "अच्छा। Purple Team दोनों पक्षों के परिणामों को एकीकृत करके सुरक्षा अंतरालों को भरती है। कमांड रूम से 3 महत्वपूर्ण सुराग एकत्र करें!",
+    d2_1: "पुष्टि हो गई! Red Team के हमला अनुकरण परिणाम, Blue Team की पहचान लॉग और एकीकृत विश्लेषण रिपोर्ट सब प्राप्त कर ली हैं।",
+    d2_2: "शाबाश। उस परिचालन मॉडल का नाम बताएं जिसमें ये दोनों टीमें सुरक्षा मजबूत करने के लिए सहयोग करती हैं।",
+    d3_1: "अब स्पीयरफ़िशिंग अटैचमेंट में उपयोग किए गए CVE का विश्लेषण करें। CVE-2021-40444 एक गंभीर zero-day था जिसने Office दस्तावेज़ों के माध्यम से MSHTML इंजन का दुरुपयोग किया।",
+    d3_2: "केवल Word दस्तावेज़ खोलने पर ActiveX नियंत्रणों के माध्यम से रिमोट कोड निष्पादन हो जाता है! CAB फ़ाइलें पेलोड वितरित करती हैं।",
+    d3_3: "सही। प्रयोगशाला से इस हमला श्रृंखला के प्रत्येक घटक को निकालें। MSHTML exploit, ActiveX नियंत्रण और CAB पेलोड प्राप्त करें!",
+    d4_1: "Exploit श्रृंखला विश्लेषण पूर्ण! पूरी प्रक्रिया पुनर्निर्मित: दस्तावेज़ खोलना → MSHTML रेंडरिंग → ActiveX लोड → CAB डाउनलोड → DLL निष्पादन।",
+    d4_2: "उत्कृष्ट। इस हमले में गंभीर रूप से शोषित Internet Explorer इंजन घटक का सटीक नाम बताएं।",
+    d5_1: "Zero-Day अनुसंधान प्रयोगशाला में आपका स्वागत है। यहाँ हम CVE-2022-30190 (Follina) और CVE-2023-23397 (Outlook विशेषाधिकार वृद्धि) का एक साथ विश्लेषण करते हैं।",
+    d5_2: "Follina ms-msdt: प्रोटोकॉल हैंडलर का दुरुपयोग करके MSDT को ट्रिगर करता है, और Outlook CVE बिना उपयोगकर्ता इंटरैक्शन के NTLM हैश चुराता है!",
+    d5_3: "दोनों कमजोरियाँ स्पीयरफ़िशिंग अटैचमेंट के हथियार के रूप में उपयोग की गईं। प्रयोगशाला से Follina MSDT, Outlook NTLM और zero-day श्रृंखला के साक्ष्य प्राप्त करें!",
+    d6_1: "दोनों CVE का विश्लेषण पूर्ण! Follina डायग्नोस्टिक टूल का शोषण करता है, और Outlook CVE केवल प्रीव्यू से भी NTLM रिले सक्षम करता है — अत्यंत गंभीर कमजोरी।",
+    d6_2: "सही। CVE-2022-30190, उर्फ़ Follina, द्वारा शोषित Windows डायग्नोस्टिक टूल का संक्षिप्त नाम बताएं।",
+    d7_1: "यह साइबर खतरा इंटेलिजेंस (CTI) केंद्र है। यहाँ हम IOC (समझौता संकेतक) एकत्र करते हैं और TTP के आधार पर हमलावर प्रोफ़ाइल बनाते हैं।",
+    d7_2: "STIX/TAXII प्रोटोकॉल स्वचालित रूप से खतरा फ़ीड प्राप्त करते हैं और हमला पैटर्न को MITRE ATT&CK मैट्रिक्स पर मैप करते हैं!",
+    d7_3: "अच्छा। CTI की तीन मूल संपत्तियाँ प्राप्त करें — रियल-टाइम खतरा फ़ीड, IOC डेटाबेस और MITRE मैपिंग प्रणाली!",
+    d8_1: "CTI संपत्तियाँ प्राप्त! खतरा फ़ीड से नवीनतम IOC निकाले और ATT&CK मैट्रिक्स पर T1566.001 स्पीयरफ़िशिंग TTP को सटीक रूप से मैप किया।",
+    d8_2: "परफ़ेक्ट। हमलावरों के व्यवहार पैटर्न को Tactics, Techniques और Procedures में वर्गीकृत करने वाले फ्रेमवर्क का नाम बताएं।",
+    d9_1: "सभी विश्लेषण पूर्ण, {LEADER}! अब zero-day प्रतिक्रिया रणनीतियों को संगठनात्मक साइबर लचीलेपन के साथ एकीकृत करना होगा।",
+    d9_2: "सही। पैच प्रबंधन मजबूत करना, घटना प्रतिक्रिया योजना स्थापित करना और संगठनात्मक साइबर लचीलापन सुनिश्चित करना अंतिम लक्ष्य है!",
+    d10_1: "संगठन की घटना प्रतिक्रिया प्रक्रियाओं को पूर्व-सत्यापित करने की प्रशिक्षण प्रणाली स्थापित हो गई है!",
+    d10_2: "अंतिम प्रश्न। वास्तविक तैनाती से पहले संगठन की सुरक्षा घटना प्रतिक्रिया क्षमता को पूर्व-सत्यापित करने वाले अभ्यास का नाम बताएं।",
+    d11_1: "रणनीतिक एकीकरण पूर्ण! Purple Team संचालन, CVE विश्लेषण, CTI प्रणाली, संगठनात्मक लचीलापन — सभी प्रणालियाँ कार्यशील हैं।",
+    d11_2: "बहुत अच्छा, {AGENT}। आज की सीख अंतिम केस बुक में दर्ज कर दी गई है। इसकी अच्छी तरह समीक्षा करें।",
+    h1: "Red Team का हमला हथियार (क्रॉसहेयर), Blue Team की ढाल,<br>और Purple Team की एकीकृत रिपोर्ट खोजें।",
+    h2: "MSHTML इंजन कमजोरी (बग), ActiveX कोड नियंत्रण,<br>और CAB पेलोड पैकेज एकत्र करें।",
+    h3: "Follina का MSDT टर्मिनल, Outlook NTLM कुंजी,<br>और zero-day हमला श्रृंखला लिंक एकत्र करें।",
+    h4: "रियल-टाइम खतरा फ़ीड (RSS), IOC डेटाबेस,<br>और MITRE ATT&CK मैपिंग मानचित्र खोजें।",
+    h5: "पैच प्रबंधन प्रणाली (रिफ़्रेश), घटना प्रतिक्रिया योजना (क्लिपबोर्ड),<br>और लचीलापन सुरक्षा कवच सक्रिय करें!",
+    c_red_t: "Red Team हमला", c_red_m: "वास्तविक हमलावरों के TTP (Tactics·Techniques·Procedures) की नकल करके संगठन की रक्षा प्रणाली का व्यावहारिक परीक्षण करने वाली आक्रमण अनुकरण टीम।",
+    c_blue_t: "Blue Team रक्षा", c_blue_m: "SIEM/EDR और अन्य रक्षा उपकरणों का उपयोग करके Red Team के हमलों का रियल-टाइम पहचान, विश्लेषण और प्रतिक्रिया करने वाली सुरक्षा संचालन टीम।",
+    c_purple_t: "Purple Team रिपोर्ट", c_purple_m: "Red Team के हमले के परिणामों और Blue Team के पहचान परिणामों को एकीकृत करके सुरक्षा अंतरालों की पहचान और सुधार योजना तैयार करने वाली सहयोगी रिपोर्ट।",
+    c_mshtml_t: "MSHTML Exploit", c_mshtml_m: "CVE-2021-40444: Office दस्तावेज़ों में OLE ऑब्जेक्ट MSHTML (Trident) इंजन को कॉल करके रिमोट HTML रेंडर करता है और ActiveX के माध्यम से मनमाना कोड निष्पादित करता है।",
+    c_activex_t: "ActiveX नियंत्रण", c_activex_m: "MSHTML द्वारा लोड किए गए रिमोट HTML पेज से ActiveX नियंत्रण इंस्टेंशिएट होकर लोकल फ़ाइल सिस्टम तक पहुँचते हैं और दुर्भावनापूर्ण DLL निष्पादित करते हैं।",
+    c_cab_t: "CAB पेलोड", c_cab_m: "हमलावर के रिमोट सर्वर पर होस्ट किया गया CAB (Cabinet) आर्काइव, जिसमें दुर्भावनापूर्ण DLL होता है जो ActiveX के माध्यम से निकाला और निष्पादित किया जाता है।",
+    c_follina_t: "Follina MSDT", c_follina_m: "CVE-2022-30190: Word दस्तावेज़ में रिमोट टेम्पलेट ms-msdt: URI स्कीम को कॉल करके MSDT ट्रिगर करता है और PowerShell कोड निष्पादित करता है — zero-day exploit।",
+    c_outlook_t: "Outlook NTLM", c_outlook_m: "CVE-2023-23397: विशेष रूप से तैयार किया गया कैलेंडर निमंत्रण ईमेल Outlook में स्वचालित रूप से प्रोसेस होता है, हमलावर के SMB सर्वर को NTLM प्रमाणीकरण हैश लीक करता है।",
+    c_zeroday_t: "Zero-Day श्रृंखला", c_zeroday_m: "कई zero-day कमजोरियों को श्रृंखलाबद्ध करके एकल कमजोरी से असंभव पूर्ण सिस्टम नियंत्रण प्राप्त करने की उन्नत हमला तकनीक।",
+    c_feed_t: "खतरा फ़ीड", c_feed_m: "STIX/TAXII प्रोटोकॉल के माध्यम से वैश्विक रूप से साझा किया जाने वाला रियल-टाइम खतरा सूचना प्रवाह, जो स्वचालित रूप से IOC, दुर्भावनापूर्ण IP और हैश मान एकत्र करता है।",
+    c_ioc_t: "IOC डेटाबेस", c_ioc_m: "Indicators of Compromise — दुर्भावनापूर्ण फ़ाइल हैश, C2 डोमेन, IP पते और रजिस्ट्री कुंजियों को व्यवस्थित रूप से संग्रहित और क्वेरी करने वाला खतरा इंटेलिजेंस DB।",
+    c_mitre_t: "MITRE मैपिंग", c_mitre_m: "एकत्रित IOC और हमला व्यवहार को MITRE ATT&CK मैट्रिक्स की Tactics, Techniques और Procedures पर सटीक रूप से मैप करके हमलावर प्रोफ़ाइल बनाना।",
+    c_patch_t: "पैच प्रबंधन", c_patch_m: "Zero-day प्रकटीकरण और विक्रेता पैच रिलीज़ के बीच एक्सपोज़र विंडो को न्यूनतम करने के लिए स्वचालित पैच प्रबंधन और वर्चुअल पैचिंग प्रणाली।",
+    c_incident_t: "प्रतिक्रिया योजना", c_incident_m: "NIST SP 800-61 आधारित घटना प्रतिक्रिया योजना, जो पहचान, विश्लेषण, रोकथाम, पुनर्प्राप्ति, पश्च-विश्लेषण के 5-चरण प्रक्रिया और RACI मैट्रिक्स को परिभाषित करती है।",
+    c_resilience_t: "लचीलापन सुदृढ़ीकरण", c_resilience_m: "साइबर हमलों के बाद भी मुख्य संचालन बनाए रखने के लिए संगठनात्मक साइबर लचीलापन (Cyber Resilience), जिसमें BCP/DRP और टेबलटॉप अभ्यास शामिल हैं।",
+    p1_title: "सहयोगी संचालन मॉडल", p1_desc: 'आक्रमण टीम (Red) और रक्षा टीम (Blue) सुरक्षा मजबूत करने के लिए सहयोग करने वाला <b>एकीकृत टीम संचालन मॉडल</b> कौन सा है?', p1_opts: ["Red Team", "Blue Team", "Purple Team", "SOC Team"],
+    p2_title: "MSHTML कमजोरी", p2_desc: 'CVE-2021-40444 में शोषित <b>Internet Explorer इंजन घटक</b> कौन सा है?', p2_opts: ["MSHTML", "VBScript", "JScript", "Chakra"],
+    p3_title: "Follina डायग्नोस्टिक टूल", p3_desc: 'CVE-2022-30190 (Follina) द्वारा शोषित <b>Windows डायग्नोस्टिक टूल</b> कौन सा है?', p3_opts: ["MSBuild", "MSDT", "MSHTA", "MSIExec"],
+    p4_title: "खतरा वर्गीकरण फ्रेमवर्क", p4_desc: 'खतरा इंटेलिजेंस में हमलावरों के व्यवहार को <b>Tactics·Techniques·Procedures (TTP) में वर्गीकृत करने वाला फ्रेमवर्क</b> कौन सा है?', p4_opts: ["NIST CSF", "ISO 27001", "MITRE ATT&CK", "CIS Controls"],
+    p5_title: "घटना प्रतिक्रिया पूर्व-सत्यापन", p5_desc: 'वास्तविक तैनाती से पहले संगठन की <b>सुरक्षा घटना प्रतिक्रिया क्षमता को पूर्व-सत्यापित करने वाला अभ्यास</b> कौन सा है?', p5_opts: ["पेनेट्रेशन टेस्टिंग", "टेबलटॉप अभ्यास", "सुरक्षा ऑडिट", "अनुपालन समीक्षा"],
+    teamLeader: 'टीम लीडर', agent: 'एजेंट', secRate: 'सुरक्षित', certReport: 'समापन रिपोर्ट',
+    analysisReport: 'विश्लेषण रिपोर्ट', freeMode: '(स्वतंत्र अन्वेषण मोड)',
+    proceed: 'जारी रखें', next: 'अगला', closeWindow: 'बंद करें', saveData: 'डेटा सहेजें',
+    inventory: 'एकत्रित डेटा (Inventory)', noClues: 'अभी तक कोई सुराग एकत्र नहीं हुआ।',
+    prevTab: '◀ पिछला', nextTab: 'अगला ▶',
+    rTab1: "1. Purple Team संचालन", rTab2: "2. CVE-2021-40444", rTab3: "3. Follina और Outlook",
+    rTab4: "4. साइबर खतरा इंटेलिजेंस", rTab5: "5. रणनीतिक सुरक्षा एकीकरण", rTab6: "6. प्रशिक्षण समापन",
+    r1_h: "Purple Team संचालन",
+    r1_ch1: "Ch 1. Red/Blue Team भूमिका विभाजन",
+    r1_ch1_p: '<span class="text-white bg-white/10 px-1 rounded">Red Team</span> वास्तविक APT समूहों के TTP को दोहराकर संगठन की रक्षा पर हमला करती है, <span class="text-white bg-white/10 px-1 rounded">Blue Team</span> SIEM, EDR, NDR का उपयोग करके रियल-टाइम पहचान और प्रतिक्रिया करती है।',
+    r1_ch2: "Ch 2. Purple Team सहयोग रिपोर्ट",
+    r1_ch2_l1: 'Purple Team Red Team के हमले की सफलता/विफलता परिणामों और Blue Team की पहचान दरों का <span class="text-white bg-white/10 px-1 rounded">एकीकृत विश्लेषण</span> करती है।',
+    r1_ch2_l2: 'पहचान अंतरालों की पहचान करती है और सुधार रोडमैप बनाने के लिए MITRE ATT&CK कवरेज को मात्रात्मक रूप से मापती है।',
+    r2_h: "CVE-2021-40444 विश्लेषण",
+    r2_ch3: "Ch 3. MSHTML कमजोरी तंत्र",
+    r2_ch3_p: 'Office दस्तावेज़ों में OLE ऑब्जेक्ट <span class="text-white bg-white/10 px-1 rounded">MSHTML (Trident) इंजन</span> को कॉल करके रिमोट HTML रेंडर करता है और ActiveX नियंत्रणों के माध्यम से स्थानीय सिस्टम पर मनमाना कोड निष्पादित करता है।',
+    r2_ch4: "Ch 4. ActiveX शोषण श्रृंखला",
+    r2_ch4_l1: "दुर्भावनापूर्ण .docx दस्तावेज़ खोलना (स्पीयरफ़िशिंग अटैचमेंट)", r2_ch4_l2: "MSHTML इंजन रिमोट HTML लोड करता है", r2_ch4_l3: "ActiveX नियंत्रण CAB आर्काइव डाउनलोड करता है", r2_ch4_l4: "CAB से दुर्भावनापूर्ण DLL निकालना और निष्पादित करना",
+    r3_h: "Follina और Outlook CVE",
+    r3_ch5: "Ch 5. CVE-2022-30190 MSDT शोषण",
+    r3_ch5_p: 'Word दस्तावेज़ में रिमोट टेम्पलेट <span class="text-white bg-white/10 px-1 rounded">ms-msdt:</span> URI स्कीम को कॉल करके Microsoft Support Diagnostic Tool ट्रिगर करता है और PowerShell कोड निष्पादित करता है — zero-day हमला।',
+    r3_ch6: "Ch 6. CVE-2023-23397 NTLM रिले",
+    r3_ch6_l1: 'विशेष रूप से तैयार किया गया कैलेंडर निमंत्रण Outlook में <span class="text-white bg-white/10 px-1 rounded">उपयोगकर्ता इंटरैक्शन के बिना स्वचालित रूप से प्रोसेस</span> होता है।',
+    r3_ch6_l2: 'NTLM प्रमाणीकरण हैश हमलावर के SMB सर्वर को लीक हो जाता है, जिससे विशेषाधिकार वृद्धि और पार्श्विक गति संभव होती है।',
+    r4_h: "साइबर खतरा इंटेलिजेंस",
+    r4_ch7: "Ch 7. IOC संग्रह और साझाकरण",
+    r4_ch7_p: '<span class="text-white bg-white/10 px-1 rounded">STIX/TAXII</span> प्रोटोकॉल के माध्यम से IOC (दुर्भावनापूर्ण हैश, C2 डोमेन, IP) स्वचालित रूप से एकत्र करता है और सुरक्षा समुदाय के साथ रियल-टाइम साझा करता है।',
+    r4_ch8: "Ch 8. TTP-आधारित हमलावर प्रोफ़ाइलिंग",
+    r4_ch8_l1: 'एकत्रित IOC को <span class="text-white bg-white/10 px-1 rounded">MITRE ATT&CK</span> मैट्रिक्स पर मैप करके हमलावरों की tactics, techniques और procedures का वर्गीकरण करता है।',
+    r4_ch8_l2: 'Diamond Model और Kill Chain विश्लेषण को जोड़कर APT समूह के व्यवहार प्रोफ़ाइल बनाता है।',
+    r5_h: "रणनीतिक सुरक्षा एकीकरण",
+    r5_ch9: "Ch 9. Zero-Day प्रतिक्रिया रणनीति",
+    r5_ch9_p: 'विक्रेता पैच रिलीज़ से पहले <span class="text-white bg-white/10 px-1 rounded">वर्चुअल पैचिंग (Virtual Patching)</span> और माइक्रोसेगमेंटेशन लागू करके एक्सपोज़र विंडो को न्यूनतम करता है।',
+    r5_ch10: "Ch 10. संगठनात्मक साइबर लचीलापन",
+    r5_ch10_l1: '<span class="text-white bg-white/10 px-1 rounded">टेबलटॉप अभ्यास</span> के माध्यम से घटना प्रतिक्रिया प्रक्रियाओं को पूर्व-सत्यापित करता है और RACI मैट्रिक्स की समीक्षा करता है।',
+    r5_ch10_l2: 'साइबर हमलों के बाद भी व्यवसाय निरंतरता सुनिश्चित करने के लिए BCP/DRP ढांचा स्थापित करता है।',
+    r6_complete: "प्रशिक्षण समापन पूर्ण!",
+    r6_desc: "Purple Team संचालन से CVE विश्लेषण,<br/>CTI प्रणाली और संगठनात्मक लचीलेपन तक —<br/>आपने Expert पाठ्यक्रम उत्कृष्ट रूप से पूरा किया।",
+    r6_grade: "अंतिम ग्रेड:", r6_labBtn: "प्रयोगशाला में जाएं 🚀",
+    r6_freeHint: "(इस विंडो को बंद करें और प्रत्येक सेक्टर को स्वतंत्र रूप से पुनः खोजें)",
+  },
 };
 
 const getT = (lang) => T[lang] || T.ko;
@@ -571,7 +759,12 @@ const buildPUZZLES = (t) => ({
 // ──────────────────────────────────────────────────────────────────────────────
 // [메인 교육 게임 컴포넌트]
 // ──────────────────────────────────────────────────────────────────────────────
-function InteractiveGameCanvas({ onFinish, userName, companyName }) {
+function InteractiveGameCanvas({ onFinish, userName, companyName, lang = 'ko' }) {
+  const t = getT(lang);
+  const CHAPTERS = buildCHAPTERS(t);
+  const CLUES_DATA = buildCLUES_DATA(t);
+  const PUZZLES = buildPUZZLES(t);
+
   const [gameState, setGameState] = useState(() => {
     try {
       const saved = localStorage.getItem('t1566_expert_state');
@@ -768,8 +961,8 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
 
   const activeClueObj = cluePopupId ? Object.values(CLUES_DATA).flat().find(c => c.id === cluePopupId) : null;
   const currentSpeakerName = currentDialogue?.speaker === 'TEAM_LEADER'
-    ? `팀장 ${companyName}`
-    : `요원 ${userName}`;
+    ? `${t.teamLeader} ${companyName}`
+    : `${t.agent} ${userName}`;
 
   const renderHotspots = () => {
     const scene = currentChapter?.scene;
@@ -802,29 +995,29 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
       );
     };
     if (scene === 'scene_phase1') return (<>
-      {generateClueItem('red_team',      0, Crosshair, "#FF3333", "레드팀 공격")}
-      {generateClueItem('blue_team',     1, Shield,    "#00E5FF", "블루팀 방어")}
-      {generateClueItem('purple_report', 2, FileText,  "#DFB8B6", "퍼플팀 리포트")}
+      {generateClueItem('red_team',      0, Crosshair, "#FF3333", t.c_red_t)}
+      {generateClueItem('blue_team',     1, Shield,    "#00E5FF", t.c_blue_t)}
+      {generateClueItem('purple_report', 2, FileText,  "#DFB8B6", t.c_purple_t)}
     </>);
     if (scene === 'scene_phase2') return (<>
-      {generateClueItem('mshtml_exploit',  0, Bug,     "#FF6B6B", "MSHTML 익스플로잇")}
-      {generateClueItem('activex_control', 1, Code,    "#00E5FF", "ActiveX 컨트롤")}
-      {generateClueItem('cab_payload',     2, Package, "#DFB8B6", "CAB 페이로드")}
+      {generateClueItem('mshtml_exploit',  0, Bug,     "#FF6B6B", t.c_mshtml_t)}
+      {generateClueItem('activex_control', 1, Code,    "#00E5FF", t.c_activex_t)}
+      {generateClueItem('cab_payload',     2, Package, "#DFB8B6", t.c_cab_t)}
     </>);
     if (scene === 'scene_phase3') return (<>
-      {generateClueItem('follina_msdt',   0, Terminal, "#FF3333", "Follina MSDT")}
-      {generateClueItem('outlook_ntlm',   1, Key,      "#DFB8B6", "Outlook NTLM")}
-      {generateClueItem('zero_day_chain', 2, Link,     "#10B981", "제로데이 체인")}
+      {generateClueItem('follina_msdt',   0, Terminal, "#FF3333", t.c_follina_t)}
+      {generateClueItem('outlook_ntlm',   1, Key,      "#DFB8B6", t.c_outlook_t)}
+      {generateClueItem('zero_day_chain', 2, Link,     "#10B981", t.c_zeroday_t)}
     </>);
     if (scene === 'scene_phase4') return (<>
-      {generateClueItem('threat_feed',   0, Rss,      "#FF6B6B", "위협 피드")}
-      {generateClueItem('ioc_database',  1, Database, "#00E5FF", "IOC 데이터베이스")}
-      {generateClueItem('mitre_mapping', 2, Map,      "#10B981", "MITRE 매핑")}
+      {generateClueItem('threat_feed',   0, Rss,      "#FF6B6B", t.c_feed_t)}
+      {generateClueItem('ioc_database',  1, Database, "#00E5FF", t.c_ioc_t)}
+      {generateClueItem('mitre_mapping', 2, Map,      "#10B981", t.c_mitre_t)}
     </>);
     if (scene === 'scene_phase5') return (<>
-      {generateClueItem('patch_mgmt',    0, RefreshCw,   "#00E5FF", "패치 관리")}
-      {generateClueItem('incident_plan', 1, Clipboard,   "#DFB8B6", "대응 계획")}
-      {generateClueItem('resilience',    2, ShieldCheck, "#10B981", "복원력 강화")}
+      {generateClueItem('patch_mgmt',    0, RefreshCw,   "#00E5FF", t.c_patch_t)}
+      {generateClueItem('incident_plan', 1, Clipboard,   "#DFB8B6", t.c_incident_t)}
+      {generateClueItem('resilience',    2, ShieldCheck, "#10B981", t.c_resilience_t)}
     </>);
     return null;
   };
@@ -897,7 +1090,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
         {/* 중앙 Sector 진행바 */}
         <div className="hidden md:flex flex-col w-1/3 max-w-[300px] mx-4 pointer-events-auto">
           <div className="flex justify-between w-full text-[10px] md:text-xs font-bold text-[#DFB8B6] mb-1.5 tracking-widest uppercase drop-shadow-md">
-            <span>SECTOR PROGRESS {clearDate && <span className="text-[#00E5FF] ml-2 animate-pulse">(자유 탐색 모드)</span>}</span>
+            <span>SECTOR PROGRESS {clearDate && <span className="text-[#00E5FF] ml-2 animate-pulse">{t.freeMode}</span>}</span>
             <span className="text-[#00E5FF]">SEC 0{currentSector} / 0{totalSectors}</span>
           </div>
           <div className="flex gap-1.5 w-full h-2">
@@ -921,7 +1114,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
         {/* 우측 네비게이션 */}
         <div className="flex flex-col gap-2 pointer-events-auto max-w-[45%] md:max-w-none">
           <div className="flex items-center gap-1.5 md:gap-2 bg-[#0A0F1C]/80 border border-[#00E5FF]/50 px-2 md:px-4 py-1.5 md:py-2 rounded-lg backdrop-blur-sm shadow-lg cursor-pointer hover:bg-white/10" onClick={() => setShowInventory(true)}>
-            <span className="text-[10px] md:text-xs font-bold text-[#00E5FF] whitespace-nowrap">확보율</span>
+            <span className="text-[10px] md:text-xs font-bold text-[#00E5FF] whitespace-nowrap">{t.secRate}</span>
             <div className="flex gap-1">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className={`w-3 md:w-4 h-2.5 md:h-3 rounded-sm border transition-all duration-300 ${i < phaseCount ? 'bg-[#00E5FF] border-[#00E5FF] shadow-[0_0_8px_#00E5FF]' : 'border-[#00E5FF]/30'}`} />
@@ -932,7 +1125,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
             <div className="flex items-center justify-center gap-2 bg-[#0A0F1C]/80 border border-[#DFB8B6]/50 px-3 py-2 rounded-lg backdrop-blur-sm shadow-[0_0_10px_rgba(223,184,182,0.3)] cursor-pointer hover:bg-[#DFB8B6]/20 transition-all"
               onClick={() => { setActiveReportTab(0); setGameState(prev => ({ ...prev, showBook: true })); }}>
               <ShieldCheck size={14} className="text-[#DFB8B6]" />
-              <span className="text-xs font-bold text-[#DFB8B6]">수료 보고서</span>
+              <span className="text-xs font-bold text-[#DFB8B6]">{t.certReport}</span>
             </div>
           )}
         </div>
@@ -984,7 +1177,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                   <path d="M 44 62 Q 50 68 56 62" stroke="#0F172A" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
                 </svg>
               </div>
-              <span className="text-sm font-bold text-[#DFB8B6] tracking-widest">팀장 {companyName}</span>
+              <span className="text-sm font-bold text-[#DFB8B6] tracking-widest">{t.teamLeader} {companyName}</span>
             </div>
             <p dangerouslySetInnerHTML={{ __html: currentChapter?.hint || '' }} className="text-sm font-medium text-gray-200 leading-relaxed"></p>
           </motion.div>
@@ -1055,7 +1248,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
               </div>
               <p className="text-[15px] md:text-lg text-[#FDF5E6] mt-2 font-medium leading-relaxed min-h-[60px] break-keep pr-8">{typedText}</p>
               <div className="absolute bottom-4 right-4 animate-pulse text-[#DFB8B6] flex items-center gap-1">
-                <span className="text-xs tracking-widest hidden md:inline">{clearDate ? '다음' : '진행'}</span>
+                <span className="text-xs tracking-widest hidden md:inline">{clearDate ? t.next : t.proceed}</span>
                 <ChevronRight size={24}/>
               </div>
             </div>
@@ -1087,7 +1280,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
               </div>
               <p className="text-gray-300 text-sm leading-relaxed mb-6 bg-black/40 p-4 rounded-lg">{activeClueObj.msg}</p>
               <RoseGoldButton onClick={closeCluePopup} className="w-full !py-3">
-                {clearDate ? '창 닫기' : '데이터 저장하기'}
+                {clearDate ? t.closeWindow : t.saveData}
               </RoseGoldButton>
             </div>
           </motion.div>
@@ -1149,19 +1342,12 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                 <div className="px-4 py-3 border-b border-[#DFB8B6]/20 flex items-center gap-2 bg-[#0A0F1C]">
                   <ShieldCheck size={22} className="text-[#00E5FF] drop-shadow-[0_0_10px_rgba(0,229,255,0.8)] shrink-0" />
                   <div>
-                    <h2 className="text-sm font-bold text-[#DFB8B6] tracking-wider">분석 리포트</h2>
+                    <h2 className="text-sm font-bold text-[#DFB8B6] tracking-wider">{t.analysisReport}</h2>
                     <div className="text-[9px] text-[#00E5FF] tracking-widest font-mono">SYSTEM DEBRIEFING</div>
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto flex flex-row md:flex-col p-2 gap-1 overflow-x-auto md:overflow-x-hidden report-scroll">
-                  {[
-                    "1. Purple Team 운영",
-                    "2. CVE-2021-40444",
-                    "3. Follina와 Outlook",
-                    "4. 사이버 위협 인텔리전스",
-                    "5. 전략적 보안 통합",
-                    "6. 최종 훈련 수료"
-                  ].map((tabName, idx) => (
+                  {[t.rTab1, t.rTab2, t.rTab3, t.rTab4, t.rTab5, t.rTab6].map((tabName, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActiveReportTab(idx)}
@@ -1183,17 +1369,17 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                     >
                       {activeReportTab === 0 && (
                         <>
-                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">Purple Team 운영</h3>
+                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">{t.r1_h}</h3>
                           <div className="space-y-6 text-gray-300 leading-relaxed break-keep">
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 1. Red/Blue 팀 역할 분담</strong>
-                              <p><span className="text-white bg-white/10 px-1 rounded">레드팀</span>은 실제 APT 그룹의 TTP를 재현하여 조직의 방어 체계를 공격하고, <span className="text-white bg-white/10 px-1 rounded">블루팀</span>은 SIEM·EDR·NDR을 활용해 실시간 탐지와 대응을 수행합니다.</p>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r1_ch1}</strong>
+                              <p dangerouslySetInnerHTML={{ __html: t.r1_ch1_p }} />
                             </div>
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 2. 퍼플팀 협업 보고서</strong>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r1_ch2}</strong>
                               <ul className="list-disc pl-5 space-y-2">
-                                <li>퍼플팀은 레드팀의 공격 성공/실패 결과와 블루팀의 탐지율을 <span className="text-white bg-white/10 px-1 rounded">통합 분석</span>합니다.</li>
-                                <li>보안 갭(Detection Gap)을 식별하고 MITRE ATT&CK 커버리지를 정량화하여 개선 로드맵을 수립합니다.</li>
+                                <li dangerouslySetInnerHTML={{ __html: t.r1_ch2_l1 }} />
+                                <li>{t.r1_ch2_l2}</li>
                               </ul>
                             </div>
                           </div>
@@ -1201,19 +1387,19 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                       )}
                       {activeReportTab === 1 && (
                         <>
-                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">CVE-2021-40444 분석</h3>
+                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">{t.r2_h}</h3>
                           <div className="space-y-6 text-gray-300 leading-relaxed break-keep">
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 3. MSHTML 취약점 메커니즘</strong>
-                              <p>Office 문서 내 OLE 객체가 <span className="text-white bg-white/10 px-1 rounded">MSHTML(Trident) 엔진</span>을 호출하여 원격 HTML을 렌더링하고, ActiveX 컨트롤을 통해 로컬 시스템에서 임의 코드를 실행합니다.</p>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r2_ch3}</strong>
+                              <p dangerouslySetInnerHTML={{ __html: t.r2_ch3_p }} />
                             </div>
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 4. ActiveX 악용 체인</strong>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r2_ch4}</strong>
                               <ol className="list-decimal pl-5 space-y-2 text-[#DFB8B6] font-bold">
-                                <li>악성 .docx 문서 오픈 (스피어피싱 첨부)</li>
-                                <li>MSHTML 엔진이 원격 HTML 로드</li>
-                                <li>ActiveX 컨트롤이 CAB 아카이브 다운로드</li>
-                                <li>CAB 내 악성 DLL 추출 및 실행</li>
+                                <li>{t.r2_ch4_l1}</li>
+                                <li>{t.r2_ch4_l2}</li>
+                                <li>{t.r2_ch4_l3}</li>
+                                <li>{t.r2_ch4_l4}</li>
                               </ol>
                             </div>
                           </div>
@@ -1221,17 +1407,17 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                       )}
                       {activeReportTab === 2 && (
                         <>
-                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">Follina와 Outlook CVE</h3>
+                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">{t.r3_h}</h3>
                           <div className="space-y-6 text-gray-300 leading-relaxed break-keep">
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 5. CVE-2022-30190 MSDT 악용</strong>
-                              <p>Word 문서의 원격 템플릿이 <span className="text-white bg-white/10 px-1 rounded">ms-msdt:</span> URI 스킴을 호출하여 Microsoft Support Diagnostic Tool을 트리거하고, PowerShell 코드를 실행하는 제로데이 공격입니다.</p>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r3_ch5}</strong>
+                              <p dangerouslySetInnerHTML={{ __html: t.r3_ch5_p }} />
                             </div>
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 6. CVE-2023-23397 NTLM 릴레이</strong>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r3_ch6}</strong>
                               <ul className="list-disc pl-5 space-y-2">
-                                <li>특수 조작된 캘린더 초대 메일이 Outlook에서 <span className="text-white bg-white/10 px-1 rounded">사용자 상호작용 없이</span> 자동 처리됩니다.</li>
-                                <li>공격자의 SMB 서버로 NTLM 인증 해시가 유출되어 권한 상승 및 횡적 이동이 가능해집니다.</li>
+                                <li dangerouslySetInnerHTML={{ __html: t.r3_ch6_l1 }} />
+                                <li>{t.r3_ch6_l2}</li>
                               </ul>
                             </div>
                           </div>
@@ -1239,17 +1425,17 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                       )}
                       {activeReportTab === 3 && (
                         <>
-                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">사이버 위협 인텔리전스</h3>
+                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">{t.r4_h}</h3>
                           <div className="space-y-6 text-gray-300 leading-relaxed break-keep">
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 7. IOC 수집과 공유</strong>
-                              <p><span className="text-white bg-white/10 px-1 rounded">STIX/TAXII</span> 프로토콜을 통해 악성 해시·C2 도메인·IP 등 침해 지표(IOC)를 자동 수집하고 보안 커뮤니티와 실시간으로 공유합니다.</p>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r4_ch7}</strong>
+                              <p dangerouslySetInnerHTML={{ __html: t.r4_ch7_p }} />
                             </div>
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 8. TTP 기반 공격자 프로파일링</strong>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r4_ch8}</strong>
                               <ul className="list-disc pl-5 space-y-2">
-                                <li>수집된 IOC를 <span className="text-white bg-white/10 px-1 rounded">MITRE ATT&CK</span> 매트릭스에 매핑하여 공격자의 전술·기법·절차를 분류합니다.</li>
-                                <li>Diamond Model과 Kill Chain 분석을 결합하여 APT 그룹의 행동 프로파일을 구축합니다.</li>
+                                <li dangerouslySetInnerHTML={{ __html: t.r4_ch8_l1 }} />
+                                <li>{t.r4_ch8_l2}</li>
                               </ul>
                             </div>
                           </div>
@@ -1257,17 +1443,17 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                       )}
                       {activeReportTab === 4 && (
                         <>
-                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">전략적 보안 통합</h3>
+                          <h3 className="text-xl font-black text-[#DFB8B6] mb-4 border-b border-[#DFB8B6]/30 pb-3">{t.r5_h}</h3>
                           <div className="space-y-6 text-gray-300 leading-relaxed break-keep">
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 9. 제로데이 대응 전략</strong>
-                              <p>벤더 패치 배포 전 <span className="text-white bg-white/10 px-1 rounded">가상 패칭(Virtual Patching)</span>과 마이크로세그멘테이션을 적용하여 취약 기간(Window of Exposure)을 최소화합니다.</p>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r5_ch9}</strong>
+                              <p dangerouslySetInnerHTML={{ __html: t.r5_ch9_p }} />
                             </div>
                             <div>
-                              <strong className="text-[#00E5FF] text-xl block mb-2">Ch 10. 조직 사이버 복원력</strong>
+                              <strong className="text-[#00E5FF] text-xl block mb-2">{t.r5_ch10}</strong>
                               <ul className="list-disc pl-5 space-y-2">
-                                <li><span className="text-white bg-white/10 px-1 rounded">테이블탑 연습</span>을 통해 사고 대응 절차를 사전 검증하고 RACI 매트릭스를 점검합니다.</li>
-                                <li>BCP/DRP 체계를 수립하여 사이버 공격 후에도 핵심 업무 연속성을 보장합니다.</li>
+                                <li dangerouslySetInnerHTML={{ __html: t.r5_ch10_l1 }} />
+                                <li>{t.r5_ch10_l2}</li>
                               </ul>
                             </div>
                           </div>
@@ -1281,21 +1467,19 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                               <div className="text-lg tracking-wider text-[#00E5FF] font-mono">{clearDate.split(' ')[0]}</div>
                             </div>
                           )}
-                          <h1 className="text-2xl md:text-3xl text-[#DFB8B6] font-black mb-3 drop-shadow-[0_0_15px_rgba(223,184,182,0.4)]">훈련 수료 완료!</h1>
-                          <p className="text-sm md:text-base text-gray-300 mb-4 leading-relaxed break-keep">
-                            퍼플팀 운영부터 CVE 분석, CTI 체계,<br/>조직 복원력까지 Expert 과정을<br/>모두 훌륭히 마쳤습니다.
-                          </p>
+                          <h1 className="text-2xl md:text-3xl text-[#DFB8B6] font-black mb-3 drop-shadow-[0_0_15px_rgba(223,184,182,0.4)]">{t.r6_complete}</h1>
+                          <p className="text-sm md:text-base text-gray-300 mb-4 leading-relaxed break-keep" dangerouslySetInnerHTML={{ __html: t.r6_desc }} />
                           <p className="text-base md:text-xl text-gray-400 mb-6 flex items-center gap-3 z-20">
-                            최종 등급: <span className="text-[#00E5FF] text-5xl md:text-6xl font-black drop-shadow-[0_0_20px_rgba(0,229,255,0.5)]">S</span>
+                            {t.r6_grade} <span className="text-[#00E5FF] text-5xl md:text-6xl font-black drop-shadow-[0_0_20px_rgba(0,229,255,0.5)]">S</span>
                           </p>
                           <button
                             onClick={() => { if (onFinish) onFinish(); resetGame(); }}
                             className="w-full max-w-md relative overflow-hidden inline-flex items-center justify-center font-bold px-8 py-4 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(0,229,255,0.3)] tracking-wide text-lg md:text-xl border-2 border-[#00E5FF] bg-[#0A0F1C] text-[#00E5FF] hover:bg-[#00E5FF] hover:text-[#0A0F1C] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] whitespace-nowrap z-20 cursor-pointer"
                           >
-                            실습 랩으로 이동하기 🚀
+                            {t.r6_labBtn}
                           </button>
                           <div className="text-gray-500 mt-6 text-sm font-medium animate-pulse">
-                            (창을 닫으면 각 구역을 자유롭게 재탐색할 수 있습니다)
+                            {t.r6_freeHint}
                           </div>
                         </div>
                       )}
@@ -1309,7 +1493,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                     disabled={activeReportTab === 0}
                     className="px-4 py-2 text-sm font-bold text-gray-400 hover:text-[#DFB8B6] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   >
-                    ◀ 이전
+                    {t.prevTab}
                   </button>
                   <div className="flex gap-2">
                     {[0,1,2,3,4,5].map(idx => (
@@ -1321,7 +1505,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                     disabled={activeReportTab === 5}
                     className="px-4 py-2 text-sm font-bold text-[#00E5FF] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   >
-                    다음 ▶
+                    {t.nextTab}
                   </button>
                 </div>
               </div>
@@ -1342,7 +1526,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
               <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-[#DFB8B6]/30">
                 <div className="flex items-center gap-2">
                   <Briefcase className="text-[#00E5FF]" size={20} />
-                  <h2 className="text-base font-bold text-[#DFB8B6]">수집 데이터 (Inventory)</h2>
+                  <h2 className="text-base font-bold text-[#DFB8B6]">{t.inventory}</h2>
                 </div>
                 <button onClick={() => setShowInventory(false)} className="p-1.5 hover:bg-white/10 rounded-full text-[#DFB8B6] transition-colors cursor-pointer shrink-0"><X size={22}/></button>
               </div>
@@ -1369,7 +1553,7 @@ function InteractiveGameCanvas({ onFinish, userName, companyName }) {
                   })}
                   {gameState.foundClues.length === 0 && (
                     <div className="col-span-full py-10 text-center text-gray-500 font-bold border-2 border-dashed border-gray-700 rounded-xl">
-                      아직 수집된 단서가 없습니다.
+                      {t.noClues}
                     </div>
                   )}
                 </div>
