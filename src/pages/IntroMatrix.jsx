@@ -961,17 +961,7 @@ export default function UltimateCinematicMatrix() {
                 로그인
               </button>
             </div>
-            {/* AIROOT 소개 */}
-            <div className="mt-6 pt-5 border-t border-slate-700/50">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-lg">🤖</span>
-                <span className="text-cyan-400 font-black text-xs tracking-widest">AIROOT ZERO</span>
-              </div>
-              <p className="text-slate-500 text-[11px] font-mono mb-3">
-                AI 학습 · 회의록 · 커뮤니티<br/>
-                ROOT14 회원 전용 공간
-              </p>
-            </div>
+            {/* AIROOT 소개 — 로컬 전용 (Vercel 배포 시 숨김) */}
 
             <button
               onClick={() => { setHeroPhase('entering'); localStorage.removeItem('gotroot_intro_seen'); window.scrollTo({ top: 0 }); }}
@@ -1027,14 +1017,7 @@ export default function UltimateCinematicMatrix() {
                   📖 <span className="dm-mobile-hide">{t.itBasics}</span>
                 </span>
               )}
-              {isLoggedIn && (
-                <span
-                  onClick={() => { window.location.href = '/airoot'; }}
-                  className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-cyan-200 text-cyan-500 bg-cyan-50/50 hover:text-cyan-700 hover:border-cyan-400 transition-colors"
-                  title="AIROOT ZERO">
-                  🤖 <span className="dm-mobile-hide">AIROOT</span>
-                </span>
-              )}
+              {/* AIROOT 버튼 — 로컬 전용 (Vercel 배포 시 숨김) */}
               <span
                 onClick={() => navigate('/community')}
                 className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-emerald-200 text-emerald-500 bg-emerald-50/50 hover:text-emerald-700 hover:border-emerald-400 transition-colors"
