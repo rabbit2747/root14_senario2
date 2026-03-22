@@ -44,7 +44,7 @@ Before writing code, MUST output the following steps using XML tags:
 ## 공지사항 자동 업데이트 규칙
 
 업데이트 완료 후, `announcements` 테이블에 변경 사항 등록.
-- 기술 용어 최소화, 버전 번호 포함 (현재 최신: **v1.2.1**)
+- 기술 용어 최소화, 버전 번호 포함 (현재 최신: **v1.3.0**)
 - 카테고리: 🆕 새 기능 / 🔧 개선 / 🛡️ 보안 / 🐛 버그 수정
 
 ---
@@ -59,7 +59,7 @@ Before writing code, MUST output the following steps using XML tags:
 [✅] V-05: feedback_likes RLS 자기 것만 — 2026-03-16
 [✅] V-06: 이메일 인증 활성화 — 2026-03-16
 [✅] V-07: 회원가입 Rate Limiting — 2026-03-16
-[🔜] V-08: HSTS — Vercel 전환 시 자동 해결
+[✅] V-08: HSTS — Vercel HTTPS 자동 적용 (2026-03-22)
 ✅ 전면 보안 패치 완료. 새 테이블 추가 시 RLS 필수 확인.
 보안 SQL 전문: docs/security/SECURITY_REPORT.md
 ```
@@ -135,7 +135,7 @@ edu_progress 쓰기: public/edu/progress-tracker.js (SPA 밖!)
 edu_progress 읽기: useEduProgress (CourseSelector, IntroMatrix)
 tactics/techniques: useMatrixData → Supabase (실패 시 matrix-fallback.json)
 랩 완료: edu_progress.upsert + localStorage['gotroot_completed_labs'] 이중 저장
-레벨테스트: 서버 채점 (POST /api/level-test/check, server-data/ 정답 보유)
+레벨테스트: Vercel Serverless 채점 (POST /api/level-test/check)
 ```
 
 ### 관리자 탭 (11개)
@@ -157,25 +157,33 @@ src/
 ├── lib/          ← supabase.js, i18n.js, sanitize.js
 └── pages/        ← IntroMatrix, CourseSelector, lab/, admin/
 
+api/              ← Vercel Serverless Functions (7개 엔드포인트)
 public/edu/       ← 203개 HTML (SPA 밖, window.location.href로 이동)
-server.js         ← Express 프로덕션 (30+ API 라우트, JWT 인증)
-server-data/      ← 레벨테스트 정답 (서버 전용, 배포 제외)
+server.js         ← Express 로컬 전용 (Vercel 전환 후 레거시, AIROOT 로컬용)
+server-data/      ← 레벨테스트 정답 (Serverless Function이 읽음)
 ```
 
 ---
 
-## 🗺️ 마이그레이션 규칙 (Phase 0 — 현재 적용 중)
+## 🚀 배포 구조 (v1.3.0 — Vercel)
 
-**금지**: 컴포넌트에서 `supabase.*` 신규 직접 호출 추가 금지
-**허용 예외**: AuthContext.jsx, public/edu/progress-tracker.js
+**프로덕션**: https://gotroot-edu.vercel.app
+**배포 방식**: GitHub push → Vercel 자동 빌드+배포
+**브랜치**: `feature/hero-incident-matrix` → Production
 
-```js
-// ❌ 금지
-const { data } = await supabase.from('announcements').select('*');
-// ✅ 허용
-import { getAnnouncements } from '../api/announcements';
-const data = await getAnnouncements();
+### Vercel Serverless Functions (7개)
+```
+api/level-test/questions.js  ← GET  문제 목록 (정답 제외)
+api/level-test/check.js      ← POST 답안 채점
+api/auth/check-rate.js       ← GET  브루트포스 확인
+api/auth/report-failure.js   ← POST 로그인 실패 보고
+api/auth/report-success.js   ← POST 로그인 성공 보고
+api/ip.js                    ← GET  클라이언트 IP
+api/geoip.js                 ← POST IP 지오로케이션 배치
 ```
 
-향후 전환: Vercel Serverless Functions + Edge Middleware (JWT)
-상세 계획: `docs/internal/추후마이그레이션 계획 개발자에게.txt`
+### 코드 규칙
+- **금지**: 컴포넌트에서 `supabase.*` 신규 직접 호출 추가 금지
+- **허용 예외**: AuthContext.jsx, public/edu/progress-tracker.js
+- **신규 API**: `api/` 폴더에 Vercel Serverless Function으로 추가
+- `server.js`는 로컬 개발/AIROOT 전용 (Vercel 배포에 포함 안 됨)
