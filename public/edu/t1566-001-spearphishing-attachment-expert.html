@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1566.001" data-level="expert">
+<head>
+    <script>
+        (function() {
+            try {
+                var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
+                var session = sessionStorage.getItem(key);
+                if (!session || !JSON.parse(session)) {
+                    var redirect = encodeURIComponent(window.location.href);
+                    window.location.replace('/login?redirect=' + redirect);
+                }
+            } catch(e) { window.location.replace('/login'); }
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded = false;
+        (async function() {
+            try {
+                var SUPA = 'https://bnwbybawqrnhznirivfg.supabase.co';
+                var KEY  = 'sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';
+                var res = await fetch(SUPA + '/rest/v1/edu_html_content?page_id=eq.t1566-001-spearphishing-attachment-expert&select=content&limit=1', { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY } });
+                if (res.ok) { var data = await res.json(); if (data && data.length > 0 && data[0].content) { _eduDynLoaded = true; document.open(); document.write(data[0].content); document.close(); return; } }
+            } catch(e) {}
+            document.documentElement.classList.add('edu-ready');
+        })();
+        setTimeout(function() { if (!_eduDynLoaded) document.documentElement.classList.add('edu-ready'); }, 3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <title>ROOT14 EDU | T1566.001 전문가: Purple Team과 제로데이 연구</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] }, colors: { cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569' } } } }</script>
+    <style>
+        body { scroll-behavior:smooth; background-color:#FFF8F0; color:#1e293b; transition: background-color 0.3s ease, color 0.3s ease; }
+        .glass-panel { background:rgba(255,255,255,0.7); backdrop-filter:blur(16px); border:1px solid rgba(168,85,247,0.3); box-shadow:0 8px 32px rgba(30,41,59,0.05); }
+        .dark body { background-color:#0f172a; color:#f8fafc; }
+        .dark .glass-panel { background:rgba(30,41,59,0.7); border:1px solid rgba(168,85,247,0.2); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+        .hl-teal { color:#0f766e; font-weight:700; } .dark .hl-teal { color:#9DD9D2; }
+        .hl-yel { color:#b45309; font-weight:700; } .dark .hl-yel { color:#F4D06F; }
+        .hl-blue { color:#1d4ed8; font-weight:700; } .dark .hl-blue { color:#60a5fa; }
+        .hl-red { color:#dc2626; font-weight:700; } .dark .hl-red { color:#f87171; }
+        .hl-purple { color:#7c3aed; font-weight:700; } .dark .hl-purple { color:#a78bfa; }
+        .nav-item.active { background:linear-gradient(90deg,rgba(168,85,247,0.2) 0%,transparent 100%); border-left:4px solid #a855f7; color:#7c3aed; font-weight:700; }
+        .dark .nav-item.active { background:linear-gradient(90deg,rgba(167,139,250,0.15) 0%,transparent 100%); border-left:4px solid #a78bfa; color:#a78bfa; }
+        .terminal-bg { background-color:#1e293b; color:#9DD9D2; font-family:'JetBrains Mono',monospace; }
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#a855f7;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#a78bfa;}
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-purple-200 selection:text-purple-900 transition-colors duration-300">
+    <!-- Brand Header Bar -->
+    <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">ROOT14</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-3">
+            <span style="font-size:8px;color:#a855f7;font-weight:700;background:rgba(168,85,247,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(168,85,247,0.3);">⭐ EXPERT</span>
+            <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+    <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-purple-400"><span id="theme-icon" class="text-xl">🌙</span></button>
+    <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-purple-400/50 hover:border-purple-400 shadow transition-all">← 대시보드</button>
+
+    <!-- Sidebar -->
+    <aside class="hidden md:flex w-64 shrink-0 flex-col bg-white/50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-700 overflow-y-auto">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700">
+            <div class="text-[10px] font-mono text-slate-500 mb-1">T1566.001 · Expert</div>
+            <h2 class="font-extrabold text-base text-slate-800 dark:text-slate-100 leading-tight">스피어피싱 첨부파일<br><span class="text-purple-600 dark:text-purple-400">Purple Team & 제로데이</span></h2>
+        </div>
+        <nav class="flex-1 p-2 space-y-0.5 text-xs">
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch1" onclick="go('ch1')">Ch.1 Purple Team 운영 개론</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch2" onclick="go('ch2')">Ch.2 Red Team 피싱 시뮬레이션</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch3" onclick="go('ch3')">Ch.3 Blue Team 실시간 대응</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch4" onclick="go('ch4')">Ch.4 CVE-2021-40444 분석</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch5" onclick="go('ch5')">Ch.5 CVE-2022-30190 Follina</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch6" onclick="go('ch6')">Ch.6 CVE-2023-23397 분석</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch7" onclick="go('ch7')">Ch.7 제로데이 연구 방법론</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch8" onclick="go('ch8')">Ch.8 자체 탐지 프레임워크 설계</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch9" onclick="go('ch9')">Ch.9 위협 인텔리전스 통합</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch10" onclick="go('ch10')">Ch.10 전문가 종합 평가</a>
+        </nav>
+    </aside>
+
+    <!-- Mobile Nav -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-700 px-2 py-1.5 flex gap-1 overflow-x-auto">
+        <button onclick="go('ch1')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.1</button>
+        <button onclick="go('ch2')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.2</button>
+        <button onclick="go('ch3')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.3</button>
+        <button onclick="go('ch4')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.4</button>
+        <button onclick="go('ch5')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.5</button>
+        <button onclick="go('ch6')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.6</button>
+        <button onclick="go('ch7')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.7</button>
+        <button onclick="go('ch8')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.8</button>
+        <button onclick="go('ch9')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.9</button>
+        <button onclick="go('ch10')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.10</button>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-scroll" class="flex-1 overflow-y-auto scroll-smooth px-4 md:px-8 lg:px-16 py-8 pb-20 md:pb-8">
+
+        <!-- ===================== Ch.1 Purple Team 운영 개론 ===================== -->
+        <section id="ch1" data-chapter-id="ch1" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">01</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Purple Team 운영 개론</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Purple Team의 개념, Red/Blue Team과의 관계, 스피어피싱 방어 평가를 위한 Purple Team Exercise 설계 방법을 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Purple Team이란?</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300"><span class="hl-purple">Purple Team</span>은 Red Team(공격)과 Blue Team(방어)이 <span class="hl-teal">실시간으로 협력</span>하여 탐지 능력을 개선하는 접근입니다. Red Team이 공격을 실행하면, Blue Team이 즉시 탐지 여부를 확인하고, 미탐지 시 즉석에서 규칙을 개선합니다.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-700 text-center">
+                        <p class="font-bold text-red-600 dark:text-red-400 text-base mb-1">Red Team</p>
+                        <p class="text-slate-500 dark:text-slate-400">공격 시뮬레이션</p>
+                        <p class="text-slate-500 dark:text-slate-400">ATT&CK 기법 실행</p>
+                        <p class="text-slate-500 dark:text-slate-400">우회 기법 적용</p>
+                    </div>
+                    <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700 text-center">
+                        <p class="font-bold text-purple-600 dark:text-purple-400 text-base mb-1">Purple Team</p>
+                        <p class="text-slate-500 dark:text-slate-400">실시간 협력</p>
+                        <p class="text-slate-500 dark:text-slate-400">탐지 갭 식별</p>
+                        <p class="text-slate-500 dark:text-slate-400">즉시 개선</p>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700 text-center">
+                        <p class="font-bold text-blue-600 dark:text-blue-400 text-base mb-1">Blue Team</p>
+                        <p class="text-slate-500 dark:text-slate-400">탐지 모니터링</p>
+                        <p class="text-slate-500 dark:text-slate-400">규칙 튜닝</p>
+                        <p class="text-slate-500 dark:text-slate-400">인시던트 대응</p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Purple Team Exercise 프레임워크</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ T1566.001 Purple Team Exercise 계획서 ═══</span>
+
+Phase 1: 사전 준비 (D-7)
+  - ATT&CK Navigator에서 T1566.001 관련 기법 매핑
+  - 현재 탐지 규칙 인벤토리 수집 (Sigma/YARA/ASR)
+  - Atomic Red Team 테스트 케이스 선정
+
+Phase 2: 테이블탑 (D-1)
+  - Red: 공격 시나리오 브리핑 (5단계 공격 체인)
+  - Blue: 예상 탐지 포인트 명시
+  - Purple: 탐지 기대치 합의 (Expected Detection Matrix)
+
+Phase 3: 실행 (D-Day)
+  - Red: Atomic Red Team T1566.001 테스트 실행
+  - Blue: SIEM에서 실시간 탐지 확인
+  - Purple: 탐지/미탐지 실시간 기록
+
+Phase 4: 후속 조치 (D+1~7)
+  - 미탐지 항목 → 새 Sigma 규칙 작성
+  - Detection Coverage 업데이트
+  - 리포트 작성 및 경영진 보고</pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">전통적 Red Team은 "침투 성공"이 목표이고, Blue Team은 "탐지/차단"이 목표입니다. <span class="hl-purple">Purple Team의 목표는 "탐지 갭을 제로로 줄이는 것"</span>입니다. 경쟁이 아닌 협력 관계입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.2 Red Team 피싱 시뮬레이션 ===================== -->
+        <section id="ch2" data-chapter-id="ch2" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">02</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Red Team 피싱 시뮬레이션</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Red Team이 Purple Team Exercise에서 수행하는 단계별 피싱 시뮬레이션 절차와 Atomic Red Team 테스트 활용법을 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Atomic Red Team: T1566.001 테스트</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">Atomic Red Team은 MITRE ATT&CK 기법을 <span class="hl-red">작은 단위의 테스트(Atomic Test)</span>로 분해하여, 각 기법이 탐지되는지 검증하는 오픈소스 프레임워크입니다.</p>
+
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># Atomic Red Team 설치 및 T1566.001 테스트 실행</span>
+Install-Module -Name Invoke-AtomicRedTeam -Force
+Import-Module Invoke-AtomicRedTeam
+
+<span style="color:#F4D06F"># 사용 가능한 T1566.001 테스트 목록 확인</span>
+Invoke-AtomicTest T1566.001 -ShowDetailsBrief
+
+<span style="color:#9DD9D2"># Test #1: Download Phishing Attachment - VBA Macro</span>
+<span style="color:#9DD9D2"># Test #2: Word spawning cmd.exe</span>
+<span style="color:#9DD9D2"># Test #3: PowerShell download cradle from Office macro</span>
+
+<span style="color:#F4D06F"># 특정 테스트 실행</span>
+Invoke-AtomicTest T1566.001 -TestNumbers 1,2,3
+
+<span style="color:#F4D06F"># 테스트 후 정리 (Clean-up)</span>
+Invoke-AtomicTest T1566.001 -TestNumbers 1,2,3 -Cleanup</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Red Team 체크리스트</h3>
+                <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                    <p>✅ 테스트 전 Blue Team에 시간대 공유 (Purple 원칙)</p>
+                    <p>✅ 각 테스트 단계별 타임스탬프 기록 (초 단위)</p>
+                    <p>✅ 기본 공격 → 난독화 공격 → LOLBin 공격 순서로 난이도 상승</p>
+                    <p>✅ 테스트 완료 후 반드시 Cleanup 실행 (잔여 아티팩트 제거)</p>
+                    <p>✅ 각 단계의 Expected Detection 문서화</p>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">⚠️ 운영 규칙</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">Purple Team Exercise는 반드시 <span class="hl-red">경영진 승인</span>과 <span class="hl-blue">법적 동의서(Rules of Engagement)</span>가 필요합니다. 프로덕션 환경에서 실행 시 업무 영향도를 사전 평가해야 합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.3 Blue Team 실시간 대응 ===================== -->
+        <section id="ch3" data-chapter-id="ch3" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">03</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Blue Team 실시간 대응</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Purple Team Exercise에서 Blue Team이 수행하는 실시간 탐지 검증, 미탐지 분석, 즉석 규칙 작성 절차를 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">실시간 탐지 검증 프로세스</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ Blue Team 실시간 대시보드 ═══</span>
+
+Red Team 실행 시각: 14:32:15 KST
+Expected Detection: Sysmon ID 1 (WINWORD → cmd.exe)
+
+[14:32:15] 🔴 Red: Atomic Test #2 실행 (Word spawning cmd.exe)
+[14:32:17] 🔵 Blue: Sysmon ID 1 탐지 ✅
+           ParentImage=WINWORD.EXE, Image=cmd.exe
+[14:32:17] 🔵 Blue: Sigma 규칙 "Office Child Process" 알림 발생 ✅
+[14:32:18] 🟣 Purple: 기본 공격 탐지 성공. 다음 단계로 이동.
+
+[14:35:00] 🔴 Red: 난독화 매크로 + certutil 다운로더 실행
+[14:35:02] 🔵 Blue: Sysmon ID 1 탐지 ✅ (WINWORD → certutil)
+[14:35:02] 🔵 Blue: Sigma LOLBin 규칙... <span style="color:#ef4444">❌ 미탐지!</span>
+[14:35:03] 🟣 Purple: certutil이 LOLBin Sigma 규칙에 누락됨.
+           → 즉석 규칙 추가 필요.
+
+[14:40:00] 🔵 Blue: Sigma 규칙 업데이트 완료 (certutil 추가)
+[14:40:30] 🔴 Red: 동일 공격 재실행 (검증)
+[14:40:32] 🔵 Blue: 탐지 확인 ✅</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Detection Gap Analysis 템플릿</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse">
+                        <thead><tr class="bg-slate-200 dark:bg-slate-700">
+                            <th class="p-2 text-left">공격 단계</th>
+                            <th class="p-2 text-left">예상 탐지</th>
+                            <th class="p-2 text-center">결과</th>
+                            <th class="p-2 text-left">조치</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">기본 매크로 실행</td><td class="p-2">Sigma Office Child</td><td class="p-2 text-center text-green-600 font-bold">✅</td><td class="p-2">-</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">certutil 다운로더</td><td class="p-2">Sigma LOLBin</td><td class="p-2 text-center text-red-600 font-bold">❌</td><td class="p-2">certutil 패턴 추가</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">AMSI 바이패스</td><td class="p-2">PS ScriptBlock 로그</td><td class="p-2 text-center text-green-600 font-bold">✅</td><td class="p-2">-</td></tr>
+                            <tr><td class="p-2">DLL 사이드로딩</td><td class="p-2">Sysmon ID 7</td><td class="p-2 text-center text-red-600 font-bold">❌</td><td class="p-2">비정상 DLL 경로 규칙</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">Purple Team의 핵심 가치는 <span class="hl-purple">"미탐지를 발견한 즉시 해결"</span>하는 것입니다. 전통적 Red Team 보고서는 수주 후에 전달되지만, Purple Team에서는 당일에 Gap이 해결됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.4 CVE-2021-40444 ===================== -->
+        <section id="ch4" data-chapter-id="ch4" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">04</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">CVE-2021-40444 MSHTML 분석</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">CVE-2021-40444(MSHTML 원격 코드 실행) 취약점의 공격 메커니즘과 스피어피싱에서의 활용 방식, 탐지 전략을 분석합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">취약점 개요</h3>
+                <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl text-xs space-y-1">
+                    <p><span class="font-bold text-slate-700 dark:text-slate-200">CVE:</span> CVE-2021-40444</p>
+                    <p><span class="font-bold text-slate-700 dark:text-slate-200">CVSS:</span> 8.8 (High)</p>
+                    <p><span class="font-bold text-slate-700 dark:text-slate-200">영향:</span> MSHTML (Internet Explorer 렌더링 엔진) 원격 코드 실행</p>
+                    <p><span class="font-bold text-slate-700 dark:text-slate-200">핵심:</span> 매크로 없이 Office 문서를 열기만 해도 코드 실행 가능</p>
+                    <p><span class="font-bold text-slate-700 dark:text-slate-200">패치:</span> 2021년 9월 Microsoft 보안 업데이트</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">공격 체인</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ CVE-2021-40444 공격 흐름 ═══</span>
+
+1. 공격자가 악성 .docx 전송 (매크로 불필요!)
+2. 사용자가 문서 열기 → Word가 OLE Object 로드
+3. OLE Object 내 URL → MSHTML(IE 엔진)이 원격 HTML 렌더링
+4. HTML 내 JavaScript → ActiveX 컨트롤 → .cab 다운로드
+5. .cab 내 .dll → 사이드로딩으로 코드 실행
+6. 결과: <span style="color:#ef4444">사용자 상호작용 = "파일 열기"만으로 RCE 달성</span>
+
+<span style="color:#F4D06F">핵심 차이점:</span>
+기존 T1566.001: 매크로 "콘텐츠 사용" 클릭 필요
+CVE-2021-40444: 파일 열기만 하면 자동 실행 (0-click에 가까움)</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">탐지 전략</h3>
+                <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                    <p>• <span class="hl-teal">Sysmon ID 1</span>: WINWORD.EXE → control.exe 또는 rundll32.exe 자식 프로세스</p>
+                    <p>• <span class="hl-teal">Sysmon ID 3</span>: WINWORD.EXE에서 직접 외부 HTTP 연결</p>
+                    <p>• <span class="hl-teal">Sysmon ID 11</span>: %TEMP%\*.cab 파일 생성</p>
+                    <p>• <span class="hl-teal">YARA</span>: .docx 내 relationship 파일에서 mhtml: URL 패턴 탐지</p>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">⚠️ 교훈</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">이 CVE는 "매크로 차단이면 안전하다"는 가정을 무너뜨렸습니다. <span class="hl-red">ASR + 매크로 차단만으로는 불충분</span>하며, 문서 내 OLE 객체와 외부 리소스 로드도 모니터링해야 합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.5 CVE-2022-30190 Follina ===================== -->
+        <section id="ch5" data-chapter-id="ch5" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">05</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">CVE-2022-30190 Follina 분석</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">CVE-2022-30190(Follina)의 ms-msdt: 프로토콜 핸들러 악용 방식과, 스피어피싱 첨부파일에서의 활용 및 탐지 방법을 분석합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Follina 공격 메커니즘</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ Follina (CVE-2022-30190) 공격 체인 ═══</span>
+
+1. 악성 .docx 파일 (매크로 없음)
+2. 문서 내 OLE Object → 외부 HTML 참조
+3. HTML 내 JavaScript → ms-msdt: 프로토콜 핸들러 호출
+4. MSDT(Microsoft Support Diagnostic Tool) 실행
+5. MSDT가 PowerShell 페이로드 실행
+6. 결과: <span style="color:#ef4444">매크로/ActiveX 없이 코드 실행</span>
+
+<span style="color:#F4D06F">핵심:</span> ms-msdt: URI 스킴이 MSDT를 호출하고,
+      MSDT의 IT_BrowseForFile 매개변수에 PowerShell 삽입
+
+<span style="color:#F4D06F">Sysmon 탐지 포인트:</span>
+Event ID 1: WINWORD.EXE → msdt.exe (비정상 자식 프로세스)
+Event ID 1: msdt.exe → sdiagnhost.exe → powershell.exe
+Event ID 3: powershell.exe → 외부 C2 연결</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">탐지 Sigma 규칙</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre>title: Follina MSDT Exploitation via Office Application
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+        Image|endswith: '\msdt.exe'
+    condition: selection
+level: critical
+tags:
+    - attack.initial_access
+    - attack.t1566.001
+    - cve.2022.30190</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">완화 조치</h3>
+                <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                    <p>• <span class="hl-teal">레지스트리</span>: ms-msdt 프로토콜 핸들러 비활성화 (<code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">reg delete HKCR\ms-msdt</code>)</p>
+                    <p>• <span class="hl-teal">ASR</span>: "Office 앱의 자식 프로세스 생성 차단" 규칙 적용</p>
+                    <p>• <span class="hl-teal">패치</span>: 2022년 6월 보안 업데이트 적용</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.6 CVE-2023-23397 ===================== -->
+        <section id="ch6" data-chapter-id="ch6" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">06</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">CVE-2023-23397 Outlook 분석</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">CVE-2023-23397(Outlook NTLM 릴레이)의 0-click 공격 메커니즘과, 이메일 수신만으로 인증 정보가 탈취되는 과정을 분석합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">0-Click 공격의 정점</h3>
+                <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-200 dark:border-red-700 text-sm">
+                    <p class="font-bold text-red-700 dark:text-red-300">CVSS 9.8 (Critical)</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">사용자가 이메일을 열지 않아도, Outlook이 알림음 리소스를 로드하는 순간 NTLM 해시가 공격자 서버로 전송됩니다. <span class="hl-red">진정한 0-click 공격</span>입니다.</p>
+                </div>
+
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ CVE-2023-23397 공격 흐름 ═══</span>
+
+1. 공격자가 악성 캘린더 초대/이메일 발송
+2. 메일에 PidLidReminderFileParameter 속성 포함
+   값: \\attacker-server\share\alarm.wav (UNC 경로)
+3. Outlook이 알림 처리 시 UNC 경로 접근 시도
+4. Windows가 자동으로 NTLM 인증 수행
+5. 공격자 서버에서 NTLM 해시 캡처
+6. Pass-the-Hash 또는 NTLM 릴레이로 인증 탈취
+
+<span style="color:#ef4444">사용자 상호작용: 없음 (0-click)</span>
+<span style="color:#ef4444">Outlook 미리보기 창에서도 트리거됨</span></pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">탐지 및 완화</h3>
+                <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                    <p>• <span class="hl-teal">네트워크</span>: 내부→외부 SMB(445)/WebDAV 아웃바운드 트래픽 차단</p>
+                    <p>• <span class="hl-teal">Sysmon ID 3</span>: OUTLOOK.EXE → 외부 IP:445 연결 탐지</p>
+                    <p>• <span class="hl-teal">GPO</span>: NTLM 인증 제한 (Kerberos only 정책)</p>
+                    <p>• <span class="hl-teal">Microsoft 스크립트</span>: CVE-2023-23397 검사 스크립트로 기존 메일 감사</p>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 교훈</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">T1566.001의 전통적 방어(매크로 차단, 사용자 교육)는 이 CVE에 무력합니다. <span class="hl-purple">네트워크 계층 방어(SMB 아웃바운드 차단)</span>와 <span class="hl-blue">신속한 패치 관리</span>가 0-click 취약점의 유일한 방어선입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.7 제로데이 연구 방법론 ===================== -->
+        <section id="ch7" data-chapter-id="ch7" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">07</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">제로데이 연구 방법론</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Office 문서 파서의 공격 표면(Attack Surface)을 분석하는 방법론과, 제로데이 취약점 연구의 체계적 접근법을 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Office 문서의 공격 표면</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ Office 문서 파싱 시 실행되는 컴포넌트 ═══</span>
+
+.docx/.xlsx 열기
+    │
+    ├─ XML 파서 (System.Xml)
+    │   └─ XXE 취약점 가능성
+    │
+    ├─ OLE Object 핸들러
+    │   ├─ ActiveX 컨트롤 로드
+    │   ├─ DDE (Dynamic Data Exchange)
+    │   └─ 외부 리소스 참조 (URL)
+    │
+    ├─ OOXML Relationship 처리
+    │   └─ 외부 HTML/RTF 참조
+    │       └─ MSHTML 렌더링 (CVE-2021-40444)
+    │
+    ├─ 프로토콜 핸들러 호출
+    │   └─ ms-msdt: (CVE-2022-30190)
+    │   └─ ms-search: / ms-officecmd:
+    │
+    └─ 미디어/리소스 로드
+        └─ UNC 경로 → NTLM 인증 (CVE-2023-23397)</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">취약점 연구 5단계</h3>
+                <div class="space-y-2">
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-xs">
+                        <span class="shrink-0 bg-purple-600 text-white font-bold w-6 h-6 flex items-center justify-center rounded-full">1</span>
+                        <div><p class="font-bold">공격 표면 매핑</p><p class="text-slate-500 dark:text-slate-400">파일 형식 사양(OOXML, OLE2)을 분석하여 파서가 처리하는 모든 입력 벡터를 목록화</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-xs">
+                        <span class="shrink-0 bg-purple-600 text-white font-bold w-6 h-6 flex items-center justify-center rounded-full">2</span>
+                        <div><p class="font-bold">퍼징 (Fuzzing)</p><p class="text-slate-500 dark:text-slate-400">변형된 입력 파일을 대량 생성하여 크래시/비정상 동작 유발 (AFL, WinAFL)</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-xs">
+                        <span class="shrink-0 bg-purple-600 text-white font-bold w-6 h-6 flex items-center justify-center rounded-full">3</span>
+                        <div><p class="font-bold">근본 원인 분석 (Root Cause)</p><p class="text-slate-500 dark:text-slate-400">크래시 트리거의 근본 원인(메모리 손상, 타입 혼동 등) 분석</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-xs">
+                        <span class="shrink-0 bg-purple-600 text-white font-bold w-6 h-6 flex items-center justify-center rounded-full">4</span>
+                        <div><p class="font-bold">익스플로잇 개발</p><p class="text-slate-500 dark:text-slate-400">코드 실행까지 체인 완성 (RIP 제어 → ROP → 셸코드)</p></div>
+                    </div>
+                    <div class="flex items-start gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-xs">
+                        <span class="shrink-0 bg-purple-600 text-white font-bold w-6 h-6 flex items-center justify-center rounded-full">5</span>
+                        <div><p class="font-bold">책임 있는 공개</p><p class="text-slate-500 dark:text-slate-400">벤더 보고(MSRC) → 패치 개발 대기 → CVE 할당 → 공개 (Coordinated Disclosure)</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.8 자체 탐지 프레임워크 설계 ===================== -->
+        <section id="ch8" data-chapter-id="ch8" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">08</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">자체 탐지 프레임워크 설계</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">조직 맞춤형 피싱 탐지 프레임워크를 설계하기 위한 아키텍처, 데이터 흐름, 규칙 관리 체계를 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">탐지 프레임워크 아키텍처</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ Spearphishing Detection Framework Architecture ═══</span>
+
+┌─────────────────────────────────────────────────────┐
+│                   데이터 수집 계층                     │
+│  Email Gateway → Sysmon → EDR → NDR → DNS → Proxy  │
+└─────────────────────────┬───────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────┐
+│                   정규화 계층                         │
+│  ECS (Elastic Common Schema) 표준화                  │
+│  → 모든 로그를 동일 필드명으로 통일                   │
+└─────────────────────────┬───────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────┐
+│                   탐지 엔진 계층                      │
+│  ├─ 규칙 기반: Sigma → SIEM 쿼리                     │
+│  ├─ 패턴 기반: YARA → 파일 스캔                      │
+│  ├─ 이상 탐지: 베이스라인 대비 편차                   │
+│  └─ 상관분석: 다중 이벤트 연결 (kill chain)           │
+└─────────────────────────┬───────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────┐
+│                   대응 계층                           │
+│  알림 → 티켓 생성 → 자동 격리 → SOC 분석             │
+└─────────────────────────────────────────────────────┘</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Detection Maturity Model</h3>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3 text-xs"><span class="shrink-0 w-8 text-center font-bold text-slate-400">Lv.0</span><div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-4"><div class="bg-red-400 h-4 rounded-full" style="width:10%"></div></div><span class="w-24 text-right text-slate-500">없음</span></div>
+                    <div class="flex items-center gap-3 text-xs"><span class="shrink-0 w-8 text-center font-bold text-orange-500">Lv.1</span><div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-4"><div class="bg-orange-400 h-4 rounded-full" style="width:25%"></div></div><span class="w-24 text-right text-slate-500">기본 규칙</span></div>
+                    <div class="flex items-center gap-3 text-xs"><span class="shrink-0 w-8 text-center font-bold text-yellow-500">Lv.2</span><div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-4"><div class="bg-yellow-400 h-4 rounded-full" style="width:50%"></div></div><span class="w-24 text-right text-slate-500">체계화된 규칙</span></div>
+                    <div class="flex items-center gap-3 text-xs"><span class="shrink-0 w-8 text-center font-bold text-blue-500">Lv.3</span><div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-4"><div class="bg-blue-400 h-4 rounded-full" style="width:75%"></div></div><span class="w-24 text-right text-slate-500">DaC + CI/CD</span></div>
+                    <div class="flex items-center gap-3 text-xs"><span class="shrink-0 w-8 text-center font-bold text-purple-500">Lv.4</span><div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-4"><div class="bg-purple-400 h-4 rounded-full" style="width:100%"></div></div><span class="w-24 text-right text-slate-500">자동화 + 헌팅</span></div>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">프레임워크의 핵심은 <span class="hl-purple">"도구 독립성"</span>입니다. Sigma로 규칙을 작성하면 SIEM 교체 시에도 규칙을 재활용할 수 있고, ECS로 로그를 정규화하면 데이터 소스 추가가 용이합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.9 위협 인텔리전스 통합 ===================== -->
+        <section id="ch9" data-chapter-id="ch9" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">09</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">위협 인텔리전스 통합</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">CTI(Cyber Threat Intelligence)를 탐지 파이프라인에 통합하여, 스피어피싱 캠페인을 선제적으로 탐지하는 방법을 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">CTI 피라미드 (David Bianco)</h3>
+                <div class="space-y-2 text-xs">
+                    <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg text-center border-l-4 border-red-500"><p class="font-bold">TTPs (전술·기법·절차)</p><p class="text-slate-500 dark:text-slate-400">가장 가치 높은 인텔 → Sigma/YARA 규칙으로 운용화</p></div>
+                    <div class="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-lg text-center border-l-4 border-orange-500"><p class="font-bold">도구 (Tools)</p><p class="text-slate-500 dark:text-slate-400">공격자 도구 시그니처 → YARA 규칙</p></div>
+                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-lg text-center border-l-4 border-yellow-500"><p class="font-bold">네트워크/호스트 아티팩트</p><p class="text-slate-500 dark:text-slate-400">레지스트리 키, 파일 경로, User-Agent</p></div>
+                    <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg text-center border-l-4 border-green-500"><p class="font-bold">도메인/IP</p><p class="text-slate-500 dark:text-slate-400">C2 도메인, 피싱 인프라 IP → 방화벽/DNS 차단</p></div>
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg text-center border-l-4 border-blue-500"><p class="font-bold">해시 (Hash)</p><p class="text-slate-500 dark:text-slate-400">파일 해시(MD5/SHA256) → 가장 쉽게 우회 가능</p></div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">STIX/TAXII를 통한 자동화</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300"><span class="hl-teal">STIX</span>(Structured Threat Information eXpression)는 위협 정보의 표준 형식이고, <span class="hl-blue">TAXII</span>(Trusted Automated eXchange)는 이를 자동으로 교환하는 프로토콜입니다. MISP, OpenCTI 등의 CTI 플랫폼에서 STIX/TAXII로 IOC를 수신하여 SIEM에 자동 반영합니다.</p>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">피라미드 상단(TTP)으로 갈수록 공격자가 변경하기 어렵고, 탐지 가치가 높습니다. <span class="hl-purple">전문가는 해시/IP 차단에 머무르지 않고, TTP 수준의 탐지 규칙(Sigma)을 작성</span>하여 공격자의 도구/인프라 변경에도 대응합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.10 전문가 종합 평가 ===================== -->
+        <section id="ch10" data-chapter-id="ch10" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow">10</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">전문가 종합 평가</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-bold text-purple-700 dark:text-purple-300">🎯 최종 평가</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">전체 5개 레벨(Novice → Expert)에서 배운 T1566.001 스피어피싱 첨부파일의 공격과 방어를 종합 정리합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">레벨별 학습 여정 회고</h3>
+                <div class="space-y-3">
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-700 text-xs">
+                        <p class="font-bold text-yellow-700 dark:text-yellow-300">🟡 Novice — 개념 이해</p>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">피싱이란 무엇인가? 이메일 시스템(SMTP/MIME), 매크로 기초, 실제 사례</p>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-700 text-xs">
+                        <p class="font-bold text-green-700 dark:text-green-300">🟢 Beginner — 도구 사용</p>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">GoPhish, msfvenom, SET, VBA 매크로 작성, C2 연결</p>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700 text-xs">
+                        <p class="font-bold text-blue-700 dark:text-blue-300">🔵 Intermediate — 탐지와 방어</p>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">Sysmon, YARA, Sigma, ASR, 이메일 헤더 포렌식, GPO 방어</p>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-700 text-xs">
+                        <p class="font-bold text-red-700 dark:text-red-300">🔴 Advanced — 우회와 재탐지</p>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">EDR 우회, AMSI 바이패스, LOLBins, 난독화, Detection Engineering, Threat Hunting</p>
+                    </div>
+                    <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-200 dark:border-purple-700 text-xs">
+                        <p class="font-bold text-purple-700 dark:text-purple-300">⭐ Expert — 전략과 연구</p>
+                        <p class="text-slate-600 dark:text-slate-300 mt-1">Purple Team, CVE 분석, 제로데이 연구, 탐지 프레임워크 설계, CTI 통합</p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">전문가 역량 체크리스트</h3>
+                <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                    <p>✅ T1566.001 공격 체인의 모든 단계를 설명할 수 있다</p>
+                    <p>✅ 각 단계별 YARA/Sigma 탐지 규칙을 작성할 수 있다</p>
+                    <p>✅ 공격자의 우회 기법과 그에 대한 재탐지 전략을 설계할 수 있다</p>
+                    <p>✅ Purple Team Exercise를 기획하고 주도할 수 있다</p>
+                    <p>✅ CVE 취약점의 공격 메커니즘을 분석하고 탐지 규칙을 작성할 수 있다</p>
+                    <p>✅ Detection as Code 파이프라인을 구축할 수 있다</p>
+                    <p>✅ CTI를 탐지 엔진에 통합하여 선제적 방어를 구현할 수 있다</p>
+                </div>
+
+                <!-- ════════ 인터랙티브: CVE 타임라인 매칭 게임 ════════ -->
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mt-8">🎮 인터랙티브: CVE 타임라인 매칭 게임</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">각 CVE를 올바른 설명과 연결하세요. 왼쪽 CVE 버튼을 클릭한 뒤 오른쪽 설명 버튼을 클릭하면 매칭됩니다.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cve-match-game">
+                    <!-- 왼쪽: CVE 목록 -->
+                    <div class="space-y-3">
+                        <p class="text-xs font-bold text-purple-600 dark:text-purple-400 mb-2">CVE 번호 (클릭으로 선택)</p>
+                        <button class="match-btn w-full text-left px-4 py-3 rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-white dark:bg-slate-800 text-sm font-mono transition-all" data-cve="CVE-2021-40444" onclick="selectCVE(this)">
+                            <span class="font-bold text-purple-700 dark:text-purple-300">CVE-2021-40444</span>
+                            <span class="text-xs text-slate-400 ml-2">CVSS 8.8</span>
+                        </button>
+                        <button class="match-btn w-full text-left px-4 py-3 rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-white dark:bg-slate-800 text-sm font-mono transition-all" data-cve="CVE-2022-30190" onclick="selectCVE(this)">
+                            <span class="font-bold text-purple-700 dark:text-purple-300">CVE-2022-30190</span>
+                            <span class="text-xs text-slate-400 ml-2">CVSS 7.8</span>
+                        </button>
+                        <button class="match-btn w-full text-left px-4 py-3 rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-white dark:bg-slate-800 text-sm font-mono transition-all" data-cve="CVE-2023-23397" onclick="selectCVE(this)">
+                            <span class="font-bold text-purple-700 dark:text-purple-300">CVE-2023-23397</span>
+                            <span class="text-xs text-slate-400 ml-2">CVSS 9.8</span>
+                        </button>
+                        <button class="match-btn w-full text-left px-4 py-3 rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-white dark:bg-slate-800 text-sm font-mono transition-all" data-cve="CVE-2017-11882" onclick="selectCVE(this)">
+                            <span class="font-bold text-purple-700 dark:text-purple-300">CVE-2017-11882</span>
+                            <span class="text-xs text-slate-400 ml-2">CVSS 7.8</span>
+                        </button>
+                    </div>
+                    <!-- 오른쪽: 설명 (셔플됨) -->
+                    <div class="space-y-3">
+                        <p class="text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">설명 (클릭으로 매칭)</p>
+                        <button class="match-btn w-full text-left px-4 py-3 rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm transition-all" data-answer="CVE-2023-23397" onclick="selectDesc(this)">
+                            <span class="font-bold">🔴 0-click NTLM 해시 탈취</span>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Outlook 알림음 UNC 경로로 인증정보 유출. 메일 열지 않아도 트리거</p>
+                        </button>
+                        <button class="match-btn w-full text-left px-4 py-3 rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm transition-all" data-answer="CVE-2017-11882" onclick="selectDesc(this)">
+                            <span class="font-bold">🟠 Equation Editor 메모리 손상</span>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">17년된 레거시 OLE 컴포넌트의 스택 버퍼 오버플로</p>
+                        </button>
+                        <button class="match-btn w-full text-left px-4 py-3 rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm transition-all" data-answer="CVE-2022-30190" onclick="selectDesc(this)">
+                            <span class="font-bold">🟡 ms-msdt: 프로토콜 핸들러 악용</span>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">MSDT를 통해 PowerShell 실행. 매크로 없이 코드 실행</p>
+                        </button>
+                        <button class="match-btn w-full text-left px-4 py-3 rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm transition-all" data-answer="CVE-2021-40444" onclick="selectDesc(this)">
+                            <span class="font-bold">🔵 MSHTML 원격 코드 실행</span>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">OLE Object → IE 렌더링 → ActiveX → .cab 다운로드 → DLL 실행</p>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-4">
+                    <button onclick="checkCVEMatch()" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-colors text-sm">매칭 채점하기</button>
+                    <button onclick="resetCVEMatch()" class="px-6 py-2.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 text-slate-700 dark:text-white font-bold rounded-xl transition-colors text-sm">초기화</button>
+                </div>
+                <div id="cve-match-result" class="hidden"></div>
+
+                <!-- ════════ 전문가 종합 퀴즈 5문항 ════════ -->
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mt-10">📝 전문가 종합 퀴즈</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Purple Team, CVE 분석, 탐지 프레임워크 설계 역량을 평가합니다. 5문항 중 4문항 이상 정답 시 통과입니다.</p>
+
+                <!-- EQ1 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q1. Purple Team의 핵심 목표는?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq1" value="1" class="mt-1 shrink-0"><span>Red Team이 Blue Team을 이기는 것</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq1" value="2" class="mt-1 shrink-0"><span>탐지 갭을 실시간으로 발견하고 즉시 해결하는 것</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq1" value="3" class="mt-1 shrink-0"><span>모든 네트워크 트래픽을 차단하는 것</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq1" value="4" class="mt-1 shrink-0"><span>취약점 패치를 자동화하는 것</span></label>
+                </div>
+
+                <!-- EQ2 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q2. CVE-2021-40444가 기존 매크로 공격과 가장 다른 점은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq2" value="1" class="mt-1 shrink-0"><span>VBA 대신 JavaScript를 사용한다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq2" value="2" class="mt-1 shrink-0"><span>매크로 없이 문서 열기만으로 코드 실행이 가능하다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq2" value="3" class="mt-1 shrink-0"><span>Linux에서만 동작한다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq2" value="4" class="mt-1 shrink-0"><span>이메일이 아닌 USB로만 전파된다</span></label>
+                </div>
+
+                <!-- EQ3 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q3. CVE-2023-23397의 완화 조치로 가장 효과적인 것은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq3" value="1" class="mt-1 shrink-0"><span>매크로 비활성화</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq3" value="2" class="mt-1 shrink-0"><span>내부→외부 SMB(445) 아웃바운드 차단</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq3" value="3" class="mt-1 shrink-0"><span>PowerShell 실행 정책 변경</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq3" value="4" class="mt-1 shrink-0"><span>AMSI 활성화</span></label>
+                </div>
+
+                <!-- EQ4 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q4. David Bianco의 CTI 피라미드에서 가장 가치가 높은(우회가 어려운) 인텔리전스는?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq4" value="1" class="mt-1 shrink-0"><span>파일 해시 (MD5/SHA256)</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq4" value="2" class="mt-1 shrink-0"><span>IP 주소</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq4" value="3" class="mt-1 shrink-0"><span>도메인 이름</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq4" value="4" class="mt-1 shrink-0"><span>TTPs (전술·기법·절차)</span></label>
+                </div>
+
+                <!-- EQ5 -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q5. Detection Maturity Lv.3에 해당하는 특징은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq5" value="1" class="mt-1 shrink-0"><span>탐지 규칙이 전혀 없음</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq5" value="2" class="mt-1 shrink-0"><span>기본적인 SIEM 규칙만 존재</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq5" value="3" class="mt-1 shrink-0"><span>Detection as Code + CI/CD 파이프라인으로 자동 테스트·배포</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="eq5" value="4" class="mt-1 shrink-0"><span>모든 위협을 AI가 자동으로 차단</span></label>
+                </div>
+
+                <button onclick="checkExpertQuiz()" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-colors text-sm">종합 퀴즈 채점하기</button>
+                <div id="expert-quiz-result" class="hidden"></div>
+
+                <!-- 완료 배너 -->
+                <div class="bg-purple-100 dark:bg-purple-900/30 p-6 rounded-xl border border-purple-300 dark:border-purple-600 text-center mt-8">
+                    <p class="text-2xl font-black text-purple-700 dark:text-purple-300 mb-2">🎓 T1566.001 전 과정 완료</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300">Novice부터 Expert까지 스피어피싱 첨부파일의 공격과 방어를 마스터했습니다.</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">다음 기법으로 이동하여 학습을 계속하세요.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            var html = document.documentElement;
+            html.classList.toggle('dark');
+            document.getElementById('theme-icon').textContent = html.classList.contains('dark') ? '☀️' : '🌙';
+            localStorage.setItem('gotroot_theme', html.classList.contains('dark') ? 'dark' : 'light');
+        }
+        if (localStorage.getItem('gotroot_theme') === 'dark') { document.documentElement.classList.add('dark'); document.getElementById('theme-icon').textContent = '☀️'; }
+
+        function go(id) {
+            var el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        /* ── CVE 타임라인 매칭 게임 ── */
+        var _selectedCVE = null;
+        var _cveMatches = {};
+        function selectCVE(btn) {
+            document.querySelectorAll('[data-cve]').forEach(function(b) { b.style.outline = ''; });
+            _selectedCVE = btn.getAttribute('data-cve');
+            btn.style.outline = '3px solid #a855f7';
+        }
+        function selectDesc(btn) {
+            if (!_selectedCVE) { alert('먼저 왼쪽에서 CVE를 선택하세요.'); return; }
+            var descAnswer = btn.getAttribute('data-answer');
+            _cveMatches[_selectedCVE] = { descEl: btn, descAnswer: descAnswer };
+            /* 시각적 연결 표시 */
+            btn.style.outline = '3px solid #a855f7';
+            btn.innerHTML = '<span class="text-purple-600 dark:text-purple-400 text-xs font-bold">🔗 ' + _selectedCVE + '</span><br>' + btn.innerHTML;
+            /* CVE 버튼도 매칭 표시 */
+            var cveBtn = document.querySelector('[data-cve="'+_selectedCVE+'"]');
+            if (cveBtn) cveBtn.style.background = 'rgba(168,85,247,0.1)';
+            _selectedCVE = null;
+            document.querySelectorAll('[data-cve]').forEach(function(b) { b.style.outline = ''; });
+        }
+        function checkCVEMatch() {
+            var correct = 0; var total = 4;
+            for (var cve in _cveMatches) {
+                var m = _cveMatches[cve];
+                var cveBtn = document.querySelector('[data-cve="'+cve+'"]');
+                if (cve === m.descAnswer) {
+                    correct++;
+                    if (cveBtn) cveBtn.classList.add('correct');
+                    m.descEl.classList.add('correct');
+                } else {
+                    if (cveBtn) cveBtn.classList.add('wrong');
+                    m.descEl.classList.add('wrong');
+                }
+            }
+            /* 매칭하지 않은 CVE도 wrong 처리 */
+            document.querySelectorAll('[data-cve]').forEach(function(b) {
+                if (!_cveMatches[b.getAttribute('data-cve')]) b.classList.add('wrong');
+            });
+            var rb = document.getElementById('cve-match-result');
+            rb.className = 'mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm';
+            rb.classList.remove('hidden');
+            if (correct === total) {
+                rb.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');
+                rb.innerHTML = '✅ 완벽! 4/4 — 모든 CVE를 정확히 매칭했습니다. 각 취약점의 핵심 메커니즘을 이해하고 있습니다.';
+            } else {
+                rb.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');
+                rb.innerHTML = '❌ ' + correct + '/4 정답. 틀린 매칭(빨간색)을 확인하고 해당 챕터를 복습하세요.';
+            }
+        }
+        function resetCVEMatch() {
+            _cveMatches = {}; _selectedCVE = null;
+            document.querySelectorAll('.match-btn').forEach(function(b) {
+                b.classList.remove('correct','wrong');
+                b.style.outline = ''; b.style.background = '';
+                /* 🔗 라벨 제거 */
+                var link = b.querySelector('.text-purple-600, .dark\\:text-purple-400');
+                if (link && link.textContent.indexOf('🔗') > -1) {
+                    var br = link.nextElementSibling;
+                    if (br && br.tagName === 'BR') br.remove();
+                    link.remove();
+                }
+            });
+            document.getElementById('cve-match-result').classList.add('hidden');
+        }
+
+        /* ── 전문가 종합 퀴즈 ── */
+        function checkExpertQuiz() {
+            var answers = {eq1:'2', eq2:'2', eq3:'2', eq4:'4', eq5:'3'};
+            var score = 0; var total = 5;
+            for (var key in answers) {
+                var sel = document.querySelector('input[name="'+key+'"]:checked');
+                if (!sel) { alert('모든 문제의 답을 선택해주세요.'); return; }
+                if (sel.value === answers[key]) score++;
+            }
+            var rb = document.getElementById('expert-quiz-result');
+            rb.className = 'mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm';
+            rb.classList.remove('hidden');
+            if (score >= 4) {
+                rb.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');
+                rb.innerHTML = '✅ ' + score + '/' + total + ' 정답! T1566.001 전체 과정을 마스터했습니다. 🎓';
+            } else {
+                rb.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');
+                rb.innerHTML = '❌ ' + score + '/' + total + ' 정답입니다. 관련 챕터를 다시 복습해 보세요.';
+            }
+        }
+
+        var observerOptions = { root: document.getElementById('main-scroll'), rootMargin: '0px 0px -40% 0px', threshold: 0.1 };
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0','translate-y-10');
+                    entry.target.classList.add('opacity-100','translate-y-0');
+                    var id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-item').forEach(function(nav) {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-target') === id) nav.classList.add('active');
+                    });
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s) { observer.observe(s); });
+        window.onload = function() { setTimeout(function() { go('ch1'); }, 100); };
+    </script>
+    </div>
+<script src="/edu/graphic-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
+</body>
+</html>

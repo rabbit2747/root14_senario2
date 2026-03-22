@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" font-family="monospace">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0a0a1a"/><stop offset="100%" stop-color="#1a1a3a"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="900" height="600" fill="url(#bg)" rx="16"/>
+  <text x="450" y="40" fill="#00ffaa" font-size="20" font-weight="bold" text-anchor="middle" filter="url(#glow)">AIROOT v0.3.0 — 4개 기능 추가</text>
+  <text x="450" y="60" fill="#555" font-size="11" text-anchor="middle">2026-03-16</text>
+
+  <!-- Task 1: deep-learning.html 완성 -->
+  <rect x="30" y="80" width="410" height="120" rx="10" fill="#111" stroke="#00ffaa" stroke-width="1.5"/>
+  <text x="45" y="105" fill="#00ffaa" font-size="13" font-weight="bold">① deep-learning.html 완성</text>
+  <text x="45" y="125" fill="#aaa" font-size="10">• toggleMobileMenu() — 햄버거 ↔ X 아이콘 전환</text>
+  <text x="45" y="142" fill="#aaa" font-size="10">• initQuiz() — 터치 이벤트 바인딩 (모바일 DnD)</text>
+  <text x="45" y="159" fill="#aaa" font-size="10">• 네비게이션 스크롤 축소 + 외부 클릭 메뉴 닫기</text>
+  <text x="45" y="176" fill="#aaa" font-size="10">• 누락 함수 3개 추가 → 모바일 완전 동작</text>
+
+  <!-- Task 2: Cert Count API -->
+  <rect x="460" y="80" width="410" height="120" rx="10" fill="#111" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="475" y="105" fill="#f59e0b" font-size="13" font-weight="bold">② 수료증 카운트 API</text>
+  <text x="475" y="125" fill="#aaa" font-size="10">• GET /api/airoot/cert/count → {count: N}</text>
+  <text x="475" y="142" fill="#aaa" font-size="10">• Supabase HEAD + content-range 헤더 파싱</text>
+  <text x="475" y="159" fill="#aaa" font-size="10">• 대시보드 stat-certs 실시간 표시</text>
+  <text x="475" y="176" fill="#aaa" font-size="10">• 인증 불필요 (공개 통계)</text>
+
+  <!-- Task 3: Courses → Supabase -->
+  <rect x="30" y="220" width="410" height="140" rx="10" fill="#111" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="45" y="245" fill="#3b82f6" font-size="13" font-weight="bold">③ 코스 관리 → Supabase 영구 저장</text>
+  <text x="45" y="265" fill="#aaa" font-size="10">• localStorage → API 기반 (localStorage 폴백 유지)</text>
+  <text x="45" y="282" fill="#aaa" font-size="10">• GET /api/airoot/courses — 목록 조회</text>
+  <text x="45" y="299" fill="#aaa" font-size="10">• POST /api/airoot/courses — 추가 (관리자)</text>
+  <text x="45" y="316" fill="#aaa" font-size="10">• DELETE /api/airoot/courses/:id — 삭제 (관리자)</text>
+  <text x="45" y="333" fill="#aaa" font-size="10">• airoot_courses 테이블 (title, description, file_path)</text>
+  <text x="45" y="350" fill="#666" font-size="9">SQL: Supabase SQL Editor에서 실행 필요</text>
+
+  <!-- Task 4: Q&A 댓글 API -->
+  <rect x="460" y="220" width="410" height="140" rx="10" fill="#111" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="475" y="245" fill="#ef4444" font-size="13" font-weight="bold">④ 교육페이지 Q&amp;A 댓글 시스템</text>
+  <text x="475" y="265" fill="#aaa" font-size="10">• 로그인 필수 (비로그인 → "로그인 필요" 안내)</text>
+  <text x="475" y="282" fill="#aaa" font-size="10">• GET /api/airoot/comments?page=deep-learning</text>
+  <text x="475" y="299" fill="#aaa" font-size="10">• POST /api/airoot/comments — 댓글 작성</text>
+  <text x="475" y="316" fill="#aaa" font-size="10">• DELETE /api/airoot/comments/:id — 본인+관리자 삭제</text>
+  <text x="475" y="333" fill="#aaa" font-size="10">• timeAgo() 한국어 (방금 전/N분 전/N시간 전)</text>
+  <text x="475" y="350" fill="#666" font-size="9">삭제 시 fade-out 애니메이션 + confirm 확인</text>
+
+  <!-- Architecture -->
+  <rect x="30" y="380" width="840" height="100" rx="10" fill="#0a0a1a" stroke="#555" stroke-width="1"/>
+  <text x="450" y="400" fill="#888" font-size="12" text-anchor="middle" font-weight="bold">아키텍처 흐름</text>
+  <!-- Flow -->
+  <rect x="60" y="415" width="120" height="40" rx="6" fill="#1a1a3a" stroke="#00ffaa"/>
+  <text x="120" y="440" fill="#00ffaa" font-size="10" text-anchor="middle">index.html</text>
+  <line x1="180" y1="435" x2="220" y2="435" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="220" y="415" width="140" height="40" rx="6" fill="#1a1a3a" stroke="#3b82f6"/>
+  <text x="290" y="440" fill="#3b82f6" font-size="10" text-anchor="middle">/api/airoot/*</text>
+  <line x1="360" y1="435" x2="400" y2="435" stroke="#555" stroke-width="1.5"/>
+  <rect x="400" y="415" width="130" height="40" rx="6" fill="#1a1a3a" stroke="#f59e0b"/>
+  <text x="465" y="440" fill="#f59e0b" font-size="10" text-anchor="middle">server.js</text>
+  <line x1="530" y1="435" x2="570" y2="435" stroke="#555" stroke-width="1.5"/>
+  <rect x="570" y="415" width="140" height="40" rx="6" fill="#1a1a3a" stroke="#ef4444"/>
+  <text x="640" y="440" fill="#ef4444" font-size="10" text-anchor="middle">Supabase</text>
+  <text x="640" y="470" fill="#666" font-size="8" text-anchor="middle">airoot_courses / airoot_comments</text>
+
+  <!-- SQL Notice -->
+  <rect x="30" y="500" width="840" height="80" rx="10" fill="#1a0a0a" stroke="#ef4444" stroke-width="1" stroke-dasharray="5,3"/>
+  <text x="450" y="525" fill="#ef4444" font-size="13" text-anchor="middle" font-weight="bold">⚠️ Supabase SQL 실행 필요</text>
+  <text x="450" y="545" fill="#aaa" font-size="10" text-anchor="middle">airoot_courses + airoot_comments 테이블 생성 SQL</text>
+  <text x="450" y="565" fill="#666" font-size="9" text-anchor="middle">CLAUDE.md "테이블 SQL" 섹션 참조 → Supabase SQL Editor에서 직접 실행</text>
+</svg>

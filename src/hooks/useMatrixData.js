@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+// ✅ Phase 0: src/api/ 경유 — supabase 직접 호출 제거
+import { getTactics, getTechniques, getSubTechniques } from '../api/matrix';
 import fallbackData from '../data/matrix-fallback.json';
 
 /**
  * IntroMatrix용 매트릭스 데이터 로더
  * Supabase 3테이블 → attackMatrix + langMapping 형태로 변환
  * DB 오류시 matrix-fallback.json 자동 폴백
+ *
+ * 🔄 마이그레이션 이력:
+ *   v0.9.3 이전: supabase 직접 호출
+ *   v0.9.4~    : src/api/matrix.js 경유 (Phase 0 완료)
  */
 export default function useMatrixData() {
   const [attackMatrix, setAttackMatrix] = useState(fallbackData.attackMatrix);
@@ -18,11 +23,11 @@ export default function useMatrixData() {
 
     async function load() {
       try {
-        // 병렬 쿼리
+        // 병렬 쿼리 — api/matrix.js 경유 (supabase 직접 호출 없음)
         const [tacRes, techRes, subRes] = await Promise.all([
-          supabase.from('matrix_tactics').select('*').order('sort_order'),
-          supabase.from('matrix_techniques').select('*').order('sort_order'),
-          supabase.from('matrix_sub_techniques').select('*').order('sort_order'),
+          getTactics(),
+          getTechniques(),
+          getSubTechniques(),
         ]);
 
         // 에러 체크

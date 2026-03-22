@@ -64,9 +64,9 @@ export default function Announcements() {
             <span className="text-slate-300">|</span>
             <div className="flex items-center gap-1.5">
               <img
-                src="/logo/logo-white.png"
-                alt="GR"
-                style={{ width: 28, height: 28, objectFit: 'contain', filter: 'brightness(0)' }}
+                src="/logo/root14-logo.svg"
+                alt="ROOT14"
+                style={{ width: 28, height: 28, objectFit: 'contain' }}
                 draggable={false}
               />
               <h1 className="text-sm font-black tracking-wider text-slate-800">{t.title}</h1>
@@ -193,7 +193,7 @@ export default function Announcements() {
       <div className="border-t border-slate-200 bg-white mt-auto">
         <div className="max-w-full mx-auto px-4 lg:px-6 2xl:px-8 py-4 text-center">
           <p className="text-[10px] text-slate-400">
-            © 2026 (주)갓루트(GOTROOT) — ALL RIGHTS RESERVED
+            © 2026 ROOT14 Academy — ALL RIGHTS RESERVED
           </p>
         </div>
       </div>

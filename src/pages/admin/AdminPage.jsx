@@ -10,13 +10,16 @@ import EduHtmlEditor from './edu-html-editor/EduHtmlEditor';
 import AuditLogViewer from './audit-log/AuditLogViewer';
 import LabScenarioManager from './lab-scenario-manager/LabScenarioManager';
 import EduProgressStats from './EduProgressStats';
+import WikiTermManager from './wiki-manager/WikiTermManager';
+import LevelTestManager from './level-test-manager/LevelTestManager';
+import AccessLogsDashboard from './access-logs/AccessLogsDashboard';
 import useAdminVerify from '../../hooks/useAdminVerify';
 import AdminVerifyModal from '../../components/admin/AdminVerifyModal';
 import NotificationBell from '../../components/admin/NotificationBell';
 import { maskEmail } from '../../lib/maskUtils';
 import {
   Book, Grid, Bullhorn,
-  User, Chemistry, Screen, ChartBar, Task
+  User, Chemistry, Screen, ChartBar, Task, Catalog, Education, Activity
 } from '@carbon/icons-react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
@@ -27,7 +30,10 @@ const TABS = [
   { id: 'users',   label: '사용자 관리', Icon: User },
   { id: 'lab',     label: '실습 페이지', Icon: Chemistry },
   { id: 'labscenario', label: '랩 시나리오', Icon: Screen },
+  { id: 'wiki',    label: '위키 관리',  Icon: Catalog },
+  { id: 'leveltest', label: '레벨테스트', Icon: Education },
   { id: 'stats',   label: '교육 통계',  Icon: ChartBar },
+  { id: 'accesslogs', label: '접속 로그', Icon: Activity },
   { id: 'audit',   label: '감사 로그',  Icon: Task },
 ];
 
@@ -48,7 +54,7 @@ function AdminContent() {
             </button>
             <span className="text-slate-600">|</span>
             <h1 className="text-sm font-black tracking-wider uppercase">
-              <span className="text-emerald-400">GOTROOT</span> Admin
+              <span className="text-emerald-400">ROOT14</span> Admin
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -84,8 +90,11 @@ function AdminContent() {
         {activeTab === 'announce' && <AnnouncementManager requestVerify={verify.requestVerify} />}
         {activeTab === 'users' && <UserManager requestVerify={verify.requestVerify} />}
         {activeTab === 'lab' && <EduHtmlEditor requestVerify={verify.requestVerify} />}
-        {activeTab === 'labscenario' && <LabScenarioManager />}
+        {activeTab === 'labscenario' && <LabScenarioManager requestVerify={verify.requestVerify} />}
+        {activeTab === 'wiki' && <WikiTermManager requestVerify={verify.requestVerify} />}
+        {activeTab === 'leveltest' && <LevelTestManager requestVerify={verify.requestVerify} />}
         {activeTab === 'stats' && <EduProgressStats requestVerify={verify.requestVerify} />}
+        {activeTab === 'accesslogs' && <AccessLogsDashboard requestVerify={verify.requestVerify} />}
         {activeTab === 'audit' && <AuditLogViewer requestVerify={verify.requestVerify} />}
       </div>
 

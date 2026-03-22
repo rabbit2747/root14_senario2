@@ -1,15 +1,15 @@
-<!DOCTYPE html>
-<html lang="ko" class="light" data-technique-id="T1596.003">
+﻿<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1596.003" data-level="beginner">
 <head>
-    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>(function(){try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
     <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1596-003-digital-certificates&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
     <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1596.003 디지털 인증서 검색">
-    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta name="description" content="ROOT14 Academy 사이버보안 교육 — T1596.003 디지털 인증서 검색">
+    <meta name="author" content="ROOT14 Academy">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';"/>
     <meta http-equiv="X-Content-Type-Options" content="nosniff"/><meta name="referrer" content="strict-origin-when-cross-origin"/>
-    <title>GOTROOT EDU | T1596.003 디지털 인증서 — (주)갓루트 사이버보안 교육</title>
+    <title>ROOT14 EDU | T1596.003 디지털 인증서 — ROOT14 Academy 사이버보안 교육</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
@@ -26,7 +26,7 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
     <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
-        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">ROOT14</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span></div>
         <div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div>
     </div>
     <div class="flex flex-1 overflow-hidden">
@@ -71,7 +71,7 @@
                             <h3 class="font-bold mb-2 text-red-600 dark:text-red-400 text-center">crt.sh</h3>
                             <p class="text-xs text-cgray dark:text-slate-300 leading-relaxed">CT Log 데이터베이스를 검색하여 특정 도메인에 발급된 모든 인증서를 조회합니다.</p>
                             <div class="terminal-bg p-2 rounded text-xs mt-3">
-                                <div>https://crt.sh/?q=%.gotroot.co.kr</div>
+                                <div>https://crt.sh/?q=%.root14.co.kr</div>
                                 <div class="text-slate-500 mt-1">→ 47개 인증서, 23개 서브도메인 발견</div>
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                             <h3 class="font-bold mb-2 hl-teal text-center">Censys Certificates</h3>
                             <p class="text-xs text-cgray dark:text-slate-300 leading-relaxed">인터넷 전체를 스캔하여 인증서 메타데이터를 수집, 조직명으로 연관 도메인을 찾습니다.</p>
                             <div class="terminal-bg p-2 rounded text-xs mt-3">
-                                <div>parsed.subject.organization:"GOTROOT"</div>
+                                <div>parsed.subject.organization:"ROOT14"</div>
                                 <div class="text-slate-500 mt-1">→ 내부 서비스 도메인 노출</div>
                             </div>
                         </div>
@@ -87,10 +87,10 @@
                     <div class="glass-panel p-6 rounded-xl border-l-4 border-l-red-400">
                         <h3 class="font-bold text-lg mb-3 text-red-600 dark:text-red-400">인증서에서 노출되는 정보</h3>
                         <ul class="space-y-2 text-sm text-cgray dark:text-slate-300">
-                            <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span> <strong>SAN(Subject Alternative Names)</strong>: dev.gotroot.co.kr, staging.gotroot.co.kr 등 숨겨진 서브도메인</li>
+                            <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span> <strong>SAN(Subject Alternative Names)</strong>: dev.root14.co.kr, staging.root14.co.kr 등 숨겨진 서브도메인</li>
                             <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span> <strong>Organization</strong>: 법인명, 부서명 등 조직 구조 파악</li>
                             <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span> <strong>발급 시기</strong>: 인프라 변경 타임라인 추적</li>
-                            <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span> <strong>와일드카드 인증서</strong>: *.gotroot.co.kr → 서브도메인 브루트포싱 대상</li>
+                            <li class="flex items-start gap-2"><span class="text-red-500 mt-0.5">●</span> <strong>와일드카드 인증서</strong>: *.root14.co.kr → 서브도메인 브루트포싱 대상</li>
                         </ul>
                     </div>
                 </div>
@@ -146,12 +146,13 @@
         var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
         var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
         document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
-        function certQuery(type){var t=document.getElementById('cert-terminal');if(type==='crtsh'){t.innerHTML='<div class="text-[#9DD9D2]">$ curl -s "https://crt.sh/?q=%.gotroot.co.kr&output=json" | jq ".[].name_value"</div><div class="text-slate-500 animate-pulse mt-1">조회 중...</div>';setTimeout(function(){t.innerHTML='<div class="text-[#9DD9D2]">$ curl -s "https://crt.sh/?q=%.gotroot.co.kr&output=json" | jq</div><div class="text-white mt-1">gotroot.co.kr</div><div class="text-white">www.gotroot.co.kr</div><div class="text-white">mail.gotroot.co.kr</div><div class="text-[#F4D06F]">dev.gotroot.co.kr</div><div class="text-[#F4D06F]">staging.gotroot.co.kr</div><div class="text-[#F4D06F]">api-internal.gotroot.co.kr</div><div class="text-[#F4D06F]">jenkins.gotroot.co.kr</div><div class="text-red-400">vpn.gotroot.co.kr</div><div class="text-red-400">admin-panel.gotroot.co.kr</div><div class="text-slate-500 mt-2">[!] 9 unique subdomains discovered</div><div class="text-red-400">[!] dev, staging, jenkins - 내부 서비스 노출!</div>';},900);}else{t.innerHTML='<div class="text-[#9DD9D2]">$ openssl s_client -connect gotroot.co.kr:443 2>/dev/null | openssl x509 -text</div><div class="text-slate-500 animate-pulse mt-1">분석 중...</div>';setTimeout(function(){t.innerHTML='<div class="text-[#9DD9D2]">$ openssl x509 -text</div><div class="text-[#F4D06F] mt-1">Subject: O=GOTROOT Inc., L=Seoul, C=KR</div><div class="text-white">Issuer: Let\'s Encrypt Authority X3</div><div class="text-white">Valid: 2026-01-15 ~ 2026-04-15</div><div class="text-[#F4D06F] mt-1">Subject Alternative Names:</div><div class="text-white">  DNS:gotroot.co.kr</div><div class="text-white">  DNS:*.gotroot.co.kr</div><div class="text-red-400 mt-2">[!] 와일드카드 인증서 → 서브도메인 무제한</div><div class="text-red-400">[!] Let\'s Encrypt → 자동 발급, DV 인증서</div>';},900);}}
+        function certQuery(type){var t=document.getElementById('cert-terminal');if(type==='crtsh'){t.innerHTML='<div class="text-[#9DD9D2]">$ curl -s "https://crt.sh/?q=%.root14.co.kr&output=json" | jq ".[].name_value"</div><div class="text-slate-500 animate-pulse mt-1">조회 중...</div>';setTimeout(function(){t.innerHTML='<div class="text-[#9DD9D2]">$ curl -s "https://crt.sh/?q=%.root14.co.kr&output=json" | jq</div><div class="text-white mt-1">root14.co.kr</div><div class="text-white">www.root14.co.kr</div><div class="text-white">mail.root14.co.kr</div><div class="text-[#F4D06F]">dev.root14.co.kr</div><div class="text-[#F4D06F]">staging.root14.co.kr</div><div class="text-[#F4D06F]">api-internal.root14.co.kr</div><div class="text-[#F4D06F]">jenkins.root14.co.kr</div><div class="text-red-400">vpn.root14.co.kr</div><div class="text-red-400">admin-panel.root14.co.kr</div><div class="text-slate-500 mt-2">[!] 9 unique subdomains discovered</div><div class="text-red-400">[!] dev, staging, jenkins - 내부 서비스 노출!</div>';},900);}else{t.innerHTML='<div class="text-[#9DD9D2]">$ openssl s_client -connect root14.co.kr:443 2>/dev/null | openssl x509 -text</div><div class="text-slate-500 animate-pulse mt-1">분석 중...</div>';setTimeout(function(){t.innerHTML='<div class="text-[#9DD9D2]">$ openssl x509 -text</div><div class="text-[#F4D06F] mt-1">Subject: O=ROOT14 Inc., L=Seoul, C=KR</div><div class="text-white">Issuer: Let\'s Encrypt Authority X3</div><div class="text-white">Valid: 2026-01-15 ~ 2026-04-15</div><div class="text-[#F4D06F] mt-1">Subject Alternative Names:</div><div class="text-white">  DNS:root14.co.kr</div><div class="text-white">  DNS:*.root14.co.kr</div><div class="text-red-400 mt-2">[!] 와일드카드 인증서 → 서브도메인 무제한</div><div class="text-red-400">[!] Let\'s Encrypt → 자동 발급, DV 인증서</div>';},900);}}
         function checkQuiz(){var q=document.querySelector('input[name="q1"]:checked');if(!q){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]','bg-red-100','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');if(q.value==='1'){r.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');r.innerHTML='✅ 정답입니다!<br><span class="text-xs mt-1 block font-normal">CT Log는 모든 발급 인증서를 투명하게 공개하므로, 공격자가 숨겨진 서브도메인과 조직 정보를 손쉽게 수집할 수 있습니다.</span>';}else{r.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');r.innerHTML='❌ 오답입니다. CT Log의 "투명성"이 양날의 검인 이유를 다시 생각해 보세요.';}}
         window.onload=function(){setTimeout(function(){go('ch1');},100);};
     </script>
-<script src="/edu/lab-link.js"></script>
+<script src="/edu/graphic-link.js"></script>
 <script src="/edu/progress-tracker.js"></script>
 <script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
 </body>
 </html>

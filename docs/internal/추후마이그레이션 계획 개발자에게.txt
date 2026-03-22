@@ -1,0 +1,27 @@
+프로젝트: React 교육 플랫폼 백엔드 마이그레이션
+
+현재 상황: Vite + React 프론트엔드가 Supabase(BaaS)에 직접 연결되어 있음. 사용자 100명 대비 자체 백엔드 전환 필요.
+
+요청 작업:
+
+NestJS + Prisma + PostgreSQL 백엔드 구축
+npx prisma db pull로 기존 Supabase 스키마 자동 추출
+src/api/_client.js 파일 1개 교체로 프론트 연동
+화면은 절대 변경하지 말 것 — API 레이어만 교체
+참고 자료: CLAUDE.md → "🗺️ 중장기 마이그레이션 플랜" 섹션 (Phase 0~2, 파일 우선순위, SQL 패치 포함)
+
+예상 공수: ~95시간 (Phase 1 기준)
+
+팀장/개발자에게 말로 설명할 때:
+
+"지금 데이터베이스를 Supabase가 직접 들고 있어요. 나중에 우리 서버로 옮길 건데, src/api/라는 폴더에 이미 통로를 만들어 뒀어요. 거기 _client.js 파일 하나만 바꾸면 화면 건드리지 않고 백엔드를 교체할 수 있어요. CLAUDE.md 파일에 단계별 계획 다 적혀있으니까 읽어보시면 돼요."
+
+
+src/api/
+├── _client.js      ← 🔑 핵심: "나중에 이 1파일만 바꾸면 전체 백엔드 교체"
+├── auth.js         ← 로그인/로그아웃/세션
+├── matrix.js       ← ATT&CK 매트릭스 데이터
+├── announcements.js← 공지사항 CRUD
+├── edu.js          ← 교육 진행률/수료 기록
+├── feedback.js     ← 커뮤니티 댓글/좋아요
+└── admin.js        ← 관리자(감사로그/유저관리)

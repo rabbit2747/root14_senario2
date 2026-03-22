@@ -1,8 +1,14 @@
 import { useState, useCallback } from 'react';
+import DOMPurify from 'dompurify';
 import { useAuth } from '../../../context/AuthContext';
 import useAnnouncements from '../../../hooks/useAnnouncements';
 import AdminGuideSection from '../../../components/admin/AdminGuideSection';
 import { Bullhorn, Pin, PinFilled, MailAll } from '@carbon/icons-react';
+
+/** XSS 방어: 텍스트 필드에서 HTML 태그/스크립트 제거 */
+function sanitizeText(str) {
+  return DOMPurify.sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }).trim();
+}
 
 const CATEGORY_OPTIONS = [
   { value: 'general',     label: '일반',     icon: '📄' },
@@ -75,11 +81,16 @@ export default function AnnouncementManager({ requestVerify }) {
     if (!ok) return;
 
     setSaving(true);
+    const sanitizedForm = {
+      ...form,
+      title: sanitizeText(form.title),
+      content: sanitizeText(form.content),
+    };
     let result;
     if (editId) {
-      result = await updateAnnouncement(editId, form);
+      result = await updateAnnouncement(editId, sanitizedForm);
     } else {
-      result = await createAnnouncement(form);
+      result = await createAnnouncement(sanitizedForm);
     }
     setSaving(false);
 

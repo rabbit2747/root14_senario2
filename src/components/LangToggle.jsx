@@ -9,11 +9,13 @@ export const LANG_STORAGE_KEY = 'gotroot_lang';
 export const LANG_DEFAULT     = 'ko';
 
 export const LANG_OPTIONS = [
-  { code: 'ko', label: '한국어', flag: '🇰🇷' },
-  { code: 'en', label: 'English', flag: '🇺🇸' },
-  { code: 'zh', label: '中文',    flag: '🇨🇳' },
-  { code: 'hi', label: 'हिन्दी',  flag: '🇮🇳' },
-  { code: 'ja', label: '日本語',  flag: '🇯🇵' },
+  { code: 'ko', label: '한국어',   flag: '🇰🇷' },
+  { code: 'en', label: 'English',  flag: '🇺🇸' },
+  { code: 'zh', label: '中文',     flag: '🇨🇳' },
+  { code: 'hi', label: 'हिन्दी',   flag: '🇮🇳' },
+  { code: 'ja', label: '日本語',   flag: '🇯🇵' },
+  { code: 'ar', label: 'العربية',  flag: '🇸🇦' },
+  { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
 ];
 
 /** 지원 언어 코드 Set (빠른 조회용) */

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>갓루트 위키 — Gotroot Wiki</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-bottom: 1px solid rgba(96,165,250,0.2);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header h1 {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+    }
+    header h1 span { color: #60a5fa; }
+    .technique-badge {
+      font-size: 11px;
+      background: rgba(29,78,216,0.3);
+      color: #93c5fd;
+      border: 1px solid rgba(96,165,250,0.3);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: monospace;
+    }
+    .search-bar {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(71,85,105,0.3);
+    }
+    .search-bar input {
+      width: 100%;
+      background: rgba(30,41,59,0.8);
+      border: 1px solid rgba(71,85,105,0.5);
+      border-radius: 8px;
+      padding: 8px 14px 8px 36px;
+      color: #e2e8f0;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-bar input:focus {
+      border-color: rgba(96,165,250,0.5);
+    }
+    .search-wrap {
+      position: relative;
+    }
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      pointer-events: none;
+    }
+    .hint {
+      font-size: 11px;
+      color: #475569;
+      margin-top: 6px;
+    }
+    #results {
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      height: calc(100vh - 155px);
+    }
+    .term-card {
+      background: rgba(30,41,59,0.6);
+      border: 1px solid rgba(71,85,105,0.35);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color 0.15s;
+    }
+    .term-card:hover { border-color: rgba(96,165,250,0.3); }
+    .term-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .term-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .badges { display: flex; gap: 4px; flex-wrap: wrap; }
+    .badge {
+      font-size: 10px;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: monospace;
+    }
+    .badge-level {
+      background: rgba(16,185,129,0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16,185,129,0.25);
+    }
+    .badge-tech {
+      background: rgba(29,78,216,0.2);
+      color: #93c5fd;
+      border: 1px solid rgba(29,78,216,0.3);
+    }
+    .badge-common {
+      background: rgba(71,85,105,0.3);
+      color: #94a3b8;
+      border: 1px solid rgba(71,85,105,0.4);
+    }
+    .term-def {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .term-source {
+      font-size: 11px;
+      color: #60a5fa;
+      margin-top: 8px;
+      display: inline-block;
+    }
+    .term-source:hover { text-decoration: underline; }
+    .empty {
+      text-align: center;
+      color: #475569;
+      font-size: 13px;
+      padding: 40px 0;
+    }
+    .spinner {
+      text-align: center;
+      padding: 40px 0;
+    }
+    .spinner-ring {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(96,165,250,0.2);
+      border-top-color: #60a5fa;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0; right: 0;
+      background: rgba(15,23,42,0.9);
+      border-top: 1px solid rgba(71,85,105,0.3);
+      padding: 6px 16px;
+      font-size: 11px;
+      color: #475569;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span style="font-size:20px">📖</span>
+    <h1>갓루트 위키 <span>Wiki</span></h1>
+    <span id="technique-badge" class="technique-badge" style="display:none"></span>
+  </header>
+
+  <div class="search-bar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input id="search-input" type="text" placeholder="용어 검색..." autocomplete="off" />
+    </div>
+    <div class="hint" id="hint-text"></div>
+  </div>
+
+  <div id="results">
+    <div class="spinner"><div class="spinner-ring"></div></div>
+  </div>
+
+  <footer>
+    <span id="count-label">불러오는 중...</span>
+    <span>갓루트 Edu</span>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://bnwbybawqrnhznirivfg.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';
+
+    const params = new URLSearchParams(location.search);
+    const techniqueId = params.get('techniqueId') || '';
+    const level = params.get('level') || '';
+
+    // UI 초기화
+    if (techniqueId) {
+      const badge = document.getElementById('technique-badge');
+      badge.textContent = techniqueId + (level ? ' · ' + level : '');
+      badge.style.display = '';
+      document.getElementById('search-input').placeholder = techniqueId + ' 관련 용어 검색...';
+      document.getElementById('hint-text').textContent = '현재 기법(' + techniqueId + ') 관련 + 공통 용어 표시 중';
+    }
+
+    let debounceTimer = null;
+
+    async function fetchTerms(search) {
+      const resultsEl = document.getElementById('results');
+      resultsEl.innerHTML = '<div class="spinner"><div class="spinner-ring"></div></div>';
+      document.getElementById('count-label').textContent = '불러오는 중...';
+
+      try {
+        let url = SUPABASE_URL + '/rest/v1/wiki_terms?select=*&order=term';
+
+        if (search) {
+          url += '&term=ilike.*' + encodeURIComponent(search) + '*';
+        }
+
+        if (techniqueId) {
+          // technique_id=T1587.001 OR technique_id IS NULL
+          url += '&or=(technique_id.eq.' + encodeURIComponent(techniqueId) + ',technique_id.is.null)';
+        }
+
+        const res = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          }
+        });
+
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        renderTerms(data, search);
+      } catch (e) {
+        resultsEl.innerHTML = '<div class="empty">⚠️ 용어를 불러오지 못했습니다.<br><small>' + e.message + '</small></div>';
+        document.getElementById('count-label').textContent = '오류';
+      }
+    }
+
+    function renderTerms(terms, search) {
+      const resultsEl = document.getElementById('results');
+      document.getElementById('count-label').textContent = terms.length + '개 용어';
+
+      if (terms.length === 0) {
+        resultsEl.innerHTML = '<div class="empty">' +
+          (search ? '"' + search + '" 검색 결과 없음' : '등록된 용어가 없습니다.') +
+          '</div>';
+        return;
+      }
+
+      resultsEl.innerHTML = terms.map(t => {
+        const levelBadge = t.level ? '<span class="badge badge-level">' + t.level + '</span>' : '';
+        const techBadge = t.technique_id
+          ? '<span class="badge badge-tech">' + t.technique_id + '</span>'
+          : '<span class="badge badge-common">공통</span>';
+        const sourceLink = t.source_url
+          ? '<a href="' + t.source_url + '" target="_blank" class="term-source">📄 출처 보기</a>'
+          : '';
+        return '<div class="term-card">' +
+          '<div class="term-header">' +
+            '<span class="term-name">' + escapeHtml(t.term) + '</span>' +
+            '<div class="badges">' + levelBadge + techBadge + '</div>' +
+          '</div>' +
+          '<p class="term-def">' + escapeHtml(t.definition) + '</p>' +
+          sourceLink +
+        '</div>';
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    document.getElementById('search-input').addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fetchTerms(this.value.trim()), 300);
+    });
+
+    // 초기 로드
+    fetchTerms('');
+  </script>
+</body>
+</html>

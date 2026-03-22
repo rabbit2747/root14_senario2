@@ -15,6 +15,8 @@ const TIME_UNITS = {
   ja: { now: 'たった今', min: '分前', hr: '時間前', day: '日前' },
   zh: { now: '刚刚', min: '分钟前', hr: '小时前', day: '天前' },
   hi: { now: 'अभी', min: 'मिनट पहले', hr: 'घंटे पहले', day: 'दिन पहले' },
+  vi: { now: 'vừa xong', min: ' phút trước', hr: ' giờ trước', day: ' ngày trước' },
+  ar: { now: 'الآن', min: ' د', hr: ' س', day: ' ي' },
 };
 
 export function timeAgo(dateStr, lang) {
@@ -29,7 +31,7 @@ export function timeAgo(dateStr, lang) {
   if (hr < 24) return `${hr}${u.hr}`;
   const day = Math.floor(hr / 24);
   if (day < 30) return `${day}${u.day}`;
-  return new Date(dateStr).toLocaleDateString(l === 'ko' ? 'ko-KR' : l === 'ja' ? 'ja-JP' : l === 'zh' ? 'zh-CN' : l === 'hi' ? 'hi-IN' : 'en-US');
+  return new Date(dateStr).toLocaleDateString(l === 'ko' ? 'ko-KR' : l === 'ja' ? 'ja-JP' : l === 'zh' ? 'zh-CN' : l === 'hi' ? 'hi-IN' : l === 'vi' ? 'vi-VN' : l === 'ar' ? 'en-GB' : 'en-US');
 }
 
 // ── 카테고리 라벨 ──
@@ -39,6 +41,8 @@ export const CAT_LABELS = {
   ja: { general: '一般', update: '更新', maintenance: 'メンテ', event: 'イベント', important: '🚨 重要' },
   zh: { general: '一般', update: '更新', maintenance: '维护', event: '活动', important: '🚨 重要' },
   hi: { general: 'सामान्य', update: 'अपडेट', maintenance: 'रखरखाव', event: 'इवेंट', important: '🚨 महत्वपूर्ण' },
+  vi: { general: 'Chung', update: 'Cập nhật', maintenance: 'Bảo trì', event: 'Sự kiện', important: '🚨 Quan trọng' },
+  ar: { general: 'عام', update: 'تحديث', maintenance: 'صيانة', event: 'فعالية', important: '🚨 مهم' },
 };
 
 export function getCatLabel(category, lang) {
@@ -279,6 +283,98 @@ export const FEEDBACK_UI = {
     edited: '(संपादित)',
     boldTip: 'Ctrl+B बोल्ड',
   },
+  vi: {
+    title: 'Phản hồi cộng đồng',
+    placeholder: 'Để lại phản hồi... (Enter để gửi)',
+    sending: 'Đang gửi...',
+    post: 'Đăng',
+    loginPrompt: 'Đăng nhập để xem và tham gia phản hồi',
+    login: 'Đăng nhập',
+    loginRequired: 'Cần đăng nhập để xem phản hồi',
+    loginBtn: 'Đăng nhập',
+    empty: 'Chưa có phản hồi nào',
+    emptyHint: 'Hãy là người đầu tiên để lại phản hồi!',
+    deleteConfirm: 'Xóa bình luận này?',
+    deleteSuccess: 'Đã xóa bình luận',
+    deleteFail: 'Xóa thất bại',
+    deleteAdmin: 'Xóa với quyền admin',
+    deleteMine: 'Xóa bình luận của tôi',
+    deleteBtn: 'Xóa',
+    adminOnly: 'Chỉ admin mới có thể xóa bình luận của admin',
+    adminReplyLock: 'Không thể xóa: đã có reply từ admin',
+    policy: 'Bạn có thể xóa bình luận của chính mình',
+    policyAdmin: 'Bình luận admin: chỉ admin mới xóa được',
+    policyLock: 'Bình luận có reply từ admin: bị khóa',
+    admin: '🛡️ Admin',
+    myComment: 'Của tôi',
+    reply: 'Trả lời',
+    replyBtn: '💬 Trả lời',
+    like: 'Thích',
+    unlike: 'Bỏ thích',
+    loginNeeded: 'Cần đăng nhập',
+    replyCount: (n) => `${n} trả lời`,
+    collapse: 'Ẩn',
+    expand: 'Xem',
+    replyTo: (name) => `💬 Trả lời @${name}`,
+    replyPlaceholder: 'Nhập trả lời... (Enter để gửi, Esc để hủy)',
+    cancel: 'Hủy',
+    postReply: 'Trả lời',
+    loadMore: 'Tải thêm ↓',
+    anon: 'Ẩn danh',
+    editBtn: '✏️ Sửa',
+    editSave: 'Lưu',
+    editCancel: 'Hủy',
+    editSuccess: 'Đã cập nhật bình luận',
+    editFail: 'Cập nhật thất bại',
+    edited: '(đã chỉnh sửa)',
+    boldTip: 'Ctrl+B để in đậm',
+  },
+  ar: {
+    title: 'تعليقات المجتمع',
+    placeholder: 'اترك تعليقك... (Enter للإرسال)',
+    sending: 'جارٍ الإرسال...',
+    post: 'نشر',
+    loginPrompt: 'سجّل الدخول لعرض التعليقات والمشاركة',
+    login: 'تسجيل الدخول',
+    loginRequired: 'يجب تسجيل الدخول لعرض التعليقات',
+    loginBtn: 'تسجيل الدخول',
+    empty: 'لا توجد تعليقات بعد',
+    emptyHint: 'كن أول من يترك تعليقاً!',
+    deleteConfirm: 'حذف هذا التعليق؟',
+    deleteSuccess: 'تم حذف التعليق',
+    deleteFail: 'فشل الحذف',
+    deleteAdmin: 'حذف بصلاحية المسؤول',
+    deleteMine: 'حذف تعليقي',
+    deleteBtn: 'حذف',
+    adminOnly: 'تعليقات المسؤول لا يمكن حذفها إلا من قِبَله',
+    adminReplyLock: 'لا يمكن الحذف: يوجد رد من المسؤول',
+    policy: 'يمكنك حذف تعليقاتك الخاصة',
+    policyAdmin: 'تعليقات المسؤول: للمسؤول فقط',
+    policyLock: 'التعليقات ذات الردود الإدارية: مقفلة',
+    admin: '🛡️ Admin',
+    myComment: 'تعليقي',
+    reply: 'رد',
+    replyBtn: '💬 رد',
+    like: 'إعجاب',
+    unlike: 'إلغاء الإعجاب',
+    loginNeeded: 'يجب تسجيل الدخول',
+    replyCount: (n) => `${n} ردود`,
+    collapse: 'إخفاء',
+    expand: 'عرض',
+    replyTo: (name) => `💬 الرد على @${name}`,
+    replyPlaceholder: 'اكتب رداً... (Enter للإرسال، Esc للإلغاء)',
+    cancel: 'إلغاء',
+    postReply: 'إرسال الرد',
+    loadMore: 'تحميل المزيد ↓',
+    anon: 'مجهول',
+    editBtn: '✏️ تعديل',
+    editSave: 'حفظ',
+    editCancel: 'إلغاء',
+    editSuccess: 'تم تحديث التعليق',
+    editFail: 'فشل التحديث',
+    edited: '(معدَّل)',
+    boldTip: 'Ctrl+B للتغميق',
+  },
 };
 
 // ── 공지사항 UI 텍스트 ──
@@ -288,6 +384,8 @@ export const ANNOUNCE_UI = {
   ja: { title: 'お知らせ', viewAll: 'すべて見る →', empty: 'お知らせはありません', pinned: '固定', all: '全て', items: '件', delete: '削除', deleting: '削除中...', deleteConfirm: 'このお知らせを削除しますか？', noAnn: 'お知らせはありません', noAnnHint: '新しいお知らせがここに表示されます' },
   zh: { title: '公告', viewAll: '查看全部 →', empty: '没有公告', pinned: '置顶', all: '全部', items: '条', delete: '删除', deleting: '删除中...', deleteConfirm: '删除此公告？', noAnn: '没有公告', noAnnHint: '新公告将显示在这里' },
   hi: { title: 'घोषणाएं', viewAll: 'सभी देखें →', empty: 'कोई घोषणा नहीं', pinned: 'पिन', all: 'सभी', items: '', delete: 'हटाएं', deleting: 'हटा रहा है...', deleteConfirm: 'यह घोषणा हटाएं?', noAnn: 'कोई घोषणा नहीं', noAnnHint: 'नई घोषणाएं यहां दिखाई देंगी' },
+  vi: { title: 'Thông báo', viewAll: 'Xem tất cả →', empty: 'Không có thông báo nào', pinned: 'Ghim', all: 'Tất cả', items: '', delete: 'Xóa', deleting: 'Đang xóa...', deleteConfirm: 'Xóa thông báo này?', noAnn: 'Không có thông báo', noAnnHint: 'Thông báo mới sẽ hiển thị tại đây' },
+  ar: { title: 'الإعلانات', viewAll: 'عرض الكل →', empty: 'لا توجد إعلانات', pinned: 'مثبَّت', all: 'الكل', items: '', delete: 'حذف', deleting: 'جارٍ الحذف...', deleteConfirm: 'حذف هذا الإعلان؟', noAnn: 'لا توجد إعلانات', noAnnHint: 'ستظهر الإعلانات الجديدة هنا' },
 };
 
 export function getFeedbackUI(lang) {
@@ -301,7 +399,7 @@ export function getAnnounceUI(lang) {
 }
 
 // ── 날짜 포맷 (formatDate) ──
-const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN', hi: 'hi-IN' };
+const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN', hi: 'hi-IN', vi: 'vi-VN', ar: 'en-GB' };
 
 export function formatDate(dateStr, lang) {
   const l = lang || getLang();
@@ -318,6 +416,8 @@ export const EMOJI_UI = {
   ja: { title: '絵文字', smile: 'スマイル', gesture: 'ジェスチャー', heart: 'ハート', tech: 'テック' },
   zh: { title: '表情', smile: '笑脸', gesture: '手势', heart: '爱心', tech: '技术' },
   hi: { title: 'इमोजी', smile: 'स्माइल', gesture: 'जेस्चर', heart: 'दिल', tech: 'टेक' },
+  vi: { title: 'Emoji', smile: 'Biểu cảm', gesture: 'Cử chỉ', heart: 'Trái tim', tech: 'Công nghệ' },
+  ar: { title: 'رمز تعبيري', smile: 'ابتسامة', gesture: 'إيماءة', heart: 'قلب', tech: 'تقنية' },
 };
 
 export function getEmojiUI(lang) {

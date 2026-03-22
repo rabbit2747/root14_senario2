@@ -17,6 +17,11 @@ const SCENARIO_LOADERS = {
   'T1585.001': () => import('../../data/lab-scenarios/T1585.001.json'),
   'T1587.001': () => import('../../data/lab-scenarios/T1587.001.json'),
   'T1566.001': () => import('../../data/lab-scenarios/T1566.001.json'),
+  'T1566.001-novice': () => import('../../data/lab-scenarios/T1566.001-novice.json'),
+  'T1566.001-beginner': () => import('../../data/lab-scenarios/T1566.001-beginner.json'),
+  'T1566.001-intermediate': () => import('../../data/lab-scenarios/T1566.001-intermediate.json'),
+  'T1566.001-advanced': () => import('../../data/lab-scenarios/T1566.001-advanced.json'),
+  'T1566.001-expert': () => import('../../data/lab-scenarios/T1566.001-expert.json'),
   'T1195.002': () => import('../../data/lab-scenarios/T1195.002.json'),
   'T1059.001': () => import('../../data/lab-scenarios/T1059.001.json'),
   'T1047':     () => import('../../data/lab-scenarios/T1047.json'),
@@ -54,7 +59,7 @@ const SCENARIO_LOADERS = {
 };
 
 export default function DesktopLab() {
-  const { techniqueId } = useParams();
+  const { techniqueId, level } = useParams();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   const [authChecked, setAuthChecked] = useState(false);
@@ -66,11 +71,11 @@ export default function DesktopLab() {
   // ── Auth Gate ──
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate(`/login?redirect=${encodeURIComponent(`/lab/desktop/${techniqueId}`)}`, { replace: true });
+      navigate(`/login?redirect=${encodeURIComponent(`/lab/desktop/${techniqueId}/${level || 'beginner'}`)}`, { replace: true });
       return;
     }
     setAuthChecked(true);
-  }, [isLoggedIn, navigate, techniqueId]);
+  }, [isLoggedIn, navigate, techniqueId, level]);
 
   // ── 전용 랩이 있으면 리다이렉트 ──
   useEffect(() => {
@@ -83,7 +88,7 @@ export default function DesktopLab() {
   useEffect(() => {
     if (!authChecked || dedicatedPath) return;
 
-    const loader = SCENARIO_LOADERS[techniqueId];
+    const loader = (level && SCENARIO_LOADERS[`${techniqueId}-${level}`]) || SCENARIO_LOADERS[techniqueId];
     if (loader) {
       loader()
         .then(mod => { setScenario(mod.default || mod); setLoading(false); })

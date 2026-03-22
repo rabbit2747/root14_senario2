@@ -71,11 +71,11 @@ function PixelChar({ color, name, isJoining }) {
 
 // ── 다국어 번역 ──
 const roomT = {
-  ko: { title: '훈련실', online: '접속 중', waiting: '훈련생 대기 중...', footer: 'GOTROOT 사이버보안 훈련 — 실시간 프레즌스', loginReq: '로그인 후 입장 가능합니다' },
-  en: { title: 'TRAINING ROOM', online: 'ONLINE', waiting: 'WAITING FOR AGENTS...', footer: 'GOTROOT CYBERSECURITY TRAINING — REAL-TIME PRESENCE', loginReq: 'Login required to enter' },
-  zh: { title: '训练室', online: '在线', waiting: '等待训练员...', footer: 'GOTROOT 网络安全训练 — 实时在线', loginReq: '请登录后进入' },
-  hi: { title: 'प्रशिक्षण कक्ष', online: 'ऑनलाइन', waiting: 'एजेंट की प्रतीक्षा...', footer: 'GOTROOT — रीयल-टाइम प्रेजेंस', loginReq: 'प्रवेश के लिए लॉगिन करें' },
-  ja: { title: '訓練室', online: 'オンライン', waiting: 'エージェント待機中...', footer: 'GOTROOT サイバーセキュリティ — リアルタイム', loginReq: 'ログインが必要です' },
+  ko: { title: '훈련실', online: '접속 중', waiting: '훈련생 대기 중...', footer: 'ROOT14 사이버보안 훈련 — 실시간 프레즌스', loginReq: '로그인 후 입장 가능합니다' },
+  en: { title: 'TRAINING ROOM', online: 'ONLINE', waiting: 'WAITING FOR AGENTS...', footer: 'ROOT14 CYBERSECURITY TRAINING — REAL-TIME PRESENCE', loginReq: 'Login required to enter' },
+  zh: { title: '训练室', online: '在线', waiting: '等待训练员...', footer: 'ROOT14 网络安全训练 — 实时在线', loginReq: '请登录后进入' },
+  hi: { title: 'प्रशिक्षण कक्ष', online: 'ऑनलाइन', waiting: 'एजेंट की प्रतीक्षा...', footer: 'ROOT14 — रीयल-टाइम प्रेजेंस', loginReq: 'प्रवेश के लिए लॉगिन करें' },
+  ja: { title: '訓練室', online: 'オンライン', waiting: 'エージェント待機中...', footer: 'ROOT14 サイバーセキュリティ — リアルタイム', loginReq: 'ログインが必要です' },
 };
 
 export default function AvatarRoom({ isOpen, onClose, language = 'ko' }) {

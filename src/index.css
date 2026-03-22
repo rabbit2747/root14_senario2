@@ -51,3 +51,92 @@ html {
 body {
   font-family: var(--font-sans);
 }
+
+/* ─────────────────────────────────────────────
+   투어 진행 바 애니메이션 (width 0% → 100%)
+───────────────────────────────────────────── */
+@keyframes tour-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+.anim-tour-progress {
+  animation: tour-progress 10s linear forwards;
+}
+
+/* ─────────────────────────────────────────────
+   원형 타이머 SVG 애니메이션
+   (stroke-dashoffset 75.4 → 0, r=12 기준 2π×12≈75.4)
+───────────────────────────────────────────── */
+@keyframes circle-fill {
+  from { stroke-dashoffset: 75.4; }
+  to   { stroke-dashoffset: 0; }
+}
+.anim-progress-circle {
+  animation: circle-fill 10s linear forwards;
+}
+
+/* ─────────────────────────────────────────────
+   Glass Gradient Border (호버 시 회전 테두리)
+   @property 미지원 브라우저에서는 정적 그라디언트로 폴백
+───────────────────────────────────────────── */
+@property --glass-angle {
+  syntax: '<angle>';
+  initial-value: 135deg;
+  inherits: false;
+}
+
+@keyframes border-rotate {
+  from { --glass-angle: 0deg; }
+  to   { --glass-angle: 360deg; }
+}
+
+.glass-gradient-border {
+  position: relative;
+}
+
+.glass-gradient-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    var(--glass-angle),
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.04) 40%,
+    rgba(255, 255, 255, 0.14) 70%,
+    rgba(255, 255, 255, 0.22) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-gradient-border:hover::after {
+  animation: border-rotate 3s linear infinite;
+}
+
+/* ─────────────────────────────────────────────
+   레벨 테스트 페이지 애니메이션
+───────────────────────────────────────────── */
+@keyframes popIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+@keyframes zooFloat {
+  0% { transform: translateY(110dvh) rotate(0deg) scale(0.5); opacity: 1; }
+  50% { transform: translateY(30dvh) rotate(180deg) scale(1.5); }
+  100% { transform: translateY(-20dvh) rotate(360deg) scale(1); opacity: 0; }
+}

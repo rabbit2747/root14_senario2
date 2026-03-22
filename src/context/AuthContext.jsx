@@ -3,6 +3,15 @@ import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
+// ── 서버 측 인증용 쿠키 동기화 (Express server.js가 읽음) ──
+function setAuthCookie(token) {
+  document.cookie = `gotroot_auth_token=${token}; path=/; max-age=3600; SameSite=Lax`;
+}
+
+function clearAuthCookie() {
+  document.cookie = 'gotroot_auth_token=; path=/; max-age=0; SameSite=Lax';
+}
+
 // ── 세션 타임아웃 설정 ──
 const IDLE_TIMEOUT  = 10 * 60 * 1000;  // 10분 비활동 시 자동 로그아웃
 const WARN_BEFORE   = 30 * 1000;       // 30초 전 경고 표시
@@ -11,6 +20,8 @@ const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userLevel, setUserLevel] = useState(null);
+  const [userName, setUserName] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sessionWarning, setSessionWarning] = useState(null);
 
@@ -20,22 +31,32 @@ export function AuthProvider({ children }) {
   const userRef = useRef(null);
   userRef.current = user;
 
-  // 프로필에서 role 조회
+  // 프로필에서 role, level, name 조회
   const fetchRole = async (uid) => {
-    if (!uid) { setIsAdmin(false); return; }
+    if (!uid) { setIsAdmin(false); setUserLevel(null); setUserName(null); return; }
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, level, name')
         .eq('id', uid)
         .single();
-      setIsAdmin(data?.role === 'admin');
+      const admin = data?.role === 'admin';
+      setIsAdmin(admin);
+      setUserLevel(data?.level || null);
+      setUserName(data?.name || null);
+      // AIROOT 연동: admin 힌트를 localStorage에 저장 (같은 도메인 HTML 페이지에서 참조)
+      try { localStorage.setItem('gotroot_is_admin', String(admin)); } catch {}
     } catch {
       setIsAdmin(false);
+      setUserLevel(null);
+      setUserName(null);
+      try { localStorage.setItem('gotroot_is_admin', 'false'); } catch {}
     }
   };
 
   const logout = useCallback(async () => {
+    clearAuthCookie();
+    try { localStorage.removeItem('gotroot_is_admin'); } catch {}
     await supabase.auth.signOut();
     setUser(null);
     setIsAdmin(false);
@@ -100,17 +121,24 @@ export function AuthProvider({ children }) {
 
   // ── 세션 복원 + 상태 감지 ──
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       const u = session?.user ?? null;
       setUser(u);
-      fetchRole(u?.id);
+      await fetchRole(u?.id);   // role/level 로딩 완료 후 렌더링 (깜빡임 방지)
       setLoading(false);
-    });
+      // 서버 측 인증 쿠키 동기화
+      if (session?.access_token) setAuthCookie(session.access_token);
+      else clearAuthCookie();
+    })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const u = session?.user ?? null;
       setUser(u);
       fetchRole(u?.id);
+      // 토큰 갱신(TOKEN_REFRESHED) 시에도 쿠키 자동 동기화
+      if (session?.access_token) setAuthCookie(session.access_token);
+      else clearAuthCookie();
     });
 
     // [IDOR 방어 #7] 5분마다 role 재검증
@@ -130,7 +158,7 @@ export function AuthProvider({ children }) {
   if (loading) return null;
 
   return (
-    <AuthContext.Provider value={{ user, logout, isLoggedIn: !!user, isAdmin, sessionWarning }}>
+    <AuthContext.Provider value={{ user, logout, isLoggedIn: !!user, isAdmin, userLevel, userName, sessionWarning }}>
       {children}
     </AuthContext.Provider>
   );

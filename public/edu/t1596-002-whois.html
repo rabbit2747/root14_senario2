@@ -1,15 +1,15 @@
-<!DOCTYPE html>
-<html lang="ko" class="light" data-technique-id="T1596.002">
+﻿<!DOCTYPE html>
+<html lang="ko" class="light" data-technique-id="T1596.002" data-level="beginner">
 <head>
-    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>(function(){try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
     <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1596-002-whois&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
     <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1596.002 WHOIS 정보 검색">
-    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta name="description" content="ROOT14 Academy 사이버보안 교육 — T1596.002 WHOIS 정보 검색">
+    <meta name="author" content="ROOT14 Academy">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';"/>
     <meta http-equiv="X-Content-Type-Options" content="nosniff"/><meta name="referrer" content="strict-origin-when-cross-origin"/>
-    <title>GOTROOT EDU | T1596.002 WHOIS — (주)갓루트 사이버보안 교육</title>
+    <title>ROOT14 EDU | T1596.002 WHOIS — ROOT14 Academy 사이버보안 교육</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569'}}}}</script>
@@ -26,7 +26,7 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
     <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
-        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">ROOT14</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span></div>
         <div class="flex items-center gap-3"><button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button></div>
     </div>
     <div class="flex flex-1 overflow-hidden">
@@ -78,7 +78,7 @@
                             <h3 class="font-bold mb-2 text-red-600 dark:text-red-400 text-center">역방향 WHOIS</h3>
                             <p class="text-xs text-cgray dark:text-slate-300 leading-relaxed">같은 등록자/조직이 소유한 다른 도메인을 모두 찾아냅니다. 하나의 취약한 도메인이 전체 조직의 진입점이 됩니다.</p>
                             <div class="terminal-bg p-2 rounded text-xs mt-3">
-                                <div>$ whois -h whois.arin.net "org GOTROOT"</div>
+                                <div>$ whois -h whois.arin.net "org ROOT14"</div>
                                 <div class="text-slate-500 mt-1">→ 12개 관련 도메인 발견</div>
                             </div>
                         </div>
@@ -154,13 +154,14 @@
         var observerOptions={root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1};
         var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.remove('opacity-0','translate-y-10');entry.target.classList.add('opacity-100','translate-y-0');var id=entry.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(nav){nav.classList.remove('active');if(nav.getAttribute('data-target')===id)nav.classList.add('active');});}});},observerOptions);
         document.querySelectorAll('.section-observe').forEach(function(s){observer.observe(s);});
-        var whoisData={standard:{cmd:'$ whois gotroot.co.kr',lines:['Domain Name: gotroot.co.kr','Registrant: GOTROOT Inc.','Admin Email: admin@gotroot.co.kr','Tech Contact: tech@gotroot.co.kr','Name Server: ns1.cloudflare.com','Name Server: ns2.cloudflare.com','Created: 2024-01-15','Expires: 2027-01-15','Updated: 2025-12-01','Registrar: Gabia Inc.']},reverse:{cmd:'$ python3 reverse_whois.py --org "GOTROOT"',lines:['[*] Reverse WHOIS for organization: GOTROOT','[+] gotroot.co.kr (Active)','[+] gotroot.com (Active)','[+] gotroot-dev.com (Active)','[+] gotroot-staging.kr (Active)','[+] gotroot-internal.net (Expired!)','[!] 5 domains found, 1 expired']},historical:{cmd:'$ python3 whois_history.py gotroot.co.kr',lines:['[2024-01-15] Created by: Kim Admin (kim@gotroot.co.kr)','[2024-06-01] NS changed: ns1.cafe24.com → ns1.cloudflare.com','[2025-03-15] Registrant changed: Kim Admin → GOTROOT Inc.','[2025-12-01] Privacy protection enabled','[!] Pre-privacy email exposed: kim@gotroot.co.kr']}};
+        var whoisData={standard:{cmd:'$ whois root14.co.kr',lines:['Domain Name: root14.co.kr','Registrant: ROOT14 Inc.','Admin Email: admin@root14.co.kr','Tech Contact: tech@root14.co.kr','Name Server: ns1.cloudflare.com','Name Server: ns2.cloudflare.com','Created: 2024-01-15','Expires: 2027-01-15','Updated: 2025-12-01','Registrar: Gabia Inc.']},reverse:{cmd:'$ python3 reverse_whois.py --org "ROOT14"',lines:['[*] Reverse WHOIS for organization: ROOT14','[+] root14.co.kr (Active)','[+] gotroot.com (Active)','[+] gotroot-dev.com (Active)','[+] gotroot-staging.kr (Active)','[+] gotroot-internal.net (Expired!)','[!] 5 domains found, 1 expired']},historical:{cmd:'$ python3 whois_history.py root14.co.kr',lines:['[2024-01-15] Created by: Kim Admin (kim@root14.co.kr)','[2024-06-01] NS changed: ns1.cafe24.com → ns1.cloudflare.com','[2025-03-15] Registrant changed: Kim Admin → ROOT14 Inc.','[2025-12-01] Privacy protection enabled','[!] Pre-privacy email exposed: kim@root14.co.kr']}};
         function whoisQuery(type){var t=document.getElementById('whois-terminal');var d=whoisData[type];t.innerHTML='<div class="text-[#9DD9D2]">'+d.cmd+'</div><div class="text-slate-500 animate-pulse mt-1">조회 중...</div>';setTimeout(function(){var h='<div class="text-[#9DD9D2]">'+d.cmd+'</div>';d.lines.forEach(function(l){var c=l.startsWith('[!')?'text-red-400':l.startsWith('[+]')?'text-[#9DD9D2]':'text-white';h+='<div class="'+c+'">'+l+'</div>';});t.innerHTML=h;},800);}
         function checkQuiz(){var q=document.querySelector('input[name="q1"]:checked');if(!q){alert('답을 선택해주세요.');return;}var r=document.getElementById('quiz-result');r.classList.remove('hidden','bg-[#9DD9D2]/30','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]','bg-red-100','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');if(q.value==='2'){r.classList.add('bg-[#9DD9D2]/30','border','border-[#9DD9D2]','text-[#0f766e]','dark:text-[#9DD9D2]');r.innerHTML='✅ 정답입니다!<br><span class="text-xs mt-1 block font-normal">역방향 WHOIS는 같은 등록자가 보유한 모든 도메인을 찾아 공격 표면을 확장하는 강력한 정찰 기법입니다.</span>';}else{r.classList.add('bg-red-100','border','border-red-400','text-red-700','dark:bg-red-900/50','dark:text-red-400');r.innerHTML='❌ 오답입니다. "역방향"이 의미하는 바를 다시 생각해 보세요.';}}
         window.onload=function(){setTimeout(function(){go('ch1');},100);};
     </script>
-<script src="/edu/lab-link.js"></script>
+<script src="/edu/graphic-link.js"></script>
 <script src="/edu/progress-tracker.js"></script>
 <script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
 </body>
 </html>

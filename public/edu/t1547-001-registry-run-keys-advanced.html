@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko" class="light" data-technique-id="T1547.001" data-level="advanced">
 <head>
-    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>(function(){try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
     <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1547-001-registry-run-keys-advanced&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
     <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1547.001 고급: CLSID 하이재킹과 포렌식 분석">
-    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta name="description" content="ROOT14 Academy 사이버보안 교육 — T1547.001 고급: CLSID 하이재킹과 포렌식 분석">
+    <meta name="author" content="ROOT14 Academy">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>GOTROOT EDU | T1547.001 고급: CLSID 하이재킹과 포렌식 분석 — (주)갓루트</title>
+    <title>ROOT14 EDU | T1547.001 고급: CLSID 하이재킹과 포렌식 분석 — ROOT14 Academy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
@@ -24,7 +24,7 @@
         .dark .nav-item.active{background:linear-gradient(90deg,rgba(248,113,113,0.15) 0%,transparent 100%);border-left:4px solid #f87171;color:#f87171;}
         .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
         ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#f87171;}
-        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}.drag-item.dragging{opacity:0.5;transform:scale(0.95);}
+        .drag-item{cursor:grab;user-select:none;touch-action:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}.drag-item.dragging{opacity:0.5;transform:scale(0.95);}
         .drop-zone{min-height:48px;border:2px dashed transparent;border-radius:8px;transition:all 0.2s;}.drop-zone.drag-over{border-color:#ef4444;background:rgba(239,68,68,0.1);}
         .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
         .step-btn{transition:all 0.3s;}.step-btn.active{border-color:#ef4444!important;background:rgba(239,68,68,0.1)!important;}.step-btn.completed{border-color:#059669!important;background:rgba(5,150,105,0.1)!important;}
@@ -33,7 +33,7 @@
 <body class="flex flex-col h-screen overflow-hidden selection:bg-red-200 selection:text-red-900 transition-colors duration-300">
     <!-- Brand Header Bar -->
     <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
-        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">ROOT14</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span></div>
         <div class="flex items-center gap-3">
             <span style="font-size:8px;color:#ef4444;font-weight:700;background:rgba(239,68,68,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.3);">ADVANCED</span>
             <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
@@ -234,7 +234,7 @@
                         <div class="terminal-bg p-4 overflow-x-auto">
                             <div class="text-cyan-400 text-xs leading-relaxed font-mono whitespace-pre">rule Registry_Persistence_Malware {</div>
                             <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">    meta:</div>
-                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        author = "GOTROOT EDU"</div>
+                            <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        author = "ROOT14 EDU"</div>
                             <div class="text-green-400 text-xs leading-relaxed font-mono whitespace-pre">        description = "Detects malware modifying Run keys"</div>
                             <div class="text-red-400 text-xs leading-relaxed font-mono whitespace-pre">        severity = "high"</div>
                             <div class="text-white text-xs leading-relaxed font-mono whitespace-pre"></div>
@@ -412,7 +412,68 @@
                 div.addEventListener('drop',function(e){e.preventDefault();div.classList.remove('drag-over');var fromIdx=parseInt(e.dataTransfer.getData('text/plain'));var items=container.querySelectorAll('.drag-item');var toIdx=Array.from(items).indexOf(div);if(fromIdx!==toIdx){var fromEl=items[fromIdx];if(fromIdx<toIdx)div.after(fromEl);else div.before(fromEl);var newItems=container.querySelectorAll('.drag-item');newItems.forEach(function(el,i){el.querySelector('span:first-child').textContent=i+1;});}});
                 container.appendChild(div);
             });
+            addTouchDragSupport(container, function(fromIdx, toIdx){
+                var items=container.querySelectorAll('.drag-item');
+                var fromEl=items[fromIdx];var toEl=items[toIdx];
+                if(fromIdx<toIdx)toEl.after(fromEl);else toEl.before(fromEl);
+                var newItems=container.querySelectorAll('.drag-item');
+                newItems.forEach(function(el,i){el.querySelector('span:first-child').textContent=i+1;});
+            });
         }
+        /* ── 모바일 터치 드래그 지원 ── */
+        function addTouchDragSupport(container, swapFn) {
+            if (container._touchDragAttached) return;
+            container._touchDragAttached = true;
+            var dragIdx = -1, dragEl = null, dragClone = null, initRect = null;
+
+            container.addEventListener('touchstart', function(e) {
+                var item = e.target.closest('.drag-item');
+                if (!item) return;
+                e.preventDefault();
+                dragIdx = Array.from(container.querySelectorAll('.drag-item')).indexOf(item);
+                dragEl = item;
+                initRect = item.getBoundingClientRect();
+                item.style.opacity = '0.5';
+                item.style.transform = 'scale(0.95)';
+                dragClone = item.cloneNode(true);
+                dragClone.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;opacity:0.9;transform:scale(1.05);box-shadow:0 8px 24px rgba(0,0,0,0.3);width:'+item.offsetWidth+'px;left:'+initRect.left+'px;top:'+initRect.top+'px;';
+                document.body.appendChild(dragClone);
+            }, { passive: false });
+
+            container.addEventListener('touchmove', function(e) {
+                if (dragIdx < 0 || !dragClone) return;
+                e.preventDefault();
+                var touch = e.touches[0];
+                var dx = touch.clientX - (initRect.left + initRect.width / 2);
+                var dy = touch.clientY - (initRect.top + initRect.height / 2);
+                dragClone.style.left = (initRect.left + dx) + 'px';
+                dragClone.style.top = (initRect.top + dy) + 'px';
+                dragClone.style.display = 'none';
+                var el = document.elementFromPoint(touch.clientX, touch.clientY);
+                dragClone.style.display = '';
+                container.querySelectorAll('.drag-item').forEach(function(c){ c.classList.remove('drop-zone','drag-over'); });
+                if (el) { var t = el.closest('.drag-item'); if (t && t !== dragEl) t.classList.add('drop-zone','drag-over'); }
+            }, { passive: false });
+
+            container.addEventListener('touchend', function(e) {
+                if (dragIdx < 0) return;
+                var ct = e.changedTouches[0];
+                if (dragClone) { dragClone.style.display = 'none'; }
+                var el = document.elementFromPoint(ct.clientX, ct.clientY);
+                if (dragClone) { dragClone.remove(); dragClone = null; }
+                if (el) {
+                    var t = el.closest('.drag-item');
+                    if (t && t !== dragEl) {
+                        var toIdx = Array.from(container.querySelectorAll('.drag-item')).indexOf(t);
+                        if (dragIdx !== toIdx) swapFn(dragIdx, toIdx);
+                    }
+                }
+                if (dragEl) { dragEl.style.opacity = ''; dragEl.style.transform = ''; }
+                container.querySelectorAll('.drag-item').forEach(function(c){ c.classList.remove('drop-zone','drag-over'); });
+                dragIdx = -1; dragEl = null; initRect = null;
+            });
+        }
+
         function checkOrderGame_0(){
             var items=document.querySelectorAll('#order-game-0 .drag-item');var correct=0;
             items.forEach(function(item,idx){
@@ -473,8 +534,9 @@
             setTimeout(function(){go('ch1');},100);
         };
     </script>
-    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/graphic-link.js"></script>
     <script src="/edu/progress-tracker.js"></script>
     <script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
 </body>
 </html>

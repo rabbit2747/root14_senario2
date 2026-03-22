@@ -1,4 +1,19 @@
 import { useState, useCallback } from 'react';
+// ⏳ Phase 1: supabase 직접 호출 분리 대기
+// ─────────────────────────────────────────────────────────────────────
+// 분리 불가 이유 1 — getPublicIP() + logAudit() 복합 구조:
+//   logAudit() 내부: getPublicIP() → supabase.auth.getUser() → admin_audit_logs.insert()
+//   세 가지 동작이 단일 함수에 결합 → api/ 단순 wrapping 불가
+//   예정: NestJS req.ip 미들웨어(서버측 IP 수집) + 인터셉터(자동 감사 로깅)
+//
+// 분리 불가 이유 2 — IDOR 검증(verifyAdmin):
+//   supabase.auth.getUser() + profiles.role SELECT 2단계 검증
+//   → Phase 2 NestJS JWT Guard로 교체 시 함께 이관
+//
+// 분리 불가 이유 3 — fetchContent / saveContent / deleteContent 직접 호출:
+//   api/edu.js에 getEduHtmlContent / upsertEduHtmlContent / deleteEduHtmlContent 껍데기 존재
+//   그러나 logAudit 결합으로 인해 Phase 1 완전 이관 시 saveContent/deleteContent 함께 교체 필요
+// ─────────────────────────────────────────────────────────────────────
 import { supabase, getPublicIP } from '../lib/supabase';
 import { sanitizeEduHtml } from '../lib/sanitizeHtml';
 

@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko" class="light" data-technique-id="T1003.001" data-level="advanced">
 <head>
-    <script>(function(){if(new URLSearchParams(window.location.search).get('preview')==='1')return;try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
+    <script>(function(){try{var k='sb-bnwbybawqrnhznirivfg-auth-token';var s=sessionStorage.getItem(k);if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));}}catch(e){window.location.replace('/login');}})();</script>
     <script>var _eduDynLoaded=false;(async function(){try{var S='https://bnwbybawqrnhznirivfg.supabase.co';var K='sb_publishable_fiXeTnAxpTatUSnC0ZvOWg_x5eSbL1w';var r=await fetch(S+'/rest/v1/edu_html_content?page_id=eq.t1003-001-lsass-memory-advanced&select=content&limit=1',{headers:{'apikey':K,'Authorization':'Bearer '+K}});if(r.ok){var d=await r.json();if(d&&d.length>0&&d[0].content){_eduDynLoaded=true;document.open();document.write(d[0].content);document.close();return;}}}catch(e){}document.documentElement.classList.add('edu-ready');})();setTimeout(function(){if(!_eduDynLoaded)document.documentElement.classList.add('edu-ready');},3000);</script>
     <style>html:not(.edu-ready) body{visibility:hidden;}html.edu-ready body{visibility:visible;}</style>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1003.001 고급: LSASS 덤프 심화: 커스텀 구현과 우회 분석">
-    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta name="description" content="ROOT14 Academy 사이버보안 교육 — T1003.001 고급: LSASS 덤프 심화: 커스텀 구현과 우회 분석">
+    <meta name="author" content="ROOT14 Academy">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" /><meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>GOTROOT EDU | T1003.001 고급: LSASS 덤프 심화: 커스텀 구현과 우회 분석 — (주)갓루트</title>
+    <title>ROOT14 EDU | T1003.001 고급: LSASS 덤프 심화: 커스텀 구현과 우회 분석 — ROOT14 Academy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{cbg:'#FFF8F0',cyel:'#F4D06F',cteal:'#9DD9D2',cdark:'#1e293b',cgray:'#475569',slate:{850:'#151e2e',900:'#0f172a',950:'#020617'}}}}}</script>
@@ -24,7 +24,7 @@
         .dark .nav-item.active{background:linear-gradient(90deg,rgba(248,113,113,0.15) 0%,transparent 100%);border-left:4px solid #f87171;color:#f87171;}
         .terminal-bg{background-color:#1e293b;color:#9DD9D2;font-family:'JetBrains Mono',monospace;}
         ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px;}.dark ::-webkit-scrollbar-thumb{background:#f87171;}
-        .drag-item{cursor:grab;user-select:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
+        .drag-item{cursor:grab;user-select:none;touch-action:none;transition:transform 0.2s,box-shadow 0.2s;}.drag-item:active{cursor:grabbing;}
         .drag-item.dragging{opacity:0.5;transform:scale(0.95);}
         .drop-zone.drag-over{border:2px dashed #ef4444;background:rgba(239,68,68,0.05);}
         .match-btn{transition:all 0.2s;cursor:pointer;}.match-btn:hover{transform:scale(1.05);}.match-btn.correct{background:#059669!important;color:white!important;border-color:#059669!important;}.match-btn.wrong{background:#dc2626!important;color:white!important;border-color:#dc2626!important;}
@@ -38,7 +38,7 @@
 <body class="flex flex-col h-screen overflow-hidden selection:bg-red-200 selection:text-red-900 transition-colors duration-300">
     <!-- Brand Header Bar -->
     <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
-        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">GOTROOT</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span></div>
+        <div class="flex items-center gap-2"><span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:0.25em;">ROOT14</span><span style="font-size:8px;color:#94a3b8;">|</span><span style="font-size:8px;color:#64748b;" class="hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span></div>
         <div class="flex items-center gap-3">
             <span style="font-size:8px;color:#ef4444;font-weight:700;background:rgba(239,68,68,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.3);">ADVANCED</span>
             <button onclick="window.location.href='/'" style="font-size:8px;color:#bb3e03;background:transparent;border:1px solid rgba(187,62,3,0.3);padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">← 매트릭스 대시보드</button>
@@ -686,8 +686,62 @@
 
         /* ═══════ Ordering Game 0 ═══════ */
         var orderItems_0=[{&#34;id&#34;:1,&#34;label&#34;:&#34;SIEM 알림 확인 및 이벤트 분석&#34;},{&#34;id&#34;:2,&#34;label&#34;:&#34;감염 시스템 네트워크 격리&#34;},{&#34;id&#34;:3,&#34;label&#34;:&#34;메모리 및 디스크 포렌식 이미지 확보&#34;},{&#34;id&#34;:4,&#34;label&#34;:&#34;공격 타임라인 재구성&#34;},{&#34;id&#34;:5,&#34;label&#34;:&#34;탈취된 자격증명 식별 및 리셋&#34;},{&#34;id&#34;:6,&#34;label&#34;:&#34;횡단이동 경로 추적 및 추가 시스템 점검&#34;},{&#34;id&#34;:7,&#34;label&#34;:&#34;최종 보고서 작성 및 보안 강화 권고&#34;}];var currentOrder_0=[];
-        function initOrderGame_0(){currentOrder_0=shuffleArray(orderItems_0.slice());renderOrderGame_0();document.getElementById('order-result-0').classList.add('hidden');}
+        function initOrderGame_0(){currentOrder_0=shuffleArray(orderItems_0.slice());renderOrderGame_0();addTouchDragSupport(document.getElementById('order-game-0'), function(fromIdx, toIdx){ var temp=currentOrder_0[fromIdx]; currentOrder_0[fromIdx]=currentOrder_0[toIdx]; currentOrder_0[toIdx]=temp; renderOrderGame_0(); });document.getElementById('order-result-0').classList.add('hidden');}
         function renderOrderGame_0(){var c=document.getElementById('order-game-0');c.innerHTML='';currentOrder_0.forEach(function(s,i){var d=document.createElement('div');d.className='drag-item flex items-center gap-3 p-3 rounded-lg bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 hover:border-red-400 transition-all';d.draggable=true;d.setAttribute('data-idx',i);d.setAttribute('data-id',s.id);d.innerHTML='<span class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-sm">'+(i+1)+'</span><span class="font-bold text-sm text-[#1e293b] dark:text-white">'+s.label+'</span>';d.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/plain',i.toString());this.classList.add('dragging');});d.addEventListener('dragend',function(){this.classList.remove('dragging');});d.addEventListener('dragover',function(e){e.preventDefault();this.classList.add('drop-zone','drag-over');});d.addEventListener('dragleave',function(){this.classList.remove('drop-zone','drag-over');});d.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drop-zone','drag-over');var f=parseInt(e.dataTransfer.getData('text/plain'));var t=parseInt(this.getAttribute('data-idx'));if(f!==t){var tmp=currentOrder_0[f];currentOrder_0[f]=currentOrder_0[t];currentOrder_0[t]=tmp;renderOrderGame_0();}});c.appendChild(d);});}
+        /* ── 모바일 터치 드래그 지원 ── */
+        function addTouchDragSupport(container, swapFn) {
+            if (container._touchDragAttached) return;
+            container._touchDragAttached = true;
+            var dragIdx = -1, dragEl = null, dragClone = null, initRect = null;
+
+            container.addEventListener('touchstart', function(e) {
+                var item = e.target.closest('.drag-item');
+                if (!item) return;
+                e.preventDefault();
+                dragIdx = parseInt(item.getAttribute('data-idx'));
+                dragEl = item;
+                initRect = item.getBoundingClientRect();
+                item.style.opacity = '0.5';
+                item.style.transform = 'scale(0.95)';
+                dragClone = item.cloneNode(true);
+                dragClone.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;opacity:0.9;transform:scale(1.05);box-shadow:0 8px 24px rgba(0,0,0,0.3);width:'+item.offsetWidth+'px;left:'+initRect.left+'px;top:'+initRect.top+'px;';
+                document.body.appendChild(dragClone);
+            }, { passive: false });
+
+            container.addEventListener('touchmove', function(e) {
+                if (dragIdx < 0 || !dragClone) return;
+                e.preventDefault();
+                var touch = e.touches[0];
+                var dx = touch.clientX - (initRect.left + initRect.width / 2);
+                var dy = touch.clientY - (initRect.top + initRect.height / 2);
+                dragClone.style.left = (initRect.left + dx) + 'px';
+                dragClone.style.top = (initRect.top + dy) + 'px';
+                dragClone.style.display = 'none';
+                var el = document.elementFromPoint(touch.clientX, touch.clientY);
+                dragClone.style.display = '';
+                container.querySelectorAll('.drag-item').forEach(function(c){ c.classList.remove('drop-zone','drag-over'); });
+                if (el) { var t = el.closest('.drag-item'); if (t && t !== dragEl) t.classList.add('drop-zone','drag-over'); }
+            }, { passive: false });
+
+            container.addEventListener('touchend', function(e) {
+                if (dragIdx < 0) return;
+                var ct = e.changedTouches[0];
+                if (dragClone) { dragClone.style.display = 'none'; }
+                var el = document.elementFromPoint(ct.clientX, ct.clientY);
+                if (dragClone) { dragClone.remove(); dragClone = null; }
+                if (el) {
+                    var t = el.closest('.drag-item');
+                    if (t && t !== dragEl) {
+                        var toIdx = parseInt(t.getAttribute('data-idx'));
+                        if (dragIdx !== toIdx) swapFn(dragIdx, toIdx);
+                    }
+                }
+                if (dragEl) { dragEl.style.opacity = ''; dragEl.style.transform = ''; }
+                container.querySelectorAll('.drag-item').forEach(function(c){ c.classList.remove('drop-zone','drag-over'); });
+                dragIdx = -1; dragEl = null; initRect = null;
+            });
+        }
+
         function checkOrder_0(){var ok=true;for(var i=0;i<currentOrder_0.length;i++){if(currentOrder_0[i].id!==(i+1)){ok=false;break;}}var r=document.getElementById('order-result-0');r.classList.remove('hidden');if(ok){r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-green-100 border border-green-400 text-green-700 dark:bg-green-900/30 dark:text-green-400';r.textContent='✅ 정답!';}else{r.className='mt-4 p-4 rounded text-sm font-mono text-center font-bold shadow-sm bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:text-red-400';r.textContent='❌ 다시 시도해 보세요!';}}
         /* ═══════ Step Click 1 ═══════ */
         var stepCurrent_1=0;
@@ -718,8 +772,9 @@
             setTimeout(function(){go('ch1');},100);
         };
     </script>
-    <script src="/edu/lab-link.js"></script>
+    <script src="/edu/graphic-link.js"></script>
     <script src="/edu/progress-tracker.js"></script>
     <script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
 </body>
 </html>

@@ -4,7 +4,6 @@
     <!-- ★ 인증 게이트: 로그인 없이 직접 URL 접근 차단 (Supabase 세션 기반) -->
     <script>
         (function() {
-            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
             try {
                 var key = 'sb-bnwbybawqrnhznirivfg-auth-token';
                 var session = sessionStorage.getItem(key);
@@ -46,8 +45,8 @@
     <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="(주)갓루트(GOTROOT) 사이버보안 교육 — T1078.002 Domain Accounts 고급: Kerberoasting 실전 공격">
-    <meta name="author" content="(주)갓루트 GOTROOT">
+    <meta name="description" content="ROOT14 Academy 사이버보안 교육 — T1078.002 Domain Accounts 고급: Kerberoasting 실전 공격">
+    <meta name="author" content="ROOT14 Academy">
     <meta http-equiv="Content-Security-Policy"
       content="default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com;
@@ -60,7 +59,7 @@
         base-uri 'self';" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>GOTROOT EDU | T1078.002 고급: Kerberoasting 실전 공격 — (주)갓루트</title>
+    <title>ROOT14 EDU | T1078.002 고급: Kerberoasting 실전 공격 — ROOT14 Academy</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -150,12 +149,12 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden selection:bg-red-200 selection:text-red-900 transition-colors duration-300">
 
-    <!-- ★ GOTROOT 브랜드 배너 -->
+    <!-- ★ ROOT14 브랜드 배너 -->
     <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family: 'JetBrains Mono', monospace;">
         <div class="flex items-center gap-2">
-            <span style="font-size:9px; font-weight:900; color:#bb3e03; letter-spacing:0.25em;">GOTROOT</span>
+            <span style="font-size:9px; font-weight:900; color:#bb3e03; letter-spacing:0.25em;">ROOT14</span>
             <span style="font-size:8px; color:#94a3b8;">|</span>
-            <span style="font-size:8px; color:#64748b;" class="hidden sm:inline">(주)갓루트 · 사이버보안 교육 플랫폼</span>
+            <span style="font-size:8px; color:#64748b;" class="hidden sm:inline">ROOT14 Academy · 사이버보안 교육 플랫폼</span>
         </div>
         <div class="flex items-center gap-3">
             <span style="font-size:8px; color:#ef4444; font-weight:700; background:rgba(239,68,68,0.1); padding:2px 8px; border-radius:4px; border:1px solid rgba(239,68,68,0.3);">ADVANCED</span>
@@ -163,9 +162,9 @@
                 onmouseover="this.style.background='rgba(187,62,3,0.08)'" onmouseout="this.style.background='transparent'">
                 ← 매트릭스 대시보드
             </button>
-            <a href="https://gotroot.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px; color:rgba(187,62,3,0.5); text-decoration:none;" class="hidden sm:inline"
+            <a href="https://root14.co.kr" target="_blank" rel="noopener noreferrer" style="font-size:8px; color:rgba(187,62,3,0.5); text-decoration:none;" class="hidden sm:inline"
                 onmouseover="this.style.color='#bb3e03'" onmouseout="this.style.color='rgba(187,62,3,0.5)'">
-                gotroot.co.kr ↗
+                root14.co.kr ↗
             </a>
         </div>
     </div>
@@ -974,8 +973,9 @@
     </script>
 
     </div><!-- /기존 레이아웃 래퍼 -->
-<script src="/edu/lab-link.js"></script>
+<script src="/edu/graphic-link.js"></script>
 <script src="/edu/progress-tracker.js"></script>
 <script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
 </body>
 </html>

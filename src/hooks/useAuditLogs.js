@@ -1,4 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+// ⏳ Phase 1: supabase 직접 호출 분리 대기
+// ─────────────────────────────────────────────────────────────────────
+// 분리 불가 이유 1 — 동적 쿼리 빌더(buildQuery):
+//   .eq() / .ilike() / .gte() / .lte() / .range() 를 조건별로 체이닝
+//   api/ 함수는 고정 파라미터만 수용 → NestJS @Query() 쿼리스트링 방식 필요
+//   예정: GET /api/admin/audit-logs?action=X&email=Y&dateFrom=Z&page=N
+//
+// 분리 불가 이유 2 — Action 옵션 동적 조회:
+//   .select('action').order('action') 직접 호출 → 전환 시 GET /api/admin/audit-logs/actions
+//
+// 분리 불가 이유 3 — Realtime 채널 (audit-logs-realtime):
+//   postgres_changes INSERT 감지 → Phase 2 NestJS WebSocket Gateway 이전까지 직접 유지
+// ─────────────────────────────────────────────────────────────────────
 import { supabase } from '../lib/supabase';
 
 const PAGE_SIZE = 50;

@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko" class="light" data-technique-id="T1070.001">
+<html lang="ko" class="light" data-technique-id="T1070.001" data-level="beginner">
 <head>
     <script>
         (function() {
-            if (new URLSearchParams(window.location.search).get('preview') === '1') return;
             try { var key='sb-bnwbybawqrnhznirivfg-auth-token'; var s=sessionStorage.getItem(key); if(!s||!JSON.parse(s)){window.location.replace('/login?redirect='+encodeURIComponent(window.location.href));} } catch(e){window.location.replace('/login');}
         })();
     </script>
@@ -15,9 +14,9 @@
     <style>html:not(.edu-ready) body { visibility: hidden; } html.edu-ready body { visibility: visible; }</style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GOTROOT EDU — T1070.001 Clear Windows Event Logs 방어 회피 기법 교육">
+    <meta name="description" content="ROOT14 EDU — T1070.001 Clear Windows Event Logs 방어 회피 기법 교육">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';" />
-    <title>GOTROOT EDU | T1070.001 Clear Windows Event Logs</title>
+    <title>ROOT14 EDU | T1070.001 Clear Windows Event Logs</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -39,7 +38,7 @@
 <body class="flex flex-col h-screen overflow-hidden selection:bg-[#9DD9D2] selection:text-[#1e293b] transition-colors duration-300">
     <div class="w-full px-4 py-1.5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shrink-0 z-[60]" style="font-family:'JetBrains Mono',monospace;">
         <div class="flex items-center gap-2">
-            <span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">GOTROOT</span>
+            <span style="font-size:9px;font-weight:900;color:#bb3e03;letter-spacing:.25em;">ROOT14</span>
             <span style="font-size:8px;color:#94a3b8;">|</span>
             <span style="font-size:8px;color:#64748b;" class="hidden sm:inline">사이버보안 교육 플랫폼</span>
         </div>
@@ -187,8 +186,9 @@
         var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('opacity-0','translate-y-10');e.target.classList.add('opacity-100','translate-y-0');var id=e.target.getAttribute('id');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');if(n.getAttribute('data-target')===id)n.classList.add('active');});}});},{root:document.getElementById('main-scroll'),rootMargin:'0px 0px -40% 0px',threshold:0.1});
         document.querySelectorAll('.section-observe').forEach(function(s){obs.observe(s);});
     </script>
-<script src="/edu/lab-link.js"></script>
+<script src="/edu/graphic-link.js"></script>
 <script src="/edu/progress-tracker.js"></script>
 <script src="/edu/breadcrumb.js"></script>
+    <script src="/wiki-button.js"></script>
 </body>
 </html>

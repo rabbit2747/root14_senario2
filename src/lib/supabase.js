@@ -10,12 +10,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// 공인 IP 조회
+// 클라이언트 IP 조회 (자체 서버 엔드포인트 — 제3자 의존 없음)
+// v0.9.4: api.ipify.org 제거 → 'unknown' 반환
+// v1.0.1: Express server.js + Vite dev 서버에 /api/ip 엔드포인트 추가
 export async function getPublicIP() {
   try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const data = await res.json();
-    return data.ip;
+    const res = await fetch('/api/ip');
+    if (res.ok) {
+      const data = await res.json();
+      return data.ip || 'unknown';
+    }
+    return 'unknown';
   } catch {
     return 'unknown';
   }

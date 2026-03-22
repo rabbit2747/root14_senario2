@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+// ✅ Phase 0: supabase.auth.signInWithPassword → api/auth.signIn 경유
+// 분리 가능 이유: auth 단일 호출, DB 쿼리 없음, api/auth.js signIn 시그니처 완전 일치
+import { signIn } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 
 const CACHE_KEY = 'admin_verified_at';
@@ -39,10 +41,8 @@ export default function useAdminVerify() {
     setError(null);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password,
-      });
+      // ✅ api/auth.js 경유 — supabase 직접 호출 없음
+      const { error: authError } = await signIn(user.email, password);
 
       if (authError) {
         setError('비밀번호가 일치하지 않습니다');

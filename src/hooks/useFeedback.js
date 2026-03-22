@@ -1,4 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+// ⏳ Phase 1~2: supabase 직접 호출 분리 대기
+// ─────────────────────────────────────────────────────────────────────
+// 분리 불가 이유 1 — Realtime 2채널:
+//   'feedback-realtime' : feedback_comments 변경(INSERT/UPDATE/DELETE) 감지
+//   'likes-realtime'    : feedback_likes 변경 감지
+//   → Phase 2 NestJS WebSocket Gateway 이전까지 직접 유지
+//
+// 분리 불가 이유 2 — buildTree() 복합 다단계 쿼리:
+//   ① 최상위 댓글 페이지네이션 → ② 답글 IN 쿼리 → ③ 좋아요 집계 3단계 순차 조회
+//   api/ 함수는 단일 쿼리 wrapping → NestJS JOIN + 집계 쿼리로 Phase 1 단순화 필요
+//   예정: GET /api/feedback/comments?offset=N (서버에서 tree 조합 후 단일 응답)
+//
+// 분리 불가 이유 3 — IDOR 방어(getAuthUserId):
+//   supabase.auth.getUser() 로 userId 스푸핑 방지 (addComment/updateComment/deleteComment/toggleLike)
+//   → Phase 2 NestJS JWT Bearer 토큰 검증(req.user)으로 교체
+// ─────────────────────────────────────────────────────────────────────
 import { supabase, logAdminAudit } from '../lib/supabase';
 import { stripHtml } from '../lib/sanitize';
 
