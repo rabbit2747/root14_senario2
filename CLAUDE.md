@@ -169,7 +169,8 @@ server-data/      ← 레벨테스트 정답 (Serverless Function이 읽음)
 
 **프로덕션**: https://gotroot-edu.vercel.app
 **배포 방식**: GitHub push → Vercel 자동 빌드+배포
-**브랜치**: `feature/hero-incident-matrix` → Production
+**브랜치**: `master` → Production
+**Edge Middleware**: `/edu/*` 정적 HTML JWT 인증 (5분 토큰 캐시)
 
 ### Vercel Serverless Functions (7개)
 ```
