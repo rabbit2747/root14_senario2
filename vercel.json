@@ -8,9 +8,9 @@
   },
 
   "rewrites": [
-    { "source": "/api/auth/:path*", "destination": "http://183.109.96.205:22000/api/auth/:path*" },
-    { "source": "/api/ip", "destination": "http://183.109.96.205:22000/api/ip" },
-    { "source": "/api/geoip", "destination": "http://183.109.96.205:22000/api/geoip" },
+    { "source": "/api/auth/:path*", "destination": "https://average-soa-internet-qualifying.trycloudflare.com/api/auth/:path*" },
+    { "source": "/api/ip", "destination": "https://average-soa-internet-qualifying.trycloudflare.com/api/ip" },
+    { "source": "/api/geoip", "destination": "https://average-soa-internet-qualifying.trycloudflare.com/api/geoip" },
     { "source": "/((?!edu/).*)", "destination": "/index.html" }
   ],
 
