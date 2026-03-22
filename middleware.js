@@ -1,18 +1,36 @@
-// Vercel Edge Middleware — /edu/*.html JWT 인증
+// Vercel Edge Middleware — /edu/ 정적 HTML JWT 인증
 // 비로그인 사용자가 교육 HTML에 직접 접근 시 /login으로 리다이렉트
-// 쿠키 'gotroot_auth_token' (Supabase access_token) 존재+유효성 확인
+// 쿠키 'gotroot_auth_token' (Supabase access_token) 확인
 
 export const config = {
-  matcher: ['/edu/:path*.html'],
+  // /edu/ 하위 경로만 인터셉트
+  // 제외: /edu/graphic/*, /edu/scenario/* (SPA 라우트, React Router가 처리)
+  // 포함: /edu/t1587-001-malware-beginner 등 (정적 HTML, cleanUrls로 .html 없이 접근)
+  matcher: ['/edu/:path*'],
 };
 
 export default async function middleware(request) {
+  const pathname = request.nextUrl.pathname;
+
+  // SPA 라우트는 통과 — React Router + AuthContext가 인증 처리
+  if (pathname.startsWith('/edu/graphic/') || pathname.startsWith('/edu/scenario/')) {
+    return undefined;
+  }
+
+  // /edu/:techniqueId (CourseSelector SPA 라우트) 패턴 감지
+  // SPA: /edu/T1587.001 (점 포함, 대문자 T로 시작)
+  // HTML: /edu/t1587-001-malware-beginner (소문자, 하이픈 구분, 긴 이름)
+  const segment = pathname.replace('/edu/', '');
+  if (segment.includes('.') && !segment.includes('-')) {
+    return undefined; // SPA 라우트 (T1587.001 형태)
+  }
+
+  // 정적 edu HTML에 대한 인증 확인
   const token = request.cookies.get('gotroot_auth_token')?.value;
 
-  // 토큰 없음 → 로그인으로
   if (!token) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+    loginUrl.searchParams.set('redirect', pathname);
     return Response.redirect(loginUrl);
   }
 
@@ -30,9 +48,8 @@ export default async function middleware(request) {
       });
 
       if (!res.ok) {
-        // 토큰 만료/무효 → 로그인으로
         const loginUrl = new URL('/login', request.url);
-        loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+        loginUrl.searchParams.set('redirect', pathname);
         return Response.redirect(loginUrl);
       }
     } catch {
@@ -40,6 +57,5 @@ export default async function middleware(request) {
     }
   }
 
-  // 인증 통과
   return undefined;
 }
