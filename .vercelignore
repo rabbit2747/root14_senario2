@@ -1,0 +1,21 @@
+# Vercel 배포 제외 — 보안/용량 최적화
+
+# 대형 폴더
+.git/
+server-data/
+scripts/
+docs/
+templates/
+logo/
+
+# 서버 전용 (Vercel에서 불필요)
+server.js
+ecosystem.config.cjs
+
+# 문서/설정
+CLAUDE.md
+*.sql
+*.cjs
+*.sh
+*.ai
+*.psd

@@ -34,29 +34,19 @@ function SeverityBadge({ severity, isDark }) {
 //   language  — 언어 코드
 //   isDark    — 다크모드
 //   onClose   — 닫기 콜백
-//   videoRef  — HeroIncidentMatrix의 bgVideoRef (모달 열릴 때 영상 일시정지)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-export default function FullScreenReportModal({ incident, language, isDark, onClose, videoRef }) {
-  // ── Body scroll lock + 배경 영상 제어 ──
+export default function FullScreenReportModal({ incident, language, isDark, onClose }) {
+  // ── Body scroll lock ──
   useEffect(() => {
     if (incident) {
-      // 모달 열림: 스크롤 잠금 + 영상 일시정지
       document.body.style.overflow = 'hidden';
-      if (videoRef?.current) {
-        videoRef.current.pause();
-      }
     } else {
-      // 모달 닫힘: 스크롤 복원 + 영상 재개
       document.body.style.overflow = '';
-      if (videoRef?.current) {
-        videoRef.current.play().catch(() => {});
-      }
     }
-    // 언마운트 시 항상 복원
     return () => {
       document.body.style.overflow = '';
     };
-  }, [incident, videoRef]);
+  }, [incident]);
 
   const ht = HERO_TEXT[language] || HERO_TEXT.ko;
   const lang = ['ko', 'en', 'vi', 'ar'].includes(language) ? language : 'en';

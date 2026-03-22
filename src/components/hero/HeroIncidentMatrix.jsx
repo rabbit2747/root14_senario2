@@ -10,16 +10,6 @@ import FullScreenReportModal from './FullScreenReportModal';
 
 const INTRO_DELAY = 2200;
 const STEP_DURATION = 10000; // 투어 스텝 간격 (10초)
-const VIDEO_SWITCH_INTERVAL = 5000; // 배경 영상 교체 간격 (5초)
-
-// 배경 영상 목록 (폴더 기반, 투어와 독립)
-const HERO_VIDEOS = [
-  '/videos/hero/wannacry-ia.mp4',
-  '/videos/hero/apt1-exec.mp4',
-  '/videos/hero/wannacry-exec.mp4',
-  '/videos/hero/stuxnet-evasion.mp4',
-  '/videos/hero/solarwinds-2020.mp4',
-];
 
 // ── 타이핑 효과 훅 ──
 function useTypingEffect(text, isActive, speed = 45) {
@@ -311,25 +301,6 @@ export default function HeroIncidentMatrix({
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, []);
 
-  // ── 배경 영상 무한 루프 (투어 독립) ──
-  const [videoIdx, setVideoIdx] = useState(0);
-  const bgVideoRef = useRef(null);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setVideoIdx(prev => (prev + 1) % HERO_VIDEOS.length);
-    }, VIDEO_SWITCH_INTERVAL);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const v = bgVideoRef.current;
-    if (!v) return;
-    v.src = HERO_VIDEOS[videoIdx];
-    v.currentTime = 0;
-    v.play().catch(() => {});
-  }, [videoIdx]);
-
   // 무비모드: 사용자가 재생을 컨트롤할 수 없음 (클릭/호버 인터랙션 없음)
 
   return (
@@ -355,25 +326,15 @@ export default function HeroIncidentMatrix({
         transition={{ duration: 0.8 }}
       />
 
-      {/* 전체화면 배경 영상 (항상 재생, 최대한 은은하게) */}
-      <div className="absolute inset-0 z-[1]">
-        <video
-          ref={bgVideoRef}
-          className="w-full h-full object-cover"
-          muted
-          playsInline
-          style={{ opacity: 0.28 }}
-        />
-        {/* 오버레이: 배경 영상이 은은하게 보이도록 */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: isDark
-              ? 'linear-gradient(to bottom, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.72) 40%, rgba(15,23,42,0.82) 100%)'
-              : 'linear-gradient(to bottom, rgba(240,244,248,0.85) 0%, rgba(240,244,248,0.78) 40%, rgba(240,244,248,0.85) 100%)',
-          }}
-        />
-      </div>
+      {/* 배경 오버레이 (gradient) */}
+      <div
+        className="absolute inset-0 z-[1]"
+        style={{
+          background: isDark
+            ? 'linear-gradient(to bottom, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.72) 40%, rgba(15,23,42,0.82) 100%)'
+            : 'linear-gradient(to bottom, rgba(240,244,248,0.85) 0%, rgba(240,244,248,0.78) 40%, rgba(240,244,248,0.85) 100%)',
+        }}
+      />
 
       {/* 플로팅 파티클 */}
       <FloatingParticles
@@ -730,14 +691,12 @@ export default function HeroIncidentMatrix({
       </div>
     </motion.div>
 
-    {/* FullScreenReportModal: 항상 마운트, AnimatePresence는 portal 내부에서 처리
-        videoRef로 모달 열릴 때 배경 영상 자동 일시정지/재개 */}
+    {/* FullScreenReportModal: 항상 마운트, AnimatePresence는 portal 내부에서 처리 */}
     <FullScreenReportModal
       incident={fullScreenIncident}
       language={language}
       isDark={isDark}
       onClose={() => setFullScreenIncident(null)}
-      videoRef={bgVideoRef}
     />
     </>
   );
