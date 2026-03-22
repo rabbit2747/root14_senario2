@@ -2,7 +2,6 @@
 
 # 대형 폴더
 .git/
-server-data/
 scripts/
 docs/
 templates/

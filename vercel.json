@@ -1,8 +1,16 @@
 {
   "framework": "vite",
 
+  "functions": {
+    "api/level-test/*.js": {
+      "includeFiles": "server-data/level-test-questions.json"
+    }
+  },
+
   "rewrites": [
-    { "source": "/api/:path*", "destination": "http://183.109.96.205:22000/api/:path*" },
+    { "source": "/api/auth/:path*", "destination": "http://183.109.96.205:22000/api/auth/:path*" },
+    { "source": "/api/ip", "destination": "http://183.109.96.205:22000/api/ip" },
+    { "source": "/api/geoip", "destination": "http://183.109.96.205:22000/api/geoip" },
     { "source": "/((?!edu/).*)", "destination": "/index.html" }
   ],
 
