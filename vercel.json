@@ -8,9 +8,6 @@
   },
 
   "rewrites": [
-    { "source": "/api/auth/:path*", "destination": "https://average-soa-internet-qualifying.trycloudflare.com/api/auth/:path*" },
-    { "source": "/api/ip", "destination": "https://average-soa-internet-qualifying.trycloudflare.com/api/ip" },
-    { "source": "/api/geoip", "destination": "https://average-soa-internet-qualifying.trycloudflare.com/api/geoip" },
     { "source": "/((?!edu/).*)", "destination": "/index.html" }
   ],
 
