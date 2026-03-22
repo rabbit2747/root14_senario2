@@ -2,6 +2,7 @@
   "framework": "vite",
 
   "rewrites": [
+    { "source": "/api/:path*", "destination": "http://183.109.96.205:22000/api/:path*" },
     { "source": "/((?!edu/).*)", "destination": "/index.html" }
   ],
 
