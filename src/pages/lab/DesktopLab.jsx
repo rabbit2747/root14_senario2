@@ -61,7 +61,7 @@ const SCENARIO_LOADERS = {
 export default function DesktopLab() {
   const { techniqueId, level } = useParams();
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading: authLoading } = useAuth();
   const [authChecked, setAuthChecked] = useState(false);
   const [scenario, setScenario] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,12 +70,13 @@ export default function DesktopLab() {
 
   // ── Auth Gate ──
   useEffect(() => {
+    if (authLoading) return; // 세션 로딩 완료 대기
     if (!isLoggedIn) {
       navigate(`/login?redirect=${encodeURIComponent(`/lab/desktop/${techniqueId}/${level || 'beginner'}`)}`, { replace: true });
       return;
     }
     setAuthChecked(true);
-  }, [isLoggedIn, navigate, techniqueId, level]);
+  }, [authLoading, isLoggedIn, navigate, techniqueId, level]);
 
   // ── 전용 랩이 있으면 리다이렉트 ──
   useEffect(() => {

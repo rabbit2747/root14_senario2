@@ -38,13 +38,14 @@ function getUserRank(percent) {
 
 // ── 메인 컴포넌트 ──
 export default function BasicsPage() {
-  const { isLoggedIn, user, userLevel } = useAuth();
+  const { isLoggedIn, loading: authLoading, user, userLevel } = useAuth();
   const navigate = useNavigate();
 
   // Auth Gate
   useEffect(() => {
+    if (authLoading) return; // 세션 로딩 완료 대기
     if (!isLoggedIn) navigate('/login?redirect=/basics', { replace: true });
-  }, [isLoggedIn, navigate]);
+  }, [authLoading, isLoggedIn, navigate]);
 
   // UI State
   const [currentCategory, setCurrentCategory] = useState('network_web');

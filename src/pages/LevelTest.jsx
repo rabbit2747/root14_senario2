@@ -489,12 +489,13 @@ function PageWrapper({ children, showOutsideText = false, isDark, t, toggleTheme
 // ── 메인 컴포넌트 ──
 export default function LevelTest() {
   const navigate = useNavigate();
-  const { isLoggedIn, userLevel, user } = useAuth();
+  const { isLoggedIn, loading: authLoading, userLevel, user } = useAuth();
 
   // Auth Gate: 비로그인 → 로그인 페이지로
   useEffect(() => {
+    if (authLoading) return; // 세션 로딩 완료 대기
     if (!isLoggedIn) navigate('/login?redirect=/level-test', { replace: true });
-  }, [isLoggedIn, navigate]);
+  }, [authLoading, isLoggedIn, navigate]);
 
   // 이미 레벨 있는 사용자 → 재응시 차단
   useEffect(() => {

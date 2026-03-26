@@ -362,7 +362,7 @@ function SelfDirectedPhase({ onBack, isDark, navigate }) {
 // ── 메인 컴포넌트 ──
 export default function LearningPathChoice() {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading: authLoading } = useAuth();
 
   const [phase, setPhase] = useState('choice');
   const [selectedTactic, setSelectedTactic] = useState(null);
@@ -370,8 +370,9 @@ export default function LearningPathChoice() {
 
   // Auth Gate
   useEffect(() => {
+    if (authLoading) return; // 세션 로딩 완료 대기
     if (!isLoggedIn) navigate('/login', { replace: true });
-  }, [isLoggedIn, navigate]);
+  }, [authLoading, isLoggedIn, navigate]);
 
   // 다크모드 감지
   useEffect(() => {

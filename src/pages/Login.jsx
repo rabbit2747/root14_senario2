@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { supabase, getPublicIP, logAccess } from '../lib/supabase';
 import LangToggle, { getStoredLang, storeLang } from '../components/LangToggle';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../context/AuthContext';
 
 // ── 다국어 번역 ──
 const loginT = {
@@ -110,6 +111,7 @@ function setBfState(state) {
 }
 
 export default function Login() {
+  const { isLoggedIn, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -117,6 +119,22 @@ export default function Login() {
   const [lang, setLang] = useState(() => getStoredLang());
   const [lockRemaining, setLockRemaining] = useState(0); // 잠금 남은 초
   const lockTimerRef = useRef(null);
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
+
+  // ── 이미 로그인된 유저 자동 리다이렉트 (무한 루프 방지) ──
+  useEffect(() => {
+    if (authLoading || !isLoggedIn) return;
+    if (redirectUrl) {
+      const decoded = decodeURIComponent(redirectUrl);
+      const isSafe = decoded.startsWith('/') && !decoded.startsWith('//') && !/^[a-z]+:/i.test(decoded.replace(/^\/+/, ''));
+      window.location.href = isSafe ? decoded : '/';
+    } else {
+      navigate('/', { replace: true });
+    }
+  }, [authLoading, isLoggedIn, redirectUrl, navigate]);
 
   // 잠금 상태 확인 + 카운트다운
   useEffect(() => {
@@ -136,10 +154,6 @@ export default function Login() {
     }
     return () => { if (lockTimerRef.current) clearInterval(lockTimerRef.current); };
   }, []);
-
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const redirectUrl = searchParams.get('redirect');
 
   const t = loginT[lang] || loginT.ko;
 
@@ -236,7 +250,7 @@ export default function Login() {
 
     // 서버 측 인증용 쿠키 즉시 설정 (레이스컨디션 방어: onAuthStateChange 보다 먼저)
     if (data?.session?.access_token) {
-      document.cookie = `gotroot_auth_token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax`;
+      document.cookie = `gotroot_auth_token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax; Secure`;
     }
 
     // 리다이렉트 URL 검증 (Open Redirect 방어: 내부 경로만 허용)
