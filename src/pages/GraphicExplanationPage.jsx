@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getStoredLang } from '../components/LangToggle';
+import ContentProtection from '../components/ContentProtection';
 import eduMeta from '../data/edu-meta.json';
 // FontAwesome: main.jsx에서 전역 import (@fortawesome/fontawesome-free)
 
@@ -833,6 +834,7 @@ export default function GraphicExplanationPage() {
   }
 
   return (
+    <ContentProtection>
     <div className={`min-h-screen flex flex-col transition-colors duration-500 ${isDark ? 'bg-[#0a0f1a] text-white' : 'bg-slate-50 text-slate-900'}`}>
 
       {/* ── 헤더 ── */}
@@ -948,5 +950,6 @@ export default function GraphicExplanationPage() {
         </div>
       </div>
     </div>
+    </ContentProtection>
   );
 }

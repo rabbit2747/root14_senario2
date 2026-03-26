@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { Icons } from './labT1078Data';
 import LangToggle, { getStoredLang, storeLang } from '../../components/LangToggle';
 import useSimulationZoom from '../../hooks/useSimulationZoom';
+import ContentProtection from '../../components/ContentProtection';
 import { Close } from '@carbon/icons-react';
 
 // ── 다국어 UI (LabT1078과 동일 구조) ──
@@ -323,6 +324,7 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
   const currentPhaseIdx = getCurrentPhaseIndex();
 
   return (
+    <ContentProtection>
     <div className="flex flex-col min-h-screen font-sans" style={{ backgroundColor: colors.bg, color: colors.textDark }}>
 
       {/* ── 회사 브랜드 배너 ── */}
@@ -950,5 +952,6 @@ export default function GenericLabSimulator({ scenario, techniqueId }) {
         </div>
       </div>
     </div>
+    </ContentProtection>
   );
 }

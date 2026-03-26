@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getStoredLang } from '../components/LangToggle';
+import ContentProtection from '../components/ContentProtection';
 import eduMeta from '../data/edu-meta.json';
 import { supabase } from '../lib/supabase';
 
@@ -218,6 +219,7 @@ export default function ScenarioExplanationPage() {
   const handleFinish = () => navigate(`/lab/desktop/${techniqueId}/${level}`);
 
   return (
+    <ContentProtection>
     <div className="min-h-screen bg-[#0a0f1a] text-white flex flex-col">
       {/* ── 헤더 ── */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#0a0f1a]/80 border-b border-slate-800/60">
@@ -310,5 +312,6 @@ export default function ScenarioExplanationPage() {
         </div>
       </div>
     </div>
+    </ContentProtection>
   );
 }
