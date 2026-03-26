@@ -250,7 +250,8 @@ export default function Login() {
 
     // 서버 측 인증용 쿠키 즉시 설정 (레이스컨디션 방어: onAuthStateChange 보다 먼저)
     if (data?.session?.access_token) {
-      document.cookie = `gotroot_auth_token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax; Secure`;
+      const secFlag = location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = `gotroot_auth_token=${data.session.access_token}; path=/; max-age=3600; SameSite=Lax${secFlag}`;
     }
 
     // 리다이렉트 URL 검증 (Open Redirect 방어: 내부 경로만 허용)

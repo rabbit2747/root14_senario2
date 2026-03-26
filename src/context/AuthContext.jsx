@@ -3,9 +3,10 @@ import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
-// ── 서버 측 인증용 쿠키 동기화 (Express server.js가 읽음) ──
+// ── 서버 측 인증용 쿠키 동기화 (Edge Middleware가 읽음) ──
 function setAuthCookie(token) {
-  document.cookie = `gotroot_auth_token=${token}; path=/; max-age=3600; SameSite=Lax; Secure`;
+  const secure = globalThis.location?.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `gotroot_auth_token=${token}; path=/; max-age=3600; SameSite=Lax${secure}`;
 }
 
 function clearAuthCookie() {
