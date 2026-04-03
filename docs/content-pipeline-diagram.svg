@@ -1,0 +1,262 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1100" font-family="'Segoe UI', 'Apple SD Gothic Neo', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="10" markerHeight="7" orient="auto-start-auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#10b981"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="1100" fill="url(#bg)" rx="12"/>
+
+  <!-- Title -->
+  <text x="700" y="50" text-anchor="middle" fill="#f8fafc" font-size="28" font-weight="700">Gotroot Edu - Content Pipeline</text>
+  <text x="700" y="78" text-anchor="middle" fill="#94a3b8" font-size="14">MITRE ATT&amp;CK 기반 사이버보안 교육 콘텐츠 생성 파이프라인 (2026-04)</text>
+
+  <!-- ═══════════ ROW 1: SOURCE LAYER ═══════════ -->
+  <text x="50" y="125" fill="#64748b" font-size="12" font-weight="600" letter-spacing="2">SOURCE LAYER</text>
+
+  <!-- MITRE ATT&CK -->
+  <rect x="50" y="140" width="250" height="90" rx="8" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="175" y="165" text-anchor="middle" fill="#60a5fa" font-size="15" font-weight="700">MITRE ATT&amp;CK</text>
+  <text x="175" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">attack.mitre.org</text>
+  <text x="175" y="205" text-anchor="middle" fill="#cbd5e1" font-size="11">14 Tactics / 200+ Techniques</text>
+  <text x="175" y="220" text-anchor="middle" fill="#94a3b8" font-size="10">TTP ID, 공격 단계, 탐지 방법</text>
+
+  <!-- Real Incidents -->
+  <rect x="330" y="140" width="250" height="90" rx="8" fill="#3b1f1f" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="455" y="165" text-anchor="middle" fill="#f87171" font-size="15" font-weight="700">Real-World Incidents</text>
+  <text x="455" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">CVE DB / CISA / 뉴스 보도</text>
+  <text x="455" y="205" text-anchor="middle" fill="#cbd5e1" font-size="11">SolarWinds, Log4Shell, MOVEit...</text>
+  <text x="455" y="220" text-anchor="middle" fill="#94a3b8" font-size="10">공격 벡터, 영향, 타임라인, 교훈</text>
+
+  <!-- Claude AI -->
+  <rect x="610" y="140" width="250" height="90" rx="8" fill="#2d1f3d" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="735" y="165" text-anchor="middle" fill="#c084fc" font-size="15" font-weight="700">Claude AI (Opus)</text>
+  <text x="735" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">콘텐츠 생성 + 코드 작성</text>
+  <text x="735" y="205" text-anchor="middle" fill="#cbd5e1" font-size="11">교육 HTML, JSX, JSON 자동 생성</text>
+  <text x="735" y="220" text-anchor="middle" fill="#94a3b8" font-size="10">i18n 7개 언어 번역 포함</text>
+
+  <!-- Docs/Templates -->
+  <rect x="890" y="140" width="250" height="90" rx="8" fill="#1f3329" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="1015" y="165" text-anchor="middle" fill="#4ade80" font-size="15" font-weight="700">Template Guides</text>
+  <text x="1015" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">docs/guides/</text>
+  <text x="1015" y="205" text-anchor="middle" fill="#cbd5e1" font-size="11">edu-page / graphic / i18n 가이드</text>
+  <text x="1015" y="220" text-anchor="middle" fill="#94a3b8" font-size="10">파일 구조, 네이밍, export 규칙</text>
+
+  <!-- Supabase Admin -->
+  <rect x="1170" y="140" width="200" height="90" rx="8" fill="#1f2937" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="1270" y="165" text-anchor="middle" fill="#fbbf24" font-size="15" font-weight="700">Admin Panel</text>
+  <text x="1270" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">/admin (8 tabs)</text>
+  <text x="1270" y="205" text-anchor="middle" fill="#cbd5e1" font-size="11">edu-meta, matrix, lab CRUD</text>
+  <text x="1270" y="220" text-anchor="middle" fill="#94a3b8" font-size="10">Supabase DB 직접 관리</text>
+
+  <!-- ═══════════ ARROWS: Source → Content ═══════════ -->
+  <line x1="175" y1="230" x2="175" y2="290" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <line x1="455" y1="230" x2="455" y2="290" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="735" y1="230" x2="400" y2="290" stroke="#a855f7" stroke-width="1" stroke-dasharray="6,3"/>
+  <line x1="735" y1="230" x2="680" y2="290" stroke="#a855f7" stroke-width="1" stroke-dasharray="6,3"/>
+  <line x1="735" y1="230" x2="960" y2="290" stroke="#a855f7" stroke-width="1" stroke-dasharray="6,3"/>
+  <line x1="735" y1="230" x2="1240" y2="290" stroke="#a855f7" stroke-width="1" stroke-dasharray="6,3"/>
+
+  <!-- ═══════════ ROW 2: CONTENT TYPES (4 columns) ═══════════ -->
+  <text x="50" y="280" fill="#64748b" font-size="12" font-weight="600" letter-spacing="2">CONTENT LAYER (4 Types)</text>
+
+  <!-- TYPE 1: 교육 HTML -->
+  <rect x="50" y="295" width="300" height="210" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
+  <rect x="50" y="295" width="300" height="36" rx="10" fill="#1e3a5f"/>
+  <rect x="50" y="318" width="300" height="13" fill="#1e3a5f"/>
+  <text x="70" y="319" fill="#60a5fa" font-size="16" font-weight="700">1. Edu HTML</text>
+  <text x="340" y="319" text-anchor="end" fill="#3b82f6" font-size="12">203 files</text>
+
+  <text x="70" y="356" fill="#e2e8f0" font-size="12" font-weight="600">public/edu/*.html</text>
+  <text x="70" y="376" fill="#94a3b8" font-size="11">t1566-001-beginner-ch1.html</text>
+  <text x="70" y="396" fill="#94a3b8" font-size="11">- 10~15 챕터 (개념 → 실습 → 퀴즈)</text>
+  <text x="70" y="416" fill="#94a3b8" font-size="11">- data-technique-id, data-level 속성</text>
+  <text x="70" y="436" fill="#94a3b8" font-size="11">- breadcrumb.js + progress-tracker.js</text>
+  <text x="70" y="456" fill="#94a3b8" font-size="11">- graphic-link.js → 그래픽 페이지 연결</text>
+  <text x="70" y="480" fill="#64748b" font-size="10">출처: MITRE ATT&amp;CK + Claude AI 자동생성</text>
+  <text x="70" y="495" fill="#64748b" font-size="10">등록: edu-meta.json (레벨/태그/URL)</text>
+
+  <!-- TYPE 2: Graphic JSX -->
+  <rect x="380" y="295" width="300" height="210" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+  <rect x="380" y="295" width="300" height="36" rx="10" fill="#3d2e0a"/>
+  <rect x="380" y="318" width="300" height="13" fill="#3d2e0a"/>
+  <text x="400" y="319" fill="#fbbf24" font-size="16" font-weight="700">2. Graphic JSX</text>
+  <text x="670" y="319" text-anchor="end" fill="#f59e0b" font-size="12">6 files</text>
+
+  <text x="400" y="356" fill="#e2e8f0" font-size="12" font-weight="600">src/data/graphic-contents/*.jsx</text>
+  <text x="400" y="376" fill="#94a3b8" font-size="11">T1587.001-beginner.jsx</text>
+  <text x="400" y="396" fill="#94a3b8" font-size="11">- 20 slides (1280x720 시네마틱)</text>
+  <text x="400" y="416" fill="#94a3b8" font-size="11">- export: subtitlesData[] + renderSlides()</text>
+  <text x="400" y="436" fill="#94a3b8" font-size="11">- i18n: {ko,en,vi,ar,ja,zh,hi} 객체</text>
+  <text x="400" y="456" fill="#94a3b8" font-size="11">- CinematicPlayer 자동재생 + 전체화면</text>
+  <text x="400" y="480" fill="#64748b" font-size="10">출처: 실제 사고 시각화 (Claude AI 생성)</text>
+  <text x="400" y="495" fill="#64748b" font-size="10">등록: GRAPHIC_DATA_LOADERS 맵</text>
+
+  <!-- TYPE 3: Scenario JSX -->
+  <rect x="710" y="295" width="300" height="210" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+  <rect x="710" y="295" width="300" height="36" rx="10" fill="#0a3d2e"/>
+  <rect x="710" y="318" width="300" height="13" fill="#0a3d2e"/>
+  <text x="730" y="319" fill="#34d399" font-size="16" font-weight="700">3. Scenario JSX</text>
+  <text x="1000" y="319" text-anchor="end" fill="#10b981" font-size="12">6 files</text>
+
+  <text x="730" y="356" fill="#e2e8f0" font-size="12" font-weight="600">src/data/scenario-contents/*.jsx</text>
+  <text x="730" y="376" fill="#94a3b8" font-size="11">T1566.001-beginner.jsx</text>
+  <text x="730" y="396" fill="#94a3b8" font-size="11">- 인터랙티브 게임 (Sector 탐색)</text>
+  <text x="730" y="416" fill="#94a3b8" font-size="11">- CHAPTERS[], dialogues, 인벤토리</text>
+  <text x="730" y="436" fill="#94a3b8" font-size="11">- language prop 수신 (다국어 분기)</text>
+  <text x="730" y="456" fill="#94a3b8" font-size="11">- 수료 보고서 모달 (성적표)</text>
+  <text x="730" y="480" fill="#64748b" font-size="10">출처: 실제 공격 시나리오 재구성</text>
+  <text x="730" y="495" fill="#64748b" font-size="10">등록: SCENARIO_COMPONENTS 맵</text>
+
+  <!-- TYPE 4: Lab JSON -->
+  <rect x="1040" y="295" width="310" height="210" rx="10" fill="#0f172a" stroke="#ef4444" stroke-width="2"/>
+  <rect x="1040" y="295" width="310" height="36" rx="10" fill="#3b1f1f"/>
+  <rect x="1040" y="318" width="310" height="13" fill="#3b1f1f"/>
+  <text x="1060" y="319" fill="#f87171" font-size="16" font-weight="700">4. Lab Scenario JSON</text>
+  <text x="1340" y="319" text-anchor="end" fill="#ef4444" font-size="12">191 files</text>
+
+  <text x="1060" y="356" fill="#e2e8f0" font-size="12" font-weight="600">src/data/lab-scenarios/*.json</text>
+  <text x="1060" y="376" fill="#94a3b8" font-size="11">T1566.001-beginner.json</text>
+  <text x="1060" y="396" fill="#94a3b8" font-size="11">- 8~15 steps (해커PC + 방어자SOC)</text>
+  <text x="1060" y="416" fill="#94a3b8" font-size="11">- phases[], processTree[], desktopIcons[]</text>
+  <text x="1060" y="436" fill="#94a3b8" font-size="11">- TTS 자동재생 + stepDuration</text>
+  <text x="1060" y="456" fill="#94a3b8" font-size="11">- hackerLog, feynman, expert 설명</text>
+  <text x="1060" y="480" fill="#64748b" font-size="10">출처: MITRE ATT&amp;CK 절차 + 실제 도구</text>
+  <text x="1060" y="495" fill="#64748b" font-size="10">등록: SCENARIO_LOADERS 맵 (dynamic import)</text>
+
+  <!-- ═══════════ ROW 3: USER FLOW ═══════════ -->
+  <text x="50" y="545" fill="#64748b" font-size="12" font-weight="600" letter-spacing="2">USER JOURNEY (4-Step Pipeline)</text>
+
+  <!-- Flow boxes -->
+  <rect x="80" y="560" width="240" height="70" rx="8" fill="#1e3a5f" stroke="#60a5fa" stroke-width="2"/>
+  <text x="200" y="590" text-anchor="middle" fill="#60a5fa" font-size="22" font-weight="700">Step 1</text>
+  <text x="200" y="612" text-anchor="middle" fill="#e2e8f0" font-size="13">Edu HTML (개념 학습)</text>
+
+  <line x1="320" y1="595" x2="390" y2="595" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="400" y="560" width="240" height="70" rx="8" fill="#3d2e0a" stroke="#fbbf24" stroke-width="2"/>
+  <text x="520" y="590" text-anchor="middle" fill="#fbbf24" font-size="22" font-weight="700">Step 2</text>
+  <text x="520" y="612" text-anchor="middle" fill="#e2e8f0" font-size="13">Graphic (시네마틱 이해)</text>
+
+  <line x1="640" y1="595" x2="710" y2="595" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="720" y="560" width="240" height="70" rx="8" fill="#0a3d2e" stroke="#34d399" stroke-width="2"/>
+  <text x="840" y="590" text-anchor="middle" fill="#34d399" font-size="22" font-weight="700">Step 3</text>
+  <text x="840" y="612" text-anchor="middle" fill="#e2e8f0" font-size="13">Scenario (인터랙티브)</text>
+
+  <line x1="960" y1="595" x2="1030" y2="595" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="1040" y="560" width="240" height="70" rx="8" fill="#3b1f1f" stroke="#f87171" stroke-width="2"/>
+  <text x="1160" y="590" text-anchor="middle" fill="#f87171" font-size="22" font-weight="700">Step 4</text>
+  <text x="1160" y="612" text-anchor="middle" fill="#e2e8f0" font-size="13">Lab (실습 시뮬레이션)</text>
+
+  <!-- Route paths -->
+  <text x="200" y="648" text-anchor="middle" fill="#64748b" font-size="10">/edu/:techniqueId</text>
+  <text x="520" y="648" text-anchor="middle" fill="#64748b" font-size="10">/edu/graphic/:id/:level</text>
+  <text x="840" y="648" text-anchor="middle" fill="#64748b" font-size="10">/edu/scenario/:id/:level</text>
+  <text x="1160" y="648" text-anchor="middle" fill="#64748b" font-size="10">/lab/desktop/:id</text>
+
+  <!-- ═══════════ ROW 4: REGISTRATION & META ═══════════ -->
+  <text x="50" y="695" fill="#64748b" font-size="12" font-weight="600" letter-spacing="2">REGISTRATION LAYER</text>
+
+  <!-- edu-meta.json -->
+  <rect x="50" y="710" width="400" height="130" rx="8" fill="#1a1a2e" stroke="#818cf8" stroke-width="1.5"/>
+  <text x="70" y="738" fill="#a5b4fc" font-size="14" font-weight="700">edu-meta.json (237 techniques)</text>
+  <text x="70" y="760" fill="#94a3b8" font-size="11">CourseSelector + IntroMatrix 둘 다 참조</text>
+  <rect x="70" y="770" width="360" height="55" rx="4" fill="#0f172a"/>
+  <text x="80" y="788" fill="#67e8f9" font-size="10" font-family="monospace">"T1566.001": {</text>
+  <text x="80" y="802" fill="#94a3b8" font-size="10" font-family="monospace">  title, titleEn, levels: [{level, url}],</text>
+  <text x="80" y="816" fill="#94a3b8" font-size="10" font-family="monospace">  tags, difficulty, description }</text>
+
+  <!-- Component Maps -->
+  <rect x="480" y="710" width="400" height="130" rx="8" fill="#1a1a2e" stroke="#818cf8" stroke-width="1.5"/>
+  <text x="500" y="738" fill="#a5b4fc" font-size="14" font-weight="700">Component Registration Maps</text>
+  <rect x="500" y="750" width="360" height="22" rx="3" fill="#1e3a5f"/>
+  <text x="510" y="766" fill="#60a5fa" font-size="10" font-family="monospace">GRAPHIC_DATA_LOADERS[id]  → subtitlesData + renderSlides</text>
+  <rect x="500" y="778" width="360" height="22" rx="3" fill="#0a3d2e"/>
+  <text x="510" y="794" fill="#34d399" font-size="10" font-family="monospace">SCENARIO_COMPONENTS[id]   → React.lazy(() => import(...))</text>
+  <rect x="500" y="806" width="360" height="22" rx="3" fill="#3b1f1f"/>
+  <text x="510" y="822" fill="#f87171" font-size="10" font-family="monospace">SCENARIO_LOADERS[id]      → dynamic import(lab-scenarios/)</text>
+
+  <!-- Supabase Tables -->
+  <rect x="910" y="710" width="440" height="130" rx="8" fill="#1a1a2e" stroke="#818cf8" stroke-width="1.5"/>
+  <text x="930" y="738" fill="#a5b4fc" font-size="14" font-weight="700">Supabase DB (Progress + Matrix)</text>
+  <rect x="930" y="750" width="400" height="18" rx="3" fill="#0f172a"/>
+  <text x="940" y="764" fill="#fbbf24" font-size="10" font-family="monospace">edu_progress  → user_id, technique_id, chapter_id, level</text>
+  <rect x="930" y="774" width="400" height="18" rx="3" fill="#0f172a"/>
+  <text x="940" y="788" fill="#fbbf24" font-size="10" font-family="monospace">tactics       → id, name, nameEn, nameVi, nameAr, order</text>
+  <rect x="930" y="798" width="400" height="18" rx="3" fill="#0f172a"/>
+  <text x="940" y="812" fill="#fbbf24" font-size="10" font-family="monospace">techniques    → id, tactic_id, name, mitre_id, has_edu</text>
+  <rect x="930" y="822" width="200" height="15" rx="2" fill="none"/>
+  <text x="940" y="834" fill="#64748b" font-size="9">+ profiles, announcements, wiki_terms...</text>
+
+  <!-- ═══════════ ROW 5: LEVEL SYSTEM ═══════════ -->
+  <text x="50" y="880" fill="#64748b" font-size="12" font-weight="600" letter-spacing="2">LEVEL SYSTEM (5 Tiers)</text>
+
+  <rect x="50" y="895" width="180" height="50" rx="25" fill="#422006" stroke="#f59e0b" stroke-width="2"/>
+  <text x="140" y="925" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700">Novice</text>
+
+  <line x1="230" y1="920" x2="280" y2="920" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="290" y="895" width="180" height="50" rx="25" fill="#052e16" stroke="#22c55e" stroke-width="2"/>
+  <text x="380" y="925" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="700">Beginner</text>
+
+  <line x1="470" y1="920" x2="520" y2="920" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="530" y="895" width="180" height="50" rx="25" fill="#172554" stroke="#3b82f6" stroke-width="2"/>
+  <text x="620" y="925" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="700">Intermediate</text>
+
+  <line x1="710" y1="920" x2="760" y2="920" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="770" y="895" width="180" height="50" rx="25" fill="#450a0a" stroke="#ef4444" stroke-width="2"/>
+  <text x="860" y="925" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">Advanced</text>
+
+  <line x1="950" y1="920" x2="1000" y2="920" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="1010" y="895" width="180" height="50" rx="25" fill="#3b0764" stroke="#a855f7" stroke-width="2"/>
+  <text x="1100" y="925" text-anchor="middle" fill="#c084fc" font-size="14" font-weight="700">Expert</text>
+
+  <!-- Unlock rule -->
+  <text x="140" y="965" text-anchor="middle" fill="#64748b" font-size="10">Always open</text>
+  <text x="620" y="965" text-anchor="middle" fill="#64748b" font-size="10">Previous level complete = Unlock next</text>
+
+  <!-- ═══════════ STATS BAR ═══════════ -->
+  <rect x="50" y="990" width="1300" height="80" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="700" y="1015" text-anchor="middle" fill="#64748b" font-size="12" font-weight="600" letter-spacing="2">CURRENT STATS (2026-04)</text>
+
+  <text x="120" y="1045" text-anchor="middle" fill="#60a5fa" font-size="24" font-weight="700">203</text>
+  <text x="120" y="1062" text-anchor="middle" fill="#94a3b8" font-size="10">Edu HTML</text>
+
+  <text x="330" y="1045" text-anchor="middle" fill="#fbbf24" font-size="24" font-weight="700">6</text>
+  <text x="330" y="1062" text-anchor="middle" fill="#94a3b8" font-size="10">Graphic JSX</text>
+
+  <text x="540" y="1045" text-anchor="middle" fill="#34d399" font-size="24" font-weight="700">6</text>
+  <text x="540" y="1062" text-anchor="middle" fill="#94a3b8" font-size="10">Scenario JSX</text>
+
+  <text x="750" y="1045" text-anchor="middle" fill="#f87171" font-size="24" font-weight="700">191</text>
+  <text x="750" y="1062" text-anchor="middle" fill="#94a3b8" font-size="10">Lab JSON</text>
+
+  <text x="960" y="1045" text-anchor="middle" fill="#a5b4fc" font-size="24" font-weight="700">237</text>
+  <text x="960" y="1062" text-anchor="middle" fill="#94a3b8" font-size="10">Techniques (meta)</text>
+
+  <text x="1170" y="1045" text-anchor="middle" fill="#818cf8" font-size="24" font-weight="700">7</text>
+  <text x="1170" y="1062" text-anchor="middle" fill="#94a3b8" font-size="10">Languages</text>
+
+  <!-- Watermark -->
+  <text x="1350" y="1090" text-anchor="end" fill="#334155" font-size="9">Gotroot Edu Content Pipeline v1.0 | Generated by Claude</text>
+</svg>
