@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gotroot Edu — Content Pipeline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      line-height: 1.7;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid #334155;
+      padding: 32px 0;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .header p {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      color: #f8fafc;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #334155;
+    }
+
+    .section h2 span { color: #60a5fa; }
+
+    .mermaid {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+
+    th {
+      background: #1e293b;
+      color: #94a3b8;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    td { color: #cbd5e1; font-size: 14px; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-edu { background: #1e3a5f; color: #60a5fa; }
+    .badge-graphic { background: #3d2e0a; color: #fbbf24; }
+    .badge-scenario { background: #0a3d2e; color: #34d399; }
+    .badge-lab { background: #3b1f1f; color: #f87171; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .stat-card {
+      background: #1e293b;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+
+    .stat-card .number {
+      font-size: 36px;
+      font-weight: 700;
+      display: block;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+
+    .flow-card {
+      flex: 1;
+      min-width: 200px;
+      padding: 20px;
+      border-radius: 10px;
+      position: relative;
+      text-align: center;
+    }
+
+    .flow-card h3 { font-size: 18px; margin-bottom: 6px; }
+    .flow-card p { font-size: 13px; color: #94a3b8; }
+
+    .flow-card.edu { background: #1e3a5f; border: 2px solid #3b82f6; }
+    .flow-card.edu h3 { color: #60a5fa; }
+    .flow-card.graphic { background: #3d2e0a; border: 2px solid #f59e0b; }
+    .flow-card.graphic h3 { color: #fbbf24; }
+    .flow-card.scenario { background: #0a3d2e; border: 2px solid #10b981; }
+    .flow-card.scenario h3 { color: #34d399; }
+    .flow-card.lab { background: #3b1f1f; border: 2px solid #ef4444; }
+    .flow-card.lab h3 { color: #f87171; }
+
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      color: #475569;
+      font-size: 24px;
+    }
+
+    .level-bar {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .level-pill {
+      padding: 10px 24px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .level-arrow { display: flex; align-items: center; color: #475569; font-size: 18px; }
+
+    .code-block {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      color: #94a3b8;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 12px 0;
+    }
+
+    .code-block .cmd { color: #67e8f9; }
+    .code-block .flag { color: #fbbf24; }
+    .code-block .comment { color: #475569; }
+
+    .checklist { list-style: none; padding: 0; }
+    .checklist li {
+      padding: 8px 0;
+      border-bottom: 1px solid #1e293b;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    .checklist li::before { content: '☐ '; color: #64748b; }
+
+    .footer {
+      text-align: center;
+      padding: 32px;
+      color: #475569;
+      font-size: 12px;
+      border-top: 1px solid #1e293b;
+    }
+
+    @media (max-width: 768px) {
+      .flow-arrow { transform: rotate(90deg); padding: 4px; }
+      .flow-step { flex-direction: column; align-items: center; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Gotroot Edu — Content Pipeline</h1>
+  <p>MITRE ATT&CK 기반 사이버보안 교육 콘텐츠 생성 파이프라인</p>
+</div>
+
+<div class="container">
+
+  <!-- ═══ Stats ═══ -->
+  <div class="section">
+    <h2><span>01</span> 현재 통계</h2>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <span class="number" style="color: #60a5fa">203</span>
+        <span class="label">Edu HTML</span>
+      </div>
+      <div class="stat-card">
+        <span class="number" style="color: #fbbf24">6</span>
+        <span class="label">Graphic JSX</span>
+      </div>
+      <div class="stat-card">
+        <span class="number" style="color: #34d399">6</span>
+        <span class="label">Scenario JSX</span>
+      </div>
+      <div class="stat-card">
+        <span class="number" style="color: #f87171">191</span>
+        <span class="label">Lab JSON</span>
+      </div>
+      <div class="stat-card">
+        <span class="number" style="color: #a5b4fc">237</span>
+        <span class="label">Techniques</span>
+      </div>
+      <div class="stat-card">
+        <span class="number" style="color: #818cf8">7</span>
+        <span class="label">Languages</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ User Journey ═══ -->
+  <div class="section">
+    <h2><span>02</span> 학습 흐름 (4 Steps)</h2>
+    <div class="flow-step">
+      <div class="flow-card edu">
+        <h3>Step 1</h3>
+        <p>개념 학습</p>
+        <p style="font-size:11px; margin-top:4px; color:#60a5fa">/edu/:id</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-card graphic">
+        <h3>Step 2</h3>
+        <p>시네마틱 이해</p>
+        <p style="font-size:11px; margin-top:4px; color:#fbbf24">/edu/graphic/:id/:level</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-card scenario">
+        <h3>Step 3</h3>
+        <p>시나리오 체험</p>
+        <p style="font-size:11px; margin-top:4px; color:#34d399">/edu/scenario/:id/:level</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-card lab">
+        <h3>Step 4</h3>
+        <p>실습 시뮬레이션</p>
+        <p style="font-size:11px; margin-top:4px; color:#f87171">/lab/desktop/:id</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Content Types ═══ -->
+  <div class="section">
+    <h2><span>03</span> 콘텐츠 타입별 상세</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>타입</th>
+          <th>위치</th>
+          <th>포맷</th>
+          <th>출처</th>
+          <th>핵심 구조</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-edu">Edu HTML</span></td>
+          <td>public/edu/</td>
+          <td>HTML</td>
+          <td>MITRE ATT&CK + Claude AI</td>
+          <td>10~15 챕터, progress-tracker, breadcrumb</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-graphic">Graphic</span></td>
+          <td>src/data/graphic-contents/</td>
+          <td>JSX</td>
+          <td>실제 사고 시각화</td>
+          <td>subtitlesData[] + renderSlides(), 1280×720</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-scenario">Scenario</span></td>
+          <td>src/data/scenario-contents/</td>
+          <td>JSX</td>
+          <td>공격 시나리오 재구성</td>
+          <td>CHAPTERS[], language prop, 수료 보고서</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-lab">Lab JSON</span></td>
+          <td>src/data/lab-scenarios/</td>
+          <td>JSON</td>
+          <td>MITRE 절차 + 실제 도구</td>
+          <td>steps[], phases[], feynman/expert 이중 설명</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ Pipeline Diagram (Mermaid) ═══ -->
+  <div class="section">
+    <h2><span>04</span> 파이프라인 다이어그램</h2>
+    <div class="mermaid">
+flowchart TB
+    subgraph SOURCE["SOURCE LAYER"]
+        direction LR
+        MITRE["MITRE ATT&CK\n14 Tactics / 200+ Techniques"]
+        INCIDENT["Real-World Incidents\nCVE DB / CISA"]
+        CLAUDE["Claude AI\n콘텐츠 생성 + 번역"]
+    end
+
+    subgraph CONTENT["CONTENT LAYER"]
+        direction LR
+        EDU["Edu HTML\n203 files"]
+        GRAPHIC["Graphic JSX\n6 files"]
+        SCENARIO["Scenario JSX\n6 files"]
+        LAB["Lab JSON\n191 files"]
+    end
+
+    subgraph REG["REGISTRATION"]
+        META["edu-meta.json\n237 techniques"]
+        MAPS["Component Maps\nGRAPHIC_DATA_LOADERS\nSCENARIO_COMPONENTS\nSCENARIO_LOADERS"]
+    end
+
+    MITRE --> EDU & LAB
+    INCIDENT --> GRAPHIC & SCENARIO
+    CLAUDE -.-> EDU & GRAPHIC & SCENARIO & LAB
+
+    EDU --> META
+    GRAPHIC --> MAPS
+    SCENARIO --> MAPS
+    LAB --> MAPS
+    </div>
+  </div>
+
+  <!-- ═══ Level System ═══ -->
+  <div class="section">
+    <h2><span>05</span> 레벨 시스템</h2>
+    <div class="level-bar">
+      <div class="level-pill" style="background:#422006; color:#fbbf24; border:2px solid #f59e0b">Novice</div>
+      <div class="level-arrow">→</div>
+      <div class="level-pill" style="background:#052e16; color:#4ade80; border:2px solid #22c55e">Beginner</div>
+      <div class="level-arrow">→</div>
+      <div class="level-pill" style="background:#172554; color:#60a5fa; border:2px solid #3b82f6">Intermediate</div>
+      <div class="level-arrow">→</div>
+      <div class="level-pill" style="background:#450a0a; color:#f87171; border:2px solid #ef4444">Advanced</div>
+      <div class="level-arrow">→</div>
+      <div class="level-pill" style="background:#3b0764; color:#c084fc; border:2px solid #a855f7">Expert</div>
+    </div>
+    <p style="color:#94a3b8; font-size:13px; margin-top:8px">이전 레벨의 콘텐츠를 완료하면 다음 레벨이 해금됩니다. Novice는 항상 열려있습니다.</p>
+  </div>
+
+  <!-- ═══ Script Usage ═══ -->
+  <div class="section">
+    <h2><span>06</span> 콘텐츠 생성 자동화</h2>
+    <div class="code-block"><span class="comment"># 새 기법 콘텐츠 4종 골격 생성</span>
+<span class="cmd">node</span> scripts/create-technique-content.cjs <span class="flag">T1566.001 beginner</span> \
+  --title "스피어피싱 첨부" --titleEn "Spearphishing Attachment"
+
+<span class="comment"># 미리보기 (파일 생성 없이)</span>
+<span class="cmd">node</span> scripts/create-technique-content.cjs <span class="flag">T1059.001 novice --dry-run</span>
+
+<span class="comment"># 품질 검증</span>
+<span class="cmd">node</span> scripts/validate-content-quality.cjs              <span class="comment"># 전체</span>
+<span class="cmd">node</span> scripts/validate-content-quality.cjs <span class="flag">--type graphic</span> <span class="comment"># 타입별</span>
+<span class="cmd">node</span> scripts/validate-content-quality.cjs <span class="flag">--id T1566.001</span> <span class="comment"># 기법별</span>
+<span class="cmd">node</span> scripts/validate-content-quality.cjs <span class="flag">--json</span>         <span class="comment"># JSON 출력</span></div>
+  </div>
+
+  <!-- ═══ Quality Checklist ═══ -->
+  <div class="section">
+    <h2><span>07</span> 품질 체크리스트</h2>
+    <ul class="checklist">
+      <li>해당 레벨에 적절한 난이도인가?</li>
+      <li>feynman 설명이 비전공자도 이해 가능한가?</li>
+      <li>expert 설명이 실무자에게 유용한가?</li>
+      <li>실제 명령어/도구가 정확한가? (가짜 명령어 없음)</li>
+      <li>i18n 구조가 가이드를 준수하는가? (ko/en 필수, 5개 추가 언어)</li>
+      <li>시네마틱 슬라이드가 15~20장인가?</li>
+      <li>시나리오가 3~5 Sector로 분할되었는가?</li>
+      <li>Lab step이 8~15개인가?</li>
+      <li>npm run build 성공하는가?</li>
+    </ul>
+  </div>
+
+  <!-- ═══ Registration Map ═══ -->
+  <div class="section">
+    <h2><span>08</span> 등록 포인트 (수동)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>콘텐츠 타입</th>
+          <th>등록 파일</th>
+          <th>맵 이름</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-edu">Edu HTML</span></td>
+          <td>src/data/edu-meta.json</td>
+          <td>levels[].url</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-graphic">Graphic</span></td>
+          <td>GraphicExplanationPage.jsx</td>
+          <td>GRAPHIC_DATA_LOADERS + GRAPHIC_COMPONENTS</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-scenario">Scenario</span></td>
+          <td>ScenarioExplanationPage.jsx</td>
+          <td>SCENARIO_COMPONENTS</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-lab">Lab JSON</span></td>
+          <td>DesktopLab.jsx</td>
+          <td>SCENARIO_LOADERS</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  Gotroot Edu Content Pipeline v1.0 — Generated by Claude<br>
+  <a href="https://github.com/derekChae/Gotroot_edu" style="color:#60a5fa; text-decoration:none">github.com/derekChae/Gotroot_edu</a>
+</div>
+
+<!-- Mermaid CDN -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1e3a5f',
+      primaryTextColor: '#f8fafc',
+      primaryBorderColor: '#3b82f6',
+      lineColor: '#475569',
+      secondaryColor: '#1e293b',
+      tertiaryColor: '#0f172a',
+    },
+  });
+</script>
+
+</body>
+</html>
