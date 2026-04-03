@@ -171,7 +171,7 @@ function ScenarioLoader() {
 export default function ScenarioExplanationPage() {
   const { techniqueId, level } = useParams();
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading: authLoading } = useAuth();
   const [authChecked, setAuthChecked] = useState(false);
   const [userName, setUserName] = useState('김요원');
   const [companyName] = useState('보안랩스');
@@ -185,8 +185,9 @@ export default function ScenarioExplanationPage() {
   const scenarioKey = `${techniqueId}-${level}`;
   const ScenarioComp = SCENARIO_COMPONENTS[scenarioKey] ?? null;
 
-  // ── Auth Gate ──
+  // ── Auth Gate — authLoading 대기 필수 (세션 복원 전 리다이렉트 방지) ──
   useEffect(() => {
+    if (authLoading) return; // 세션 로딩 완료 대기
     if (!isLoggedIn) {
       navigate(`/login?redirect=${encodeURIComponent(`/edu/scenario/${techniqueId}/${level}`)}`);
       return;
@@ -206,7 +207,7 @@ export default function ScenarioExplanationPage() {
         }
       } catch (e) {}
     })();
-  }, [isLoggedIn, navigate, techniqueId, level]);
+  }, [authLoading, isLoggedIn, navigate, techniqueId, level]);
 
   if (!authChecked) {
     return (

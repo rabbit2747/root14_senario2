@@ -774,7 +774,7 @@ export default function GraphicExplanationPage() {
   // FontAwesome: 상단 import로 로컬 번들에 포함됨 (CDN 불필요)
   const { techniqueId, level } = useParams();
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loading: authLoading } = useAuth();
   const [authChecked, setAuthChecked] = useState(false);
   const [lang] = useState(() => getStoredLang());
   const t = uiText[lang] || uiText.ko;
@@ -790,14 +790,15 @@ export default function GraphicExplanationPage() {
   const [slideContent, setSlideContent] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
 
-  // Auth Gate
+  // Auth Gate — authLoading 대기 필수 (세션 복원 전 리다이렉트 방지)
   useEffect(() => {
+    if (authLoading) return; // 세션 로딩 완료 대기
     if (!isLoggedIn) {
       navigate(`/login?redirect=${encodeURIComponent(`/edu/graphic/${techniqueId}/${level}`)}`);
       return;
     }
     setAuthChecked(true);
-  }, [isLoggedIn, navigate, techniqueId, level]);
+  }, [authLoading, isLoggedIn, navigate, techniqueId, level]);
 
   // 콘텐츠 동적 로딩
   useEffect(() => {
