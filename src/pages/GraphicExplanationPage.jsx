@@ -436,6 +436,15 @@ function CinematicPlayer({ theme, slideContent, subtitles, lang }) {
   const [showTooltip, setShowTooltip] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // 자막 텍스트 추출 — 문자열 배열 / 다국어 객체 배열 모두 지원
+  const getSubtitleText = useCallback((idx) => {
+    const item = subtitles[idx];
+    if (!item) return '';
+    if (typeof item === 'string') return item;
+    // 다국어 객체: { ko: "...", en: "...", ... }
+    return item[lang] || item.ko || '';
+  }, [subtitles, lang]);
+
   // ── ref 미러 (타이머 콜백 클로저에서 최신 값 읽기용) ──
   const ttsFinishedRef = useRef(false);
   const isMutedRef = useRef(false);
@@ -531,7 +540,7 @@ function CinematicPlayer({ theme, slideContent, subtitles, lang }) {
     ttsFinishedRef.current = false;
 
     if (isPlaying && subtitles[currentSlide]) {
-      const text = subtitles[currentSlide];
+      const text = getSubtitleText(currentSlide);
       if (!isMuted && text && window.speechSynthesis) {
         const u = new SpeechSynthesisUtterance(text);
         u.lang = lang === 'ko' ? 'ko-KR' : lang === 'en' ? 'en-US' : lang === 'ja' ? 'ja-JP' : 'ko-KR';
@@ -717,7 +726,7 @@ function CinematicPlayer({ theme, slideContent, subtitles, lang }) {
 
               <div className={`subtitle-area ${isCCEnabled ? '' : 'hidden'}`}>
                 <p className="subtitle-text">
-                  {subtitles[currentSlide]}
+                  {getSubtitleText(currentSlide)}
                   {!isMuted && isPlaying && !ttsFinished && (
                     <span className="inline-block ml-2 w-2 h-2 rounded-full bg-green-400 animate-pulse" style={{ verticalAlign: 'middle' }} />
                   )}
