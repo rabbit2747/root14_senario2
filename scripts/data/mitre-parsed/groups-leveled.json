@@ -1,0 +1,7129 @@
+[
+  {
+    "attackId": "G0102",
+    "name": "Wizard Spider",
+    "aliases": [
+      "Wizard Spider",
+      "UNC1878",
+      "TEMP.MixMaster",
+      "Grim Spider",
+      "FIN12",
+      "GOLD BLACKBURN",
+      "ITG23",
+      "Periwinkle Tempest",
+      "DEV-0193"
+    ],
+    "difficultyScore": 85,
+    "autoScore": 85,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 49,
+      "subTechniqueCount": 44,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 7
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 49개 (18pt) + Sub 44개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 7종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 187건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0046",
+    "name": "FIN7",
+    "aliases": [
+      "FIN7",
+      "GOLD NIAGARA",
+      "ITG14",
+      "Carbon Spider",
+      "ELBRUS",
+      "Sangria Tempest"
+    ],
+    "difficultyScore": 85,
+    "autoScore": 85,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 50,
+      "subTechniqueCount": 44,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 5
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 50개 (18pt) + Sub 44개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 179건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1006",
+    "name": "Earth Lusca",
+    "aliases": [
+      "Earth Lusca",
+      "TAG-22",
+      "Charcoal Typhoon",
+      "CHROMIUM",
+      "ControlX"
+    ],
+    "difficultyScore": 85,
+    "autoScore": 85,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 34,
+      "subTechniqueCount": 29,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 5
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 34개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,mshta)",
+      "분석요구 10/10 — mitigation 연결 116건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0129",
+    "name": "Mustang Panda",
+    "aliases": [
+      "Mustang Panda",
+      "TA416",
+      "RedDelta",
+      "BRONZE PRESIDENT",
+      "STATELY TAURUS",
+      "FIREANT",
+      "CAMARO DRAGON",
+      "EARTH PRETA",
+      "HIVE0154",
+      "TWILL TYPHOON",
+      "TANTALUM",
+      "LUMINOUS MOTH",
+      "UNC6384",
+      "TEMP.Hex",
+      "Red Lich"
+    ],
+    "difficultyScore": 85,
+    "autoScore": 85,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 61,
+      "subTechniqueCount": 53,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 5
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 61개 (18pt) + Sub 53개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,mshta)",
+      "분석요구 10/10 — mitigation 연결 211건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0114",
+    "name": "Chimera",
+    "aliases": [
+      "Chimera"
+    ],
+    "difficultyScore": 85,
+    "autoScore": 85,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 48,
+      "subTechniqueCount": 33,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 5
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 48개 (18pt) + Sub 33개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 126건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1051",
+    "name": "Medusa Group",
+    "aliases": [
+      "Medusa Group"
+    ],
+    "difficultyScore": 83,
+    "autoScore": 83,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 50,
+      "subTechniqueCount": 33,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 50개 (18pt) + Sub 33개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,certutil,bitsadmin)",
+      "분석요구 10/10 — mitigation 연결 146건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0032",
+    "name": "Lazarus Group",
+    "aliases": [
+      "Lazarus Group",
+      "Labyrinth Chollima",
+      "HIDDEN COBRA",
+      "Guardians of Peace",
+      "ZINC",
+      "NICKEL ACADEMY",
+      "Diamond Sleet"
+    ],
+    "difficultyScore": 83,
+    "autoScore": 83,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 68,
+      "subTechniqueCount": 60,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 7
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 68개 (18pt) + Sub 60개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 7종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 213건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0034",
+    "name": "Sandworm Team",
+    "aliases": [
+      "Sandworm Team",
+      "ELECTRUM",
+      "Telebots",
+      "IRON VIKING",
+      "BlackEnergy (Group)",
+      "Quedagh",
+      "Voodoo Bear",
+      "IRIDIUM",
+      "Seashell Blizzard",
+      "FROZENBARENTS",
+      "APT44"
+    ],
+    "difficultyScore": 83,
+    "autoScore": 83,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 64,
+      "subTechniqueCount": 45,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 64개 (18pt) + Sub 45개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 211건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply-chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0007",
+    "name": "APT28",
+    "aliases": [
+      "APT28",
+      "IRON TWILIGHT",
+      "SNAKEMACKEREL",
+      "Swallowtail",
+      "Group 74",
+      "Sednit",
+      "Sofacy",
+      "Pawn Storm",
+      "Fancy Bear",
+      "STRONTIUM",
+      "Tsar Team",
+      "Threat Group-4127",
+      "TG-4127",
+      "Forest Blizzard",
+      "FROZENLAKE",
+      "GruesomeLarch"
+    ],
+    "difficultyScore": 83,
+    "autoScore": 83,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 71,
+      "subTechniqueCount": 54,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 71개 (18pt) + Sub 54개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,rundll32,certutil)",
+      "분석요구 10/10 — mitigation 연결 241건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0016",
+    "name": "APT29",
+    "aliases": [
+      "APT29",
+      "IRON RITUAL",
+      "IRON HEMLOCK",
+      "NobleBaron",
+      "Dark Halo",
+      "NOBELIUM",
+      "UNC2452",
+      "YTTRIUM",
+      "The Dukes",
+      "Cozy Bear",
+      "CozyDuke",
+      "SolarStorm",
+      "Blue Kitsune",
+      "UNC3524",
+      "Midnight Blizzard"
+    ],
+    "difficultyScore": 83,
+    "autoScore": 83,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 47,
+      "subTechniqueCount": 49,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 47개 (18pt) + Sub 49개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,mshta)",
+      "분석요구 10/10 — mitigation 연결 184건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'kerberos' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0045",
+    "name": "menuPass",
+    "aliases": [
+      "menuPass",
+      "Cicada",
+      "POTASSIUM",
+      "Stone Panda",
+      "APT10",
+      "Red Apollo",
+      "CVNX",
+      "HOGFISH",
+      "BRONZE RIVERSIDE"
+    ],
+    "difficultyScore": 83,
+    "autoScore": 83,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 37,
+      "subTechniqueCount": 28,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 37개 (18pt) + Sub 28개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,certutil)",
+      "분석요구 10/10 — mitigation 연결 124건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1053",
+    "name": "Storm-0501",
+    "aliases": [
+      "Storm-0501"
+    ],
+    "difficultyScore": 83,
+    "autoScore": 83,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 34,
+      "subTechniqueCount": 28,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 34개 (18pt) + Sub 28개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,rundll32,regsvr32)",
+      "분석요구 10/10 — mitigation 연결 116건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0050",
+    "name": "APT32",
+    "aliases": [
+      "APT32",
+      "SeaLotus",
+      "OceanLotus",
+      "APT-C-00",
+      "Canvas Cyclone",
+      "BISMUTH"
+    ],
+    "difficultyScore": 82,
+    "autoScore": 82,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 54,
+      "subTechniqueCount": 51,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 5
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 54개 (18pt) + Sub 51개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 214건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0096",
+    "name": "APT41",
+    "aliases": [
+      "APT41",
+      "Wicked Panda",
+      "Brass Typhoon",
+      "BARIUM"
+    ],
+    "difficultyScore": 82,
+    "autoScore": 82,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 66,
+      "subTechniqueCount": 49,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 5
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 66개 (18pt) + Sub 49개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 213건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'ntds.dit' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1048",
+    "name": "UNC3886",
+    "aliases": [
+      "UNC3886"
+    ],
+    "difficultyScore": 81,
+    "autoScore": 81,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 35,
+      "subTechniqueCount": 29,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 35개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,rundll32)",
+      "분석요구 10/10 — mitigation 연결 139건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0117",
+    "name": "Fox Kitten",
+    "aliases": [
+      "Fox Kitten",
+      "UNC757",
+      "Parisite",
+      "Pioneer Kitten",
+      "RUBIDIUM",
+      "Lemon Sandstorm"
+    ],
+    "difficultyScore": 81,
+    "autoScore": 81,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 31,
+      "subTechniqueCount": 23,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 31개 (18pt) + Sub 23개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,psexec)",
+      "분석요구 10/10 — mitigation 연결 135건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0010",
+    "name": "Turla",
+    "aliases": [
+      "Turla",
+      "IRON HUNTER",
+      "Group 88",
+      "Waterbug",
+      "WhiteBear",
+      "Snake",
+      "Krypton",
+      "Venomous Bear",
+      "Secret Blizzard",
+      "BELUGASTURGEON"
+    ],
+    "difficultyScore": 81,
+    "autoScore": 81,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 50,
+      "subTechniqueCount": 43,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 50개 (18pt) + Sub 43개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 121건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1003",
+    "name": "Ember Bear",
+    "aliases": [
+      "Ember Bear",
+      "UNC2589",
+      "Bleeding Bear",
+      "DEV-0586",
+      "Cadet Blizzard",
+      "Frozenvista",
+      "UAC-0056"
+    ],
+    "difficultyScore": 81,
+    "autoScore": 81,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 40,
+      "subTechniqueCount": 23,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 40개 (18pt) + Sub 23개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 146건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'pass-the-hash' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1001",
+    "name": "HEXANE",
+    "aliases": [
+      "HEXANE",
+      "Lyceum",
+      "Siamesekitten",
+      "Spirlin"
+    ],
+    "difficultyScore": 81,
+    "autoScore": 81,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 29,
+      "subTechniqueCount": 23,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 29개 (18pt) + Sub 23개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,bitsadmin)",
+      "분석요구 10/10 — mitigation 연결 60건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0125",
+    "name": "HAFNIUM",
+    "aliases": [
+      "HAFNIUM",
+      "Operation Exchange Marauder",
+      "Silk Typhoon"
+    ],
+    "difficultyScore": 81,
+    "autoScore": 81,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 37,
+      "subTechniqueCount": 29,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 37개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,rundll32)",
+      "분석요구 10/10 — mitigation 연결 110건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1023",
+    "name": "APT5",
+    "aliases": [
+      "APT5",
+      "Mulberry Typhoon",
+      "MANGANESE",
+      "BRONZE FLEETWOOD",
+      "Keyhole Panda",
+      "UNC2630"
+    ],
+    "difficultyScore": 81,
+    "autoScore": 81,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 22,
+      "subTechniqueCount": 21,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 22개 (18pt) + Sub 21개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 85건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "키워드 'ntlm' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1015",
+    "name": "Scattered Spider",
+    "aliases": [
+      "Scattered Spider",
+      "Roasted 0ktapus",
+      "Octo Tempest",
+      "Storm-0875",
+      "UNC3944"
+    ],
+    "difficultyScore": 81,
+    "autoScore": 81,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 50,
+      "subTechniqueCount": 33,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 50개 (18pt) + Sub 33개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 177건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0119",
+    "name": "Indrik Spider",
+    "aliases": [
+      "Indrik Spider",
+      "Evil Corp",
+      "Manatee Tempest",
+      "DEV-0243",
+      "UNC2165"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 28,
+      "subTechniqueCount": 21,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 28개 (18pt) + Sub 21개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 95건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0049",
+    "name": "OilRig",
+    "aliases": [
+      "OilRig",
+      "COBALT GYPSY",
+      "IRN2",
+      "APT34",
+      "Helix Kitten",
+      "Evasive Serpens",
+      "Hazel Sandstorm",
+      "EUROPIUM",
+      "ITG13",
+      "Earth Simnavaz",
+      "Crambus",
+      "TA452"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 58,
+      "subTechniqueCount": 45,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 58개 (18pt) + Sub 45개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,certutil)",
+      "분석요구 10/10 — mitigation 연결 204건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0143",
+    "name": "Aquatic Panda",
+    "aliases": [
+      "Aquatic Panda"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 25,
+      "subTechniqueCount": 25,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 25개 (18pt) + Sub 25개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 99건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0037",
+    "name": "FIN6",
+    "aliases": [
+      "FIN6",
+      "Magecart Group 6",
+      "ITG08",
+      "Skeleton Spider",
+      "TAAL",
+      "Camouflage Tempest"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 33,
+      "subTechniqueCount": 26,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 33개 (18pt) + Sub 26개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,psexec)",
+      "분석요구 10/10 — mitigation 연결 141건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1017",
+    "name": "Volt Typhoon",
+    "aliases": [
+      "Volt Typhoon",
+      "BRONZE SILHOUETTE",
+      "Vanguard Panda",
+      "DEV-0391",
+      "UNC3236",
+      "Voltzite",
+      "Insidious Taurus"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 57,
+      "subTechniqueCount": 40,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 57개 (18pt) + Sub 40개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 147건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0059",
+    "name": "Magic Hound",
+    "aliases": [
+      "Magic Hound",
+      "TA453",
+      "COBALT ILLUSION",
+      "Charming Kitten",
+      "ITG18",
+      "Phosphorus",
+      "Newscaster",
+      "APT35",
+      "Mint Sandstorm"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 57,
+      "subTechniqueCount": 52,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 57개 (18pt) + Sub 52개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 188건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0094",
+    "name": "Kimsuky",
+    "aliases": [
+      "Kimsuky",
+      "Black Banshee",
+      "Velvet Chollima",
+      "Emerald Sleet",
+      "THALLIUM",
+      "APT43",
+      "TA427",
+      "Springtail"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 72,
+      "subTechniqueCount": 73,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 6
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 72개 (18pt) + Sub 73개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 6종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 255건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1016",
+    "name": "FIN13",
+    "aliases": [
+      "FIN13",
+      "Elephant Beetle"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 42,
+      "subTechniqueCount": 33,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 42개 (18pt) + Sub 33개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,certutil)",
+      "분석요구 10/10 — mitigation 연결 151건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0061",
+    "name": "FIN8",
+    "aliases": [
+      "FIN8",
+      "Syssphinx"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 30,
+      "subTechniqueCount": 25,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 30개 (18pt) + Sub 25개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 98건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0108",
+    "name": "Blue Mockingbird",
+    "aliases": [
+      "Blue Mockingbird"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 18,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 19,
+      "subTechniqueCount": 16,
+      "tacticCount": 11,
+      "platformCount": 8,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 5
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 18/20 — Parent 19개 (16pt) + Sub 16개 (+2 다양성)",
+      "환경 12/15 — platform 8종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 69건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0027",
+    "name": "Threat Group-3390",
+    "aliases": [
+      "Threat Group-3390",
+      "Earth Smilodon",
+      "TG-3390",
+      "Emissary Panda",
+      "BRONZE UNION",
+      "APT27",
+      "Iron Tiger",
+      "LuckyMouse",
+      "Linen Typhoon"
+    ],
+    "difficultyScore": 80,
+    "autoScore": 80,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 47,
+      "subTechniqueCount": 36,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 47개 (18pt) + Sub 36개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,certutil)",
+      "분석요구 10/10 — mitigation 연결 145건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0139",
+    "name": "TeamTNT",
+    "aliases": [
+      "TeamTNT"
+    ],
+    "difficultyScore": 79,
+    "autoScore": 79,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 42,
+      "subTechniqueCount": 34,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 42개 (18pt) + Sub 34개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 127건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1039",
+    "name": "RedCurl",
+    "aliases": [
+      "RedCurl"
+    ],
+    "difficultyScore": 79,
+    "autoScore": 79,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 32,
+      "subTechniqueCount": 28,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 32개 (18pt) + Sub 28개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,rundll32)",
+      "분석요구 10/10 — mitigation 연결 104건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0035",
+    "name": "Dragonfly",
+    "aliases": [
+      "Dragonfly",
+      "TEMP.Isotope",
+      "DYMALLOY",
+      "Berserk Bear",
+      "TG-4192",
+      "Crouching Yeti",
+      "IRON LIBERTY",
+      "Energetic Bear",
+      "Ghost Blizzard",
+      "BROMINE"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 47,
+      "subTechniqueCount": 35,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 47개 (18pt) + Sub 35개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,psexec)",
+      "분석요구 10/10 — mitigation 연결 150건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1040",
+    "name": "Play",
+    "aliases": [
+      "Play"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 22,
+      "subTechniqueCount": 14,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 22개 (18pt) + Sub 14개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 74건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0091",
+    "name": "Silence",
+    "aliases": [
+      "Silence",
+      "Whisper Spider"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 25,
+      "subTechniqueCount": 18,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 25개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,psexec)",
+      "분석요구 10/10 — mitigation 연결 91건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0004",
+    "name": "Ke3chang",
+    "aliases": [
+      "Ke3chang",
+      "APT15",
+      "Mirage",
+      "Vixen Panda",
+      "GREF",
+      "Playful Dragon",
+      "RoyalAPT",
+      "NICKEL",
+      "Nylon Typhoon"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 37,
+      "subTechniqueCount": 26,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 37개 (18pt) + Sub 26개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (psexec)",
+      "분석요구 10/10 — mitigation 연결 109건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'kerberos' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0069",
+    "name": "MuddyWater",
+    "aliases": [
+      "MuddyWater",
+      "Earth Vetala",
+      "MERCURY",
+      "Static Kitten",
+      "Seedworm",
+      "TEMP.Zagros",
+      "Mango Sandstorm",
+      "TA450"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 43,
+      "subTechniqueCount": 40,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 43개 (18pt) + Sub 40개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 152건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'credential dumping' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0060",
+    "name": "BRONZE BUTLER",
+    "aliases": [
+      "BRONZE BUTLER",
+      "REDBALDKNIGHT",
+      "Tick"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 33,
+      "subTechniqueCount": 26,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 33개 (18pt) + Sub 26개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,schtasks)",
+      "분석요구 10/10 — mitigation 연결 112건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'kerberos' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0065",
+    "name": "Leviathan",
+    "aliases": [
+      "Leviathan",
+      "MUDCARP",
+      "Kryptonite Panda",
+      "Gadolinium",
+      "BRONZE MOHAWK",
+      "TEMP.Jumper",
+      "APT40",
+      "TEMP.Periscope",
+      "Gingham Typhoon"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 37,
+      "subTechniqueCount": 36,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 37개 (18pt) + Sub 36개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,bitsadmin)",
+      "분석요구 10/10 — mitigation 연결 142건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0093",
+    "name": "GALLIUM",
+    "aliases": [
+      "GALLIUM",
+      "Granite Typhoon"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 27,
+      "subTechniqueCount": 18,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 27개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,psexec)",
+      "분석요구 10/10 — mitigation 연결 87건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1043",
+    "name": "BlackByte",
+    "aliases": [
+      "BlackByte",
+      "Hecamede"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 43,
+      "subTechniqueCount": 24,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 43개 (18pt) + Sub 24개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 136건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0047",
+    "name": "Gamaredon Group",
+    "aliases": [
+      "Gamaredon Group",
+      "IRON TILDEN",
+      "Primitive Bear",
+      "ACTINIUM",
+      "Armageddon",
+      "Shuckworm",
+      "DEV-0157",
+      "Aqua Blizzard"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 55,
+      "subTechniqueCount": 37,
+      "tacticCount": 12,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 5
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 55개 (18pt) + Sub 37개 (+2 다양성)",
+      "환경 13/15 — platform 10종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 128건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0022",
+    "name": "APT3",
+    "aliases": [
+      "APT3",
+      "Gothic Panda",
+      "Pirpi",
+      "UPS Team",
+      "Buckeye",
+      "Threat Group-0110",
+      "TG-0110"
+    ],
+    "difficultyScore": 78,
+    "autoScore": 78,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 40,
+      "subTechniqueCount": 29,
+      "tacticCount": 11,
+      "platformCount": 10,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 40개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 12/15 — platform 10종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,schtasks)",
+      "분석요구 10/10 — mitigation 연결 108건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0087",
+    "name": "APT39",
+    "aliases": [
+      "APT39",
+      "ITG07",
+      "Chafer",
+      "Remix Kitten"
+    ],
+    "difficultyScore": 76,
+    "autoScore": 76,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 39,
+      "subTechniqueCount": 33,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 39개 (18pt) + Sub 33개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 146건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1046",
+    "name": "Storm-1811",
+    "aliases": [
+      "Storm-1811"
+    ],
+    "difficultyScore": 76,
+    "autoScore": 76,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 25,
+      "subTechniqueCount": 21,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 25개 (18pt) + Sub 21개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,bitsadmin)",
+      "분석요구 10/10 — mitigation 연결 72건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1032",
+    "name": "INC Ransom",
+    "aliases": [
+      "INC Ransom",
+      "GOLD IONIC"
+    ],
+    "difficultyScore": 76,
+    "autoScore": 76,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 25,
+      "subTechniqueCount": 10,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 25개 (18pt) + Sub 10개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (wmi,wmic,psexec)",
+      "분석요구 10/10 — mitigation 연결 75건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1030",
+    "name": "Agrius",
+    "aliases": [
+      "Agrius",
+      "Pink Sandstorm",
+      "AMERICIUM",
+      "Agonizing Serpens",
+      "BlackShadow"
+    ],
+    "difficultyScore": 76,
+    "autoScore": 76,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 20,
+      "subTechniqueCount": 11,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 20개 (18pt) + Sub 11개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 72건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1033",
+    "name": "Star Blizzard",
+    "aliases": [
+      "Star Blizzard",
+      "SEABORGIUM",
+      "Callisto Group",
+      "TA446",
+      "COLDRIVER"
+    ],
+    "difficultyScore": 75,
+    "autoScore": 75,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 18,
+      "environment": 13,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 15,
+      "subTechniqueCount": 14,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 18/20 — Parent 15개 (16pt) + Sub 14개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 50건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1014",
+    "name": "LuminousMoth",
+    "aliases": [
+      "LuminousMoth"
+    ],
+    "difficultyScore": 74,
+    "autoScore": 74,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 24,
+      "subTechniqueCount": 18,
+      "tacticCount": 12,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 24개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 62건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0100",
+    "name": "Inception",
+    "aliases": [
+      "Inception",
+      "Inception Framework",
+      "Cloud Atlas"
+    ],
+    "difficultyScore": 74,
+    "autoScore": 74,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 20,
+      "subTechniqueCount": 14,
+      "tacticCount": 10,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 20개 (18pt) + Sub 14개 (+2 다양성)",
+      "환경 13/15 — platform 7종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,regsvr32)",
+      "분석요구 10/10 — mitigation 연결 45건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0040",
+    "name": "Patchwork",
+    "aliases": [
+      "Patchwork",
+      "Hangover Group",
+      "Dropping Elephant",
+      "Chinastrats",
+      "MONSOON",
+      "Operation Hangover"
+    ],
+    "difficultyScore": 74,
+    "autoScore": 74,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 34,
+      "subTechniqueCount": 29,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 34개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 107건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1024",
+    "name": "Akira",
+    "aliases": [
+      "Akira",
+      "GOLD SAHARA",
+      "PUNK SPIDER",
+      "Howling Scorpius"
+    ],
+    "difficultyScore": 74,
+    "autoScore": 74,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 16,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 17,
+      "subTechniqueCount": 8,
+      "tacticCount": 12,
+      "platformCount": 10,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 16/20 — Parent 17개 (16pt) + Sub 8개",
+      "환경 12/15 — platform 10종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 60건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1004",
+    "name": "LAPSUS$",
+    "aliases": [
+      "LAPSUS$",
+      "DEV-0537",
+      "Strawberry Tempest"
+    ],
+    "difficultyScore": 74,
+    "autoScore": 74,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 32,
+      "subTechniqueCount": 29,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 32개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 113건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0106",
+    "name": "Rocke",
+    "aliases": [
+      "Rocke"
+    ],
+    "difficultyScore": 74,
+    "autoScore": 74,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 28,
+      "subTechniqueCount": 23,
+      "tacticCount": 10,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 28개 (18pt) + Sub 23개 (+2 다양성)",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 82건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0064",
+    "name": "APT33",
+    "aliases": [
+      "APT33",
+      "HOLMIUM",
+      "Elfin",
+      "Peach Sandstorm"
+    ],
+    "difficultyScore": 74,
+    "autoScore": 74,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 23,
+      "subTechniqueCount": 24,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 23개 (18pt) + Sub 24개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 111건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1047",
+    "name": "Velvet Ant",
+    "aliases": [
+      "Velvet Ant"
+    ],
+    "difficultyScore": 73,
+    "autoScore": 73,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 21,
+      "subTechniqueCount": 11,
+      "tacticCount": 9,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 9/14 커버 (12pt)",
+      "기법수 20/20 — Parent 21개 (18pt) + Sub 11개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (wmi)",
+      "분석요구 10/10 — mitigation 연결 59건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0082",
+    "name": "APT38",
+    "aliases": [
+      "APT38",
+      "NICKEL GLADSTONE",
+      "BeagleBoyz",
+      "Bluenoroff",
+      "Stardust Chollima",
+      "Sapphire Sleet",
+      "COPERNICIUM"
+    ],
+    "difficultyScore": 73,
+    "autoScore": 73,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 41,
+      "subTechniqueCount": 37,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 41개 (18pt) + Sub 37개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,rundll32,mshta)",
+      "분석요구 10/10 — mitigation 연결 121건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1022",
+    "name": "ToddyCat",
+    "aliases": [
+      "ToddyCat"
+    ],
+    "difficultyScore": 73,
+    "autoScore": 73,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 24,
+      "subTechniqueCount": 15,
+      "tacticCount": 10,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 24개 (18pt) + Sub 15개 (+2 다양성)",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 55건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1021",
+    "name": "Cinnamon Tempest",
+    "aliases": [
+      "Cinnamon Tempest",
+      "DEV-0401",
+      "Emperor Dragonfly",
+      "BRONZE STARLIGHT"
+    ],
+    "difficultyScore": 72,
+    "autoScore": 72,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 18,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 16,
+      "subTechniqueCount": 10,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 18/20 — Parent 16개 (16pt) + Sub 10개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 66건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0012",
+    "name": "Darkhotel",
+    "aliases": [
+      "Darkhotel",
+      "DUBNIUM",
+      "Zigzag Hail"
+    ],
+    "difficultyScore": 72,
+    "autoScore": 72,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 22,
+      "subTechniqueCount": 12,
+      "tacticCount": 10,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 22개 (18pt) + Sub 12개 (+2 다양성)",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 39건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0067",
+    "name": "APT37",
+    "aliases": [
+      "APT37",
+      "InkySquid",
+      "ScarCruft",
+      "Reaper",
+      "Group123",
+      "TEMP.Reaper",
+      "Ricochet Chollima"
+    ],
+    "difficultyScore": 72,
+    "autoScore": 72,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 25,
+      "subTechniqueCount": 15,
+      "tacticCount": 10,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 25개 (18pt) + Sub 15개 (+2 다양성)",
+      "환경 13/15 — platform 8종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 75건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1052",
+    "name": "Contagious Interview",
+    "aliases": [
+      "Contagious Interview",
+      "DeceptiveDevelopment",
+      "Gwisin Gang",
+      "Tenacious Pungsan",
+      "DEV#POPPER",
+      "PurpleBravo",
+      "TAG-121"
+    ],
+    "difficultyScore": 72,
+    "autoScore": 72,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 33,
+      "subTechniqueCount": 35,
+      "tacticCount": 12,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 33개 (18pt) + Sub 35개 (+2 다양성)",
+      "환경 13/15 — platform 10종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 102건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0092",
+    "name": "TA505",
+    "aliases": [
+      "TA505",
+      "Hive0065",
+      "Spandex Tempest",
+      "CHIMBORAZO"
+    ],
+    "difficultyScore": 71,
+    "autoScore": 71,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 24,
+      "subTechniqueCount": 28,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 24개 (18pt) + Sub 28개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,rundll32)",
+      "분석요구 10/10 — mitigation 연결 89건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1044",
+    "name": "APT42",
+    "aliases": [
+      "APT42"
+    ],
+    "difficultyScore": 71,
+    "autoScore": 71,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 27,
+      "subTechniqueCount": 18,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 27개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 66건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1036",
+    "name": "Moonstone Sleet",
+    "aliases": [
+      "Moonstone Sleet",
+      "Storm-1789"
+    ],
+    "difficultyScore": 71,
+    "autoScore": 71,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 23,
+      "subTechniqueCount": 19,
+      "tacticCount": 11,
+      "platformCount": 7,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 23개 (18pt) + Sub 19개 (+2 다양성)",
+      "환경 12/15 — platform 7종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 58건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1035",
+    "name": "Winter Vivern",
+    "aliases": [
+      "Winter Vivern",
+      "TA473",
+      "UAC-0114"
+    ],
+    "difficultyScore": 71,
+    "autoScore": 71,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 22,
+      "subTechniqueCount": 14,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 22개 (18pt) + Sub 14개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 77건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0080",
+    "name": "Cobalt Group",
+    "aliases": [
+      "Cobalt Group",
+      "GOLD KINGSWOOD",
+      "Cobalt Gang",
+      "Cobalt Spider"
+    ],
+    "difficultyScore": 70,
+    "autoScore": 70,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 26,
+      "subTechniqueCount": 26,
+      "tacticCount": 9,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 9/14 커버 (12pt)",
+      "기법수 20/20 — Parent 26개 (18pt) + Sub 26개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,regsvr32,psexec)",
+      "분석요구 10/10 — mitigation 연결 101건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1018",
+    "name": "TA2541",
+    "aliases": [
+      "TA2541"
+    ],
+    "difficultyScore": 70,
+    "autoScore": 70,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 5,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 20,
+      "subTechniqueCount": 23,
+      "tacticCount": 8,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 6
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 20/20 — Parent 20개 (18pt) + Sub 23개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 6종 (powershell,wmi,mshta)",
+      "분석요구 10/10 — mitigation 연결 64건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0001",
+    "name": "Axiom",
+    "aliases": [
+      "Axiom",
+      "Group 72"
+    ],
+    "difficultyScore": 70,
+    "autoScore": 70,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 16,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 15,
+      "subTechniqueCount": 7,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 16/20 — Parent 15개 (16pt) + Sub 7개",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 68건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0081",
+    "name": "Tropic Trooper",
+    "aliases": [
+      "Tropic Trooper",
+      "Pirate Panda",
+      "KeyBoy"
+    ],
+    "difficultyScore": 69,
+    "autoScore": 69,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 35,
+      "subTechniqueCount": 21,
+      "tacticCount": 10,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 35개 (18pt) + Sub 21개 (+2 다양성)",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 78건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0131",
+    "name": "Tonto Team",
+    "aliases": [
+      "Tonto Team",
+      "Earth Akhlut",
+      "BRONZE HUNTLEY",
+      "CactusPete",
+      "Karma Panda"
+    ],
+    "difficultyScore": 69,
+    "autoScore": 69,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 14,
+      "subTechniqueCount": 9,
+      "tacticCount": 10,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 13/20 — Parent 14개 (13pt) + Sub 9개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 55건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1045",
+    "name": "Salt Typhoon",
+    "aliases": [
+      "Salt Typhoon"
+    ],
+    "difficultyScore": 69,
+    "autoScore": 69,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 14,
+      "subTechniqueCount": 10,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 15/20 — Parent 14개 (13pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 46건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0128",
+    "name": "ZIRCONIUM",
+    "aliases": [
+      "ZIRCONIUM",
+      "APT31",
+      "Violet Typhoon"
+    ],
+    "difficultyScore": 69,
+    "autoScore": 69,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 25,
+      "subTechniqueCount": 17,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 25개 (18pt) + Sub 17개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 58건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1034",
+    "name": "Daggerfly",
+    "aliases": [
+      "Daggerfly",
+      "Evasive Panda",
+      "BRONZE HIGHLAND"
+    ],
+    "difficultyScore": 68,
+    "autoScore": 68,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 18,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 17,
+      "subTechniqueCount": 13,
+      "tacticCount": 9,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 9/14 커버 (12pt)",
+      "기법수 18/20 — Parent 17개 (16pt) + Sub 13개 (+2 다양성)",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,rundll32,bitsadmin)",
+      "분석요구 10/10 — mitigation 연결 43건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0142",
+    "name": "Confucius",
+    "aliases": [
+      "Confucius",
+      "Confucius APT"
+    ],
+    "difficultyScore": 67,
+    "autoScore": 67,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 18,
+      "environment": 13,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 16,
+      "subTechniqueCount": 12,
+      "tacticCount": 10,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 18/20 — Parent 16개 (16pt) + Sub 12개 (+2 다양성)",
+      "환경 13/15 — platform 10종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,mshta)",
+      "분석요구 10/10 — mitigation 연결 51건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0098",
+    "name": "BlackTech",
+    "aliases": [
+      "BlackTech",
+      "Palmerworm"
+    ],
+    "difficultyScore": 66,
+    "autoScore": 66,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 15,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 10,
+      "tacticCount": 8,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 15/20 — Parent 10개 (13pt) + Sub 10개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (psexec)",
+      "분석요구 10/10 — mitigation 연결 53건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0121",
+    "name": "Sidewinder",
+    "aliases": [
+      "Sidewinder",
+      "T-APT-04",
+      "Rattlesnake"
+    ],
+    "difficultyScore": 66,
+    "autoScore": 66,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 23,
+      "subTechniqueCount": 19,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 23개 (18pt) + Sub 19개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,mshta)",
+      "분석요구 10/10 — mitigation 연결 63건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1041",
+    "name": "Sea Turtle",
+    "aliases": [
+      "Sea Turtle",
+      "Teal Kurma",
+      "Marbled Dust",
+      "Cosmic Wolf",
+      "SILICON"
+    ],
+    "difficultyScore": 66,
+    "autoScore": 66,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 22,
+      "subTechniqueCount": 19,
+      "tacticCount": 9,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 9/14 커버 (12pt)",
+      "기법수 20/20 — Parent 22개 (18pt) + Sub 19개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 78건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0006",
+    "name": "APT1",
+    "aliases": [
+      "APT1",
+      "Comment Crew",
+      "Comment Group",
+      "Comment Panda"
+    ],
+    "difficultyScore": 66,
+    "autoScore": 66,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 20,
+      "subTechniqueCount": 16,
+      "tacticCount": 8,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 20/20 — Parent 20개 (18pt) + Sub 16개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + lateral-movement",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 51건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'credential dumping' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0030",
+    "name": "Lotus Blossom",
+    "aliases": [
+      "Lotus Blossom",
+      "DRAGONFISH",
+      "Spring Dragon",
+      "RADIUM",
+      "Raspberry Typhoon",
+      "Bilbug",
+      "Thrip"
+    ],
+    "difficultyScore": 66,
+    "autoScore": 66,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 18,
+      "environment": 12,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 17,
+      "subTechniqueCount": 10,
+      "tacticCount": 9,
+      "platformCount": 10,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 9/14 커버 (12pt)",
+      "기법수 18/20 — Parent 17개 (16pt) + Sub 10개 (+2 다양성)",
+      "환경 12/15 — platform 10종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (wmi)",
+      "분석요구 8/10 — mitigation 연결 30건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0077",
+    "name": "Leafminer",
+    "aliases": [
+      "Leafminer",
+      "Raspite"
+    ],
+    "difficultyScore": 63,
+    "autoScore": 63,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 14,
+      "subTechniqueCount": 12,
+      "tacticCount": 9,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 9/14 커버 (12pt)",
+      "기법수 15/20 — Parent 14개 (13pt) + Sub 12개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (psexec)",
+      "분석요구 10/10 — mitigation 연결 51건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0073",
+    "name": "APT19",
+    "aliases": [
+      "APT19",
+      "Codoso",
+      "C0d0so0",
+      "Codoso Team",
+      "Sunshop Group"
+    ],
+    "difficultyScore": 63,
+    "autoScore": 63,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 18,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 18,
+      "subTechniqueCount": 14,
+      "tacticCount": 8,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 18/20 — Parent 18개 (16pt) + Sub 14개 (+2 다양성)",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,rundll32,regsvr32)",
+      "분석요구 10/10 — mitigation 연결 52건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0021",
+    "name": "Molerats",
+    "aliases": [
+      "Molerats",
+      "Operation Molerats",
+      "Gaza Cybergang"
+    ],
+    "difficultyScore": 63,
+    "autoScore": 63,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 13,
+      "tacticCount": 8,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 15/20 — Parent 12개 (13pt) + Sub 13개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 51건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0126",
+    "name": "Higaisa",
+    "aliases": [
+      "Higaisa"
+    ],
+    "difficultyScore": 63,
+    "autoScore": 63,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 24,
+      "subTechniqueCount": 17,
+      "tacticCount": 8,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 20/20 — Parent 24개 (18pt) + Sub 17개 (+2 다양성)",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (certutil)",
+      "분석요구 10/10 — mitigation 연결 60건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0053",
+    "name": "FIN5",
+    "aliases": [
+      "FIN5"
+    ],
+    "difficultyScore": 62,
+    "autoScore": 62,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 15,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 5,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 13/20 — Parent 10개 (13pt) + Sub 5개",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (psexec)",
+      "분석요구 8/10 — mitigation 연결 36건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0140",
+    "name": "LazyScripter",
+    "aliases": [
+      "LazyScripter"
+    ],
+    "difficultyScore": 60,
+    "autoScore": 60,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 13,
+      "subTechniqueCount": 17,
+      "tacticCount": 7,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 15/20 — Parent 13개 (13pt) + Sub 17개 (+2 다양성)",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,rundll32,mshta)",
+      "분석요구 10/10 — mitigation 연결 56건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1002",
+    "name": "BITTER",
+    "aliases": [
+      "BITTER",
+      "T-APT-17"
+    ],
+    "difficultyScore": 59,
+    "autoScore": 59,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 18,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 16,
+      "subTechniqueCount": 10,
+      "tacticCount": 7,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 18/20 — Parent 16개 (16pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 51건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0068",
+    "name": "PLATINUM",
+    "aliases": [
+      "PLATINUM"
+    ],
+    "difficultyScore": 59,
+    "autoScore": 59,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 5,
+      "tacticCount": 7,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 13/20 — Parent 10개 (13pt) + Sub 5개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 43건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1008",
+    "name": "SideCopy",
+    "aliases": [
+      "SideCopy"
+    ],
+    "difficultyScore": 59,
+    "autoScore": 59,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 18,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 15,
+      "subTechniqueCount": 10,
+      "tacticCount": 9,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 9/14 커버 (12pt)",
+      "기법수 18/20 — Parent 15개 (16pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (mshta)",
+      "분석요구 8/10 — mitigation 연결 33건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0120",
+    "name": "Evilnum",
+    "aliases": [
+      "Evilnum"
+    ],
+    "difficultyScore": 59,
+    "autoScore": 59,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 11,
+      "subTechniqueCount": 8,
+      "tacticCount": 8,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 13/20 — Parent 11개 (13pt) + Sub 8개",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 8/10 — mitigation 연결 38건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0122",
+    "name": "Silent Librarian",
+    "aliases": [
+      "Silent Librarian",
+      "TA407",
+      "COBALT DICKENS"
+    ],
+    "difficultyScore": 59,
+    "autoScore": 59,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 10,
+      "tacticCount": 8,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 15/20 — Parent 10개 (13pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 29건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0112",
+    "name": "Windshift",
+    "aliases": [
+      "Windshift",
+      "Bahamut"
+    ],
+    "difficultyScore": 58,
+    "autoScore": 58,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 14,
+      "subTechniqueCount": 10,
+      "tacticCount": 7,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 15/20 — Parent 14개 (13pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (wmi)",
+      "분석요구 10/10 — mitigation 연결 54건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1026",
+    "name": "Malteiro",
+    "aliases": [
+      "Malteiro"
+    ],
+    "difficultyScore": 57,
+    "autoScore": 57,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 11,
+      "subTechniqueCount": 8,
+      "tacticCount": 7,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 13/20 — Parent 11개 (13pt) + Sub 8개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 28건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0009",
+    "name": "Deep Panda",
+    "aliases": [
+      "Deep Panda",
+      "Shell Crew",
+      "WebMasters",
+      "KungFu Kittens",
+      "PinkPanther",
+      "Black Vine"
+    ],
+    "difficultyScore": 57,
+    "autoScore": 57,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 8,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 7,
+      "tacticCount": 6,
+      "platformCount": 5,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 13/20 — Parent 10개 (13pt) + Sub 7개",
+      "환경 10/15 — platform 5종 (10pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,regsvr32)",
+      "분석요구 8/10 — mitigation 연결 25건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0078",
+    "name": "Gorgon Group",
+    "aliases": [
+      "Gorgon Group"
+    ],
+    "difficultyScore": 56,
+    "autoScore": 56,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 12,
+      "tacticCount": 7,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 15/20 — Parent 12개 (13pt) + Sub 12개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 8/10 — mitigation 연결 39건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0019",
+    "name": "Naikon",
+    "aliases": [
+      "Naikon"
+    ],
+    "difficultyScore": 56,
+    "autoScore": 56,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 13,
+      "subTechniqueCount": 10,
+      "tacticCount": 6,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 15/20 — Parent 13개 (13pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (wmi,wmic,schtasks)",
+      "분석요구 10/10 — mitigation 연결 43건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0038",
+    "name": "Stealth Falcon",
+    "aliases": [
+      "Stealth Falcon"
+    ],
+    "difficultyScore": 55,
+    "autoScore": 55,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 2,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 13,
+      "subTechniqueCount": 6,
+      "tacticCount": 8,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 13/20 — Parent 13개 (13pt) + Sub 6개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 2/10 — LOTL 2종 (powershell,wmi)",
+      "분석요구 8/10 — mitigation 연결 37건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0105",
+    "name": "DarkVishnya",
+    "aliases": [
+      "DarkVishnya"
+    ],
+    "difficultyScore": 55,
+    "autoScore": 55,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 2,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 3,
+      "tacticCount": 8,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 13/20 — Parent 10개 (13pt) + Sub 3개",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 2/10 — LOTL 2종 (powershell,psexec)",
+      "분석요구 8/10 — mitigation 연결 32건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0051",
+    "name": "FIN10",
+    "aliases": [
+      "FIN10"
+    ],
+    "difficultyScore": 55,
+    "autoScore": 55,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 8,
+      "tacticCount": 8,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 9/20 — Parent 9개 (9pt) + Sub 8개",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 8/10 — mitigation 연결 36건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0085",
+    "name": "FIN4",
+    "aliases": [
+      "FIN4"
+    ],
+    "difficultyScore": 55,
+    "autoScore": 55,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 11,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 11,
+      "tacticCount": 8,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 11/20 — Parent 9개 (9pt) + Sub 11개 (+2 다양성)",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 39건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0135",
+    "name": "BackdoorDiplomacy",
+    "aliases": [
+      "BackdoorDiplomacy"
+    ],
+    "difficultyScore": 54,
+    "autoScore": 54,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 13,
+      "subTechniqueCount": 8,
+      "tacticCount": 8,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 13/20 — Parent 13개 (13pt) + Sub 8개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 42건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1031",
+    "name": "Saint Bear",
+    "aliases": [
+      "Saint Bear",
+      "Storm-0587",
+      "TA471",
+      "UAC-0056",
+      "Lorec53"
+    ],
+    "difficultyScore": 53,
+    "autoScore": 53,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 13,
+      "subTechniqueCount": 13,
+      "tacticCount": 7,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 15/20 — Parent 13개 (13pt) + Sub 13개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wscript)",
+      "분석요구 10/10 — mitigation 연결 54건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0107",
+    "name": "Whitefly",
+    "aliases": [
+      "Whitefly"
+    ],
+    "difficultyScore": 53,
+    "autoScore": 53,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 6,
+      "tacticCount": 7,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 9/20 — Parent 9개 (9pt) + Sub 6개",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 37건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1009",
+    "name": "Moses Staff",
+    "aliases": [
+      "Moses Staff",
+      "DEV-0500",
+      "Marigold Sandstorm"
+    ],
+    "difficultyScore": 52,
+    "autoScore": 52,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 8,
+      "tacticCount": 7,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 13/20 — Parent 12개 (13pt) + Sub 8개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — lateral-movement",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 30건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1012",
+    "name": "CURIUM",
+    "aliases": [
+      "CURIUM",
+      "Crimson Sandstorm",
+      "TA456",
+      "Tortoise Shell",
+      "Yellow Liderc"
+    ],
+    "difficultyScore": 52,
+    "autoScore": 52,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 18,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 2,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 15,
+      "subTechniqueCount": 14,
+      "tacticCount": 8,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 18/20 — Parent 15개 (16pt) + Sub 14개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 2/10 — LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 43건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0026",
+    "name": "APT18",
+    "aliases": [
+      "APT18",
+      "TG-0416",
+      "Dynamite Panda",
+      "Threat Group-0416"
+    ],
+    "difficultyScore": 52,
+    "autoScore": 52,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 11,
+      "subTechniqueCount": 7,
+      "tacticCount": 7,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 13/20 — Parent 11개 (13pt) + Sub 7개",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 29건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0070",
+    "name": "Dark Caracal",
+    "aliases": [
+      "Dark Caracal"
+    ],
+    "difficultyScore": 50,
+    "autoScore": 50,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 11,
+      "subTechniqueCount": 8,
+      "tacticCount": 8,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 13/20 — Parent 11개 (13pt) + Sub 8개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 22건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0056",
+    "name": "PROMETHIUM",
+    "aliases": [
+      "PROMETHIUM",
+      "StrongPity"
+    ],
+    "difficultyScore": 50,
+    "autoScore": 50,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 11,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 10,
+      "tacticCount": 7,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 11/20 — Parent 9개 (9pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 36건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0039",
+    "name": "Suckfly",
+    "aliases": [
+      "Suckfly"
+    ],
+    "difficultyScore": 49,
+    "autoScore": 49,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 2,
+      "tacticCount": 7,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 2개",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 26건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1005",
+    "name": "POLONIUM",
+    "aliases": [
+      "POLONIUM",
+      "Plaid Rain"
+    ],
+    "difficultyScore": 49,
+    "autoScore": 49,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 9,
+      "environment": 13,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 4,
+      "tacticCount": 7,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 4개",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 19건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0127",
+    "name": "TA551",
+    "aliases": [
+      "TA551",
+      "GOLD CABIN",
+      "Shathak"
+    ],
+    "difficultyScore": 49,
+    "autoScore": 49,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 8,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 11,
+      "subTechniqueCount": 12,
+      "tacticCount": 5,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 15/20 — Parent 11개 (13pt) + Sub 12개 (+2 다양성)",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (rundll32,mshta,regsvr32)",
+      "분석요구 8/10 — mitigation 연결 37건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0075",
+    "name": "Rancor",
+    "aliases": [
+      "Rancor"
+    ],
+    "difficultyScore": 48,
+    "autoScore": 48,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 8,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 8,
+      "subTechniqueCount": 8,
+      "tacticCount": 6,
+      "platformCount": 5,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 9/20 — Parent 8개 (9pt) + Sub 8개",
+      "환경 10/15 — platform 5종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (wmi,certutil,schtasks)",
+      "분석요구 8/10 — mitigation 연결 29건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0095",
+    "name": "Machete",
+    "aliases": [
+      "Machete",
+      "APT-C-43",
+      "El Machete"
+    ],
+    "difficultyScore": 48,
+    "autoScore": 48,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 11,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 10,
+      "tacticCount": 5,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 11/20 — Parent 7개 (9pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 42건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0099",
+    "name": "APT-C-36",
+    "aliases": [
+      "APT-C-36",
+      "Blind Eagle"
+    ],
+    "difficultyScore": 48,
+    "autoScore": 48,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 6,
+      "tacticCount": 7,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 7/14 커버 (12pt)",
+      "기법수 9/20 — Parent 9개 (9pt) + Sub 6개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 36건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0138",
+    "name": "Andariel",
+    "aliases": [
+      "Andariel",
+      "Silent Chollima",
+      "PLUTONIUM",
+      "Onyx Sleet"
+    ],
+    "difficultyScore": 47,
+    "autoScore": 47,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 12,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 6,
+      "tacticCount": 8,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt)",
+      "기법수 13/20 — Parent 12개 (13pt) + Sub 6개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 28건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0134",
+    "name": "Transparent Tribe",
+    "aliases": [
+      "Transparent Tribe",
+      "COPPER FIELDSTONE",
+      "APT36",
+      "Mythic Leopard",
+      "ProjectM"
+    ],
+    "difficultyScore": 47,
+    "autoScore": 47,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 11,
+      "tacticCount": 5,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 15/20 — Parent 12개 (13pt) + Sub 11개 (+2 다양성)",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 45건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0008",
+    "name": "Carbanak",
+    "aliases": [
+      "Carbanak",
+      "Anunak"
+    ],
+    "difficultyScore": 46,
+    "autoScore": 46,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 8,
+      "subTechniqueCount": 7,
+      "tacticCount": 6,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 9/20 — Parent 8개 (9pt) + Sub 7개",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (rundll32,psexec)",
+      "분석요구 8/10 — mitigation 연결 37건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0090",
+    "name": "WIRTE",
+    "aliases": [
+      "WIRTE"
+    ],
+    "difficultyScore": 45,
+    "autoScore": 45,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 8,
+      "tacticCount": 5,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 13/20 — Parent 10개 (13pt) + Sub 8개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,regsvr32)",
+      "분석요구 8/10 — mitigation 연결 31건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1011",
+    "name": "EXOTIC LILY",
+    "aliases": [
+      "EXOTIC LILY"
+    ],
+    "difficultyScore": 44,
+    "autoScore": 44,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 15,
+      "environment": 13,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 11,
+      "subTechniqueCount": 11,
+      "tacticCount": 5,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 15/20 — Parent 11개 (13pt) + Sub 11개 (+2 다양성)",
+      "환경 13/15 — platform 8종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 8/10 — mitigation 연결 36건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0048",
+    "name": "RTM",
+    "aliases": [
+      "RTM"
+    ],
+    "difficultyScore": 44,
+    "autoScore": 44,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 6,
+      "tacticCount": 6,
+      "platformCount": 5,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 6개",
+      "환경 10/15 — platform 5종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 25건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1013",
+    "name": "Metador",
+    "aliases": [
+      "Metador"
+    ],
+    "difficultyScore": 44,
+    "autoScore": 44,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 8,
+      "subTechniqueCount": 7,
+      "tacticCount": 6,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 9/20 — Parent 8개 (9pt) + Sub 7개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (wmi)",
+      "분석요구 6/10 — mitigation 연결 19건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0115",
+    "name": "GOLD SOUTHFIELD",
+    "aliases": [
+      "GOLD SOUTHFIELD",
+      "Pinchy Spider"
+    ],
+    "difficultyScore": 44,
+    "autoScore": 44,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 13,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 3,
+      "tacticCount": 6,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 9/20 — Parent 9개 (9pt) + Sub 3개",
+      "환경 13/15 — platform 10종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 8/10 — mitigation 연결 36건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1019",
+    "name": "MoustachedBouncer",
+    "aliases": [
+      "MoustachedBouncer"
+    ],
+    "difficultyScore": 44,
+    "autoScore": 44,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 4,
+      "tacticCount": 6,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 4개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 6/10 — mitigation 연결 20건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0028",
+    "name": "Threat Group-1314",
+    "aliases": [
+      "Threat Group-1314",
+      "TG-1314"
+    ],
+    "difficultyScore": 43,
+    "autoScore": 43,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 3,
+      "tacticCount": 6,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 3개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 20건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1007",
+    "name": "Aoqin Dragon",
+    "aliases": [
+      "Aoqin Dragon"
+    ],
+    "difficultyScore": 42,
+    "autoScore": 42,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 4,
+      "tacticCount": 6,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 9/20 — Parent 9개 (9pt) + Sub 4개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 5/15 — lateral-movement",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 22건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0054",
+    "name": "Sowbug",
+    "aliases": [
+      "Sowbug"
+    ],
+    "difficultyScore": 42,
+    "autoScore": 42,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 4,
+      "tacticCount": 5,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 9/20 — Parent 9개 (9pt) + Sub 4개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 15건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'credential dumping' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0079",
+    "name": "DarkHydrus",
+    "aliases": [
+      "DarkHydrus"
+    ],
+    "difficultyScore": 41,
+    "autoScore": 41,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 7,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 5,
+      "tacticCount": 5,
+      "platformCount": 4,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 5개",
+      "환경 7/15 — platform 4종 (7pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 6/10 — mitigation 연결 24건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0033",
+    "name": "Poseidon Group",
+    "aliases": [
+      "Poseidon Group"
+    ],
+    "difficultyScore": 41,
+    "autoScore": 41,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 4,
+      "tacticCount": 4,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 4개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 6/10 — mitigation 연결 19건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'credential dumping' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0052",
+    "name": "CopyKittens",
+    "aliases": [
+      "CopyKittens"
+    ],
+    "difficultyScore": 39,
+    "autoScore": 39,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 7,
+      "tacticCount": 5,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 7개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,rundll32)",
+      "분석요구 6/10 — mitigation 연결 19건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0018",
+    "name": "admin@338",
+    "aliases": [
+      "admin@338"
+    ],
+    "difficultyScore": 38,
+    "autoScore": 38,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 6,
+      "tacticCount": 4,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 13/20 — Parent 12개 (13pt) + Sub 6개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 18건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0133",
+    "name": "Nomadic Octopus",
+    "aliases": [
+      "Nomadic Octopus",
+      "DustSquad"
+    ],
+    "difficultyScore": 38,
+    "autoScore": 38,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 6,
+      "subTechniqueCount": 5,
+      "tacticCount": 4,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 9/20 — Parent 6개 (9pt) + Sub 5개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 8/10 — mitigation 연결 28건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1020",
+    "name": "Mustard Tempest",
+    "aliases": [
+      "Mustard Tempest",
+      "DEV-0206",
+      "TA569",
+      "GOLD PRELUDE",
+      "UNC1543"
+    ],
+    "difficultyScore": 37,
+    "autoScore": 37,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 9,
+      "tacticCount": 6,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 6/14 커버 (8pt)",
+      "기법수 9/20 — Parent 9개 (9pt) + Sub 9개",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 24건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0066",
+    "name": "Elderwood",
+    "aliases": [
+      "Elderwood",
+      "Elderwood Gang",
+      "Beijing Group",
+      "Sneaky Panda"
+    ],
+    "difficultyScore": 36,
+    "autoScore": 36,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 6,
+      "subTechniqueCount": 6,
+      "tacticCount": 4,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 9/20 — Parent 6개 (9pt) + Sub 6개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 31건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0084",
+    "name": "Gallmaker",
+    "aliases": [
+      "Gallmaker"
+    ],
+    "difficultyScore": 36,
+    "autoScore": 36,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 6,
+      "subTechniqueCount": 5,
+      "tacticCount": 4,
+      "platformCount": 5,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 9/20 — Parent 6개 (9pt) + Sub 5개",
+      "환경 10/15 — platform 5종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 6/10 — mitigation 연결 24건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0130",
+    "name": "Ajax Security Team",
+    "aliases": [
+      "Ajax Security Team",
+      "Operation Woolen-Goldfish",
+      "AjaxTM",
+      "Rocket Kitten",
+      "Flying Kitten",
+      "Operation Saffron Rose"
+    ],
+    "difficultyScore": 34,
+    "autoScore": 34,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 0,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 5,
+      "tacticCount": 5,
+      "platformCount": 5,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 5개",
+      "환경 10/15 — platform 5종 (10pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 6/10 — mitigation 연결 22건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0089",
+    "name": "The White Company",
+    "aliases": [
+      "The White Company"
+    ],
+    "difficultyScore": 34,
+    "autoScore": 34,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 5,
+      "tacticCount": 4,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 5개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 17건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0124",
+    "name": "Windigo",
+    "aliases": [
+      "Windigo"
+    ],
+    "difficultyScore": 33,
+    "autoScore": 33,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 0,
+      "tacticCount": 5,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 0개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 6/10 — mitigation 연결 18건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0024",
+    "name": "Putter Panda",
+    "aliases": [
+      "Putter Panda",
+      "APT2",
+      "MSUpdater"
+    ],
+    "difficultyScore": 33,
+    "autoScore": 33,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 4,
+      "tacticCount": 3,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 3/14 커버 (5pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 4개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 4/10 — mitigation 연결 8건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0011",
+    "name": "PittyTiger",
+    "aliases": [
+      "PittyTiger"
+    ],
+    "difficultyScore": 33,
+    "autoScore": 33,
+    "manualAdjust": 0,
+    "level": "intermediate",
+    "breakdown": {
+      "chainScope": 8,
+      "ttpCount": 2,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 2,
+      "subTechniqueCount": 1,
+      "tacticCount": 5,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt)",
+      "기법수 2/20 — Parent 2개 (2pt) + Sub 1개",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 4/10 — mitigation 연결 9건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0041",
+    "name": "Strider",
+    "aliases": [
+      "Strider",
+      "ProjectSauron"
+    ],
+    "difficultyScore": 33,
+    "autoScore": 33,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 12,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 3,
+      "subTechniqueCount": 3,
+      "tacticCount": 4,
+      "platformCount": 5,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 5/20 — Parent 3개 (5pt) + Sub 3개",
+      "환경 12/15 — platform 5종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 2/10 — mitigation 연결 6건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0044",
+    "name": "Winnti Group",
+    "aliases": [
+      "Winnti Group",
+      "Blackfly"
+    ],
+    "difficultyScore": 32,
+    "autoScore": 32,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 6,
+      "subTechniqueCount": 2,
+      "tacticCount": 4,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 9/20 — Parent 6개 (9pt) + Sub 2개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 4/10 — mitigation 연결 8건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0043",
+    "name": "Group5",
+    "aliases": [
+      "Group5"
+    ],
+    "difficultyScore": 31,
+    "autoScore": 31,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 3,
+      "tacticCount": 3,
+      "platformCount": 5,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 3/14 커버 (5pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 3개",
+      "환경 10/15 — platform 5종 (10pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 2/10 — mitigation 연결 5건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1037",
+    "name": "TA577",
+    "aliases": [
+      "TA577"
+    ],
+    "difficultyScore": 30,
+    "autoScore": 30,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 6,
+      "tacticCount": 4,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 6개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 16건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0103",
+    "name": "Mofang",
+    "aliases": [
+      "Mofang"
+    ],
+    "difficultyScore": 30,
+    "autoScore": 30,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 3,
+      "subTechniqueCount": 6,
+      "tacticCount": 3,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 3/14 커버 (5pt)",
+      "기법수 5/20 — Parent 3개 (5pt) + Sub 6개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 21건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0003",
+    "name": "Cleaver",
+    "aliases": [
+      "Cleaver",
+      "Threat Group 2889",
+      "TG-2889"
+    ],
+    "difficultyScore": 30,
+    "autoScore": 30,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 7,
+      "credLateral": 5,
+      "stealthLotl": 2,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 5,
+      "tacticCount": 3,
+      "platformCount": 4,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 3/14 커버 (5pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 5개",
+      "환경 7/15 — platform 4종 (7pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 2/10 — LOTL 2종 (wmi,psexec)",
+      "분석요구 6/10 — mitigation 연결 16건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'credential dumping' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0137",
+    "name": "Ferocious Kitten",
+    "aliases": [
+      "Ferocious Kitten"
+    ],
+    "difficultyScore": 30,
+    "autoScore": 30,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 6,
+      "tacticCount": 4,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 6개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 23건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0136",
+    "name": "IndigoZebra",
+    "aliases": [
+      "IndigoZebra"
+    ],
+    "difficultyScore": 30,
+    "autoScore": 30,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 6,
+      "subTechniqueCount": 6,
+      "tacticCount": 4,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 9/20 — Parent 6개 (9pt) + Sub 6개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 6/10 — mitigation 연결 16건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0076",
+    "name": "Thrip",
+    "aliases": [
+      "Thrip"
+    ],
+    "difficultyScore": 29,
+    "autoScore": 29,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 13,
+      "credLateral": 0,
+      "stealthLotl": 2,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 4,
+      "tacticCount": 4,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 2
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 4개",
+      "환경 13/15 — platform 6종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 2/10 — LOTL 2종 (powershell,psexec)",
+      "분석요구 4/10 — mitigation 연결 13건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0123",
+    "name": "Volatile Cedar",
+    "aliases": [
+      "Volatile Cedar",
+      "Lebanese Cedar"
+    ],
+    "difficultyScore": 26,
+    "autoScore": 26,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 3,
+      "tacticCount": 4,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 4/14 커버 (5pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 3개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 6/10 — mitigation 연결 15건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0020",
+    "name": "Equation",
+    "aliases": [
+      "Equation"
+    ],
+    "difficultyScore": 23,
+    "autoScore": 23,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 7,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 3,
+      "tacticCount": 3,
+      "platformCount": 3,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 3/14 커버 (5pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 3개",
+      "환경 7/15 — platform 3종 (7pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 2/10 — mitigation 연결 6건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0005",
+    "name": "APT12",
+    "aliases": [
+      "APT12",
+      "IXESHE",
+      "DynCalc",
+      "Numbered Panda",
+      "DNSCALC"
+    ],
+    "difficultyScore": 23,
+    "autoScore": 23,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 7,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 4,
+      "tacticCount": 3,
+      "platformCount": 4,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 3/14 커버 (5pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 4개",
+      "환경 7/15 — platform 4종 (7pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 6/10 — mitigation 연결 17건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0062",
+    "name": "TA459",
+    "aliases": [
+      "TA459"
+    ],
+    "difficultyScore": 22,
+    "autoScore": 22,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 5,
+      "environment": 7,
+      "credLateral": 0,
+      "stealthLotl": 2,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 4,
+      "tacticCount": 2,
+      "platformCount": 3,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 2/14 커버 (2pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 4개",
+      "환경 7/15 — platform 3종 (7pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 2/10 — LOTL 1종 (powershell)",
+      "분석요구 6/10 — mitigation 연결 23건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1042",
+    "name": "RedEcho",
+    "aliases": [
+      "RedEcho"
+    ],
+    "difficultyScore": 21,
+    "autoScore": 21,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 3,
+      "tacticCount": 2,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 2/14 커버 (2pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 3개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 4/10 — mitigation 연결 9건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0071",
+    "name": "Orangeworm",
+    "aliases": [
+      "Orangeworm"
+    ],
+    "difficultyScore": 21,
+    "autoScore": 21,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 0,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 2,
+      "subTechniqueCount": 2,
+      "tacticCount": 2,
+      "platformCount": 5,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 2/14 커버 (2pt)",
+      "기법수 2/20 — Parent 2개 (2pt) + Sub 2개",
+      "환경 10/15 — platform 5종 (10pt)",
+      "자격증명/횡적 5/15 — lateral-movement",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 2/10 — mitigation 연결 6건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1038",
+    "name": "TA578",
+    "aliases": [
+      "TA578"
+    ],
+    "difficultyScore": 21,
+    "autoScore": 21,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 5,
+      "ttpCount": 5,
+      "environment": 7,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 3,
+      "tacticCount": 3,
+      "platformCount": 4,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 5/20 — tactic 3/14 커버 (5pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 3개",
+      "환경 7/15 — platform 4종 (7pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 4/10 — mitigation 연결 9건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0063",
+    "name": "BlackOasis",
+    "aliases": [
+      "BlackOasis"
+    ],
+    "difficultyScore": 20,
+    "autoScore": 20,
+    "manualAdjust": 0,
+    "level": "novice",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 1,
+      "subTechniqueCount": 0,
+      "tacticCount": 1,
+      "platformCount": 5,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 1/14 커버 (2pt)",
+      "기법수 2/20 — Parent 1개 (2pt) + Sub 0개",
+      "환경 10/15 — platform 5종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 2/10 — mitigation 연결 4건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1050",
+    "name": "Water Galura",
+    "aliases": [
+      "Water Galura",
+      "GOLD FEATHER"
+    ],
+    "difficultyScore": 19,
+    "autoScore": 19,
+    "manualAdjust": 0,
+    "level": "novice",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 3,
+      "subTechniqueCount": 1,
+      "tacticCount": 2,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 2/14 커버 (2pt)",
+      "기법수 5/20 — Parent 3개 (5pt) + Sub 1개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 2/10 — mitigation 연결 5건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0029",
+    "name": "Scarlet Mimic",
+    "aliases": [
+      "Scarlet Mimic"
+    ],
+    "difficultyScore": 19,
+    "autoScore": 19,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 7,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 1,
+      "subTechniqueCount": 1,
+      "tacticCount": 1,
+      "platformCount": 3,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 1/14 커버 (2pt)",
+      "기법수 2/20 — Parent 1개 (2pt) + Sub 1개",
+      "환경 7/15 — platform 3종 (7pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 4/10 — mitigation 연결 8건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0036",
+    "name": "GCMAN",
+    "aliases": [
+      "GCMAN"
+    ],
+    "difficultyScore": 18,
+    "autoScore": 18,
+    "manualAdjust": 0,
+    "level": "advanced",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 7,
+      "credLateral": 5,
+      "stealthLotl": 0,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 1,
+      "subTechniqueCount": 2,
+      "tacticCount": 1,
+      "platformCount": 4,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 1/14 커버 (2pt)",
+      "기법수 2/20 — Parent 1개 (2pt) + Sub 2개",
+      "환경 7/15 — platform 4종 (7pt)",
+      "자격증명/횡적 5/15 — lateral-movement",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 2/10 — mitigation 연결 7건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0083",
+    "name": "SilverTerrier",
+    "aliases": [
+      "SilverTerrier"
+    ],
+    "difficultyScore": 18,
+    "autoScore": 18,
+    "manualAdjust": 0,
+    "level": "novice",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 2,
+      "subTechniqueCount": 3,
+      "tacticCount": 2,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 2/14 커버 (2pt)",
+      "기법수 2/20 — Parent 2개 (2pt) + Sub 3개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 4/10 — mitigation 연결 8건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1049",
+    "name": "AppleJeus",
+    "aliases": [
+      "AppleJeus",
+      "Gleaming Pisces",
+      "Citrine Sleet",
+      "UNC1720",
+      "UNC4736"
+    ],
+    "difficultyScore": 18,
+    "autoScore": 18,
+    "manualAdjust": 0,
+    "level": "expert",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 2,
+      "subTechniqueCount": 0,
+      "tacticCount": 2,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 2/14 커버 (2pt)",
+      "기법수 2/20 — Parent 2개 (2pt) + Sub 0개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 4/10 — mitigation 연결 8건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0002",
+    "name": "Moafee",
+    "aliases": [
+      "Moafee"
+    ],
+    "difficultyScore": 17,
+    "autoScore": 17,
+    "manualAdjust": 0,
+    "level": "novice",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 7,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 1,
+      "subTechniqueCount": 1,
+      "tacticCount": 1,
+      "platformCount": 3,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 1/14 커버 (2pt)",
+      "기법수 2/20 — Parent 1개 (2pt) + Sub 1개",
+      "환경 7/15 — platform 3종 (7pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 2/10 — mitigation 연결 4건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0013",
+    "name": "APT30",
+    "aliases": [
+      "APT30"
+    ],
+    "difficultyScore": 15,
+    "autoScore": 15,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 7,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 2,
+      "subTechniqueCount": 2,
+      "tacticCount": 2,
+      "platformCount": 3,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 2/14 커버 (2pt)",
+      "기법수 2/20 — Parent 2개 (2pt) + Sub 2개",
+      "환경 7/15 — platform 3종 (7pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 4/10 — mitigation 연결 10건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0025",
+    "name": "APT17",
+    "aliases": [
+      "APT17",
+      "Deputy Dog"
+    ],
+    "difficultyScore": 5,
+    "autoScore": 5,
+    "manualAdjust": 0,
+    "level": "novice",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 1,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 0,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 2,
+      "subTechniqueCount": 1,
+      "tacticCount": 1,
+      "platformCount": 1,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 1/14 커버 (2pt)",
+      "기법수 2/20 — Parent 2개 (2pt) + Sub 1개",
+      "환경 1/15 — platform 1종 (1pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 0/10 — mitigation 연결 2건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0023",
+    "name": "APT16",
+    "aliases": [
+      "APT16"
+    ],
+    "difficultyScore": 5,
+    "autoScore": 5,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 2,
+      "ttpCount": 2,
+      "environment": 1,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 0,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 1,
+      "subTechniqueCount": 1,
+      "tacticCount": 1,
+      "platformCount": 1,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 2/20 — tactic 1/14 커버 (2pt)",
+      "기법수 2/20 — Parent 1개 (2pt) + Sub 1개",
+      "환경 1/15 — platform 1종 (1pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 0/10 — mitigation 연결 1건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0088",
+    "name": "TEMP.Veles",
+    "aliases": [
+      "TEMP.Veles",
+      "XENOTIME"
+    ],
+    "difficultyScore": 0,
+    "autoScore": 0,
+    "manualAdjust": 0,
+    "level": "novice",
+    "breakdown": {
+      "chainScope": 0,
+      "ttpCount": 0,
+      "environment": 0,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 0,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 0,
+      "subTechniqueCount": 0,
+      "tacticCount": 0,
+      "platformCount": 0,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 0/20 — tactic 0/14 커버 (0pt)",
+      "기법수 0/20 — Parent 0개 (0pt) + Sub 0개",
+      "환경 0/15 — platform 0종 (0pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 0/10 — mitigation 연결 0건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0055",
+    "name": "NEODYMIUM",
+    "aliases": [
+      "NEODYMIUM"
+    ],
+    "difficultyScore": 0,
+    "autoScore": 0,
+    "manualAdjust": 0,
+    "level": "novice",
+    "breakdown": {
+      "chainScope": 0,
+      "ttpCount": 0,
+      "environment": 0,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 0,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 0,
+      "subTechniqueCount": 0,
+      "tacticCount": 0,
+      "platformCount": 0,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 0/20 — tactic 0/14 커버 (0pt)",
+      "기법수 0/20 — Parent 0개 (0pt) + Sub 0개",
+      "환경 0/15 — platform 0종 (0pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 0/10 — mitigation 연결 0건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G0017",
+    "name": "DragonOK",
+    "aliases": [
+      "DragonOK"
+    ],
+    "difficultyScore": 0,
+    "autoScore": 0,
+    "manualAdjust": 0,
+    "level": "beginner",
+    "breakdown": {
+      "chainScope": 0,
+      "ttpCount": 0,
+      "environment": 0,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 0,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 0,
+      "subTechniqueCount": 0,
+      "tacticCount": 0,
+      "platformCount": 0,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 0/20 — tactic 0/14 커버 (0pt)",
+      "기법수 0/20 — Parent 0개 (0pt) + Sub 0개",
+      "환경 0/15 — platform 0종 (0pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 0/10 — mitigation 연결 0건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  },
+  {
+    "attackId": "G1028",
+    "name": "APT-C-23",
+    "aliases": [
+      "APT-C-23",
+      "Mantis",
+      "Arid Viper",
+      "Desert Falcon",
+      "TAG-63",
+      "Grey Karkadann",
+      "Big Bang APT",
+      "Two-tailed Scorpion"
+    ],
+    "difficultyScore": 0,
+    "autoScore": 0,
+    "manualAdjust": 0,
+    "level": "novice",
+    "breakdown": {
+      "chainScope": 0,
+      "ttpCount": 0,
+      "environment": 0,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 0,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 0,
+      "subTechniqueCount": 0,
+      "tacticCount": 0,
+      "platformCount": 0,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    },
+    "reasons": [
+      "공격체인 0/20 — tactic 0/14 커버 (0pt)",
+      "기법수 0/20 — Parent 0개 (0pt) + Sub 0개",
+      "환경 0/15 — platform 0종 (0pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 0/10 — mitigation 연결 0건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ]
+  }
+]

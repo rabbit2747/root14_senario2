@@ -1,0 +1,3496 @@
+[
+  {
+    "attackId": "G0034",
+    "name": "Sandworm Team",
+    "aliases": [
+      "Sandworm Team",
+      "ELECTRUM",
+      "Telebots",
+      "IRON VIKING",
+      "BlackEnergy (Group)",
+      "Quedagh",
+      "Voodoo Bear",
+      "IRIDIUM",
+      "Seashell Blizzard",
+      "FROZENBARENTS",
+      "APT44"
+    ],
+    "curationScore": 98,
+    "breakdown": {
+      "fame": 28,
+      "relevance": 30,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 28/30 — 큐레이션 매핑: 28/30",
+      "관련성 30/30 — usMiddleEast: us  / criticalInfra:government,military / globalScale:worldwide",
+      "교육가치 40/40 — 다양성 79기법/15pt + tactic 14/15pt + mit 211/10pt"
+    ]
+  },
+  {
+    "attackId": "G0049",
+    "name": "OilRig",
+    "aliases": [
+      "OilRig",
+      "COBALT GYPSY",
+      "IRN2",
+      "APT34",
+      "Helix Kitten",
+      "Evasive Serpens",
+      "Hazel Sandstorm",
+      "EUROPIUM",
+      "ITG13",
+      "Earth Simnavaz",
+      "Crambus",
+      "TA452"
+    ],
+    "curationScore": 96,
+    "breakdown": {
+      "fame": 26,
+      "relevance": 30,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 26/30 — 큐레이션 매핑: 26/30",
+      "관련성 30/30 — usMiddleEast:middle east,iran / criticalInfra:financial,energy,oil / globalScale:international",
+      "교육가치 40/40 — 다양성 76기법/15pt + tactic 12/15pt + mit 204/10pt"
+    ]
+  },
+  {
+    "attackId": "G0016",
+    "name": "APT29",
+    "aliases": [
+      "APT29",
+      "IRON RITUAL",
+      "IRON HEMLOCK",
+      "NobleBaron",
+      "Dark Halo",
+      "NOBELIUM",
+      "UNC2452",
+      "YTTRIUM",
+      "The Dukes",
+      "Cozy Bear",
+      "CozyDuke",
+      "SolarStorm",
+      "Blue Kitsune",
+      "UNC3524",
+      "Midnight Blizzard"
+    ],
+    "curationScore": 95,
+    "breakdown": {
+      "fame": 30,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 30/30 — 큐레이션 매핑: 30/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:government,ot ",
+      "교육가치 40/40 — 다양성 66기법/15pt + tactic 12/15pt + mit 184/10pt"
+    ]
+  },
+  {
+    "attackId": "G0007",
+    "name": "APT28",
+    "aliases": [
+      "APT28",
+      "IRON TWILIGHT",
+      "SNAKEMACKEREL",
+      "Swallowtail",
+      "Group 74",
+      "Sednit",
+      "Sofacy",
+      "Pawn Storm",
+      "Fancy Bear",
+      "STRONTIUM",
+      "Tsar Team",
+      "Threat Group-4127",
+      "TG-4127",
+      "Forest Blizzard",
+      "FROZENLAKE",
+      "GruesomeLarch"
+    ],
+    "curationScore": 94,
+    "breakdown": {
+      "fame": 29,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 29/30 — 큐레이션 매핑: 29/30",
+      "관련성 25/30 — usMiddleEast:u.s., us  / criticalInfra:military,nuclear",
+      "교육가치 40/40 — 다양성 91기법/15pt + tactic 14/15pt + mit 241/10pt"
+    ]
+  },
+  {
+    "attackId": "G1017",
+    "name": "Volt Typhoon",
+    "aliases": [
+      "Volt Typhoon",
+      "BRONZE SILHOUETTE",
+      "Vanguard Panda",
+      "DEV-0391",
+      "UNC3236",
+      "Voltzite",
+      "Insidious Taurus"
+    ],
+    "curationScore": 93,
+    "breakdown": {
+      "fame": 28,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 28/30 — 큐레이션 매핑: 28/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:critical infrastructure",
+      "교육가치 40/40 — 다양성 81기법/15pt + tactic 12/15pt + mit 147/10pt"
+    ]
+  },
+  {
+    "attackId": "G0046",
+    "name": "FIN7",
+    "aliases": [
+      "FIN7",
+      "GOLD NIAGARA",
+      "ITG14",
+      "Carbon Spider",
+      "ELBRUS",
+      "Sangria Tempest"
+    ],
+    "curationScore": 91,
+    "breakdown": {
+      "fame": 26,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 26/30 — 큐레이션 매핑: 26/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:financial,hospital",
+      "교육가치 40/40 — 다양성 67기법/15pt + tactic 14/15pt + mit 179/10pt"
+    ]
+  },
+  {
+    "attackId": "G0064",
+    "name": "APT33",
+    "aliases": [
+      "APT33",
+      "HOLMIUM",
+      "Elfin",
+      "Peach Sandstorm"
+    ],
+    "curationScore": 91,
+    "breakdown": {
+      "fame": 26,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 26/30 — 큐레이션 매핑: 26/30",
+      "관련성 25/30 — usMiddleEast:united states,iran,saudi / criticalInfra:energy",
+      "교육가치 40/40 — 다양성 31기법/15pt + tactic 11/15pt + mit 111/10pt"
+    ]
+  },
+  {
+    "attackId": "G0069",
+    "name": "MuddyWater",
+    "aliases": [
+      "MuddyWater",
+      "Earth Vetala",
+      "MERCURY",
+      "Static Kitten",
+      "Seedworm",
+      "TEMP.Zagros",
+      "Mango Sandstorm",
+      "TA450"
+    ],
+    "curationScore": 90,
+    "breakdown": {
+      "fame": 25,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 25/30 — usMiddleEast:middle east,iran / criticalInfra:oil,gas,government",
+      "교육가치 40/40 — 다양성 58기법/15pt + tactic 12/15pt + mit 152/10pt"
+    ]
+  },
+  {
+    "attackId": "G0094",
+    "name": "Kimsuky",
+    "aliases": [
+      "Kimsuky",
+      "Black Banshee",
+      "Velvet Chollima",
+      "Emerald Sleet",
+      "THALLIUM",
+      "APT43",
+      "TA427",
+      "Springtail"
+    ],
+    "curationScore": 90,
+    "breakdown": {
+      "fame": 25,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:government,nuclear",
+      "교육가치 40/40 — 다양성 109기법/15pt + tactic 14/15pt + mit 255/10pt"
+    ]
+  },
+  {
+    "attackId": "G0065",
+    "name": "Leviathan",
+    "aliases": [
+      "Leviathan",
+      "MUDCARP",
+      "Kryptonite Panda",
+      "Gadolinium",
+      "BRONZE MOHAWK",
+      "TEMP.Jumper",
+      "APT40",
+      "TEMP.Periscope",
+      "Gingham Typhoon"
+    ],
+    "curationScore": 90,
+    "breakdown": {
+      "fame": 25,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:government,defense,healthcare",
+      "교육가치 40/40 — 다양성 50기법/15pt + tactic 12/15pt + mit 142/10pt"
+    ]
+  },
+  {
+    "attackId": "G0087",
+    "name": "APT39",
+    "aliases": [
+      "APT39",
+      "ITG07",
+      "Chafer",
+      "Remix Kitten"
+    ],
+    "curationScore": 86,
+    "breakdown": {
+      "fame": 21,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 21/30 — 큐레이션 매핑: 21/30",
+      "관련성 25/30 — usMiddleEast:iran / criticalInfra:hospital,telecom",
+      "교육가치 40/40 — 다양성 53기법/15pt + tactic 12/15pt + mit 146/10pt"
+    ]
+  },
+  {
+    "attackId": "G0059",
+    "name": "Magic Hound",
+    "aliases": [
+      "Magic Hound",
+      "TA453",
+      "COBALT ILLUSION",
+      "Charming Kitten",
+      "ITG18",
+      "Phosphorus",
+      "Newscaster",
+      "APT35",
+      "Mint Sandstorm"
+    ],
+    "curationScore": 84,
+    "breakdown": {
+      "fame": 19,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 19/30 — 큐레이션 매핑: 19/30",
+      "관련성 25/30 — usMiddleEast:u.s.,middle east,iran / criticalInfra:government,military,ics",
+      "교육가치 40/40 — 다양성 79기법/15pt + tactic 14/15pt + mit 188/10pt"
+    ]
+  },
+  {
+    "attackId": "G0125",
+    "name": "HAFNIUM",
+    "aliases": [
+      "HAFNIUM",
+      "Operation Exchange Marauder",
+      "Silk Typhoon"
+    ],
+    "curationScore": 84,
+    "breakdown": {
+      "fame": 19,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 19/30 — 큐레이션 매핑: 19/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:defense",
+      "교육가치 40/40 — 다양성 44기법/15pt + tactic 13/15pt + mit 110/10pt"
+    ]
+  },
+  {
+    "attackId": "G0119",
+    "name": "Indrik Spider",
+    "aliases": [
+      "Indrik Spider",
+      "Evil Corp",
+      "Manatee Tempest",
+      "DEV-0243",
+      "UNC2165"
+    ],
+    "curationScore": 82,
+    "breakdown": {
+      "fame": 17,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 17/30 — 큐레이션 매핑: 17/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:banking,ics",
+      "교육가치 40/40 — 다양성 33기법/15pt + tactic 14/15pt + mit 95/10pt"
+    ]
+  },
+  {
+    "attackId": "G0040",
+    "name": "Patchwork",
+    "aliases": [
+      "Patchwork",
+      "Hangover Group",
+      "Dropping Elephant",
+      "Chinastrats",
+      "MONSOON",
+      "Operation Hangover"
+    ],
+    "curationScore": 82,
+    "breakdown": {
+      "fame": 17,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 17/30 — 큐레이션 매핑: 17/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:government,ot ",
+      "교육가치 40/40 — 다양성 41기법/15pt + tactic 12/15pt + mit 107/10pt"
+    ]
+  },
+  {
+    "attackId": "G0032",
+    "name": "Lazarus Group",
+    "aliases": [
+      "Lazarus Group",
+      "Labyrinth Chollima",
+      "HIDDEN COBRA",
+      "Guardians of Peace",
+      "ZINC",
+      "NICKEL ACADEMY",
+      "Diamond Sleet"
+    ],
+    "curationScore": 80,
+    "breakdown": {
+      "fame": 30,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 30/30 — 큐레이션 매핑: 30/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 40/40 — 다양성 93기법/15pt + tactic 14/15pt + mit 213/10pt"
+    ]
+  },
+  {
+    "attackId": "G0129",
+    "name": "Mustang Panda",
+    "aliases": [
+      "Mustang Panda",
+      "TA416",
+      "RedDelta",
+      "BRONZE PRESIDENT",
+      "STATELY TAURUS",
+      "FIREANT",
+      "CAMARO DRAGON",
+      "EARTH PRETA",
+      "HIVE0154",
+      "TWILL TYPHOON",
+      "TANTALUM",
+      "LUMINOUS MOTH",
+      "UNC6384",
+      "TEMP.Hex",
+      "Red Lich"
+    ],
+    "curationScore": 79,
+    "breakdown": {
+      "fame": 14,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 14/30 — 별칭 15개 기반 추정: 14/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:government",
+      "교육가치 40/40 — 다양성 85기법/15pt + tactic 13/15pt + mit 211/10pt"
+    ]
+  },
+  {
+    "attackId": "G0045",
+    "name": "menuPass",
+    "aliases": [
+      "menuPass",
+      "Cicada",
+      "POTASSIUM",
+      "Stone Panda",
+      "APT10",
+      "Red Apollo",
+      "CVNX",
+      "HOGFISH",
+      "BRONZE RIVERSIDE"
+    ],
+    "curationScore": 79,
+    "breakdown": {
+      "fame": 24,
+      "relevance": 15,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 15/30 — criticalInfra:energy,government,defense / globalScale:global",
+      "교육가치 40/40 — 다양성 46기법/15pt + tactic 11/15pt + mit 124/10pt"
+    ]
+  },
+  {
+    "attackId": "G0082",
+    "name": "APT38",
+    "aliases": [
+      "APT38",
+      "NICKEL GLADSTONE",
+      "BeagleBoyz",
+      "Bluenoroff",
+      "Stardust Chollima",
+      "Sapphire Sleet",
+      "COPERNICIUM"
+    ],
+    "curationScore": 78,
+    "breakdown": {
+      "fame": 23,
+      "relevance": 15,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 15/30 — criticalInfra:financial,bank  / globalScale:worldwide",
+      "교육가치 40/40 — 다양성 56기법/15pt + tactic 11/15pt + mit 121/10pt"
+    ]
+  },
+  {
+    "attackId": "G0102",
+    "name": "Wizard Spider",
+    "aliases": [
+      "Wizard Spider",
+      "UNC1878",
+      "TEMP.MixMaster",
+      "Grim Spider",
+      "FIN12",
+      "GOLD BLACKBURN",
+      "ITG23",
+      "Periwinkle Tempest",
+      "DEV-0193"
+    ],
+    "curationScore": 77,
+    "breakdown": {
+      "fame": 27,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 27/30 — 큐레이션 매핑: 27/30",
+      "관련성 10/30 — criticalInfra:financial,healthcare,hospital",
+      "교육가치 40/40 — 다양성 64기법/15pt + tactic 13/15pt + mit 187/10pt"
+    ]
+  },
+  {
+    "attackId": "G0035",
+    "name": "Dragonfly",
+    "aliases": [
+      "Dragonfly",
+      "TEMP.Isotope",
+      "DYMALLOY",
+      "Berserk Bear",
+      "TG-4192",
+      "Crouching Yeti",
+      "IRON LIBERTY",
+      "Energetic Bear",
+      "Ghost Blizzard",
+      "BROMINE"
+    ],
+    "curationScore": 76,
+    "breakdown": {
+      "fame": 21,
+      "relevance": 15,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 21/30 — 큐레이션 매핑: 21/30",
+      "관련성 15/30 — criticalInfra:government,defense,critical infrastructure / globalScale:worldwide",
+      "교육가치 40/40 — 다양성 56기법/15pt + tactic 12/15pt + mit 150/10pt"
+    ]
+  },
+  {
+    "attackId": "G0117",
+    "name": "Fox Kitten",
+    "aliases": [
+      "Fox Kitten",
+      "UNC757",
+      "Parisite",
+      "Pioneer Kitten",
+      "RUBIDIUM",
+      "Lemon Sandstorm"
+    ],
+    "curationScore": 75,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 6개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast:middle east,iran / criticalInfra:oil,gas,government",
+      "교육가치 40/40 — 다양성 41기법/15pt + tactic 11/15pt + mit 135/10pt"
+    ]
+  },
+  {
+    "attackId": "G1006",
+    "name": "Earth Lusca",
+    "aliases": [
+      "Earth Lusca",
+      "TAG-22",
+      "Charcoal Typhoon",
+      "CHROMIUM",
+      "ControlX"
+    ],
+    "curationScore": 75,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:financial,government,telecom",
+      "교육가치 40/40 — 다양성 44기법/15pt + tactic 13/15pt + mit 116/10pt"
+    ]
+  },
+  {
+    "attackId": "G0050",
+    "name": "APT32",
+    "aliases": [
+      "APT32",
+      "SeaLotus",
+      "OceanLotus",
+      "APT-C-00",
+      "Canvas Cyclone",
+      "BISMUTH"
+    ],
+    "curationScore": 75,
+    "breakdown": {
+      "fame": 25,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 40/40 — 다양성 78기법/15pt + tactic 13/15pt + mit 214/10pt"
+    ]
+  },
+  {
+    "attackId": "G0010",
+    "name": "Turla",
+    "aliases": [
+      "Turla",
+      "IRON HUNTER",
+      "Group 88",
+      "Waterbug",
+      "WhiteBear",
+      "Snake",
+      "Krypton",
+      "Venomous Bear",
+      "Secret Blizzard",
+      "BELUGASTURGEON"
+    ],
+    "curationScore": 73,
+    "breakdown": {
+      "fame": 23,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 40/40 — 다양성 68기법/15pt + tactic 12/15pt + mit 121/10pt"
+    ]
+  },
+  {
+    "attackId": "G1004",
+    "name": "LAPSUS$",
+    "aliases": [
+      "LAPSUS$",
+      "DEV-0537",
+      "Strawberry Tempest"
+    ],
+    "curationScore": 73,
+    "breakdown": {
+      "fame": 18,
+      "relevance": 15,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 18/30 — 큐레이션 매핑: 18/30",
+      "관련성 15/30 — criticalInfra:energy,government,healthcare / globalScale:global",
+      "교육가치 40/40 — 다양성 43기법/15pt + tactic 12/15pt + mit 113/10pt"
+    ]
+  },
+  {
+    "attackId": "G0027",
+    "name": "Threat Group-3390",
+    "aliases": [
+      "Threat Group-3390",
+      "Earth Smilodon",
+      "TG-3390",
+      "Emissary Panda",
+      "BRONZE UNION",
+      "APT27",
+      "Iron Tiger",
+      "LuckyMouse",
+      "Linen Typhoon"
+    ],
+    "curationScore": 73,
+    "breakdown": {
+      "fame": 23,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 10/30 — criticalInfra:energy,government,defense",
+      "교육가치 40/40 — 다양성 57기법/15pt + tactic 12/15pt + mit 145/10pt"
+    ]
+  },
+  {
+    "attackId": "G0037",
+    "name": "FIN6",
+    "aliases": [
+      "FIN6",
+      "Magecart Group 6",
+      "ITG08",
+      "Skeleton Spider",
+      "TAAL",
+      "Camouflage Tempest"
+    ],
+    "curationScore": 72,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 10/30 — criticalInfra:hospital",
+      "교육가치 40/40 — 다양성 40기법/15pt + tactic 12/15pt + mit 141/10pt"
+    ]
+  },
+  {
+    "attackId": "G0060",
+    "name": "BRONZE BUTLER",
+    "aliases": [
+      "BRONZE BUTLER",
+      "REDBALDKNIGHT",
+      "Tick"
+    ],
+    "curationScore": 72,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 10/30 — criticalInfra:government,ics",
+      "교육가치 40/40 — 다양성 40기법/15pt + tactic 11/15pt + mit 112/10pt"
+    ]
+  },
+  {
+    "attackId": "G1023",
+    "name": "APT5",
+    "aliases": [
+      "APT5",
+      "Mulberry Typhoon",
+      "MANGANESE",
+      "BRONZE FLEETWOOD",
+      "Keyhole Panda",
+      "UNC2630"
+    ],
+    "curationScore": 72,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 25,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 6개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:defense,telecom",
+      "교육가치 37/40 — 다양성 29기법/12pt + tactic 10/15pt + mit 85/10pt"
+    ]
+  },
+  {
+    "attackId": "G0106",
+    "name": "Rocke",
+    "aliases": [
+      "Rocke"
+    ],
+    "curationScore": 72,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 40/40 — 다양성 36기법/15pt + tactic 10/15pt + mit 82/10pt"
+    ]
+  },
+  {
+    "attackId": "G1001",
+    "name": "HEXANE",
+    "aliases": [
+      "HEXANE",
+      "Lyceum",
+      "Siamesekitten",
+      "Spirlin"
+    ],
+    "curationScore": 71,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 4개 기반 추정: 6/30",
+      "관련성 25/30 — usMiddleEast:middle east,israel,saudi / criticalInfra:oil,gas,telecom",
+      "교육가치 40/40 — 다양성 36기법/15pt + tactic 12/15pt + mit 60/10pt"
+    ]
+  },
+  {
+    "attackId": "G1032",
+    "name": "INC Ransom",
+    "aliases": [
+      "INC Ransom",
+      "GOLD IONIC"
+    ],
+    "curationScore": 70,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 30,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 30/30 — usMiddleEast: us  / criticalInfra:healthcare / globalScale:worldwide",
+      "교육가치 37/40 — 다양성 25기법/12pt + tactic 12/15pt + mit 75/10pt"
+    ]
+  },
+  {
+    "attackId": "G0143",
+    "name": "Aquatic Panda",
+    "aliases": [
+      "Aquatic Panda"
+    ],
+    "curationScore": 69,
+    "breakdown": {
+      "fame": 19,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 19/30 — 큐레이션 매핑: 19/30",
+      "관련성 10/30 — criticalInfra:government,telecom",
+      "교육가치 40/40 — 다양성 35기법/15pt + tactic 12/15pt + mit 99/10pt"
+    ]
+  },
+  {
+    "attackId": "G0131",
+    "name": "Tonto Team",
+    "aliases": [
+      "Tonto Team",
+      "Earth Akhlut",
+      "BRONZE HUNTLEY",
+      "CactusPete",
+      "Karma Panda"
+    ],
+    "curationScore": 69,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 25,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:financial,energy,government",
+      "교육가치 34/40 — 다양성 15기법/9pt + tactic 10/15pt + mit 55/10pt"
+    ]
+  },
+  {
+    "attackId": "G1033",
+    "name": "Star Blizzard",
+    "aliases": [
+      "Star Blizzard",
+      "SEABORGIUM",
+      "Callisto Group",
+      "TA446",
+      "COLDRIVER"
+    ],
+    "curationScore": 69,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 25,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:government,defense",
+      "교육가치 34/40 — 다양성 19기법/9pt + tactic 10/15pt + mit 50/10pt"
+    ]
+  },
+  {
+    "attackId": "G1048",
+    "name": "UNC3886",
+    "aliases": [
+      "UNC3886"
+    ],
+    "curationScore": 68,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:defense,telecom",
+      "교육가치 40/40 — 다양성 49기법/15pt + tactic 12/15pt + mit 139/10pt"
+    ]
+  },
+  {
+    "attackId": "G0100",
+    "name": "Inception",
+    "aliases": [
+      "Inception",
+      "Inception Framework",
+      "Cloud Atlas"
+    ],
+    "curationScore": 68,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 25,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 25/30 — usMiddleEast:united states,middle east / criticalInfra:government",
+      "교육가치 37/40 — 다양성 22기법/12pt + tactic 10/15pt + mit 45/10pt"
+    ]
+  },
+  {
+    "attackId": "G0096",
+    "name": "APT41",
+    "aliases": [
+      "APT41",
+      "Wicked Panda",
+      "Brass Typhoon",
+      "BARIUM"
+    ],
+    "curationScore": 68,
+    "breakdown": {
+      "fame": 18,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 18/30 — 큐레이션 매핑: 18/30",
+      "관련성 10/30 — criticalInfra:financial,healthcare,telecom",
+      "교육가치 40/40 — 다양성 82기법/15pt + tactic 14/15pt + mit 213/10pt"
+    ]
+  },
+  {
+    "attackId": "G1035",
+    "name": "Winter Vivern",
+    "aliases": [
+      "Winter Vivern",
+      "TA473",
+      "UAC-0114"
+    ],
+    "curationScore": 68,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 25,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:government",
+      "교육가치 37/40 — 다양성 27기법/12pt + tactic 12/15pt + mit 77/10pt"
+    ]
+  },
+  {
+    "attackId": "G0056",
+    "name": "PROMETHIUM",
+    "aliases": [
+      "PROMETHIUM",
+      "StrongPity"
+    ],
+    "curationScore": 68,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 15,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 15/30 — criticalInfra:ics / globalScale:global",
+      "교육가치 31/40 — 다양성 11기법/9pt + tactic 7/12pt + mit 36/10pt"
+    ]
+  },
+  {
+    "attackId": "G0080",
+    "name": "Cobalt Group",
+    "aliases": [
+      "Cobalt Group",
+      "GOLD KINGSWOOD",
+      "Cobalt Gang",
+      "Cobalt Spider"
+    ],
+    "curationScore": 66,
+    "breakdown": {
+      "fame": 19,
+      "relevance": 10,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 19/30 — 큐레이션 매핑: 19/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 37/40 — 다양성 34기법/15pt + tactic 9/12pt + mit 101/10pt"
+    ]
+  },
+  {
+    "attackId": "G0019",
+    "name": "Naikon",
+    "aliases": [
+      "Naikon"
+    ],
+    "curationScore": 66,
+    "breakdown": {
+      "fame": 24,
+      "relevance": 15,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 15/30 — criticalInfra:government,military,ics / globalScale:international",
+      "교육가치 27/40 — 다양성 14기법/9pt + tactic 6/8pt + mit 43/10pt"
+    ]
+  },
+  {
+    "attackId": "G0022",
+    "name": "APT3",
+    "aliases": [
+      "APT3",
+      "Gothic Panda",
+      "Pirpi",
+      "UPS Team",
+      "Buckeye",
+      "Threat Group-0110",
+      "TG-0110"
+    ],
+    "curationScore": 65,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 15,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 7개 기반 추정: 10/30",
+      "관련성 15/30 — usMiddleEast: us ",
+      "교육가치 40/40 — 다양성 44기법/15pt + tactic 11/15pt + mit 108/10pt"
+    ]
+  },
+  {
+    "attackId": "G0004",
+    "name": "Ke3chang",
+    "aliases": [
+      "Ke3chang",
+      "APT15",
+      "Mirage",
+      "Vixen Panda",
+      "GREF",
+      "Playful Dragon",
+      "RoyalAPT",
+      "NICKEL",
+      "Nylon Typhoon"
+    ],
+    "curationScore": 64,
+    "breakdown": {
+      "fame": 14,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 14/30 — 별칭 9개 기반 추정: 14/30",
+      "관련성 10/30 — criticalInfra:oil,government,military",
+      "교육가치 40/40 — 다양성 46기법/15pt + tactic 12/15pt + mit 109/10pt"
+    ]
+  },
+  {
+    "attackId": "G0047",
+    "name": "Gamaredon Group",
+    "aliases": [
+      "Gamaredon Group",
+      "IRON TILDEN",
+      "Primitive Bear",
+      "ACTINIUM",
+      "Armageddon",
+      "Shuckworm",
+      "DEV-0157",
+      "Aqua Blizzard"
+    ],
+    "curationScore": 64,
+    "breakdown": {
+      "fame": 14,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 14/30 — 별칭 8개 기반 추정: 14/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 40/40 — 다양성 70기법/15pt + tactic 12/15pt + mit 128/10pt"
+    ]
+  },
+  {
+    "attackId": "G0122",
+    "name": "Silent Librarian",
+    "aliases": [
+      "Silent Librarian",
+      "TA407",
+      "COBALT DICKENS"
+    ],
+    "curationScore": 64,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 30,
+      "educational": 28
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 30/30 — usMiddleEast:iran / criticalInfra:government / globalScale:worldwide",
+      "교육가치 28/40 — 다양성 13기법/9pt + tactic 8/12pt + mit 29/7pt"
+    ]
+  },
+  {
+    "attackId": "G0128",
+    "name": "ZIRCONIUM",
+    "aliases": [
+      "ZIRCONIUM",
+      "APT31",
+      "Violet Typhoon"
+    ],
+    "curationScore": 63,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 20,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 20/30 — usMiddleEast: us  / globalScale:international",
+      "교육가치 37/40 — 다양성 29기법/12pt + tactic 11/15pt + mit 58/10pt"
+    ]
+  },
+  {
+    "attackId": "G1009",
+    "name": "Moses Staff",
+    "aliases": [
+      "Moses Staff",
+      "DEV-0500",
+      "Marigold Sandstorm"
+    ],
+    "curationScore": 62,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 25,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 25/30 — usMiddleEast:iran,israel,uae / criticalInfra:energy,government",
+      "교육가치 31/40 — 다양성 12기법/9pt + tactic 7/12pt + mit 30/10pt"
+    ]
+  },
+  {
+    "attackId": "G0067",
+    "name": "APT37",
+    "aliases": [
+      "APT37",
+      "InkySquid",
+      "ScarCruft",
+      "Reaper",
+      "Group123",
+      "TEMP.Reaper",
+      "Ricochet Chollima"
+    ],
+    "curationScore": 62,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 15,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 7개 기반 추정: 10/30",
+      "관련성 15/30 — usMiddleEast:middle east,kuwait,oman",
+      "교육가치 37/40 — 다양성 29기법/12pt + tactic 10/15pt + mit 75/10pt"
+    ]
+  },
+  {
+    "attackId": "G1030",
+    "name": "Agrius",
+    "aliases": [
+      "Agrius",
+      "Pink Sandstorm",
+      "AMERICIUM",
+      "Agonizing Serpens",
+      "BlackShadow"
+    ],
+    "curationScore": 62,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 15,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 15/30 — usMiddleEast:middle east,iran,israel",
+      "교육가치 37/40 — 다양성 22기법/12pt + tactic 11/15pt + mit 72/10pt"
+    ]
+  },
+  {
+    "attackId": "G1045",
+    "name": "Salt Typhoon",
+    "aliases": [
+      "Salt Typhoon"
+    ],
+    "curationScore": 62,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:u.s., us  / criticalInfra:telecom",
+      "교육가치 34/40 — 다양성 14기법/9pt + tactic 12/15pt + mit 46/10pt"
+    ]
+  },
+  {
+    "attackId": "G1003",
+    "name": "Ember Bear",
+    "aliases": [
+      "Ember Bear",
+      "UNC2589",
+      "Bleeding Bear",
+      "DEV-0586",
+      "Cadet Blizzard",
+      "Frozenvista",
+      "UAC-0056"
+    ],
+    "curationScore": 60,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 7개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:government,telecom,critical infrastructure",
+      "교육가치 40/40 — 다양성 48기법/15pt + tactic 14/15pt + mit 146/10pt"
+    ]
+  },
+  {
+    "attackId": "G1015",
+    "name": "Scattered Spider",
+    "aliases": [
+      "Scattered Spider",
+      "Roasted 0ktapus",
+      "Octo Tempest",
+      "Storm-0875",
+      "UNC3944"
+    ],
+    "curationScore": 60,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:financial,defense,hospital",
+      "교육가치 40/40 — 다양성 64기법/15pt + tactic 14/15pt + mit 177/10pt"
+    ]
+  },
+  {
+    "attackId": "G1052",
+    "name": "Contagious Interview",
+    "aliases": [
+      "Contagious Interview",
+      "DeceptiveDevelopment",
+      "Gwisin Gang",
+      "Tenacious Pungsan",
+      "DEV#POPPER",
+      "PurpleBravo",
+      "TAG-121"
+    ],
+    "curationScore": 60,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 7개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 40/40 — 다양성 52기법/15pt + tactic 12/15pt + mit 102/10pt"
+    ]
+  },
+  {
+    "attackId": "G0026",
+    "name": "APT18",
+    "aliases": [
+      "APT18",
+      "TG-0416",
+      "Dynamite Panda",
+      "Threat Group-0416"
+    ],
+    "curationScore": 60,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 10,
+      "educational": 28
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 28/40 — 다양성 12기법/9pt + tactic 7/12pt + mit 29/7pt"
+    ]
+  },
+  {
+    "attackId": "G0098",
+    "name": "BlackTech",
+    "aliases": [
+      "BlackTech",
+      "Palmerworm"
+    ],
+    "curationScore": 59,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:financial,ics",
+      "교육가치 31/40 — 다양성 14기법/9pt + tactic 8/12pt + mit 53/10pt"
+    ]
+  },
+  {
+    "attackId": "G0077",
+    "name": "Leafminer",
+    "aliases": [
+      "Leafminer",
+      "Raspite"
+    ],
+    "curationScore": 59,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east,iran / criticalInfra:government",
+      "교육가치 31/40 — 다양성 17기법/9pt + tactic 9/12pt + mit 51/10pt"
+    ]
+  },
+  {
+    "attackId": "G0135",
+    "name": "BackdoorDiplomacy",
+    "aliases": [
+      "BackdoorDiplomacy"
+    ],
+    "curationScore": 59,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:telecom",
+      "교육가치 31/40 — 다양성 15기법/9pt + tactic 8/12pt + mit 42/10pt"
+    ]
+  },
+  {
+    "attackId": "G1002",
+    "name": "BITTER",
+    "aliases": [
+      "BITTER",
+      "T-APT-17"
+    ],
+    "curationScore": 59,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:saudi / criticalInfra:energy,government",
+      "교육가치 31/40 — 다양성 16기법/9pt + tactic 7/12pt + mit 51/10pt"
+    ]
+  },
+  {
+    "attackId": "G0038",
+    "name": "Stealth Falcon",
+    "aliases": [
+      "Stealth Falcon"
+    ],
+    "curationScore": 59,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:uae / criticalInfra:government,ot ",
+      "교육가치 31/40 — 다양성 16기법/9pt + tactic 8/12pt + mit 37/10pt"
+    ]
+  },
+  {
+    "attackId": "G0078",
+    "name": "Gorgon Group",
+    "aliases": [
+      "Gorgon Group"
+    ],
+    "curationScore": 59,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:government",
+      "교육가치 31/40 — 다양성 16기법/9pt + tactic 7/12pt + mit 39/10pt"
+    ]
+  },
+  {
+    "attackId": "G0112",
+    "name": "Windshift",
+    "aliases": [
+      "Windshift",
+      "Bahamut"
+    ],
+    "curationScore": 59,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:government,critical infrastructure",
+      "교육가치 31/40 — 다양성 19기법/9pt + tactic 7/12pt + mit 54/10pt"
+    ]
+  },
+  {
+    "attackId": "G1051",
+    "name": "Medusa Group",
+    "aliases": [
+      "Medusa Group"
+    ],
+    "curationScore": 58,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — criticalInfra:ics,ot  / globalScale:global",
+      "교육가치 40/40 — 다양성 57기법/15pt + tactic 12/15pt + mit 146/10pt"
+    ]
+  },
+  {
+    "attackId": "G1044",
+    "name": "APT42",
+    "aliases": [
+      "APT42"
+    ],
+    "curationScore": 58,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — usMiddleEast:middle east,iran",
+      "교육가치 40/40 — 다양성 31기법/15pt + tactic 10/15pt + mit 66/10pt"
+    ]
+  },
+  {
+    "attackId": "G1053",
+    "name": "Storm-0501",
+    "aliases": [
+      "Storm-0501"
+    ],
+    "curationScore": 58,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — criticalInfra:financial / globalScale:international",
+      "교육가치 40/40 — 다양성 42기법/15pt + tactic 13/15pt + mit 116/10pt"
+    ]
+  },
+  {
+    "attackId": "G0076",
+    "name": "Thrip",
+    "aliases": [
+      "Thrip"
+    ],
+    "curationScore": 58,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 25,
+      "educational": 11
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:defense,telecom",
+      "교육가치 11/40 — 다양성 4기법/2pt + tactic 4/5pt + mit 13/4pt"
+    ]
+  },
+  {
+    "attackId": "G0139",
+    "name": "TeamTNT",
+    "aliases": [
+      "TeamTNT"
+    ],
+    "curationScore": 56,
+    "breakdown": {
+      "fame": 16,
+      "relevance": 0,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 16/30 — 큐레이션 매핑: 16/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 40/40 — 다양성 56기법/15pt + tactic 14/15pt + mit 127/10pt"
+    ]
+  },
+  {
+    "attackId": "G0081",
+    "name": "Tropic Trooper",
+    "aliases": [
+      "Tropic Trooper",
+      "Pirate Panda",
+      "KeyBoy"
+    ],
+    "curationScore": 56,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:government,healthcare",
+      "교육가치 40/40 — 다양성 40기법/15pt + tactic 10/15pt + mit 78/10pt"
+    ]
+  },
+  {
+    "attackId": "G1012",
+    "name": "CURIUM",
+    "aliases": [
+      "CURIUM",
+      "Crimson Sandstorm",
+      "TA456",
+      "Tortoise Shell",
+      "Yellow Liderc"
+    ],
+    "curationScore": 56,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 15,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 15/30 — usMiddleEast:middle east,iran",
+      "교육가치 31/40 — 다양성 19기법/9pt + tactic 8/12pt + mit 43/10pt"
+    ]
+  },
+  {
+    "attackId": "G0121",
+    "name": "Sidewinder",
+    "aliases": [
+      "Sidewinder",
+      "T-APT-04",
+      "Rattlesnake"
+    ],
+    "curationScore": 56,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 40/40 — 다양성 30기법/15pt + tactic 10/15pt + mit 63/10pt"
+    ]
+  },
+  {
+    "attackId": "G0090",
+    "name": "WIRTE",
+    "aliases": [
+      "WIRTE"
+    ],
+    "curationScore": 55,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:financial,government,military",
+      "교육가치 27/40 — 다양성 11기법/9pt + tactic 5/8pt + mit 31/10pt"
+    ]
+  },
+  {
+    "attackId": "G0130",
+    "name": "Ajax Security Team",
+    "aliases": [
+      "Ajax Security Team",
+      "Operation Woolen-Goldfish",
+      "AjaxTM",
+      "Rocket Kitten",
+      "Flying Kitten",
+      "Operation Saffron Rose"
+    ],
+    "curationScore": 55,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 25,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 6개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast: us ,iran / criticalInfra:defense",
+      "교육가치 20/40 — 다양성 6기법/5pt + tactic 5/8pt + mit 22/7pt"
+    ]
+  },
+  {
+    "attackId": "G0073",
+    "name": "APT19",
+    "aliases": [
+      "APT19",
+      "Codoso",
+      "C0d0so0",
+      "Codoso Team",
+      "Sunshop Group"
+    ],
+    "curationScore": 54,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:energy,defense,telecom",
+      "교육가치 34/40 — 다양성 21기법/12pt + tactic 8/12pt + mit 52/10pt"
+    ]
+  },
+  {
+    "attackId": "G0030",
+    "name": "Lotus Blossom",
+    "aliases": [
+      "Lotus Blossom",
+      "DRAGONFISH",
+      "Spring Dragon",
+      "RADIUM",
+      "Raspberry Typhoon",
+      "Bilbug",
+      "Thrip"
+    ],
+    "curationScore": 54,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 7개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 34/40 — 다양성 21기법/12pt + tactic 9/12pt + mit 30/10pt"
+    ]
+  },
+  {
+    "attackId": "G0012",
+    "name": "Darkhotel",
+    "aliases": [
+      "Darkhotel",
+      "DUBNIUM",
+      "Zigzag Hail"
+    ],
+    "curationScore": 53,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:defense",
+      "교육가치 37/40 — 다양성 24기법/12pt + tactic 10/15pt + mit 39/10pt"
+    ]
+  },
+  {
+    "attackId": "G1046",
+    "name": "Storm-1811",
+    "aliases": [
+      "Storm-1811"
+    ],
+    "curationScore": 53,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 40/40 — 다양성 31기법/15pt + tactic 13/15pt + mit 72/10pt"
+    ]
+  },
+  {
+    "attackId": "G1016",
+    "name": "FIN13",
+    "aliases": [
+      "FIN13",
+      "Elephant Beetle"
+    ],
+    "curationScore": 53,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,hospital",
+      "교육가치 40/40 — 다양성 53기법/15pt + tactic 13/15pt + mit 151/10pt"
+    ]
+  },
+  {
+    "attackId": "G0093",
+    "name": "GALLIUM",
+    "aliases": [
+      "GALLIUM",
+      "Granite Typhoon"
+    ],
+    "curationScore": 53,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,government,telecom",
+      "교육가치 40/40 — 다양성 31기법/15pt + tactic 12/15pt + mit 87/10pt"
+    ]
+  },
+  {
+    "attackId": "G0061",
+    "name": "FIN8",
+    "aliases": [
+      "FIN8",
+      "Syssphinx"
+    ],
+    "curationScore": 53,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,hospital",
+      "교육가치 40/40 — 다양성 36기법/15pt + tactic 13/15pt + mit 98/10pt"
+    ]
+  },
+  {
+    "attackId": "G1039",
+    "name": "RedCurl",
+    "aliases": [
+      "RedCurl"
+    ],
+    "curationScore": 53,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 40/40 — 다양성 41기법/15pt + tactic 12/15pt + mit 104/10pt"
+    ]
+  },
+  {
+    "attackId": "G1043",
+    "name": "BlackByte",
+    "aliases": [
+      "BlackByte",
+      "Hecamede"
+    ],
+    "curationScore": 53,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:critical infrastructure",
+      "교육가치 40/40 — 다양성 49기법/15pt + tactic 13/15pt + mit 136/10pt"
+    ]
+  },
+  {
+    "attackId": "G1036",
+    "name": "Moonstone Sleet",
+    "aliases": [
+      "Moonstone Sleet",
+      "Storm-1789"
+    ],
+    "curationScore": 53,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 40/40 — 다양성 30기법/15pt + tactic 11/15pt + mit 58/10pt"
+    ]
+  },
+  {
+    "attackId": "G1005",
+    "name": "POLONIUM",
+    "aliases": [
+      "POLONIUM",
+      "Plaid Rain"
+    ],
+    "curationScore": 52,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 24
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:iran,israel / criticalInfra:defense",
+      "교육가치 24/40 — 다양성 7기법/5pt + tactic 7/12pt + mit 19/7pt"
+    ]
+  },
+  {
+    "attackId": "G0021",
+    "name": "Molerats",
+    "aliases": [
+      "Molerats",
+      "Operation Molerats",
+      "Gaza Cybergang"
+    ],
+    "curationScore": 52,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 15,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 15/30 — usMiddleEast:united states,middle east",
+      "교육가치 31/40 — 다양성 16기법/9pt + tactic 8/12pt + mit 51/10pt"
+    ]
+  },
+  {
+    "attackId": "G0108",
+    "name": "Blue Mockingbird",
+    "aliases": [
+      "Blue Mockingbird"
+    ],
+    "curationScore": 52,
+    "breakdown": {
+      "fame": 15,
+      "relevance": 0,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 15/30 — 큐레이션 매핑: 15/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 37/40 — 다양성 22기법/12pt + tactic 11/15pt + mit 69/10pt"
+    ]
+  },
+  {
+    "attackId": "G0092",
+    "name": "TA505",
+    "aliases": [
+      "TA505",
+      "Hive0065",
+      "Spandex Tempest",
+      "CHIMBORAZO"
+    ],
+    "curationScore": 51,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 5,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 4개 기반 추정: 6/30",
+      "관련성 5/30 — globalScale:global",
+      "교육가치 40/40 — 다양성 34기법/15pt + tactic 10/15pt + mit 89/10pt"
+    ]
+  },
+  {
+    "attackId": "G1031",
+    "name": "Saint Bear",
+    "aliases": [
+      "Saint Bear",
+      "Storm-0587",
+      "TA471",
+      "UAC-0056",
+      "Lorec53"
+    ],
+    "curationScore": 51,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:government,ot ",
+      "교육가치 31/40 — 다양성 18기법/9pt + tactic 7/12pt + mit 54/10pt"
+    ]
+  },
+  {
+    "attackId": "G1014",
+    "name": "LuminousMoth",
+    "aliases": [
+      "LuminousMoth"
+    ],
+    "curationScore": 50,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 37/40 — 다양성 28기법/12pt + tactic 12/15pt + mit 62/10pt"
+    ]
+  },
+  {
+    "attackId": "G1040",
+    "name": "Play",
+    "aliases": [
+      "Play"
+    ],
+    "curationScore": 50,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,healthcare,critical infrastructure",
+      "교육가치 37/40 — 다양성 26기법/12pt + tactic 13/15pt + mit 74/10pt"
+    ]
+  },
+  {
+    "attackId": "G0091",
+    "name": "Silence",
+    "aliases": [
+      "Silence",
+      "Whisper Spider"
+    ],
+    "curationScore": 50,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,banking",
+      "교육가치 37/40 — 다양성 28기법/12pt + tactic 11/15pt + mit 91/10pt"
+    ]
+  },
+  {
+    "attackId": "G1021",
+    "name": "Cinnamon Tempest",
+    "aliases": [
+      "Cinnamon Tempest",
+      "DEV-0401",
+      "Emperor Dragonfly",
+      "BRONZE STARLIGHT"
+    ],
+    "curationScore": 50,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 4개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:financial,government,ot ",
+      "교육가치 34/40 — 다양성 19기법/9pt + tactic 10/15pt + mit 66/10pt"
+    ]
+  },
+  {
+    "attackId": "G1024",
+    "name": "Akira",
+    "aliases": [
+      "Akira",
+      "GOLD SAHARA",
+      "PUNK SPIDER",
+      "Howling Scorpius"
+    ],
+    "curationScore": 50,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 4개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 34/40 — 다양성 17기법/9pt + tactic 12/15pt + mit 60/10pt"
+    ]
+  },
+  {
+    "attackId": "G1022",
+    "name": "ToddyCat",
+    "aliases": [
+      "ToddyCat"
+    ],
+    "curationScore": 50,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 37/40 — 다양성 25기법/12pt + tactic 10/15pt + mit 55/10pt"
+    ]
+  },
+  {
+    "attackId": "G0006",
+    "name": "APT1",
+    "aliases": [
+      "APT1",
+      "Comment Crew",
+      "Comment Group",
+      "Comment Panda"
+    ],
+    "curationScore": 50,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 4개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:military",
+      "교육가치 34/40 — 다양성 23기법/12pt + tactic 8/12pt + mit 51/10pt"
+    ]
+  },
+  {
+    "attackId": "G1013",
+    "name": "Metador",
+    "aliases": [
+      "Metador"
+    ],
+    "curationScore": 48,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:telecom",
+      "교육가치 20/40 — 다양성 9기법/5pt + tactic 6/8pt + mit 19/7pt"
+    ]
+  },
+  {
+    "attackId": "G0079",
+    "name": "DarkHydrus",
+    "aliases": [
+      "DarkHydrus"
+    ],
+    "curationScore": 48,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:government",
+      "교육가치 20/40 — 다양성 7기법/5pt + tactic 5/8pt + mit 24/7pt"
+    ]
+  },
+  {
+    "attackId": "G1034",
+    "name": "Daggerfly",
+    "aliases": [
+      "Daggerfly",
+      "Evasive Panda",
+      "BRONZE HIGHLAND"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:government,telecom",
+      "교육가치 31/40 — 다양성 17기법/9pt + tactic 9/12pt + mit 43/10pt"
+    ]
+  },
+  {
+    "attackId": "G0134",
+    "name": "Transparent Tribe",
+    "aliases": [
+      "Transparent Tribe",
+      "COPPER FIELDSTONE",
+      "APT36",
+      "Mythic Leopard",
+      "ProjectM"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:defense",
+      "교육가치 27/40 — 다양성 14기법/9pt + tactic 5/8pt + mit 45/10pt"
+    ]
+  },
+  {
+    "attackId": "G1018",
+    "name": "TA2541",
+    "aliases": [
+      "TA2541"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:defense",
+      "교육가치 34/40 — 다양성 28기법/12pt + tactic 8/12pt + mit 64/10pt"
+    ]
+  },
+  {
+    "attackId": "G0126",
+    "name": "Higaisa",
+    "aliases": [
+      "Higaisa"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 34/40 — 다양성 28기법/12pt + tactic 8/12pt + mit 60/10pt"
+    ]
+  },
+  {
+    "attackId": "G0142",
+    "name": "Confucius",
+    "aliases": [
+      "Confucius",
+      "Confucius APT"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 34/40 — 다양성 19기법/9pt + tactic 10/15pt + mit 51/10pt"
+    ]
+  },
+  {
+    "attackId": "G0001",
+    "name": "Axiom",
+    "aliases": [
+      "Axiom",
+      "Group 72"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,defense",
+      "교육가치 34/40 — 다양성 16기법/9pt + tactic 10/15pt + mit 68/10pt"
+    ]
+  },
+  {
+    "attackId": "G0053",
+    "name": "FIN5",
+    "aliases": [
+      "FIN5"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 34/40 — 다양성 11기법/9pt + tactic 10/15pt + mit 36/10pt"
+    ]
+  },
+  {
+    "attackId": "G0041",
+    "name": "Strider",
+    "aliases": [
+      "Strider",
+      "ProjectSauron"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 21,
+      "relevance": 15,
+      "educational": 11
+    },
+    "reasons": [
+      "유명도 21/30 — 큐레이션 매핑: 21/30",
+      "관련성 15/30 — usMiddleEast:iran",
+      "교육가치 11/40 — 다양성 3기법/2pt + tactic 4/5pt + mit 6/4pt"
+    ]
+  },
+  {
+    "attackId": "G0084",
+    "name": "Gallmaker",
+    "aliases": [
+      "Gallmaker"
+    ],
+    "curationScore": 45,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:government,defense,military",
+      "교육가치 17/40 — 다양성 6기법/5pt + tactic 4/5pt + mit 24/7pt"
+    ]
+  },
+  {
+    "attackId": "G0138",
+    "name": "Andariel",
+    "aliases": [
+      "Andariel",
+      "Silent Chollima",
+      "PLUTONIUM",
+      "Onyx Sleet"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 28
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 4개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:financial,government,military",
+      "교육가치 28/40 — 다양성 12기법/9pt + tactic 8/12pt + mit 28/7pt"
+    ]
+  },
+  {
+    "attackId": "G0105",
+    "name": "DarkVishnya",
+    "aliases": [
+      "DarkVishnya"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 31/40 — 다양성 10기법/9pt + tactic 8/12pt + mit 32/10pt"
+    ]
+  },
+  {
+    "attackId": "G0068",
+    "name": "PLATINUM",
+    "aliases": [
+      "PLATINUM"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 31/40 — 다양성 11기법/9pt + tactic 7/12pt + mit 43/10pt"
+    ]
+  },
+  {
+    "attackId": "G0051",
+    "name": "FIN10",
+    "aliases": [
+      "FIN10"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 31/40 — 다양성 11기법/9pt + tactic 8/12pt + mit 36/10pt"
+    ]
+  },
+  {
+    "attackId": "G0085",
+    "name": "FIN4",
+    "aliases": [
+      "FIN4"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,healthcare,ot ",
+      "교육가치 31/40 — 다양성 12기법/9pt + tactic 8/12pt + mit 39/10pt"
+    ]
+  },
+  {
+    "attackId": "G1041",
+    "name": "Sea Turtle",
+    "aliases": [
+      "Sea Turtle",
+      "Teal Kurma",
+      "Marbled Dust",
+      "Cosmic Wolf",
+      "SILICON"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 0,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 27기법/12pt + tactic 9/12pt + mit 78/10pt"
+    ]
+  },
+  {
+    "attackId": "G1008",
+    "name": "SideCopy",
+    "aliases": [
+      "SideCopy"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 31/40 — 다양성 16기법/9pt + tactic 9/12pt + mit 33/10pt"
+    ]
+  },
+  {
+    "attackId": "G0120",
+    "name": "Evilnum",
+    "aliases": [
+      "Evilnum"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 31/40 — 다양성 11기법/9pt + tactic 8/12pt + mit 38/10pt"
+    ]
+  },
+  {
+    "attackId": "G0009",
+    "name": "Deep Panda",
+    "aliases": [
+      "Deep Panda",
+      "Shell Crew",
+      "WebMasters",
+      "KungFu Kittens",
+      "PinkPanther",
+      "Black Vine"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 24
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 6개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:financial,government,defense",
+      "교육가치 24/40 — 다양성 10기법/9pt + tactic 6/8pt + mit 25/7pt"
+    ]
+  },
+  {
+    "attackId": "G0114",
+    "name": "Chimera",
+    "aliases": [
+      "Chimera"
+    ],
+    "curationScore": 43,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 40/40 — 다양성 59기법/15pt + tactic 13/15pt + mit 126/10pt"
+    ]
+  },
+  {
+    "attackId": "G0127",
+    "name": "TA551",
+    "aliases": [
+      "TA551",
+      "GOLD CABIN",
+      "Shathak"
+    ],
+    "curationScore": 43,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 27/40 — 다양성 14기법/9pt + tactic 5/8pt + mit 37/10pt"
+    ]
+  },
+  {
+    "attackId": "G0095",
+    "name": "Machete",
+    "aliases": [
+      "Machete",
+      "APT-C-43",
+      "El Machete"
+    ],
+    "curationScore": 43,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:government,military,telecom",
+      "교육가치 27/40 — 다양성 11기법/9pt + tactic 5/8pt + mit 42/10pt"
+    ]
+  },
+  {
+    "attackId": "G0136",
+    "name": "IndigoZebra",
+    "aliases": [
+      "IndigoZebra"
+    ],
+    "curationScore": 43,
+    "breakdown": {
+      "fame": 16,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 16/30 — 큐레이션 매핑: 16/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 17/40 — 다양성 7기법/5pt + tactic 4/5pt + mit 16/7pt"
+    ]
+  },
+  {
+    "attackId": "G1026",
+    "name": "Malteiro",
+    "aliases": [
+      "Malteiro"
+    ],
+    "curationScore": 41,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 28
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,banking",
+      "교육가치 28/40 — 다양성 12기법/9pt + tactic 7/12pt + mit 28/7pt"
+    ]
+  },
+  {
+    "attackId": "G1011",
+    "name": "EXOTIC LILY",
+    "aliases": [
+      "EXOTIC LILY"
+    ],
+    "curationScore": 40,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,healthcare",
+      "교육가치 27/40 — 다양성 15기법/9pt + tactic 5/8pt + mit 36/10pt"
+    ]
+  },
+  {
+    "attackId": "G0099",
+    "name": "APT-C-36",
+    "aliases": [
+      "APT-C-36",
+      "Blind Eagle"
+    ],
+    "curationScore": 40,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,government",
+      "교육가치 27/40 — 다양성 9기법/5pt + tactic 7/12pt + mit 36/10pt"
+    ]
+  },
+  {
+    "attackId": "G0043",
+    "name": "Group5",
+    "aliases": [
+      "Group5"
+    ],
+    "curationScore": 39,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 11
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:iran / criticalInfra:ot ",
+      "교육가치 11/40 — 다양성 4기법/2pt + tactic 3/5pt + mit 5/4pt"
+    ]
+  },
+  {
+    "attackId": "G1028",
+    "name": "APT-C-23",
+    "aliases": [
+      "APT-C-23",
+      "Mantis",
+      "Arid Viper",
+      "Desert Falcon",
+      "TAG-63",
+      "Grey Karkadann",
+      "Big Bang APT",
+      "Two-tailed Scorpion"
+    ],
+    "curationScore": 39,
+    "breakdown": {
+      "fame": 14,
+      "relevance": 25,
+      "educational": 0
+    },
+    "reasons": [
+      "유명도 14/30 — 별칭 8개 기반 추정: 14/30",
+      "관련성 25/30 — usMiddleEast:middle east,israel / criticalInfra:military",
+      "교육가치 0/40 — 다양성 0기법/0pt + tactic 0/0pt + mit 0/0pt"
+    ]
+  },
+  {
+    "attackId": "G0003",
+    "name": "Cleaver",
+    "aliases": [
+      "Cleaver",
+      "Threat Group 2889",
+      "TG-2889"
+    ],
+    "curationScore": 38,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 15,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 15/30 — usMiddleEast:iran",
+      "교육가치 17/40 — 다양성 5기법/5pt + tactic 3/5pt + mit 16/7pt"
+    ]
+  },
+  {
+    "attackId": "G0052",
+    "name": "CopyKittens",
+    "aliases": [
+      "CopyKittens"
+    ],
+    "curationScore": 38,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — usMiddleEast:u.s.,iran,israel",
+      "교육가치 20/40 — 다양성 8기법/5pt + tactic 5/8pt + mit 19/7pt"
+    ]
+  },
+  {
+    "attackId": "G1047",
+    "name": "Velvet Ant",
+    "aliases": [
+      "Velvet Ant"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 22기법/12pt + tactic 9/12pt + mit 59/10pt"
+    ]
+  },
+  {
+    "attackId": "G0005",
+    "name": "APT12",
+    "aliases": [
+      "APT12",
+      "IXESHE",
+      "DynCalc",
+      "Numbered Panda",
+      "DNSCALC"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:government,ot ",
+      "교육가치 17/40 — 다양성 5기법/5pt + tactic 3/5pt + mit 17/7pt"
+    ]
+  },
+  {
+    "attackId": "G0140",
+    "name": "LazyScripter",
+    "aliases": [
+      "LazyScripter"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 20기법/12pt + tactic 7/12pt + mit 56/10pt"
+    ]
+  },
+  {
+    "attackId": "G0066",
+    "name": "Elderwood",
+    "aliases": [
+      "Elderwood",
+      "Elderwood Gang",
+      "Beijing Group",
+      "Sneaky Panda"
+    ],
+    "curationScore": 36,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 10,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 4개 기반 추정: 6/30",
+      "관련성 10/30 — criticalInfra:government,defense",
+      "교육가치 20/40 — 다양성 9기법/5pt + tactic 4/5pt + mit 31/10pt"
+    ]
+  },
+  {
+    "attackId": "G0115",
+    "name": "GOLD SOUTHFIELD",
+    "aliases": [
+      "GOLD SOUTHFIELD",
+      "Pinchy Spider"
+    ],
+    "curationScore": 36,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 23
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,ot ",
+      "교육가치 23/40 — 다양성 9기법/5pt + tactic 6/8pt + mit 36/10pt"
+    ]
+  },
+  {
+    "attackId": "G0008",
+    "name": "Carbanak",
+    "aliases": [
+      "Carbanak",
+      "Anunak"
+    ],
+    "curationScore": 36,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 23
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 23/40 — 다양성 9기법/5pt + tactic 6/8pt + mit 37/10pt"
+    ]
+  },
+  {
+    "attackId": "G0071",
+    "name": "Orangeworm",
+    "aliases": [
+      "Orangeworm"
+    ],
+    "curationScore": 36,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 8
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:healthcare",
+      "교육가치 8/40 — 다양성 2기법/2pt + tactic 2/2pt + mit 6/4pt"
+    ]
+  },
+  {
+    "attackId": "G0137",
+    "name": "Ferocious Kitten",
+    "aliases": [
+      "Ferocious Kitten"
+    ],
+    "curationScore": 35,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — usMiddleEast:iran,persian",
+      "교육가치 17/40 — 다양성 6기법/5pt + tactic 4/5pt + mit 23/7pt"
+    ]
+  },
+  {
+    "attackId": "G0018",
+    "name": "admin@338",
+    "aliases": [
+      "admin@338"
+    ],
+    "curationScore": 34,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 21
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 21/40 — 다양성 12기법/9pt + tactic 4/5pt + mit 18/7pt"
+    ]
+  },
+  {
+    "attackId": "G1020",
+    "name": "Mustard Tempest",
+    "aliases": [
+      "Mustard Tempest",
+      "DEV-0206",
+      "TA569",
+      "GOLD PRELUDE",
+      "UNC1543"
+    ],
+    "curationScore": 34,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 0,
+      "educational": 24
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 24/40 — 다양성 12기법/9pt + tactic 6/8pt + mit 24/7pt"
+    ]
+  },
+  {
+    "attackId": "G0025",
+    "name": "APT17",
+    "aliases": [
+      "APT17",
+      "Deputy Dog"
+    ],
+    "curationScore": 34,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 6
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:government,defense",
+      "교육가치 6/40 — 다양성 2기법/2pt + tactic 1/2pt + mit 2/2pt"
+    ]
+  },
+  {
+    "attackId": "G0063",
+    "name": "BlackOasis",
+    "aliases": [
+      "BlackOasis"
+    ],
+    "curationScore": 34,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 6
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:ot ",
+      "교육가치 6/40 — 다양성 1기법/2pt + tactic 1/2pt + mit 4/2pt"
+    ]
+  },
+  {
+    "attackId": "G1007",
+    "name": "Aoqin Dragon",
+    "aliases": [
+      "Aoqin Dragon"
+    ],
+    "curationScore": 33,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,telecom",
+      "교육가치 20/40 — 다양성 9기법/5pt + tactic 6/8pt + mit 22/7pt"
+    ]
+  },
+  {
+    "attackId": "G0048",
+    "name": "RTM",
+    "aliases": [
+      "RTM"
+    ],
+    "curationScore": 33,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:banking",
+      "교육가치 20/40 — 다양성 7기법/5pt + tactic 6/8pt + mit 25/7pt"
+    ]
+  },
+  {
+    "attackId": "G0054",
+    "name": "Sowbug",
+    "aliases": [
+      "Sowbug"
+    ],
+    "curationScore": 33,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 20/40 — 다양성 9기법/5pt + tactic 5/8pt + mit 15/7pt"
+    ]
+  },
+  {
+    "attackId": "G0070",
+    "name": "Dark Caracal",
+    "aliases": [
+      "Dark Caracal"
+    ],
+    "curationScore": 31,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 28
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 28/40 — 다양성 12기법/9pt + tactic 8/12pt + mit 22/7pt"
+    ]
+  },
+  {
+    "attackId": "G0011",
+    "name": "PittyTiger",
+    "aliases": [
+      "PittyTiger"
+    ],
+    "curationScore": 31,
+    "breakdown": {
+      "fame": 17,
+      "relevance": 0,
+      "educational": 14
+    },
+    "reasons": [
+      "유명도 17/30 — 큐레이션 매핑: 17/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 14/40 — 다양성 2기법/2pt + tactic 5/8pt + mit 9/4pt"
+    ]
+  },
+  {
+    "attackId": "G0133",
+    "name": "Nomadic Octopus",
+    "aliases": [
+      "Nomadic Octopus",
+      "DustSquad"
+    ],
+    "curationScore": 30,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 17/40 — 다양성 7기법/5pt + tactic 4/5pt + mit 28/7pt"
+    ]
+  },
+  {
+    "attackId": "G0103",
+    "name": "Mofang",
+    "aliases": [
+      "Mofang"
+    ],
+    "curationScore": 30,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,military,critical infrastructure",
+      "교육가치 17/40 — 다양성 6기법/5pt + tactic 3/5pt + mit 21/7pt"
+    ]
+  },
+  {
+    "attackId": "G0107",
+    "name": "Whitefly",
+    "aliases": [
+      "Whitefly"
+    ],
+    "curationScore": 30,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 27/40 — 다양성 9기법/5pt + tactic 7/12pt + mit 37/10pt"
+    ]
+  },
+  {
+    "attackId": "G0089",
+    "name": "The White Company",
+    "aliases": [
+      "The White Company"
+    ],
+    "curationScore": 30,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 17/40 — 다양성 7기법/5pt + tactic 4/5pt + mit 17/7pt"
+    ]
+  },
+  {
+    "attackId": "G0088",
+    "name": "TEMP.Veles",
+    "aliases": [
+      "TEMP.Veles",
+      "XENOTIME"
+    ],
+    "curationScore": 28,
+    "breakdown": {
+      "fame": 18,
+      "relevance": 10,
+      "educational": 0
+    },
+    "reasons": [
+      "유명도 18/30 — 큐레이션 매핑: 18/30",
+      "관련성 10/30 — criticalInfra:critical infrastructure",
+      "교육가치 0/40 — 다양성 0기법/0pt + tactic 0/0pt + mit 0/0pt"
+    ]
+  },
+  {
+    "attackId": "G1049",
+    "name": "AppleJeus",
+    "aliases": [
+      "AppleJeus",
+      "Gleaming Pisces",
+      "Citrine Sleet",
+      "UNC1720",
+      "UNC4736"
+    ],
+    "curationScore": 28,
+    "breakdown": {
+      "fame": 10,
+      "relevance": 10,
+      "educational": 8
+    },
+    "reasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 10/30 — criticalInfra:financial,government",
+      "교육가치 8/40 — 다양성 2기법/2pt + tactic 2/2pt + mit 8/4pt"
+    ]
+  },
+  {
+    "attackId": "G0020",
+    "name": "Equation",
+    "aliases": [
+      "Equation"
+    ],
+    "curationScore": 27,
+    "breakdown": {
+      "fame": 16,
+      "relevance": 0,
+      "educational": 11
+    },
+    "reasons": [
+      "유명도 16/30 — 큐레이션 매핑: 16/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 11/40 — 다양성 4기법/2pt + tactic 3/5pt + mit 6/4pt"
+    ]
+  },
+  {
+    "attackId": "G0039",
+    "name": "Suckfly",
+    "aliases": [
+      "Suckfly"
+    ],
+    "curationScore": 27,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 24
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 24/40 — 다양성 5기법/5pt + tactic 7/12pt + mit 26/7pt"
+    ]
+  },
+  {
+    "attackId": "G0123",
+    "name": "Volatile Cedar",
+    "aliases": [
+      "Volatile Cedar",
+      "Lebanese Cedar"
+    ],
+    "curationScore": 25,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 5,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 5/30 — globalScale:worldwide",
+      "교육가치 17/40 — 다양성 5기법/5pt + tactic 4/5pt + mit 15/7pt"
+    ]
+  },
+  {
+    "attackId": "G1042",
+    "name": "RedEcho",
+    "aliases": [
+      "RedEcho"
+    ],
+    "curationScore": 24,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 11
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:critical infrastructure",
+      "교육가치 11/40 — 다양성 5기법/5pt + tactic 2/2pt + mit 9/4pt"
+    ]
+  },
+  {
+    "attackId": "G0124",
+    "name": "Windigo",
+    "aliases": [
+      "Windigo"
+    ],
+    "curationScore": 23,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 7기법/5pt + tactic 5/8pt + mit 18/7pt"
+    ]
+  },
+  {
+    "attackId": "G0075",
+    "name": "Rancor",
+    "aliases": [
+      "Rancor"
+    ],
+    "curationScore": 23,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 9기법/5pt + tactic 6/8pt + mit 29/7pt"
+    ]
+  },
+  {
+    "attackId": "G1019",
+    "name": "MoustachedBouncer",
+    "aliases": [
+      "MoustachedBouncer"
+    ],
+    "curationScore": 23,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 8기법/5pt + tactic 6/8pt + mit 20/7pt"
+    ]
+  },
+  {
+    "attackId": "G0013",
+    "name": "APT30",
+    "aliases": [
+      "APT30"
+    ],
+    "curationScore": 21,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 8
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,ics,ot ",
+      "교육가치 8/40 — 다양성 2기법/2pt + tactic 2/2pt + mit 10/4pt"
+    ]
+  },
+  {
+    "attackId": "G0029",
+    "name": "Scarlet Mimic",
+    "aliases": [
+      "Scarlet Mimic"
+    ],
+    "curationScore": 21,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 8
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,ot ",
+      "교육가치 8/40 — 다양성 1기법/2pt + tactic 1/2pt + mit 8/4pt"
+    ]
+  },
+  {
+    "attackId": "G1037",
+    "name": "TA577",
+    "aliases": [
+      "TA577"
+    ],
+    "curationScore": 20,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 17/40 — 다양성 6기법/5pt + tactic 4/5pt + mit 16/7pt"
+    ]
+  },
+  {
+    "attackId": "G0028",
+    "name": "Threat Group-1314",
+    "aliases": [
+      "Threat Group-1314",
+      "TG-1314"
+    ],
+    "curationScore": 20,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 17/40 — 다양성 4기법/2pt + tactic 6/8pt + mit 20/7pt"
+    ]
+  },
+  {
+    "attackId": "G0033",
+    "name": "Poseidon Group",
+    "aliases": [
+      "Poseidon Group"
+    ],
+    "curationScore": 20,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 17/40 — 다양성 8기법/5pt + tactic 4/5pt + mit 19/7pt"
+    ]
+  },
+  {
+    "attackId": "G0044",
+    "name": "Winnti Group",
+    "aliases": [
+      "Winnti Group",
+      "Blackfly"
+    ],
+    "curationScore": 17,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 14
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 14/40 — 다양성 6기법/5pt + tactic 4/5pt + mit 8/4pt"
+    ]
+  },
+  {
+    "attackId": "G0024",
+    "name": "Putter Panda",
+    "aliases": [
+      "Putter Panda",
+      "APT2",
+      "MSUpdater"
+    ],
+    "curationScore": 17,
+    "breakdown": {
+      "fame": 6,
+      "relevance": 0,
+      "educational": 11
+    },
+    "reasons": [
+      "유명도 6/30 — 별칭 3개 기반 추정: 6/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 11/40 — 다양성 4기법/2pt + tactic 3/5pt + mit 8/4pt"
+    ]
+  },
+  {
+    "attackId": "G0062",
+    "name": "TA459",
+    "aliases": [
+      "TA459"
+    ],
+    "curationScore": 17,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 14
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 14/40 — 다양성 5기법/5pt + tactic 2/2pt + mit 23/7pt"
+    ]
+  },
+  {
+    "attackId": "G1038",
+    "name": "TA578",
+    "aliases": [
+      "TA578"
+    ],
+    "curationScore": 14,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 11
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 11/40 — 다양성 4기법/2pt + tactic 3/5pt + mit 9/4pt"
+    ]
+  },
+  {
+    "attackId": "G0055",
+    "name": "NEODYMIUM",
+    "aliases": [
+      "NEODYMIUM"
+    ],
+    "curationScore": 13,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 0
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ics,ot ",
+      "교육가치 0/40 — 다양성 0기법/0pt + tactic 0/0pt + mit 0/0pt"
+    ]
+  },
+  {
+    "attackId": "G0036",
+    "name": "GCMAN",
+    "aliases": [
+      "GCMAN"
+    ],
+    "curationScore": 11,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 8
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 8/40 — 다양성 2기법/2pt + tactic 1/2pt + mit 7/4pt"
+    ]
+  },
+  {
+    "attackId": "G1050",
+    "name": "Water Galura",
+    "aliases": [
+      "Water Galura",
+      "GOLD FEATHER"
+    ],
+    "curationScore": 11,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 8
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 2개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 8/40 — 다양성 3기법/2pt + tactic 2/2pt + mit 5/4pt"
+    ]
+  },
+  {
+    "attackId": "G0083",
+    "name": "SilverTerrier",
+    "aliases": [
+      "SilverTerrier"
+    ],
+    "curationScore": 11,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 8
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 8/40 — 다양성 4기법/2pt + tactic 2/2pt + mit 8/4pt"
+    ]
+  },
+  {
+    "attackId": "G0023",
+    "name": "APT16",
+    "aliases": [
+      "APT16"
+    ],
+    "curationScore": 9,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 6
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 6/40 — 다양성 1기법/2pt + tactic 1/2pt + mit 1/2pt"
+    ]
+  },
+  {
+    "attackId": "G0002",
+    "name": "Moafee",
+    "aliases": [
+      "Moafee"
+    ],
+    "curationScore": 9,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 6
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 6/40 — 다양성 1기법/2pt + tactic 1/2pt + mit 4/2pt"
+    ]
+  },
+  {
+    "attackId": "G0017",
+    "name": "DragonOK",
+    "aliases": [
+      "DragonOK"
+    ],
+    "curationScore": 3,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 0
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 0/40 — 다양성 0기법/0pt + tactic 0/0pt + mit 0/0pt"
+    ]
+  }
+]

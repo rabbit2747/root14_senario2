@@ -1,0 +1,940 @@
+[
+  {
+    "attackId": "C0024",
+    "name": "SolarWinds Compromise",
+    "aliases": [
+      "SolarWinds Compromise"
+    ],
+    "curationScore": 95,
+    "breakdown": {
+      "fame": 30,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 30/30 — 큐레이션 매핑: 30/30",
+      "관련성 25/30 — usMiddleEast: us ,middle east / criticalInfra:government,telecom,ot ",
+      "교육가치 40/40 — 다양성 71기법/15pt + tactic 13/15pt + mit 214/10pt"
+    ]
+  },
+  {
+    "attackId": "C0014",
+    "name": "Operation Wocao",
+    "aliases": [
+      "Operation Wocao"
+    ],
+    "curationScore": 89,
+    "breakdown": {
+      "fame": 24,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:energy,government",
+      "교육가치 40/40 — 다양성 70기법/15pt + tactic 13/15pt + mit 145/10pt"
+    ]
+  },
+  {
+    "attackId": "C0022",
+    "name": "Operation Dream Job",
+    "aliases": [
+      "Operation Dream Job",
+      "Operation North Star",
+      "Operation Interception"
+    ],
+    "curationScore": 87,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 25/30 — usMiddleEast:united states,israel / criticalInfra:government,defense",
+      "교육가치 40/40 — 다양성 55기법/15pt + tactic 13/15pt + mit 103/10pt"
+    ]
+  },
+  {
+    "attackId": "C0002",
+    "name": "Night Dragon",
+    "aliases": [
+      "Night Dragon"
+    ],
+    "curationScore": 87,
+    "breakdown": {
+      "fame": 25,
+      "relevance": 25,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:financial,energy,oil",
+      "교육가치 37/40 — 다양성 29기법/12pt + tactic 11/15pt + mit 74/10pt"
+    ]
+  },
+  {
+    "attackId": "C0017",
+    "name": "C0017",
+    "aliases": [
+      "C0017"
+    ],
+    "curationScore": 85,
+    "breakdown": {
+      "fame": 23,
+      "relevance": 25,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:government",
+      "교육가치 37/40 — 다양성 29기법/12pt + tactic 11/15pt + mit 74/10pt"
+    ]
+  },
+  {
+    "attackId": "C0029",
+    "name": "Cutting Edge",
+    "aliases": [
+      "Cutting Edge"
+    ],
+    "curationScore": 73,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 30,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 30/30 — usMiddleEast:u.s. / criticalInfra:financial,defense,telecom / globalScale:global",
+      "교육가치 40/40 — 다양성 31기법/15pt + tactic 12/15pt + mit 92/10pt"
+    ]
+  },
+  {
+    "attackId": "C0058",
+    "name": "SharePoint ToolShell Exploitation",
+    "aliases": [
+      "SharePoint ToolShell Exploitation"
+    ],
+    "curationScore": 68,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:energy,healthcare",
+      "교육가치 40/40 — 다양성 35기법/15pt + tactic 14/15pt + mit 77/10pt"
+    ]
+  },
+  {
+    "attackId": "C0027",
+    "name": "C0027",
+    "aliases": [
+      "C0027"
+    ],
+    "curationScore": 67,
+    "breakdown": {
+      "fame": 20,
+      "relevance": 10,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 20/30 — 큐레이션 매핑: 20/30",
+      "관련성 10/30 — criticalInfra:financial,telecom",
+      "교육가치 37/40 — 다양성 28기법/12pt + tactic 12/15pt + mit 78/10pt"
+    ]
+  },
+  {
+    "attackId": "C0038",
+    "name": "HomeLand Justice",
+    "aliases": [
+      "HomeLand Justice"
+    ],
+    "curationScore": 65,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast: us ,iran / criticalInfra:government,ics",
+      "교육가치 37/40 — 다양성 25기법/12pt + tactic 13/15pt + mit 85/10pt"
+    ]
+  },
+  {
+    "attackId": "C0010",
+    "name": "C0010",
+    "aliases": [
+      "C0010"
+    ],
+    "curationScore": 63,
+    "breakdown": {
+      "fame": 24,
+      "relevance": 25,
+      "educational": 14
+    },
+    "reasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 25/30 — usMiddleEast:iran,israel / criticalInfra:energy,government,healthcare",
+      "교육가치 14/40 — 다양성 9기법/5pt + tactic 3/5pt + mit 14/4pt"
+    ]
+  },
+  {
+    "attackId": "C0015",
+    "name": "C0015",
+    "aliases": [
+      "C0015"
+    ],
+    "curationScore": 63,
+    "breakdown": {
+      "fame": 23,
+      "relevance": 0,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 40/40 — 다양성 34기법/15pt + tactic 11/15pt + mit 71/10pt"
+    ]
+  },
+  {
+    "attackId": "C0040",
+    "name": "APT41 DUST",
+    "aliases": [
+      "APT41 DUST"
+    ],
+    "curationScore": 62,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:ics",
+      "교육가치 34/40 — 다양성 23기법/12pt + tactic 9/12pt + mit 56/10pt"
+    ]
+  },
+  {
+    "attackId": "C0035",
+    "name": "KV Botnet Activity",
+    "aliases": [
+      "KV Botnet Activity"
+    ],
+    "curationScore": 62,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:energy,telecom,critical infrastructure",
+      "교육가치 34/40 — 다양성 20기법/12pt + tactic 7/12pt + mit 47/10pt"
+    ]
+  },
+  {
+    "attackId": "C0021",
+    "name": "C0021",
+    "aliases": [
+      "C0021"
+    ],
+    "curationScore": 59,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 10,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 10/30 — criticalInfra:oil,gas,government",
+      "교육가치 27/40 — 다양성 15기법/9pt + tactic 5/8pt + mit 32/10pt"
+    ]
+  },
+  {
+    "attackId": "C0013",
+    "name": "Operation Sharpshooter",
+    "aliases": [
+      "Operation Sharpshooter"
+    ],
+    "curationScore": 57,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 30,
+      "educational": 24
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 30/30 — usMiddleEast:united states / criticalInfra:financial,energy,government / globalScale:global",
+      "교육가치 24/40 — 다양성 13기법/9pt + tactic 6/8pt + mit 28/7pt"
+    ]
+  },
+  {
+    "attackId": "C0044",
+    "name": "Juicy Mix",
+    "aliases": [
+      "Juicy Mix"
+    ],
+    "curationScore": 56,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 28
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:israel / criticalInfra:oil",
+      "교육가치 28/40 — 다양성 14기법/9pt + tactic 9/12pt + mit 25/7pt"
+    ]
+  },
+  {
+    "attackId": "C0025",
+    "name": "2016 Ukraine Electric Power Attack",
+    "aliases": [
+      "2016 Ukraine Electric Power Attack"
+    ],
+    "curationScore": 56,
+    "breakdown": {
+      "fame": 22,
+      "relevance": 0,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 21기법/12pt + tactic 7/12pt + mit 73/10pt"
+    ]
+  },
+  {
+    "attackId": "C0016",
+    "name": "Operation Dust Storm",
+    "aliases": [
+      "Operation Dust Storm"
+    ],
+    "curationScore": 55,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:oil,gas,government",
+      "교육가치 27/40 — 다양성 17기법/9pt + tactic 6/8pt + mit 52/10pt"
+    ]
+  },
+  {
+    "attackId": "C0018",
+    "name": "C0018",
+    "aliases": [
+      "C0018"
+    ],
+    "curationScore": 54,
+    "breakdown": {
+      "fame": 23,
+      "relevance": 0,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 31/40 — 다양성 19기법/9pt + tactic 8/12pt + mit 66/10pt"
+    ]
+  },
+  {
+    "attackId": "C0011",
+    "name": "C0011",
+    "aliases": [
+      "C0011"
+    ],
+    "curationScore": 51,
+    "breakdown": {
+      "fame": 24,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 17/40 — 다양성 8기법/5pt + tactic 3/5pt + mit 26/7pt"
+    ]
+  },
+  {
+    "attackId": "C0046",
+    "name": "ArcaneDoor",
+    "aliases": [
+      "ArcaneDoor"
+    ],
+    "curationScore": 50,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,critical infrastructure",
+      "교육가치 37/40 — 다양성 25기법/12pt + tactic 11/15pt + mit 77/10pt"
+    ]
+  },
+  {
+    "attackId": "C0028",
+    "name": "2015 Ukraine Electric Power Attack",
+    "aliases": [
+      "2015 Ukraine Electric Power Attack"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:energy",
+      "교육가치 34/40 — 다양성 17기법/9pt + tactic 10/15pt + mit 54/10pt"
+    ]
+  },
+  {
+    "attackId": "C0059",
+    "name": "Salesforce Data Exfiltration",
+    "aliases": [
+      "Salesforce Data Exfiltration"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,ot ",
+      "교육가치 34/40 — 다양성 18기법/9pt + tactic 11/15pt + mit 38/10pt"
+    ]
+  },
+  {
+    "attackId": "C0057",
+    "name": "3CX Supply Chain Attack",
+    "aliases": [
+      "3CX Supply Chain Attack"
+    ],
+    "curationScore": 47,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:defense",
+      "교육가치 34/40 — 다양성 22기법/12pt + tactic 7/12pt + mit 59/10pt"
+    ]
+  },
+  {
+    "attackId": "C0004",
+    "name": "CostaRicto",
+    "aliases": [
+      "CostaRicto"
+    ],
+    "curationScore": 46,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 28
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — criticalInfra:financial / globalScale:worldwide",
+      "교육가치 28/40 — 다양성 10기법/9pt + tactic 8/12pt + mit 21/7pt"
+    ]
+  },
+  {
+    "attackId": "C0042",
+    "name": "Outer Space",
+    "aliases": [
+      "Outer Space"
+    ],
+    "curationScore": 45,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:israel / criticalInfra:oil",
+      "교육가치 17/40 — 다양성 8기법/5pt + tactic 5/8pt + mit 14/4pt"
+    ]
+  },
+  {
+    "attackId": "C0026",
+    "name": "C0026",
+    "aliases": [
+      "C0026"
+    ],
+    "curationScore": 45,
+    "breakdown": {
+      "fame": 21,
+      "relevance": 10,
+      "educational": 14
+    },
+    "reasons": [
+      "유명도 21/30 — 큐레이션 매핑: 21/30",
+      "관련성 10/30 — criticalInfra:ics",
+      "교육가치 14/40 — 다양성 6기법/5pt + tactic 4/5pt + mit 8/4pt"
+    ]
+  },
+  {
+    "attackId": "C0045",
+    "name": "ShadowRay",
+    "aliases": [
+      "ShadowRay"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 31/40 — 다양성 10기법/9pt + tactic 10/15pt + mit 25/7pt"
+    ]
+  },
+  {
+    "attackId": "C0055",
+    "name": "Quad7 Activity",
+    "aliases": [
+      "Quad7 Activity"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:energy,government,defense",
+      "교육가치 31/40 — 다양성 15기법/9pt + tactic 7/12pt + mit 31/10pt"
+    ]
+  },
+  {
+    "attackId": "C0034",
+    "name": "2022 Ukraine Electric Power Attack",
+    "aliases": [
+      "2022 Ukraine Electric Power Attack"
+    ],
+    "curationScore": 44,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:scada",
+      "교육가치 31/40 — 다양성 10기법/9pt + tactic 7/12pt + mit 36/10pt"
+    ]
+  },
+  {
+    "attackId": "C0012",
+    "name": "Operation CuckooBees",
+    "aliases": [
+      "Operation CuckooBees"
+    ],
+    "curationScore": 43,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 40
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 40/40 — 다양성 33기법/15pt + tactic 10/15pt + mit 63/10pt"
+    ]
+  },
+  {
+    "attackId": "C0048",
+    "name": "Operation MidnightEclipse",
+    "aliases": [
+      "Operation MidnightEclipse"
+    ],
+    "curationScore": 42,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 5,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 5/30 — globalScale:global",
+      "교육가치 34/40 — 다양성 17기법/9pt + tactic 10/15pt + mit 52/10pt"
+    ]
+  },
+  {
+    "attackId": "C0056",
+    "name": "RedPenguin",
+    "aliases": [
+      "RedPenguin"
+    ],
+    "curationScore": 40,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 37/40 — 다양성 26기법/12pt + tactic 10/15pt + mit 53/10pt"
+    ]
+  },
+  {
+    "attackId": "C0001",
+    "name": "Frankenstein",
+    "aliases": [
+      "Frankenstein"
+    ],
+    "curationScore": 40,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 37/40 — 다양성 27기법/12pt + tactic 10/15pt + mit 59/10pt"
+    ]
+  },
+  {
+    "attackId": "C0049",
+    "name": "Leviathan Australian Intrusions",
+    "aliases": [
+      "Leviathan Australian Intrusions"
+    ],
+    "curationScore": 40,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 37
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 37/40 — 다양성 26기법/12pt + tactic 11/15pt + mit 83/10pt"
+    ]
+  },
+  {
+    "attackId": "C0005",
+    "name": "Operation Spalax",
+    "aliases": [
+      "Operation Spalax"
+    ],
+    "curationScore": 40,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 27
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:banking,energy,government",
+      "교육가치 27/40 — 다양성 17기법/9pt + tactic 6/8pt + mit 43/10pt"
+    ]
+  },
+  {
+    "attackId": "C0007",
+    "name": "FunnyDream",
+    "aliases": [
+      "FunnyDream"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 24
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 24/40 — 다양성 14기법/9pt + tactic 5/8pt + mit 17/7pt"
+    ]
+  },
+  {
+    "attackId": "C0006",
+    "name": "Operation Honeybee",
+    "aliases": [
+      "Operation Honeybee"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 28기법/12pt + tactic 9/12pt + mit 58/10pt"
+    ]
+  },
+  {
+    "attackId": "C0047",
+    "name": "RedDelta Modified PlugX Infection Chain Operations",
+    "aliases": [
+      "RedDelta Modified PlugX Infection Chain Operations"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 22기법/12pt + tactic 8/12pt + mit 67/10pt"
+    ]
+  },
+  {
+    "attackId": "C0051",
+    "name": "APT28 Nearest Neighbor Campaign",
+    "aliases": [
+      "APT28 Nearest Neighbor Campaign"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 18기법/9pt + tactic 11/15pt + mit 44/10pt"
+    ]
+  },
+  {
+    "attackId": "C0037",
+    "name": "Water Curupira Pikabot Distribution",
+    "aliases": [
+      "Water Curupira Pikabot Distribution"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 24
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 24/40 — 다양성 10기법/9pt + tactic 5/8pt + mit 28/7pt"
+    ]
+  },
+  {
+    "attackId": "C0032",
+    "name": "C0032",
+    "aliases": [
+      "C0032"
+    ],
+    "curationScore": 37,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 17기법/9pt + tactic 10/15pt + mit 59/10pt"
+    ]
+  },
+  {
+    "attackId": "C0030",
+    "name": "Triton Safety Instrumented System Attack",
+    "aliases": [
+      "Triton Safety Instrumented System Attack"
+    ],
+    "curationScore": 31,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 28
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 28/40 — 다양성 10기법/9pt + tactic 9/12pt + mit 29/7pt"
+    ]
+  },
+  {
+    "attackId": "C0053",
+    "name": "FLORAHOX Activity",
+    "aliases": [
+      "FLORAHOX Activity"
+    ],
+    "curationScore": 30,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 17/40 — 다양성 6기법/5pt + tactic 4/5pt + mit 21/7pt"
+    ]
+  },
+  {
+    "attackId": "C0043",
+    "name": "Indian Critical Infrastructure Intrusions",
+    "aliases": [
+      "Indian Critical Infrastructure Intrusions"
+    ],
+    "curationScore": 30,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:critical infrastructure,ics,ot ",
+      "교육가치 17/40 — 다양성 8기법/5pt + tactic 3/5pt + mit 16/7pt"
+    ]
+  },
+  {
+    "attackId": "C0036",
+    "name": "Pikabot Distribution February 2024",
+    "aliases": [
+      "Pikabot Distribution February 2024"
+    ],
+    "curationScore": 30,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 17/40 — 다양성 4기법/2pt + tactic 5/8pt + mit 24/7pt"
+    ]
+  },
+  {
+    "attackId": "C0052",
+    "name": "SPACEHOP Activity",
+    "aliases": [
+      "SPACEHOP Activity"
+    ],
+    "curationScore": 29,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 11
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — usMiddleEast:middle east",
+      "교육가치 11/40 — 다양성 4기법/2pt + tactic 3/5pt + mit 11/4pt"
+    ]
+  },
+  {
+    "attackId": "C0039",
+    "name": "Versa Director Zero Day Exploitation",
+    "aliases": [
+      "Versa Director Zero Day Exploitation"
+    ],
+    "curationScore": 23,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 8기법/5pt + tactic 6/8pt + mit 20/7pt"
+    ]
+  },
+  {
+    "attackId": "C0023",
+    "name": "Operation Ghost",
+    "aliases": [
+      "Operation Ghost"
+    ],
+    "curationScore": 23,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 8기법/5pt + tactic 6/8pt + mit 18/7pt"
+    ]
+  },
+  {
+    "attackId": "C0041",
+    "name": "FrostyGoop Incident",
+    "aliases": [
+      "FrostyGoop Incident"
+    ],
+    "curationScore": 23,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 5기법/5pt + tactic 5/8pt + mit 18/7pt"
+    ]
+  },
+  {
+    "attackId": "C0050",
+    "name": "J-magic Campaign",
+    "aliases": [
+      "J-magic Campaign"
+    ],
+    "curationScore": 21,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 8
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:energy",
+      "교육가치 8/40 — 다양성 4기법/2pt + tactic 2/2pt + mit 6/4pt"
+    ]
+  },
+  {
+    "attackId": "C0033",
+    "name": "C0033",
+    "aliases": [
+      "C0033"
+    ],
+    "curationScore": 3,
+    "breakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 0
+    },
+    "reasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 0/40 — 다양성 0기법/0pt + tactic 0/0pt + mit 0/0pt"
+    ]
+  }
+]
