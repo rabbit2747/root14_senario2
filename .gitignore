@@ -32,3 +32,6 @@ logo/
 # Vercel
 .vercel/
 .vercel
+
+# MITRE CTI raw clone (파싱 결과만 커밋)
+scripts/data/mitre-cti/
