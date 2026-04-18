@@ -1009,6 +1009,15 @@ export default function UltimateCinematicMatrix() {
                 title={viewMode === 'dashboard' ? '매트릭스 전체 보기' : '대시보드로 돌아가기'}>
                 {viewMode === 'dashboard' ? <><span className="dm-mobile-only">🔳</span><span className="dm-mobile-hide">🔳 MATRIX</span></> : <><span className="dm-mobile-only">📋</span><span className="dm-mobile-hide">📋 DASHBOARD</span></>}
               </span>
+              {/* APT 캠페인 갤러리 — 실제 공격 사례 학습 */}
+              <span
+                onClick={() => navigate('/apt')}
+                className="relative px-2 py-1 text-[9px] font-bold rounded border whitespace-nowrap cursor-pointer select-none border-amber-300 text-amber-600 bg-amber-50/50 hover:text-amber-800 hover:border-amber-500 transition-colors"
+                title="APT 실제 공격 사례 갤러리 — MITRE ATT&CK 기반 큐레이션">
+                <span className="dm-mobile-only">🎯</span>
+                <span className="dm-mobile-hide">🎯 APT</span>
+                <span className="ml-1 px-1 rounded-full text-[8px] font-bold bg-amber-500 text-white align-middle">NEW</span>
+              </span>
               {isLoggedIn && (
                 <span
                   onClick={() => navigate('/basics')}
