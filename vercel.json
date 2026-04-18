@@ -7,6 +7,13 @@
     }
   },
 
+  "crons": [
+    {
+      "path": "/api/health",
+      "schedule": "0 0 * * 1"
+    }
+  ],
+
   "rewrites": [
     { "source": "/docs/(.*)", "destination": "/docs/$1" },
     { "source": "/(.*)", "destination": "/" }
