@@ -26,6 +26,7 @@ const RecommendedCoursePage   = lazy(() => import('./pages/RecommendedCoursePage
 const GuidedLearning          = lazy(() => import('./pages/guided/GuidedLearning'));
 const AptGalleryPage          = lazy(() => import('./pages/apt/AptGalleryPage'));
 const AptDetailPage           = lazy(() => import('./pages/apt/AptDetailPage'));
+const AptStudyPage            = lazy(() => import('./pages/apt/study/AptStudyPage'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -130,6 +131,7 @@ function App() {
             <Route path="/guided/:techniqueId" element={<GuidedLearning />} />
             <Route path="/apt" element={<AptGalleryPage />} />
             <Route path="/apt/:campaignId" element={<AptDetailPage />} />
+            <Route path="/apt/:campaignId/study" element={<AptStudyPage />} />
             <Route path="/lab/t1078" element={<LabT1078 />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/admin" element={<AdminPage />} />

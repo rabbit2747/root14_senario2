@@ -9,6 +9,9 @@ const LEVEL_META = {
   expert:       { emoji: '⭐', ko: '전문가',   color: '#a855f7' },
 };
 
+// 학습 콘텐츠가 준비된 캠페인 ID 화이트리스트 (MVP)
+const STUDY_READY = new Set(['C0024']);
+
 function PageWrapper({ children, isDark, toggleTheme, onClose, title }) {
   return (
     <div className={`min-h-[100dvh] flex flex-col justify-center items-center transition-colors duration-300 ${isDark ? 'bg-[#1a1a1a]' : 'bg-[#F4F1EA]'}`}>
@@ -236,11 +239,32 @@ export default function AptDetailPage() {
           >
             ← 갤러리로
           </button>
+
+          {/* 학습 시작 (콘텐츠 준비된 캠페인만 활성화) */}
+          {STUDY_READY.has(campaign.attackId) ? (
+            <button
+              onClick={() => navigate(`/apt/${campaign.attackId}/study?level=${campaign.level || 'intermediate'}`)}
+              className="text-sm font-bold px-5 py-2.5 rounded-lg transition-colors bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+            >
+              🎓 학습 시작 →
+            </button>
+          ) : (
+            <button
+              disabled
+              title="이 캠페인의 학습 콘텐츠는 순차적으로 추가됩니다"
+              className={`text-sm font-semibold px-5 py-2.5 rounded-lg cursor-not-allowed ${
+                isDark ? 'bg-[#1e1e1e] text-[#666] border border-[#333]' : 'bg-[#f5f5f5] text-[#999] border border-[#e5e5e5]'
+              }`}
+            >
+              🎓 학습 준비 중
+            </button>
+          )}
+
           <a
             href={`https://attack.mitre.org/campaigns/${campaign.attackId}/`}
             target="_blank"
             rel="noopener noreferrer"
-            className={`text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors ${
+            className={`ml-auto text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors ${
               isDark ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
             }`}
           >
