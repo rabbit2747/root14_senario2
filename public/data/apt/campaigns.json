@@ -1,0 +1,2511 @@
+[
+  {
+    "attackId": "C0024",
+    "name": "SolarWinds Compromise",
+    "aliases": [
+      "SolarWinds Compromise"
+    ],
+    "curationScore": 95,
+    "level": "expert",
+    "difficultyScore": 88,
+    "curationReasons": [
+      "유명도 30/30 — 큐레이션 매핑: 30/30",
+      "관련성 25/30 — usMiddleEast: us ,middle east / criticalInfra:government,telecom,ot ",
+      "교육가치 40/40 — 다양성 71기법/15pt + tactic 13/15pt + mit 214/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 13/14 커버 (15pt), 지속 17.3개월 (+5pt)",
+      "기법수 20/20 — Parent 68개 (18pt) + Sub 85개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 325건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 30,
+      "relevance": 25,
+      "educational": 40
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 68,
+      "subTechniqueCount": 85,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 4
+    }
+  },
+  {
+    "attackId": "C0014",
+    "name": "Operation Wocao",
+    "aliases": [
+      "Operation Wocao"
+    ],
+    "curationScore": 89,
+    "level": "expert",
+    "difficultyScore": 83,
+    "curationReasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:energy,government",
+      "교육가치 40/40 — 다양성 70기법/15pt + tactic 13/15pt + mit 145/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 13/14 커버 (15pt), 지속 24.3개월 (+5pt)",
+      "기법수 20/20 — Parent 58개 (18pt) + Sub 36개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 145건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 24,
+      "relevance": 25,
+      "educational": 40
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 58,
+      "subTechniqueCount": 36,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    }
+  },
+  {
+    "attackId": "C0022",
+    "name": "Operation Dream Job",
+    "aliases": [
+      "Operation Dream Job",
+      "Operation North Star",
+      "Operation Interception"
+    ],
+    "curationScore": 87,
+    "level": "expert",
+    "difficultyScore": 88,
+    "curationReasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 25/30 — usMiddleEast:united states,israel / criticalInfra:government,defense",
+      "교육가치 40/40 — 다양성 55기법/15pt + tactic 13/15pt + mit 103/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 18/20 — tactic 14/14 커버 (15pt), 지속 11.2개월 (+3pt)",
+      "기법수 20/20 — Parent 80개 (18pt) + Sub 79개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 248건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 22,
+      "relevance": 25,
+      "educational": 40
+    },
+    "difficultyBreakdown": {
+      "chainScope": 18,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 80,
+      "subTechniqueCount": 79,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 5
+    }
+  },
+  {
+    "attackId": "C0002",
+    "name": "Night Dragon",
+    "aliases": [
+      "Night Dragon"
+    ],
+    "curationScore": 87,
+    "level": "expert",
+    "difficultyScore": 81,
+    "curationReasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:financial,energy,oil",
+      "교육가치 37/40 — 다양성 29기법/12pt + tactic 11/15pt + mit 74/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 11/14 커버 (15pt), 지속 15.2개월 (+5pt)",
+      "기법수 20/20 — Parent 26개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 74건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'scada' → expert 강제 승급",
+      "키워드 'pass-the-hash' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 25,
+      "relevance": 25,
+      "educational": 37
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 26,
+      "subTechniqueCount": 18,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0017",
+    "name": "C0017",
+    "aliases": [
+      "C0017"
+    ],
+    "curationScore": 85,
+    "level": "expert",
+    "difficultyScore": 82,
+    "curationReasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:government",
+      "교육가치 37/40 — 다양성 29기법/12pt + tactic 11/15pt + mit 74/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 18/20 — tactic 14/14 커버 (15pt), 지속 9.2개월 (+3pt)",
+      "기법수 20/20 — Parent 75개 (18pt) + Sub 55개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (schtasks)",
+      "분석요구 10/10 — mitigation 연결 243건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 23,
+      "relevance": 25,
+      "educational": 37
+    },
+    "difficultyBreakdown": {
+      "chainScope": 18,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 75,
+      "subTechniqueCount": 55,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0029",
+    "name": "Cutting Edge",
+    "aliases": [
+      "Cutting Edge"
+    ],
+    "curationScore": 73,
+    "level": "expert",
+    "difficultyScore": 77,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 30/30 — usMiddleEast:u.s. / criticalInfra:financial,defense,telecom / globalScale:global",
+      "교육가치 40/40 — 다양성 31기법/15pt + tactic 12/15pt + mit 92/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 16/20 — tactic 12/14 커버 (15pt), 지속 2.1개월 (+1pt)",
+      "기법수 20/20 — Parent 24개 (18pt) + Sub 19개 (+2 다양성)",
+      "환경 12/15 — platform 10종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 92건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 30,
+      "educational": 40
+    },
+    "difficultyBreakdown": {
+      "chainScope": 16,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 24,
+      "subTechniqueCount": 19,
+      "tacticCount": 12,
+      "platformCount": 10,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0058",
+    "name": "SharePoint ToolShell Exploitation",
+    "aliases": [
+      "SharePoint ToolShell Exploitation"
+    ],
+    "curationScore": 68,
+    "level": "advanced",
+    "difficultyScore": 80,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:energy,healthcare",
+      "교육가치 40/40 — 다양성 35기법/15pt + tactic 14/15pt + mit 77/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt), 지속 0.0개월 (+0pt)",
+      "기법수 20/20 — Parent 32개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 12/15 — platform 10종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,psexec)",
+      "분석요구 10/10 — mitigation 연결 77건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 40
+    },
+    "difficultyBreakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 32,
+      "subTechniqueCount": 18,
+      "tacticCount": 14,
+      "platformCount": 10,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    }
+  },
+  {
+    "attackId": "C0027",
+    "name": "C0027",
+    "aliases": [
+      "C0027"
+    ],
+    "curationScore": 67,
+    "level": "expert",
+    "difficultyScore": 84,
+    "curationReasons": [
+      "유명도 20/30 — 큐레이션 매핑: 20/30",
+      "관련성 10/30 — criticalInfra:financial,telecom",
+      "교육가치 37/40 — 다양성 28기법/12pt + tactic 12/15pt + mit 78/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 18/20 — tactic 14/14 커버 (15pt), 지속 6.1개월 (+3pt)",
+      "기법수 20/20 — Parent 55개 (18pt) + Sub 43개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (wmi)",
+      "분석요구 10/10 — mitigation 연결 213건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 20,
+      "relevance": 10,
+      "educational": 37
+    },
+    "difficultyBreakdown": {
+      "chainScope": 18,
+      "ttpCount": 20,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 55,
+      "subTechniqueCount": 43,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0038",
+    "name": "HomeLand Justice",
+    "aliases": [
+      "HomeLand Justice"
+    ],
+    "curationScore": 65,
+    "level": "expert",
+    "difficultyScore": 83,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast: us ,iran / criticalInfra:government,ics",
+      "교육가치 37/40 — 다양성 25기법/12pt + tactic 13/15pt + mit 85/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 14/14 커버 (15pt), 지속 16.3개월 (+5pt)",
+      "기법수 20/20 — Parent 45개 (18pt) + Sub 37개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 129건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 37
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 45,
+      "subTechniqueCount": 37,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    }
+  },
+  {
+    "attackId": "C0010",
+    "name": "C0010",
+    "aliases": [
+      "C0010"
+    ],
+    "curationScore": 63,
+    "level": "intermediate",
+    "difficultyScore": 36,
+    "curationReasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 25/30 — usMiddleEast:iran,israel / criticalInfra:energy,government,healthcare",
+      "교육가치 14/40 — 다양성 9기법/5pt + tactic 3/5pt + mit 14/4pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 10/20 — tactic 3/14 커버 (5pt), 지속 20.3개월 (+5pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 7개",
+      "환경 13/15 — platform 7종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 4/10 — mitigation 연결 14건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 24,
+      "relevance": 25,
+      "educational": 14
+    },
+    "difficultyBreakdown": {
+      "chainScope": 10,
+      "ttpCount": 9,
+      "environment": 13,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 7,
+      "tacticCount": 3,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0015",
+    "name": "C0015",
+    "aliases": [
+      "C0015"
+    ],
+    "curationScore": 63,
+    "level": "advanced",
+    "difficultyScore": 78,
+    "curationReasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 40/40 — 다양성 34기법/15pt + tactic 11/15pt + mit 71/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt), 지속 0.0개월 (+0pt)",
+      "기법수 20/20 — Parent 28개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 13/15 — platform 8종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 6종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 71건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 23,
+      "relevance": 0,
+      "educational": 40
+    },
+    "difficultyBreakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 10,
+      "stealthLotl": 10,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 28,
+      "subTechniqueCount": 18,
+      "tacticCount": 11,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 6
+    }
+  },
+  {
+    "attackId": "C0040",
+    "name": "APT41 DUST",
+    "aliases": [
+      "APT41 DUST"
+    ],
+    "curationScore": 62,
+    "level": "expert",
+    "difficultyScore": 84,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:ics",
+      "교육가치 34/40 — 다양성 23기법/12pt + tactic 9/12pt + mit 56/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 14/14 커버 (15pt), 지속 17.2개월 (+5pt)",
+      "기법수 20/20 — Parent 75개 (18pt) + Sub 59개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (certutil)",
+      "분석요구 10/10 — mitigation 연결 234건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 75,
+      "subTechniqueCount": 59,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0035",
+    "name": "KV Botnet Activity",
+    "aliases": [
+      "KV Botnet Activity"
+    ],
+    "curationScore": 62,
+    "level": "advanced",
+    "difficultyScore": 79,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:energy,telecom,critical infrastructure",
+      "교육가치 34/40 — 다양성 20기법/12pt + tactic 7/12pt + mit 47/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 12/14 커버 (15pt), 지속 15.2개월 (+5pt)",
+      "기법수 20/20 — Parent 66개 (18pt) + Sub 47개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 187건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 66,
+      "subTechniqueCount": 47,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0021",
+    "name": "C0021",
+    "aliases": [
+      "C0021"
+    ],
+    "curationScore": 59,
+    "level": "intermediate",
+    "difficultyScore": 47,
+    "curationReasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 10/30 — criticalInfra:oil,gas,government",
+      "교육가치 27/40 — 다양성 15기법/9pt + tactic 5/8pt + mit 32/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt), 지속 0.0개월 (+0pt)",
+      "기법수 15/20 — Parent 14개 (13pt) + Sub 12개 (+2 다양성)",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,rundll32)",
+      "분석요구 8/10 — mitigation 연결 32건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 22,
+      "relevance": 10,
+      "educational": 27
+    },
+    "difficultyBreakdown": {
+      "chainScope": 8,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 14,
+      "subTechniqueCount": 12,
+      "tacticCount": 5,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    }
+  },
+  {
+    "attackId": "C0013",
+    "name": "Operation Sharpshooter",
+    "aliases": [
+      "Operation Sharpshooter"
+    ],
+    "curationScore": 57,
+    "level": "intermediate",
+    "difficultyScore": 53,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 30/30 — usMiddleEast:united states / criticalInfra:financial,energy,government / globalScale:global",
+      "교육가치 24/40 — 다양성 13기법/9pt + tactic 6/8pt + mit 28/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 13/20 — tactic 6/14 커버 (8pt), 지속 18.2개월 (+5pt)",
+      "기법수 13/20 — Parent 13개 (13pt) + Sub 9개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 28건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 30,
+      "educational": 24
+    },
+    "difficultyBreakdown": {
+      "chainScope": 13,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 13,
+      "subTechniqueCount": 9,
+      "tacticCount": 6,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0044",
+    "name": "Juicy Mix",
+    "aliases": [
+      "Juicy Mix"
+    ],
+    "curationScore": 56,
+    "level": "advanced",
+    "difficultyScore": 79,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:israel / criticalInfra:oil",
+      "교육가치 28/40 — 다양성 14기법/9pt + tactic 9/12pt + mit 25/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 18/20 — tactic 12/14 커버 (15pt), 지속 11.1개월 (+3pt)",
+      "기법수 20/20 — Parent 63개 (18pt) + Sub 48개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 206건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 28
+    },
+    "difficultyBreakdown": {
+      "chainScope": 18,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 63,
+      "subTechniqueCount": 48,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0025",
+    "name": "2016 Ukraine Electric Power Attack",
+    "aliases": [
+      "2016 Ukraine Electric Power Attack"
+    ],
+    "curationScore": 56,
+    "level": "advanced",
+    "difficultyScore": 78,
+    "curationReasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 21기법/12pt + tactic 7/12pt + mit 73/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt), 지속 0.0개월 (+0pt)",
+      "기법수 20/20 — Parent 70개 (18pt) + Sub 53개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 250건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 22,
+      "relevance": 0,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 70,
+      "subTechniqueCount": 53,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    }
+  },
+  {
+    "attackId": "C0016",
+    "name": "Operation Dust Storm",
+    "aliases": [
+      "Operation Dust Storm"
+    ],
+    "curationScore": 55,
+    "level": "expert",
+    "difficultyScore": 54,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:oil,gas,government",
+      "교육가치 27/40 — 다양성 17기법/9pt + tactic 6/8pt + mit 52/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 13/20 — tactic 6/14 커버 (8pt), 지속 74.1개월 (+5pt)",
+      "기법수 15/20 — Parent 13개 (13pt) + Sub 11개 (+2 다양성)",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (mshta)",
+      "분석요구 10/10 — mitigation 연결 52건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 27
+    },
+    "difficultyBreakdown": {
+      "chainScope": 13,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 13,
+      "subTechniqueCount": 11,
+      "tacticCount": 6,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0018",
+    "name": "C0018",
+    "aliases": [
+      "C0018"
+    ],
+    "curationScore": 54,
+    "level": "advanced",
+    "difficultyScore": 61,
+    "curationReasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 31/40 — 다양성 19기법/9pt + tactic 8/12pt + mit 66/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 12/20 — tactic 8/14 커버 (12pt), 지속 0.9개월 (+0pt)",
+      "기법수 16/20 — Parent 18개 (16pt) + Sub 8개",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 5/15 — lateral-movement",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 66건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 23,
+      "relevance": 0,
+      "educational": 31
+    },
+    "difficultyBreakdown": {
+      "chainScope": 12,
+      "ttpCount": 16,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 18,
+      "subTechniqueCount": 8,
+      "tacticCount": 8,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    }
+  },
+  {
+    "attackId": "C0011",
+    "name": "C0011",
+    "aliases": [
+      "C0011"
+    ],
+    "curationScore": 51,
+    "level": "intermediate",
+    "difficultyScore": 50,
+    "curationReasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 17/40 — 다양성 8기법/5pt + tactic 3/5pt + mit 26/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 11/20 — tactic 5/14 커버 (8pt), 지속 7.1개월 (+3pt)",
+      "기법수 15/20 — Parent 13개 (13pt) + Sub 13개 (+2 다양성)",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 47건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 24,
+      "relevance": 10,
+      "educational": 17
+    },
+    "difficultyBreakdown": {
+      "chainScope": 11,
+      "ttpCount": 15,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 13,
+      "subTechniqueCount": 13,
+      "tacticCount": 5,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0046",
+    "name": "ArcaneDoor",
+    "aliases": [
+      "ArcaneDoor"
+    ],
+    "curationScore": 50,
+    "level": "advanced",
+    "difficultyScore": 70,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government,critical infrastructure",
+      "교육가치 37/40 — 다양성 25기법/12pt + tactic 11/15pt + mit 77/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 18/20 — tactic 11/14 커버 (15pt), 지속 9.2개월 (+3pt)",
+      "기법수 18/20 — Parent 22개 (18pt) + Sub 9개",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 77건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 37
+    },
+    "difficultyBreakdown": {
+      "chainScope": 18,
+      "ttpCount": 18,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 22,
+      "subTechniqueCount": 9,
+      "tacticCount": 11,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0028",
+    "name": "2015 Ukraine Electric Power Attack",
+    "aliases": [
+      "2015 Ukraine Electric Power Attack"
+    ],
+    "curationScore": 47,
+    "level": "expert",
+    "difficultyScore": 77,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:energy",
+      "교육가치 34/40 — 다양성 17기법/9pt + tactic 10/15pt + mit 54/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 16/20 — tactic 14/14 커버 (15pt), 지속 1.0개월 (+1pt)",
+      "기법수 20/20 — Parent 68개 (18pt) + Sub 47개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (rundll32)",
+      "분석요구 10/10 — mitigation 연결 223건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'industrial control' → expert 강제 승급",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 16,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 68,
+      "subTechniqueCount": 47,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0059",
+    "name": "Salesforce Data Exfiltration",
+    "aliases": [
+      "Salesforce Data Exfiltration"
+    ],
+    "curationScore": 47,
+    "level": "advanced",
+    "difficultyScore": 68,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:financial,ot ",
+      "교육가치 34/40 — 다양성 18기법/9pt + tactic 11/15pt + mit 38/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 11/14 커버 (15pt), 지속 254.7개월 (+5pt)",
+      "기법수 18/20 — Parent 16개 (16pt) + Sub 10개 (+2 다양성)",
+      "환경 13/15 — platform 9종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 38건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 18,
+      "environment": 13,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 16,
+      "subTechniqueCount": 10,
+      "tacticCount": 11,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0057",
+    "name": "3CX Supply Chain Attack",
+    "aliases": [
+      "3CX Supply Chain Attack"
+    ],
+    "curationScore": 47,
+    "level": "expert",
+    "difficultyScore": 62,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:defense",
+      "교육가치 34/40 — 다양성 22기법/12pt + tactic 7/12pt + mit 59/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 13/20 — tactic 8/14 커버 (12pt), 지속 4.0개월 (+1pt)",
+      "기법수 20/20 — Parent 20개 (18pt) + Sub 13개 (+2 다양성)",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 67건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 13,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 20,
+      "subTechniqueCount": 13,
+      "tacticCount": 8,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0004",
+    "name": "CostaRicto",
+    "aliases": [
+      "CostaRicto"
+    ],
+    "curationScore": 46,
+    "level": "intermediate",
+    "difficultyScore": 51,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — criticalInfra:financial / globalScale:worldwide",
+      "교육가치 28/40 — 다양성 10기법/9pt + tactic 8/12pt + mit 21/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 17/20 — tactic 8/14 커버 (12pt), 지속 13.2개월 (+5pt)",
+      "기법수 13/20 — Parent 10개 (13pt) + Sub 5개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 6/10 — mitigation 연결 21건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 28
+    },
+    "difficultyBreakdown": {
+      "chainScope": 17,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 0,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 5,
+      "tacticCount": 8,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0042",
+    "name": "Outer Space",
+    "aliases": [
+      "Outer Space"
+    ],
+    "curationScore": 45,
+    "level": "advanced",
+    "difficultyScore": 77,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 25/30 — usMiddleEast:israel / criticalInfra:oil",
+      "교육가치 17/40 — 다양성 8기법/5pt + tactic 5/8pt + mit 14/4pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 18/20 — tactic 12/14 커버 (15pt), 지속 11.1개월 (+3pt)",
+      "기법수 20/20 — Parent 61개 (18pt) + Sub 47개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 206건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 25,
+      "educational": 17
+    },
+    "difficultyBreakdown": {
+      "chainScope": 18,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 61,
+      "subTechniqueCount": 47,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0026",
+    "name": "C0026",
+    "aliases": [
+      "C0026"
+    ],
+    "curationScore": 45,
+    "level": "beginner",
+    "difficultyScore": 32,
+    "curationReasons": [
+      "유명도 21/30 — 큐레이션 매핑: 21/30",
+      "관련성 10/30 — criticalInfra:ics",
+      "교육가치 14/40 — 다양성 6기법/5pt + tactic 4/5pt + mit 8/4pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 6/20 — tactic 4/14 커버 (5pt), 지속 1.0개월 (+1pt)",
+      "기법수 9/20 — Parent 6개 (9pt) + Sub 2개",
+      "환경 13/15 — platform 6종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 4/10 — mitigation 연결 8건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 21,
+      "relevance": 10,
+      "educational": 14
+    },
+    "difficultyBreakdown": {
+      "chainScope": 6,
+      "ttpCount": 9,
+      "environment": 13,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 4,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 6,
+      "subTechniqueCount": 2,
+      "tacticCount": 4,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0045",
+    "name": "ShadowRay",
+    "aliases": [
+      "ShadowRay"
+    ],
+    "curationScore": 44,
+    "level": "advanced",
+    "difficultyScore": 63,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 31/40 — 다양성 10기법/9pt + tactic 10/15pt + mit 25/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 18/20 — tactic 10/14 커버 (15pt), 지속 6.1개월 (+3pt)",
+      "기법수 13/20 — Parent 10개 (13pt) + Sub 6개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 25건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "difficultyBreakdown": {
+      "chainScope": 18,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 6,
+      "tacticCount": 10,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0055",
+    "name": "Quad7 Activity",
+    "aliases": [
+      "Quad7 Activity"
+    ],
+    "curationScore": 44,
+    "level": "advanced",
+    "difficultyScore": 64,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:energy,government,defense",
+      "교육가치 31/40 — 다양성 15기법/9pt + tactic 7/12pt + mit 31/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 17/20 — tactic 7/14 커버 (12pt), 지속 24.4개월 (+5pt)",
+      "기법수 15/20 — Parent 12개 (13pt) + Sub 11개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 8/10 — mitigation 연결 31건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "difficultyBreakdown": {
+      "chainScope": 17,
+      "ttpCount": 15,
+      "environment": 13,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 11,
+      "tacticCount": 7,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0034",
+    "name": "2022 Ukraine Electric Power Attack",
+    "aliases": [
+      "2022 Ukraine Electric Power Attack"
+    ],
+    "curationScore": 44,
+    "level": "expert",
+    "difficultyScore": 77,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:scada",
+      "교육가치 31/40 — 다양성 10기법/9pt + tactic 7/12pt + mit 36/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 16/20 — tactic 14/14 커버 (15pt), 지속 4.1개월 (+1pt)",
+      "기법수 20/20 — Parent 68개 (18pt) + Sub 48개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 231건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'scada' → expert 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 31
+    },
+    "difficultyBreakdown": {
+      "chainScope": 16,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 68,
+      "subTechniqueCount": 48,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0012",
+    "name": "Operation CuckooBees",
+    "aliases": [
+      "Operation CuckooBees"
+    ],
+    "curationScore": 43,
+    "level": "advanced",
+    "difficultyScore": 78,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 40/40 — 다양성 33기법/15pt + tactic 10/15pt + mit 63/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 10/14 커버 (15pt), 지속 29.4개월 (+5pt)",
+      "기법수 20/20 — Parent 30개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (rundll32,cscript,wscript)",
+      "분석요구 10/10 — mitigation 연결 63건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 40
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 30,
+      "subTechniqueCount": 18,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 4
+    }
+  },
+  {
+    "attackId": "C0048",
+    "name": "Operation MidnightEclipse",
+    "aliases": [
+      "Operation MidnightEclipse"
+    ],
+    "curationScore": 42,
+    "level": "expert",
+    "difficultyScore": 75,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 5/30 — globalScale:global",
+      "교육가치 34/40 — 다양성 17기법/9pt + tactic 10/15pt + mit 52/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 16/20 — tactic 10/14 커버 (15pt), 지속 1.0개월 (+1pt)",
+      "기법수 15/20 — Parent 14개 (13pt) + Sub 11개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 52건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 5,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 16,
+      "ttpCount": 15,
+      "environment": 15,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 14,
+      "subTechniqueCount": 11,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": true,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0056",
+    "name": "RedPenguin",
+    "aliases": [
+      "RedPenguin"
+    ],
+    "curationScore": 40,
+    "level": "advanced",
+    "difficultyScore": 77,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 37/40 — 다양성 26기법/12pt + tactic 10/15pt + mit 53/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 18/20 — tactic 13/14 커버 (15pt), 지속 8.1개월 (+3pt)",
+      "기법수 20/20 — Parent 44개 (18pt) + Sub 34개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 161건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 37
+    },
+    "difficultyBreakdown": {
+      "chainScope": 18,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 44,
+      "subTechniqueCount": 34,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0001",
+    "name": "Frankenstein",
+    "aliases": [
+      "Frankenstein"
+    ],
+    "curationScore": 40,
+    "level": "advanced",
+    "difficultyScore": 69,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 37/40 — 다양성 27기법/12pt + tactic 10/15pt + mit 59/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 16/20 — tactic 10/14 커버 (15pt), 지속 3.0개월 (+1pt)",
+      "기법수 20/20 — Parent 25개 (18pt) + Sub 14개 (+2 다양성)",
+      "환경 10/15 — platform 9종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,msbuild)",
+      "분석요구 10/10 — mitigation 연결 59건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 37
+    },
+    "difficultyBreakdown": {
+      "chainScope": 16,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 8,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 25,
+      "subTechniqueCount": 14,
+      "tacticCount": 10,
+      "platformCount": 9,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 3
+    }
+  },
+  {
+    "attackId": "C0049",
+    "name": "Leviathan Australian Intrusions",
+    "aliases": [
+      "Leviathan Australian Intrusions"
+    ],
+    "curationScore": 40,
+    "level": "advanced",
+    "difficultyScore": 77,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 37/40 — 다양성 26기법/12pt + tactic 11/15pt + mit 83/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 16/20 — tactic 13/14 커버 (15pt), 지속 5.1개월 (+1pt)",
+      "기법수 20/20 — Parent 53개 (18pt) + Sub 44개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 202건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 37
+    },
+    "difficultyBreakdown": {
+      "chainScope": 16,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 53,
+      "subTechniqueCount": 44,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0005",
+    "name": "Operation Spalax",
+    "aliases": [
+      "Operation Spalax"
+    ],
+    "curationScore": 40,
+    "level": "intermediate",
+    "difficultyScore": 57,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:banking,energy,government",
+      "교육가치 27/40 — 다양성 17기법/9pt + tactic 6/8pt + mit 43/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 13/20 — tactic 6/14 커버 (8pt), 지속 14.2개월 (+5pt)",
+      "기법수 15/20 — Parent 12개 (13pt) + Sub 12개 (+2 다양성)",
+      "환경 13/15 — platform 10종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (rundll32)",
+      "분석요구 10/10 — mitigation 연결 43건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 27
+    },
+    "difficultyBreakdown": {
+      "chainScope": 13,
+      "ttpCount": 15,
+      "environment": 13,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 12,
+      "tacticCount": 6,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0007",
+    "name": "FunnyDream",
+    "aliases": [
+      "FunnyDream"
+    ],
+    "curationScore": 37,
+    "level": "intermediate",
+    "difficultyScore": 44,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 24/40 — 다양성 14기법/9pt + tactic 5/8pt + mit 17/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 13/20 — tactic 5/14 커버 (8pt), 지속 28.5개월 (+5pt)",
+      "기법수 13/20 — Parent 12개 (13pt) + Sub 7개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 2/10 — LOTL 1종 (wmi)",
+      "분석요구 6/10 — mitigation 연결 17건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 24
+    },
+    "difficultyBreakdown": {
+      "chainScope": 13,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 2,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 12,
+      "subTechniqueCount": 7,
+      "tacticCount": 5,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0006",
+    "name": "Operation Honeybee",
+    "aliases": [
+      "Operation Honeybee"
+    ],
+    "curationScore": 37,
+    "level": "advanced",
+    "difficultyScore": 64,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 28기법/12pt + tactic 9/12pt + mit 58/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 9/14 커버 (12pt), 지속 6.1개월 (+3pt)",
+      "기법수 20/20 — Parent 25개 (18pt) + Sub 18개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 58건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 15,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 25,
+      "subTechniqueCount": 18,
+      "tacticCount": 9,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0047",
+    "name": "RedDelta Modified PlugX Infection Chain Operations",
+    "aliases": [
+      "RedDelta Modified PlugX Infection Chain Operations"
+    ],
+    "curationScore": 37,
+    "level": "expert",
+    "difficultyScore": 84,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 22기법/12pt + tactic 8/12pt + mit 67/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 13/14 커버 (15pt), 지속 17.3개월 (+5pt)",
+      "기법수 20/20 — Parent 63개 (18pt) + Sub 57개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 229건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 13,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 63,
+      "subTechniqueCount": 57,
+      "tacticCount": 13,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": true,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0051",
+    "name": "APT28 Nearest Neighbor Campaign",
+    "aliases": [
+      "APT28 Nearest Neighbor Campaign"
+    ],
+    "curationScore": 37,
+    "level": "expert",
+    "difficultyScore": 83,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 18기법/9pt + tactic 11/15pt + mit 44/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 14/14 커버 (15pt), 지속 33.5개월 (+5pt)",
+      "기법수 20/20 — Parent 75개 (18pt) + Sub 60개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 262건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "키워드 'ntds.dit' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 12,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 75,
+      "subTechniqueCount": 60,
+      "tacticCount": 14,
+      "platformCount": 11,
+      "hasAd": true,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0037",
+    "name": "Water Curupira Pikabot Distribution",
+    "aliases": [
+      "Water Curupira Pikabot Distribution"
+    ],
+    "curationScore": 37,
+    "level": "intermediate",
+    "difficultyScore": 44,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 24/40 — 다양성 10기법/9pt + tactic 5/8pt + mit 28/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 11/20 — tactic 5/14 커버 (8pt), 지속 11.1개월 (+3pt)",
+      "기법수 9/20 — Parent 7개 (9pt) + Sub 7개",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (rundll32)",
+      "분석요구 8/10 — mitigation 연결 28건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 24
+    },
+    "difficultyBreakdown": {
+      "chainScope": 11,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 7,
+      "subTechniqueCount": 7,
+      "tacticCount": 5,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0032",
+    "name": "C0032",
+    "aliases": [
+      "C0032"
+    ],
+    "curationScore": 37,
+    "level": "advanced",
+    "difficultyScore": 79,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 34/40 — 다양성 17기법/9pt + tactic 10/15pt + mit 59/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 10/14 커버 (15pt), 지속 27.4개월 (+5pt)",
+      "기법수 18/20 — Parent 15개 (16pt) + Sub 13개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,psexec)",
+      "분석요구 10/10 — mitigation 연결 59건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 34
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 18,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 15,
+      "subTechniqueCount": 13,
+      "tacticCount": 10,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    }
+  },
+  {
+    "attackId": "C0030",
+    "name": "Triton Safety Instrumented System Attack",
+    "aliases": [
+      "Triton Safety Instrumented System Attack"
+    ],
+    "curationScore": 31,
+    "level": "intermediate",
+    "difficultyScore": 60,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 28/40 — 다양성 10기법/9pt + tactic 9/12pt + mit 29/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 13/20 — tactic 9/14 커버 (12pt), 지속 2.0개월 (+1pt)",
+      "기법수 13/20 — Parent 10개 (13pt) + Sub 8개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 8/10 — mitigation 연결 29건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 28
+    },
+    "difficultyBreakdown": {
+      "chainScope": 13,
+      "ttpCount": 13,
+      "environment": 10,
+      "credLateral": 10,
+      "stealthLotl": 6,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 10,
+      "subTechniqueCount": 8,
+      "tacticCount": 9,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 2
+    }
+  },
+  {
+    "attackId": "C0053",
+    "name": "FLORAHOX Activity",
+    "aliases": [
+      "FLORAHOX Activity"
+    ],
+    "curationScore": 30,
+    "level": "beginner",
+    "difficultyScore": 31,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 17/40 — 다양성 6기법/5pt + tactic 4/5pt + mit 21/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 10/20 — tactic 4/14 커버 (5pt), 지속 64.9개월 (+5pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 4개",
+      "환경 10/15 — platform 10종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 0/10 — 은닉 시그널 없음",
+      "분석요구 6/10 — mitigation 연결 21건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "difficultyBreakdown": {
+      "chainScope": 10,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 0,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 4,
+      "tacticCount": 4,
+      "platformCount": 10,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0043",
+    "name": "Indian Critical Infrastructure Intrusions",
+    "aliases": [
+      "Indian Critical Infrastructure Intrusions"
+    ],
+    "curationScore": 30,
+    "level": "beginner",
+    "difficultyScore": 39,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:critical infrastructure,ics,ot ",
+      "교육가치 17/40 — 다양성 8기법/5pt + tactic 3/5pt + mit 16/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 10/20 — tactic 3/14 커버 (5pt), 지속 15.2개월 (+5pt)",
+      "기법수 9/20 — Parent 8개 (9pt) + Sub 4개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 16건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "difficultyBreakdown": {
+      "chainScope": 10,
+      "ttpCount": 9,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 8,
+      "subTechniqueCount": 4,
+      "tacticCount": 3,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0036",
+    "name": "Pikabot Distribution February 2024",
+    "aliases": [
+      "Pikabot Distribution February 2024"
+    ],
+    "curationScore": 30,
+    "level": "beginner",
+    "difficultyScore": 40,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:ot ",
+      "교육가치 17/40 — 다양성 4기법/2pt + tactic 5/8pt + mit 24/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt), 지속 0.0개월 (+0pt)",
+      "기법수 5/20 — Parent 3개 (5pt) + Sub 3개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 6/10 — mitigation 연결 24건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 17
+    },
+    "difficultyBreakdown": {
+      "chainScope": 8,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 6,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 3,
+      "subTechniqueCount": 3,
+      "tacticCount": 5,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0052",
+    "name": "SPACEHOP Activity",
+    "aliases": [
+      "SPACEHOP Activity"
+    ],
+    "curationScore": 29,
+    "level": "advanced",
+    "difficultyScore": 79,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 15/30 — usMiddleEast:middle east",
+      "교육가치 11/40 — 다양성 4기법/2pt + tactic 3/5pt + mit 11/4pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 12/14 커버 (15pt), 지속 64.9개월 (+5pt)",
+      "기법수 20/20 — Parent 48개 (18pt) + Sub 41개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 164건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 15,
+      "educational": 11
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 48,
+      "subTechniqueCount": 41,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0039",
+    "name": "Versa Director Zero Day Exploitation",
+    "aliases": [
+      "Versa Director Zero Day Exploitation"
+    ],
+    "curationScore": 23,
+    "level": "expert",
+    "difficultyScore": 75,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 8기법/5pt + tactic 6/8pt + mit 20/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 16/20 — tactic 12/14 커버 (15pt), 지속 2.0개월 (+1pt)",
+      "기법수 20/20 — Parent 59개 (18pt) + Sub 43개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 156건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "difficultyBreakdown": {
+      "chainScope": 16,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 4,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 59,
+      "subTechniqueCount": 43,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0023",
+    "name": "Operation Ghost",
+    "aliases": [
+      "Operation Ghost"
+    ],
+    "curationScore": 23,
+    "level": "expert",
+    "difficultyScore": 81,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 8기법/5pt + tactic 6/8pt + mit 18/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 20/20 — tactic 12/14 커버 (15pt), 지속 74.0개월 (+5pt)",
+      "기법수 20/20 — Parent 50개 (18pt) + Sub 55개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (wmi)",
+      "분석요구 10/10 — mitigation 연결 198건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "difficultyBreakdown": {
+      "chainScope": 20,
+      "ttpCount": 20,
+      "environment": 10,
+      "credLateral": 15,
+      "stealthLotl": 6,
+      "analysisDemand": 10,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 50,
+      "subTechniqueCount": 55,
+      "tacticCount": 12,
+      "platformCount": 11,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 1
+    }
+  },
+  {
+    "attackId": "C0041",
+    "name": "FrostyGoop Incident",
+    "aliases": [
+      "FrostyGoop Incident"
+    ],
+    "curationScore": 23,
+    "level": "intermediate",
+    "difficultyScore": 38,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 20/40 — 다양성 5기법/5pt + tactic 5/8pt + mit 18/7pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 8/20 — tactic 5/14 커버 (8pt), 지속 0.0개월 (+0pt)",
+      "기법수 5/20 — Parent 5개 (5pt) + Sub 3개",
+      "환경 10/15 — platform 7종 (10pt)",
+      "자격증명/횡적 5/15 — credential-access",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 6/10 — mitigation 연결 18건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 20
+    },
+    "difficultyBreakdown": {
+      "chainScope": 8,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 6,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 5,
+      "subTechniqueCount": 3,
+      "tacticCount": 5,
+      "platformCount": 7,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0050",
+    "name": "J-magic Campaign",
+    "aliases": [
+      "J-magic Campaign"
+    ],
+    "curationScore": 21,
+    "level": "beginner",
+    "difficultyScore": 28,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 10/30 — criticalInfra:energy",
+      "교육가치 8/40 — 다양성 4기법/2pt + tactic 2/2pt + mit 6/4pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 7/20 — tactic 2/14 커버 (2pt), 지속 12.2개월 (+5pt)",
+      "기법수 5/20 — Parent 4개 (5pt) + Sub 4개",
+      "환경 10/15 — platform 6종 (10pt)",
+      "자격증명/횡적 0/15 — 자격증명/횡적이동 tactic 없음",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 2/10 — mitigation 연결 6건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 10,
+      "educational": 8
+    },
+    "difficultyBreakdown": {
+      "chainScope": 7,
+      "ttpCount": 5,
+      "environment": 10,
+      "credLateral": 0,
+      "stealthLotl": 4,
+      "analysisDemand": 2,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 4,
+      "subTechniqueCount": 4,
+      "tacticCount": 2,
+      "platformCount": 6,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  },
+  {
+    "attackId": "C0033",
+    "name": "C0033",
+    "aliases": [
+      "C0033"
+    ],
+    "curationScore": 3,
+    "level": "intermediate",
+    "difficultyScore": 55,
+    "curationReasons": [
+      "유명도 3/30 — 별칭 1개 기반 추정: 3/30",
+      "관련성 0/30 — 관련성 키워드 미검출",
+      "교육가치 0/40 — 다양성 0기법/0pt + tactic 0/0pt + mit 0/0pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 17/20 — tactic 7/14 커버 (12pt), 지속 81.2개월 (+5pt)",
+      "기법수 11/20 — Parent 9개 (9pt) + Sub 10개 (+2 다양성)",
+      "환경 10/15 — platform 8종 (10pt)",
+      "자격증명/횡적 5/15 — privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 8/10 — mitigation 연결 36건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)"
+    ],
+    "curationBreakdown": {
+      "fame": 3,
+      "relevance": 0,
+      "educational": 0
+    },
+    "difficultyBreakdown": {
+      "chainScope": 17,
+      "ttpCount": 11,
+      "environment": 10,
+      "credLateral": 5,
+      "stealthLotl": 4,
+      "analysisDemand": 8,
+      "autonomy": 0
+    },
+    "meta": {
+      "parentTechniqueCount": 9,
+      "subTechniqueCount": 10,
+      "tacticCount": 7,
+      "platformCount": 8,
+      "hasAd": false,
+      "hasCloud": false,
+      "lotlHitCount": 0
+    }
+  }
+]

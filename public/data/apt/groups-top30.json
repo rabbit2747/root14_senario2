@@ -1,0 +1,1010 @@
+[
+  {
+    "attackId": "G0034",
+    "name": "Sandworm Team",
+    "aliases": [
+      "Sandworm Team",
+      "ELECTRUM",
+      "Telebots",
+      "IRON VIKING",
+      "BlackEnergy (Group)",
+      "Quedagh",
+      "Voodoo Bear",
+      "IRIDIUM",
+      "Seashell Blizzard",
+      "FROZENBARENTS",
+      "APT44"
+    ],
+    "curationScore": 98,
+    "level": "expert",
+    "difficultyScore": 83,
+    "curationReasons": [
+      "유명도 28/30 — 큐레이션 매핑: 28/30",
+      "관련성 30/30 — usMiddleEast: us  / criticalInfra:government,military / globalScale:worldwide",
+      "교육가치 40/40 — 다양성 79기법/15pt + tactic 14/15pt + mit 211/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 64개 (18pt) + Sub 45개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 211건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply-chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0049",
+    "name": "OilRig",
+    "aliases": [
+      "OilRig",
+      "COBALT GYPSY",
+      "IRN2",
+      "APT34",
+      "Helix Kitten",
+      "Evasive Serpens",
+      "Hazel Sandstorm",
+      "EUROPIUM",
+      "ITG13",
+      "Earth Simnavaz",
+      "Crambus",
+      "TA452"
+    ],
+    "curationScore": 96,
+    "level": "expert",
+    "difficultyScore": 80,
+    "curationReasons": [
+      "유명도 26/30 — 큐레이션 매핑: 26/30",
+      "관련성 30/30 — usMiddleEast:middle east,iran / criticalInfra:financial,energy,oil / globalScale:international",
+      "교육가치 40/40 — 다양성 76기법/15pt + tactic 12/15pt + mit 204/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 58개 (18pt) + Sub 45개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,certutil)",
+      "분석요구 10/10 — mitigation 연결 204건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0016",
+    "name": "APT29",
+    "aliases": [
+      "APT29",
+      "IRON RITUAL",
+      "IRON HEMLOCK",
+      "NobleBaron",
+      "Dark Halo",
+      "NOBELIUM",
+      "UNC2452",
+      "YTTRIUM",
+      "The Dukes",
+      "Cozy Bear",
+      "CozyDuke",
+      "SolarStorm",
+      "Blue Kitsune",
+      "UNC3524",
+      "Midnight Blizzard"
+    ],
+    "curationScore": 95,
+    "level": "expert",
+    "difficultyScore": 83,
+    "curationReasons": [
+      "유명도 30/30 — 큐레이션 매핑: 30/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:government,ot ",
+      "교육가치 40/40 — 다양성 66기법/15pt + tactic 12/15pt + mit 184/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 47개 (18pt) + Sub 49개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,mshta)",
+      "분석요구 10/10 — mitigation 연결 184건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'kerberos' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0007",
+    "name": "APT28",
+    "aliases": [
+      "APT28",
+      "IRON TWILIGHT",
+      "SNAKEMACKEREL",
+      "Swallowtail",
+      "Group 74",
+      "Sednit",
+      "Sofacy",
+      "Pawn Storm",
+      "Fancy Bear",
+      "STRONTIUM",
+      "Tsar Team",
+      "Threat Group-4127",
+      "TG-4127",
+      "Forest Blizzard",
+      "FROZENLAKE",
+      "GruesomeLarch"
+    ],
+    "curationScore": 94,
+    "level": "expert",
+    "difficultyScore": 83,
+    "curationReasons": [
+      "유명도 29/30 — 큐레이션 매핑: 29/30",
+      "관련성 25/30 — usMiddleEast:u.s., us  / criticalInfra:military,nuclear",
+      "교육가치 40/40 — 다양성 91기법/15pt + tactic 14/15pt + mit 241/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 71개 (18pt) + Sub 54개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,rundll32,certutil)",
+      "분석요구 10/10 — mitigation 연결 241건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1017",
+    "name": "Volt Typhoon",
+    "aliases": [
+      "Volt Typhoon",
+      "BRONZE SILHOUETTE",
+      "Vanguard Panda",
+      "DEV-0391",
+      "UNC3236",
+      "Voltzite",
+      "Insidious Taurus"
+    ],
+    "curationScore": 93,
+    "level": "expert",
+    "difficultyScore": 80,
+    "curationReasons": [
+      "유명도 28/30 — 큐레이션 매핑: 28/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:critical infrastructure",
+      "교육가치 40/40 — 다양성 81기법/15pt + tactic 12/15pt + mit 147/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 57개 (18pt) + Sub 40개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 147건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0046",
+    "name": "FIN7",
+    "aliases": [
+      "FIN7",
+      "GOLD NIAGARA",
+      "ITG14",
+      "Carbon Spider",
+      "ELBRUS",
+      "Sangria Tempest"
+    ],
+    "curationScore": 91,
+    "level": "expert",
+    "difficultyScore": 85,
+    "curationReasons": [
+      "유명도 26/30 — 큐레이션 매핑: 26/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:financial,hospital",
+      "교육가치 40/40 — 다양성 67기법/15pt + tactic 14/15pt + mit 179/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 50개 (18pt) + Sub 44개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 179건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0064",
+    "name": "APT33",
+    "aliases": [
+      "APT33",
+      "HOLMIUM",
+      "Elfin",
+      "Peach Sandstorm"
+    ],
+    "curationScore": 91,
+    "level": "expert",
+    "difficultyScore": 74,
+    "curationReasons": [
+      "유명도 26/30 — 큐레이션 매핑: 26/30",
+      "관련성 25/30 — usMiddleEast:united states,iran,saudi / criticalInfra:energy",
+      "교육가치 40/40 — 다양성 31기법/15pt + tactic 11/15pt + mit 111/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 23개 (18pt) + Sub 24개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 111건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0069",
+    "name": "MuddyWater",
+    "aliases": [
+      "MuddyWater",
+      "Earth Vetala",
+      "MERCURY",
+      "Static Kitten",
+      "Seedworm",
+      "TEMP.Zagros",
+      "Mango Sandstorm",
+      "TA450"
+    ],
+    "curationScore": 90,
+    "level": "advanced",
+    "difficultyScore": 78,
+    "curationReasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 25/30 — usMiddleEast:middle east,iran / criticalInfra:oil,gas,government",
+      "교육가치 40/40 — 다양성 58기법/15pt + tactic 12/15pt + mit 152/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 43개 (18pt) + Sub 40개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 152건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'credential dumping' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0094",
+    "name": "Kimsuky",
+    "aliases": [
+      "Kimsuky",
+      "Black Banshee",
+      "Velvet Chollima",
+      "Emerald Sleet",
+      "THALLIUM",
+      "APT43",
+      "TA427",
+      "Springtail"
+    ],
+    "curationScore": 90,
+    "level": "advanced",
+    "difficultyScore": 80,
+    "curationReasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:government,nuclear",
+      "교육가치 40/40 — 다양성 109기법/15pt + tactic 14/15pt + mit 255/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 72개 (18pt) + Sub 73개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 6종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 255건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0065",
+    "name": "Leviathan",
+    "aliases": [
+      "Leviathan",
+      "MUDCARP",
+      "Kryptonite Panda",
+      "Gadolinium",
+      "BRONZE MOHAWK",
+      "TEMP.Jumper",
+      "APT40",
+      "TEMP.Periscope",
+      "Gingham Typhoon"
+    ],
+    "curationScore": 90,
+    "level": "advanced",
+    "difficultyScore": 78,
+    "curationReasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 25/30 — usMiddleEast:middle east / criticalInfra:government,defense,healthcare",
+      "교육가치 40/40 — 다양성 50기법/15pt + tactic 12/15pt + mit 142/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 37개 (18pt) + Sub 36개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,bitsadmin)",
+      "분석요구 10/10 — mitigation 연결 142건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0087",
+    "name": "APT39",
+    "aliases": [
+      "APT39",
+      "ITG07",
+      "Chafer",
+      "Remix Kitten"
+    ],
+    "curationScore": 86,
+    "level": "advanced",
+    "difficultyScore": 76,
+    "curationReasons": [
+      "유명도 21/30 — 큐레이션 매핑: 21/30",
+      "관련성 25/30 — usMiddleEast:iran / criticalInfra:hospital,telecom",
+      "교육가치 40/40 — 다양성 53기법/15pt + tactic 12/15pt + mit 146/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 39개 (18pt) + Sub 33개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 146건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0059",
+    "name": "Magic Hound",
+    "aliases": [
+      "Magic Hound",
+      "TA453",
+      "COBALT ILLUSION",
+      "Charming Kitten",
+      "ITG18",
+      "Phosphorus",
+      "Newscaster",
+      "APT35",
+      "Mint Sandstorm"
+    ],
+    "curationScore": 84,
+    "level": "advanced",
+    "difficultyScore": 80,
+    "curationReasons": [
+      "유명도 19/30 — 큐레이션 매핑: 19/30",
+      "관련성 25/30 — usMiddleEast:u.s.,middle east,iran / criticalInfra:government,military,ics",
+      "교육가치 40/40 — 다양성 79기법/15pt + tactic 14/15pt + mit 188/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 57개 (18pt) + Sub 52개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 188건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0125",
+    "name": "HAFNIUM",
+    "aliases": [
+      "HAFNIUM",
+      "Operation Exchange Marauder",
+      "Silk Typhoon"
+    ],
+    "curationScore": 84,
+    "level": "expert",
+    "difficultyScore": 81,
+    "curationReasons": [
+      "유명도 19/30 — 큐레이션 매핑: 19/30",
+      "관련성 25/30 — usMiddleEast: us  / criticalInfra:defense",
+      "교육가치 40/40 — 다양성 44기법/15pt + tactic 13/15pt + mit 110/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 37개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,rundll32)",
+      "분석요구 10/10 — mitigation 연결 110건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0119",
+    "name": "Indrik Spider",
+    "aliases": [
+      "Indrik Spider",
+      "Evil Corp",
+      "Manatee Tempest",
+      "DEV-0243",
+      "UNC2165"
+    ],
+    "curationScore": 82,
+    "level": "advanced",
+    "difficultyScore": 80,
+    "curationReasons": [
+      "유명도 17/30 — 큐레이션 매핑: 17/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:banking,ics",
+      "교육가치 40/40 — 다양성 33기법/15pt + tactic 14/15pt + mit 95/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 28개 (18pt) + Sub 21개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 95건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0040",
+    "name": "Patchwork",
+    "aliases": [
+      "Patchwork",
+      "Hangover Group",
+      "Dropping Elephant",
+      "Chinastrats",
+      "MONSOON",
+      "Operation Hangover"
+    ],
+    "curationScore": 82,
+    "level": "advanced",
+    "difficultyScore": 74,
+    "curationReasons": [
+      "유명도 17/30 — 큐레이션 매핑: 17/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:government,ot ",
+      "교육가치 40/40 — 다양성 41기법/15pt + tactic 12/15pt + mit 107/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 34개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 107건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0032",
+    "name": "Lazarus Group",
+    "aliases": [
+      "Lazarus Group",
+      "Labyrinth Chollima",
+      "HIDDEN COBRA",
+      "Guardians of Peace",
+      "ZINC",
+      "NICKEL ACADEMY",
+      "Diamond Sleet"
+    ],
+    "curationScore": 80,
+    "level": "expert",
+    "difficultyScore": 83,
+    "curationReasons": [
+      "유명도 30/30 — 큐레이션 매핑: 30/30",
+      "관련성 10/30 — criticalInfra:financial",
+      "교육가치 40/40 — 다양성 93기법/15pt + tactic 14/15pt + mit 213/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 14/14 커버 (15pt)",
+      "기법수 20/20 — Parent 68개 (18pt) + Sub 60개 (+2 다양성)",
+      "환경 13/15 — platform 11종 (10pt) + Cloud/SaaS (+3pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 7종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 213건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lateral movement' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0129",
+    "name": "Mustang Panda",
+    "aliases": [
+      "Mustang Panda",
+      "TA416",
+      "RedDelta",
+      "BRONZE PRESIDENT",
+      "STATELY TAURUS",
+      "FIREANT",
+      "CAMARO DRAGON",
+      "EARTH PRETA",
+      "HIVE0154",
+      "TWILL TYPHOON",
+      "TANTALUM",
+      "LUMINOUS MOTH",
+      "UNC6384",
+      "TEMP.Hex",
+      "Red Lich"
+    ],
+    "curationScore": 79,
+    "level": "expert",
+    "difficultyScore": 85,
+    "curationReasons": [
+      "유명도 14/30 — 별칭 15개 기반 추정: 14/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:government",
+      "교육가치 40/40 — 다양성 85기법/15pt + tactic 13/15pt + mit 211/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 61개 (18pt) + Sub 53개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,mshta)",
+      "분석요구 10/10 — mitigation 연결 211건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0045",
+    "name": "menuPass",
+    "aliases": [
+      "menuPass",
+      "Cicada",
+      "POTASSIUM",
+      "Stone Panda",
+      "APT10",
+      "Red Apollo",
+      "CVNX",
+      "HOGFISH",
+      "BRONZE RIVERSIDE"
+    ],
+    "curationScore": 79,
+    "level": "expert",
+    "difficultyScore": 83,
+    "curationReasons": [
+      "유명도 24/30 — 큐레이션 매핑: 24/30",
+      "관련성 15/30 — criticalInfra:energy,government,defense / globalScale:global",
+      "교육가치 40/40 — 다양성 46기법/15pt + tactic 11/15pt + mit 124/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 37개 (18pt) + Sub 28개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 4종 (powershell,wmi,certutil)",
+      "분석요구 10/10 — mitigation 연결 124건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0082",
+    "name": "APT38",
+    "aliases": [
+      "APT38",
+      "NICKEL GLADSTONE",
+      "BeagleBoyz",
+      "Bluenoroff",
+      "Stardust Chollima",
+      "Sapphire Sleet",
+      "COPERNICIUM"
+    ],
+    "curationScore": 78,
+    "level": "advanced",
+    "difficultyScore": 73,
+    "curationReasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 15/30 — criticalInfra:financial,bank  / globalScale:worldwide",
+      "교육가치 40/40 — 다양성 56기법/15pt + tactic 11/15pt + mit 121/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 41개 (18pt) + Sub 37개 (+2 다양성)",
+      "환경 10/15 — platform 11종 (10pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,rundll32,mshta)",
+      "분석요구 10/10 — mitigation 연결 121건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0102",
+    "name": "Wizard Spider",
+    "aliases": [
+      "Wizard Spider",
+      "UNC1878",
+      "TEMP.MixMaster",
+      "Grim Spider",
+      "FIN12",
+      "GOLD BLACKBURN",
+      "ITG23",
+      "Periwinkle Tempest",
+      "DEV-0193"
+    ],
+    "curationScore": 77,
+    "level": "expert",
+    "difficultyScore": 85,
+    "curationReasons": [
+      "유명도 27/30 — 큐레이션 매핑: 27/30",
+      "관련성 10/30 — criticalInfra:financial,healthcare,hospital",
+      "교육가치 40/40 — 다양성 64기법/15pt + tactic 13/15pt + mit 187/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 49개 (18pt) + Sub 44개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 7종 (powershell,wmi,wmic)",
+      "분석요구 10/10 — mitigation 연결 187건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0035",
+    "name": "Dragonfly",
+    "aliases": [
+      "Dragonfly",
+      "TEMP.Isotope",
+      "DYMALLOY",
+      "Berserk Bear",
+      "TG-4192",
+      "Crouching Yeti",
+      "IRON LIBERTY",
+      "Energetic Bear",
+      "Ghost Blizzard",
+      "BROMINE"
+    ],
+    "curationScore": 76,
+    "level": "expert",
+    "difficultyScore": 78,
+    "curationReasons": [
+      "유명도 21/30 — 큐레이션 매핑: 21/30",
+      "관련성 15/30 — criticalInfra:government,defense,critical infrastructure / globalScale:worldwide",
+      "교육가치 40/40 — 다양성 56기법/15pt + tactic 12/15pt + mit 150/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 47개 (18pt) + Sub 35개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,psexec)",
+      "분석요구 10/10 — mitigation 연결 150건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0117",
+    "name": "Fox Kitten",
+    "aliases": [
+      "Fox Kitten",
+      "UNC757",
+      "Parisite",
+      "Pioneer Kitten",
+      "RUBIDIUM",
+      "Lemon Sandstorm"
+    ],
+    "curationScore": 75,
+    "level": "expert",
+    "difficultyScore": 81,
+    "curationReasons": [
+      "유명도 10/30 — 별칭 6개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast:middle east,iran / criticalInfra:oil,gas,government",
+      "교육가치 40/40 — 다양성 41기법/15pt + tactic 11/15pt + mit 135/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 31개 (18pt) + Sub 23개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,psexec)",
+      "분석요구 10/10 — mitigation 연결 135건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'lsass' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1006",
+    "name": "Earth Lusca",
+    "aliases": [
+      "Earth Lusca",
+      "TAG-22",
+      "Charcoal Typhoon",
+      "CHROMIUM",
+      "ControlX"
+    ],
+    "curationScore": 75,
+    "level": "expert",
+    "difficultyScore": 85,
+    "curationReasons": [
+      "유명도 10/30 — 별칭 5개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast:united states / criticalInfra:financial,government,telecom",
+      "교육가치 40/40 — 다양성 44기법/15pt + tactic 13/15pt + mit 116/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 34개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,mshta)",
+      "분석요구 10/10 — mitigation 연결 116건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0050",
+    "name": "APT32",
+    "aliases": [
+      "APT32",
+      "SeaLotus",
+      "OceanLotus",
+      "APT-C-00",
+      "Canvas Cyclone",
+      "BISMUTH"
+    ],
+    "curationScore": 75,
+    "level": "expert",
+    "difficultyScore": 82,
+    "curationReasons": [
+      "유명도 25/30 — 큐레이션 매핑: 25/30",
+      "관련성 10/30 — criticalInfra:government",
+      "교육가치 40/40 — 다양성 78기법/15pt + tactic 13/15pt + mit 214/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 13/14 커버 (15pt)",
+      "기법수 20/20 — Parent 54개 (18pt) + Sub 51개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 10/10 — defense-evasion tactic + LOTL 5종 (powershell,wmi,rundll32)",
+      "분석요구 10/10 — mitigation 연결 214건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0010",
+    "name": "Turla",
+    "aliases": [
+      "Turla",
+      "IRON HUNTER",
+      "Group 88",
+      "Waterbug",
+      "WhiteBear",
+      "Snake",
+      "Krypton",
+      "Venomous Bear",
+      "Secret Blizzard",
+      "BELUGASTURGEON"
+    ],
+    "curationScore": 73,
+    "level": "expert",
+    "difficultyScore": 81,
+    "curationReasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 10/30 — criticalInfra:government,military",
+      "교육가치 40/40 — 다양성 68기법/15pt + tactic 12/15pt + mit 121/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 50개 (18pt) + Sub 43개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,wmi)",
+      "분석요구 10/10 — mitigation 연결 121건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1004",
+    "name": "LAPSUS$",
+    "aliases": [
+      "LAPSUS$",
+      "DEV-0537",
+      "Strawberry Tempest"
+    ],
+    "curationScore": 73,
+    "level": "expert",
+    "difficultyScore": 74,
+    "curationReasons": [
+      "유명도 18/30 — 큐레이션 매핑: 18/30",
+      "관련성 15/30 — criticalInfra:energy,government,healthcare / globalScale:global",
+      "교육가치 40/40 — 다양성 43기법/15pt + tactic 12/15pt + mit 113/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 32개 (18pt) + Sub 29개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 10/15 — credential-access + privilege-escalation",
+      "은닉/LOTL 4/10 — defense-evasion tactic",
+      "분석요구 10/10 — mitigation 연결 113건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'supply chain' → expert 강제 승급",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "랜섬웨어+impact+AD → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0027",
+    "name": "Threat Group-3390",
+    "aliases": [
+      "Threat Group-3390",
+      "Earth Smilodon",
+      "TG-3390",
+      "Emissary Panda",
+      "BRONZE UNION",
+      "APT27",
+      "Iron Tiger",
+      "LuckyMouse",
+      "Linen Typhoon"
+    ],
+    "curationScore": 73,
+    "level": "advanced",
+    "difficultyScore": 80,
+    "curationReasons": [
+      "유명도 23/30 — 큐레이션 매핑: 23/30",
+      "관련성 10/30 — criticalInfra:energy,government,defense",
+      "교육가치 40/40 — 다양성 57기법/15pt + tactic 12/15pt + mit 145/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 47개 (18pt) + Sub 36개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,certutil)",
+      "분석요구 10/10 — mitigation 연결 145건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'domain controller' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0037",
+    "name": "FIN6",
+    "aliases": [
+      "FIN6",
+      "Magecart Group 6",
+      "ITG08",
+      "Skeleton Spider",
+      "TAAL",
+      "Camouflage Tempest"
+    ],
+    "curationScore": 72,
+    "level": "advanced",
+    "difficultyScore": 80,
+    "curationReasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 10/30 — criticalInfra:hospital",
+      "교육가치 40/40 — 다양성 40기법/15pt + tactic 12/15pt + mit 141/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 12/14 커버 (15pt)",
+      "기법수 20/20 — Parent 33개 (18pt) + Sub 26개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 8/10 — defense-evasion tactic + LOTL 3종 (powershell,wmi,psexec)",
+      "분석요구 10/10 — mitigation 연결 141건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'active directory' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G0060",
+    "name": "BRONZE BUTLER",
+    "aliases": [
+      "BRONZE BUTLER",
+      "REDBALDKNIGHT",
+      "Tick"
+    ],
+    "curationScore": 72,
+    "level": "advanced",
+    "difficultyScore": 78,
+    "curationReasons": [
+      "유명도 22/30 — 큐레이션 매핑: 22/30",
+      "관련성 10/30 — criticalInfra:government,ics",
+      "교육가치 40/40 — 다양성 40기법/15pt + tactic 11/15pt + mit 112/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 11/14 커버 (15pt)",
+      "기법수 20/20 — Parent 33개 (18pt) + Sub 26개 (+2 다양성)",
+      "환경 12/15 — platform 11종 (10pt) + AD (+2pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 2종 (powershell,schtasks)",
+      "분석요구 10/10 — mitigation 연결 112건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'kerberos' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급"
+    ]
+  },
+  {
+    "attackId": "G1023",
+    "name": "APT5",
+    "aliases": [
+      "APT5",
+      "Mulberry Typhoon",
+      "MANGANESE",
+      "BRONZE FLEETWOOD",
+      "Keyhole Panda",
+      "UNC2630"
+    ],
+    "curationScore": 72,
+    "level": "expert",
+    "difficultyScore": 81,
+    "curationReasons": [
+      "유명도 10/30 — 별칭 6개 기반 추정: 10/30",
+      "관련성 25/30 — usMiddleEast:u.s. / criticalInfra:defense,telecom",
+      "교육가치 37/40 — 다양성 29기법/12pt + tactic 10/15pt + mit 85/10pt"
+    ],
+    "difficultyReasons": [
+      "공격체인 15/20 — tactic 10/14 커버 (15pt)",
+      "기법수 20/20 — Parent 22개 (18pt) + Sub 21개 (+2 다양성)",
+      "환경 15/15 — platform 11종 (10pt) + Cloud/SaaS/AD (+5pt)",
+      "자격증명/횡적 15/15 — credential-access + lateral-movement + privilege-escalation",
+      "은닉/LOTL 6/10 — defense-evasion tactic + LOTL 1종 (powershell)",
+      "분석요구 10/10 — mitigation 연결 85건",
+      "자율성 0/10 — 수동 보정 없음 (기본 0)",
+      "키워드 'zero-day' → expert 강제 승급",
+      "키워드 'ntlm' → advanced 강제 승급",
+      "Parent 8+Sub 15+ → advanced 강제 승급",
+      "Cloud + credential + privesc → expert 강제 승급"
+    ]
+  }
+]
