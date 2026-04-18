@@ -9,8 +9,11 @@ const LEVEL_META = {
   expert:       { emoji: '⭐', ko: '전문가',   color: '#a855f7' },
 };
 
-// 학습 콘텐츠가 준비된 캠페인 ID 화이트리스트 (MVP)
-const STUDY_READY = new Set(['C0024']);
+// 학습 콘텐츠가 준비된 캠페인 ID + 해당 캠페인의 "시작 레벨" (MVP)
+// 캠페인 자체 난이도(campaign.level)와 학습 콘텐츠 풀콘텐츠 레벨이 다를 수 있어 분리함
+const STUDY_READY = {
+  C0024: 'intermediate', // SolarWinds — 프로토타입 풀콘텐츠
+};
 
 function PageWrapper({ children, isDark, toggleTheme, onClose, title }) {
   return (
@@ -241,9 +244,9 @@ export default function AptDetailPage() {
           </button>
 
           {/* 학습 시작 (콘텐츠 준비된 캠페인만 활성화) */}
-          {STUDY_READY.has(campaign.attackId) ? (
+          {STUDY_READY[campaign.attackId] ? (
             <button
-              onClick={() => navigate(`/apt/${campaign.attackId}/study?level=${campaign.level || 'intermediate'}`)}
+              onClick={() => navigate(`/apt/${campaign.attackId}/study?level=${STUDY_READY[campaign.attackId]}`)}
               className="text-sm font-bold px-5 py-2.5 rounded-lg transition-colors bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
             >
               🎓 학습 시작 →
