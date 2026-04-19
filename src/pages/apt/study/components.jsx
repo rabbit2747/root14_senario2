@@ -442,7 +442,7 @@ export function Timeline({ steps = [], isDark }) {
   );
 }
 
-// ── 레이어 헤더 배지 ──
+// ── 레이어/챕터 헤더 배지 ──
 export function LayerBadge({ num, title, subtitle, isDark }) {
   return (
     <div className="flex items-start gap-3 mb-4">
@@ -461,6 +461,380 @@ export function LayerBadge({ num, title, subtitle, isDark }) {
           <p className={`text-xs mt-0.5 ${isDark ? 'text-[#aaa]' : 'text-[#666]'}`}>{subtitle}</p>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── ChapterHeader (대형 챕터 히어로) ──
+export function ChapterHeader({ num, total, title, subtitle, estMin, isDark }) {
+  return (
+    <div
+      className={`rounded-lg p-5 mb-5 ${
+        isDark
+          ? 'bg-gradient-to-r from-[#1a2332] to-[#1f1a2e] border border-[#3a3a5a]'
+          : 'bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200'
+      }`}
+    >
+      <div className={`flex items-center gap-2 text-[10px] font-mono font-bold tracking-wider mb-2 ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+        <span>CHAPTER {num} / {total}</span>
+        {estMin && <span className={isDark ? 'text-[#888]' : 'text-[#888]'}>· ⏱️ ~{estMin}분</span>}
+      </div>
+      <h2 className={`text-xl md:text-2xl font-bold mb-1 ${isDark ? 'text-white' : 'text-[#1a1a1a]'}`}>
+        {title}
+      </h2>
+      {subtitle && (
+        <p className={`text-sm leading-relaxed ${isDark ? 'text-[#bbb]' : 'text-[#555]'}`}>
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Paragraph: 학습용 본문 단락 (여유 있는 line-height) ──
+export function P({ children, isDark }) {
+  return (
+    <p className={`text-[14px] leading-[1.8] my-3 ${isDark ? 'text-[#dcdcdc]' : 'text-[#2a2a2a]'}`}>
+      {children}
+    </p>
+  );
+}
+
+// ── 소제목(H3) ──
+export function H3({ children, icon, isDark }) {
+  return (
+    <h3 className={`text-base md:text-[17px] font-bold mt-6 mb-2 flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#111]'}`}>
+      {icon && <span>{icon}</span>}
+      {children}
+    </h3>
+  );
+}
+
+// ── CodeBlock: 읽기용 코드 박스 (syntax highlight는 생략, 가독성 위주) ──
+export function CodeBlock({ lang = '', filename, children, isDark, annotate }) {
+  return (
+    <div className="my-4">
+      {(filename || lang) && (
+        <div
+          className={`flex items-center justify-between px-3 py-1.5 text-[10px] font-mono rounded-t-md ${
+            isDark ? 'bg-[#0a0a0a] text-[#888] border border-[#333] border-b-0' : 'bg-[#2d2d2d] text-[#ccc]'
+          }`}
+        >
+          <span className="font-bold">{filename}</span>
+          {lang && <span className="uppercase">{lang}</span>}
+        </div>
+      )}
+      <pre
+        className={`m-0 p-4 text-[12.5px] leading-relaxed font-mono overflow-x-auto rounded-b-md ${
+          !filename && !lang ? 'rounded-t-md' : ''
+        } ${isDark ? 'bg-[#0a0a0a] text-[#e0e0e0] border border-[#333]' : 'bg-[#1a1a1a] text-[#e8e8e8]'}`}
+      >
+        <code>{children}</code>
+      </pre>
+      {annotate && (
+        <div className={`mt-1 text-xs italic ${isDark ? 'text-[#888]' : 'text-[#666]'}`}>
+          💡 {annotate}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── AttackFlow: 공격 단계 가로 플로우 (이모지+라벨) ──
+// steps: [{ icon, label, detail?, active?, tone? }]
+export function AttackFlow({ steps = [], isDark }) {
+  return (
+    <div className="my-4">
+      <div className="flex flex-col md:flex-row items-stretch gap-2">
+        {steps.map((s, i) => {
+          const t = tone(s.tone || 'info', isDark);
+          return (
+            <div key={i} className="flex items-center gap-2 md:flex-1">
+              <div
+                className={`flex-1 rounded-lg p-3 text-center transition-transform hover:scale-[1.02] ${
+                  isDark ? 'bg-[#1e1e1e] border' : 'bg-white border-2'
+                }`}
+                style={{ borderColor: t.border }}
+              >
+                <div className="text-2xl mb-1">{s.icon}</div>
+                <div
+                  className="text-xs font-bold"
+                  style={{ color: t.text }}
+                >
+                  {s.label}
+                </div>
+                {s.detail && (
+                  <div className={`text-[10px] mt-1 ${isDark ? 'text-[#aaa]' : 'text-[#666]'}`}>
+                    {s.detail}
+                  </div>
+                )}
+              </div>
+              {i < steps.length - 1 && (
+                <div className={`text-lg font-bold ${isDark ? 'text-[#555]' : 'text-[#aaa]'} hidden md:block`}>
+                  →
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── CompareTable: 좌/우 비교 (전통 공격 vs 공급망 공격 등) ──
+export function CompareTable({ leftTitle, rightTitle, rows = [], isDark }) {
+  return (
+    <div className={`my-4 rounded-lg overflow-hidden border ${isDark ? 'border-[#333]' : 'border-[#e5e5e5]'}`}>
+      <div className="grid grid-cols-3 text-xs">
+        <div className={`p-3 font-bold ${isDark ? 'bg-[#2d2d2d] text-[#ddd]' : 'bg-[#f5f5f5] text-[#333]'}`}>
+          기준
+        </div>
+        <div className={`p-3 font-bold text-center ${isDark ? 'bg-[#2a1a1a] text-orange-300' : 'bg-orange-50 text-orange-700'}`}>
+          {leftTitle}
+        </div>
+        <div className={`p-3 font-bold text-center ${isDark ? 'bg-[#1a2a1a] text-emerald-300' : 'bg-emerald-50 text-emerald-700'}`}>
+          {rightTitle}
+        </div>
+        {rows.map((r, i) => (
+          <div key={i} className="contents">
+            <div className={`p-3 text-[11px] font-semibold border-t ${isDark ? 'bg-[#1e1e1e] text-[#ccc] border-[#333]' : 'bg-white text-[#555] border-[#e5e5e5]'}`}>
+              {r.key}
+            </div>
+            <div className={`p-3 text-[11px] border-t ${isDark ? 'bg-[#1e1e1e] text-[#ccc] border-[#333]' : 'bg-white text-[#555] border-[#e5e5e5]'}`}>
+              {r.left}
+            </div>
+            <div className={`p-3 text-[11px] border-t ${isDark ? 'bg-[#1e1e1e] text-[#ccc] border-[#333]' : 'bg-white text-[#555] border-[#e5e5e5]'}`}>
+              {r.right}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── DiagramBox: 다이어그램/SVG 래퍼 (caption 포함) ──
+export function DiagramBox({ caption, children, isDark }) {
+  return (
+    <figure
+      className={`my-5 rounded-lg p-4 ${
+        isDark ? 'bg-[#0f0f13] border border-[#2a2a3a]' : 'bg-[#f9fafb] border border-[#e5e7eb]'
+      }`}
+    >
+      <div className="flex justify-center">{children}</div>
+      {caption && (
+        <figcaption className={`mt-3 text-[11px] text-center italic ${isDark ? 'text-[#999]' : 'text-[#666]'}`}>
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+// ── HotspotImage: 이미지/SVG에 클릭 포인트 표시 (공격 지점 탐색) ──
+// hotspots: [{ x, y, label, detail, correct?:bool }]
+export function Hotspot({ imgW = 600, imgH = 300, children, hotspots = [], question, isDark, onSolve }) {
+  const [picked, setPicked] = useState(null);
+
+  return (
+    <div
+      className={`my-5 rounded-lg p-4 ${
+        isDark ? 'bg-[#0f0f13] border border-[#2a2a3a]' : 'bg-[#f9fafb] border border-[#e5e7eb]'
+      }`}
+    >
+      {question && (
+        <div
+          className={`text-sm font-bold mb-3 px-3 py-2 rounded ${
+            isDark ? 'bg-[#1f1f2e] text-amber-200' : 'bg-amber-50 text-amber-900'
+          }`}
+        >
+          🎯 {question}
+        </div>
+      )}
+      <div
+        className="relative mx-auto"
+        style={{ width: '100%', maxWidth: imgW, aspectRatio: `${imgW}/${imgH}` }}
+      >
+        <div className="absolute inset-0">{children}</div>
+        {hotspots.map((h, i) => {
+          const isPicked = picked?.i === i;
+          const show = picked !== null;
+          return (
+            <button
+              key={i}
+              onClick={() => {
+                if (picked === null) {
+                  setPicked({ i, ...h });
+                  if (onSolve && h.correct) onSolve();
+                }
+              }}
+              className={`absolute w-8 h-8 -ml-4 -mt-4 rounded-full text-xs font-bold transition-all ${
+                show
+                  ? isPicked
+                    ? h.correct
+                      ? 'bg-green-500 text-white scale-125'
+                      : 'bg-red-500 text-white scale-125'
+                    : h.correct
+                    ? 'bg-green-500/50 text-white'
+                    : 'bg-[#888]/30 text-white opacity-50'
+                  : 'bg-amber-400 hover:bg-amber-500 text-black animate-pulse'
+              }`}
+              style={{ left: `${h.x}%`, top: `${h.y}%` }}
+              disabled={show}
+              title={h.label}
+            >
+              {show ? (h.correct ? '✓' : '✗') : '?'}
+            </button>
+          );
+        })}
+      </div>
+      {picked && (
+        <div
+          className={`mt-3 p-3 rounded text-sm leading-relaxed ${
+            picked.correct
+              ? isDark
+                ? 'bg-green-900/30 text-green-200 border border-green-700'
+                : 'bg-green-50 text-green-900 border border-green-300'
+              : isDark
+              ? 'bg-red-900/30 text-red-200 border border-red-700'
+              : 'bg-red-50 text-red-900 border border-red-300'
+          }`}
+        >
+          <div className="font-bold mb-1">
+            {picked.correct ? '🎯 정확합니다' : '❌ 다시 생각해 보세요'} — {picked.label}
+          </div>
+          <div className="text-xs">{picked.detail}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── StepByStep: 번호 매긴 세로 단계 리스트 ──
+// items: [{ title, body, code? }]
+export function StepByStep({ items = [], isDark }) {
+  return (
+    <div className="my-4 space-y-3">
+      {items.map((s, i) => (
+        <div
+          key={i}
+          className={`flex gap-3 p-3 rounded-lg ${
+            isDark ? 'bg-[#1a1a1a] border border-[#2a2a2a]' : 'bg-white border border-[#e5e5e5]'
+          }`}
+        >
+          <div
+            className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+              isDark ? 'bg-blue-700 text-white' : 'bg-blue-600 text-white'
+            }`}
+          >
+            {i + 1}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className={`text-sm font-bold mb-1 ${isDark ? 'text-white' : 'text-[#1a1a1a]'}`}>
+              {s.title}
+            </div>
+            {s.body && (
+              <div className={`text-[13px] leading-relaxed ${isDark ? 'text-[#bbb]' : 'text-[#555]'}`}>
+                {s.body}
+              </div>
+            )}
+            {s.code && (
+              <pre
+                className={`mt-2 p-2 text-[11.5px] font-mono rounded overflow-x-auto ${
+                  isDark ? 'bg-[#0a0a0a] text-[#e0e0e0]' : 'bg-[#1a1a1a] text-[#e8e8e8]'
+                }`}
+              >
+                <code>{s.code}</code>
+              </pre>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Metaphor: 친숙한 비유 박스 (초보자 친화) ──
+export function Metaphor({ icon = '🧠', title = '쉽게 비유하자면', children, isDark }) {
+  return (
+    <div
+      className={`my-4 rounded-lg p-4 border-l-4 ${
+        isDark ? 'bg-[#1a2a1a] border-emerald-500' : 'bg-emerald-50 border-emerald-500'
+      }`}
+    >
+      <div className={`text-xs font-bold mb-1 ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
+        {icon} {title}
+      </div>
+      <div className={`text-sm leading-relaxed ${isDark ? 'text-[#ddd]' : 'text-[#333]'}`}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ── ChapterFooter: 챕터 끝 액션 영역 ──
+export function ChapterFooter({ onNext, nextTitle, onPrev, prevTitle, isDark, showComplete }) {
+  return (
+    <div
+      className={`mt-6 pt-5 flex flex-col sm:flex-row gap-3 border-t ${
+        isDark ? 'border-[#2a2a2a]' : 'border-[#e5e5e5]'
+      }`}
+    >
+      {onPrev && (
+        <button
+          onClick={onPrev}
+          className={`text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors ${
+            isDark ? 'bg-[#2d2d2d] hover:bg-[#333] text-white' : 'bg-[#f0f0f0] hover:bg-[#e0e0e0] text-[#1a1a1a]'
+          }`}
+        >
+          ← {prevTitle || '이전 챕터'}
+        </button>
+      )}
+      {onNext && (
+        <button
+          onClick={onNext}
+          className="sm:ml-auto text-sm font-semibold px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+        >
+          {showComplete ? '✅ 종합 체크포인트로 →' : `다음: ${nextTitle || '다음 챕터'} →`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── NotReady: 챕터 skeleton 표시 ──
+export function NotReadyChapter({ num, title, estMin, bullets = [], isDark }) {
+  return (
+    <div
+      className={`rounded-lg p-5 border-2 border-dashed ${
+        isDark ? 'bg-[#15151a] border-[#333]' : 'bg-[#fafafa] border-[#d5d5d5]'
+      }`}
+    >
+      <div className={`flex items-center gap-2 mb-2 text-[10px] font-mono font-bold ${isDark ? 'text-[#888]' : 'text-[#999]'}`}>
+        <span>CHAPTER {num}</span>
+        {estMin && <span>· ⏱️ ~{estMin}분</span>}
+        <span
+          className={`ml-auto px-2 py-0.5 rounded-full ${
+            isDark ? 'bg-amber-900/40 text-amber-300' : 'bg-amber-100 text-amber-800'
+          }`}
+        >
+          🚧 집필 중
+        </span>
+      </div>
+      <h3 className={`text-base font-bold mb-2 ${isDark ? 'text-[#ddd]' : 'text-[#1a1a1a]'}`}>
+        {title}
+      </h3>
+      {bullets.length > 0 && (
+        <ul className={`text-xs space-y-1 list-disc pl-5 ${isDark ? 'text-[#999]' : 'text-[#666]'}`}>
+          {bullets.map((b, i) => (
+            <li key={i}>{b}</li>
+          ))}
+        </ul>
+      )}
+      <p className={`mt-3 text-[11px] italic ${isDark ? 'text-[#777]' : 'text-[#888]'}`}>
+        이 챕터는 Ch1~3 톤 승인 후 풀 콘텐츠로 확장됩니다.
+      </p>
     </div>
   );
 }

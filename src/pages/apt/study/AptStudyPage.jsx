@@ -1,16 +1,11 @@
 // APT 학습 모드 — /apt/:campaignId/study?level=intermediate
 //
-// 구조:
-//   macOS 윈도우 래퍼 (라이트/다크, 닫기=갤러리)
-//   헤더: 캠페인명 + 레벨 토글 + 예상소요
-//   프로그레스 바: 읽은 레이어 / 전체
-//   본문: 5 레이어 (하나씩 순차적으로, 완료 시 다음 활성화)
-//   종합 체크포인트 퀴즈
-//   용어 사전
+// v2 (2026-04-19): 5레이어 → 10챕터 공격자 관점 재구성
+//   - CHAPTERS[] (10개, Ch1-3 full, Ch4-10 skeleton)
+//   - ready:true 챕터만 순차 해금 (skeleton은 항상 "집필 중" 배너)
+//   - Ch3에 DgaSandbox 인터랙티브 삽입
 //
-// 데이터:
-//   CONTENT_LOADERS[campaignId]() → dynamic import
-//   현재는 C0024 SolarWinds만 intermediate 풀콘텐츠, 나머지는 준비중
+// macOS 윈도우 + 레벨 토글 + 프로그레스 + 사이드 내비는 유지
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
@@ -89,7 +84,7 @@ function ProgressBar({ current, total, isDark }) {
   return (
     <div>
       <div className={`flex justify-between items-center text-[10px] mb-1 ${isDark ? 'text-[#aaa]' : 'text-[#666]'}`}>
-        <span>학습 진행률</span>
+        <span>읽은 챕터</span>
         <span className="font-mono font-bold">{current}/{total} · {pct}%</span>
       </div>
       <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-[#1a1a1a]' : 'bg-[#e5e5e5]'}`}>
@@ -99,6 +94,58 @@ function ProgressBar({ current, total, isDark }) {
         />
       </div>
     </div>
+  );
+}
+
+// ── 챕터 네비게이터 (좌측 목차) ──
+function ChapterNav({ chapters, activeIdx, readIdxs, onJump, isDark }) {
+  return (
+    <nav
+      className={`rounded-lg p-3 mb-5 ${
+        isDark ? 'bg-[#1a1a1a] border border-[#2a2a2a]' : 'bg-[#fafafa] border border-[#e5e5e5]'
+      }`}
+    >
+      <div className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-[#888]' : 'text-[#888]'}`}>
+        📖 목차 ({chapters.filter(c => c.ready).length} / {chapters.length} 풀콘텐츠)
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-1.5">
+        {chapters.map((c, i) => {
+          const isActive = i === activeIdx;
+          const isRead = readIdxs.has(i);
+          const isReady = c.ready;
+          return (
+            <button
+              key={c.id}
+              onClick={() => isReady && onJump(i)}
+              disabled={!isReady}
+              className={`text-left px-2 py-1.5 rounded text-[11px] font-semibold transition-colors ${
+                isActive
+                  ? isDark
+                    ? 'bg-blue-700 text-white'
+                    : 'bg-blue-600 text-white'
+                  : isRead
+                  ? isDark
+                    ? 'bg-[#1a2a1a] text-emerald-300 hover:bg-[#1e3a1e]'
+                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  : isReady
+                  ? isDark
+                    ? 'bg-[#2a2a2a] text-[#ddd] hover:bg-[#333]'
+                    : 'bg-white text-[#333] hover:bg-[#f0f0f0] border border-[#e5e5e5]'
+                  : isDark
+                  ? 'bg-[#15151a] text-[#555] cursor-not-allowed'
+                  : 'bg-[#f0f0f0] text-[#aaa] cursor-not-allowed'
+              }`}
+              title={isReady ? c.title : '🚧 집필 중 — Ch1-3 톤 승인 후 오픈'}
+            >
+              <div className="font-mono text-[9px] opacity-75">
+                Ch{c.num} {isReady ? '' : '🚧'}
+              </div>
+              <div className="truncate">{c.title.split(' — ')[0]}</div>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -196,7 +243,10 @@ export default function AptStudyPage() {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [unlockedLayers, setUnlockedLayers] = useState(1); // 1부터 시작
+
+  // 챕터 인덱스 기반 상태
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [readIdxs, setReadIdxs] = useState(() => new Set([0])); // 첫 챕터는 기본 열림
 
   const [isDark, setIsDark] = useState(() => {
     try { return localStorage.getItem('gotroot_theme') === 'dark'; } catch { return false; }
@@ -231,13 +281,36 @@ export default function AptStudyPage() {
   // 레벨 변경 시 URL 쿼리 동기화 + 진행률 리셋
   const changeLevel = (l) => {
     setLevel(l);
-    setUnlockedLayers(1);
+    setActiveIdx(0);
+    setReadIdxs(new Set([0]));
     const qs = new URLSearchParams();
     qs.set('level', l);
     navigate(`${location.pathname}?${qs.toString()}`, { replace: true });
   };
 
-  const unlockNext = () => setUnlockedLayers(v => Math.min(v + 1, content?.LAYERS?.length || 5));
+  // 챕터 점프 (스크롤 상단)
+  const jumpTo = (i) => {
+    setActiveIdx(i);
+    setReadIdxs(prev => new Set([...prev, i]));
+    if (typeof window !== 'undefined') {
+      // 상위 스크롤 컨테이너 대신 현재 챕터 섹션으로 스크롤
+      const el = document.getElementById(`chapter-section-${i}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // 다음 챕터로 넘어가기
+  const goNext = () => {
+    if (!content) return;
+    const chapters = content.CHAPTERS || [];
+    const nextIdx = chapters.findIndex((c, i) => i > activeIdx && c.ready);
+    if (nextIdx >= 0) jumpTo(nextIdx);
+    else {
+      // 모든 풀콘텐츠 챕터를 다 읽음 → 체크포인트로
+      const quizEl = document.getElementById('final-checkpoint');
+      if (quizEl) quizEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // 로딩/에러
   if (loading) {
@@ -282,12 +355,14 @@ export default function AptStudyPage() {
     );
   }
 
-  const { META, LAYERS, FINAL_QUIZ, GLOSSARY } = content;
+  const { META, CHAPTERS = [], FINAL_QUIZ = [], GLOSSARY = [] } = content;
   const availableLevels = META.availableLevels || ['intermediate'];
   const levelMeta = LEVEL_META[level];
-
-  // 레벨이 available에 없으면 placeholder
   const levelReady = availableLevels.includes(level);
+
+  const readyChapters = CHAPTERS.filter(c => c.ready);
+  const readReadyCount = [...readIdxs].filter(i => CHAPTERS[i]?.ready).length;
+  const activeChapter = CHAPTERS[activeIdx];
 
   return (
     <PageWrapper
@@ -310,10 +385,23 @@ export default function AptStudyPage() {
               {levelMeta.emoji} {levelMeta.ko}
             </span>
             <span className={`text-[11px] ${isDark ? 'text-[#aaa]' : 'text-[#666]'}`}>
-              ⏱️ ~{META.totalEstimatedMin}분
+              ⏱️ 총 ~{META.totalEstimatedMin}분 · {CHAPTERS.length}챕터
+            </span>
+            <span
+              className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                isDark ? 'bg-amber-900/40 text-amber-300' : 'bg-amber-100 text-amber-800'
+              }`}
+              title="Ch1-3 풀콘텐츠 + Ch4-10 skeleton"
+            >
+              MVP 3/10
             </span>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold mb-3">{META.title}</h1>
+          <h1 className="text-xl md:text-2xl font-bold mb-1">{META.title}</h1>
+          {META.subtitle && (
+            <p className={`text-xs md:text-sm leading-relaxed mb-3 ${isDark ? 'text-[#aaa]' : 'text-[#666]'}`}>
+              {META.subtitle}
+            </p>
+          )}
 
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div className="flex-1 min-w-0">
@@ -327,9 +415,13 @@ export default function AptStudyPage() {
                 isDark={isDark}
               />
             </div>
-            {levelReady && (
+            {levelReady && readyChapters.length > 0 && (
               <div className="w-full sm:w-64">
-                <ProgressBar current={unlockedLayers} total={LAYERS.length} isDark={isDark} />
+                <ProgressBar
+                  current={readReadyCount}
+                  total={readyChapters.length}
+                  isDark={isDark}
+                />
               </div>
             )}
           </div>
@@ -345,73 +437,91 @@ export default function AptStudyPage() {
           />
         ) : (
           <>
-            {/* 5 레이어 */}
-            <div className="space-y-6">
-              {LAYERS.map((layer, i) => {
-                const unlocked = i < unlockedLayers;
-                if (!unlocked) {
-                  return (
-                    <div
-                      key={layer.id}
-                      className={`rounded-lg p-5 text-center border-2 border-dashed ${
-                        isDark ? 'bg-[#1a1a1a] border-[#333] text-[#666]' : 'bg-[#fafafa] border-[#d5d5d5] text-[#999]'
-                      }`}
-                    >
-                      <div className="text-xs font-mono mb-1">LAYER {layer.num}</div>
-                      <div className="text-sm font-bold">🔒 {layer.title}</div>
-                      <div className="text-[11px] mt-1">이전 레이어를 먼저 완료해 주세요</div>
-                    </div>
-                  );
-                }
-                return (
-                  <section
-                    key={layer.id}
-                    className={`rounded-lg p-5 ${
-                      isDark ? 'bg-[#1e1e1e]' : 'bg-white border border-[#e5e5e5] shadow-sm'
-                    }`}
-                  >
-                    <Study.LayerBadge
-                      num={`L${layer.num}`}
-                      title={layer.title}
-                      subtitle={layer.subtitle}
-                      isDark={isDark}
-                    />
-                    <div className="pl-0 md:pl-[52px]">
-                      {layer.render({ isDark, C: Study })}
+            {/* 챕터 목차 내비 */}
+            <ChapterNav
+              chapters={CHAPTERS}
+              activeIdx={activeIdx}
+              readIdxs={readIdxs}
+              onJump={jumpTo}
+              isDark={isDark}
+            />
 
-                      {/* 다음 레이어 해금 버튼 */}
-                      {i === unlockedLayers - 1 && i < LAYERS.length - 1 && (
-                        <div className="mt-5 flex justify-end">
-                          <button
-                            onClick={unlockNext}
-                            className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                          >
-                            다음 레이어: {LAYERS[i + 1].title} →
-                          </button>
-                        </div>
-                      )}
+            {/* 현재 챕터 본문 */}
+            {activeChapter && activeChapter.ready ? (
+              <section
+                id={`chapter-section-${activeIdx}`}
+                className={`rounded-lg p-5 md:p-6 ${
+                  isDark ? 'bg-[#1e1e1e]' : 'bg-white border border-[#e5e5e5] shadow-sm'
+                }`}
+              >
+                <Study.ChapterHeader
+                  num={activeChapter.num}
+                  total={CHAPTERS.length}
+                  title={activeChapter.title}
+                  subtitle={activeChapter.subtitle}
+                  estMin={activeChapter.estMin}
+                  isDark={isDark}
+                />
+                <div>{activeChapter.render({ isDark, C: Study })}</div>
 
-                      {/* 마지막 레이어 뒤에는 체크포인트로 */}
-                      {i === unlockedLayers - 1 && i === LAYERS.length - 1 && (
-                        <div className="mt-5 text-center">
-                          <p className={`text-xs mb-2 ${isDark ? 'text-[#aaa]' : 'text-[#666]'}`}>
-                            ✅ 모든 레이어를 읽었습니다. 아래 체크포인트로 마무리해 보세요.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </section>
-                );
-              })}
+                {/* 챕터 풋터: 이전/다음 */}
+                <Study.ChapterFooter
+                  isDark={isDark}
+                  onPrev={activeIdx > 0 ? () => jumpTo(activeIdx - 1) : null}
+                  prevTitle={activeIdx > 0 ? `Ch${CHAPTERS[activeIdx - 1].num}` : null}
+                  onNext={goNext}
+                  nextTitle={(() => {
+                    const next = CHAPTERS.slice(activeIdx + 1).find(c => c.ready);
+                    return next ? `Ch${next.num} ${next.title.split(' — ')[0]}` : '종합 체크포인트';
+                  })()}
+                  showComplete={!CHAPTERS.slice(activeIdx + 1).find(c => c.ready)}
+                />
+              </section>
+            ) : (
+              // skeleton 챕터가 선택된 경우
+              <section
+                id={`chapter-section-${activeIdx}`}
+                className={`rounded-lg p-5 ${isDark ? 'bg-[#1e1e1e]' : 'bg-white border border-[#e5e5e5]'}`}
+              >
+                <Study.NotReadyChapter
+                  num={activeChapter?.num}
+                  title={activeChapter?.title}
+                  estMin={activeChapter?.estMin}
+                  bullets={activeChapter?.bullets || []}
+                  isDark={isDark}
+                />
+              </section>
+            )}
+
+            {/* 앞으로 이어질 챕터 프리뷰 (skeleton 리스트) */}
+            <div className="mt-6">
+              <h3 className={`text-sm font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-[#ddd]' : 'text-[#333]'}`}>
+                🚧 곧 오픈될 챕터 ({CHAPTERS.filter(c => !c.ready).length})
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {CHAPTERS.filter(c => !c.ready).map((c) => (
+                  <Study.NotReadyChapter
+                    key={c.id}
+                    num={c.num}
+                    title={c.title}
+                    estMin={c.estMin}
+                    bullets={c.bullets || []}
+                    isDark={isDark}
+                  />
+                ))}
+              </div>
             </div>
 
-            {/* 종합 체크포인트 퀴즈 — 모든 레이어 해금 후 노출 */}
-            {unlockedLayers >= LAYERS.length && (
-              <div className="mt-8">
+            {/* 종합 체크포인트 — Ch1-3 모두 읽은 뒤 노출 */}
+            {readReadyCount >= readyChapters.length && readyChapters.length > 0 && (
+              <div id="final-checkpoint" className="mt-8">
                 <h2 className={`text-lg font-bold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-[#1a1a1a]'}`}>
-                  🏁 종합 체크포인트
+                  🏁 종합 체크포인트 (Ch1~3 범위)
                 </h2>
-                <Study.MiniQuiz title="5문제 정리 퀴즈" questions={FINAL_QUIZ} isDark={isDark} />
+                <p className={`text-xs mb-3 ${isDark ? 'text-[#aaa]' : 'text-[#666]'}`}>
+                  전체 10챕터 오픈 후에는 20문제 심화 평가 + 수료증으로 확장됩니다.
+                </p>
+                <Study.MiniQuiz title={`5문제 — ${META.campaignId} 프리뷰`} questions={FINAL_QUIZ} isDark={isDark} />
               </div>
             )}
 
@@ -447,7 +557,7 @@ export default function AptStudyPage() {
             </div>
 
             <div className={`mt-6 pt-4 border-t text-[11px] text-center ${isDark ? 'border-[#333] text-[#666]' : 'border-[#e5e5e5] text-[#999]'}`}>
-              MVP 프로토타입 — 다른 캠페인·레벨은 단계적으로 추가됩니다.
+              MVP 프로토타입 · Ch1-3 풀콘텐츠, Ch4-10은 톤 승인 후 단계적 확장
             </div>
           </>
         )}
