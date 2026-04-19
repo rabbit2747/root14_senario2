@@ -28,6 +28,7 @@ const AptGalleryPage          = lazy(() => import('./pages/apt/AptGalleryPage'))
 const AptDetailPage           = lazy(() => import('./pages/apt/AptDetailPage'));
 const AptStudyPage            = lazy(() => import('./pages/apt/study/AptStudyPage'));
 const DensityPreview          = lazy(() => import('./pages/apt/study/DensityPreview'));
+const Ch1Prototype            = lazy(() => import('./pages/apt/study/Ch1Prototype'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -134,6 +135,7 @@ function App() {
             <Route path="/apt/:campaignId" element={<AptDetailPage />} />
             <Route path="/apt/:campaignId/study" element={<AptStudyPage />} />
             <Route path="/apt/preview-density" element={<DensityPreview />} />
+            <Route path="/apt/C0024/ch1-proto" element={<Ch1Prototype />} />
             <Route path="/lab/t1078" element={<LabT1078 />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/admin" element={<AdminPage />} />
