@@ -52,10 +52,15 @@ const chapter = {
   subtitle: 'APT29 · Cozy Bear · SolarWinds Supply Chain',
   group: 'APT29 (Cozy Bear / SVR)',
 
+  // HUD 기준 (실제 SUNBURST 타임라인):
+  //   2019.01 초기 정찰 → 2019.09.12 첫 테스트 주입 → 2020.02.20 본 SUNBURST 배포
+  //   → 2020.06.04 마지막 악성 빌드 → 2020.12.13 FireEye 탐지·작전 종료
+  //   총 작전 수명 ≈ 700일. Ch1~Ch5 전체에 걸쳐 소진되는 공용 예산.
+  //   Beat별 예상 소모: Ch1 ≈ 270일 / Ch2 ≈ 60일 / Ch3 ≈ 150일 / Ch4 ≈ 120일 / Ch5 ≈ 30일
   hud: {
-    totalDays: 365,         // 남은 일수 (작전 수행 시간 예산)
-    initialBudget: 100,     // 자원/인력 (추상 지표)
-    initialDetection: 0,    // 탐지 확률 (%)
+    totalDays: 700,         // 남은 작전 수명 (탐지 전까지 가용한 총 일수)
+    initialBudget: 100,     // 자원·인력 (추상 지표, 100 기준)
+    initialDetection: 0,    // 누적 탐지 위험 (%, 50% 넘으면 경고)
   },
 
   beats: [

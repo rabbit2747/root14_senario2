@@ -137,7 +137,8 @@ function App() {
             <Route path="/apt/:campaignId/study" element={<AptStudyPage />} />
             <Route path="/apt/preview-density" element={<DensityPreview />} />
             <Route path="/apt/C0024/ch1-proto" element={<Ch1Prototype />} />
-            <Route path="/apt/C0024/scenario" element={<VictimScenario />} />
+            <Route path="/apt/C0024/scenario" element={<VictimScenario campaignId="C0024" />} />
+            <Route path="/apt/C0023/scenario" element={<VictimScenario campaignId="C0023" />} />
             <Route path="/lab/t1078" element={<LabT1078 />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/admin" element={<AdminPage />} />

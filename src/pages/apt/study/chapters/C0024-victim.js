@@ -162,9 +162,28 @@ const scenario = {
 · 사유: 정기 디스크 헬스체크`,
         actions: [
           { id: 'allow', label: '✅ 허용', primary: true },
-          { id: 'deny', label: '거부' },
+          { id: 'deny', label: '거부', intercept: 'colleague-allowed' },
         ],
         footnote: '※ Orion 에이전트는 운영 모니터링을 위해 일반적으로 읽기 권한을 요청합니다.',
+      },
+      // 인터셉트 — "거부"를 눌러도 다른 약한 고리에서 결국 허용됨을 보여줌
+      intercepts: {
+        'colleague-allowed': {
+          icon: '💬',
+          title: 'Teams · 인프라운영팀 채널 (10분 전)',
+          body:
+`👤 김주임 (서버운영)
+"방금 Orion 알림 떠서 그냥 허용 눌렀어요. 매주 하던 거니까~ 👌"
+
+👤 이대리
+"네, 저도 점심때 허용 눌렀습니다. 디스크 헬스체크 정기 점검이에요."
+
+👤 박팀장
+"확인했습니다. 다음 주 패치노트에 반영해주세요."`,
+          insight:
+            '당신은 "거부"를 눌렀다. 하지만 같은 메일을 받은 동료 12명 중 누군가는 결국 "허용"을 누른다. 공급망 공격은 조직 안 가장 약한 한 명만 있으면 된다.',
+          confirmLabel: '동료가 이미 허용함을 확인 ▶',
+        },
       },
       hidden: {
         tactic: 'Lateral Movement',
@@ -221,6 +240,47 @@ const scenario = {
           '09:37  Slack 알림: "오후 2시 회의 준비 부탁드립니다"',
           '09:38  Orion 백그라운드 작업: 정상',
         ],
+        // 미니 분기 — 의심 트래픽 라인이 표시되면 학습자에게 신고/무시 선택지
+        alertAt: 3, // ambient 인덱스 (avsvmcloud.com 라인)
+        alertOptions: [
+          { id: 'report', label: '🚨 SOC팀에 신고', primary: true },
+          { id: 'ignore', label: '평소 정상 트래픽이라 무시' },
+        ],
+        alertResolutions: {
+          report: {
+            icon: '📞',
+            title: 'SOC팀 자동응답',
+            body:
+`💬 SOC 24/7 핫라인
+"안녕하세요, 한빛은행 SOC 1차 응대입니다.
+현재 모든 상담원이 통화 중입니다. 잠시 후 다시 시도해 주세요."
+
+📧 이메일 자동 회신
+보안운영팀 박팀장: "휴가 중입니다 (~ 04/24).
+긴급 사안은 백업 담당 정과장에게 연락 바랍니다."
+
+📧 자동 회신
+정과장: "외근 중입니다. 메일 확인 어렵습니다."`,
+            insight:
+              '신고는 옳은 행동이었다. 단지 받을 사람이 없었다. 평일 오전 9시 38분, 인력 공백은 어느 조직에나 있다. 공격은 그 공백을 노린다.',
+            confirmLabel: '일단 자리에서 일을 계속한다 ▶',
+          },
+          ignore: {
+            icon: '🤷',
+            title: '평소 정상 트래픽이라 판단',
+            body:
+`avsvmcloud.com 은 SolarWinds 정품 도메인이고,
+Orion 에이전트가 매일 메트릭을 송신하는 정상 트래픽이다.
+
+방화벽 화이트리스트에 이미 등록되어 있고,
+SOC 대시보드도 "정상"으로 분류 중이다.
+
+이상한 점은 없다. 커피를 가지러 간다.`,
+            insight:
+              '판단은 합리적이었다. avsvmcloud.com 은 진짜 SolarWinds 정품이고, 평소에도 트래픽이 있다. 단지 오늘은 그 안에 다른 것이 섞여 있다.',
+            confirmLabel: '커피를 가지러 자리를 비운다 ▶',
+          },
+        },
       },
       hidden: {
         tactic: 'Exfiltration',

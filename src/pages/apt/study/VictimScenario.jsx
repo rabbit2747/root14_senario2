@@ -13,7 +13,14 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import scenarioData from './chapters/C0024-victim';
+import c0024VictimData from './chapters/C0024-victim';
+import c0023VictimData from './chapters/C0023-victim';
+
+// 캠페인별 시나리오 데이터 — 추가 캠페인은 chapters/{id}-victim.js 만 만들어 등록
+const SCENARIOS = {
+  C0024: c0024VictimData,
+  C0023: c0023VictimData,
+};
 
 // ══════════════════════════════════════════════════════════════════════
 // SCENE 1 — Mail (Outlook 스타일)
@@ -53,7 +60,7 @@ function MailScene({ scene, onAction, isDark }) {
 
       {/* 메일 본문 */}
       <div className={`px-5 py-4 ${isDark ? 'bg-[#1a1a1e] text-[#ddd]' : 'bg-white text-[#333]'}`}>
-        <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">{c.body}</pre>
+        <pre className="whitespace-pre-wrap break-words text-sm leading-relaxed font-sans">{c.body}</pre>
       </div>
 
       {/* 액션 */}
@@ -359,19 +366,39 @@ function DownloadScene({ scene, onAction, isDark }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════
-// SCENE 6 — Background (자리 비움 + ambient 로그)
+// SCENE 6 — Background (자리 비움 + ambient 로그 + 미니 분기)
 // ══════════════════════════════════════════════════════════════════════
-function BackgroundScene({ scene, onAction, isDark }) {
+function BackgroundScene({ scene, onAction, onIntercept, isDark }) {
   const c = scene.content;
   const [shown, setShown] = useState(0);
+  const [alertChoice, setAlertChoice] = useState(null); // 'report' | 'ignore' | null
+
+  // alertAt 도달 전까지는 자동 진행, 도달 후엔 알림 노출 → 사용자 선택 대기 → 그 후에만 끝까지 자동 진행
+  const hasAlert = typeof c.alertAt === 'number';
+  const alertReached = hasAlert && shown > c.alertAt;
+  const waitingForAlert = alertReached && !alertChoice;
+  const allShown = shown >= c.ambient.length;
 
   useEffect(() => {
-    if (shown >= c.ambient.length) return;
+    if (waitingForAlert) return;        // 알림 선택 전엔 멈춤
+    if (allShown) return;
     const t = setTimeout(() => setShown((s) => s + 1), 700);
     return () => clearTimeout(t);
-  }, [shown, c.ambient.length]);
+  }, [shown, waitingForAlert, allShown]);
 
-  const done = shown >= c.ambient.length;
+  const done = allShown && (!hasAlert || !!alertChoice);
+
+  const handleAlertChoice = (optId) => {
+    setAlertChoice(optId);
+    const resolution = c.alertResolutions?.[optId];
+    if (!resolution) return;
+    // 결과 모달은 인터셉트 메커니즘으로 띄우되, "확정" 시 advance 로직은 부모가 처리
+    onIntercept({
+      ...resolution,
+      __metaChoiceId: optId,           // 부모에 전달용
+      __metaChoiceLabel: c.alertOptions.find((o) => o.id === optId)?.label || optId,
+    });
+  };
 
   return (
     <motion.div
@@ -391,24 +418,58 @@ function BackgroundScene({ scene, onAction, isDark }) {
           isDark ? 'bg-[#0f0f13] border border-[#2a2a2a] text-[#888]' : 'bg-white border border-[#e5e5e5] text-[#666]'
         }`}
       >
-        {c.ambient.slice(0, shown).map((line, i) => (
-          <motion.li
-            key={i}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            className={
-              line.includes('avsvmcloud')
-                ? isDark ? 'text-amber-400' : 'text-amber-600'
-                : ''
-            }
-          >
-            {line}
-          </motion.li>
-        ))}
+        {c.ambient.slice(0, shown).map((line, i) => {
+          const isAlertLine = i === c.alertAt;
+          return (
+            <motion.li
+              key={i}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              className={
+                isAlertLine || line.includes('avsvmcloud')
+                  ? isDark ? 'text-amber-400 font-bold' : 'text-amber-600 font-bold'
+                  : ''
+              }
+            >
+              {line}
+              {isAlertLine && <span className="ml-1 text-amber-500">⚠</span>}
+            </motion.li>
+          );
+        })}
       </ul>
 
+      {/* 미니 분기 — 의심 라인 표시되면 즉시 노출 */}
+      {waitingForAlert && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mt-4 mx-auto max-w-md rounded-md p-3 border-2 ${
+            isDark ? 'bg-[#241a0f] border-amber-700' : 'bg-amber-50 border-amber-300'
+          }`}
+        >
+          <div className={`text-xs mb-2 font-semibold ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>
+            💡 잠깐, 위 트래픽 라인이 평소보다 좀 큰 것 같다. 어떻게 할까?
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {c.alertOptions.map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => handleAlertChoice(opt.id)}
+                className={`flex-1 text-xs font-bold px-3 py-2 rounded-md transition-colors ${
+                  opt.primary
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                    : isDark ? 'bg-[#2a2a2a] hover:bg-[#3a3a3a] text-[#ddd]' : 'bg-white hover:bg-[#f5f5f5] text-[#555] border border-[#e5e5e5]'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       <button
-        onClick={() => onAction('return-to-desk', '자리로 돌아옴')}
+        onClick={() => onAction('return-to-desk', alertChoice ? `자리 복귀 (${alertChoice === 'report' ? '신고함' : '무시함'})` : '자리 복귀')}
         disabled={!done}
         className={`mt-5 text-sm font-bold px-6 py-2 rounded-md transition-colors ${
           done
@@ -416,8 +477,63 @@ function BackgroundScene({ scene, onAction, isDark }) {
             : isDark ? 'bg-[#2a2a2a] text-[#555] cursor-not-allowed' : 'bg-[#eee] text-[#aaa] cursor-not-allowed'
         }`}
       >
-        {done ? '자리로 돌아간다 ▶' : '잠시 자리 비움...'}
+        {done ? '자리로 돌아간다 ▶' : waitingForAlert ? '결정을 기다리는 중...' : '잠시 자리 비움...'}
       </button>
+    </motion.div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// InterceptModal — 거부/신고 후 "결국 같은 결과로 수렴" 메시지
+// ══════════════════════════════════════════════════════════════════════
+function InterceptModal({ data, onConfirm, isDark }) {
+  if (!data) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={onConfirm}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        onClick={(e) => e.stopPropagation()}
+        className={`w-full max-w-lg rounded-xl border-2 shadow-2xl overflow-hidden ${
+          isDark ? 'bg-[#1a1a1e] border-[#2a2a2a]' : 'bg-white border-[#e5e5e5]'
+        }`}
+      >
+        <div className={`px-5 py-3 border-b flex items-center gap-3 ${isDark ? 'border-[#2a2a2a] bg-[#0f0f13]' : 'border-[#e5e5e5] bg-[#f8f8f8]'}`}>
+          <div className="text-2xl">{data.icon}</div>
+          <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-[#1a1a1a]'}`}>{data.title}</h3>
+        </div>
+        <div className="px-5 py-4">
+          <pre className={`whitespace-pre-wrap break-words text-sm leading-relaxed font-sans mb-4 ${isDark ? 'text-[#ddd]' : 'text-[#333]'}`}>
+            {data.body}
+          </pre>
+          {data.insight && (
+            <div
+              className={`text-xs leading-relaxed rounded-md p-3 border-l-4 ${
+                isDark ? 'bg-[#0f1a24] border-blue-500 text-[#ddd]' : 'bg-blue-50 border-blue-400 text-[#333]'
+              }`}
+            >
+              <span className="font-bold">💭 잠깐, </span>
+              {data.insight}
+            </div>
+          )}
+        </div>
+        <div className={`px-5 py-3 border-t flex justify-end ${isDark ? 'border-[#2a2a2a] bg-[#0f0f13]' : 'border-[#e5e5e5] bg-[#fafafa]'}`}>
+          <button
+            onClick={onConfirm}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-md"
+          >
+            {data.confirmLabel || '확인 ▶'}
+          </button>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -643,7 +759,8 @@ const SCENE_RENDERERS = {
   background: BackgroundScene,
 };
 
-export default function VictimScenario() {
+export default function VictimScenario({ campaignId = 'C0024' }) {
+  const scenarioData = SCENARIOS[campaignId] || c0024VictimData;
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(() => {
     try { return localStorage.getItem('gotroot_theme') === 'dark'; } catch { return false; }
@@ -655,22 +772,52 @@ export default function VictimScenario() {
   const [sceneIdx, setSceneIdx] = useState(0);
   const [actionLog, setActionLog] = useState([]);
   const [introDismissed, setIntroDismissed] = useState(false);
+  const [intercept, setIntercept] = useState(null); // { ...modal data, __pendingAdvance: true|false }
 
   const currentScene = scenarioData.scenes[sceneIdx];
 
-  const recordAndAdvance = (actionId, label) => {
+  // Scene 컴포넌트들이 직접 호출 — Scene 6 분기 결과 모달 등 (advance 보류)
+  const showInterceptOnly = (data) => {
+    setIntercept({ ...data, __pendingAdvance: false });
+  };
+
+  const recordAndAdvance = (actionId, label, options = {}) => {
+    // Scene actions[]에 intercept 키가 있으면 — 인터셉트 모달 표시 + advance 보류
+    const action = currentScene.content?.actions?.find((a) => a.id === actionId);
+    if (action?.intercept && currentScene.intercepts?.[action.intercept]) {
+      // 액션 자체는 로그에 남김 (사용자가 거부했다는 사실)
+      setActionLog((prev) => [
+        ...prev,
+        { sceneId: currentScene.id, actionId, label, at: Date.now() },
+      ]);
+      setIntercept({
+        ...currentScene.intercepts[action.intercept],
+        __pendingAdvance: true,
+      });
+      return;
+    }
+
     setActionLog((prev) => [
       ...prev,
       { sceneId: currentScene.id, actionId, label, at: Date.now() },
     ]);
     setSceneIdx((i) => Math.min(i + 1, scenarioData.scenes.length - 1));
-    // 다음 화면 진입 시 스크롤 상단
     requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  };
+
+  const closeIntercept = () => {
+    const wasAdvancing = intercept?.__pendingAdvance;
+    setIntercept(null);
+    if (wasAdvancing) {
+      setSceneIdx((i) => Math.min(i + 1, scenarioData.scenes.length - 1));
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
   };
 
   const restart = () => {
     setSceneIdx(0);
     setActionLog([]);
+    setIntercept(null);
     setIntroDismissed(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -797,7 +944,12 @@ export default function VictimScenario() {
         <AnimatePresence mode="wait">
           {Renderer ? (
             <div key={currentScene.id}>
-              <Renderer scene={currentScene} onAction={recordAndAdvance} isDark={isDark} />
+              <Renderer
+                scene={currentScene}
+                onAction={recordAndAdvance}
+                onIntercept={showInterceptOnly}
+                isDark={isDark}
+              />
             </div>
           ) : (
             <div key="result">
@@ -806,6 +958,13 @@ export default function VictimScenario() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* 인터셉트 모달 — 거부/신고 후 "결국 같은 결과로 수렴" */}
+      <AnimatePresence>
+        {intercept && (
+          <InterceptModal data={intercept} onConfirm={closeIntercept} isDark={isDark} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
