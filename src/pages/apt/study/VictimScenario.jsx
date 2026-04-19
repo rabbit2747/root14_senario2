@@ -366,6 +366,86 @@ function DownloadScene({ scene, onAction, isDark }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════
+// SCENE — Chkdsk (Windows 부팅 점검 위장 화면) — NotPetya 등 와이퍼 위장용
+// ══════════════════════════════════════════════════════════════════════
+function ChkdskScene({ scene, onAction, isDark }) {
+  const c = scene.content;
+  const [stepIdx, setStepIdx] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (stepIdx >= c.steps.length) {
+      setDone(true);
+      return;
+    }
+    const t = setTimeout(() => setStepIdx((i) => i + 1), c.steps[stepIdx].durationMs || 1100);
+    return () => clearTimeout(t);
+  }, [stepIdx, c.steps]);
+
+  // Windows 7 BSOD 점검 화면 모방 — 다크 테마와 무관하게 항상 파란 배경
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="rounded-lg overflow-hidden border-2 border-[#1d4ed8] shadow-2xl"
+      style={{ background: '#1e40af', fontFamily: '"Lucida Console", Menlo, Consolas, monospace' }}
+    >
+      {/* 가짜 BIOS/Windows 헤더 */}
+      <div className="px-6 py-4 border-b border-[#3b5fc4] text-white text-center">
+        <div className="text-[10px] tracking-[0.3em] opacity-70 mb-1">WINDOWS</div>
+        <div className="text-base font-bold">{c.title}</div>
+        <div className="text-xs opacity-80 mt-1">{c.subtitle}</div>
+      </div>
+
+      <div className="px-6 py-5 text-white text-sm leading-loose">
+        {c.steps.map((s, i) => (
+          <div
+            key={i}
+            className={`flex items-center gap-3 ${
+              i < stepIdx ? 'opacity-60' : i === stepIdx ? 'opacity-100' : 'opacity-30'
+            }`}
+          >
+            <span className="w-6 text-right">
+              {i < stepIdx ? '✓' : i === stepIdx ? '▶' : '·'}
+            </span>
+            <span className="flex-1">
+              {s.label}
+              {i === stepIdx && !done && <span className="ml-2 animate-pulse">_</span>}
+            </span>
+            {s.percent !== undefined && (
+              <span className="text-xs opacity-80 font-mono w-14 text-right">
+                {i < stepIdx ? '100%' : i === stepIdx ? `${s.percent}%` : '0%'}
+              </span>
+            )}
+          </div>
+        ))}
+
+        <div className="mt-6 pt-4 border-t border-[#3b5fc4] text-xs opacity-80 text-center">
+          {c.warning || '컴퓨터를 끄거나 전원을 분리하지 마세요. 이 작업은 몇 분 정도 걸릴 수 있습니다.'}
+        </div>
+      </div>
+
+      {done && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="px-6 py-4 border-t border-[#3b5fc4] flex justify-end gap-2"
+          style={{ background: 'rgba(0,0,0,0.2)' }}
+        >
+          <button
+            onClick={() => onAction('chkdsk-confirm', '점검 화면 확인')}
+            className="bg-white text-[#1e40af] hover:bg-blue-100 text-sm font-bold px-4 py-2 rounded"
+          >
+            {c.confirmLabel || '점검이 끝나길 기다리며 자리를 비운다 ▶'}
+          </button>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════
 // SCENE 6 — Background (자리 비움 + ambient 로그 + 미니 분기)
 // ══════════════════════════════════════════════════════════════════════
 function BackgroundScene({ scene, onAction, onIntercept, isDark }) {
@@ -757,6 +837,7 @@ const SCENE_RENDERERS = {
   dialog: DialogScene,
   download: DownloadScene,
   background: BackgroundScene,
+  chkdsk: ChkdskScene,
 };
 
 export default function VictimScenario({ campaignId = 'C0024' }) {
