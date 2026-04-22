@@ -17,9 +17,16 @@ import c0024VictimData from './chapters/C0024-victim';
 import c0023VictimData from './chapters/C0023-victim';
 
 // 캠페인별 시나리오 데이터 — 추가 캠페인은 chapters/{id}-victim.js 만 만들어 등록
-const SCENARIOS = {
+export const SCENARIOS = {
   C0024: c0024VictimData,
   C0023: c0023VictimData,
+};
+
+// 시나리오 레벨 메타 (ScenarioHub 잠금 판정용)
+// 1=비기너 · 2=초급 · 3=중급(준비중) · 4=고급(준비중) · 5=전문가(준비중)
+export const SCENARIO_LEVEL_META = {
+  C0024: { level: 1, order: 1 },
+  C0023: { level: 2, order: 1 },
 };
 
 // ══════════════════════════════════════════════════════════════════════

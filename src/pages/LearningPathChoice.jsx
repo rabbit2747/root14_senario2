@@ -141,7 +141,7 @@ function ChoicePhase({ onSelect, navigate, isDark }) {
 
         {/* APT 공격사례 학습 카드 */}
         <button
-          onClick={() => navigate('/apt')}
+          onClick={() => navigate('/apt/scenarios')}
           className={`group text-left p-5 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${isDark
             ? 'border-amber-800/40 bg-amber-900/15 hover:border-amber-600/60 hover:bg-amber-900/25'
             : 'border-amber-200 bg-amber-50/60 hover:border-amber-400 hover:bg-amber-50'

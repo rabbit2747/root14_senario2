@@ -30,6 +30,8 @@ const AptStudyPage            = lazy(() => import('./pages/apt/study/AptStudyPag
 const DensityPreview          = lazy(() => import('./pages/apt/study/DensityPreview'));
 const Ch1Prototype            = lazy(() => import('./pages/apt/study/Ch1Prototype'));
 const VictimScenario          = lazy(() => import('./pages/apt/study/VictimScenario'));
+const ScenarioHub             = lazy(() => import('./pages/apt/study/ScenarioHub'));
+const AptGame                 = lazy(() => import('./pages/apt/study/AptGame'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -133,6 +135,8 @@ function App() {
             <Route path="/recommended/:techniqueId" element={<RecommendedCoursePage />} />
             <Route path="/guided/:techniqueId" element={<GuidedLearning />} />
             <Route path="/apt" element={<AptGalleryPage />} />
+            <Route path="/apt/scenarios" element={<ScenarioHub />} />
+            <Route path="/apt/:campaignId/game" element={<AptGame />} />
             <Route path="/apt/:campaignId" element={<AptDetailPage />} />
             <Route path="/apt/:campaignId/study" element={<AptStudyPage />} />
             <Route path="/apt/preview-density" element={<DensityPreview />} />
