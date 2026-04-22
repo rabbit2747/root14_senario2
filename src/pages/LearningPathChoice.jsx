@@ -103,7 +103,7 @@ function BackButton({ onClick, label, isDark }) {
 }
 
 // ── Phase: 메인 선택 ──
-function ChoicePhase({ onSelect, isDark }) {
+function ChoicePhase({ onSelect, navigate, isDark }) {
   return (
     <div className="flex-1 flex flex-col" style={{ animation: 'fadeIn 0.3s ease-out' }}>
       <div className="text-center mb-8">
@@ -115,21 +115,21 @@ function ChoicePhase({ onSelect, isDark }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 flex-1">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-4 flex-1">
         {/* 추천 학습 카드 */}
         <button
           onClick={() => onSelect('recommended')}
-          className={`group text-left p-6 sm:p-7 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${isDark
+          className={`group text-left p-5 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${isDark
             ? 'border-blue-800/40 bg-blue-900/15 hover:border-blue-600/60 hover:bg-blue-900/25'
             : 'border-blue-200 bg-blue-50/60 hover:border-blue-400 hover:bg-blue-50'
           }`}
         >
           <div className="text-4xl mb-4">🎯</div>
-          <h3 className={`text-lg sm:text-xl font-black mb-2 ${isDark ? 'text-white' : 'text-[#1c1c1e]'}`}>
+          <h3 className={`text-base sm:text-lg font-black mb-2 ${isDark ? 'text-white' : 'text-[#1c1c1e]'}`}>
             ROOT14 추천 학습
           </h3>
           <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            전술(Tactic)별로 추천하는 기법을 단계별로 학습합니다.
+            전술(Tactic)별로 추천 기법을 단계별로 학습합니다.
             <br />
             <span className={`font-semibold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>초보자에게 추천!</span>
           </p>
@@ -139,20 +139,43 @@ function ChoicePhase({ onSelect, isDark }) {
           </div>
         </button>
 
+        {/* APT 공격사례 학습 카드 */}
+        <button
+          onClick={() => navigate('/apt')}
+          className={`group text-left p-5 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${isDark
+            ? 'border-amber-800/40 bg-amber-900/15 hover:border-amber-600/60 hover:bg-amber-900/25'
+            : 'border-amber-200 bg-amber-50/60 hover:border-amber-400 hover:bg-amber-50'
+          }`}
+        >
+          <div className="text-4xl mb-4">🎬</div>
+          <h3 className={`text-base sm:text-lg font-black mb-2 ${isDark ? 'text-white' : 'text-[#1c1c1e]'}`}>
+            APT 공격사례 학습
+          </h3>
+          <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            실제 해킹 사건을 통해 공격 흐름을 체험합니다.
+            <br />
+            <span className={`font-semibold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>몰입형 스토리텔링!</span>
+          </p>
+          <div className={`mt-4 inline-flex items-center gap-1.5 text-xs font-bold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
+            사례 탐색
+            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </div>
+        </button>
+
         {/* 자율학습 카드 */}
         <button
           onClick={() => onSelect('self-directed')}
-          className={`group text-left p-6 sm:p-7 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${isDark
+          className={`group text-left p-5 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${isDark
             ? 'border-emerald-800/40 bg-emerald-900/15 hover:border-emerald-600/60 hover:bg-emerald-900/25'
             : 'border-emerald-200 bg-emerald-50/60 hover:border-emerald-400 hover:bg-emerald-50'
           }`}
         >
           <div className="text-4xl mb-4">📚</div>
-          <h3 className={`text-lg sm:text-xl font-black mb-2 ${isDark ? 'text-white' : 'text-[#1c1c1e]'}`}>
+          <h3 className={`text-base sm:text-lg font-black mb-2 ${isDark ? 'text-white' : 'text-[#1c1c1e]'}`}>
             자율학습
           </h3>
           <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            IT 기초 또는 MITRE ATT&CK 매트릭스에서 자유롭게 탐색합니다.
+            IT 기초 또는 MITRE ATT&CK 매트릭스를 자유롭게 탐색합니다.
             <br />
             <span className={`font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>내 페이스대로!</span>
           </p>
@@ -411,6 +434,7 @@ export default function LearningPathChoice() {
         {phase === 'choice' && (
           <ChoicePhase
             onSelect={(p) => setPhase(p)}
+            navigate={navigate}
             isDark={isDark}
           />
         )}
