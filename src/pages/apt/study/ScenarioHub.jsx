@@ -6,12 +6,13 @@
 //   · Lv1~2 실제 운영, Lv3~5 "준비중" 프리뷰 카드
 //
 // 데이터: SCENARIOS (VictimScenario.jsx) · SCENARIO_LEVEL_META
-// 완료 판정: localStorage['gotroot_apt_completed'] JSON 배열 (scenarioId 목록)
+// 완료 판정: Supabase edu_progress 테이블 (useAptProgress 훅) + localStorage 폴백
 
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { SCENARIOS, SCENARIO_LEVEL_META } from './VictimScenario';
+import useAptProgress from '../../../hooks/useAptProgress';
 
 const LEVEL_META = {
   1: { label: '비기너', color: '#22c55e', accent: 'from-emerald-500 to-green-600' },
@@ -42,22 +43,17 @@ const LEVEL_STR_TO_NUM = {
   beginner: 1, junior: 2, intermediate: 3, advanced: 4, expert: 5,
 };
 
-function getCompletedIds() {
-  try {
-    return JSON.parse(localStorage.getItem('gotroot_apt_completed') || '[]');
-  } catch { return []; }
-}
-
 export default function ScenarioHub() {
   const navigate = useNavigate();
   const { userLevel, isLoggedIn } = useAuth();
+  const { completedSet, loading: progressLoading } = useAptProgress();
 
   const myLevelNum = useMemo(() => {
     if (!userLevel) return 1;
     return typeof userLevel === 'number' ? userLevel : (LEVEL_STR_TO_NUM[userLevel] || 1);
   }, [userLevel]);
 
-  const completed = getCompletedIds();
+  const completed = useMemo(() => Array.from(completedSet), [completedSet]);
 
   // 레벨별 시나리오 그루핑
   const byLevel = useMemo(() => {

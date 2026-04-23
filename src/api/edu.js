@@ -56,6 +56,30 @@ export const getGuidedProgress = (userId, techniqueId) =>
     .eq('technique_id', techniqueId)
     .eq('level', 'guided');
 
+// ── APT 시나리오 완료 기록 (edu_progress 재사용) ──
+// technique_id = 'APT' · chapter_id = campaignId · level = 'apt'
+
+/** APT 시나리오 완료 기록 */
+export const upsertAptScenarioComplete = (userId, campaignId) =>
+  client.from('edu_progress').upsert(
+    {
+      user_id: userId,
+      technique_id: 'APT',
+      chapter_id: campaignId,
+      level: 'apt',
+    },
+    { ignoreDuplicates: true }
+  );
+
+/** APT 완료한 캠페인 ID 목록 조회 */
+export const getAptCompletedScenarios = (userId) =>
+  client
+    .from('edu_progress')
+    .select('chapter_id')
+    .eq('user_id', userId)
+    .eq('technique_id', 'APT')
+    .eq('level', 'apt');
+
 // ── edu_html_content ──
 
 /**

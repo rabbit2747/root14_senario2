@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import c0024VictimData from './chapters/C0024-victim';
 import c0023VictimData from './chapters/C0023-victim';
+import useAptProgress from '../../../hooks/useAptProgress';
 
 // 캠페인별 시나리오 데이터 — 추가 캠페인은 chapters/{id}-victim.js 만 만들어 등록
 export const SCENARIOS = {
@@ -850,6 +851,7 @@ const SCENE_RENDERERS = {
 export default function VictimScenario({ campaignId = 'C0024' }) {
   const scenarioData = SCENARIOS[campaignId] || c0024VictimData;
   const navigate = useNavigate();
+  const { markComplete } = useAptProgress();
   const [isDark, setIsDark] = useState(() => {
     try { return localStorage.getItem('gotroot_theme') === 'dark'; } catch { return false; }
   });
@@ -913,6 +915,14 @@ export default function VictimScenario({ campaignId = 'C0024' }) {
   const Renderer = currentScene.ui !== 'result' ? SCENE_RENDERERS[currentScene.ui] : null;
   const totalActable = scenarioData.scenes.length - 1; // 결과 제외
   const currentNum = currentScene.ui === 'result' ? totalActable : currentScene.num;
+
+  // 결과 화면 도달 시 → edu_progress DB + localStorage 이중 저장 (1회)
+  useEffect(() => {
+    if (currentScene.ui === 'result' && campaignId) {
+      markComplete(campaignId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScene.ui, campaignId]);
 
   // ──────────────────────────────────────────────────────────────
   // 인트로
