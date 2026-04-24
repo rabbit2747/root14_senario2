@@ -31,19 +31,24 @@ const SHEET_SRC = {
 const SHEET_COLS = { room: 17, deco: 16 };
 const SHEET_ROWS = { room: 23, deco: 89 };
 
-// Interiors 카테고리 (행 범위 기반 추정 — 실제 필요시 조정)
+// Interiors 카테고리 (256×1424 PNG 실측 기반 — 2026-04-24 보정)
 const DECO_CATEGORIES = [
-  { id: 'all',    label: '전체',   rowStart: 0,  rowEnd: 89 },
-  { id: 'window', label: '창문',   rowStart: 0,  rowEnd: 5 },
-  { id: 'bed',    label: '침대',   rowStart: 5,  rowEnd: 11 },
-  { id: 'table',  label: '테이블', rowStart: 11, rowEnd: 21 },
-  { id: 'chair',  label: '의자',   rowStart: 21, rowEnd: 28 },
-  { id: 'desk',   label: '책상',   rowStart: 28, rowEnd: 36 },
-  { id: 'elec',   label: '전자',   rowStart: 36, rowEnd: 43 },
-  { id: 'kitchen',label: '주방',   rowStart: 43, rowEnd: 51 },
-  { id: 'plant',  label: '식물',   rowStart: 51, rowEnd: 59 },
-  { id: 'sofa',   label: '소파',   rowStart: 59, rowEnd: 76 },
-  { id: 'misc',   label: '기타',   rowStart: 76, rowEnd: 89 },
+  { id: 'all',       label: '전체',      rowStart: 0,  rowEnd: 89 },
+  { id: 'window',    label: '🪟 창문',    rowStart: 0,  rowEnd: 5 },
+  { id: 'shelf',     label: '📚 책장/서랍', rowStart: 5,  rowEnd: 10 },
+  { id: 'sofa',      label: '🛋️ 소파/쿠션', rowStart: 10, rowEnd: 16 },
+  { id: 'deco',      label: '🖼️ 액자/벽',  rowStart: 16, rowEnd: 23 },
+  { id: 'kitchen',   label: '🍳 주방카운터', rowStart: 23, rowEnd: 28 },
+  { id: 'door',      label: '🚪 문',       rowStart: 28, rowEnd: 31 },
+  { id: 'chair',     label: '🪑 의자',     rowStart: 31, rowEnd: 38 },
+  { id: 'table',     label: '🔲 테이블/보드', rowStart: 38, rowEnd: 46 },
+  { id: 'elec',      label: '🖥️ 전자제품',  rowStart: 46, rowEnd: 51 },
+  { id: 'plant',     label: '🌿 식물',     rowStart: 51, rowEnd: 55 },
+  { id: 'lamp',      label: '💡 조명',     rowStart: 55, rowEnd: 59 },
+  { id: 'utensil',   label: '🍽️ 주방기구',  rowStart: 59, rowEnd: 69 },
+  { id: 'fireplace', label: '🔥 벽난로/거울', rowStart: 69, rowEnd: 74 },
+  { id: 'bed',       label: '🛏️ 침대',     rowStart: 74, rowEnd: 79 },
+  { id: 'misc',      label: '📦 기타',     rowStart: 79, rowEnd: 89 },
 ];
 const ROOM_CATEGORIES = [
   { id: 'all',   label: '전체', rowStart: 0,  rowEnd: 23 },
@@ -134,11 +139,47 @@ function countCropped(m, w, h) {
 }
 
 // ═══ 룸 템플릿 ══════════════════════════════════
+// ── 템플릿 헬퍼: 팔레트에서 오브젝트 id로 찾기 (없으면 null)
+function findObj(palette, id) { return (palette.objects || []).find((o) => o.id === id) || null; }
+function addObj(m, palette, id, x, y) {
+  const o = findObj(palette, id);
+  if (!o) return;
+  m.objects.push({ x, y, sheet: o.sheet, frame: o.frame, collide: !!o.collide });
+}
+function rect(m, x0, y0, x1, y1, wallFrame) {
+  for (let x = x0; x <= x1; x++) { m.walls[y0][x] = wallFrame; m.walls[y1][x] = wallFrame; }
+  for (let y = y0; y <= y1; y++) { m.walls[y][x0] = wallFrame; m.walls[y][x1] = wallFrame; }
+}
+function fillFloor(m, x0, y0, x1, y1, frame) {
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) m.floor[y][x] = frame;
+}
+
 function templateOpen(palette) {
   const m = emptyMap(30, 20, palette.floors[0].frame);
-  // 외곽 벽
-  for (let x = 0; x < 30; x++) { m.walls[0][x] = palette.walls[0].frame; m.walls[19][x] = palette.walls[0].frame; }
-  for (let y = 0; y < 20; y++) { m.walls[y][0] = palette.walls[0].frame; m.walls[y][29] = palette.walls[0].frame; }
+  const W = palette.walls[0].frame;
+  rect(m, 0, 0, 29, 19, W);
+  // 4열 책상 배치 (가로 2개씩 쌍)
+  for (let row = 0; row < 2; row++) {
+    const by = 4 + row * 7;
+    for (let col = 0; col < 4; col++) {
+      const bx = 3 + col * 6;
+      addObj(m, palette, 'o_desk',  bx,     by);
+      addObj(m, palette, 'o_desk',  bx + 1, by);
+      addObj(m, palette, 'o_pc',    bx,     by);
+      addObj(m, palette, 'o_pc',    bx + 1, by);
+      addObj(m, palette, 'o_chair', bx,     by + 1);
+      addObj(m, palette, 'o_chair', bx + 1, by + 1);
+    }
+  }
+  // 코너 화분
+  addObj(m, palette, 'o_plant', 1, 1);
+  addObj(m, palette, 'o_plant', 28, 1);
+  addObj(m, palette, 'o_plant', 1, 18);
+  addObj(m, palette, 'o_plant', 28, 18);
+  // 창문 (상단 벽)
+  addObj(m, palette, 'o_window', 8, 0);
+  addObj(m, palette, 'o_window', 15, 0);
+  addObj(m, palette, 'o_window', 22, 0);
   m.start = { x: 2, y: 2 };
   return m;
 }
@@ -146,33 +187,113 @@ function templateOpen(palette) {
 function template3Rooms(palette) {
   const m = emptyMap(36, 20, palette.floors[0].frame);
   const W = palette.walls[0].frame;
-  // 외곽
-  for (let x = 0; x < 36; x++) { m.walls[0][x] = W; m.walls[19][x] = W; }
-  for (let y = 0; y < 20; y++) { m.walls[y][0] = W; m.walls[y][35] = W; }
-  // 세로 분리벽 2개 (문 구멍 포함)
+  const F1 = palette.floors[0].frame;
+  const F2 = palette.floors[1]?.frame ?? F1;
+  const F3 = palette.floors[2]?.frame ?? F1;
+
+  rect(m, 0, 0, 35, 19, W);
+  // 세로 분리벽 (복도 쪽 문 y=10)
   for (let y = 1; y < 19; y++) { if (y !== 10) m.walls[y][12] = W; }
   for (let y = 1; y < 19; y++) { if (y !== 10) m.walls[y][24] = W; }
-  // 각 방 바닥 다르게
-  for (let y = 1; y < 19; y++) for (let x = 1; x < 12; x++) m.floor[y][x] = palette.floors[0].frame;
-  for (let y = 1; y < 19; y++) for (let x = 13; x < 24; x++) m.floor[y][x] = palette.floors[1]?.frame ?? palette.floors[0].frame;
-  for (let y = 1; y < 19; y++) for (let x = 25; x < 35; x++) m.floor[y][x] = palette.floors[2]?.frame ?? palette.floors[0].frame;
-  m.start = { x: 2, y: 2 };
+  // 방별 바닥
+  fillFloor(m,  1, 1, 11, 18, F1);
+  fillFloor(m, 13, 1, 23, 18, F2);
+  fillFloor(m, 25, 1, 34, 18, F3);
+
+  // ── Room A (좌): 업무 공간 — 책상 3쌍
+  for (let i = 0; i < 3; i++) {
+    const by = 3 + i * 5;
+    addObj(m, palette, 'o_desk', 3, by);
+    addObj(m, palette, 'o_desk', 4, by);
+    addObj(m, palette, 'o_pc',   3, by);
+    addObj(m, palette, 'o_pc',   4, by);
+    addObj(m, palette, 'o_chair', 3, by + 1);
+    addObj(m, palette, 'o_chair', 4, by + 1);
+    addObj(m, palette, 'o_desk', 8, by);
+    addObj(m, palette, 'o_desk', 9, by);
+    addObj(m, palette, 'o_pc',   8, by);
+    addObj(m, palette, 'o_pc',   9, by);
+    addObj(m, palette, 'o_chair', 8, by + 1);
+    addObj(m, palette, 'o_chair', 9, by + 1);
+  }
+  addObj(m, palette, 'o_plant', 1, 1);
+  addObj(m, palette, 'o_shelf', 11, 2);
+  addObj(m, palette, 'o_shelf', 11, 3);
+
+  // ── Room B (중): 라운지 — 소파 + 책장
+  addObj(m, palette, 'o_sofa', 15, 4);
+  addObj(m, palette, 'o_sofa', 16, 4);
+  addObj(m, palette, 'o_sofa', 17, 4);
+  addObj(m, palette, 'o_sofa', 20, 14);
+  addObj(m, palette, 'o_sofa', 21, 14);
+  addObj(m, palette, 'o_sofa', 22, 14);
+  addObj(m, palette, 'o_shelf', 14, 1);
+  addObj(m, palette, 'o_shelf', 15, 1);
+  addObj(m, palette, 'o_shelf', 22, 18);
+  addObj(m, palette, 'o_plant', 14, 18);
+  addObj(m, palette, 'o_plant', 23, 1);
+
+  // ── Room C (우): 회의실 — 긴 테이블 + 의자
+  for (let x = 27; x <= 32; x++) addObj(m, palette, 'o_desk', x, 8);
+  for (let x = 27; x <= 32; x++) addObj(m, palette, 'o_chair', x, 6);
+  for (let x = 27; x <= 32; x++) addObj(m, palette, 'o_chair', x, 10);
+  addObj(m, palette, 'o_plant', 25, 1);
+  addObj(m, palette, 'o_plant', 34, 1);
+  addObj(m, palette, 'o_plant', 25, 18);
+  addObj(m, palette, 'o_plant', 34, 18);
+
+  // 창문
+  addObj(m, palette, 'o_window', 5, 0);
+  addObj(m, palette, 'o_window', 17, 0);
+  addObj(m, palette, 'o_window', 29, 0);
+
+  m.start = { x: 2, y: 10 };
   return m;
 }
 
 function templateMeeting(palette) {
   const m = emptyMap(32, 22, palette.floors[0].frame);
   const W = palette.walls[0].frame;
-  for (let x = 0; x < 32; x++) { m.walls[0][x] = W; m.walls[21][x] = W; }
-  for (let y = 0; y < 22; y++) { m.walls[y][0] = W; m.walls[y][31] = W; }
-  // 중앙 회의실
-  for (let x = 10; x < 22; x++) { m.walls[5][x] = W; m.walls[15][x] = W; }
-  for (let y = 5; y < 16; y++) { m.walls[y][10] = W; m.walls[y][21] = W; }
-  // 회의실 문 구멍
+  const F2 = palette.floors[1]?.frame ?? palette.floors[0].frame;
+
+  rect(m, 0, 0, 31, 21, W);
+  // 중앙 회의실 (10,5 ~ 21,15)
+  rect(m, 10, 5, 21, 15, W);
+  // 문 구멍 (상/하)
   m.walls[5][15] = null; m.walls[15][15] = null;
-  // 회의실 안쪽 카펫
-  for (let y = 6; y < 15; y++) for (let x = 11; x < 21; x++) m.floor[y][x] = palette.floors[1]?.frame ?? palette.floors[0].frame;
-  m.start = { x: 2, y: 2 };
+  fillFloor(m, 11, 6, 20, 14, F2);
+
+  // ── 회의실 안: 긴 회의 테이블 + 의자 20석
+  for (let x = 12; x <= 19; x++) addObj(m, palette, 'o_desk', x, 10);
+  for (let x = 12; x <= 19; x++) addObj(m, palette, 'o_chair', x, 8);
+  for (let x = 12; x <= 19; x++) addObj(m, palette, 'o_chair', x, 12);
+  addObj(m, palette, 'o_plant', 11, 6);
+  addObj(m, palette, 'o_plant', 20, 6);
+  addObj(m, palette, 'o_plant', 11, 14);
+  addObj(m, palette, 'o_plant', 20, 14);
+
+  // ── 외곽: 워크스테이션 4군데 (회의실 밖 모서리)
+  // 좌상
+  addObj(m, palette, 'o_desk', 2, 2); addObj(m, palette, 'o_desk', 3, 2);
+  addObj(m, palette, 'o_pc', 2, 2); addObj(m, palette, 'o_pc', 3, 2);
+  addObj(m, palette, 'o_chair', 2, 3); addObj(m, palette, 'o_chair', 3, 3);
+  // 우상
+  addObj(m, palette, 'o_desk', 27, 2); addObj(m, palette, 'o_desk', 28, 2);
+  addObj(m, palette, 'o_pc', 27, 2); addObj(m, palette, 'o_pc', 28, 2);
+  addObj(m, palette, 'o_chair', 27, 3); addObj(m, palette, 'o_chair', 28, 3);
+  // 좌하: 라운지 소파
+  addObj(m, palette, 'o_sofa', 2, 18); addObj(m, palette, 'o_sofa', 3, 18); addObj(m, palette, 'o_sofa', 4, 18);
+  addObj(m, palette, 'o_plant', 1, 17);
+  // 우하: 책장 라이브러리
+  addObj(m, palette, 'o_shelf', 27, 18); addObj(m, palette, 'o_shelf', 28, 18); addObj(m, palette, 'o_shelf', 29, 18);
+  addObj(m, palette, 'o_plant', 30, 17);
+
+  // 창문
+  addObj(m, palette, 'o_window', 6, 0);
+  addObj(m, palette, 'o_window', 15, 0);
+  addObj(m, palette, 'o_window', 25, 0);
+
+  m.start = { x: 2, y: 20 };
   return m;
 }
 
