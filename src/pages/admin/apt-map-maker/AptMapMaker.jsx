@@ -71,14 +71,18 @@ const DEFAULT_PALETTE = {
     { id: 'w_brick', name: '벽돌벽', sheet: 'room', frame: 153 },
     { id: 'w_top',   name: '벽상단', sheet: 'room', frame: 17 },
   ],
+  // 실측 기반 기본 프레임 (카테고리 중앙값) — 2026-04-24 보정
+  // desk: row 40(table),  chair: row 33,  pc: row 47(elec),  plant: row 52
+  // shelf: row 6,  sofa: row 12,  window: row 1,  door: row 29
   objects: [
-    { id: 'o_desk',   name: '책상',   sheet: 'deco', frame: 486, collide: true },
-    { id: 'o_chair',  name: '의자',   sheet: 'deco', frame: 611, collide: true },
-    { id: 'o_pc',     name: '모니터', sheet: 'deco', frame: 645, collide: false },
-    { id: 'o_plant',  name: '화분',   sheet: 'deco', frame: 858, collide: false },
-    { id: 'o_shelf',  name: '책장',   sheet: 'deco', frame: 772, collide: true },
-    { id: 'o_sofa',   name: '소파',   sheet: 'deco', frame: 994, collide: true },
-    { id: 'o_window', name: '창문',   sheet: 'deco', frame: 18,  collide: false },
+    { id: 'o_desk',   name: '책상',   sheet: 'deco', frame: 640, collide: true },   // row 40 col 0
+    { id: 'o_chair',  name: '의자',   sheet: 'deco', frame: 528, collide: true },   // row 33 col 0
+    { id: 'o_pc',     name: '모니터', sheet: 'deco', frame: 752, collide: false },  // row 47 col 0
+    { id: 'o_plant',  name: '화분',   sheet: 'deco', frame: 842, collide: false },  // row 52 col 10
+    { id: 'o_shelf',  name: '책장',   sheet: 'deco', frame: 96,  collide: true },   // row 6  col 0
+    { id: 'o_sofa',   name: '소파',   sheet: 'deco', frame: 192, collide: true },   // row 12 col 0
+    { id: 'o_window', name: '창문',   sheet: 'deco', frame: 18,  collide: false },  // row 1  col 2
+    { id: 'o_door',   name: '문',     sheet: 'deco', frame: 464, collide: false },  // row 29 col 0
   ],
 };
 
@@ -139,6 +143,21 @@ function countCropped(m, w, h) {
 }
 
 // ═══ 룸 템플릿 ══════════════════════════════════
+// ── APT 시나리오 기본 NPC 3명 (alex=피해자/amelia=보안팀/bob=공격자)
+const APT_NPCS = [
+  { spriteKey: 'alex',   name: '김민수 (재무팀)', line: '이상한 이메일이 계속 와서 이미 열어버렸어요... 첨부 파일도 실행했는데, 괜찮을까요?' },
+  { spriteKey: 'amelia', name: '박지영 (보안팀)', line: 'SIEM에 알림이 연속으로 뜨고 있어요. PowerShell 비정상 실행 + 외부 IP 통신 의심. 로그 분석 도와주세요.' },
+  { spriteKey: 'bob',    name: '정체불명의 직원',  line: '(수상한 USB를 만지작거리며) 어? 뭐야, 그냥 지나가는 중인데요?' },
+];
+
+function addNpcs(m, palette, positions) {
+  // positions: [{x,y}, {x,y}, {x,y}] 3개
+  positions.forEach((pos, i) => {
+    if (!pos || i >= APT_NPCS.length) return;
+    m.npcs.push({ x: pos.x, y: pos.y, ...APT_NPCS[i] });
+  });
+}
+
 // ── 템플릿 헬퍼: 팔레트에서 오브젝트 id로 찾기 (없으면 null)
 function findObj(palette, id) { return (palette.objects || []).find((o) => o.id === id) || null; }
 function addObj(m, palette, id, x, y) {
@@ -180,6 +199,11 @@ function templateOpen(palette) {
   addObj(m, palette, 'o_window', 8, 0);
   addObj(m, palette, 'o_window', 15, 0);
   addObj(m, palette, 'o_window', 22, 0);
+  // APT NPC 3명
+  addNpcs(m, palette, [{ x: 4, y: 5 }, { x: 18, y: 5 }, { x: 25, y: 12 }]);
+  // 미션 (피해자 PC / 보안팀 콘솔)
+  m.missions.push({ x: 4, y: 6 });
+  m.missions.push({ x: 18, y: 6 });
   m.start = { x: 2, y: 2 };
   return m;
 }
@@ -247,6 +271,11 @@ function template3Rooms(palette) {
   addObj(m, palette, 'o_window', 17, 0);
   addObj(m, palette, 'o_window', 29, 0);
 
+  // APT NPC: A(피해자 재무팀) / B(보안팀 라운지) / C(공격자 회의실 침투)
+  addNpcs(m, palette, [{ x: 3, y: 4 }, { x: 18, y: 10 }, { x: 29, y: 3 }]);
+  // 미션 (피해자 PC / 회의실 노트북)
+  m.missions.push({ x: 3, y: 3 });
+  m.missions.push({ x: 29, y: 8 });
   m.start = { x: 2, y: 10 };
   return m;
 }
@@ -293,14 +322,109 @@ function templateMeeting(palette) {
   addObj(m, palette, 'o_window', 15, 0);
   addObj(m, palette, 'o_window', 25, 0);
 
+  // APT NPC: 피해자(좌상 워크스테이션) / 보안팀(회의실 안) / 공격자(우상 워크스테이션)
+  addNpcs(m, palette, [{ x: 3, y: 4 }, { x: 15, y: 10 }, { x: 28, y: 4 }]);
+  m.missions.push({ x: 3, y: 3 });
+  m.missions.push({ x: 15, y: 10 });
   m.start = { x: 2, y: 20 };
   return m;
 }
 
+// ── templateBreach: 침입 시나리오 — 서버실 + 경비실 + 대기실
+function templateBreach(palette) {
+  const m = emptyMap(40, 24, palette.floors[0].frame);
+  const W = palette.walls[0].frame;
+  const F_SERVER = palette.floors[2]?.frame ?? palette.floors[0].frame; // 블루타일
+  const F_GUARD  = palette.floors[3]?.frame ?? palette.floors[0].frame; // 회색
+  const F_LOBBY  = palette.floors[4]?.frame ?? palette.floors[0].frame; // 나무
+
+  rect(m, 0, 0, 39, 23, W);
+
+  // ┌────────────┬───────────┐
+  // │ 서버실      │           │
+  // │ (좌)        │ 대기실    │
+  // ├────────────┤ (중앙)     │
+  // │ 경비실      │           │
+  // │ (좌하)      │           │
+  // └────────────┴───────────┘
+  //                         │ 복도(우) │
+
+  // 세로 분리벽 (x=15: 서버실/경비실 vs 대기실) 문 y=12
+  for (let y = 1; y < 23; y++) if (y !== 12) m.walls[y][15] = W;
+  // 가로 분리벽 (y=10: 서버실/경비실) 문 x=7
+  for (let x = 1; x < 15; x++) if (x !== 7) m.walls[10][x] = W;
+  // 세로 분리벽 (x=30: 대기실/복도) 문 y=12
+  for (let y = 1; y < 23; y++) if (y !== 12) m.walls[y][30] = W;
+
+  // 방별 바닥
+  fillFloor(m,  1, 1, 14,  9, F_SERVER);
+  fillFloor(m,  1, 11, 14, 22, F_GUARD);
+  fillFloor(m, 16, 1, 29, 22, F_LOBBY);
+
+  // ── 서버실: 서버랙(책장 대용) 2열 × 4개
+  for (let i = 0; i < 4; i++) {
+    addObj(m, palette, 'o_shelf', 3 + i * 2, 3);
+    addObj(m, palette, 'o_shelf', 3 + i * 2, 4);
+    addObj(m, palette, 'o_shelf', 3 + i * 2, 7);
+    addObj(m, palette, 'o_shelf', 3 + i * 2, 8);
+  }
+  // 서버실 관리 콘솔
+  addObj(m, palette, 'o_desk', 12, 5);
+  addObj(m, palette, 'o_pc',   12, 5);
+  addObj(m, palette, 'o_chair', 12, 6);
+
+  // ── 경비실: CCTV 모니터 벽 + 경비 책상
+  for (let x = 2; x <= 6; x++) {
+    addObj(m, palette, 'o_pc', x, 12);
+  }
+  addObj(m, palette, 'o_desk', 2, 15); addObj(m, palette, 'o_desk', 3, 15);
+  addObj(m, palette, 'o_pc', 2, 15);  addObj(m, palette, 'o_pc', 3, 15);
+  addObj(m, palette, 'o_chair', 2, 16); addObj(m, palette, 'o_chair', 3, 16);
+  // 경비 라운지
+  addObj(m, palette, 'o_sofa', 10, 18); addObj(m, palette, 'o_sofa', 11, 18); addObj(m, palette, 'o_sofa', 12, 18);
+  addObj(m, palette, 'o_plant', 13, 13);
+  addObj(m, palette, 'o_plant', 1, 22);
+
+  // ── 대기실: 방문객 소파 + 리셉션 데스크
+  addObj(m, palette, 'o_desk', 20, 3); addObj(m, palette, 'o_desk', 21, 3); addObj(m, palette, 'o_desk', 22, 3);
+  addObj(m, palette, 'o_pc',   21, 3);
+  addObj(m, palette, 'o_chair', 21, 4);
+  // 방문객 대기 소파 (2줄)
+  addObj(m, palette, 'o_sofa', 18, 10); addObj(m, palette, 'o_sofa', 19, 10); addObj(m, palette, 'o_sofa', 20, 10);
+  addObj(m, palette, 'o_sofa', 24, 10); addObj(m, palette, 'o_sofa', 25, 10); addObj(m, palette, 'o_sofa', 26, 10);
+  addObj(m, palette, 'o_sofa', 18, 18); addObj(m, palette, 'o_sofa', 19, 18); addObj(m, palette, 'o_sofa', 20, 18);
+  addObj(m, palette, 'o_plant', 17, 1); addObj(m, palette, 'o_plant', 29, 1);
+  addObj(m, palette, 'o_plant', 17, 22); addObj(m, palette, 'o_plant', 29, 22);
+
+  // ── 복도: 비상구 + 화분
+  addObj(m, palette, 'o_plant', 32, 2); addObj(m, palette, 'o_plant', 38, 2);
+  addObj(m, palette, 'o_plant', 32, 22); addObj(m, palette, 'o_plant', 38, 22);
+  addObj(m, palette, 'o_door', 39, 12);
+
+  // 창문
+  addObj(m, palette, 'o_window', 5, 0);
+  addObj(m, palette, 'o_window', 22, 0);
+  addObj(m, palette, 'o_window', 35, 0);
+
+  // APT NPC: 경비원(경비실) / 보안팀(서버실) / 공격자(대기실 위장)
+  m.npcs.push({ x: 8, y: 15, spriteKey: 'bob',    name: '이경호 (야간 경비)', line: '어젯밤 1시쯤 낯선 사람이 대기실을 서성거렸어요. CCTV 확인해보시겠어요?' });
+  m.npcs.push({ x: 10, y: 5, spriteKey: 'amelia', name: '박지영 (보안팀)',    line: '서버실 접근 로그에 이상이 있어요. 한 계정이 새벽에 여러 번 로그인 시도했어요.' });
+  m.npcs.push({ x: 22, y: 12, spriteKey: 'alex',  name: '정체불명의 방문자',   line: '(방문증을 목에 걸고) 아, 저는 외부 업체 A/S 기사입니다. 어디로 가면 되죠?' });
+
+  // 미션: 서버랙 / CCTV 콘솔 / 리셉션 출입기록
+  m.missions.push({ x: 12, y: 5 });  // 서버 콘솔
+  m.missions.push({ x: 4, y: 12 });  // CCTV
+  m.missions.push({ x: 21, y: 3 });  // 리셉션 로그
+
+  m.start = { x: 35, y: 12 };
+  return m;
+}
+
 const TEMPLATES = [
-  { id: 'open',    label: '🏢 오픈 오피스',   fn: templateOpen },
-  { id: '3rooms',  label: '🚪 3방 사무실',    fn: template3Rooms },
-  { id: 'meeting', label: '👥 회의실 중심',  fn: templateMeeting },
+  { id: 'open',    label: '🏢 오픈 오피스 (APT)',   fn: templateOpen },
+  { id: '3rooms',  label: '🚪 3방 사무실 (APT)',    fn: template3Rooms },
+  { id: 'meeting', label: '👥 회의실 중심 (APT)',   fn: templateMeeting },
+  { id: 'breach',  label: '🛡️ 침입 시나리오 (서버+경비+대기)', fn: templateBreach },
   { id: 'blank',   label: '⬜ 빈 맵 (외곽벽 없음)', fn: (p) => emptyMap(30, 20, p.floors[0].frame) },
 ];
 
