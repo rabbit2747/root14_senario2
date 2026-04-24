@@ -9,6 +9,7 @@ import AnnouncementManager from './announcement-manager/AnnouncementManager';
 import EduHtmlEditor from './edu-html-editor/EduHtmlEditor';
 import AuditLogViewer from './audit-log/AuditLogViewer';
 import LabScenarioManager from './lab-scenario-manager/LabScenarioManager';
+import AptMapMaker from './apt-map-maker/AptMapMaker';
 import EduProgressStats from './EduProgressStats';
 import WikiTermManager from './wiki-manager/WikiTermManager';
 import LevelTestManager from './level-test-manager/LevelTestManager';
@@ -30,6 +31,7 @@ const TABS = [
   { id: 'users',   label: '사용자 관리', Icon: User },
   { id: 'lab',     label: '실습 페이지', Icon: Chemistry },
   { id: 'labscenario', label: '랩 시나리오', Icon: Screen },
+  { id: 'aptmap',  label: 'APT 맵 메이커', Icon: Grid },
   { id: 'wiki',    label: '위키 관리',  Icon: Catalog },
   { id: 'leveltest', label: '레벨테스트', Icon: Education },
   { id: 'stats',   label: '교육 통계',  Icon: ChartBar },
@@ -91,6 +93,7 @@ function AdminContent() {
         {activeTab === 'users' && <UserManager requestVerify={verify.requestVerify} />}
         {activeTab === 'lab' && <EduHtmlEditor requestVerify={verify.requestVerify} />}
         {activeTab === 'labscenario' && <LabScenarioManager requestVerify={verify.requestVerify} />}
+        {activeTab === 'aptmap' && <AptMapMaker />}
         {activeTab === 'wiki' && <WikiTermManager requestVerify={verify.requestVerify} />}
         {activeTab === 'leveltest' && <LevelTestManager requestVerify={verify.requestVerify} />}
         {activeTab === 'stats' && <EduProgressStats requestVerify={verify.requestVerify} />}
