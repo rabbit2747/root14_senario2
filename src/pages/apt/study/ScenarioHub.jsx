@@ -142,14 +142,12 @@ export default function ScenarioHub() {
                 {scens.map(({ id, data }) => {
                   const isDone = completed.includes(id);
                   return (
-                    <button
+                    <div
                       key={id}
-                      onClick={() => unlocked && navigate(`/apt/${id}/scenario`)}
-                      disabled={!unlocked}
                       className={`group relative text-left rounded-xl overflow-hidden border transition-all duration-300 ${
                         unlocked
-                          ? 'border-white/10 hover:border-white/30 hover:scale-[1.02] cursor-pointer bg-gradient-to-br from-white/5 to-white/0'
-                          : 'border-white/5 opacity-50 cursor-not-allowed bg-black/40'
+                          ? 'border-white/10 hover:border-white/30 bg-gradient-to-br from-white/5 to-white/0'
+                          : 'border-white/5 opacity-50 bg-black/40'
                       }`}
                     >
                       <div className={`h-32 bg-gradient-to-br ${meta.accent} relative overflow-hidden`}>
@@ -177,8 +175,33 @@ export default function ScenarioHub() {
                         {data.durationMin && (
                           <div className="mt-3 text-xs text-gray-500">⏱ 약 {data.durationMin}분</div>
                         )}
+                        {/* 액션 버튼 2종 — 도트맵 탐험 + 바로 시나리오 */}
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => unlocked && navigate(`/apt/${id}/game`)}
+                            disabled={!unlocked}
+                            className={`px-2 py-2 rounded text-xs font-bold transition ${
+                              unlocked
+                                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:brightness-110 text-white cursor-pointer'
+                                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                            }`}
+                          >
+                            🎮 도트맵 탐험
+                          </button>
+                          <button
+                            onClick={() => unlocked && navigate(`/apt/${id}/scenario`)}
+                            disabled={!unlocked}
+                            className={`px-2 py-2 rounded text-xs font-bold transition ${
+                              unlocked
+                                ? 'bg-amber-500 hover:bg-amber-400 text-black cursor-pointer'
+                                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                            }`}
+                          >
+                            🎬 바로 시나리오
+                          </button>
+                        </div>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
 
