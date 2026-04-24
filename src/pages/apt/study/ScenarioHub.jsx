@@ -46,7 +46,7 @@ const LEVEL_STR_TO_NUM = {
 export default function ScenarioHub() {
   const navigate = useNavigate();
   const { userLevel, isLoggedIn } = useAuth();
-  const { completedSet, loading: progressLoading } = useAptProgress();
+  const { completedSet } = useAptProgress();
 
   const myLevelNum = useMemo(() => {
     if (!userLevel) return 1;
@@ -170,7 +170,9 @@ export default function ScenarioHub() {
                         <div className="text-xs text-gray-400 mb-1">{data.group || 'Unknown'}</div>
                         <div className="font-bold text-sm mb-2">{data.name || id}</div>
                         <div className="text-xs text-gray-500 line-clamp-2">
-                          {data.persona || '실제 APT 캠페인 — 1인칭 피해자/공격자 시점'}
+                          {typeof data.persona === 'string'
+                            ? data.persona
+                            : (data.persona?.setup || data.persona?.role || '실제 APT 캠페인 — 1인칭 공격자 시점')}
                         </div>
                         {data.durationMin && (
                           <div className="mt-3 text-xs text-gray-500">⏱ 약 {data.durationMin}분</div>
