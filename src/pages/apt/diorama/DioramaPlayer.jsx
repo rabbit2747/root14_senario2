@@ -8,7 +8,7 @@ import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette, ChromaticAberration, Noise, DepthOfField } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 
-import scenarioData from './data/c0024.scenario.json';
+import { useScenario } from './useScenario';
 import DioramaScene from './DioramaScene';
 import CameraRig from './CameraRig';
 import Hotspot from './Hotspot';
@@ -27,7 +27,7 @@ function findActiveCue(timeline, t) {
 export default function DioramaPlayer() {
   const { scenarioId = 'c0024' } = useParams();
   const navigate = useNavigate();
-  const scenario = scenarioData;
+  const scenario = useScenario(scenarioId);
 
   const [started, setStarted] = useState(false);
   const [t, setT] = useState(0);
