@@ -1,148 +1,90 @@
-// AptGame — DB에 저장된 관리자 편집 맵을 Phaser로 렌더
+// AptGame — Phaser.js 도트맵 게임 엔진 마운트 (PoC)
 //
-// 맵 소스: apt_maps 테이블 (관리자가 /admin "APT 맵 메이커" 탭에서 편집)
-// 맵 없음: 안내 화면 + 관리자에게 편집 유도
+// 목적: Gather.town 스타일 2D 탐험 → 작전 지점 도착 시 미션 시퀀스 트리거
+// 현재: 타일맵 에셋 없음 → 색상 블록으로 프로토타입 (사무실 배치)
+// TODO: 사용자 PNG 에셋 수집 후 Tiled로 map.json 제작 → loadTilemapTiledJSON
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Phaser from 'phaser';
-import { getAptMap } from '../../../api/apt-maps';
 
-const TS = 16;
-const SCALE = 2;
-const DISPLAY = TS * SCALE;
+const TILE = 32;
+const MAP_W = 20; // 20 * 32 = 640
+const MAP_H = 15; // 15 * 32 = 480
 
-class MapScene extends Phaser.Scene {
-  constructor() { super('map'); }
+// 맵 레이아웃 (0=바닥, 1=벽, 2=책상, 3=미션존)
+const LAYOUT = [
+  '11111111111111111111',
+  '10000000000000000031',
+  '10222000000000000001',
+  '10000000001111100001',
+  '10000000001000100001',
+  '10003000001000100001',
+  '10000000001000100001',
+  '10000000000000000001',
+  '10222000000002222001',
+  '10000000000000000001',
+  '10000003000000000001',
+  '10000000000000000001',
+  '10000000000000000001',
+  '10000000000000000001',
+  '11111111111111111111',
+];
 
-  init(data) { this.mapData = data.mapData; }
-
-  preload() {
-    this.load.spritesheet('room', '/apt-assets/Room_Builder_free_16x16.png', { frameWidth: TS, frameHeight: TS });
-    this.load.spritesheet('deco', '/apt-assets/Interiors_free_16x16.png', { frameWidth: TS, frameHeight: TS });
-    this.load.spritesheet('adam', '/apt-assets/Adam_16x16.png', { frameWidth: TS, frameHeight: TS });
-    this.load.spritesheet('alex', '/apt-assets/Alex_16x16.png', { frameWidth: TS, frameHeight: TS });
-    this.load.spritesheet('amelia', '/apt-assets/Amelia_16x16.png', { frameWidth: TS, frameHeight: TS });
-    this.load.spritesheet('bob', '/apt-assets/Bob_16x16.png', { frameWidth: TS, frameHeight: TS });
-  }
+class OfficeScene extends Phaser.Scene {
+  constructor() { super('office'); }
 
   create() {
-    const m = this.mapData;
-    this.obstacles = this.physics.add.staticGroup();
+    // 타일 그리기 (에셋 없이 Graphics)
+    const g = this.add.graphics();
     this.missionZones = [];
 
-    // 바닥
-    for (let y = 0; y < m.height; y++) {
-      for (let x = 0; x < m.width; x++) {
-        const frame = m.floor[y][x];
-        this.add.image(x * DISPLAY, y * DISPLAY, 'room', frame).setOrigin(0, 0).setScale(SCALE).setDepth(0);
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        const t = LAYOUT[y][x];
+        const px = x * TILE;
+        const py = y * TILE;
+        if (t === '1') { g.fillStyle(0x2a2a33); g.fillRect(px, py, TILE, TILE); g.lineStyle(1, 0x1a1a22); g.strokeRect(px, py, TILE, TILE); }
+        else if (t === '2') { g.fillStyle(0x8b6f3c); g.fillRect(px + 2, py + 2, TILE - 4, TILE - 4); }
+        else if (t === '3') { g.fillStyle(0xef4444); g.fillRect(px + 6, py + 6, TILE - 12, TILE - 12); this.missionZones.push({ x: px + TILE / 2, y: py + TILE / 2 }); }
+        else { g.fillStyle(0x1a1f2b); g.fillRect(px, py, TILE, TILE); }
       }
     }
-    // 벽
-    for (let y = 0; y < m.height; y++) {
-      for (let x = 0; x < m.width; x++) {
-        const frame = m.walls[y][x];
-        if (frame == null) continue;
-        this.add.image(x * DISPLAY, y * DISPLAY, 'room', frame).setOrigin(0, 0).setScale(SCALE).setDepth(5);
-        const body = this.add.rectangle(x * DISPLAY + DISPLAY / 2, y * DISPLAY + DISPLAY / 2, DISPLAY, DISPLAY);
-        this.physics.add.existing(body, true);
-        this.obstacles.add(body);
-      }
-    }
-    // 오브젝트
-    (m.objects || []).forEach((o) => {
-      const px = o.x * DISPLAY, py = o.y * DISPLAY;
-      this.add.image(px, py, o.sheet || 'deco', o.frame).setOrigin(0, 0).setScale(SCALE).setDepth(py + 100);
-      if (o.collide) {
-        const body = this.add.rectangle(px + DISPLAY / 2, py + DISPLAY / 2, DISPLAY * 0.9, DISPLAY * 0.9);
-        this.physics.add.existing(body, true);
-        this.obstacles.add(body);
-      }
-    });
-    // 미션존 마커
-    (m.missions || []).forEach((ms) => {
-      const cx = ms.x * DISPLAY + DISPLAY / 2;
-      const cy = ms.y * DISPLAY + DISPLAY / 2;
-      const mk = this.add.circle(cx, cy, 10, 0xef4444, 0.7).setStrokeStyle(2, 0xfca5a5).setDepth(2);
-      this.tweens.add({ targets: mk, alpha: { from: 0.4, to: 1 }, duration: 700, yoyo: true, repeat: -1 });
-      this.missionZones.push({ x: cx, y: cy });
-    });
 
-    // NPC
-    this.npcGroup = this.physics.add.staticGroup();
-    this.npcs = (m.npcs || []).map((n) => {
-      const cx = n.x * DISPLAY + DISPLAY / 2;
-      const cy = n.y * DISPLAY + DISPLAY / 2;
-      const s = this.physics.add.staticSprite(cx, cy, n.sprite, 0).setScale(SCALE);
-      s.body.setSize(12, 12).setOffset(2, 4); s.refreshBody();
-      const label = this.add.text(cx, cy - 24, n.name, {
-        fontSize: '10px', color: '#fbbf24', fontStyle: 'bold',
-        backgroundColor: 'rgba(0,0,0,0.6)', padding: { x: 3, y: 1 },
-      }).setOrigin(0.5).setDepth(1000);
-      return { ...n, x: cx, y: cy, sprite_obj: s, label };
-    });
+    // 플레이어 (도트 캐릭터 — 색상블록 PoC)
+    this.player = this.add.rectangle(TILE * 2 + TILE / 2, TILE * 7 + TILE / 2, TILE - 8, TILE - 8, 0x60a5fa);
+    this.physics.add.existing(this.player);
+    this.player.body.setCollideWorldBounds(true);
 
-    // 플레이어
-    const sx = m.start.x * DISPLAY + DISPLAY / 2;
-    const sy = m.start.y * DISPLAY + DISPLAY / 2;
-    this.player = this.physics.add.sprite(sx, sy, 'adam', 0).setScale(SCALE);
-    this.player.body.setSize(10, 10).setOffset(3, 6);
-    this.player.setCollideWorldBounds(true);
-    this.anims.create({ key: 'adam-down',  frames: [{ key: 'adam', frame: 0 }],  frameRate: 1 });
-    this.anims.create({ key: 'adam-right', frames: [{ key: 'adam', frame: 6 }],  frameRate: 1 });
-    this.anims.create({ key: 'adam-up',    frames: [{ key: 'adam', frame: 12 }], frameRate: 1 });
-    this.anims.create({ key: 'adam-left',  frames: [{ key: 'adam', frame: 18 }], frameRate: 1 });
-    this.player.anims.play('adam-down');
-
-    this.physics.add.collider(this.player, this.obstacles);
-    this.physics.add.collider(this.player, this.npcGroup);
-    this.npcs.forEach((n) => this.npcGroup.add(n.sprite_obj));
-
+    // 입력
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D');
-    this.eKey = this.input.keyboard.addKey('E');
 
+    // 미션존 근접 감지
     this.onMissionEnter = this.registry.get('onMissionEnter');
-    this.onNpcTalk = this.registry.get('onNpcTalk');
-
-    this.cameras.main.setBounds(0, 0, m.width * DISPLAY, m.height * DISPLAY);
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
   }
 
   update() {
+    const speed = 160;
     const b = this.player.body;
     let vx = 0, vy = 0;
-    const speed = 110;
     if (this.cursors.left.isDown || this.wasd.A.isDown) vx = -speed;
     if (this.cursors.right.isDown || this.wasd.D.isDown) vx = speed;
     if (this.cursors.up.isDown || this.wasd.W.isDown) vy = -speed;
     if (this.cursors.down.isDown || this.wasd.S.isDown) vy = speed;
     b.setVelocity(vx, vy);
-    if (Math.abs(vx) > Math.abs(vy)) this.player.anims.play(vx > 0 ? 'adam-right' : 'adam-left', true);
-    else if (vy !== 0) this.player.anims.play(vy > 0 ? 'adam-down' : 'adam-up', true);
 
-    this.player.setDepth(this.player.y + 1000);
-    this.npcs.forEach((n) => n.sprite_obj.setDepth(n.y + 1000));
-
-    for (const n of this.npcs) {
-      const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, n.x, n.y);
-      if (d < 50) {
-        const ePressed = Phaser.Input.Keyboard.JustDown(this.eKey);
-        if ((!n._hinted || ePressed) && this.onNpcTalk) {
-          n._hinted = true;
-          this.onNpcTalk({ id: `${n.x}-${n.y}`, name: n.name, line: n.line, emoji: '🧑' });
-          this.time.delayedCall(4500, () => { n._hinted = false; });
-        }
-      }
-    }
+    // 미션존 진입 체크
     for (const z of this.missionZones) {
-      const d = Phaser.Math.Distance.Between(this.player.x, this.player.y, z.x, z.y);
-      if (d < 30) {
+      const dx = this.player.x - z.x;
+      const dy = this.player.y - z.y;
+      if (Math.sqrt(dx * dx + dy * dy) < TILE * 0.7) {
         if (!z._triggered && this.onMissionEnter) {
           z._triggered = true;
           this.onMissionEnter(z);
+          this.time.delayedCall(3000, () => { z._triggered = false; });
         }
-      } else if (d > 80) z._triggered = false;
+      }
     }
   }
 }
@@ -152,41 +94,33 @@ export default function AptGame() {
   const navigate = useNavigate();
   const mountRef = useRef(null);
   const gameRef = useRef(null);
-  const [mapData, setMapData] = useState(null);
-  const [loadState, setLoadState] = useState('loading'); // loading|ready|missing|error
-  const [missionPrompt, setMissionPrompt] = useState(false);
-  const [dialogue, setDialogue] = useState(null);
+  const [currentMission, setCurrentMission] = useState(null);
 
   useEffect(() => {
-    getAptMap(campaignId).then(({ data, error }) => {
-      if (error) { setLoadState('error'); return; }
-      if (!data?.map_data) { setLoadState('missing'); return; }
-      setMapData(data.map_data);
-      setLoadState('ready');
-    });
-  }, [campaignId]);
+    if (!mountRef.current) return;
 
-  useEffect(() => {
-    if (loadState !== 'ready' || !mountRef.current || !mapData) return;
     const config = {
       type: Phaser.AUTO,
-      width: 800, height: 500,
+      width: MAP_W * TILE,
+      height: MAP_H * TILE,
       backgroundColor: '#0a0a0f',
       parent: mountRef.current,
       pixelArt: true,
-      physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
-      scene: [MapScene],
+      physics: {
+        default: 'arcade',
+        arcade: { gravity: { y: 0 }, debug: false },
+      },
+      scene: [OfficeScene],
     };
+
     const game = new Phaser.Game(config);
-    game.registry.set('onMissionEnter', () => setMissionPrompt(true));
-    game.registry.set('onNpcTalk', (d) => {
-      setDialogue(d);
-      setTimeout(() => setDialogue((cur) => (cur && cur.id === d.id ? null : cur)), 5000);
+    game.registry.set('onMissionEnter', (zone) => {
+      setCurrentMission({ zone, at: Date.now() });
     });
-    game.scene.start('map', { mapData });
     gameRef.current = game;
+
     return () => { game.destroy(true); };
-  }, [loadState, mapData]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
@@ -195,80 +129,54 @@ export default function AptGame() {
           <button onClick={() => navigate('/apt/scenarios')} className="text-xs text-gray-400 hover:text-white">
             ← 시나리오 허브
           </button>
-          <div className="text-xs text-gray-500 font-mono">{campaignId} · 탐험 모드</div>
+          <div className="text-xs text-gray-500 font-mono">{campaignId} · 탐험 모드 (PoC)</div>
         </div>
 
-        {loadState === 'loading' && (
-          <div className="text-center py-20 text-sm text-gray-400">맵 로딩 중…</div>
-        )}
-
-        {loadState === 'missing' && (
-          <div className="bg-white/5 border border-amber-500/30 rounded-xl p-8 text-center">
-            <div className="text-amber-400 text-4xl mb-3">🗺️</div>
-            <div className="text-lg font-bold mb-2">이 캠페인은 아직 맵이 없습니다</div>
-            <div className="text-sm text-gray-400 mb-5">
-              관리자가 <span className="text-amber-400 font-bold">/admin → APT 맵 메이커</span>에서<br />
-              {campaignId} 맵을 편집하면 즉시 반영됩니다.
-            </div>
-            <button
-              onClick={() => navigate(`/apt/${campaignId}/scenario`)}
-              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold rounded"
-            >
-              🎬 1인칭 시나리오로 바로 시작
-            </button>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+          {/* 게임 캔버스 */}
+          <div className="bg-black/50 border border-white/10 rounded-xl overflow-hidden flex items-center justify-center p-4">
+            <div ref={mountRef} />
           </div>
-        )}
 
-        {loadState === 'error' && (
-          <div className="text-center py-20 text-red-400">맵 로드 실패 — 네트워크 확인</div>
-        )}
+          {/* 사이드 패널 */}
+          <div className="space-y-4">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <h3 className="text-sm font-bold mb-2">🎮 조작</h3>
+              <div className="text-xs text-gray-400 space-y-1">
+                <div>WASD / 화살표: 이동</div>
+                <div>🔴 빨간 블록 = 미션존</div>
+                <div>책상 옆으로 가면 작전 시작</div>
+              </div>
+            </div>
 
-        {loadState === 'ready' && (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
-            <div className="relative bg-black/50 border border-white/10 rounded-xl overflow-hidden">
-              <div ref={mountRef} className="flex items-center justify-center" />
-              {dialogue && !missionPrompt && (
-                <div className="absolute left-1/2 bottom-6 -translate-x-1/2 max-w-md w-[90%] bg-black/90 border-2 border-amber-400 rounded-lg px-4 py-3 shadow-xl">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xl">{dialogue.emoji}</span>
-                    <span className="text-amber-400 font-bold text-sm">{dialogue.name}</span>
-                    <span className="ml-auto text-[10px] text-gray-500">E키로 재대화</span>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <h3 className="text-sm font-bold mb-2">📍 현재 미션</h3>
+              {currentMission ? (
+                <div className="text-xs">
+                  <div className="text-amber-400 font-bold mb-1">미션존 진입</div>
+                  <div className="text-gray-400">
+                    좌표 ({Math.round(currentMission.zone.x)}, {Math.round(currentMission.zone.y)})
                   </div>
-                  <div className="text-xs text-gray-200 leading-relaxed">{dialogue.line}</div>
+                  <button
+                    onClick={() => navigate(`/apt/${campaignId}/scenario`)}
+                    className="mt-3 w-full px-3 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded"
+                  >
+                    ▶ 시나리오 시작
+                  </button>
                 </div>
-              )}
-              {missionPrompt && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                  <div className="bg-[#1a1a22] border-2 border-red-500 rounded-xl p-6 max-w-sm w-[90%] shadow-2xl">
-                    <div className="text-red-400 text-xs font-bold mb-2">▶ 작전 지점 도달</div>
-                    <div className="text-lg font-bold mb-3">시나리오를 시작할까요?</div>
-                    <div className="text-xs text-gray-400 mb-5">탐험을 중단하고 1인칭 공격자 시점으로 전환됩니다.</div>
-                    <div className="flex gap-2">
-                      <button onClick={() => setMissionPrompt(false)} className="flex-1 px-3 py-2 bg-white/5 border border-white/10 text-xs font-bold rounded">좀 더 탐험</button>
-                      <button onClick={() => navigate(`/apt/${campaignId}/scenario`)} className="flex-1 px-3 py-2 bg-red-500 text-white text-xs font-bold rounded">▶ 시나리오 시작</button>
-                    </div>
-                  </div>
-                </div>
+              ) : (
+                <div className="text-xs text-gray-500">미션존에 접근하세요</div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <h3 className="text-sm font-bold mb-2">🎮 조작</h3>
-                <div className="text-xs text-gray-400 space-y-1">
-                  <div>WASD / 화살표: 이동</div>
-                  <div>E: 동료 대화 재활성</div>
-                  <div>🔴 붉은 마커 = 미션존</div>
-                </div>
-              </div>
-              <div className="bg-white/5 border border-white/5 rounded-xl p-3">
-                <div className="text-[10px] text-gray-500">
-                  타일: <a href="https://limezu.itch.io/" target="_blank" rel="noreferrer" className="underline">LimeZu Modern Interiors</a>
-                </div>
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+              <div className="text-xs text-amber-400 font-bold mb-1">🚧 PoC 단계</div>
+              <div className="text-xs text-gray-400 leading-relaxed">
+                타일맵 에셋 수집 후 Tiled 포맷으로 교체 예정. 현재는 색상블록 프로토타입.
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
