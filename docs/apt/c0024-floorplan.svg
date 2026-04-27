@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" font-family="-apple-system,sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#020617"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"/>
+    </marker>
+    <pattern id="floor" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="#1e293b"/>
+      <path d="M 0 10 H 20 M 10 0 V 20" stroke="#334155" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="800" fill="url(#bg2)"/>
+
+  <!-- 헤더 -->
+  <text x="40" y="40" font-size="22" font-weight="800" fill="#e2e8f0">C0024 디오라마 평면도 (Top-Down) + 카메라 위치</text>
+  <text x="40" y="62" font-size="13" fill="#64748b">월드 단위: 1u = 1m · 디오라마 박스: 24m × 16m × 9m</text>
+
+  <!-- 평면도 영역 (월드 X = -12~12 → SVG 100~1180, Z = -8~8 → SVG 100~700) -->
+  <g transform="translate(640,400)">
+    <!-- 좌표축 가이드 -->
+    <line x1="-540" y1="0" x2="540" y2="0" stroke="#1e293b" stroke-dasharray="2,4"/>
+    <line x1="0" y1="-300" x2="0" y2="300" stroke="#1e293b" stroke-dasharray="2,4"/>
+    <text x="540" y="-6" font-size="10" fill="#475569" text-anchor="end">+X</text>
+    <text x="-6" y="-300" font-size="10" fill="#475569" text-anchor="end">-Z(앞)</text>
+    <text x="-6" y="306" font-size="10" fill="#475569" text-anchor="end">+Z(뒤)</text>
+
+    <!-- ── 디오라마 외곽 (24m × 16m → 720 × 480 px @ 30px/m) -->
+    <rect x="-360" y="-240" width="720" height="480" fill="url(#floor)" stroke="#475569" stroke-width="2"/>
+
+    <!-- ── 구역 분할 -->
+    <!-- 외부 입구 (x:-12~-7, z:-8~8) -->
+    <rect x="-360" y="-240" width="150" height="480" fill="#0f172a" stroke="#334155" stroke-dasharray="3,3"/>
+    <text x="-285" y="-220" font-size="10" fill="#64748b" text-anchor="middle" font-weight="700">외부 입구</text>
+
+    <!-- 로비 (x:-7~-2, z:-4~4) -->
+    <rect x="-210" y="-120" width="150" height="240" fill="#1e293b" stroke="#475569"/>
+    <text x="-135" y="-100" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="700">로비 / 보안실</text>
+
+    <!-- 사무실 (x:-2~6, z:-4~4) -->
+    <rect x="-60" y="-120" width="240" height="240" fill="#1e293b" stroke="#475569"/>
+    <text x="60" y="-100" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="700">사무실 (PC×6)</text>
+
+    <!-- 책상들 (간략) -->
+    <g fill="#475569">
+      <rect x="-40" y="-80" width="20" height="14"/><rect x="-40" y="-50" width="20" height="14"/>
+      <rect x="0"   y="-80" width="20" height="14"/><rect x="0"   y="-50" width="20" height="14"/>
+      <rect x="40"  y="-80" width="20" height="14"/><rect x="40"  y="-50" width="20" height="14"/>
+    </g>
+    <!-- 관리자 자리 (강조) -->
+    <rect x="-100" y="-30" width="24" height="18" fill="#7c3aed" stroke="#a855f7"/>
+    <text x="-88" y="-2" font-size="9" fill="#ddd6fe" text-anchor="middle">관리자 PC</text>
+
+    <!-- 복도 (x:6~7) -->
+    <rect x="180" y="-240" width="30" height="480" fill="#0f172a" stroke="#334155"/>
+    <text x="195" y="0" font-size="10" fill="#64748b" text-anchor="middle" font-weight="700" transform="rotate(-90 195 0)">복도</text>
+
+    <!-- 서버실 (x:7~12, z:-4~2) -->
+    <rect x="210" y="-120" width="150" height="180" fill="#1e293b" stroke="#475569"/>
+    <text x="285" y="-100" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="700">서버실</text>
+    <!-- 서버랙 4대 -->
+    <g fill="#0891b2">
+      <rect x="225" y="-70" width="14" height="40"/>
+      <rect x="255" y="-70" width="14" height="40"/>
+      <rect x="285" y="-70" width="14" height="40"/>
+      <rect x="315" y="-70" width="14" height="40"/>
+    </g>
+
+    <!-- 모니터링 룸 (x:7~12, z:2~8) -->
+    <rect x="210" y="60" width="150" height="180" fill="#1e293b" stroke="#475569"/>
+    <text x="285" y="80" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="700">다크웹 모니터</text>
+    <rect x="245" y="120" width="80" height="40" fill="#581c87" stroke="#a855f7"/>
+    <text x="285" y="145" font-size="9" fill="#e9d5ff" text-anchor="middle">다크웹 화면</text>
+
+    <!-- ═══════════════════════════════════ 카메라 위치 마커 ═══ -->
+    <!-- pos=(x,y,z), SVG: 30px/m, sx = x*30, sy = z*30 (y는 평면에선 무시) -->
+    <g>
+      <!-- 1. wide_outside (16, 9, 16) -->
+      <g>
+        <circle cx="480" cy="480" r="10" fill="#1e40af" stroke="#dbeafe" stroke-width="2"/>
+        <text x="480" y="484" font-size="10" fill="#dbeafe" text-anchor="middle" font-weight="700">1</text>
+        <text x="480" y="500" font-size="9" fill="#bfdbfe" text-anchor="middle">wide_outside (16,9,16)</text>
+        <line x1="480" y1="480" x2="0" y2="60" stroke="#1e40af" stroke-width="1" marker-end="url(#arrow)" opacity="0.7"/>
+      </g>
+
+      <!-- 2. dolly_lobby (6, 2.5, 8) -->
+      <g>
+        <circle cx="180" cy="240" r="10" fill="#1d4ed8" stroke="#dbeafe" stroke-width="2"/>
+        <text x="180" y="244" font-size="10" fill="#dbeafe" text-anchor="middle" font-weight="700">2</text>
+        <text x="180" y="260" font-size="9" fill="#bfdbfe" text-anchor="middle">dolly_lobby</text>
+        <line x1="180" y1="240" x2="-60" y2="60" stroke="#1d4ed8" stroke-width="1" marker-end="url(#arrow)" opacity="0.7"/>
+      </g>
+
+      <!-- 3. zoom_admin_pc (-3, 1.6, 3) -->
+      <g>
+        <circle cx="-90" cy="90" r="10" fill="#7c3aed" stroke="#ede9fe" stroke-width="2"/>
+        <text x="-90" y="94" font-size="10" fill="#ede9fe" text-anchor="middle" font-weight="700">3</text>
+        <text x="-90" y="110" font-size="9" fill="#ddd6fe" text-anchor="middle">zoom_admin_pc</text>
+        <line x1="-90" y1="90" x2="-120" y2="15" stroke="#7c3aed" stroke-width="1" marker-end="url(#arrow)" opacity="0.7"/>
+      </g>
+
+      <!-- 4. tilt_corridor (-1, 4, 6) -->
+      <g>
+        <circle cx="-30" cy="180" r="10" fill="#0891b2" stroke="#cffafe" stroke-width="2"/>
+        <text x="-30" y="184" font-size="10" fill="#cffafe" text-anchor="middle" font-weight="700">4</text>
+        <text x="-30" y="200" font-size="9" fill="#a5f3fc" text-anchor="middle">tilt_corridor</text>
+        <line x1="-30" y1="180" x2="90" y2="-60" stroke="#0891b2" stroke-width="1" marker-end="url(#arrow)" opacity="0.7"/>
+      </g>
+
+      <!-- 5. dolly_server (4, 2, -4) -->
+      <g>
+        <circle cx="120" cy="-120" r="10" fill="#0e7490" stroke="#cffafe" stroke-width="2"/>
+        <text x="120" y="-116" font-size="10" fill="#cffafe" text-anchor="middle" font-weight="700">5</text>
+        <text x="120" y="-100" font-size="9" fill="#a5f3fc" text-anchor="middle">dolly_server</text>
+        <line x1="120" y1="-120" x2="180" y2="-180" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)" opacity="0.7"/>
+      </g>
+
+      <!-- 6. close_rack (5.5, 1.4, -5) -->
+      <g>
+        <circle cx="165" cy="-150" r="10" fill="#0369a1" stroke="#dbeafe" stroke-width="2"/>
+        <text x="165" y="-146" font-size="10" fill="#dbeafe" text-anchor="middle" font-weight="700">6</text>
+        <text x="180" y="-165" font-size="9" fill="#bfdbfe">close_rack</text>
+        <line x1="165" y1="-150" x2="195" y2="-180" stroke="#0369a1" stroke-width="1" marker-end="url(#arrow)" opacity="0.7"/>
+      </g>
+
+      <!-- 7. wide_darkweb (12, 3, -10... 평면이 안되니 z=-10 → 평면 -300) -->
+      <g>
+        <circle cx="360" cy="-300" r="10" fill="#581c87" stroke="#f3e8ff" stroke-width="2"/>
+        <text x="360" y="-296" font-size="10" fill="#f3e8ff" text-anchor="middle" font-weight="700">7</text>
+        <text x="360" y="-280" font-size="9" fill="#e9d5ff" text-anchor="middle">wide_darkweb (외곽)</text>
+        <line x1="360" y1="-300" x2="120" y2="-120" stroke="#581c87" stroke-width="1" marker-end="url(#arrow)" opacity="0.7"/>
+      </g>
+
+      <!-- 8. pull_back_wide (20, 12, 20) → 평면 (600,600) — 박스 밖 -->
+      <g>
+        <circle cx="540" cy="280" r="10" fill="#3730a3" stroke="#e0e7ff" stroke-width="2"/>
+        <text x="540" y="284" font-size="10" fill="#e0e7ff" text-anchor="middle" font-weight="700">8</text>
+        <text x="540" y="300" font-size="9" fill="#c7d2fe" text-anchor="middle">pull_back_wide</text>
+        <line x1="540" y1="280" x2="0" y2="60" stroke="#3730a3" stroke-width="1" marker-end="url(#arrow)" opacity="0.7"/>
+      </g>
+    </g>
+
+    <!-- 카메라 경로 (1→8 순서 점선) -->
+    <path d="M 480 480 L 180 240 L -90 90 L -30 180 L 120 -120 L 165 -150 L 360 -300 L 540 280"
+          fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/>
+
+    <!-- 핫스팟 -->
+    <circle cx="-90" cy="90" r="14" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" opacity="0.8"/>
+    <circle cx="195" cy="-150" r="14" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2" opacity="0.8"/>
+  </g>
+
+  <!-- 범례 -->
+  <g transform="translate(40,720)" font-size="11" fill="#cbd5e1">
+    <rect x="0" y="0" width="14" height="14" fill="#7c3aed"/><text x="20" y="11">관리자 PC (T1078 시작점)</text>
+    <rect x="180" y="0" width="14" height="14" fill="#0891b2"/><text x="200" y="11">서버랙 (T1041/T1486)</text>
+    <rect x="360" y="0" width="14" height="14" fill="#581c87"/><text x="380" y="11">다크웹 모니터 (결말씬)</text>
+    <circle cx="540" cy="7" r="7" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="2,2"/><text x="555" y="11">핫스팟</text>
+    <line x1="660" y1="7" x2="690" y2="7" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,4"/><text x="700" y="11">카메라 경로 (1→8)</text>
+  </g>
+</svg>
