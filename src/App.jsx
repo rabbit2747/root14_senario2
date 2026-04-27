@@ -33,6 +33,7 @@ const VictimScenario          = lazy(() => import('./pages/apt/study/VictimScena
 const ScenarioHub             = lazy(() => import('./pages/apt/study/ScenarioHub'));
 const AptGame                 = lazy(() => import('./pages/apt/study/AptGame'));
 const DioramaPlayer           = lazy(() => import('./pages/apt/diorama/DioramaPlayer'));
+const DioramaPlayerInk        = lazy(() => import('./pages/apt/diorama/DioramaPlayerInk'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -139,6 +140,7 @@ function App() {
             <Route path="/apt/scenarios" element={<ScenarioHub />} />
             <Route path="/apt/:campaignId/game" element={<AptGame />} />
             <Route path="/apt/diorama/:scenarioId" element={<DioramaPlayer />} />
+            <Route path="/apt/diorama/:scenarioId/ink" element={<DioramaPlayerInk />} />
             <Route path="/apt/:campaignId" element={<AptDetailPage />} />
             <Route path="/apt/:campaignId/study" element={<AptStudyPage />} />
             <Route path="/apt/preview-density" element={<DensityPreview />} />
