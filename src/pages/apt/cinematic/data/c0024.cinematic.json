@@ -11,9 +11,11 @@
   "clips": [
     {
       "id": "intro",
-      "src": "/cinematic/c0024/01-night-skyline.mp4",
-      "fallback": { "type": "gradient", "colors": ["#020617", "#1e293b", "#0c4a6e"], "motion": "slow-pan-up", "icon": "🏙️" },
-      "duration": 6,
+      "type": "voxel",
+      "scene": "city-night-wide",
+      "cameraPreset": "slow-pan-up",
+      "glb": "/voxels/c0024-intro-city.glb",
+      "duration": 8,
       "subtitle": "23:47.  서울.  나는 OO은행 본사 앞에 있었다.",
       "next": "lobby"
     },

@@ -1,10 +1,12 @@
 /**
- * ClipPlayer — 영상 또는 fallback 그라디언트 렌더
- * - <video>로 재생 시도. onError·404면 fallback motion 그라디언트
- * - duration prop으로 fallback에서도 자동 onEnded 호출
- * - 21:9 letterbox는 부모 컨테이너에서 처리
+ * ClipPlayer — 영상 / 복셀 / fallback 그라디언트 디스패처
+ * - clip.type === 'voxel'  → VoxelClip (Three.js)
+ * - clip.src 있고 video 로드 성공 → <video>
+ * - 둘 다 실패 → CSS 그라디언트 모션 fallback
  */
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+
+const VoxelClip = lazy(() => import('./VoxelClip'));
 
 const MOTIONS = {
   'slow-pan-up':    { key: 'panUp',     dur: '12s' },
@@ -58,6 +60,16 @@ export default function ClipPlayer({ clip, playing, onEnded, fade = 1 }) {
   }, [videoFailed, playing, clip?.id, clip?.duration, onEnded]);
 
   if (!clip) return null;
+
+  // ── 복셀 클립이면 VoxelClip으로 위임 ──
+  if (clip.type === 'voxel') {
+    return (
+      <Suspense fallback={<div style={{ position: 'absolute', inset: 0, background: '#020617' }}/>}>
+        <VoxelClip clip={clip} playing={playing} onEnded={onEnded} fade={fade} />
+      </Suspense>
+    );
+  }
+
   const fb = clip.fallback || { type: 'gradient', colors: ['#020617', '#1e293b'], motion: 'slow-pan-up', icon: '·' };
   const motion = MOTIONS[fb.motion] || MOTIONS['slow-pan-up'];
 
