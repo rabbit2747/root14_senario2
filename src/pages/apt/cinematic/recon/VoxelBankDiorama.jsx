@@ -1,46 +1,29 @@
 /**
- * VoxelBankDiorama — InstancedMesh 기반 OO은행 야경 디오라마
- * - 메인 빌딩 InstancedMesh (외벽 블록 ~3000개)
- * - 창문 발광 InstancedMesh (~500개, 무작위 점등)
- * - 주변 도시 InstancedMesh (~1500개)
- * - 자동 오빗 카메라
+ * VoxelBankDiorama — InstancedMesh 야경 디오라마 (디테일 업그레이드)
+ * 추가: 1F 로비 통유리, 정문 회전문, 좌우 ATM, OO BANK 간판,
+ *       돌계단, 보도블럭, 가로수 voxel
  */
-import { useEffect, useMemo, useRef } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
-import * as THREE from 'three';
+import { useMemo } from 'react';
+import { rng, VoxelInstances, AutoOrbit } from '../voxel/shared';
 
-const dummy = new THREE.Object3D();
-const tmpColor = new THREE.Color();
-
-// 시드 RNG
-function rng(seed) {
-  let s = seed;
-  return () => {
-    s = (s * 1103515245 + 12345) & 0x7fffffff;
-    return s / 0x7fffffff;
-  };
-}
-
-// ── 1. 은행 본체 빌딩 외벽 데이터 생성 ─────────
+// ── 1. 은행 본체 외벽 셸 ─────────────────────
 function buildBankExterior() {
-  const data = []; // {x, y, z, color}
+  const data = [];
   const W = 8, D = 8, H = 28;
-  const facadeColor = '#1f2937';
-  const accentColor = '#374151';
+  const facade = '#1f2937';
+  const accent = '#374151';
 
-  for (let y = 0; y < H; y++) {
+  for (let y = 1; y < H; y++) { // 1F는 통유리(아래에서 별도 처리)
     for (let x = -W/2; x < W/2; x++) {
       for (let z = -D/2; z < D/2; z++) {
-        // 외벽만 (셸)
         const onEdge =
           x === -W/2 || x === W/2 - 1 ||
           z === -D/2 || z === D/2 - 1 ||
-          y === 0 || y === H - 1;
+          y === H - 1;
         if (!onEdge) continue;
-
-        // 5층 단위로 어두운 라인
+        // 5층 단위 어두운 코니스
         const isFloorLine = y % 5 === 0;
-        const c = isFloorLine ? '#0f172a' : (y % 2 === 0 ? facadeColor : accentColor);
+        const c = isFloorLine ? '#0f172a' : (y % 2 === 0 ? facade : accent);
         data.push({ x, y, z, color: c });
       }
     }
@@ -48,25 +31,159 @@ function buildBankExterior() {
   return data;
 }
 
-// ── 2. 창문 (발광 큐브) ────────────────────
+// ── 2. 1층 로비 통유리 + 기둥 ────────────────
+function buildLobby() {
+  const data = [];
+  const W = 8, D = 8;
+  // 모서리 4기둥
+  for (let y = 0; y < 4; y++) {
+    data.push({ x: -W/2, y, z: -D/2, color: '#0f172a' });
+    data.push({ x: W/2 - 1, y, z: -D/2, color: '#0f172a' });
+    data.push({ x: -W/2, y, z: D/2 - 1, color: '#0f172a' });
+    data.push({ x: W/2 - 1, y, z: D/2 - 1, color: '#0f172a' });
+  }
+  // 1층 통유리 (전·후·좌·우)
+  for (let y = 0; y < 4; y++) {
+    // 전면 (z = D/2 - 1)
+    for (let x = -W/2 + 1; x < W/2 - 1; x++) {
+      data.push({ x, y, z: D/2 - 1, color: '#06b6d4' });
+    }
+    // 후면
+    for (let x = -W/2 + 1; x < W/2 - 1; x++) {
+      data.push({ x, y, z: -D/2, color: '#0e7490' });
+    }
+    // 측면
+    for (let z = -D/2 + 1; z < D/2 - 1; z++) {
+      data.push({ x: -W/2, y, z, color: '#0e7490' });
+      data.push({ x: W/2 - 1, y, z, color: '#0e7490' });
+    }
+  }
+  // 1층 천장 보더
+  for (let x = -W/2; x < W/2; x++) {
+    data.push({ x, y: 4, z: D/2 - 1, color: '#1f2937' });
+    data.push({ x, y: 4, z: -D/2, color: '#1f2937' });
+  }
+  for (let z = -D/2; z < D/2; z++) {
+    data.push({ x: -W/2, y: 4, z, color: '#1f2937' });
+    data.push({ x: W/2 - 1, y: 4, z, color: '#1f2937' });
+  }
+  return data;
+}
+
+// ── 3. 정문 (회전문 — 4사분원 박스) ──────────
+function buildEntrance() {
+  const data = [];
+  // 정문 상단 캐노피
+  for (let x = -2; x <= 1; x++) {
+    data.push({ x, y: 3, z: 5, color: '#fbbf24' });
+  }
+  // 정문 좌·우 프레임
+  for (let y = 0; y < 3; y++) {
+    data.push({ x: -2, y, z: 4, color: '#27272a' });
+    data.push({ x: 1, y, z: 4, color: '#27272a' });
+  }
+  // 회전문 — 십자 4분 (윗부분)
+  data.push({ x: -1, y: 1, z: 4, color: '#06b6d4' });
+  data.push({ x: 0, y: 1, z: 4, color: '#06b6d4' });
+  data.push({ x: -1, y: 2, z: 4, color: '#06b6d4' });
+  data.push({ x: 0, y: 2, z: 4, color: '#06b6d4' });
+  // 입구 발판
+  for (let x = -3; x <= 2; x++) {
+    for (let z = 4; z <= 6; z++) {
+      data.push({ x, y: -0.4, z, color: '#94a3b8' });
+    }
+  }
+  // 계단 한 단
+  for (let x = -3; x <= 2; x++) {
+    data.push({ x, y: -0.7, z: 6, color: '#64748b' });
+  }
+  return data;
+}
+
+// ── 4. ATM 박스 (좌·우 1대씩) ────────────────
+function buildATMs() {
+  const data = [];
+  const positions = [{ x: -5, z: 5 }, { x: 4, z: 5 }];
+  positions.forEach(({ x, z }) => {
+    // 본체
+    for (let dy = 0; dy < 2; dy++) {
+      data.push({ x, y: dy, z, color: '#1e293b' });
+    }
+    // 화면 발광
+    data.push({ x, y: 1.5, z: z + 0.5, color: '#22c55e', emissive: true });
+  });
+  return data;
+}
+
+// ── 5. OO BANK 간판 ───────────────────────────
+function buildSignage() {
+  const data = [];
+  // O O 두 글자를 voxel로 표현 (5x5 ring × 2)
+  // 좌측 O (x: -3 ~ -1)
+  const oPattern = [
+    [0,1,1,1,0],
+    [1,0,0,0,1],
+    [1,0,0,0,1],
+    [1,0,0,0,1],
+    [0,1,1,1,0],
+  ];
+  // y는 5층 정도 (위쪽 빌딩 외벽에 부착)
+  const baseY = 5;
+  oPattern.forEach((row, ri) => {
+    row.forEach((cell, ci) => {
+      if (cell) {
+        // 좌측 O
+        data.push({ x: -3.5 + ci * 0.9, y: baseY + (4 - ri) * 0.9, z: 4.05, color: '#000', emissive: true, emissiveColor: '#fbbf24' });
+        // 우측 O
+        data.push({ x: 0 + ci * 0.9, y: baseY + (4 - ri) * 0.9, z: 4.05, color: '#000', emissive: true, emissiveColor: '#fbbf24' });
+      }
+    });
+  });
+  return data;
+}
+
+// ── 6. 가로수 ────────────────────────────────
+function buildTrees() {
+  const data = [];
+  const r = rng(123);
+  const positions = [
+    { x: -8, z: 6 }, { x: 7, z: 6 },
+    { x: -10, z: 8 }, { x: 9, z: 8 },
+    { x: -8, z: -8 }, { x: 7, z: -8 },
+  ];
+  positions.forEach(({ x, z }) => {
+    // 줄기
+    data.push({ x, y: 0, z, color: '#78350f' });
+    data.push({ x, y: 1, z, color: '#78350f' });
+    // 잎 (복셀 구체)
+    const leafColor = r() > 0.5 ? '#16a34a' : '#15803d';
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dz = -1; dz <= 1; dz++) {
+        data.push({ x: x + dx, y: 2, z: z + dz, color: leafColor });
+      }
+    }
+    data.push({ x, y: 3, z, color: leafColor });
+  });
+  return data;
+}
+
+// ── 7. 창문 (발광) ─────────────────────────
 function buildWindows() {
-  const data = []; // {x, y, z, color}
+  const data = [];
   const r = rng(7);
   const W = 8, D = 8, H = 28;
   const colors = ['#fbbf24', '#fde68a', '#3b82f6', '#fb923c', '#facc15'];
 
-  for (let y = 1; y < H - 1; y++) {
-    if (y % 2 === 0) continue; // 홀수층만 창문
+  for (let y = 5; y < H - 1; y++) {
+    if (y % 2 === 0) continue;
     for (let x = -W/2 + 1; x < W/2 - 1; x++) {
       for (let z = -D/2 + 1; z < D/2 - 1; z++) {
-        // 외벽 안쪽 한 줄만
         const onWall =
           (x === -W/2 + 1 || x === W/2 - 2) ||
           (z === -D/2 + 1 || z === D/2 - 2);
         if (!onWall) continue;
-        if (r() > 0.45) continue; // 절반 정도만 점등
+        if (r() > 0.45) continue;
         const c = colors[Math.floor(r() * colors.length)];
-        // 외벽 살짝 바깥으로
         let dx = 0, dz = 0;
         if (x === -W/2 + 1) dx = -0.55;
         if (x === W/2 - 2)  dx = 0.55;
@@ -79,57 +196,47 @@ function buildWindows() {
   return data;
 }
 
-// ── 3. 주변 도시 ───────────────────────────
+// ── 8. 주변 도시 ─────────────────────────────
 function buildSurrounding() {
   const data = [];
   const r = rng(42);
   const palette = ['#374151', '#1f2937', '#475569', '#334155'];
-
-  // 4사분면에 작은 빌딩들 배치
   const positions = [
     { cx: -16, cz: -16 }, { cx: -16, cz: 16 },
     { cx: 16, cz: -16 },  { cx: 16, cz: 16 },
     { cx: -22, cz: 0 },   { cx: 22, cz: 0 },
     { cx: 0, cz: -22 },   { cx: 0, cz: 22 },
-    { cx: -12, cz: -22 }, { cx: 12, cz: -22 },
     { cx: -22, cz: -12 }, { cx: 22, cz: -12 },
     { cx: -22, cz: 12 },  { cx: 22, cz: 12 },
-    { cx: -12, cz: 22 },  { cx: 12, cz: 22 },
   ];
-
   positions.forEach(({ cx, cz }) => {
     const w = 2 + Math.floor(r() * 3);
     const d = 2 + Math.floor(r() * 3);
     const h = 4 + Math.floor(r() * 12);
-    const baseColor = palette[Math.floor(r() * palette.length)];
+    const c = palette[Math.floor(r() * palette.length)];
     for (let y = 0; y < h; y++) {
       for (let x = -w; x <= w; x++) {
         for (let z = -d; z <= d; z++) {
           if (Math.abs(x) === w || Math.abs(z) === d || y === 0 || y === h - 1) {
-            data.push({ x: cx + x, y, z: cz + z, color: baseColor });
+            data.push({ x: cx + x, y, z: cz + z, color: c });
           }
         }
       }
     }
   });
-
   return data;
 }
 
-// ── 4. 작은 창문(주변 도시) ────────────────
 function buildSurroundingWindows() {
   const data = [];
   const r = rng(99);
   const colors = ['#fbbf24', '#fde68a', '#3b82f6', '#fb923c'];
-
-  // 빌딩별 무작위 창문
   const positions = [
     { cx: -16, cz: -16 }, { cx: -16, cz: 16 },
     { cx: 16, cz: -16 },  { cx: 16, cz: 16 },
     { cx: -22, cz: 0 },   { cx: 22, cz: 0 },
     { cx: 0, cz: -22 },   { cx: 0, cz: 22 },
     { cx: -22, cz: -12 }, { cx: 22, cz: -12 },
-    { cx: -22, cz: 12 },  { cx: 22, cz: 12 },
   ];
   positions.forEach(({ cx, cz }) => {
     for (let i = 0; i < 12; i++) {
@@ -143,111 +250,89 @@ function buildSurroundingWindows() {
   return data;
 }
 
-// ── 5. 도로 ───────────────────────────────
 function buildStreets() {
   const data = [];
-  const grayDark = '#0a0e1a';
-  // 십자 도로
   for (let x = -28; x <= 28; x++) {
-    for (let z = -2; z <= 2; z++) data.push({ x, y: -0.4, z, color: grayDark });
+    for (let z = -2; z <= 2; z++) data.push({ x, y: -0.4, z, color: '#0a0e1a' });
   }
   for (let z = -28; z <= 28; z++) {
-    for (let x = -2; x <= 2; x++) data.push({ x, y: -0.4, z, color: grayDark });
+    for (let x = -2; x <= 2; x++) data.push({ x, y: -0.4, z, color: '#0a0e1a' });
+  }
+  // 보도블럭 (은행 앞)
+  for (let x = -7; x <= 6; x++) {
+    for (let z = 5; z <= 9; z++) data.push({ x, y: -0.45, z, color: '#374151' });
   }
   return data;
 }
 
 // ────────────────────────────────────────────
-// InstancedMesh 컴포넌트
-// ────────────────────────────────────────────
-function VoxelInstances({ data, emissive = false, size = 1 }) {
-  const ref = useRef();
-  useEffect(() => {
-    if (!ref.current) return;
-    data.forEach((v, i) => {
-      dummy.position.set(v.x, v.y, v.z);
-      dummy.scale.setScalar(size);
-      dummy.updateMatrix();
-      ref.current.setMatrixAt(i, dummy.matrix);
-      ref.current.setColorAt(i, tmpColor.set(v.color));
-    });
-    ref.current.instanceMatrix.needsUpdate = true;
-    if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
-  }, [data, size]);
-
-  return (
-    <instancedMesh ref={ref} args={[null, null, data.length]} castShadow receiveShadow>
-      <boxGeometry args={[1, 1, 1]} />
-      {emissive ? (
-        <meshStandardMaterial flatShading vertexColors emissive="#ffffff" emissiveIntensity={1.4} />
-      ) : (
-        <meshStandardMaterial flatShading vertexColors roughness={0.7} metalness={0.1} />
-      )}
-    </instancedMesh>
-  );
-}
-
-// 자동 오빗 카메라
-function AutoOrbit({ speed = 0.05, radius = 38, height = 22, target = [0, 8, 0] }) {
-  const { camera } = useThree();
-  useFrame((state) => {
-    const t = state.clock.elapsedTime * speed;
-    camera.position.set(Math.sin(t) * radius, height, Math.cos(t) * radius);
-    camera.lookAt(target[0], target[1], target[2]);
-  });
-  return null;
-}
-
-// ────────────────────────────────────────────
-// 메인 디오라마
-// ────────────────────────────────────────────
 export default function VoxelBankDiorama() {
-  const bankExterior = useMemo(buildBankExterior, []);
-  const bankWindows  = useMemo(buildWindows, []);
+  const exterior     = useMemo(buildBankExterior, []);
+  const lobby        = useMemo(buildLobby, []);
+  const entrance     = useMemo(buildEntrance, []);
+  const atms         = useMemo(buildATMs, []);
+  const signage      = useMemo(buildSignage, []);
+  const trees        = useMemo(buildTrees, []);
+  const windows      = useMemo(buildWindows, []);
   const surrounding  = useMemo(buildSurrounding, []);
-  const surroundingWindows = useMemo(buildSurroundingWindows, []);
+  const surrWindows  = useMemo(buildSurroundingWindows, []);
   const streets      = useMemo(buildStreets, []);
 
-  const totalVoxels = bankExterior.length + bankWindows.length + surrounding.length + surroundingWindows.length + streets.length;
+  // emissive 분리
+  const lobbyEmissive = lobby.filter((d) => ['#06b6d4','#0e7490'].includes(d.color));
+  const lobbySolid    = lobby.filter((d) => !['#06b6d4','#0e7490'].includes(d.color));
+
+  const entranceEmissive = entrance.filter((d) => d.color === '#06b6d4' || d.color === '#fbbf24');
+  const entranceSolid    = entrance.filter((d) => d.color !== '#06b6d4' && d.color !== '#fbbf24');
+
+  const atmEmissive = atms.filter((d) => d.emissive);
+  const atmSolid    = atms.filter((d) => !d.emissive);
 
   return (
     <>
       <fog attach="fog" args={['#020617', 28, 90]} />
-
-      {/* 환경광 */}
       <ambientLight intensity={0.15} color="#1e3a8a" />
       <directionalLight position={[20, 30, 20]} intensity={0.4} color="#dbeafe" castShadow />
-      {/* 메인 빌딩 강조 광 */}
       <pointLight position={[0, 30, 0]} intensity={20} color="#3b82f6" distance={40} decay={2} />
-      <pointLight position={[0, 10, 12]} intensity={3} color="#fbbf24" distance={10} decay={2} />
+      <pointLight position={[0, 6, 8]} intensity={4} color="#fbbf24" distance={12} decay={2} />
+      <pointLight position={[0, 2, 6]} intensity={2.5} color="#06b6d4" distance={8} decay={2} />
 
-      {/* 도로 */}
+      {/* 도로·보도 */}
       <VoxelInstances data={streets} size={1} />
       {/* 주변 도시 */}
       <VoxelInstances data={surrounding} />
-      <VoxelInstances data={surroundingWindows} emissive size={0.6} />
-      {/* 본 빌딩 */}
-      <VoxelInstances data={bankExterior} />
-      <VoxelInstances data={bankWindows} emissive size={0.5} />
+      <VoxelInstances data={surrWindows} emissive size={0.6} />
+      {/* 가로수 */}
+      <VoxelInstances data={trees} />
+      {/* 1층 로비 */}
+      <VoxelInstances data={lobbySolid} />
+      <VoxelInstances data={lobbyEmissive} emissive opacity={0.7} />
+      {/* 정문·캐노피·계단 */}
+      <VoxelInstances data={entranceSolid} />
+      <VoxelInstances data={entranceEmissive} emissive />
+      {/* ATM */}
+      <VoxelInstances data={atmSolid} />
+      <VoxelInstances data={atmEmissive} emissive size={0.4} />
+      {/* OO 간판 */}
+      <VoxelInstances data={signage} emissive size={0.7} />
+      {/* 빌딩 외벽 + 창문 */}
+      <VoxelInstances data={exterior} />
+      <VoxelInstances data={windows} emissive size={0.5} />
 
-      {/* 옥상 안테나 (꼭대기 강조) */}
+      {/* 옥상 안테나 */}
       <mesh position={[0, 30, 0]}>
         <boxGeometry args={[0.3, 4, 0.3]} />
         <meshStandardMaterial color="#1e293b" flatShading />
       </mesh>
       <mesh position={[0, 32.2, 0]}>
         <boxGeometry args={[0.4, 0.4, 0.4]} />
-        <meshStandardMaterial color="#000" emissive="#dc2626" emissiveIntensity={2} />
+        <meshStandardMaterial color="#000" emissive="#dc2626" emissiveIntensity={1.4} />
       </mesh>
-      <pointLight position={[0, 32, 0]} intensity={3} color="#dc2626" distance={6} />
+      <pointLight position={[0, 32, 0]} intensity={2} color="#dc2626" distance={6} />
 
-      <AutoOrbit speed={0.04} radius={38} height={22} target={[0, 8, 0]} />
-
-      {/* totalVoxels 노출용 invisible — 부모에서 props로 받기보다 디버그용 */}
-      <mesh visible={false} userData={{ totalVoxels }} />
+      <AutoOrbit speed={0.025} radius={38} height={22} target={[0, 8, 0]} />
     </>
   );
 }
 
-// 외부에서 voxel count 조회용 (HUD에서 사용)
-export const VOXEL_COUNT_ESTIMATE = 5000;
+export const VOXEL_COUNT_ESTIMATE = 5800;
