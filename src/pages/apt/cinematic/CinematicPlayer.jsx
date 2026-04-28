@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCinematic } from './useCinematic';
 import ClipPlayer from './ClipPlayer';
-import StartGate from './StartGate';
+import PreMissionRecon from './recon/PreMissionRecon';
 import SubtitleOverlay from './SubtitleOverlay';
 import ChoiceCard from './ChoiceCard';
 import EndCredits from './EndCredits';
@@ -169,8 +169,8 @@ export default function CinematicPlayer() {
       }}
       onMouseMove={showHudTemporarily}
     >
-      {/* 시작 게이트 */}
-      {!started && <StartGate scenario={scenario} onStart={() => setStarted(true)} />}
+      {/* 정찰 화면 (Voxel 디오라마 + HUD + PROCEED) */}
+      {!started && <PreMissionRecon scenario={scenario} onProceed={() => setStarted(true)} />}
 
       {/* ── 21:9 영상 영역 (위아래 letterbox 안쪽) ── */}
       <div style={{
