@@ -3,10 +3,13 @@
  * - 천장·창문·복도 디테일 추가
  * - 분기 결과(consequence)에 따라 조명·LUT 변화
  * - 모니터 발광 톤다운, 책상 그룹화로 공간감
+ * - extraObjects: 에디터에서 추가한 데이터 기반 오브젝트 (배열)
+ * - glbPath: 선택적 GLB 모델 슬롯 (있으면 procedural 위에 겹쳐 렌더)
  * 평면도 좌표 그대로 차용. 1u = 1m
  */
-import { useRef } from 'react';
+import { Suspense, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
 
 // ── 헬퍼 ────────────────────────────────────────
 function Box({ pos, size, color = '#475569', emissive = null, emissiveIntensity = 0.4, ...props }) {
@@ -139,8 +142,47 @@ function mergeLighting(consequenceTags = []) {
   return m;
 }
 
+// ── GLB 슬롯 (선택적) ────────────────────────
+function GLBSlot({ path }) {
+  const { scene } = useGLTF(path);
+  return <primitive object={scene} />;
+}
+
+// ── ExtraObject — 에디터로 추가한 사용자 박스 ─
+function ExtraObject({ obj, onSelect, selected = false }) {
+  const handleClick = (e) => {
+    if (onSelect) {
+      e.stopPropagation();
+      onSelect(obj.id);
+    }
+  };
+  return (
+    <mesh
+      position={obj.pos}
+      rotation={obj.rot || [0, 0, 0]}
+      onClick={handleClick}
+    >
+      <boxGeometry args={obj.size || [1, 1, 1]} />
+      <meshStandardMaterial
+        color={obj.color || '#475569'}
+        emissive={obj.emissive || '#000'}
+        emissiveIntensity={obj.emissive ? (obj.emissiveIntensity || 0.5) : 0}
+        roughness={obj.roughness ?? 0.7}
+        metalness={obj.metalness ?? 0.1}
+        wireframe={selected}
+      />
+    </mesh>
+  );
+}
+
 // ──────────────────────────────────────────────
-export default function DioramaScene({ consequences = [] }) {
+export default function DioramaScene({
+  consequences = [],
+  extraObjects = [],
+  glbPath = null,
+  selectedObjectId = null,
+  onObjectSelect = null,
+}) {
   const L = mergeLighting(consequences);
 
   return (

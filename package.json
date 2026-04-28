@@ -12,9 +12,6 @@
     "@carbon/icons-react": "^11.76.0",
     "@fortawesome/fontawesome-free": "^7.2.0",
     "@heroicons/react": "^2.2.0",
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.6.0",
-    "@react-three/postprocessing": "^3.0.4",
     "@supabase/supabase-js": "^2.97.0",
     "canvas-confetti": "^1.9.4",
     "chart.js": "^4.5.1",
@@ -35,8 +32,7 @@
     "react-dom": "^19.0.0",
     "react-ga4": "^2.1.0",
     "react-router-dom": "^6.28.0",
-    "react-simple-code-editor": "^0.14.1",
-    "three": "^0.184.0"
+    "react-simple-code-editor": "^0.14.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
