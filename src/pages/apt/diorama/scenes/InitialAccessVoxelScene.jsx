@@ -3,7 +3,7 @@
  * 학습자 행동: sender_domain / attachment / reward_copy 검사 → trust meter 떨어짐 → 문 열림
  */
 import { useState } from 'react';
-import { Text, Line } from '@react-three/drei';
+import { Html, Line } from '@react-three/drei';
 import { VoxelDesk, VoxelServerRoomGate } from '../engine/VoxelEnvironment';
 import { VoxelActor } from '../engine/VoxelActor';
 import { VoxelTool } from '../engine/VoxelTool';
@@ -21,15 +21,11 @@ function EmailVoxel({ opened, onClick }) {
           emissiveIntensity={opened ? 0.5 : 0.18}
         />
       </mesh>
-      <Text position={[0, 0.22, 0.07]} fontSize={0.1} color="#ffffff" anchorX="center">
-        INVESTMENT OFFER
-      </Text>
-      <Text position={[0, -0.08, 0.07]} fontSize={0.08} color="#ffcc66" anchorX="center">
-        beta test reward
-      </Text>
-      <Text position={[0, -0.28, 0.07]} fontSize={0.08} color="#ff3b3b" anchorX="center">
-        attachment.pkg
-      </Text>
+      <Html position={[0, 0, 0.06]} center transform distanceFactor={3} style={{ pointerEvents: 'none', textAlign: 'center', minWidth: 140 }}>
+        <div style={{ fontSize: 11, color: '#ffffff', fontWeight: 700 }}>INVESTMENT OFFER</div>
+        <div style={{ fontSize: 8, color: '#ffcc66', marginTop: 3 }}>beta test reward</div>
+        <div style={{ fontSize: 8, color: '#ff3b3b', marginTop: 2, fontFamily: 'monospace' }}>attachment.pkg</div>
+      </Html>
     </group>
   );
 }
@@ -48,9 +44,9 @@ function TrustMeter({ value }) {
         <boxGeometry args={[Math.max(0.01, filled), 0.1, 0.04]} />
         <meshStandardMaterial color={value < 0.4 ? '#dc2626' : value < 0.7 ? '#fbbf24' : '#22c55e'} emissive={value < 0.4 ? '#dc2626' : '#000'} emissiveIntensity={0.4} />
       </mesh>
-      <Text position={[0, -0.18, 0]} fontSize={0.08} color="#94a3b8" anchorX="center">
-        TRUST METER
-      </Text>
+      <Html position={[0, -0.18, 0]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+        <div style={{ fontSize: 9, color: '#94a3b8', fontFamily: 'monospace', letterSpacing: 1 }}>TRUST METER</div>
+      </Html>
     </group>
   );
 }
@@ -83,9 +79,9 @@ export function InitialAccessVoxelScene({ stage, onHotspot }) {
         scale={0.85}
         onClick={() => inspect('sender_domain')}
       />
-      <Text position={[-1.8, 1.45, 0.4]} fontSize={0.08} color="#94a3b8" anchorX="center">
-        SENDER DOMAIN
-      </Text>
+      <Html position={[-1.8, 1.45, 0.4]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+        <div style={{ fontSize: 9, color: '#94a3b8', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>SENDER DOMAIN</div>
+      </Html>
 
       <VoxelTool
         position={[0, 0.85, 0.4]}
@@ -94,9 +90,9 @@ export function InitialAccessVoxelScene({ stage, onHotspot }) {
         scale={0.85}
         onClick={() => inspect('reward_copy')}
       />
-      <Text position={[0, 1.35, 0.4]} fontSize={0.08} color="#94a3b8" anchorX="center">
-        REWARD COPY
-      </Text>
+      <Html position={[0, 1.35, 0.4]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+        <div style={{ fontSize: 9, color: '#94a3b8', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>REWARD COPY</div>
+      </Html>
 
       <TrustMeter value={trust} />
 
@@ -108,15 +104,15 @@ export function InitialAccessVoxelScene({ stage, onHotspot }) {
             lineWidth={2}
           />
           <VoxelServerRoomGate opened />
-          <Text position={[2.7, 1.2, 0.86]} fontSize={0.1} color="#ff3b3b" anchorX="center">
-            DOOR OPENED
-          </Text>
+          <Html position={[2.7, 1.2, 0.86]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+            <div style={{ fontSize: 11, color: '#ff3b3b', fontFamily: 'monospace', fontWeight: 700, letterSpacing: 1, textShadow: '0 2px 8px rgba(0,0,0,0.95)', whiteSpace: 'nowrap' }}>DOOR OPENED</div>
+          </Html>
         </>
       )}
 
-      <Text position={[0, 2.35, -1.2]} fontSize={0.18} color="#ffffff" anchorX="center">
-        EMAIL ARRIVES.  INSPECT BEFORE TRUST.
-      </Text>
+      <Html position={[0, 2.35, -1.2]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+        <div style={{ fontSize: 14, color: '#ffffff', fontFamily: 'monospace', fontWeight: 700, letterSpacing: 1, textShadow: '0 2px 8px rgba(0,0,0,0.95)', whiteSpace: 'nowrap' }}>EMAIL ARRIVES. INSPECT BEFORE TRUST.</div>
+      </Html>
     </group>
   );
 }

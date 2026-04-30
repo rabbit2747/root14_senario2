@@ -3,7 +3,7 @@
  * 학습자 행동: 노드 클릭 → wallet_node 식별 → 하이라이트
  */
 import { useState } from 'react';
-import { Text, Line } from '@react-three/drei';
+import { Html, Line } from '@react-three/drei';
 import { VoxelTool } from '../engine/VoxelTool';
 import { VoxelNetworkFloor } from '../engine/VoxelEnvironment';
 import { PulseRing } from '../engine/VoxelEffect';
@@ -18,9 +18,9 @@ function NetworkNode({ position, label, risky, selected, onClick }) {
         active={selected}
         scale={risky ? 1.15 : 0.9}
       />
-      <Text position={[0, 0.55, 0]} fontSize={0.09} color="#ffffff" anchorX="center">
-        {label}
-      </Text>
+      <Html position={[0, 0.55, 0]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+        <div style={{ fontSize: 10, color: '#ffffff', fontFamily: 'monospace', fontWeight: 700, whiteSpace: 'nowrap' }}>{label}</div>
+      </Html>
     </group>
   );
 }
@@ -65,9 +65,9 @@ export function DiscoveryVoxelScene({ stage, onHotspot }) {
         </mesh>
       )}
 
-      <Text position={[0, 2.15, -1.2]} fontSize={0.18} color="#ffffff" anchorX="center">
-        SCANNER PULSE REVEALS HIGH-VALUE NODE
-      </Text>
+      <Html position={[0, 2.15, -1.2]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+        <div style={{ fontSize: 13, color: '#ffffff', fontFamily: 'monospace', fontWeight: 700, letterSpacing: 1, textShadow: '0 2px 8px rgba(0,0,0,0.95)', whiteSpace: 'nowrap' }}>SCANNER PULSE REVEALS HIGH-VALUE NODE</div>
+      </Html>
     </group>
   );
 }

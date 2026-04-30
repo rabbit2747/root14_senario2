@@ -2,7 +2,7 @@
  * SceneRenderer — Stage.sceneType에 따라 적절한 Voxel 씬 디스패치
  */
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, ContactShadows, Environment } from '@react-three/drei';
+import { OrbitControls, ContactShadows } from '@react-three/drei';
 import { ReconVoxelScene } from '../scenes/ReconVoxelScene';
 import { InitialAccessVoxelScene } from '../scenes/InitialAccessVoxelScene';
 import { DiscoveryVoxelScene } from '../scenes/DiscoveryVoxelScene';
@@ -30,11 +30,12 @@ export function SceneRenderer({ stage, onHotspot }) {
     }}>
       <Canvas shadows camera={{ position: [5, 5, 7], fov: 42 }}>
         <color attach="background" args={['#06070a']} />
+        <fog attach="fog" args={['#06070a', 8, 24]} />
         <ambientLight intensity={0.55} />
         <directionalLight position={[5, 8, 6]} intensity={1.4} castShadow />
+        <hemisphereLight args={['#a855f7', '#0c4a6e', 0.4]} />
         <Scene stage={stage} onHotspot={onHotspot} />
         <ContactShadows position={[0, -0.3, 0]} opacity={0.55} blur={2.5} />
-        <Environment preset="city" />
         <OrbitControls
           enablePan={false}
           maxPolarAngle={1.3}

@@ -2,7 +2,7 @@
  * GenericVoxelScene — 14단계 중 미완성 씬용 stub
  * stage.atoms를 단순 voxel로 표현 (환경+도구 픽토그램)
  */
-import { Text } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 import { VoxelTool } from '../engine/VoxelTool';
 import { PulseRing } from '../engine/VoxelEffect';
 
@@ -32,22 +32,18 @@ export function GenericVoxelScene({ stage, onHotspot }) {
               active={isPrimary}
               onClick={() => onHotspot?.(correctHotspot?.id || toolId)}
             />
-            <Text position={[0, 1.15, 0]} fontSize={0.08} color="#94a3b8" anchorX="center">
-              {toolId}
-            </Text>
+            <Html position={[0, 1.15, 0]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+              <div style={{ fontSize: 9, color: '#94a3b8', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{toolId}</div>
+            </Html>
           </group>
         );
       })}
 
-      <Text position={[0, 2.0, -1]} fontSize={0.22} color="#ffffff" anchorX="center">
-        {stage?.title}
-      </Text>
-      <Text position={[0, 1.65, -1]} fontSize={0.1} color="#94a3b8" anchorX="center" maxWidth={6}>
-        {stage?.objective}
-      </Text>
-      <Text position={[0, -0.85, -1]} fontSize={0.08} color="#475569" anchorX="center">
-        ▎ STUB SCENE · TIMELINE READY
-      </Text>
+      <Html position={[0, 2.0, -1]} center distanceFactor={4} style={{ pointerEvents: 'none', textAlign: 'center', minWidth: 280 }}>
+        <div style={{ fontSize: 16, color: '#ffffff', fontFamily: 'monospace', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>{stage?.title}</div>
+        <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>{stage?.objective}</div>
+        <div style={{ fontSize: 9, color: '#475569', fontFamily: 'monospace', marginTop: 14, letterSpacing: 2 }}>▎ STUB SCENE · TIMELINE READY</div>
+      </Html>
     </group>
   );
 }

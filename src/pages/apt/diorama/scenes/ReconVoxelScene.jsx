@@ -4,7 +4,7 @@
  * 단서 2개 모두 선택 시: 빨간 그림자 등장 + 공격선 활성
  */
 import { useMemo, useState } from 'react';
-import { Text, Line } from '@react-three/drei';
+import { Html, Line } from '@react-three/drei';
 import { VoxelDesk } from '../engine/VoxelEnvironment';
 import { VoxelActor } from '../engine/VoxelActor';
 import { VoxelTool } from '../engine/VoxelTool';
@@ -23,12 +23,10 @@ function ProfileCard({ position, label, sub, active, correct, onClick }) {
           emissiveIntensity={active ? 0.45 : 0.05}
         />
       </mesh>
-      <Text position={[0, 0.16, 0.07]} fontSize={0.11} color="#ffffff" anchorX="center">
-        {label}
-      </Text>
-      <Text position={[0, -0.04, 0.07]} fontSize={0.07} color={active ? (correct ? '#00ffd1' : '#ff3b3b') : '#94a3b8'} anchorX="center">
-        {sub}
-      </Text>
+      <Html position={[0, 0, 0.06]} center transform distanceFactor={3} style={{ pointerEvents: 'none', textAlign: 'center', minWidth: 100 }}>
+        <div style={{ fontSize: 11, color: '#ffffff', fontWeight: 600 }}>{label}</div>
+        <div style={{ fontSize: 8, color: active ? (correct ? '#00ffd1' : '#ff3b3b') : '#94a3b8', fontFamily: 'monospace', marginTop: 2 }}>{sub}</div>
+      </Html>
     </group>
   );
 }
@@ -94,14 +92,17 @@ export function ReconVoxelScene({ stage, onHotspot }) {
         </>
       )}
 
-      <Text
-        position={[0, 2.45, -1.3]}
-        fontSize={0.18}
-        color={targetLocked ? '#00ffd1' : '#ffffff'}
-        anchorX="center"
-      >
-        {targetLocked ? 'TARGET PROFILE LOCKED' : 'INSPECT OSINT CLUES'}
-      </Text>
+      <Html position={[0, 2.45, -1.3]} center distanceFactor={4} style={{ pointerEvents: 'none' }}>
+        <div style={{
+          fontSize: 14, fontWeight: 700, letterSpacing: 2,
+          color: targetLocked ? '#00ffd1' : '#ffffff',
+          fontFamily: 'monospace',
+          textShadow: '0 2px 8px rgba(0,0,0,0.95)',
+          whiteSpace: 'nowrap',
+        }}>
+          {targetLocked ? 'TARGET PROFILE LOCKED' : 'INSPECT OSINT CLUES'}
+        </div>
+      </Html>
     </group>
   );
 }
