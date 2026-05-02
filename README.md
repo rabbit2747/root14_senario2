@@ -37,6 +37,12 @@ Detailed demo commands are in:
 docs/demo/README_demo.md
 ```
 
+Korean attack-chain teaching walkthrough:
+
+```text
+docs/demo/attack_walkthrough_ko.md
+```
+
 For container-internal end-to-end verification, use:
 
 ```powershell
@@ -52,6 +58,7 @@ docker compose exec -T support-portal python /tmp/verify_chain.py
 ├── README.md
 ├── docs/
 │   ├── demo/
+│   │   ├── attack_walkthrough_ko.md
 │   │   └── README_demo.md
 │   ├── design/
 │   │   ├── ai_instruction_enterprise_apt_range.md
