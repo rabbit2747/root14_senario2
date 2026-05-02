@@ -9,7 +9,7 @@ The current implementation is a compact MVP:
 recon
 -> support-portal lab initial access
 -> safe C2 emulator
--> wiki/ticket/repo discovery
+-> corporate SSO/intranet/HR/wiki/ticket/docs/mail discovery
 -> build/sign/publish flow
 -> trusted ANRC customer update
 -> customer export discovery
@@ -50,6 +50,13 @@ docker compose exec -T support-portal sh -c "cat > /tmp/verify_chain.py" < scrip
 docker compose exec -T support-portal python /tmp/verify_chain.py
 ```
 
+For enterprise-surface verification, use:
+
+```powershell
+docker compose exec -T support-portal sh -c "cat > /tmp/verify_enterprise.py" < scripts/verify_enterprise.py
+docker compose exec -T support-portal python /tmp/verify_enterprise.py
+```
+
 ## Directory Layout
 
 ```text
@@ -74,6 +81,7 @@ docker compose exec -T support-portal python /tmp/verify_chain.py
 │   └── edge-proxy/
 │       └── nginx.conf
 ├── scripts/
+│   ├── verify_enterprise.py
 │   ├── verify_chain.py
 │   └── walkthrough.ps1
 └── services/
@@ -83,6 +91,31 @@ docker compose exec -T support-portal python /tmp/verify_chain.py
         └── app/
             ├── __init__.py
             └── main.py
+```
+
+## Enterprise Network Surfaces
+
+The demo keeps the verified supply-chain attack path, but now includes
+additional enterprise-like services from the original design:
+
+```text
+DMZ:
+  public-site, public-docs, vendor-portal, support-portal
+
+Corporate:
+  corp-sso, intranet, hr-directory, wiki, ticket-service, doc-portal, mail-web
+
+DevOps:
+  source-repo, build-server
+
+Release:
+  signing-service, update-server
+
+Customer:
+  customer-app, customer-api, object-store, monitoring
+
+Control:
+  c2-emulator, flag-service, audit-log
 ```
 
 ## Important Docs

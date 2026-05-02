@@ -11,6 +11,7 @@ services:
       - public-site
       - public-docs
       - support-portal
+      - vendor-portal
     networks:
       public_net:
       dmz_net:
@@ -66,6 +67,71 @@ services:
     cap_drop: [ALL]
     restart: unless-stopped
 
+  vendor-portal:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: vendor-portal
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      dmz_net:
+        aliases:
+          - portal.orionecho.test
+      corp_net:
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  corp-sso:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: corp-sso
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      corp_net:
+        aliases:
+          - sso.corp.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  intranet:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: intranet
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      corp_net:
+        aliases:
+          - intranet.corp.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  hr-directory:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: hr-directory
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      corp_net:
+        aliases:
+          - hr.corp.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
   wiki:
     build: ./services/orion-demo
     environment:
@@ -91,6 +157,38 @@ services:
       corp_net:
         aliases:
           - tickets.corp.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  doc-portal:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: doc-portal
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      corp_net:
+        aliases:
+          - docs.corp.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  mail-web:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: mail-web
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      corp_net:
+        aliases:
+          - mail.corp.local
       control_net:
     read_only: true
     tmpfs: [/tmp]
@@ -210,6 +308,22 @@ services:
       customer_net:
         aliases:
           - objects.anrc.customer.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  monitoring:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: monitoring
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      customer_net:
+        aliases:
+          - monitoring.anrc.customer.local
       control_net:
     read_only: true
     tmpfs: [/tmp]

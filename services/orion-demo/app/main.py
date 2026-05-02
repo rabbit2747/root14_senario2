@@ -138,6 +138,74 @@ REPO_FILES = {
     "echo-agent/CODEOWNERS": "* @emp-0048 @emp-0031\n",
 }
 
+EMPLOYEES = [
+    {"user_id": "emp-0048", "name": "Fatima Al Qasimi", "email": "f.alqasimi@orionecho.test", "dept": "release-engineering", "title": "Release Engineering Lead", "groups": ["releng", "build-trigger"]},
+    {"user_id": "emp-0031", "name": "Hamad Al Mazrouei", "email": "h.almazrouei@orionecho.test", "dept": "product-engineering", "title": "EchoAgent Maintainer", "groups": ["engineering"]},
+    {"user_id": "emp-0062", "name": "Priya Nair", "email": "p.nair@orionecho.test", "dept": "customer-success", "title": "ANRC Account Owner", "groups": ["customer-success"]},
+    {"user_id": "emp-0077", "name": "Daniel Hughes", "email": "d.hughes@orionecho.test", "dept": "security-operations", "title": "Security Operations Analyst", "groups": ["secops"]},
+    {"user_id": "svc-build", "name": "build-svc", "email": "build-svc@orionecho.test", "dept": "service-accounts", "title": "Build Server Service Account", "groups": ["service"]},
+]
+
+DEPARTMENTS = [
+    {"dept_id": "corporate-it", "name": "Corporate IT", "manager_id": "emp-0077"},
+    {"dept_id": "product-engineering", "name": "Product Engineering", "manager_id": "emp-0031"},
+    {"dept_id": "release-engineering", "name": "Release Engineering", "manager_id": "emp-0048"},
+    {"dept_id": "customer-success", "name": "Customer Success", "manager_id": "emp-0062"},
+    {"dept_id": "security-operations", "name": "Security Operations", "manager_id": "emp-0077"},
+]
+
+CUSTOMERS = [
+    {"customer_id": "anrc", "name": "Al Noor Research Campus", "region": "UAE", "channel": "anrc", "version": "2.6.3", "health": "watch"},
+    {"customer_id": "smartport-jb", "name": "Jebel Bay Smart Port", "region": "UAE", "channel": "stable", "version": "2.5.9", "health": "nominal"},
+    {"customer_id": "qadr-energy", "name": "Qadr Energy Operations", "region": "UAE", "channel": "stable", "version": "2.5.9", "health": "nominal"},
+    {"customer_id": "delta-cargo", "name": "Delta Cargo Hub", "region": "UAE", "channel": "beta", "version": "2.6.0-beta.4", "health": "degraded"},
+]
+
+DOC_FILES = {
+    "restricted/anrc-channel-2026q2.txt": {
+        "visibility": "restricted",
+        "owner": "emp-0048",
+        "body": "ANRC channel token name: CUSTOMER_ANRC_CHANNEL_TOKEN\nOwner: emp-0048\nRotation: quarterly\nNote: token value is held by customer-app only in this demo.",
+        "clue_kind": "partial",
+    },
+    "legacy/build-tokens-2023.txt": {
+        "visibility": "internal",
+        "owner": "emp-0077",
+        "body": "BUILD_TRIGGER_TOKEN=expired-2023-alpha\nBUILD_TRIGGER_TOKEN=expired-2023-beta\nAll entries revoked.",
+        "clue_kind": "decoy",
+    },
+    "architecture/update-trust-overview.md": {
+        "visibility": "internal",
+        "owner": "emp-0031",
+        "body": "# EchoUpdate Trust Overview\nCustomer agents poll their assigned channel, verify HMAC signatures, validate sha256, then report update-applied to customer-api.",
+        "clue_kind": "partial",
+    },
+}
+
+MAIL_MESSAGES = {
+    "msg-1001": {
+        "from": "f.alqasimi@orionecho.test",
+        "to": ["release-engineering@orionecho.test"],
+        "subject": "Re: build trigger token - see wiki",
+        "body": "Please stop pasting trigger values into tickets. The current value is in the Release Engineering runbook.",
+        "clue_kind": "partial",
+    },
+    "msg-1002": {
+        "from": "d.hughes@orionecho.test",
+        "to": ["secops@orionecho.test"],
+        "subject": "Legacy ANRC credential export honeytoken",
+        "body": "The anrc-objects-legacy deprecated credential export remains a honeytoken. Do not use it for recovery.",
+        "clue_kind": "decoy",
+    },
+    "msg-1003": {
+        "from": "p.nair@orionecho.test",
+        "to": ["customer-success@orionecho.test"],
+        "subject": "ANRC update behavior follow-up",
+        "body": "ANRC is pinned to channel anrc until the Q2 facility audit export review is complete.",
+        "clue_kind": "partial",
+    },
+}
+
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -216,6 +284,36 @@ async def build_info():
     return body
 
 
+@app.get("/.well-known/openid-configuration")
+async def oidc_config():
+    if SERVICE != "corp-sso":
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    return {
+        "issuer": "https://sso.corp.local",
+        "authorization_endpoint": "https://sso.corp.local/oauth/authorize",
+        "token_endpoint": "https://sso.corp.local/oauth/token",
+        "userinfo_endpoint": "https://sso.corp.local/oauth/userinfo",
+        "jwks_uri": "https://sso.corp.local/oauth/jwks",
+        "response_types_supported": ["code"],
+        "id_token_signing_alg_values_supported": ["HS256"],
+    }
+
+
+@app.get("/oauth/userinfo")
+async def oidc_userinfo():
+    if SERVICE != "corp-sso":
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    await emit("auth.userinfo.viewed", "T1078", "flag_4_internal_discovery", "/oauth/userinfo")
+    return EMPLOYEES[0]
+
+
+@app.get("/oauth/jwks")
+async def oidc_jwks():
+    if SERVICE != "corp-sso":
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    return {"keys": []}
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index():
     if SERVICE == "public-site":
@@ -228,7 +326,7 @@ async def index():
           <h2>Products</h2>
           <ul><li>EchoAgent</li><li>EchoUpdate</li><li>EchoInsights</li></ul>
           <p>Customer spotlight: Al Noor Research Campus uses the ANRC EchoAgent channel.</p>
-          <p><a href="/docs/releases/public">Release notes</a> | <a href="/support/">Support portal</a></p>
+          <p><a href="/docs/releases/public">Release notes</a> | <a href="/support/">Support portal</a> | <a href="/portal/">Partner portal</a></p>
         </body></html>
         """
     if SERVICE == "public-docs":
@@ -246,6 +344,49 @@ async def index():
         <code>POST /support/preview {"body":"..."}</code>
         </body></html>
         """
+    if SERVICE == "vendor-portal":
+        await emit("portal.home.viewed", "T1591", "flag_0_recon_context", "/portal")
+        rows = "".join(f"<tr><td>{c['name']}</td><td>{c['channel']}</td><td>{c['version']}</td><td>{c['health']}</td></tr>" for c in CUSTOMERS)
+        return f"""
+        <html><body><h1>Orion Echo Partner Portal</h1>
+        <p>Customer deployment and release-channel summary.</p>
+        <table border="1"><tr><th>Customer</th><th>Channel</th><th>Version</th><th>Health</th></tr>{rows}</table>
+        <p>Private release route: <code>/portal/releases/private</code></p>
+        </body></html>
+        """
+    if SERVICE == "corp-sso":
+        return """
+        <html><body><h1>Orion Echo SSO</h1>
+        <p>OIDC-lite identity simulator for internal tools.</p>
+        <p>Demo user: emp-0048 / release-engineering / releng.</p>
+        </body></html>
+        """
+    if SERVICE == "intranet":
+        await emit("intranet.home.viewed", "T1213", "flag_4_internal_discovery", "/")
+        rows = "".join(f"<tr><td>{d['dept_id']}</td><td>{d['name']}</td><td>{d['manager_id']}</td></tr>" for d in DEPARTMENTS)
+        return f"""
+        <html><body><h1>Orion Echo Intranet</h1>
+        <p>Internal service directory: SSO, HR, wiki, tickets, docs, mail, git, build, update.</p>
+        <table border="1"><tr><th>ID</th><th>Department</th><th>Manager</th></tr>{rows}</table>
+        </body></html>
+        """
+    if SERVICE == "hr-directory":
+        rows = "".join(f"<tr><td>{e['user_id']}</td><td>{e['name']}</td><td>{e['dept']}</td><td>{e['title']}</td></tr>" for e in EMPLOYEES)
+        return f"<html><body><h1>HR Directory</h1><table border='1'><tr><th>ID</th><th>Name</th><th>Dept</th><th>Title</th></tr>{rows}</table></body></html>"
+    if SERVICE == "doc-portal":
+        rows = "".join(f"<li><a href='/files/{path}'>{path}</a> ({meta['visibility']})</li>" for path, meta in DOC_FILES.items())
+        return f"<html><body><h1>Internal Document Portal</h1><ul>{rows}</ul></body></html>"
+    if SERVICE == "mail-web":
+        rows = "".join(f"<li><a href='/messages/{mid}'>{msg['subject']}</a> - {msg['from']}</li>" for mid, msg in MAIL_MESSAGES.items())
+        return f"<html><body><h1>Orion Echo Webmail</h1><ul>{rows}</ul></body></html>"
+    if SERVICE == "monitoring":
+        return """
+        <html><body><h1>ANRC Monitoring</h1>
+        <p>EchoAgent status: polling channel anrc every 60 seconds.</p>
+        <p>Customer API: api.anrc.customer.local</p>
+        <p>Object store bucket: anrc-objects</p>
+        </body></html>
+        """
     return {"service": SERVICE, "message": "Orion Echo demo service"}
 
 
@@ -255,6 +396,17 @@ async def releases_public():
     return [
         {"version": "2.6.4", "channel": "internal-canary", "summary": "ANRC compatibility marker support"},
         {"version": "2.6.3", "channel": "anrc", "summary": "Current ANRC deployment"},
+    ]
+
+
+@app.get("/releases/private")
+async def releases_private():
+    if SERVICE != "vendor-portal":
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    await emit("portal.private_releases.viewed", "T1213", "flag_4_internal_discovery", "/releases/private")
+    return [
+        {"version": "2.6.4", "channel": "anrc", "owner": "emp-0048", "notes": "Requires signed marker manifest before customer rollout."},
+        {"version": "2.5.7", "channel": "legacy-2.5", "owner": "emp-0031", "notes": "Legacy decoy channel. Do not use for ANRC."},
     ]
 
 
@@ -336,15 +488,64 @@ async def get_ticket(ticket_id: str):
     return ticket
 
 
+@app.get("/employees")
+async def list_employees():
+    if SERVICE != "hr-directory":
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    await emit("hr.employees.viewed", "T1213", "flag_4_internal_discovery", "/employees")
+    return {"items": EMPLOYEES}
+
+
+@app.get("/departments")
+async def list_departments():
+    if SERVICE not in {"hr-directory", "intranet"}:
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    await emit("hr.departments.viewed", "T1213", "flag_4_internal_discovery", "/departments")
+    return {"items": DEPARTMENTS}
+
+
+@app.get("/customers")
+async def list_customers():
+    if SERVICE not in {"vendor-portal", "intranet"}:
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    await emit("customers.viewed", "T1213", "flag_4_internal_discovery", "/customers")
+    return {"items": CUSTOMERS}
+
+
+@app.get("/messages")
+async def list_messages():
+    if SERVICE != "mail-web":
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    return [{"message_id": mid, "from": msg["from"], "subject": msg["subject"], "clue_kind": msg["clue_kind"]} for mid, msg in MAIL_MESSAGES.items()]
+
+
+@app.get("/messages/{message_id}")
+async def get_message(message_id: str):
+    if SERVICE != "mail-web":
+        return JSONResponse(status_code=404, content={"error": "not found"})
+    message = MAIL_MESSAGES.get(message_id)
+    if not message:
+        return JSONResponse(status_code=404, content={"error": "message not found"})
+    await emit("mail.message.viewed", "T1213", "flag_4_internal_discovery", message_id, {"clue_kind": message["clue_kind"]})
+    return message
+
+
 @app.get("/files/{path:path}")
 async def repo_file(path: str):
-    if SERVICE != "source-repo":
-        return JSONResponse(status_code=404, content={"error": "not found"})
-    item = REPO_FILES.get(path)
-    if item is None:
-        return JSONResponse(status_code=404, content={"error": "file not found"})
-    await emit("repo.file.viewed", "T1213.003", "flag_4_internal_discovery", path)
-    return item if isinstance(item, dict) else PlainTextResponse(item)
+    if SERVICE == "source-repo":
+        item = REPO_FILES.get(path)
+        if item is None:
+            return JSONResponse(status_code=404, content={"error": "file not found"})
+        await emit("repo.file.viewed", "T1213.003", "flag_4_internal_discovery", path)
+        return item if isinstance(item, dict) else PlainTextResponse(item)
+    if SERVICE == "doc-portal":
+        item = DOC_FILES.get(path)
+        if item is None:
+            return JSONResponse(status_code=404, content={"error": "file not found"})
+        technique = "T1552" if item["clue_kind"] == "decoy" else "T1213"
+        await emit("doc.file.viewed", technique, "flag_4_internal_discovery", path, {"clue_kind": item["clue_kind"]})
+        return item
+    return JSONResponse(status_code=404, content={"error": "not found"})
 
 
 @app.post("/api/jobs")
@@ -646,7 +847,21 @@ async def beacon_result(implant_id: str, action_id: str, payload: dict[str, Any]
 async def discover_services():
     if SERVICE != "c2-emulator":
         return JSONResponse(status_code=404, content={"error": "not found"})
-    services = ["wiki.corp.local", "tickets.corp.local", "git.dev.local", "build.dev.local", "signing.release.local", "updates.release.local", "api.anrc.customer.local"]
+    services = [
+        "sso.corp.local",
+        "intranet.corp.local",
+        "hr.corp.local",
+        "wiki.corp.local",
+        "tickets.corp.local",
+        "docs.corp.local",
+        "mail.corp.local",
+        "git.dev.local",
+        "build.dev.local",
+        "signing.release.local",
+        "updates.release.local",
+        "api.anrc.customer.local",
+        "monitoring.anrc.customer.local",
+    ]
     await emit("c2.discovery.service_probe", "T1046", "flag_4_internal_discovery", "curated-services", {"services": services})
     return {"services": services, "flag": flag("flag_4_internal_discovery")}
 
