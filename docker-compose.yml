@@ -1,0 +1,259 @@
+name: orion-echo-demo
+
+services:
+  edge-proxy:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./infra/edge-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - public-site
+      - public-docs
+      - support-portal
+    networks:
+      public_net:
+      dmz_net:
+        aliases:
+          - portal.orionecho.test
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+  public-site:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: public-site
+    networks:
+      dmz_net:
+        aliases:
+          - www.orionecho.test
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  public-docs:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: public-docs
+    networks:
+      dmz_net:
+        aliases:
+          - docs.orionecho.test
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  support-portal:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: support-portal
+      C2_URL: http://c2-emulator:8000
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      dmz_net:
+        aliases:
+          - support.orionecho.test
+      corp_net:
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  wiki:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: wiki
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      corp_net:
+        aliases:
+          - wiki.corp.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  ticket-service:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: ticket-service
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      corp_net:
+        aliases:
+          - tickets.corp.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  source-repo:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: source-repo
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      dev_net:
+        aliases:
+          - git.dev.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  build-server:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: build-server
+      AUDIT_URL: http://audit-log:8000
+      SOURCE_REPO_URL: http://source-repo:8000
+      SIGNING_URL: http://signing-service:8000
+      UPDATE_URL: http://update-server:8000
+    networks:
+      dev_net:
+        aliases:
+          - build.dev.local
+      release_net:
+      control_net:
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  signing-service:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: signing-service
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      release_net:
+        aliases:
+          - signing.release.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  update-server:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: update-server
+      AUDIT_URL: http://audit-log:8000
+      BUILD_URL: http://build-server:8000
+    networks:
+      release_net:
+        aliases:
+          - updates.release.local
+      customer_net:
+      control_net:
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  customer-app:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: customer-app
+      AUDIT_URL: http://audit-log:8000
+      UPDATE_URL: http://update-server:8000
+      SIGNING_URL: http://signing-service:8000
+      CUSTOMER_API_URL: http://customer-api:8000
+    networks:
+      customer_net:
+        aliases:
+          - agent.anrc.customer.local
+      control_net:
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  customer-api:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: customer-api
+      AUDIT_URL: http://audit-log:8000
+      OBJECT_STORE_URL: http://object-store:8000
+    networks:
+      customer_net:
+        aliases:
+          - api.anrc.customer.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  object-store:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: object-store
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      customer_net:
+        aliases:
+          - objects.anrc.customer.local
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  c2-emulator:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: c2-emulator
+      AUDIT_URL: http://audit-log:8000
+      FLAG_URL: http://flag-service:8000
+    networks:
+      control_net:
+        aliases:
+          - c2-emulator
+      corp_net:
+      dev_net:
+      release_net:
+      customer_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  flag-service:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: flag-service
+      AUDIT_URL: http://audit-log:8000
+    networks:
+      control_net:
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+  audit-log:
+    build: ./services/orion-demo
+    environment:
+      SERVICE_NAME: audit-log
+    networks:
+      control_net:
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
+networks:
+  public_net:
+  dmz_net:
+  corp_net:
+  dev_net:
+  release_net:
+  customer_net:
+  control_net:
