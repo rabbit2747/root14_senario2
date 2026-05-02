@@ -118,6 +118,23 @@ Control:
   c2-emulator, flag-service, audit-log
 ```
 
+The current seed dataset is intentionally larger than a linear CTF path:
+
+```text
+Employees: 49
+Customers: 10
+Wiki pages: 46
+Tickets: 103
+Doc files: 28
+Mail messages: 45
+Repo files: 65
+```
+
+The dataset mixes valid clues, partial operational clues, expired credentials,
+legacy false leads, routine operational noise, and customer-specific ANRC
+records so students must triage evidence instead of following a single obvious
+breadcrumb.
+
 ## Important Docs
 
 - MITRE stage and implementation plan:

@@ -207,6 +207,165 @@ MAIL_MESSAGES = {
 }
 
 
+def expand_seed_data() -> None:
+    """Add realistic surrounding enterprise data without changing the core path."""
+    first_names = [
+        "Aisha", "Omar", "Mariam", "Khalid", "Noor", "Saeed", "Layla", "Yousef",
+        "Priya", "Imran", "Anika", "Ravi", "Daniel", "Marta", "Sofia", "Lucas",
+        "Jihoon", "Mina", "Hana", "Tariq", "Salma", "Nadia", "Karim", "Leen",
+        "Farah", "Nasser", "Arjun", "Meera", "Elena", "Jonas", "Sara", "Zaid",
+        "Rania", "Bilal", "Noura", "Samir", "Ibrahim", "Lina", "Amal", "Faisal",
+    ]
+    last_names = [
+        "Al Qasimi", "Al Mazrouei", "Al Nuaimi", "Al Mansoori", "Khan", "Nair",
+        "Sheikh", "Patel", "Hughes", "Lindgren", "Park", "Tanaka", "Rahman",
+        "Haddad", "Saleh", "Farouk", "Dawson", "Meyer", "Singh", "Iyer",
+    ]
+    dept_cycle = [d["dept_id"] for d in DEPARTMENTS]
+    titles = {
+        "corporate-it": ["Systems Administrator", "Endpoint Engineer", "Network Analyst"],
+        "product-engineering": ["Backend Engineer", "Frontend Engineer", "EchoAgent Maintainer"],
+        "release-engineering": ["Release Coordinator", "Build Engineer", "Signing Operator"],
+        "customer-success": ["Account Engineer", "Customer Success Manager", "Implementation Specialist"],
+        "security-operations": ["SOC Analyst", "Detection Engineer", "Security Reviewer"],
+    }
+    existing_ids = {employee["user_id"] for employee in EMPLOYEES}
+    for idx in range(1, 46):
+        user_id = f"emp-{idx:04d}"
+        if user_id in existing_ids:
+            continue
+        dept = dept_cycle[idx % len(dept_cycle)]
+        first = first_names[idx % len(first_names)]
+        last = last_names[(idx * 3) % len(last_names)]
+        username = f"{first[0]}.{last.split()[-1]}".lower().replace("'", "")
+        EMPLOYEES.append(
+            {
+                "user_id": user_id,
+                "name": f"{first} {last}",
+                "email": f"{username}{idx}@orionecho.test",
+                "dept": dept,
+                "title": titles[dept][idx % len(titles[dept])],
+                "groups": [dept.split("-")[0]],
+            }
+        )
+
+    more_customers = [
+        ("nova-towers", "Nova Towers Real Estate", "stable", "2.5.9", "nominal"),
+        ("mahra-rail", "Mahra Rail Authority", "stable", "2.5.8", "nominal"),
+        ("shams-water", "Shams Water Utility", "stable", "2.5.9", "watch"),
+        ("falcon-medical", "Falcon Medical Group", "beta", "2.6.0-beta.4", "nominal"),
+        ("zayd-edu", "Zayd Education Foundation", "stable", "2.5.9", "nominal"),
+        ("harbor-grid", "Harbor Grid Facilities", "internal-canary", "2.6.4-rc1", "degraded"),
+    ]
+    existing_customers = {customer["customer_id"] for customer in CUSTOMERS}
+    for customer_id, name, channel, version, health in more_customers:
+        if customer_id not in existing_customers:
+            CUSTOMERS.append({"customer_id": customer_id, "name": name, "region": "UAE", "channel": channel, "version": version, "health": health})
+
+    wiki_specs = [
+        ("runbook/vpn-access", "VPN Access Runbook", "runbook", "Corporate VPN access requires SSO group corporate-it. Customer networks are not reachable from VPN.", "noise"),
+        ("runbook/incident-triage", "Incident Triage Checklist", "runbook", "Collect request_id, service name, build id, and audit-log event id before escalation.", "noise"),
+        ("runbook/release-freeze", "Release Freeze Calendar", "runbook", "ANRC has a Q2 exception for EchoAgent 2.6.4 marker compatibility testing.", "partial"),
+        ("runbook/customer-rollout", "Customer Rollout Procedure", "runbook", "Use the customer channel listed in vendor-portal. Never publish test manifests to stable.", "partial"),
+        ("architecture/service-map", "Service Map", "architecture", "DMZ: support and vendor portal. Corp: SSO, wiki, tickets, docs, mail. Dev: git and build. Release: signing and update.", "partial"),
+        ("architecture/echoagent-polling", "EchoAgent Polling Model", "architecture", "Customer app polls updates.release.local and reports update-applied events to customer-api.", "partial"),
+        ("architecture/object-storage", "Object Storage Layout", "architecture", "Customer exports are referenced by object_key and accessed through presigned URLs.", "partial"),
+        ("policy/secrets-handling", "Secrets Handling Policy", "policy", "Do not paste current tokens into tickets, mail, or .env.sample files. Use approved runbooks.", "partial"),
+        ("policy/service-accounts", "Service Account Policy", "policy", "build-svc may call source-repo, signing-service, update-server, and audit-log.", "partial"),
+        ("policy/customer-data", "Customer Data Handling", "policy", "ANRC audit exports are restricted to customer-api presigned access.", "partial"),
+        ("onboarding/release-engineering", "Release Engineering Onboarding", "onboarding", "New release engineers should read release/runbook-build-trigger and release/runbook-signing.", "partial"),
+        ("onboarding/customer-success", "Customer Success Onboarding", "onboarding", "Customer Success may see channel names but not signing or build trigger values.", "noise"),
+        ("customer/anrc-q2-audit", "ANRC Q2 Audit Coordination", "customer", "Q2 exports include facility-risk-summary.pdf and project-orion-echo-final.txt.", "partial"),
+        ("customer/delta-cargo-beta", "Delta Cargo Beta Notes", "customer", "Delta Cargo is on beta and unrelated to ANRC channel issues.", "noise"),
+        ("legacy/signing-key-2024", "Old Signing Key Notes", "legacy", "orion-prod-signing-key-2024 was retired. Do not use it for 2.6.x releases.", "decoy"),
+        ("legacy/anrc-channel-2025", "ANRC Channel 2025", "legacy", "ANRC_LEGACY_SECRET=revoked-2025-Q4. This is not accepted by current services.", "decoy"),
+        ("legacy/build-worker-migration", "Build Worker Migration", "legacy", "OLD_BUILD_TOKEN=expired-worker-token. Kept for migration history only.", "decoy"),
+    ]
+    for page_id, title, category, body, clue_kind in wiki_specs:
+        WIKI_PAGES.setdefault(page_id, {"title": title, "category": category, "body": body, "clue_kind": clue_kind})
+    for idx in range(1, 26):
+        page_id = f"noise/weekly-ops-{idx:02d}"
+        WIKI_PAGES.setdefault(
+            page_id,
+            {
+                "title": f"Weekly Operations Notes {idx:02d}",
+                "category": "onboarding" if idx % 2 else "policy",
+                "body": f"Routine operations note {idx}. No release credentials are stored on this page. Refer to service owners for access requests.",
+                "clue_kind": "noise",
+            },
+        )
+
+    base_ticket = 1400
+    categories = ["helpdesk", "engineering", "release", "security", "customer"]
+    statuses = ["open", "in_progress", "resolved", "closed"]
+    for idx in range(1, 101):
+        ticket_id = f"OES-{base_ticket + idx}"
+        if ticket_id in TICKETS:
+            continue
+        category = categories[idx % len(categories)]
+        clue_kind = "noise"
+        body = f"Routine {category} ticket for Orion Echo operations. Request id attached for audit review."
+        title = f"{category.title()} follow-up {idx:02d}"
+        if idx % 13 == 0:
+            clue_kind = "decoy"
+            title = f"Legacy token reference cleanup {idx:02d}"
+            body = "Found OLD_BUILD_TOKEN=expired-worker-token in an archived note. Validation confirms it is revoked."
+        elif idx % 9 == 0:
+            clue_kind = "partial"
+            title = f"Release channel note {idx:02d}"
+            body = "For ANRC channel questions, check the customer rollout procedure and release signing notes."
+        elif idx % 17 == 0:
+            clue_kind = "partial"
+            title = f"Customer escalation ANRC {idx:02d}"
+            body = "ANRC reports update timing concerns. Release Engineering owner emp-0048 is tracking the 2.6.4 marker rollout."
+        TICKETS[ticket_id] = {"title": title, "category": category, "body": body, "status": statuses[idx % len(statuses)], "clue_kind": clue_kind}
+
+    doc_specs = [
+        ("restricted/anrc-channel-rotation-q2.md", "restricted", "emp-0048", "ANRC channel rotation checklist. Validate manifest signature, lab marker, and update-applied audit event.", "partial"),
+        ("legacy/intranet-oidc-2023.txt", "internal", "emp-0077", "client_secret=old-intranet-secret-2023. Rejected by current corp-sso.", "decoy"),
+        ("release/signing-checklist.md", "internal", "emp-0048", "Canonical manifest must include metadata.lab_marker before signing.", "partial"),
+        ("customer/anrc-support-escalation.md", "internal", "emp-0062", "ANRC Q2 export review depends on customer-api /exports records.", "partial"),
+        ("security/honeytoken-index.md", "internal", "emp-0077", "Legacy ANRC credential export is intentionally monitored as a honeytoken.", "decoy"),
+    ]
+    for path, visibility, owner, body, clue_kind in doc_specs:
+        DOC_FILES.setdefault(path, {"visibility": visibility, "owner": owner, "body": body, "clue_kind": clue_kind})
+    for idx in range(1, 21):
+        DOC_FILES.setdefault(
+            f"routine/ops-note-{idx:02d}.md",
+            {"visibility": "internal", "owner": f"emp-{(idx % 40) + 1:04d}", "body": f"Routine operational memo {idx}. Contains no active credentials.", "clue_kind": "noise"},
+        )
+
+    for idx in range(4, 46):
+        message_id = f"msg-{1000 + idx}"
+        if message_id in MAIL_MESSAGES:
+            continue
+        sender = EMPLOYEES[idx % len(EMPLOYEES)]["email"]
+        clue_kind = "noise"
+        subject = f"Weekly operations digest {idx:02d}"
+        body = "Routine deployment, support, and facilities notes. No action required."
+        if idx % 10 == 0:
+            clue_kind = "partial"
+            subject = "Re: build trigger token - see wiki"
+            body = "Please point engineers to the release runbook instead of forwarding token values in mail."
+        elif idx % 14 == 0:
+            clue_kind = "decoy"
+            subject = "Old staging key found in archive"
+            body = "STAGING_API_KEY=stg-old-2025-Q3 was found in an archive and is confirmed revoked."
+        elif idx % 17 == 0:
+            clue_kind = "partial"
+            subject = "ANRC rollout watch"
+            body = "ANRC remains on channel anrc. Check monitoring after publish to confirm update-applied."
+        MAIL_MESSAGES[message_id] = {"from": sender, "to": ["ops@orionecho.test"], "subject": subject, "body": body, "clue_kind": clue_kind}
+
+    for idx in range(1, 36):
+        REPO_FILES.setdefault(f"echo-agent/src/module_{idx:02d}.py", f"# EchoAgent module {idx:02d}\nVERSION = '2.6.3'\n")
+    for idx in range(1, 26):
+        REPO_FILES.setdefault(f"release-pipeline/jobs/job_{idx:02d}.yml", f"name: release-job-{idx:02d}\nchannel: stable\n")
+
+
+expand_seed_data()
+
+
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -449,10 +608,20 @@ def run_guarded_command(command: str) -> tuple[str, bool]:
 
 
 @app.get("/pages")
-async def wiki_pages():
+async def wiki_pages(category: str | None = None, q: str | None = None, clue_kind: str | None = None):
     if SERVICE != "wiki":
         return JSONResponse(status_code=404, content={"error": "not found"})
-    return [{"page_id": page_id, "title": page["title"], "category": page["category"]} for page_id, page in WIKI_PAGES.items()]
+    items = []
+    for page_id, page in WIKI_PAGES.items():
+        if category and page["category"] != category:
+            continue
+        if clue_kind and page["clue_kind"] != clue_kind:
+            continue
+        haystack = f"{page_id} {page['title']} {page['body']}".lower()
+        if q and q.lower() not in haystack:
+            continue
+        items.append({"page_id": page_id, "title": page["title"], "category": page["category"], "clue_kind": page["clue_kind"]})
+    return {"count": len(items), "items": items}
 
 
 @app.get("/pages/{page_id:path}")
@@ -471,10 +640,20 @@ async def wiki_page(page_id: str):
 
 
 @app.get("/tickets")
-async def list_tickets():
+async def list_tickets(category: str | None = None, status: str | None = None, q: str | None = None):
     if SERVICE != "ticket-service":
         return JSONResponse(status_code=404, content={"error": "not found"})
-    return [{"ticket_id": ticket_id, "title": t["title"], "category": t["category"]} for ticket_id, t in TICKETS.items()]
+    items = []
+    for ticket_id, ticket in TICKETS.items():
+        if category and ticket["category"] != category:
+            continue
+        if status and ticket.get("status") != status:
+            continue
+        haystack = f"{ticket_id} {ticket['title']} {ticket['body']}".lower()
+        if q and q.lower() not in haystack:
+            continue
+        items.append({"ticket_id": ticket_id, "title": ticket["title"], "category": ticket["category"], "status": ticket.get("status", "open"), "clue_kind": ticket["clue_kind"]})
+    return {"count": len(items), "items": items}
 
 
 @app.get("/tickets/{ticket_id}")
@@ -489,11 +668,19 @@ async def get_ticket(ticket_id: str):
 
 
 @app.get("/employees")
-async def list_employees():
+async def list_employees(dept: str | None = None, q: str | None = None):
     if SERVICE != "hr-directory":
         return JSONResponse(status_code=404, content={"error": "not found"})
     await emit("hr.employees.viewed", "T1213", "flag_4_internal_discovery", "/employees")
-    return {"items": EMPLOYEES}
+    items = []
+    for employee in EMPLOYEES:
+        if dept and employee["dept"] != dept:
+            continue
+        haystack = f"{employee['user_id']} {employee['name']} {employee['email']} {employee['dept']} {employee['title']}".lower()
+        if q and q.lower() not in haystack:
+            continue
+        items.append(employee)
+    return {"count": len(items), "items": items}
 
 
 @app.get("/departments")
@@ -505,18 +692,34 @@ async def list_departments():
 
 
 @app.get("/customers")
-async def list_customers():
+async def list_customers(channel: str | None = None, q: str | None = None):
     if SERVICE not in {"vendor-portal", "intranet"}:
         return JSONResponse(status_code=404, content={"error": "not found"})
     await emit("customers.viewed", "T1213", "flag_4_internal_discovery", "/customers")
-    return {"items": CUSTOMERS}
+    items = []
+    for customer in CUSTOMERS:
+        if channel and customer["channel"] != channel:
+            continue
+        haystack = f"{customer['customer_id']} {customer['name']} {customer['channel']} {customer['health']}".lower()
+        if q and q.lower() not in haystack:
+            continue
+        items.append(customer)
+    return {"count": len(items), "items": items}
 
 
 @app.get("/messages")
-async def list_messages():
+async def list_messages(q: str | None = None, clue_kind: str | None = None):
     if SERVICE != "mail-web":
         return JSONResponse(status_code=404, content={"error": "not found"})
-    return [{"message_id": mid, "from": msg["from"], "subject": msg["subject"], "clue_kind": msg["clue_kind"]} for mid, msg in MAIL_MESSAGES.items()]
+    items = []
+    for mid, message in MAIL_MESSAGES.items():
+        if clue_kind and message["clue_kind"] != clue_kind:
+            continue
+        haystack = f"{mid} {message['from']} {message['subject']} {message['body']}".lower()
+        if q and q.lower() not in haystack:
+            continue
+        items.append({"message_id": mid, "from": message["from"], "subject": message["subject"], "clue_kind": message["clue_kind"]})
+    return {"count": len(items), "items": items}
 
 
 @app.get("/messages/{message_id}")
@@ -545,6 +748,29 @@ async def repo_file(path: str):
         technique = "T1552" if item["clue_kind"] == "decoy" else "T1213"
         await emit("doc.file.viewed", technique, "flag_4_internal_discovery", path, {"clue_kind": item["clue_kind"]})
         return item
+    return JSONResponse(status_code=404, content={"error": "not found"})
+
+
+@app.get("/files")
+async def list_files(q: str | None = None, clue_kind: str | None = None):
+    if SERVICE == "doc-portal":
+        rows = []
+        for path, item in DOC_FILES.items():
+            if clue_kind and item["clue_kind"] != clue_kind:
+                continue
+            haystack = f"{path} {item['body']} {item['owner']}".lower()
+            if q and q.lower() not in haystack:
+                continue
+            rows.append({"path": path, "visibility": item["visibility"], "owner": item["owner"], "clue_kind": item["clue_kind"]})
+        return {"count": len(rows), "items": rows}
+    if SERVICE == "source-repo":
+        rows = []
+        for path, item in REPO_FILES.items():
+            haystack = f"{path} {item}".lower()
+            if q and q.lower() not in haystack:
+                continue
+            rows.append({"path": path, "kind": "json" if isinstance(item, dict) else "text"})
+        return {"count": len(rows), "items": rows}
     return JSONResponse(status_code=404, content={"error": "not found"})
 
 
