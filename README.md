@@ -37,6 +37,13 @@ Detailed demo commands are in:
 docs/demo/README_demo.md
 ```
 
+For container-internal end-to-end verification, use:
+
+```powershell
+docker compose exec -T support-portal sh -c "cat > /tmp/verify_chain.py" < scripts/verify_chain.py
+docker compose exec -T support-portal python /tmp/verify_chain.py
+```
+
 ## Directory Layout
 
 ```text
@@ -60,6 +67,7 @@ docs/demo/README_demo.md
 │   └── edge-proxy/
 │       └── nginx.conf
 ├── scripts/
+│   ├── verify_chain.py
 │   └── walkthrough.ps1
 └── services/
     └── orion-demo/

@@ -18,10 +18,7 @@ services:
           - portal.orionecho.test
     security_opt:
       - no-new-privileges:true
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_BIND_SERVICE
+    restart: unless-stopped
 
   public-site:
     build: ./services/orion-demo
@@ -35,6 +32,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   public-docs:
     build: ./services/orion-demo
@@ -48,6 +46,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   support-portal:
     build: ./services/orion-demo
@@ -65,6 +64,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   wiki:
     build: ./services/orion-demo
@@ -80,6 +80,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   ticket-service:
     build: ./services/orion-demo
@@ -95,6 +96,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   source-repo:
     build: ./services/orion-demo
@@ -110,6 +112,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   build-server:
     build: ./services/orion-demo
@@ -128,6 +131,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   signing-service:
     build: ./services/orion-demo
@@ -143,6 +147,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   update-server:
     build: ./services/orion-demo
@@ -159,6 +164,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   customer-app:
     build: ./services/orion-demo
@@ -176,6 +182,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   customer-api:
     build: ./services/orion-demo
@@ -192,6 +199,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   object-store:
     build: ./services/orion-demo
@@ -207,6 +215,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   c2-emulator:
     build: ./services/orion-demo
@@ -226,6 +235,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   flag-service:
     build: ./services/orion-demo
@@ -238,6 +248,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
   audit-log:
     build: ./services/orion-demo
@@ -248,6 +259,7 @@ services:
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
+    restart: unless-stopped
 
 networks:
   public_net:
