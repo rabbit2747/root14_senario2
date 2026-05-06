@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { SCENARIOS, SCENARIO_LEVEL_META } from './VictimScenario';
 import useAptProgress from '../../../hooks/useAptProgress';
+import OE from '../orion-echo/data/orion-echo';
 
 const LEVEL_META = {
   1: { label: '비기너', color: '#22c55e', accent: 'from-emerald-500 to-green-600' },
@@ -22,19 +23,15 @@ const LEVEL_META = {
   5: { label: '전문가', color: '#ef4444', accent: 'from-rose-500 to-red-700' },
 };
 
-// 준비중 프리뷰 카드 (Lv3~5)
-const COMING_SOON = {
-  3: [
-    { id: 'C0010', name: 'APT1 Comment Crew', group: 'APT1', teaser: '중국발 장기 스파이 작전 — 수백 조직 침투' },
-    { id: 'C0006', name: 'APT28 Fancy Bear', group: 'APT28', teaser: '정치·군사 표적 스피어피싱' },
-  ],
+// Lab(실습 환경) 카드 — 1인칭 시나리오 외 Docker 기반 멀티스테이지 랩
+const LABS = {
   4: [
-    { id: 'C0015', name: 'Conti Ransomware', group: 'WizardSpider', teaser: '대규모 이중 갈취 랜섬웨어 작전' },
-    { id: 'C0011', name: 'APT29 SolarWinds 2차', group: 'APT29', teaser: 'Cloud Identity 체인 침투' },
-  ],
-  5: [
-    { id: 'C0020', name: 'Stuxnet', group: '국가주도', teaser: 'ICS/SCADA 제로데이 4종 — 원심분리기 파괴' },
-    { id: 'C0021', name: 'Equation Group', group: 'EQUATION', teaser: 'BIOS/펌웨어 레벨 지속성' },
+    {
+      id: OE.id, name: OE.name, group: OE.group,
+      teaser: `${OE.stages.length}단계 SolarWinds-style 공급망 침투 · Docker 기반 ~${OE.containerCount}컨테이너`,
+      status: OE.status,
+      route: '/apt/orion-echo',
+    },
   ],
 };
 
@@ -113,7 +110,7 @@ export default function ScenarioHub() {
         {[1, 2, 3, 4, 5].map((lv) => {
           const unlocked = isLevelUnlocked(lv);
           const scens = byLevel[lv] || [];
-          const previews = COMING_SOON[lv] || [];
+          const labs = LABS[lv] || [];
           const meta = LEVEL_META[lv];
 
           return (
@@ -205,25 +202,61 @@ export default function ScenarioHub() {
                   );
                 })}
 
-                {/* 준비중 프리뷰 */}
-                {previews.map((p) => (
-                  <div
-                    key={p.id}
-                    className="relative rounded-xl overflow-hidden border border-dashed border-white/10 bg-black/30"
-                  >
-                    <div className={`h-32 bg-gradient-to-br ${meta.accent} opacity-40`} />
-                    <div className="p-4">
-                      <div className="text-xs text-gray-500 mb-1">{p.group}</div>
-                      <div className="font-bold text-sm mb-2 text-gray-300">{p.name}</div>
-                      <div className="text-xs text-gray-500 line-clamp-2">{p.teaser}</div>
-                      <div className="mt-3 inline-block px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px] font-bold text-amber-400">
-                        준비중 · COMING SOON
+                {/* Lab(실습 환경) 카드 — Docker 멀티스테이지 */}
+                {labs.map((lab) => {
+                  const isPreparing = lab.status === 'preparing';
+                  return (
+                    <div
+                      key={lab.id}
+                      onClick={() => unlocked && navigate(lab.route)}
+                      className={`group relative text-left rounded-xl overflow-hidden border transition-all duration-300 ${
+                        unlocked
+                          ? 'border-white/10 hover:border-amber-500/50 bg-gradient-to-br from-amber-500/5 to-white/0 cursor-pointer'
+                          : 'border-white/5 opacity-50 bg-black/40'
+                      }`}
+                    >
+                      <div className={`h-32 bg-gradient-to-br ${meta.accent} relative overflow-hidden`}>
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.25),transparent_60%)]" />
+                        <div className="absolute top-3 left-3 text-xs font-mono text-white/80">{lab.id}</div>
+                        <div className="absolute top-3 right-3 px-2 py-0.5 rounded bg-amber-500/30 border border-amber-300/50 text-[10px] font-bold text-amber-100">
+                          🐳 LAB
+                        </div>
+                        {!unlocked && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-3xl">
+                            🔒
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <div className="text-xs text-gray-400 mb-1">{lab.group}</div>
+                        <div className="font-bold text-sm mb-2">{lab.name}</div>
+                        <div className="text-xs text-gray-500 line-clamp-2">{lab.teaser}</div>
+                        <div className="mt-3 flex items-center gap-2">
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                            isPreparing
+                              ? 'bg-amber-500/10 border border-amber-500/30 text-amber-400'
+                              : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                          }`}>
+                            {isPreparing ? '⚙ 준비중' : '✓ 사용 가능'}
+                          </span>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); unlocked && navigate(lab.route); }}
+                          disabled={!unlocked}
+                          className={`mt-4 w-full px-2 py-2 rounded text-xs font-bold transition ${
+                            unlocked
+                              ? 'bg-amber-500 hover:bg-amber-400 text-black cursor-pointer'
+                              : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                          }`}
+                        >
+                          📋 시나리오 브리핑 →
+                        </button>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
-                {scens.length === 0 && previews.length === 0 && (
+                {scens.length === 0 && labs.length === 0 && (
                   <div className="col-span-full text-center py-10 text-gray-600 text-sm">
                     이 레벨의 시나리오를 준비하고 있습니다.
                   </div>
@@ -239,7 +272,7 @@ export default function ScenarioHub() {
         <div className="max-w-7xl mx-auto px-6 py-8 text-center">
           <div className="text-xs text-gray-500 mb-2">▶ 다음 작전</div>
           <div className="text-sm text-gray-300">
-            곧 추가됩니다 — <span className="text-amber-400">Colonial Pipeline (C1004)</span> · 물리 인프라를 마비시킨 랜섬웨어
+            준비중 — <span className="text-amber-400">{OE.next.title}</span> · {OE.next.hint}
           </div>
         </div>
       </div>
