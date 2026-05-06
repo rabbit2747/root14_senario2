@@ -9,7 +9,7 @@ export default {
   id: 'OE001',
   name: 'Orion Echo Enterprise APT Range',
   group: 'Inspired by APT29 (SolarWinds-style)',
-  level: 4,
+  level: 3,
   type: 'lab', // 'lab' = Docker 실습 환경 (1인칭 시나리오 X)
   durationMin: 360, // 6시간 권장
   difficulty: 'advanced',

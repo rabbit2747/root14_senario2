@@ -25,7 +25,7 @@ const LEVEL_META = {
 
 // Lab(실습 환경) 카드 — 1인칭 시나리오 외 Docker 기반 멀티스테이지 랩
 const LABS = {
-  4: [
+  3: [
     {
       id: OE.id, name: OE.name, group: OE.group,
       teaser: `${OE.stages.length}단계 SolarWinds-style 공급망 침투 · Docker 기반 ~${OE.containerCount}컨테이너`,
@@ -34,6 +34,12 @@ const LABS = {
     },
   ],
 };
+
+// ── 진행 중 — 임시 잠금/오픈 정책 ──
+// 비기너·초급 시나리오 (C0024·C0023)는 콘텐츠 정비 중이라 잠금
+// Orion Echo (OE001)만 자유 진입 가능 — 흐름·디자인 작업 진행 중
+const TEMP_LOCKED_SCENARIOS = new Set(['C0024', 'C0023']);
+const TEMP_OPEN_LABS = new Set(['OE001']);
 
 // profiles.level 문자열 → 숫자
 const LEVEL_STR_TO_NUM = {
@@ -138,13 +144,15 @@ export default function ScenarioHub() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {scens.map(({ id, data }) => {
                   const isDone = completed.includes(id);
+                  const cardLocked = !unlocked || TEMP_LOCKED_SCENARIOS.has(id);
+                  const tempLocked = TEMP_LOCKED_SCENARIOS.has(id);
                   return (
                     <div
                       key={id}
                       className={`group relative text-left rounded-xl overflow-hidden border transition-all duration-300 ${
-                        unlocked
-                          ? 'border-white/10 hover:border-white/30 bg-gradient-to-br from-white/5 to-white/0'
-                          : 'border-white/5 opacity-50 bg-black/40'
+                        cardLocked
+                          ? 'border-white/5 opacity-50 bg-black/40'
+                          : 'border-white/10 hover:border-white/30 bg-gradient-to-br from-white/5 to-white/0'
                       }`}
                     >
                       <div className={`h-32 bg-gradient-to-br ${meta.accent} relative overflow-hidden`}>
@@ -155,9 +163,14 @@ export default function ScenarioHub() {
                             ✓ 완료
                           </div>
                         )}
-                        {!unlocked && (
-                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-3xl">
-                            🔒
+                        {cardLocked && (
+                          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-1">
+                            <span className="text-3xl">🔒</span>
+                            {tempLocked && (
+                              <span className="text-[10px] font-bold tracking-widest text-amber-300">
+                                ⚙ 콘텐츠 정비 중
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>
@@ -175,23 +188,23 @@ export default function ScenarioHub() {
                         {/* 액션 버튼 2종 — 도트맵 탐험 + 바로 시나리오 */}
                         <div className="mt-4 grid grid-cols-2 gap-2">
                           <button
-                            onClick={() => unlocked && navigate(`/apt/${id}/game`)}
-                            disabled={!unlocked}
+                            onClick={() => !cardLocked && navigate(`/apt/${id}/game`)}
+                            disabled={cardLocked}
                             className={`px-2 py-2 rounded text-xs font-bold transition ${
-                              unlocked
-                                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:brightness-110 text-white cursor-pointer'
-                                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                              cardLocked
+                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:brightness-110 text-white cursor-pointer'
                             }`}
                           >
                             🎮 도트맵 탐험
                           </button>
                           <button
-                            onClick={() => unlocked && navigate(`/apt/${id}/scenario`)}
-                            disabled={!unlocked}
+                            onClick={() => !cardLocked && navigate(`/apt/${id}/scenario`)}
+                            disabled={cardLocked}
                             className={`px-2 py-2 rounded text-xs font-bold transition ${
-                              unlocked
-                                ? 'bg-amber-500 hover:bg-amber-400 text-black cursor-pointer'
-                                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                              cardLocked
+                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                                : 'bg-amber-500 hover:bg-amber-400 text-black cursor-pointer'
                             }`}
                           >
                             🎬 바로 시나리오
@@ -205,13 +218,14 @@ export default function ScenarioHub() {
                 {/* Lab(실습 환경) 카드 — Docker 멀티스테이지 */}
                 {labs.map((lab) => {
                   const isPreparing = lab.status === 'preparing';
+                  const labOpen = unlocked || TEMP_OPEN_LABS.has(lab.id);
                   return (
                     <div
                       key={lab.id}
-                      onClick={() => unlocked && navigate(lab.route)}
+                      onClick={() => labOpen && navigate(lab.route)}
                       className={`group relative text-left rounded-xl overflow-hidden border transition-all duration-300 ${
-                        unlocked
-                          ? 'border-white/10 hover:border-amber-500/50 bg-gradient-to-br from-amber-500/5 to-white/0 cursor-pointer'
+                        labOpen
+                          ? 'border-amber-500/30 hover:border-amber-500/70 bg-gradient-to-br from-amber-500/10 to-white/0 cursor-pointer ring-1 ring-amber-500/20'
                           : 'border-white/5 opacity-50 bg-black/40'
                       }`}
                     >
@@ -221,7 +235,7 @@ export default function ScenarioHub() {
                         <div className="absolute top-3 right-3 px-2 py-0.5 rounded bg-amber-500/30 border border-amber-300/50 text-[10px] font-bold text-amber-100">
                           🐳 LAB
                         </div>
-                        {!unlocked && (
+                        {!labOpen && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-3xl">
                             🔒
                           </div>
@@ -237,14 +251,19 @@ export default function ScenarioHub() {
                               ? 'bg-amber-500/10 border border-amber-500/30 text-amber-400'
                               : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
                           }`}>
-                            {isPreparing ? '⚙ 준비중' : '✓ 사용 가능'}
+                            {isPreparing ? '⚙ 실습 환경 준비중' : '✓ 사용 가능'}
                           </span>
+                          {TEMP_OPEN_LABS.has(lab.id) && (
+                            <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-bold text-emerald-400">
+                              🔓 브리핑 열림
+                            </span>
+                          )}
                         </div>
                         <button
-                          onClick={(e) => { e.stopPropagation(); unlocked && navigate(lab.route); }}
-                          disabled={!unlocked}
+                          onClick={(e) => { e.stopPropagation(); labOpen && navigate(lab.route); }}
+                          disabled={!labOpen}
                           className={`mt-4 w-full px-2 py-2 rounded text-xs font-bold transition ${
-                            unlocked
+                            labOpen
                               ? 'bg-amber-500 hover:bg-amber-400 text-black cursor-pointer'
                               : 'bg-gray-800 text-gray-600 cursor-not-allowed'
                           }`}
