@@ -22,6 +22,7 @@ const LabCompletion           = lazy(() => import('./pages/lab/LabCompletionPage
 const LevelTest               = lazy(() => import('./pages/LevelTest'));
 const BasicsPage              = lazy(() => import('./pages/BasicsPage'));
 const LearningPathChoice      = lazy(() => import('./pages/LearningPathChoice'));
+const Root14ScenarioChoice    = lazy(() => import('./pages/Root14ScenarioChoice'));
 const RecommendedCoursePage   = lazy(() => import('./pages/RecommendedCoursePage'));
 const GuidedLearning          = lazy(() => import('./pages/guided/GuidedLearning'));
 const AptGalleryPage          = lazy(() => import('./pages/apt/AptGalleryPage'));
@@ -137,6 +138,7 @@ function App() {
             <Route path="/level-test" element={<LevelTest />} />
             <Route path="/basics" element={<BasicsPage />} />
             <Route path="/learning-path" element={<LearningPathChoice />} />
+            <Route path="/root14-scenario" element={<Root14ScenarioChoice />} />
             <Route path="/recommended/:techniqueId" element={<RecommendedCoursePage />} />
             <Route path="/guided/:techniqueId" element={<GuidedLearning />} />
             <Route path="/apt" element={<AptGalleryPage />} />

@@ -162,6 +162,29 @@ function ChoicePhase({ onSelect, navigate, isDark }) {
           </div>
         </button>
 
+        {/* ROOT14 시나리오 카드 */}
+        <button
+          onClick={() => navigate('/root14-scenario')}
+          className={`group text-left p-5 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${isDark
+            ? 'border-cyan-800/40 bg-cyan-900/15 hover:border-cyan-600/60 hover:bg-cyan-900/25'
+            : 'border-cyan-200 bg-cyan-50/60 hover:border-cyan-400 hover:bg-cyan-50'
+          }`}
+        >
+          <div className="text-4xl mb-4">🧭</div>
+          <h3 className={`text-base sm:text-lg font-black mb-2 ${isDark ? 'text-white' : 'text-[#1c1c1e]'}`}>
+            ROOT14 시나리오
+          </h3>
+          <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            ROOT14가 직접 설계한 학습 트랙을 단계별로 진행합니다.
+            <br />
+            <span className={`font-semibold ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>맞춤형 커리큘럼!</span>
+          </p>
+          <div className={`mt-4 inline-flex items-center gap-1.5 text-xs font-bold ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>
+            트랙 진입
+            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </div>
+        </button>
+
         {/* 자율학습 카드 */}
         <button
           onClick={() => onSelect('self-directed')}
