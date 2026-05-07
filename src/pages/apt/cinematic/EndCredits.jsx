@@ -129,8 +129,11 @@ export default function EndCredits({ scenario, ending, chosenPath, onRestart }) 
           <button onClick={onRestart} style={btn({ background: '#fbbf24', color: '#000', fontWeight: 800 })}>
             ↻ 다시 보기
           </button>
-          <button onClick={() => navigate('/apt/scenarios')} style={btn({ background: 'transparent', color: '#cbd5e1', border: '1px solid #475569' })}>
-            시나리오 허브
+          <button
+            onClick={() => navigate(scenario.exitRoute || '/apt/scenarios')}
+            style={btn({ background: 'transparent', color: '#cbd5e1', border: '1px solid #475569' })}
+          >
+            {scenario.exitLabel || '시나리오 허브'}
           </button>
         </div>
       )}

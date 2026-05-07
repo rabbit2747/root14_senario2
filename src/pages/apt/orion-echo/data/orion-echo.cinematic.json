@@ -1,0 +1,120 @@
+{
+  "id": "orion-echo",
+  "title": "사건의 그날",
+  "subtitle": "ANRC 야간 근무자의 시점",
+  "voice": "first-person-victim",
+  "aspectRatio": "21:9",
+  "transition": { "type": "crossfade", "duration": 0.7 },
+
+  "first": "morning",
+
+  "clips": [
+    {
+      "id": "morning",
+      "type": "voxel",
+      "scene": "admin-pc",
+      "duration": 7,
+      "subtitle": "22:14.  야간 근무.  모니터 두 대, 커피, 익숙한 알람.",
+      "next": "routine"
+    },
+    {
+      "id": "routine",
+      "type": "voxel",
+      "scene": "admin-pc",
+      "duration": 6,
+      "subtitle": "어제도, 그제도, 그 전 주에도 똑같은 풍경이었다.",
+      "next": "vendor-email"
+    },
+    {
+      "id": "vendor-email",
+      "type": "voxel",
+      "scene": "shell-window",
+      "duration": 6,
+      "subtitle": "Orion Echo.  EchoAgent 업데이트 알림.  v3.4.1.",
+      "next": "trust"
+    },
+    {
+      "id": "trust",
+      "type": "voxel",
+      "scene": "shell-window",
+      "duration": 5,
+      "subtitle": "익숙한 벤더의,  익숙한 통보.  나는 별 생각 없이 승인했다.",
+      "next": "install"
+    },
+    {
+      "id": "install",
+      "type": "voxel",
+      "scene": "data-transfer",
+      "duration": 5,
+      "subtitle": "1분 47초.  설치 완료.  평소보다 빨랐던가, 늦었던가.",
+      "next": "calm"
+    },
+    {
+      "id": "calm",
+      "type": "voxel",
+      "scene": "lobby",
+      "duration": 5,
+      "subtitle": "잠시 자리를 비웠다.  복도는 조용했다.",
+      "next": "anomaly"
+    },
+    {
+      "id": "anomaly",
+      "type": "voxel",
+      "scene": "final-prompt",
+      "duration": 7,
+      "subtitle": "오전 3시 28분.  모니터링 그래프에 본 적 없는 곡선이 그려졌다.",
+      "next": "alert-spread"
+    },
+    {
+      "id": "alert-spread",
+      "type": "voxel",
+      "scene": "red-screens",
+      "duration": 7,
+      "subtitle": "한 화면이, 두 화면이, 세 화면이 빨갛게 점등되었다.",
+      "next": "revelation"
+    },
+    {
+      "id": "revelation",
+      "type": "voxel",
+      "scene": "red-screens",
+      "duration": 8,
+      "subtitle": "사건은 우리에게서 시작되지 않았다.\n신뢰했던 어떤 것에서 시작되었다.",
+      "next": "epilogue"
+    },
+    {
+      "id": "epilogue",
+      "type": "voxel",
+      "scene": "credits",
+      "duration": 9,
+      "subtitle": "그렇다면 누가, 어떻게.\n— 다음 자리에서 당신은 공격자가 된다.",
+      "next": null
+    }
+  ],
+
+  "choices": {},
+  "endings": {},
+
+  "credits": {
+    "tactics": [],
+    "next": {
+      "id": "orion-echo-attacker-1",
+      "title": "공격자의 첫 수",
+      "hint": "같은 사건을 반대편에서 본다."
+    }
+  },
+
+  "principles": {
+    "continuity": "사건의 발생을 피해자의 일상에서 본다. 평범함과 비범함의 경계가 모호함을 의도.",
+    "relevance":  [
+      { "label": "T1195.002", "note": "Compromise Software Supply Chain — 신뢰된 벤더 채널 활용" },
+      { "label": "T1199",     "note": "Trusted Relationship — 외부 벤더의 정상 통신 위장" }
+    ],
+    "coherence": {
+      "nextTitle": "공격자의 첫 수",
+      "nextHint": "신뢰가 무너진 그 자리, 반대편의 손."
+    }
+  },
+
+  "exitRoute": "/apt/orion-echo",
+  "exitLabel": "목차로 돌아가기"
+}

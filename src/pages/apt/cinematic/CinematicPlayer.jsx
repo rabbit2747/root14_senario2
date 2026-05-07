@@ -18,8 +18,9 @@ import EndCredits from './EndCredits';
 // 클립 ID로 클립 객체 찾기
 const findClip = (clips, id) => clips.find((c) => c.id === id);
 
-export default function CinematicPlayer() {
-  const { scenarioId = 'c0024' } = useParams();
+export default function CinematicPlayer({ scenarioIdOverride = null } = {}) {
+  const params = useParams();
+  const scenarioId = scenarioIdOverride || params.scenarioId || 'c0024';
   const navigate = useNavigate();
   const scenario = useCinematic(scenarioId);
 
