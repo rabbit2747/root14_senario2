@@ -9,7 +9,7 @@
  */
 import { useEffect } from 'react';
 
-const TARGET = 'https://root14-scenario-choice.vercel.app';
+const TARGET = 'https://root14-scenario-choice.vercel.app/gather';
 
 export default function Root14ScenarioChoice() {
   useEffect(() => {
