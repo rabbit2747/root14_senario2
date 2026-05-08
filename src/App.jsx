@@ -33,11 +33,8 @@ const Ch1Prototype            = lazy(() => import('./pages/apt/study/Ch1Prototyp
 const VictimScenario          = lazy(() => import('./pages/apt/study/VictimScenario'));
 const ScenarioHub             = lazy(() => import('./pages/apt/study/ScenarioHub'));
 const AptGame                 = lazy(() => import('./pages/apt/study/AptGame'));
-const CinematicPlayer         = lazy(() => import('./pages/apt/cinematic/CinematicPlayer'));
 const OrionEchoTOC            = lazy(() => import('./pages/apt/orion-echo/CourseTOC'));
 const OrionEchoIntro          = lazy(() => import('./pages/apt/orion-echo/OrionEchoIntro'));
-const OrionEchoCinematic      = lazy(() => import('./pages/apt/orion-echo/OrionEchoCinematic'));
-const DioramaCourse           = lazy(() => import('./pages/apt/diorama/DioramaCourse'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -144,12 +141,8 @@ function App() {
             <Route path="/apt" element={<AptGalleryPage />} />
             <Route path="/apt/scenarios" element={<ScenarioHub />} />
             <Route path="/apt/:campaignId/game" element={<AptGame />} />
-            <Route path="/apt/cinematic/:scenarioId" element={<CinematicPlayer />} />
             <Route path="/apt/orion-echo" element={<OrionEchoTOC />} />
             <Route path="/apt/orion-echo/intro" element={<OrionEchoIntro />} />
-            <Route path="/apt/orion-echo/cinematic" element={<OrionEchoCinematic />} />
-            <Route path="/apt/diorama" element={<DioramaCourse />} />
-            <Route path="/apt/diorama/:stageId" element={<DioramaCourse />} />
             <Route path="/apt/:campaignId" element={<AptDetailPage />} />
             <Route path="/apt/:campaignId/study" element={<AptStudyPage />} />
             <Route path="/apt/preview-density" element={<DensityPreview />} />

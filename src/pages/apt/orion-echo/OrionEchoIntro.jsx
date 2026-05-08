@@ -188,27 +188,20 @@ export default function OrionEchoIntro() {
           textAlign: 'center',
         }}>
           <button
-            onClick={() => navigate('/apt/orion-echo/cinematic')}
+            disabled
             style={{
-              background: C.accent,
-              color: '#0a0a0f',
-              border: 'none',
+              background: 'transparent',
+              color: C.muted,
+              border: `1px dashed ${C.faint}`,
               padding: '18px 48px',
               fontFamily: 'monospace',
               fontSize: 15,
               fontWeight: 700,
               letterSpacing: 4,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#fde68a';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = C.accent;
+              cursor: 'not-allowed',
             }}
           >
-            ▶ 사건의 그날로 →
+            ⚙ 시네마틱 재구축 중
           </button>
           <div style={{
             marginTop: 16,

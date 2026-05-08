@@ -27,8 +27,9 @@ const SECTIONS = [
   {
     id: 2, label: '사건의 그날 — 피해자 시점',
     summary: '평범한 출근. 평범한 메일. 평범한 업데이트. 그리고 평범하지 않은 결말.',
-    route: '/apt/orion-echo/cinematic',
-    open: true,
+    route: null,
+    open: false,
+    note: '재구축 중',
   },
   {
     id: 3, label: '공격자의 첫 수',
