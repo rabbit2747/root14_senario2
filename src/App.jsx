@@ -34,6 +34,7 @@ const VictimScenario          = lazy(() => import('./pages/apt/study/VictimScena
 const ScenarioHub             = lazy(() => import('./pages/apt/study/ScenarioHub'));
 const AptGame                 = lazy(() => import('./pages/apt/study/AptGame'));
 const OrionEchoTOC            = lazy(() => import('./pages/apt/orion-echo/CourseTOC'));
+const CinematicExperience     = lazy(() => import('./pages/apt/cinematic-mvp/CinematicExperience'));
 const OrionEchoIntro          = lazy(() => import('./pages/apt/orion-echo/OrionEchoIntro'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
@@ -143,6 +144,7 @@ function App() {
             <Route path="/apt/:campaignId/game" element={<AptGame />} />
             <Route path="/apt/orion-echo" element={<OrionEchoTOC />} />
             <Route path="/apt/orion-echo/intro" element={<OrionEchoIntro />} />
+            <Route path="/apt/cinematic/:scenarioId" element={<CinematicExperience />} />
             <Route path="/apt/:campaignId" element={<AptDetailPage />} />
             <Route path="/apt/:campaignId/study" element={<AptStudyPage />} />
             <Route path="/apt/preview-density" element={<DensityPreview />} />
