@@ -6,7 +6,7 @@
  */
 import { useEffect } from 'react';
 
-const TARGET = 'https://root14-deck.vercel.app';
+const TARGET = 'https://root14-vinyl.vercel.app';
 
 export default function Root14ScenarioChoice() {
   useEffect(() => {
