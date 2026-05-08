@@ -35,6 +35,7 @@ const ScenarioHub             = lazy(() => import('./pages/apt/study/ScenarioHub
 const AptGame                 = lazy(() => import('./pages/apt/study/AptGame'));
 const OrionEchoTOC            = lazy(() => import('./pages/apt/orion-echo/CourseTOC'));
 const CinematicExperience     = lazy(() => import('./pages/apt/cinematic-mvp/CinematicExperience'));
+const Root14NotFound          = lazy(() => import('./pages/Root14NotFound'));
 const OrionEchoIntro          = lazy(() => import('./pages/apt/orion-echo/OrionEchoIntro'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
@@ -161,6 +162,7 @@ function App() {
             <Route path="/edu/scenario/:techniqueId/:level" element={<ScenarioExplanationPage />} />
             <Route path="/lab/desktop/:techniqueId/:level" element={<DesktopLab />} />
             <Route path="/lab/complete/:techniqueId" element={<LabCompletion />} />
+            <Route path="*" element={<Root14NotFound />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

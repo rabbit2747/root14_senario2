@@ -63,6 +63,17 @@ const FIRST_SCENE = {
 
 const SUPPORTED = Object.keys(FIRST_SCENE);
 
+// ── 뒤로가기 — intro briefing 으로 (현재 흐름 origin) ──
+const INTRO_BACK_BASE = "https://root14-intro-v2.vercel.app";
+function backToBriefing(scenarioId) {
+  // history가 같은 origin이면 back, 아니면 intro로 직접 이동 (404 방지)
+  if (window.history.length > 1 && document.referrer && document.referrer.includes("root14-intro")) {
+    window.history.back();
+    return;
+  }
+  window.location.href = `${INTRO_BACK_BASE}/apt/${scenarioId}/briefing`;
+}
+
 export default function CinematicExperience() {
   const { scenarioId } = useParams();
   const navigate = useNavigate();
@@ -87,6 +98,44 @@ export default function CinematicExperience() {
       }}
     >
       <Atmosphere accent={scene.accent} caseId={scenarioId} />
+
+      {/* 뒤로가기 — BRIEFING 으로 */}
+      <button
+        type="button"
+        onClick={() => backToBriefing(scenarioId)}
+        style={{
+          position: "fixed",
+          top: 16,
+          left: 60,
+          zIndex: 9999,
+          background: "rgba(8, 12, 20, 0.85)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          border: `1px solid ${scene.accent}55`,
+          color: scene.accent,
+          fontFamily: '"JetBrains Mono", monospace',
+          fontSize: 10,
+          letterSpacing: 3,
+          padding: "8px 14px",
+          borderRadius: 0,
+          cursor: "pointer",
+          transition: "all 0.2s",
+          fontWeight: 700,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = `${scene.accent}1a`;
+          e.currentTarget.style.borderColor = scene.accent;
+          e.currentTarget.style.boxShadow = `0 0 16px ${scene.accent}55`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "rgba(8, 12, 20, 0.85)";
+          e.currentTarget.style.borderColor = `${scene.accent}55`;
+          e.currentTarget.style.boxShadow = "none";
+        }}
+        aria-label="뒤로 — 작전 브리핑"
+      >
+        ← BRIEFING
+      </button>
 
       <div
         style={{
