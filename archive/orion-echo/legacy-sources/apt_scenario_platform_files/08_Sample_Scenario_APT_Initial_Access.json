@@ -1,0 +1,491 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "apt-initial-access-web-vulnerability",
+  "title": "웹서버 취약점을 통한 APT Initial Access",
+  "summary": "공격자가 외부에서 기업의 웹서버와 통신하고, 웹서버 취약점 이벤트가 관찰되는 상황을 통해 Initial Access와 탐지·대응 흐름을 학습한다.",
+  "difficulty": "beginner",
+  "estimatedMinutes": 25,
+  "layoutMode": "enterprise-network",
+  "learningObjectives": [
+    "외부 인터넷, DMZ, 내부망, 보안 영역의 역할을 구분할 수 있다.",
+    "Initial Access 단계에서 활성화되는 인프라와 통신 경로를 설명할 수 있다.",
+    "웹서버 취약점 이벤트 이후 방어 관점에서 확인해야 할 요소를 이해한다.",
+    "탐지, 격리, 포렌식, 복구의 기본 대응 흐름을 설명할 수 있다."
+  ],
+  "safetyLevel": "defensive-education",
+  "zones": [
+    {
+      "id": "external",
+      "label": "외부 인터넷",
+      "type": "external",
+      "parentId": null,
+      "description": "기업 외부의 공격자와 외부 서비스가 위치하는 영역"
+    },
+    {
+      "id": "company-a",
+      "label": "A 기업망",
+      "type": "company",
+      "parentId": null,
+      "description": "학습 대상 기업의 전체 네트워크 경계"
+    },
+    {
+      "id": "company-a-dmz",
+      "label": "DMZ",
+      "type": "dmz",
+      "parentId": "company-a",
+      "description": "외부에 노출되는 서비스가 위치하는 완충 영역"
+    },
+    {
+      "id": "company-a-internal",
+      "label": "내부망",
+      "type": "internal",
+      "parentId": "company-a",
+      "description": "기업 내부 주요 시스템이 위치하는 영역"
+    },
+    {
+      "id": "company-a-security",
+      "label": "보안 영역",
+      "type": "security",
+      "parentId": "company-a",
+      "description": "탐지, 로그 수집, 대응 시스템이 위치하는 영역"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "attacker-pc",
+      "label": "공격자 PC",
+      "type": "attackerPc",
+      "zoneId": "external",
+      "layoutRole": "source",
+      "importance": "high",
+      "description": "외부에서 기업 웹서버와 통신을 시도하는 공격자 장비"
+    },
+    {
+      "id": "external-dns",
+      "label": "외부 DNS",
+      "type": "dnsServer",
+      "zoneId": "external",
+      "layoutRole": "externalService",
+      "importance": "low",
+      "description": "도메인 질의 흐름을 설명하기 위한 외부 서비스"
+    },
+    {
+      "id": "internet-router",
+      "label": "인터넷 라우터",
+      "type": "router",
+      "zoneId": "external",
+      "layoutRole": "intermediary",
+      "importance": "medium",
+      "description": "외부 통신 경로를 표현하는 네트워크 장비"
+    },
+    {
+      "id": "edge-firewall",
+      "label": "경계 방화벽",
+      "type": "firewall",
+      "zoneId": "company-a",
+      "layoutRole": "securityControl",
+      "importance": "critical",
+      "description": "외부와 기업망 사이의 경계 통제를 담당하는 장비"
+    },
+    {
+      "id": "waf",
+      "label": "WAF",
+      "type": "waf",
+      "zoneId": "company-a-dmz",
+      "layoutRole": "securityControl",
+      "importance": "high",
+      "description": "웹 트래픽을 검사하는 보안 장비"
+    },
+    {
+      "id": "web-server",
+      "label": "웹 서버",
+      "type": "webServer",
+      "zoneId": "company-a-dmz",
+      "layoutRole": "entryPoint",
+      "importance": "critical",
+      "description": "외부 사용자에게 서비스를 제공하는 웹 서버"
+    },
+    {
+      "id": "app-server",
+      "label": "애플리케이션 서버",
+      "type": "appServer",
+      "zoneId": "company-a-internal",
+      "layoutRole": "intermediary",
+      "importance": "high",
+      "description": "웹 서버와 내부 데이터 저장소 사이에서 비즈니스 로직을 처리하는 서버"
+    },
+    {
+      "id": "db-server",
+      "label": "DB 서버",
+      "type": "database",
+      "zoneId": "company-a-internal",
+      "layoutRole": "criticalAsset",
+      "importance": "critical",
+      "description": "중요 업무 데이터가 저장된 내부 데이터베이스"
+    },
+    {
+      "id": "ad-server",
+      "label": "AD 서버",
+      "type": "adServer",
+      "zoneId": "company-a-internal",
+      "layoutRole": "identity",
+      "importance": "critical",
+      "description": "계정과 인증 정보를 관리하는 내부 주요 시스템"
+    },
+    {
+      "id": "user-pc-01",
+      "label": "사용자 PC",
+      "type": "desktop",
+      "zoneId": "company-a-internal",
+      "layoutRole": "userEndpoint",
+      "importance": "medium",
+      "description": "일반 사용자가 업무에 사용하는 단말"
+    },
+    {
+      "id": "siem",
+      "label": "SIEM",
+      "type": "siem",
+      "zoneId": "company-a-security",
+      "layoutRole": "logging",
+      "importance": "critical",
+      "description": "보안 이벤트와 로그를 수집하고 분석하는 시스템"
+    },
+    {
+      "id": "edr-manager",
+      "label": "EDR 관리 서버",
+      "type": "edr",
+      "zoneId": "company-a-security",
+      "layoutRole": "securityControl",
+      "importance": "high",
+      "description": "엔드포인트 보안 이벤트를 관리하는 시스템"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-attacker-dns",
+      "source": "attacker-pc",
+      "target": "external-dns",
+      "type": "dns",
+      "label": "도메인 질의",
+      "crossesBoundary": false,
+      "description": "공격자가 목표 웹 서비스의 주소를 확인하는 흐름"
+    },
+    {
+      "id": "edge-attacker-router",
+      "source": "attacker-pc",
+      "target": "internet-router",
+      "type": "https",
+      "label": "외부 통신",
+      "crossesBoundary": false,
+      "description": "외부에서 기업 경계로 향하는 통신 흐름"
+    },
+    {
+      "id": "edge-router-firewall",
+      "source": "internet-router",
+      "target": "edge-firewall",
+      "type": "https",
+      "label": "경계 통과",
+      "crossesBoundary": true,
+      "description": "외부 인터넷에서 기업 경계로 들어오는 통신"
+    },
+    {
+      "id": "edge-firewall-waf",
+      "source": "edge-firewall",
+      "target": "waf",
+      "type": "https",
+      "label": "웹 트래픽 검사",
+      "crossesBoundary": true,
+      "description": "방화벽을 통과한 웹 트래픽이 WAF로 전달되는 흐름"
+    },
+    {
+      "id": "edge-waf-web",
+      "source": "waf",
+      "target": "web-server",
+      "type": "https",
+      "label": "웹 요청",
+      "crossesBoundary": false,
+      "description": "WAF를 거친 요청이 웹서버로 전달되는 흐름"
+    },
+    {
+      "id": "edge-web-app",
+      "source": "web-server",
+      "target": "app-server",
+      "type": "api",
+      "label": "내부 API 호출",
+      "crossesBoundary": true,
+      "description": "웹서버가 내부 애플리케이션 서버와 통신하는 흐름"
+    },
+    {
+      "id": "edge-app-db",
+      "source": "app-server",
+      "target": "db-server",
+      "type": "db",
+      "label": "DB 접근",
+      "crossesBoundary": false,
+      "description": "애플리케이션 서버가 DB 서버와 통신하는 흐름"
+    },
+    {
+      "id": "edge-web-siem",
+      "source": "web-server",
+      "target": "siem",
+      "type": "log",
+      "label": "웹 로그 전송",
+      "crossesBoundary": true,
+      "description": "웹서버 로그가 SIEM으로 수집되는 흐름"
+    },
+    {
+      "id": "edge-waf-siem",
+      "source": "waf",
+      "target": "siem",
+      "type": "securityAlert",
+      "label": "탐지 이벤트",
+      "crossesBoundary": true,
+      "description": "WAF에서 관찰된 이상 이벤트가 SIEM으로 전달되는 흐름"
+    },
+    {
+      "id": "edge-edr-userpc",
+      "source": "edr-manager",
+      "target": "user-pc-01",
+      "type": "securityAlert",
+      "label": "엔드포인트 상태 확인",
+      "crossesBoundary": true,
+      "description": "EDR 관리 서버가 사용자 단말 상태를 확인하는 흐름"
+    }
+  ],
+  "steps": [
+    {
+      "id": "step-1-recon",
+      "order": 1,
+      "title": "Step 1. 외부 정보 확인",
+      "tactic": "Reconnaissance",
+      "summary": "공격자 PC가 외부 DNS와 통신하며 목표 웹 서비스 접근을 준비한다.",
+      "activeNodes": [
+        "attacker-pc",
+        "external-dns"
+      ],
+      "activeEdges": [
+        "edge-attacker-dns"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-recon-dns",
+          "type": "investigation",
+          "targetType": "edge",
+          "targetId": "edge-attacker-dns",
+          "label": "외부 질의",
+          "description": "외부에서 목표 서비스 정보를 확인하는 흐름을 고수준으로 표현한다."
+        }
+      ],
+      "explanation": {
+        "attackView": "공격자는 공개적으로 접근 가능한 정보를 바탕으로 목표 서비스의 위치와 노출면을 파악할 수 있다.",
+        "defenseView": "외부에 노출된 서비스 목록과 도메인 정보를 주기적으로 점검하고, 불필요한 노출을 줄이는 것이 중요하다.",
+        "learnerTakeaway": "공격은 내부망에 도달하기 전, 외부 노출면 파악에서 시작될 수 있다."
+      },
+      "quiz": {
+        "question": "이 단계에서 활성화되는 주요 인프라는 무엇인가?",
+        "options": [
+          "공격자 PC와 외부 DNS",
+          "DB 서버와 AD 서버",
+          "EDR과 사용자 PC",
+          "SIEM과 파일 서버"
+        ],
+        "answerIndex": 0,
+        "explanation": "이 단계는 외부에서 목표 정보를 확인하는 흐름이므로 공격자 PC와 외부 DNS가 활성화된다."
+      }
+    },
+    {
+      "id": "step-2-initial-access",
+      "order": 2,
+      "title": "Step 2. Initial Access 시도",
+      "tactic": "Initial Access",
+      "summary": "공격자 PC에서 기업 웹서버로 향하는 통신이 발생하고, DMZ의 웹서버가 핵심 관찰 지점이 된다.",
+      "activeNodes": [
+        "attacker-pc",
+        "internet-router",
+        "edge-firewall",
+        "waf",
+        "web-server"
+      ],
+      "activeEdges": [
+        "edge-attacker-router",
+        "edge-router-firewall",
+        "edge-firewall-waf",
+        "edge-waf-web"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-web-vulnerability",
+          "type": "vulnerability",
+          "targetType": "node",
+          "targetId": "web-server",
+          "label": "취약점 이벤트",
+          "description": "웹서버에서 취약점 관련 이벤트가 관찰되는 상황을 교육적으로 표현한다."
+        }
+      ],
+      "explanation": {
+        "attackView": "외부에서 웹서버로 향하는 통신 과정에서 웹서버의 취약점 이벤트가 관찰된다. 이 단계는 최초 접근 위험을 이해하기 위한 고수준 시나리오다.",
+        "defenseView": "방화벽, WAF, 웹서버 로그를 함께 확인하여 외부 통신이 정상 요청인지 이상 요청인지 판단해야 한다.",
+        "learnerTakeaway": "Initial Access 단계에서는 공격자 PC, 경계 장비, WAF, 웹서버가 함께 관찰되어야 한다."
+      },
+      "quiz": {
+        "question": "Initial Access 단계에서 가장 중요한 관찰 지점은 어디인가?",
+        "options": [
+          "웹서버와 WAF",
+          "사용자 PC와 프린터",
+          "DB 서버 단독",
+          "외부 DNS 단독"
+        ],
+        "answerIndex": 0,
+        "explanation": "외부에서 들어오는 웹 트래픽은 WAF와 웹서버에서 핵심적으로 관찰된다."
+      }
+    },
+    {
+      "id": "step-3-internal-access-attempt",
+      "order": 3,
+      "title": "Step 3. 내부 접근 시도 관찰",
+      "tactic": "Discovery",
+      "summary": "웹서버에서 내부 애플리케이션 서버와 DB 서버 방향의 접근 흐름이 관찰된다.",
+      "activeNodes": [
+        "web-server",
+        "app-server",
+        "db-server",
+        "ad-server"
+      ],
+      "activeEdges": [
+        "edge-web-app",
+        "edge-app-db"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-internal-access",
+          "type": "dataAccess",
+          "targetType": "edge",
+          "targetId": "edge-app-db",
+          "label": "내부 자산 접근",
+          "description": "웹 계층에서 내부 데이터 계층으로 향하는 접근 흐름을 확인한다."
+        }
+      ],
+      "explanation": {
+        "attackView": "웹서버를 시작점으로 내부 애플리케이션과 데이터 계층으로 접근 흐름이 이어질 수 있다. 이 설명은 위험 경로를 이해하기 위한 고수준 표현이다.",
+        "defenseView": "DMZ 시스템이 내부망의 중요 자산에 직접 접근하지 않도록 네트워크 분리와 접근 제어를 검토해야 한다.",
+        "learnerTakeaway": "웹서버는 외부와 내부를 잇는 지점이므로 내부 접근 범위를 제한해야 한다."
+      },
+      "quiz": {
+        "question": "웹서버에서 내부망으로 이어지는 접근을 줄이기 위한 방어 관점은 무엇인가?",
+        "options": [
+          "접근 제어와 네트워크 분리",
+          "모든 로그 삭제",
+          "보안 장비 비활성화",
+          "내부망 전체 공개"
+        ],
+        "answerIndex": 0,
+        "explanation": "DMZ와 내부망 사이의 접근 제어와 네트워크 분리가 핵심이다."
+      }
+    },
+    {
+      "id": "step-4-detection",
+      "order": 4,
+      "title": "Step 4. 탐지 이벤트 수집",
+      "tactic": "Detection & Response",
+      "summary": "WAF와 웹서버에서 관찰된 이벤트가 SIEM으로 수집되고 분석 대상이 된다.",
+      "activeNodes": [
+        "waf",
+        "web-server",
+        "siem"
+      ],
+      "activeEdges": [
+        "edge-web-siem",
+        "edge-waf-siem"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-siem-alert",
+          "type": "alert",
+          "targetType": "node",
+          "targetId": "siem",
+          "label": "탐지 알림",
+          "description": "보안 이벤트가 SIEM에서 상관분석 대상으로 표시된다."
+        }
+      ],
+      "explanation": {
+        "attackView": "이 단계에서는 공격 흐름 자체보다 방어자가 이상 징후를 어떻게 관찰하는지에 초점을 둔다.",
+        "defenseView": "WAF 이벤트, 웹서버 접근 로그, 시스템 로그를 SIEM에서 상관 분석하여 이상 행위를 식별한다.",
+        "learnerTakeaway": "탐지는 단일 장비 로그보다 여러 소스의 흐름을 함께 볼 때 더 명확해진다."
+      },
+      "quiz": {
+        "question": "탐지 단계에서 SIEM이 중요한 이유는 무엇인가?",
+        "options": [
+          "여러 로그와 이벤트를 모아 분석할 수 있기 때문",
+          "웹서버를 대신 운영하기 때문",
+          "공격 트래픽을 생성하기 때문",
+          "DB를 삭제하기 때문"
+        ],
+        "answerIndex": 0,
+        "explanation": "SIEM은 여러 보안 이벤트와 로그를 통합하여 분석하는 데 사용된다."
+      }
+    },
+    {
+      "id": "step-5-response",
+      "order": 5,
+      "title": "Step 5. 대응 및 복구",
+      "tactic": "Detection & Response",
+      "summary": "보안팀은 탐지된 이벤트를 기반으로 영향 범위를 확인하고 격리, 포렌식, 복구 절차를 수행한다.",
+      "activeNodes": [
+        "siem",
+        "edr-manager",
+        "web-server",
+        "user-pc-01"
+      ],
+      "activeEdges": [
+        "edge-edr-userpc",
+        "edge-web-siem"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-response-investigation",
+          "type": "investigation",
+          "targetType": "node",
+          "targetId": "web-server",
+          "label": "포렌식 대상",
+          "description": "웹서버는 원인 분석과 영향 범위 확인의 주요 대상이 된다."
+        },
+        {
+          "id": "marker-response-block",
+          "type": "blocked",
+          "targetType": "edge",
+          "targetId": "edge-waf-web",
+          "label": "통제 강화",
+          "description": "위험 통신에 대한 통제 강화가 필요할 수 있다."
+        }
+      ],
+      "explanation": {
+        "attackView": "대응 단계에서는 공격 확산 가능성을 가정하고 관련 인프라의 상태를 확인한다.",
+        "defenseView": "탐지된 이벤트를 기준으로 영향 범위를 확인하고, 필요한 경우 격리, 포렌식, 취약점 조치, 복구, 재발 방지 절차를 수행한다.",
+        "learnerTakeaway": "대응은 탐지 이후의 단일 조치가 아니라 분석, 격리, 복구, 개선까지 이어지는 흐름이다."
+      },
+      "quiz": {
+        "question": "대응 단계에서 가장 적절한 흐름은 무엇인가?",
+        "options": [
+          "탐지 → 영향 범위 확인 → 격리 → 포렌식 → 복구",
+          "탐지 → 로그 삭제 → 종료",
+          "탐지 → 보안 장비 제거",
+          "탐지 → 모든 시스템 공개"
+        ],
+        "answerIndex": 0,
+        "explanation": "일반적인 대응은 탐지 후 영향 범위를 확인하고 필요한 격리, 분석, 복구 절차를 진행하는 것이다."
+      }
+    }
+  ],
+  "metadata": {
+    "createdBy": "llm",
+    "reviewStatus": "draft",
+    "tags": [
+      "APT",
+      "Initial Access",
+      "DMZ",
+      "Web Server",
+      "Detection",
+      "Response"
+    ]
+  }
+}

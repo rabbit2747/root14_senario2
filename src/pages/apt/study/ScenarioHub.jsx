@@ -13,7 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { SCENARIOS, SCENARIO_LEVEL_META } from './VictimScenario';
 import useAptProgress from '../../../hooks/useAptProgress';
-import OE from '../orion-echo/data/orion-echo';
+import { orionEchoCourse } from '../orion-echo/data/orion-echo-course';
+import { ledgerMirageCourse } from '../ledger-mirage/data/ledger-mirage-course';
 
 const LEVEL_META = {
   1: { label: '비기너', color: '#22c55e', accent: 'from-emerald-500 to-green-600' },
@@ -27,10 +28,20 @@ const LEVEL_META = {
 const LABS = {
   3: [
     {
-      id: OE.id, name: OE.name, group: OE.group,
-      teaser: `${OE.stages.length}단계 SolarWinds-style 공급망 침투 · Docker 기반 ~${OE.containerCount}컨테이너`,
-      status: OE.status,
-      route: '/apt/orion-echo',
+      id: orionEchoCourse.curriculum.scenario.id,
+      name: orionEchoCourse.curriculum.scenario.title,
+      group: orionEchoCourse.curriculum.scenario.subtitle,
+      teaser: `${orionEchoCourse.practicalScenario.steps.length}단계 공급망 공격 커리큘럼 · ${orionEchoCourse.practicalScenario.nodes.length}개 인프라 노드 · Legacy/Concept/Practical 통합`,
+      status: 'available',
+      route: orionEchoCourse.curriculum.routes.toc,
+    },
+    {
+      id: ledgerMirageCourse.curriculum.scenario.id,
+      name: ledgerMirageCourse.curriculum.scenario.title,
+      group: ledgerMirageCourse.curriculum.scenario.subtitle,
+      teaser: `${ledgerMirageCourse.practicalScenario.steps.length} stage BEC investigation curriculum - ${ledgerMirageCourse.practicalScenario.nodes.length} evidence nodes - Concept/Topology/Lab flow`,
+      status: 'available',
+      route: ledgerMirageCourse.curriculum.routes.toc,
     },
   ],
 };
@@ -39,7 +50,10 @@ const LABS = {
 // 비기너·초급 시나리오 (C0024·C0023)는 콘텐츠 정비 중이라 잠금
 // Orion Echo (OE001)만 자유 진입 가능 — 흐름·디자인 작업 진행 중
 const TEMP_LOCKED_SCENARIOS = new Set(['C0024', 'C0023']);
-const TEMP_OPEN_LABS = new Set(['OE001']);
+const TEMP_OPEN_LABS = new Set([
+  orionEchoCourse.curriculum.scenario.id,
+  ledgerMirageCourse.curriculum.scenario.id,
+]);
 
 // profiles.level 문자열 → 숫자
 const LEVEL_STR_TO_NUM = {
@@ -291,7 +305,7 @@ export default function ScenarioHub() {
         <div className="max-w-7xl mx-auto px-6 py-8 text-center">
           <div className="text-xs text-gray-500 mb-2">▶ 다음 작전</div>
           <div className="text-sm text-gray-300">
-            준비중 — <span className="text-amber-400">{OE.next.title}</span> · {OE.next.hint}
+            준비중 — <span className="text-amber-400">다음 APT 시나리오</span> · 같은 템플릿 구조로 추가 예정
           </div>
         </div>
       </div>

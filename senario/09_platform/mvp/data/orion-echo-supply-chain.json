@@ -1,0 +1,965 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "orion-echo-supply-chain-redteam-lab",
+  "title": "Orion Echo 공급망 레드팀 테스트베드",
+  "summary": "SolarWinds형 공급망 침해를 모티브로, DMZ 초기 접근에서 내부 서비스 탐색, 빌드/서명/배포 체인 조작, 고객 업데이트 신뢰 관계, 고객 데이터 export 접근까지 이어지는 격리형 Docker 레드팀 테스트베드 시나리오다.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 90,
+  "layoutMode": "enterprise-network",
+  "learningObjectives": [
+    "공급망 레드팀 작전의 전체 kill chain을 인프라 관점에서 설명할 수 있다.",
+    "DMZ, Corp, DevOps, Release, Customer, Control 영역 사이의 신뢰 관계를 식별할 수 있다.",
+    "초기 foothold 이후 내부 정보 저장소와 빌드 파이프라인으로 이동하는 흐름을 구조화할 수 있다.",
+    "업데이트 서버와 고객 앱의 신뢰 관계가 어떻게 최종 영향으로 이어지는지 분석할 수 있다.",
+    "각 단계에서 남는 audit event, 접근 증거, 고객 영향 범위를 MITRE ATT&CK 관점으로 검증할 수 있다."
+  ],
+  "safetyLevel": "authorized-redteam-lab",
+  "zones": [
+    {
+      "id": "external",
+      "label": "Operator / Public Entry",
+      "type": "external",
+      "parentId": null,
+      "description": "레드팀 오퍼레이터와 공개 진입점이 위치한 외부 영역"
+    },
+    {
+      "id": "orion-enterprise",
+      "label": "Orion Echo Enterprise",
+      "type": "company",
+      "parentId": null,
+      "description": "공급망 테스트베드의 벤더 기업 전체 경계"
+    },
+    {
+      "id": "orion-dmz",
+      "label": "DMZ / Public Services",
+      "type": "dmz",
+      "parentId": "orion-enterprise",
+      "description": "edge-proxy와 공개 웹, 문서, 지원 포털, 벤더 포털이 위치한 영역"
+    },
+    {
+      "id": "orion-corp",
+      "label": "Corporate Internal",
+      "type": "internal",
+      "parentId": "orion-enterprise",
+      "description": "SSO, 인트라넷, HR, Wiki, Ticket, 문서, 메일 서비스가 위치한 내부 업무망"
+    },
+    {
+      "id": "orion-devops",
+      "label": "DevOps",
+      "type": "management",
+      "parentId": "orion-enterprise",
+      "description": "소스 저장소와 빌드 서버가 위치한 개발/빌드 영역"
+    },
+    {
+      "id": "orion-release",
+      "label": "Release Trust Chain",
+      "type": "security",
+      "parentId": "orion-enterprise",
+      "description": "서명 서비스와 업데이트 서버가 위치한 배포 신뢰 체인"
+    },
+    {
+      "id": "anrc-customer",
+      "label": "ANRC Customer Environment",
+      "type": "partner",
+      "parentId": null,
+      "description": "업데이트를 신뢰하는 고객 환경과 최종 데이터 저장소"
+    },
+    {
+      "id": "external-leak",
+      "label": "External Leak Site",
+      "type": "external",
+      "parentId": null,
+      "description": "?? ???? ?? ??? ???? ?? ?? ??"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "operator",
+      "label": "Red Team Operator",
+      "type": "attackerPc",
+      "zoneId": "external",
+      "layoutRole": "source",
+      "importance": "critical",
+      "description": "격리 랩에서 전체 작전 흐름을 수행하는 레드팀 오퍼레이터"
+    },
+    {
+      "id": "edge-proxy",
+      "label": "Edge Proxy",
+      "type": "proxy",
+      "zoneId": "orion-dmz",
+      "layoutRole": "securityControl",
+      "importance": "critical",
+      "description": "호스트 포트 8080으로 공개되는 유일한 외부 진입점"
+    },
+    {
+      "id": "public-site",
+      "label": "Public Site",
+      "type": "webServer",
+      "zoneId": "orion-dmz",
+      "layoutRole": "externalService",
+      "importance": "medium",
+      "description": "제품, 고객, 회사 정보를 노출하는 공개 웹 서비스"
+    },
+    {
+      "id": "public-docs",
+      "label": "Public Docs",
+      "type": "fileServer",
+      "zoneId": "orion-dmz",
+      "layoutRole": "externalService",
+      "importance": "medium",
+      "description": "EchoAgent 문서, 릴리즈 노트, 채널 정보를 제공하는 공개 문서 서비스"
+    },
+    {
+      "id": "support-portal",
+      "label": "Support Portal",
+      "type": "webServer",
+      "zoneId": "orion-dmz",
+      "layoutRole": "entryPoint",
+      "importance": "critical",
+      "description": "초기 접근 표면이 되는 실습용 지원 포털"
+    },
+    {
+      "id": "vendor-portal",
+      "label": "Vendor Portal",
+      "type": "webServer",
+      "zoneId": "orion-dmz",
+      "layoutRole": "externalService",
+      "importance": "medium",
+      "description": "파트너/고객 관련 포털 표면"
+    },
+    {
+      "id": "corp-sso",
+      "label": "Corp SSO",
+      "type": "identityProvider",
+      "zoneId": "orion-corp",
+      "layoutRole": "identity",
+      "importance": "high",
+      "description": "내부 계정과 인증 신뢰 관계를 표현하는 SSO 서비스"
+    },
+    {
+      "id": "wiki",
+      "label": "Wiki Runbooks",
+      "type": "fileServer",
+      "zoneId": "orion-corp",
+      "layoutRole": "criticalAsset",
+      "importance": "critical",
+      "description": "릴리즈 런북, 서명 절차, 빌드 트리거 단서가 섞여 있는 내부 지식 저장소"
+    },
+    {
+      "id": "ticket-service",
+      "label": "Ticket Service",
+      "type": "appServer",
+      "zoneId": "orion-corp",
+      "layoutRole": "criticalAsset",
+      "importance": "high",
+      "description": "고객 이슈, 릴리즈 요청, 단서와 decoy가 함께 존재하는 티켓 시스템"
+    },
+    {
+      "id": "doc-portal",
+      "label": "Doc Portal",
+      "type": "fileServer",
+      "zoneId": "orion-corp",
+      "layoutRole": "intermediary",
+      "importance": "medium",
+      "description": "내부 문서와 운영 단서가 저장된 문서 포털"
+    },
+    {
+      "id": "mail-web",
+      "label": "Mail Web",
+      "type": "mailServer",
+      "zoneId": "orion-corp",
+      "layoutRole": "intermediary",
+      "importance": "medium",
+      "description": "릴리즈, 고객, 운영 단서가 섞인 메일 시뮬레이터"
+    },
+    {
+      "id": "source-repo",
+      "label": "Source Repo",
+      "type": "fileServer",
+      "zoneId": "orion-devops",
+      "layoutRole": "criticalAsset",
+      "importance": "critical",
+      "description": "release-pipeline 설정과 EchoAgent 소스가 위치한 저장소"
+    },
+    {
+      "id": "build-server",
+      "label": "Build Server",
+      "type": "appServer",
+      "zoneId": "orion-devops",
+      "layoutRole": "criticalAsset",
+      "importance": "critical",
+      "description": "토큰으로 빌드 작업을 요청하고 artifact를 생성하는 빌드 시스템"
+    },
+    {
+      "id": "signing-service",
+      "label": "Signing Service",
+      "type": "firewall",
+      "zoneId": "orion-release",
+      "layoutRole": "securityControl",
+      "importance": "critical",
+      "description": "빌드 artifact manifest를 실습용 서명으로 검증하는 릴리즈 신뢰 지점"
+    },
+    {
+      "id": "update-server",
+      "label": "Update Server",
+      "type": "appServer",
+      "zoneId": "orion-release",
+      "layoutRole": "criticalAsset",
+      "importance": "critical",
+      "description": "ANRC 채널 manifest와 artifact를 고객 환경으로 배포하는 업데이트 서버"
+    },
+    {
+      "id": "customer-app",
+      "label": "Customer App",
+      "type": "appServer",
+      "zoneId": "anrc-customer",
+      "layoutRole": "entryPoint",
+      "importance": "critical",
+      "description": "ANRC 환경에서 벤더 업데이트를 신뢰하고 적용하는 고객 앱"
+    },
+    {
+      "id": "customer-api",
+      "label": "Customer API",
+      "type": "appServer",
+      "zoneId": "anrc-customer",
+      "layoutRole": "criticalAsset",
+      "importance": "critical",
+      "description": "시설, 감사, export metadata를 제공하는 고객 내부 API"
+    },
+    {
+      "id": "object-store",
+      "label": "Object Store",
+      "type": "cloudService",
+      "zoneId": "anrc-customer",
+      "layoutRole": "criticalAsset",
+      "importance": "critical",
+      "description": "ANRC audit export와 decoy object가 위치한 최종 데이터 저장소"
+    },
+    {
+      "id": "monitoring",
+      "label": "Monitoring",
+      "type": "siem",
+      "zoneId": "anrc-customer",
+      "layoutRole": "logging",
+      "importance": "medium",
+      "description": "고객 환경의 상태와 업데이트 타임라인을 확인하는 모니터링 표면"
+    },
+    {
+      "id": "dark-web-drop",
+      "label": "Dark Web Drop",
+      "type": "webServer",
+      "zoneId": "external-leak",
+      "layoutRole": "externalService",
+      "importance": "critical",
+      "description": "?? export ?? ??? leak bundle metadata? ???? ?? drop ??"
+    },
+    {
+      "id": "leak-bundle",
+      "label": "Leak Bundle",
+      "type": "fileServer",
+      "zoneId": "external-leak",
+      "layoutRole": "criticalAsset",
+      "importance": "critical",
+      "description": "??? ??? ?? ???? ??"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-operator-edge",
+      "source": "operator",
+      "target": "edge-proxy",
+      "type": "https",
+      "label": "8080 entry",
+      "crossesBoundary": true,
+      "description": "오퍼레이터가 공개 진입점으로 접근한다."
+    },
+    {
+      "id": "edge-edge-public",
+      "source": "edge-proxy",
+      "target": "public-site",
+      "type": "https",
+      "label": "public route",
+      "crossesBoundary": false,
+      "description": "공개 웹 서비스 라우팅"
+    },
+    {
+      "id": "edge-edge-docs",
+      "source": "edge-proxy",
+      "target": "public-docs",
+      "type": "https",
+      "label": "docs route",
+      "crossesBoundary": false,
+      "description": "공개 문서 서비스 라우팅"
+    },
+    {
+      "id": "edge-edge-support",
+      "source": "edge-proxy",
+      "target": "support-portal",
+      "type": "https",
+      "label": "support route",
+      "crossesBoundary": false,
+      "description": "초기 접근 표면으로 라우팅"
+    },
+    {
+      "id": "edge-support-wiki",
+      "source": "support-portal",
+      "target": "wiki",
+      "type": "http",
+      "label": "internal docs",
+      "crossesBoundary": true,
+      "description": "초기 foothold에서 내부 Wiki 단서를 확인한다."
+    },
+    {
+      "id": "edge-support-ticket",
+      "source": "support-portal",
+      "target": "ticket-service",
+      "type": "http",
+      "label": "tickets",
+      "crossesBoundary": true,
+      "description": "티켓 시스템에서 릴리즈/고객 단서를 확인한다."
+    },
+    {
+      "id": "edge-support-repo",
+      "source": "support-portal",
+      "target": "source-repo",
+      "type": "http",
+      "label": "repo clues",
+      "crossesBoundary": true,
+      "description": "소스 저장소에서 release pipeline 정보를 확인한다."
+    },
+    {
+      "id": "edge-wiki-build",
+      "source": "wiki",
+      "target": "build-server",
+      "type": "api",
+      "label": "build token clue",
+      "crossesBoundary": true,
+      "description": "Wiki runbook의 빌드 트리거 단서가 DevOps 영역으로 이어진다."
+    },
+    {
+      "id": "edge-repo-build",
+      "source": "source-repo",
+      "target": "build-server",
+      "type": "api",
+      "label": "release config",
+      "crossesBoundary": false,
+      "description": "release-pipeline 설정이 빌드 서버 작업과 연결된다."
+    },
+    {
+      "id": "edge-build-sign",
+      "source": "build-server",
+      "target": "signing-service",
+      "type": "api",
+      "label": "sign manifest",
+      "crossesBoundary": true,
+      "description": "빌드 artifact manifest가 서명 서비스로 전달된다."
+    },
+    {
+      "id": "edge-build-update",
+      "source": "build-server",
+      "target": "update-server",
+      "type": "api",
+      "label": "publish",
+      "crossesBoundary": true,
+      "description": "서명된 manifest와 artifact가 업데이트 채널에 게시된다."
+    },
+    {
+      "id": "edge-sign-update",
+      "source": "signing-service",
+      "target": "update-server",
+      "type": "identity",
+      "label": "trust proof",
+      "crossesBoundary": false,
+      "description": "업데이트 서버가 서명 신뢰 정보를 참조한다."
+    },
+    {
+      "id": "edge-update-customer-app",
+      "source": "update-server",
+      "target": "customer-app",
+      "type": "https",
+      "label": "trusted update",
+      "crossesBoundary": true,
+      "description": "ANRC customer app이 신뢰된 업데이트를 가져온다."
+    },
+    {
+      "id": "edge-customer-app-api",
+      "source": "customer-app",
+      "target": "customer-api",
+      "type": "api",
+      "label": "customer reach",
+      "crossesBoundary": false,
+      "description": "업데이트 적용 이후 고객 API와 상호작용한다."
+    },
+    {
+      "id": "edge-customer-api-object",
+      "source": "customer-api",
+      "target": "object-store",
+      "type": "api",
+      "label": "export object",
+      "crossesBoundary": false,
+      "description": "고객 API가 object-store export 위치를 제공한다."
+    },
+    {
+      "id": "edge-customer-monitoring",
+      "source": "customer-app",
+      "target": "monitoring",
+      "type": "log",
+      "label": "update status",
+      "crossesBoundary": false,
+      "description": "고객 환경의 업데이트 상태가 모니터링에 반영된다."
+    },
+    {
+      "id": "edge-object-dark-drop",
+      "source": "object-store",
+      "target": "dark-web-drop",
+      "type": "unknown",
+      "label": "leak transfer",
+      "crossesBoundary": true,
+      "description": "object-store? ?? export? external leak site? ????."
+    },
+    {
+      "id": "edge-dark-drop-bundle",
+      "source": "dark-web-drop",
+      "target": "leak-bundle",
+      "type": "unknown",
+      "label": "publish leak bundle",
+      "crossesBoundary": false,
+      "description": "dark-web drop? ?? ?? ?????? ????? ????."
+    },
+    {
+      "id": "edge-support-doc",
+      "source": "support-portal",
+      "target": "doc-portal",
+      "type": "http",
+      "label": "doc health",
+      "crossesBoundary": true,
+      "description": "support-portal?? doc-portal ??? ??? ?? ?? ?? ???? ????."
+    },
+    {
+      "id": "edge-support-mail",
+      "source": "support-portal",
+      "target": "mail-web",
+      "type": "http",
+      "label": "mail health",
+      "crossesBoundary": true,
+      "description": "support-portal?? mail-web? ?? ?? ?? ???? ????."
+    }
+  ],
+  "steps": [
+    {
+      "id": "stage-0-public-recon",
+      "order": 1,
+      "title": "Stage 0. ?? ?? ??",
+      "tactic": "Reconnaissance",
+      "summary": "?? ????? Orion ?? ??, ??? ??, ANRC ?? ??? ????.",
+      "activeNodes": [
+        "edge-proxy",
+        "public-site",
+        "public-docs"
+      ],
+      "activeEdges": [
+        "edge-operator-edge",
+        "edge-edge-public",
+        "edge-edge-docs"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-public-recon",
+          "type": "investigation",
+          "targetType": "node",
+          "targetId": "public-docs",
+          "label": "Public Evidence",
+          "description": "product/version metadata, release note, ANRC channel reference? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ?? ????? ??? ??? ?? ??? ???.",
+        "defenseView": "???? ?? ??? ??? ?????? ??? ??? ?? ? ??? ????.",
+        "learnerTakeaway": "??? ??? ???? ??? ??? ?? ?? ???? ??? ? ??."
+      },
+      "quiz": {
+        "question": "?? ?? ???? ?? ??? ?????",
+        "options": [
+          "??/?? ?????? ??? ??",
+          "?? DB ??",
+          "?? ?? ?",
+          "?? ? ??"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 0? product/version metadata, release note, ANRC channel reference? ??."
+      }
+    },
+    {
+      "id": "stage-1-support-initial-access",
+      "order": 2,
+      "title": "Stage 1. Support Portal ?? ??",
+      "tactic": "Initial Access",
+      "summary": "support-portal?? ?? ?? ???? post exploit marker? ????.",
+      "activeNodes": [
+        "support-portal"
+      ],
+      "activeEdges": [
+        "edge-edge-support"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-support-access",
+          "type": "vulnerability",
+          "targetType": "node",
+          "targetId": "support-portal",
+          "label": "Preview Audit Event",
+          "description": "preview audit event? post exploit marker? ???."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? support portal ?? ???? ????.",
+        "defenseView": "???? preview audit event? exploit marker? ?? ???? ??.",
+        "learnerTakeaway": "?? ??? DMZ? ?? ???? ????."
+      },
+      "quiz": {
+        "question": "?? ?? ??? ?? ?????",
+        "options": [
+          "support-portal",
+          "object-store",
+          "leak-bundle",
+          "monitoring"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 1? ???? support-portal??."
+      }
+    },
+    {
+      "id": "stage-2-foothold-validation",
+      "order": 3,
+      "title": "Stage 2. Foothold ??",
+      "tactic": "Discovery",
+      "summary": "support-portal?? ??, hostname, ???? ????? ????.",
+      "activeNodes": [
+        "support-portal"
+      ],
+      "activeEdges": [
+        "edge-edge-support"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-foothold-context",
+          "type": "investigation",
+          "targetType": "node",
+          "targetId": "support-portal",
+          "label": "Foothold Context",
+          "description": "id output, hostname output, network context? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ??? ?? ??? ??? ??? ????.",
+        "defenseView": "???? ?? ?? ??? ???? ???? ??? ????.",
+        "learnerTakeaway": "Foothold ??? ?? ?? ??? ?????."
+      },
+      "quiz": {
+        "question": "Foothold ???? ???? ???",
+        "options": [
+          "id, hostname, network context",
+          "??? manifest",
+          "dark-web drop record",
+          "?? poll response"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 2? ??? id output, hostname output, network context?."
+      }
+    },
+    {
+      "id": "stage-3-internal-discovery",
+      "order": 4,
+      "title": "Stage 3. ?? ??? ??",
+      "tactic": "Discovery",
+      "summary": "wiki, ticket-service, source-repo, build-server ?? ???? health endpoint? ????.",
+      "activeNodes": [
+        "wiki",
+        "ticket-service",
+        "source-repo",
+        "build-server"
+      ],
+      "activeEdges": [
+        "edge-support-wiki",
+        "edge-support-ticket",
+        "edge-support-repo",
+        "edge-wiki-build",
+        "edge-repo-build"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-internal-discovery",
+          "type": "investigation",
+          "targetType": "node",
+          "targetId": "wiki",
+          "label": "Service List",
+          "description": "service list, health endpoint, route evidence? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? DMZ?? Corporate? DevOps? ???? ???? ???.",
+        "defenseView": "???? ?? health endpoint? route evidence? ??????.",
+        "learnerTakeaway": "?? ??? ?? ?? ??? ?? ?? ??? ???."
+      },
+      "quiz": {
+        "question": "?? ??? ??? ???? ?????",
+        "options": [
+          "wiki, ticket-service, source-repo, build-server",
+          "dark-web-drop, leak-bundle",
+          "customer-app only",
+          "public-docs only"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 3? ??? ????."
+      }
+    },
+    {
+      "id": "stage-4-internal-knowledge-collection",
+      "order": 5,
+      "title": "Stage 4. ?? ?? ??",
+      "tactic": "Collection",
+      "summary": "wiki, ticket-service, source-repo, mail-web, doc-portal?? ??? ??? ????? ?????? ????.",
+      "activeNodes": [
+        "wiki",
+        "ticket-service",
+        "source-repo",
+        "mail-web",
+        "doc-portal"
+      ],
+      "activeEdges": [
+        "edge-support-wiki",
+        "edge-support-ticket",
+        "edge-support-repo",
+        "edge-support-doc",
+        "edge-support-mail"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-knowledge-collection",
+          "type": "dataAccess",
+          "targetType": "node",
+          "targetId": "wiki",
+          "label": "Release Runbook",
+          "description": "release runbook, release ticket, pipeline metadata? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ?? ?? ????? ??? ?? ??? ????.",
+        "defenseView": "???? ?? ??? ?? ??? ?? ???? ????.",
+        "learnerTakeaway": "??? ????? ??? ??? ??? ????? ????."
+      },
+      "quiz": {
+        "question": "?? ?? ??? ?? ????",
+        "options": [
+          "release runbook, release ticket, pipeline metadata",
+          "favicon.ico",
+          "?? poll response?",
+          "?? DNS ????"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 4 ?? ????."
+      }
+    },
+    {
+      "id": "stage-5-build-credential-discovery",
+      "order": 6,
+      "title": "Stage 5. ?? ?? ?? ??",
+      "tactic": "Credential Access",
+      "summary": "wiki, ticket-service, source-repo?? build trigger token context, release branch, ANRC channel? ????.",
+      "activeNodes": [
+        "wiki",
+        "ticket-service",
+        "source-repo"
+      ],
+      "activeEdges": [
+        "edge-support-wiki",
+        "edge-support-ticket",
+        "edge-support-repo"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-build-credential",
+          "type": "credential",
+          "targetType": "node",
+          "targetId": "source-repo",
+          "label": "Build Trigger Context",
+          "description": "build trigger token context, release branch, ANRC channel? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ?? ???? ??? ? ?? ?? ??? ????.",
+        "defenseView": "???? ?? ??? ??? ??? ??? ?? ???? ??.",
+        "learnerTakeaway": "CI/CD ?? ??? ??? ??? ?????."
+      },
+      "quiz": {
+        "question": "?? ?? ?? ??? ???? ?? ?????",
+        "options": [
+          "dark-web-drop",
+          "wiki",
+          "ticket-service",
+          "source-repo"
+        ],
+        "answerIndex": 0,
+        "explanation": "dark-web-drop? ?? ?? ?? ??? ?????."
+      }
+    },
+    {
+      "id": "stage-6-build-server-api-abuse",
+      "order": 7,
+      "title": "Stage 6. Build Server API ??",
+      "tactic": "Lateral Movement",
+      "summary": "build-server API ??? HTTP 202? ????? ???? build job id? acceptance marker? ????.",
+      "activeNodes": [
+        "build-server"
+      ],
+      "activeEdges": [
+        "edge-repo-build"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-build-api",
+          "type": "credential",
+          "targetType": "node",
+          "targetId": "build-server",
+          "label": "HTTP 202 Build Response",
+          "description": "build job id? acceptance marker? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ?? ?? API? ?? ?? ?????? ??? ??? ???.",
+        "defenseView": "???? ?? API ?? ???? ?? ?????? ????.",
+        "learnerTakeaway": "??? ?? ?? ???? ???? ??? ???? ??."
+      },
+      "quiz": {
+        "question": "Build Server API ??? ?? ????",
+        "options": [
+          "HTTP 202 build response? build job id",
+          "release note",
+          "customer poll response",
+          "dark-web drop record"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 6 ???."
+      }
+    },
+    {
+      "id": "stage-7-artifact-build-review",
+      "order": 8,
+      "title": "Stage 7. Artifact Build Review",
+      "tactic": "Collection",
+      "summary": "build-server?? artifact id, artifact hash, build marker? ????.",
+      "activeNodes": [
+        "build-server"
+      ],
+      "activeEdges": [
+        "edge-repo-build"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-artifact-review",
+          "type": "investigation",
+          "targetType": "node",
+          "targetId": "build-server",
+          "label": "Artifact Hash",
+          "description": "artifact id, artifact hash, build marker? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ??? ?? ???? ?? ??? ??? ? ??? ????.",
+        "defenseView": "???? artifact id? hash? ??? ?? ??? ????.",
+        "learnerTakeaway": "?? ? artifact review? ??? ??? ?? ???."
+      },
+      "quiz": {
+        "question": "Artifact Build Review?? ???? ???",
+        "options": [
+          "artifact id, artifact hash, build marker",
+          "ANRC customer poll only",
+          "public route only",
+          "SSO login only"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 7 ???."
+      }
+    },
+    {
+      "id": "stage-8-sign-and-publish",
+      "order": 9,
+      "title": "Stage 8. Sign and Publish",
+      "tactic": "Impact",
+      "summary": "build-server ???? signing-service? ?? update-server? ANRC update manifest? ????.",
+      "activeNodes": [
+        "build-server",
+        "signing-service",
+        "update-server"
+      ],
+      "activeEdges": [
+        "edge-build-sign",
+        "edge-sign-update"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-sign-publish",
+          "type": "dataAccess",
+          "targetType": "node",
+          "targetId": "signing-service",
+          "label": "Signed Manifest",
+          "description": "signed manifest, signing log, ANRC update manifest? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ?? ???? ??? ??? ??? ?? ???.",
+        "defenseView": "???? signing log? update manifest? ???? ??.",
+        "learnerTakeaway": "??? ?? ??? ?? ??? ???? ??? ????."
+      },
+      "quiz": {
+        "question": "Sign and Publish ??? ?? ?????",
+        "options": [
+          "build-server, signing-service, update-server",
+          "customer-api only",
+          "dark-web-drop only",
+          "public-site only"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 8 ??? ????."
+      }
+    },
+    {
+      "id": "stage-9-customer-trusted-update",
+      "order": 10,
+      "title": "Stage 9. Customer Trusted Update",
+      "tactic": "Impact",
+      "summary": "update-server? manifest? customer-app? ??? ????? ???? customer-api ??? ????.",
+      "activeNodes": [
+        "update-server",
+        "customer-app",
+        "customer-api"
+      ],
+      "activeEdges": [
+        "edge-update-customer-app",
+        "edge-customer-app-api"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-customer-update",
+          "type": "dataAccess",
+          "targetType": "node",
+          "targetId": "customer-app",
+          "label": "Customer Update Applied",
+          "description": "customer poll response? customer update applied event? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ???? ???? ?? ???? ??? ????.",
+        "defenseView": "???? update-server? customer-app telemetry? ?? ??.",
+        "learnerTakeaway": "??? ?? ??? ??? ??? ???? ??? ????."
+      },
+      "quiz": {
+        "question": "Customer Trusted Update? ?? ????",
+        "options": [
+          "customer poll response? update applied event",
+          "release note only",
+          "hostname output only",
+          "artifact hash only"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 9 ???."
+      }
+    },
+    {
+      "id": "stage-10-customer-export-access",
+      "order": 11,
+      "title": "Stage 10. Customer Export Access",
+      "tactic": "Collection",
+      "summary": "customer-api? object-store?? export detail, presigned URL, object access proof? ????.",
+      "activeNodes": [
+        "customer-api",
+        "object-store"
+      ],
+      "activeEdges": [
+        "edge-customer-api-object"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-customer-export",
+          "type": "dataAccess",
+          "targetType": "node",
+          "targetId": "object-store",
+          "label": "Object Access Proof",
+          "description": "export detail, presigned URL, object access proof? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ?? export? ?? ???? ????.",
+        "defenseView": "???? customer API ??? object-store ??? ???? ??.",
+        "learnerTakeaway": "?? ??? ??? ?? ??? ????? ??."
+      },
+      "quiz": {
+        "question": "Customer Export Access? ?? ?????",
+        "options": [
+          "customer-api? object-store",
+          "support-portal? public-docs",
+          "signing-service? update-server",
+          "dark-web-drop? leak-bundle"
+        ],
+        "answerIndex": 0,
+        "explanation": "?? stage 10 ??? ????."
+      }
+    },
+    {
+      "id": "stage-11-dark-web-exfiltration",
+      "order": 12,
+      "title": "Stage 11. Customer Data Exfiltration To Dark Web",
+      "tactic": "Exfiltration",
+      "summary": "?? export? external leak site? ???? leak bundle metadata, dark-web drop record, exposed customer dataset?? ????.",
+      "activeNodes": [
+        "customer-api",
+        "object-store",
+        "dark-web-drop",
+        "leak-bundle"
+      ],
+      "activeEdges": [
+        "edge-customer-api-object",
+        "edge-object-dark-drop",
+        "edge-dark-drop-bundle"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-dark-web-exfiltration",
+          "type": "dataAccess",
+          "targetType": "node",
+          "targetId": "dark-web-drop",
+          "label": "Dark Web Drop Record",
+          "description": "leak bundle metadata, dark-web drop record, exposed customer dataset? ????."
+        }
+      ],
+      "explanation": {
+        "attackView": "???? ??? ?? export? ?? leak site? ?? ??? ???? ????.",
+        "defenseView": "???? object-store ??? ?? ?? ??? ??? ???? ??.",
+        "learnerTakeaway": "?? ??? ??? ??? ??? ?? ???? ?? ?? ???? ???? ?? ????."
+      },
+      "quiz": {
+        "question": "?? ????? ?? ??? ?????",
+        "options": [
+          "Customer Data Exfiltration To Dark Web",
+          "Defender Report ??",
+          "SSTI ?? ??",
+          "Artifact Build Review"
+        ],
+        "answerIndex": 0,
+        "explanation": "??? Dark Web Exfiltration? ?? ??? ??."
+      }
+    }
+  ],
+  "metadata": {
+    "createdBy": "codex",
+    "reviewStatus": "draft",
+    "tags": [
+      "Red Team",
+      "Supply Chain",
+      "SolarWinds-inspired",
+      "Docker Compose",
+      "MITRE ATT&CK",
+      "Authorized Lab"
+    ]
+  }
+}

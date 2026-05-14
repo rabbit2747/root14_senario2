@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "1.0.0",
+  "scenario": {
+    "id": "operation-orion-echo",
+    "slug": "orion-echo",
+    "title": "Orion Echo Enterprise APT Range",
+    "subtitle": "Supply Chain Attack Curriculum",
+    "audience": "cybersecurity undergraduate / junior analyst",
+    "difficulty": "intermediate",
+    "estimatedMinutes": 180,
+    "canonicalStatus": "working-canonical"
+  },
+  "story": {
+    "vendor": "Orion Echo Systems",
+    "customer": "ANRC",
+    "product": "EchoAgent",
+    "incident": "ANRC observed abnormal behavior after a trusted EchoAgent update.",
+    "coreMessage": "The attacker reaches the customer by abusing the vendor supply chain, not by directly breaching the customer network."
+  },
+  "sessions": [
+    {
+      "id": "mission-briefing",
+      "label": "Mission Briefing",
+      "purpose": "Set incident context, learner role, and final investigation goal."
+    },
+    {
+      "id": "legacy-3d-overview",
+      "label": "Legacy 3D Overview",
+      "purpose": "Experience the original ROOT14 3D flow before detailed explanation."
+    },
+    {
+      "id": "concept-class",
+      "label": "Concept Class",
+      "purpose": "Teach supply chain, trust, token, CI/CD, signing, update channel, and evidence concepts on an infrastructure map."
+    },
+    {
+      "id": "practical-case-review",
+      "label": "Practical Case Review",
+      "purpose": "Reconnect concepts to the Orion Echo incident and evidence plan."
+    },
+    {
+      "id": "practical-3d",
+      "label": "Practical 3D",
+      "purpose": "Use the MVP topology to understand which systems and boundaries each stage touches."
+    },
+    {
+      "id": "hands-on-lab",
+      "label": "Hands-on Lab",
+      "purpose": "Run the Docker lab and collect concrete command output, logs, metadata, and artifacts."
+    },
+    {
+      "id": "dark-web-impact",
+      "label": "Dark Web Impact",
+      "purpose": "Confirm the final business impact by following customer export data to the external leak point."
+    }
+  ],
+  "zones": [
+    {
+      "id": "internet",
+      "label": "Internet / Operator",
+      "systems": ["operator"]
+    },
+    {
+      "id": "dmz",
+      "label": "DMZ Public Services",
+      "systems": ["edge-proxy", "public-site", "public-docs", "support-portal", "vendor-portal"]
+    },
+    {
+      "id": "corp",
+      "label": "Corporate Internal",
+      "systems": ["corp-sso", "wiki", "ticket-service", "doc-portal", "mail-web"]
+    },
+    {
+      "id": "devops",
+      "label": "DevOps Network",
+      "systems": ["source-repo", "build-server"]
+    },
+    {
+      "id": "release",
+      "label": "Release Trust Chain",
+      "systems": ["signing-service", "update-server"]
+    },
+    {
+      "id": "customer",
+      "label": "ANRC Customer Environment",
+      "systems": ["customer-app", "customer-api", "object-store", "monitoring"]
+    },
+    {
+      "id": "external-leak",
+      "label": "External Leak Site",
+      "systems": ["dark-web-drop", "leak-bundle"]
+    }
+  ],
+  "stages": [
+    {
+      "id": "stage-0-public-recon",
+      "number": 0,
+      "title": "Public Recon",
+      "zones": ["internet", "dmz"],
+      "systems": ["edge-proxy", "public-site", "public-docs"],
+      "concepts": ["supply-chain", "evidence"],
+      "evidence": ["product/version metadata", "release note", "ANRC channel reference"],
+      "labStage": "lab-stage-0-recon"
+    },
+    {
+      "id": "stage-1-support-initial-access",
+      "number": 1,
+      "title": "Support Portal Initial Access",
+      "zones": ["dmz"],
+      "systems": ["support-portal"],
+      "concepts": ["initial-access", "trust-boundary", "server-side-template-injection"],
+      "evidence": ["49 arithmetic render", "preview audit event", "post exploit marker"],
+      "labStage": "lab-stage-1-initial-access"
+    },
+    {
+      "id": "stage-2-foothold-validation",
+      "number": 2,
+      "title": "Foothold Validation",
+      "zones": ["dmz"],
+      "systems": ["support-portal"],
+      "concepts": ["system-context", "evidence"],
+      "evidence": ["id output", "hostname output", "network context"],
+      "labStage": "lab-stage-2-foothold"
+    },
+    {
+      "id": "stage-3-internal-discovery",
+      "number": 3,
+      "title": "Internal Service Discovery",
+      "zones": ["dmz", "corp", "devops"],
+      "systems": ["wiki", "ticket-service", "source-repo", "build-server"],
+      "concepts": ["network-boundary", "service-discovery"],
+      "evidence": ["service list", "health endpoint", "route evidence"],
+      "labStage": "lab-stage-4-internal-discovery"
+    },
+    {
+      "id": "stage-4-internal-knowledge-collection",
+      "number": 4,
+      "title": "Internal Knowledge Collection",
+      "zones": ["corp", "devops"],
+      "systems": ["wiki", "ticket-service", "source-repo", "mail-web", "doc-portal"],
+      "concepts": ["internal-knowledge", "token-sso"],
+      "evidence": ["release runbook", "release ticket", "pipeline metadata"],
+      "labStage": "lab-stage-5-evidence-collection"
+    },
+    {
+      "id": "stage-5-build-credential-discovery",
+      "number": 5,
+      "title": "Build Credential Discovery",
+      "zones": ["corp", "devops"],
+      "systems": ["wiki", "ticket-service", "source-repo"],
+      "concepts": ["token-sso", "ci-cd"],
+      "evidence": ["build trigger token context", "release branch", "ANRC channel"],
+      "labStage": "lab-stage-5-evidence-collection"
+    },
+    {
+      "id": "stage-6-build-server-api-abuse",
+      "number": 6,
+      "title": "Build Server API Abuse",
+      "zones": ["devops"],
+      "systems": ["build-server"],
+      "concepts": ["ci-cd", "token-abuse"],
+      "evidence": ["HTTP 202 build response", "build job id", "acceptance marker"],
+      "labStage": "lab-stage-6-build-token-use"
+    },
+    {
+      "id": "stage-7-artifact-build-review",
+      "number": 7,
+      "title": "Artifact Build Review",
+      "zones": ["devops"],
+      "systems": ["build-server"],
+      "concepts": ["artifact-integrity", "ci-cd"],
+      "evidence": ["artifact id", "artifact hash", "build marker"],
+      "labStage": "lab-stage-7-artifact-build"
+    },
+    {
+      "id": "stage-8-sign-and-publish",
+      "number": 8,
+      "title": "Sign and Publish",
+      "zones": ["devops", "release"],
+      "systems": ["build-server", "signing-service", "update-server"],
+      "concepts": ["signing", "release-trust"],
+      "evidence": ["signed manifest", "signing log", "ANRC update manifest"],
+      "labStage": "lab-stage-8-sign-publish"
+    },
+    {
+      "id": "stage-9-customer-trusted-update",
+      "number": 9,
+      "title": "Customer Trusted Update",
+      "zones": ["release", "customer"],
+      "systems": ["update-server", "customer-app", "customer-api"],
+      "concepts": ["update-channel", "trust-boundary"],
+      "evidence": ["customer poll response", "customer update applied event"],
+      "labStage": "lab-stage-9-customer-update"
+    },
+    {
+      "id": "stage-10-customer-export-access",
+      "number": 10,
+      "title": "Customer Export Access",
+      "zones": ["customer"],
+      "systems": ["customer-api", "object-store"],
+      "concepts": ["customer-impact", "evidence"],
+      "evidence": ["export detail", "presigned URL", "object access proof"],
+      "labStage": "lab-stage-10-customer-collection"
+    },
+    {
+      "id": "stage-11-dark-web-exfiltration",
+      "number": 11,
+      "title": "Customer Data Exfiltration To Dark Web",
+      "zones": ["customer", "external-leak"],
+      "systems": ["customer-api", "object-store", "dark-web-drop", "leak-bundle"],
+      "concepts": ["customer-impact", "exfiltration", "evidence"],
+      "evidence": ["dropped export file", "supervisor verdict", "dark-web drop record", "exposed customer dataset"],
+      "labStage": "lab-stage-11-dark-web-exfiltration"
+    }
+  ],
+  "canonicalDecisions": {
+    "c2Emulator": "Archive/compatibility only. The target teaching flow should explain direct foothold-based internal discovery unless the lab still requires the emulator.",
+    "flags": "Allowed only as hidden progress markers. Student-facing curriculum should call them evidence or checkpoints.",
+    "darkWebExfiltration": "Canonical final stage. Defender Report is not the scenario ending; it can remain only as an optional after-action activity.",
+    "labPort": "Use 8081 for the local hands-on lab. Web curriculum, lab docs, walkthrough script, and lab-stage manifest are aligned to localhost:8081."
+  }
+}

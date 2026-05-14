@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "scenario-id",
+  "title": "시나리오 제목",
+  "summary": "시나리오 요약",
+  "difficulty": "beginner | intermediate | advanced",
+  "estimatedMinutes": 20,
+  "layoutMode": "enterprise-network",
+  "learningObjectives": [
+    "학습 목표 1",
+    "학습 목표 2"
+  ],
+  "safetyLevel": "defensive-education | authorized-redteam-lab",
+  "zones": [
+    {
+      "id": "external",
+      "label": "외부 인터넷",
+      "type": "external",
+      "parentId": null,
+      "description": "기업 외부 영역"
+    },
+    {
+      "id": "company-a",
+      "label": "A 기업",
+      "type": "company",
+      "parentId": null,
+      "description": "학습 대상 기업 영역"
+    },
+    {
+      "id": "company-a-dmz",
+      "label": "DMZ",
+      "type": "dmz",
+      "parentId": "company-a",
+      "description": "외부와 내부망 사이의 완충 영역"
+    },
+    {
+      "id": "company-a-internal",
+      "label": "내부망",
+      "type": "internal",
+      "parentId": "company-a",
+      "description": "사내 주요 시스템이 위치한 영역"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "node-id",
+      "label": "노드 이름",
+      "type": "attackerPc | desktop | webServer | appServer | database | firewall | router | mailServer | fileServer | adServer | siem | edr | cloudService | dnsServer | vpn | waf | proxy | identityProvider",
+      "zoneId": "zone-id",
+      "layoutRole": "source | entryPoint | intermediary | criticalAsset | securityControl | userEndpoint | externalService",
+      "importance": "low | medium | high | critical",
+      "description": "노드 설명"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-id",
+      "source": "source-node-id",
+      "target": "target-node-id",
+      "type": "http | https | smtp | dns | ssh | rdp | db | smb | api | log | securityAlert | unknown",
+      "label": "통신 설명",
+      "crossesBoundary": false,
+      "description": "연결선 설명"
+    }
+  ],
+  "steps": [
+    {
+      "id": "step-id",
+      "order": 1,
+      "title": "단계 제목",
+      "tactic": "Initial Access | Execution | Persistence | Privilege Escalation | Defense Evasion | Credential Access | Discovery | Lateral Movement | Collection | Exfiltration | Detection & Response",
+      "summary": "단계 요약",
+      "activeNodes": [
+        "node-id"
+      ],
+      "activeEdges": [
+        "edge-id"
+      ],
+      "eventMarkers": [
+        {
+          "id": "marker-id",
+          "type": "vulnerability | credential | malware | dataAccess | alert | blocked | investigation",
+          "targetType": "node | edge | zone",
+          "targetId": "node-or-edge-or-zone-id",
+          "label": "이벤트 라벨",
+          "description": "이벤트 설명"
+        }
+      ],
+      "explanation": {
+        "attackView": "공격 흐름에 대한 고수준 설명",
+        "defenseView": "방어 관점 설명",
+        "learnerTakeaway": "수강생이 기억해야 할 핵심 포인트"
+      },
+      "quiz": {
+        "question": "단계 이해 확인 질문",
+        "options": [
+          "선택지 1",
+          "선택지 2",
+          "선택지 3",
+          "선택지 4"
+        ],
+        "answerIndex": 0,
+        "explanation": "정답 해설"
+      }
+    }
+  ],
+  "metadata": {
+    "createdBy": "llm",
+    "reviewStatus": "draft",
+    "tags": [
+      "APT",
+      "Initial Access",
+      "Enterprise Network"
+    ]
+  }
+}

@@ -2,6 +2,13 @@ import { createContext, useContext, useState, useEffect, useRef, useCallback } f
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
+const LOCAL_AUTH_BYPASS = import.meta.env.DEV && import.meta.env.VITE_LOCAL_AUTH_BYPASS === 'true';
+const LOCAL_DEV_USER = {
+  id: '00000000-0000-4000-8000-000000000001',
+  email: 'local-dev@gotroot.test',
+  user_metadata: { name: 'Local Dev' },
+};
+const STATIC_EDU_AUTH_KEY = 'sb-bnwbybawqrnhznirivfg-auth-token';
 
 // ── 서버 측 인증용 쿠키 동기화 (Edge Middleware가 읽음) ──
 function setAuthCookie(token) {
@@ -11,6 +18,17 @@ function setAuthCookie(token) {
 
 function clearAuthCookie() {
   document.cookie = 'gotroot_auth_token=; path=/; max-age=0; SameSite=Lax';
+}
+
+function setLocalDevAuthState() {
+  setAuthCookie('local-dev-token');
+  try {
+    localStorage.setItem('gotroot_is_admin', 'false');
+    sessionStorage.setItem(STATIC_EDU_AUTH_KEY, JSON.stringify({
+      access_token: 'local-dev-token',
+      user: LOCAL_DEV_USER,
+    }));
+  } catch {}
 }
 
 // ── 세션 타임아웃 설정 ──
@@ -56,6 +74,15 @@ export function AuthProvider({ children }) {
   };
 
   const logout = useCallback(async () => {
+    if (LOCAL_AUTH_BYPASS) {
+      setLocalDevAuthState();
+      setUser(LOCAL_DEV_USER);
+      setIsAdmin(false);
+      setUserLevel('intermediate');
+      setUserName('Local Dev');
+      setSessionWarning(null);
+      return;
+    }
     clearAuthCookie();
     try { localStorage.removeItem('gotroot_is_admin'); } catch {}
     await supabase.auth.signOut();
@@ -122,6 +149,16 @@ export function AuthProvider({ children }) {
 
   // ── 세션 복원 + 상태 감지 ──
   useEffect(() => {
+    if (LOCAL_AUTH_BYPASS) {
+      setLocalDevAuthState();
+      setUser(LOCAL_DEV_USER);
+      setIsAdmin(false);
+      setUserLevel('intermediate');
+      setUserName('Local Dev');
+      setLoading(false);
+      return;
+    }
+
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const u = session?.user ?? null;
@@ -159,7 +196,7 @@ export function AuthProvider({ children }) {
   if (loading) return null;
 
   return (
-    <AuthContext.Provider value={{ user, logout, isLoggedIn: !!user, isAdmin, userLevel, userName, sessionWarning }}>
+    <AuthContext.Provider value={{ user, logout, isLoggedIn: !!user, isAdmin, userLevel, userName, loading, sessionWarning }}>
       {children}
     </AuthContext.Provider>
   );

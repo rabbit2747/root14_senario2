@@ -2,10 +2,24 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { viteObfuscateFile } from 'vite-plugin-obfuscator'
+import http from 'node:http'
+import { execFileSync } from 'node:child_process'
 
 // ── Dev 방문자 IP 수집 (server.js 프로덕션 미들웨어와 동일 로직) ──
 // Supabase REST API 직접 호출. IP당 1시간 1회 제한.
 const devVisitedIPs = new Map();
+
+function normalizeClientIp(ip = '') {
+  return ip.replace(/^::ffff:/, '');
+}
+
+function isPrivateOrLocalIp(ip) {
+  if (ip === '127.0.0.1' || ip === '::1') return true;
+  if (ip.startsWith('10.')) return true;
+  if (ip.startsWith('192.168.')) return true;
+  const match = ip.match(/^172\.(\d+)\./);
+  return Boolean(match && Number(match[1]) >= 16 && Number(match[1]) <= 31);
+}
 const DEV_VISIT_COOLDOWN = 60 * 60 * 1000; // 1시간
 
 async function devLogVisitorIP(ip, path) {
@@ -76,10 +90,8 @@ const blockExternalSourcePlugin = {
         }
       }
 
-      const ip = req.socket?.remoteAddress ?? '';
-      const isLocal =
-        ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
-      if (!isLocal && BLOCKED.some(p => req.url?.startsWith(p))) {
+      const ip = normalizeClientIp(req.socket?.remoteAddress ?? '');
+      if (!isPrivateOrLocalIp(ip) && BLOCKED.some(p => req.url?.startsWith(p))) {
         res.statusCode = 403;
         res.setHeader('Content-Type', 'text/plain');
         res.end('403 Forbidden: Source access denied from external IP');
@@ -90,10 +102,132 @@ const blockExternalSourcePlugin = {
   },
 };
 
+function rewriteLabHtml(html) {
+  return html
+    .replaceAll('href="/', 'href="/orion-lab/')
+    .replaceAll("href='/", "href='/orion-lab/")
+    .replaceAll('action="/', 'action="/orion-lab/')
+    .replaceAll("action='/", "action='/orion-lab/")
+    .replaceAll('src="/', 'src="/orion-lab/')
+    .replaceAll("src='/", "src='/orion-lab/");
+}
+
+function discoverWslIp() {
+  try {
+    const output = execFileSync('wsl', ['-e', 'sh', '-lc', "hostname -I | awk '{print $1}'"], {
+      encoding: 'utf8',
+      timeout: 3000,
+    }).trim();
+    return output.split(/\s+/)[0] || '';
+  } catch {
+    return '';
+  }
+}
+
+function buildLabTargets() {
+  const configuredHost = process.env.ORION_LAB_HOST || '';
+  const configuredPort = Number(process.env.ORION_LAB_PORT || '28081');
+  const targets = [];
+  if (configuredHost) targets.push({ host: configuredHost, port: configuredPort });
+  targets.push({ host: '127.0.0.1', port: 18081 });
+  const wslIp = discoverWslIp();
+  if (wslIp) targets.push({ host: wslIp, port: 28081 });
+  targets.push({ host: '127.0.0.1', port: 28081 });
+
+  const seen = new Set();
+  return targets.filter((target) => {
+    const key = `${target.host}:${target.port}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+const orionLabProxyPlugin = {
+  name: 'orion-lab-proxy',
+  apply: 'serve',
+  configureServer(server) {
+    const labTargets = buildLabTargets();
+    console.log(`[orion-lab-proxy] targets: ${labTargets.map((target) => `${target.host}:${target.port}`).join(', ')}`);
+
+    server.middlewares.use('/orion-lab', (req, res) => {
+      if (req.url === '' || req.url === '/') {
+        req.url = '/';
+      }
+      const targetPath = req.url || '/';
+
+      const requestChunks = [];
+      req.on('data', (chunk) => requestChunks.push(chunk));
+      req.on('end', () => {
+        const requestBody = Buffer.concat(requestChunks);
+        let lastError = null;
+
+        const tryTarget = (index) => {
+          const target = labTargets[index];
+          if (!target) {
+            res.statusCode = 502;
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+            res.end(`Orion lab proxy unavailable: ${lastError?.message || 'no reachable target'}\n`);
+            return;
+          }
+
+          const headers = { ...req.headers, host: `${target.host}:${target.port}`, connection: 'close' };
+          delete headers['proxy-connection'];
+          if (requestBody.length > 0) headers['content-length'] = String(requestBody.length);
+
+          const proxyReq = http.request(
+            {
+              hostname: target.host,
+              port: target.port,
+              path: targetPath,
+              method: req.method,
+              headers,
+              agent: false,
+            },
+            (proxyRes) => {
+              const chunks = [];
+              proxyRes.on('data', (chunk) => chunks.push(chunk));
+              proxyRes.on('end', () => {
+                const body = Buffer.concat(chunks);
+                const contentType = proxyRes.headers['content-type'] || '';
+                const responseHeaders = { ...proxyRes.headers };
+                delete responseHeaders['content-length'];
+                res.statusCode = proxyRes.statusCode || 502;
+                for (const [key, value] of Object.entries(responseHeaders)) {
+                  if (value !== undefined) res.setHeader(key, value);
+                }
+                if (contentType.includes('text/html')) {
+                  res.end(rewriteLabHtml(body.toString('utf8')));
+                  return;
+                }
+                res.end(body);
+              });
+            },
+          );
+
+          proxyReq.setTimeout(5000, () => {
+            proxyReq.destroy(new Error(`${target.host}:${target.port} timed out`));
+          });
+
+          proxyReq.on('error', (error) => {
+            lastError = error;
+            tryTarget(index + 1);
+          });
+
+          proxyReq.end(requestBody);
+        };
+
+        tryTarget(0);
+      });
+    });
+  },
+};
+
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    orionLabProxyPlugin,
     blockExternalSourcePlugin,
     viteObfuscateFile({
       apply: 'build',

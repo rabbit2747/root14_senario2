@@ -1,0 +1,295 @@
+{
+  "id": "ledger-mirage-bec-investigation-range",
+  "title": "Operation Ledger Mirage BEC Investigation Range",
+  "subtitle": "Business Email Compromise evidence topology",
+  "difficulty": "intermediate",
+  "estimatedMinutes": 150,
+  "safetyLevel": "defensive-investigation-only",
+  "learningObjectives": [
+    "Explain how BEC combines email deception, identity evidence, mailbox manipulation, and finance workflow failure.",
+    "Map suspicious messages to sender infrastructure, domain evidence, M365 logs, endpoint activity, network logs, and payment records.",
+    "Differentiate spoofing, reply-to deception, compromised mailbox evidence, and business process failure.",
+    "Build an evidence-backed timeline from intake through final payment impact.",
+    "Produce executive findings with root cause, impact, containment, and recommendations."
+  ],
+  "zones": [
+    { "id": "case-management", "label": "Case Management", "type": "coordination" },
+    { "id": "email-evidence", "label": "Email Evidence", "type": "email" },
+    { "id": "identity-mailbox", "label": "Identity and Mailbox", "type": "identity" },
+    { "id": "endpoint-network", "label": "Endpoint and Network", "type": "telemetry" },
+    { "id": "domain-infrastructure", "label": "Domain Infrastructure", "type": "infrastructure" },
+    { "id": "finance-workflow", "label": "Finance Workflow", "type": "business" },
+    { "id": "control", "label": "Control and Reporting", "type": "reporting" }
+  ],
+  "nodes": [
+    { "id": "case-portal", "label": "Case Portal", "type": "intake", "zoneId": "case-management" },
+    { "id": "timeline-builder", "label": "Timeline Builder", "type": "analysis", "zoneId": "case-management" },
+    { "id": "mail-viewer", "label": "Mail Viewer", "type": "mailbox", "zoneId": "email-evidence" },
+    { "id": "message-trace", "label": "Message Trace", "type": "trace", "zoneId": "email-evidence" },
+    { "id": "header-analyzer", "label": "Header Analyzer", "type": "headers", "zoneId": "email-evidence" },
+    { "id": "invoice-review", "label": "Invoice Review", "type": "attachment", "zoneId": "email-evidence" },
+    { "id": "m365-dashboard", "label": "M365 Dashboard", "type": "audit", "zoneId": "identity-mailbox" },
+    { "id": "signin-log-viewer", "label": "Sign-in Log Viewer", "type": "identity", "zoneId": "identity-mailbox" },
+    { "id": "mailbox-rule-viewer", "label": "Mailbox Rule Viewer", "type": "mailbox", "zoneId": "identity-mailbox" },
+    { "id": "edr-console", "label": "EDR Console", "type": "endpoint", "zoneId": "endpoint-network" },
+    { "id": "browser-history-viewer", "label": "Browser History Viewer", "type": "endpoint", "zoneId": "endpoint-network" },
+    { "id": "proxy-log-viewer", "label": "Proxy Log Viewer", "type": "proxy", "zoneId": "endpoint-network" },
+    { "id": "dns-log-viewer", "label": "DNS Log Viewer", "type": "dns", "zoneId": "endpoint-network" },
+    { "id": "domain-record-viewer", "label": "Domain Record Viewer", "type": "domain", "zoneId": "domain-infrastructure" },
+    { "id": "ct-log-viewer", "label": "Certificate Transparency", "type": "certificate", "zoneId": "domain-infrastructure" },
+    { "id": "finance-portal", "label": "Finance Portal", "type": "payment", "zoneId": "finance-workflow" },
+    { "id": "vendor-master-log", "label": "Vendor Master Log", "type": "vendor", "zoneId": "finance-workflow" },
+    { "id": "payment-approval-chain", "label": "Payment Approval Chain", "type": "approval", "zoneId": "finance-workflow" },
+    { "id": "report-submission-portal", "label": "Report Submission Portal", "type": "report", "zoneId": "control" },
+    { "id": "flag-service", "label": "Flag Service", "type": "checkpoint", "zoneId": "control" }
+  ],
+  "edges": [
+    { "id": "case-to-finance", "source": "case-portal", "target": "finance-portal", "type": "scope", "label": "payment exception notice" },
+    { "id": "case-to-mail", "source": "case-portal", "target": "mail-viewer", "type": "evidence", "label": "reported messages" },
+    { "id": "mail-to-trace", "source": "mail-viewer", "target": "message-trace", "type": "email", "label": "message id correlation" },
+    { "id": "mail-to-header", "source": "mail-viewer", "target": "header-analyzer", "type": "email", "label": "header analysis" },
+    { "id": "header-to-domain", "source": "header-analyzer", "target": "domain-record-viewer", "type": "infrastructure", "label": "reply-to and auth clues" },
+    { "id": "mail-to-invoice", "source": "mail-viewer", "target": "invoice-review", "type": "attachment", "label": "invoice comparison" },
+    { "id": "mail-to-identity", "source": "mail-viewer", "target": "signin-log-viewer", "type": "identity", "label": "mailbox access timing" },
+    { "id": "identity-to-rules", "source": "signin-log-viewer", "target": "mailbox-rule-viewer", "type": "mailbox", "label": "rule and forwarding review" },
+    { "id": "endpoint-to-domain", "source": "browser-history-viewer", "target": "domain-record-viewer", "type": "web", "label": "suspicious site visit" },
+    { "id": "domain-to-network", "source": "domain-record-viewer", "target": "dns-log-viewer", "type": "network", "label": "DNS and proxy correlation" },
+    { "id": "network-to-finance", "source": "proxy-log-viewer", "target": "vendor-master-log", "type": "business", "label": "timeline supports payment change" },
+    { "id": "finance-to-report", "source": "payment-approval-chain", "target": "timeline-builder", "type": "analysis", "label": "impact timeline" },
+    { "id": "report-to-control", "source": "timeline-builder", "target": "report-submission-portal", "type": "report", "label": "final findings" },
+    { "id": "report-to-flag", "source": "report-submission-portal", "target": "flag-service", "type": "checkpoint", "label": "report accepted" }
+  ],
+  "steps": [
+    {
+      "id": "stage-0-intake-scope",
+      "order": 0,
+      "title": "Stage 0. Intake and Scope",
+      "tactic": "Detection & Response",
+      "summary": "Define affected user, vendor, amount, incident window, and investigation boundaries.",
+      "activeNodes": ["case-portal", "finance-portal"],
+      "activeEdges": ["case-to-finance"],
+      "eventMarkers": [{ "id": "flag-0", "label": "flag_0_scope_defined" }],
+      "explanation": {
+        "attackView": "The fraud path starts as a business exception, not as a malware alert.",
+        "defenseView": "The investigator must lock the scope before analyzing logs: who, what amount, which vendor, and which dates.",
+        "learnerTakeaway": "BEC investigation starts by defining business impact and evidence boundaries."
+      },
+      "quiz": {
+        "question": "Which fact belongs in initial BEC scope?",
+        "options": ["Affected user, vendor, amount, and date range", "Only endpoint process names", "Only malware hash", "Only firewall deny logs"],
+        "answerIndex": 0,
+        "explanation": "Stage 0 anchors the investigation around user, vendor, payment amount, and incident window."
+      }
+    },
+    {
+      "id": "stage-1-suspicious-email-triage",
+      "order": 1,
+      "title": "Stage 1. Suspicious Email Triage",
+      "tactic": "Initial Access",
+      "summary": "Identify the vendor-looking message and executive follow-up that pushed the payment change.",
+      "activeNodes": ["case-portal", "mail-viewer", "message-trace"],
+      "activeEdges": ["case-to-mail", "mail-to-trace"],
+      "eventMarkers": [{ "id": "flag-1", "label": "flag_1_suspicious_email_identified" }],
+      "explanation": {
+        "attackView": "The message abuses expected business language and executive urgency.",
+        "defenseView": "The analyst separates visible message content from transport and authentication evidence.",
+        "learnerTakeaway": "Do not trust display name, thread context, or urgent tone by themselves."
+      },
+      "quiz": {
+        "question": "What is the first email evidence task?",
+        "options": ["Identify suspicious messages and message IDs", "Block every vendor domain", "Reset all passwords immediately", "Write the final report"],
+        "answerIndex": 0,
+        "explanation": "Triage starts by identifying the relevant messages and traceable message IDs."
+      }
+    },
+    {
+      "id": "stage-2-header-sender-infrastructure",
+      "order": 2,
+      "title": "Stage 2. Header and Sender Infrastructure Analysis",
+      "tactic": "Reconnaissance",
+      "summary": "Analyze SPF, DKIM, DMARC, reply-to mismatch, relay path, and suspicious domain evidence.",
+      "activeNodes": ["mail-viewer", "header-analyzer", "message-trace", "domain-record-viewer"],
+      "activeEdges": ["mail-to-header", "mail-to-trace", "header-to-domain"],
+      "eventMarkers": [{ "id": "flag-2", "label": "flag_2_sender_infrastructure" }],
+      "explanation": {
+        "attackView": "The operator hides behind sender appearance, reply-to mismatch, and a lookalike login domain.",
+        "defenseView": "Headers and message trace reveal whether sender identity, authentication, and routing match the visible story.",
+        "learnerTakeaway": "Email authenticity must be proven with headers and authentication results, not with the From display."
+      },
+      "quiz": {
+        "question": "Which fields help classify sender authenticity?",
+        "options": ["SPF, DKIM, DMARC, reply-to, and relay path", "Font family and email color", "Invoice total only", "Local browser cache only"],
+        "answerIndex": 0,
+        "explanation": "Sender infrastructure analysis relies on authentication and transport evidence."
+      }
+    },
+    {
+      "id": "stage-3-attachment-invoice-analysis",
+      "order": 3,
+      "title": "Stage 3. Attachment and Invoice Analysis",
+      "tactic": "Collection",
+      "summary": "Compare the suspicious invoice and beneficiary change details against a legitimate baseline.",
+      "activeNodes": ["mail-viewer", "invoice-review", "finance-portal"],
+      "activeEdges": ["mail-to-invoice", "case-to-finance"],
+      "eventMarkers": [{ "id": "flag-3", "label": "flag_3_invoice_redirection" }],
+      "explanation": {
+        "attackView": "The fraud succeeds when invoice details look normal enough to pass routine processing.",
+        "defenseView": "Metadata, payment instructions, and prior vendor records reveal what changed.",
+        "learnerTakeaway": "BEC evidence crosses technical artifacts and finance records."
+      },
+      "quiz": {
+        "question": "What should the invoice be compared against?",
+        "options": ["Legitimate vendor baseline and vendor master data", "Random public invoice templates", "DNS cache only", "Endpoint AV result only"],
+        "answerIndex": 0,
+        "explanation": "Invoice analysis needs a legitimate baseline and finance workflow context."
+      }
+    },
+    {
+      "id": "stage-4-m365-log-correlation",
+      "order": 4,
+      "title": "Stage 4. Microsoft 365 Sign-in and Audit Log Correlation",
+      "tactic": "Credential Access",
+      "summary": "Review sign-ins, MFA context, user agents, source IPs, mailbox access, and audit events.",
+      "activeNodes": ["m365-dashboard", "signin-log-viewer", "mail-viewer"],
+      "activeEdges": ["mail-to-identity"],
+      "eventMarkers": [{ "id": "flag-4", "label": "flag_4_o365_log_correlation" }],
+      "explanation": {
+        "attackView": "If a mailbox was accessed, the operator may use valid credentials and blend into cloud logs.",
+        "defenseView": "Sign-in and audit logs show whether the mailbox story is spoofing only or possible account access.",
+        "learnerTakeaway": "Cloud identity evidence is central to modern BEC investigations."
+      },
+      "quiz": {
+        "question": "Which M365 fields matter most?",
+        "options": ["Time, source IP, user agent, MFA result, and mailbox audit action", "Only message subject", "Only file extension", "Only payment amount"],
+        "answerIndex": 0,
+        "explanation": "M365 correlation uses identity context, access timing, and mailbox activity."
+      }
+    },
+    {
+      "id": "stage-5-mailbox-manipulation",
+      "order": 5,
+      "title": "Stage 5. Mailbox Rule and Email Manipulation Review",
+      "tactic": "Collection",
+      "summary": "Identify suspicious inbox rules, forwarding, folder moves, or deleted payment-related messages.",
+      "activeNodes": ["signin-log-viewer", "mailbox-rule-viewer", "mail-viewer"],
+      "activeEdges": ["identity-to-rules"],
+      "eventMarkers": [{ "id": "flag-5", "label": "flag_5_mailbox_manipulation" }],
+      "explanation": {
+        "attackView": "Mailbox rules can hide replies, redirect vendor messages, or reduce user suspicion.",
+        "defenseView": "Rule creation time and folder activity must be aligned with suspicious messages and sign-ins.",
+        "learnerTakeaway": "Mailbox state is evidence, not just message storage."
+      },
+      "quiz": {
+        "question": "Why review inbox rules?",
+        "options": ["They can hide or redirect payment-related messages", "They prove malware execution", "They replace financial records", "They identify every DNS query"],
+        "answerIndex": 0,
+        "explanation": "BEC often uses mailbox manipulation to control communication flow."
+      }
+    },
+    {
+      "id": "stage-6-device-browser-history",
+      "order": 6,
+      "title": "Stage 6. Device and Browser History Review",
+      "tactic": "Discovery",
+      "summary": "Check whether the user visited the suspicious domain and whether endpoint evidence supports credential-entry activity.",
+      "activeNodes": ["edr-console", "browser-history-viewer", "domain-record-viewer"],
+      "activeEdges": ["endpoint-to-domain"],
+      "eventMarkers": [{ "id": "flag-6", "label": "flag_6_device_web_history" }],
+      "explanation": {
+        "attackView": "A lookalike login page can collect credentials without deploying malware.",
+        "defenseView": "Browser history, downloads, EDR, and scan results help confirm or refute user interaction.",
+        "learnerTakeaway": "Absence of malware does not mean absence of compromise."
+      },
+      "quiz": {
+        "question": "What conclusion can browser history support?",
+        "options": ["Whether the user visited the suspicious site", "Whether a bank transfer succeeded by itself", "Whether DKIM passed", "Whether the final report is accepted"],
+        "answerIndex": 0,
+        "explanation": "Browser history is used to validate interaction with the suspicious site."
+      }
+    },
+    {
+      "id": "stage-7-domain-dns-hosting",
+      "order": 7,
+      "title": "Stage 7. Domain, DNS, and Hosting Analysis",
+      "tactic": "Reconnaissance",
+      "summary": "Analyze the lookalike domain, registration timing, DNS history, and certificate transparency evidence.",
+      "activeNodes": ["domain-record-viewer", "ct-log-viewer", "dns-log-viewer"],
+      "activeEdges": ["header-to-domain", "domain-to-network"],
+      "eventMarkers": [{ "id": "flag-7", "label": "flag_7_domain_analysis" }],
+      "explanation": {
+        "attackView": "The suspicious domain is built to look plausible during a short fraud window.",
+        "defenseView": "Domain registration and certificate timing can support attribution of infrastructure to the campaign timeline.",
+        "learnerTakeaway": "Domain evidence helps connect email deception to user web activity."
+      },
+      "quiz": {
+        "question": "Which evidence belongs to domain analysis?",
+        "options": ["WHOIS, DNS history, and certificate transparency", "Only invoice total", "Only M365 MFA result", "Only report template"],
+        "answerIndex": 0,
+        "explanation": "Domain analysis explains the suspicious infrastructure used in the BEC path."
+      }
+    },
+    {
+      "id": "stage-8-network-correlation",
+      "order": 8,
+      "title": "Stage 8. Firewall and Proxy Log Correlation",
+      "tactic": "Detection & Response",
+      "summary": "Correlate DNS, proxy, and firewall logs with the user device and incident timeline.",
+      "activeNodes": ["proxy-log-viewer", "dns-log-viewer", "domain-record-viewer"],
+      "activeEdges": ["domain-to-network"],
+      "eventMarkers": [{ "id": "flag-8", "label": "flag_8_network_correlation" }],
+      "explanation": {
+        "attackView": "Network traces can show when the suspicious site was reached and from which device.",
+        "defenseView": "Proxy and DNS logs turn a mailbox story into a network-confirmed timeline.",
+        "learnerTakeaway": "Good BEC analysis joins cloud, endpoint, network, and business evidence."
+      },
+      "quiz": {
+        "question": "Why correlate proxy and DNS logs?",
+        "options": ["To validate timing and device interaction with suspicious infrastructure", "To sign an update package", "To decode a malware payload", "To approve a payment"],
+        "answerIndex": 0,
+        "explanation": "Network correlation validates whether the suspicious infrastructure was accessed."
+      }
+    },
+    {
+      "id": "stage-9-payment-impact",
+      "order": 9,
+      "title": "Stage 9. Payment Workflow and Impact Assessment",
+      "tactic": "Impact",
+      "summary": "Determine financial impact, recovery status, vendor master changes, approval path, and failed callback control.",
+      "activeNodes": ["finance-portal", "vendor-master-log", "payment-approval-chain", "proxy-log-viewer"],
+      "activeEdges": ["network-to-finance", "finance-to-report"],
+      "eventMarkers": [{ "id": "flag-9", "label": "flag_9_business_impact" }],
+      "explanation": {
+        "attackView": "The objective is not only mailbox access; it is payment redirection.",
+        "defenseView": "Finance records identify the exact process control that failed and the business impact.",
+        "learnerTakeaway": "BEC response must include finance workflow and recovery status, not only technical IOCs."
+      },
+      "quiz": {
+        "question": "What is the main business impact?",
+        "options": ["A 482,750 USD payment redirection risk", "A signed vendor update", "A dark web object-store leak", "A CI build trigger"],
+        "answerIndex": 0,
+        "explanation": "The Ledger Mirage impact is a high-value vendor payment redirection."
+      }
+    },
+    {
+      "id": "stage-10-final-findings",
+      "order": 10,
+      "title": "Stage 10. Final Findings and Recommendations",
+      "tactic": "Detection & Response",
+      "summary": "Submit executive findings, timeline, root cause, impact, containment, and recommendations.",
+      "activeNodes": ["timeline-builder", "report-submission-portal", "flag-service", "payment-approval-chain"],
+      "activeEdges": ["finance-to-report", "report-to-control", "report-to-flag"],
+      "eventMarkers": [{ "id": "flag-10", "label": "flag_10_final_report" }],
+      "explanation": {
+        "attackView": "The simulated attacker objective is complete when payment workflow is redirected.",
+        "defenseView": "The analyst must present facts, likely conclusions, remaining uncertainty, and control improvements.",
+        "learnerTakeaway": "A BEC investigation is finished only when technical evidence is translated into business action."
+      },
+      "quiz": {
+        "question": "What should the final output include?",
+        "options": ["Timeline, root cause, impact, containment, and recommendations", "Only a screenshot", "Only a password reset note", "Only DNS indicators"],
+        "answerIndex": 0,
+        "explanation": "The final report must explain the complete evidence-backed business incident."
+      }
+    }
+  ]
+}

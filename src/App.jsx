@@ -4,6 +4,12 @@ import ReactGA from 'react-ga4';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Time } from '@carbon/icons-react';
 import WikiFloatingButton from './components/wiki/WikiFloatingButton';
+import OrionEchoTOC from './pages/apt/orion-echo/CourseTOC';
+import OrionEchoPractical from './pages/apt/orion-echo/PracticalScenario';
+import OrionEchoLegacyBridge from './pages/apt/orion-echo/LegacyBridge';
+import OrionEchoConceptClass from './pages/apt/orion-echo/ConceptClass';
+import OrionEchoHandsOnLab from './pages/apt/orion-echo/HandsOnLab';
+import OrionEchoIntro from './pages/apt/orion-echo/OrionEchoIntro';
 
 // ── Route-level 코드 스플리팅 (lazy loading) ──
 const IntroMatrix    = lazy(() => import('./pages/IntroMatrix'));
@@ -33,10 +39,14 @@ const Ch1Prototype            = lazy(() => import('./pages/apt/study/Ch1Prototyp
 const VictimScenario          = lazy(() => import('./pages/apt/study/VictimScenario'));
 const ScenarioHub             = lazy(() => import('./pages/apt/study/ScenarioHub'));
 const AptGame                 = lazy(() => import('./pages/apt/study/AptGame'));
-const OrionEchoTOC            = lazy(() => import('./pages/apt/orion-echo/CourseTOC'));
+const LedgerMirageTOC         = lazy(() => import('./pages/apt/ledger-mirage/CourseTOC'));
+const LedgerMiragePractical   = lazy(() => import('./pages/apt/ledger-mirage/PracticalScenario'));
+const LedgerMirageLegacyBridge = lazy(() => import('./pages/apt/ledger-mirage/LegacyBridge'));
+const LedgerMirageConceptClass = lazy(() => import('./pages/apt/ledger-mirage/ConceptClass'));
+const LedgerMirageHandsOnLab  = lazy(() => import('./pages/apt/ledger-mirage/HandsOnLab'));
+const LedgerMirageIntro       = lazy(() => import('./pages/apt/ledger-mirage/LedgerMirageIntro'));
 const CinematicExperience     = lazy(() => import('./pages/apt/cinematic-mvp/CinematicExperience'));
 const Root14NotFound          = lazy(() => import('./pages/Root14NotFound'));
-const OrionEchoIntro          = lazy(() => import('./pages/apt/orion-echo/OrionEchoIntro'));
 
 // GA4 초기화 (앱 최초 로드 시 1회)
 ReactGA.initialize(import.meta.env.VITE_GA_MEASUREMENT_ID);
@@ -144,7 +154,17 @@ function App() {
             <Route path="/apt/scenarios" element={<ScenarioHub />} />
             <Route path="/apt/:campaignId/game" element={<AptGame />} />
             <Route path="/apt/orion-echo" element={<OrionEchoTOC />} />
+            <Route path="/apt/orion-echo-practical" element={<OrionEchoPractical />} />
+            <Route path="/apt/orion-echo/legacy-3d" element={<OrionEchoLegacyBridge />} />
+            <Route path="/apt/orion-echo/concepts" element={<OrionEchoConceptClass />} />
+            <Route path="/apt/orion-echo/lab" element={<OrionEchoHandsOnLab />} />
             <Route path="/apt/orion-echo/intro" element={<OrionEchoIntro />} />
+            <Route path="/apt/ledger-mirage" element={<LedgerMirageTOC />} />
+            <Route path="/apt/ledger-mirage-practical" element={<LedgerMiragePractical />} />
+            <Route path="/apt/ledger-mirage/legacy-3d" element={<LedgerMirageLegacyBridge />} />
+            <Route path="/apt/ledger-mirage/concepts" element={<LedgerMirageConceptClass />} />
+            <Route path="/apt/ledger-mirage/lab" element={<LedgerMirageHandsOnLab />} />
+            <Route path="/apt/ledger-mirage/intro" element={<LedgerMirageIntro />} />
             <Route path="/apt/cinematic/:scenarioId" element={<CinematicExperience />} />
             <Route path="/apt/:campaignId" element={<AptDetailPage />} />
             <Route path="/apt/:campaignId/study" element={<AptStudyPage />} />

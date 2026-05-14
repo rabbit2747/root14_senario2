@@ -1,0 +1,212 @@
+{
+  "schemaVersion": "1.0.0",
+  "scenario": {
+    "id": "operation-ledger-mirage",
+    "slug": "ledger-mirage",
+    "title": "Operation Ledger Mirage",
+    "subtitle": "Business Email Compromise Investigation Curriculum",
+    "audience": "cybersecurity undergraduate / junior analyst",
+    "difficulty": "intermediate",
+    "estimatedMinutes": 150,
+    "canonicalStatus": "draft-canonical"
+  },
+  "story": {
+    "company": "NorthBridge Trading Ltd.",
+    "vendor": "Meridian Office Supply LLC",
+    "affectedUser": "ap.lead@northbridge.example",
+    "executiveImpersonated": "ceo.office@northbridge.example",
+    "suspiciousSender": "billing-meridian@example.invalid",
+    "suspiciousDomain": "northbridge-secure-login.example",
+    "paymentAmount": "482,750 USD",
+    "incidentWindow": "2026-04-07 to 2026-04-18",
+    "coreMessage": "The learner reconstructs a BEC incident from evidence and identifies both technical indicators and payment workflow control failures."
+  },
+  "sessions": [
+    {
+      "id": "mission-briefing",
+      "label": "Mission Briefing",
+      "purpose": "Set case context, learner role, suspected payment, and safety scope."
+    },
+    {
+      "id": "concept-class",
+      "label": "Concept Class",
+      "purpose": "Teach BEC, sender trust, email authentication, M365 logs, mailbox rules, domain evidence, and payment controls."
+    },
+    {
+      "id": "practical-case-review",
+      "label": "Practical Case Review",
+      "purpose": "Reconnect concepts to the NorthBridge case and define the evidence plan."
+    },
+    {
+      "id": "evidence-topology-review",
+      "label": "Evidence Topology Review",
+      "purpose": "Map email, identity, endpoint, network, domain, and finance evidence relationships."
+    },
+    {
+      "id": "hands-on-investigation-lab",
+      "label": "Hands-on Investigation Lab",
+      "purpose": "Inspect evidence artifacts, answer checkpoints, build a timeline, and prepare findings."
+    },
+    {
+      "id": "final-report",
+      "label": "Final Report",
+      "purpose": "Submit executive findings, root cause, business impact, containment, and recommendations."
+    }
+  ],
+  "evidenceZones": [
+    {
+      "id": "case-management",
+      "label": "Case Management",
+      "systems": ["case-portal", "timeline-builder", "report-submission-portal"]
+    },
+    {
+      "id": "email-evidence",
+      "label": "Email Evidence",
+      "systems": ["mail-viewer", "message-trace", "email-header-analyzer"]
+    },
+    {
+      "id": "identity-mailbox",
+      "label": "Identity and Mailbox",
+      "systems": ["fake-m365-dashboard", "signin-log-viewer", "mailbox-rule-viewer"]
+    },
+    {
+      "id": "endpoint-network",
+      "label": "Endpoint and Network",
+      "systems": ["fake-edr-console", "browser-history-viewer", "proxy-log-viewer", "dns-log-viewer"]
+    },
+    {
+      "id": "domain-infrastructure",
+      "label": "Domain Infrastructure Evidence",
+      "systems": ["domain-record-viewer", "ct-log-viewer", "hosting-notes"]
+    },
+    {
+      "id": "finance-workflow",
+      "label": "Finance Workflow",
+      "systems": ["finance-portal", "vendor-master-log", "payment-approval-chain"]
+    },
+    {
+      "id": "control",
+      "label": "Control and Scoring",
+      "systems": ["flag-service", "audit-log", "instructor-console"]
+    }
+  ],
+  "stages": [
+    {
+      "id": "stage-0-intake-scope",
+      "number": 0,
+      "title": "Intake and Scope",
+      "zones": ["case-management", "finance-workflow"],
+      "systems": ["case-portal", "finance-portal"],
+      "concepts": ["investigation-scope", "business-process"],
+      "evidence": ["intake_summary.md", "affected_users.csv", "payment_exception_notice.pdf"],
+      "checkpoint": "flag_0_scope_defined"
+    },
+    {
+      "id": "stage-1-suspicious-email-triage",
+      "number": 1,
+      "title": "Suspicious Email Triage",
+      "zones": ["email-evidence"],
+      "systems": ["mail-viewer", "message-trace"],
+      "concepts": ["bec", "impersonation"],
+      "evidence": ["reported messages", "initial_vendor_notice header", "executive_followup header"],
+      "checkpoint": "flag_1_suspicious_email_identified"
+    },
+    {
+      "id": "stage-2-header-sender-infrastructure",
+      "number": 2,
+      "title": "Header and Sender Infrastructure Analysis",
+      "zones": ["email-evidence", "domain-infrastructure"],
+      "systems": ["email-header-analyzer", "domain-record-viewer"],
+      "concepts": ["spf-dkim-dmarc", "reply-to-mismatch", "sender-infrastructure"],
+      "evidence": ["email_headers", "message_trace.csv", "spf_dkim_dmarc_results.json"],
+      "checkpoint": "flag_2_sender_infrastructure"
+    },
+    {
+      "id": "stage-3-attachment-invoice-analysis",
+      "number": 3,
+      "title": "Attachment and Invoice Analysis",
+      "zones": ["email-evidence", "finance-workflow"],
+      "systems": ["mail-viewer", "finance-portal"],
+      "concepts": ["invoice-redirection", "document-metadata"],
+      "evidence": ["fake_invoice_2026-04.pdf", "legitimate_invoice_baseline.pdf", "invoice_metadata.json"],
+      "checkpoint": "flag_3_invoice_redirection"
+    },
+    {
+      "id": "stage-4-m365-log-correlation",
+      "number": 4,
+      "title": "Microsoft 365 Sign-in and Audit Log Analysis",
+      "zones": ["identity-mailbox"],
+      "systems": ["fake-m365-dashboard", "signin-log-viewer"],
+      "concepts": ["valid-accounts", "audit-correlation", "mfa-context"],
+      "evidence": ["signin_logs.csv", "audit_logs.csv", "mfa_events.csv", "unified_audit_log.jsonl"],
+      "checkpoint": "flag_4_o365_log_correlation"
+    },
+    {
+      "id": "stage-5-mailbox-manipulation",
+      "number": 5,
+      "title": "Mailbox Rule and Email Manipulation Review",
+      "zones": ["identity-mailbox", "email-evidence"],
+      "systems": ["mailbox-rule-viewer", "mail-viewer"],
+      "concepts": ["mailbox-forwarding", "inbox-rules", "email-collection"],
+      "evidence": ["inbox_rules_export.csv", "mailbox_folder_activity.csv", "deleted_items_index.csv"],
+      "checkpoint": "flag_5_mailbox_manipulation"
+    },
+    {
+      "id": "stage-6-device-browser-history",
+      "number": 6,
+      "title": "Device and Browser History Review",
+      "zones": ["endpoint-network"],
+      "systems": ["fake-edr-console", "browser-history-viewer"],
+      "concepts": ["endpoint-triage", "browser-history", "malware-absence"],
+      "evidence": ["browser_history_user_ap01.csv", "downloads_listing_user_ap01.csv", "defender_scan_results.pdf"],
+      "checkpoint": "flag_6_device_web_history"
+    },
+    {
+      "id": "stage-7-domain-dns-hosting",
+      "number": 7,
+      "title": "Domain, DNS, and Hosting Analysis",
+      "zones": ["domain-infrastructure"],
+      "systems": ["domain-record-viewer", "ct-log-viewer"],
+      "concepts": ["lookalike-domain", "dns-history", "certificate-transparency"],
+      "evidence": ["whois_suspicious_domain.txt", "dns_history.csv", "certificate_transparency.json"],
+      "checkpoint": "flag_7_domain_analysis"
+    },
+    {
+      "id": "stage-8-network-correlation",
+      "number": 8,
+      "title": "Firewall and Proxy Log Analysis",
+      "zones": ["endpoint-network", "domain-infrastructure"],
+      "systems": ["proxy-log-viewer", "dns-log-viewer"],
+      "concepts": ["proxy-correlation", "dns-correlation", "timeline-validation"],
+      "evidence": ["proxy_logs.csv", "firewall_egress_logs.csv", "dns_query_logs.csv"],
+      "checkpoint": "flag_8_network_correlation"
+    },
+    {
+      "id": "stage-9-payment-impact",
+      "number": 9,
+      "title": "Payment Workflow and Impact Assessment",
+      "zones": ["finance-workflow"],
+      "systems": ["finance-portal", "vendor-master-log", "payment-approval-chain"],
+      "concepts": ["payment-redirection", "callback-verification", "business-impact"],
+      "evidence": ["wire_transfer_record.pdf", "vendor_master_change_log.csv", "payment_approval_chain.csv", "bank_recall_status.md"],
+      "checkpoint": "flag_9_business_impact"
+    },
+    {
+      "id": "stage-10-final-findings",
+      "number": 10,
+      "title": "Final Findings and Recommendations",
+      "zones": ["case-management", "control"],
+      "systems": ["timeline-builder", "report-submission-portal", "flag-service"],
+      "concepts": ["executive-reporting", "root-cause", "recommendations"],
+      "evidence": ["report_template.md", "recommendation_matrix.xlsx", "all prior artifacts"],
+      "checkpoint": "flag_10_final_report"
+    }
+  ],
+  "canonicalDecisions": {
+    "scenarioMode": "Defensive investigation only. Students inspect simulated evidence and do not execute phishing.",
+    "phishingInfrastructure": "Static screenshots, sanitized messages, and reserved domains only.",
+    "paymentRails": "Fictional payment records only. No real bank names or accounts.",
+    "finalOutput": "Final output is an executive investigation report with findings, timeline, root cause, impact, and recommendations.",
+    "labStyle": "Evidence portal and log viewers are preferred over attack simulation."
+  }
+}

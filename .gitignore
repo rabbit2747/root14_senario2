@@ -3,6 +3,11 @@ node_modules/
 
 # Build output
 dist/
+.next/
+**/.next/
+.next*/
+**/.next*/
+*.tsbuildinfo
 
 # Environment variables
 .env
@@ -22,6 +27,16 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local verification artifacts
+output/
+video/
+hands-on lab/**/evidence/
+hands-on lab/**/logs/
 
 # Claude Code
 .claude/
