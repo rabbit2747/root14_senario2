@@ -49,13 +49,28 @@ Invoke-RestMethod http://localhost:28081/service/build-info
 
 목표:
 
-`support-portal`의 실제 Jinja2 draft preview 기능에서 SSTI가 가능한지 먼저 확인한 뒤, Release Engineering이 남겨둔 diagnostic helper를 통해 초기 접근 marker를 확인합니다.
+`support-portal`의 실제 Jinja2 draft preview 기능에서 SSTI가 가능한지 먼저 확인한 뒤, preview context를 탐색해서 Release Engineering이 남겨둔 audited diagnostic helper를 발견합니다.
 
 ```powershell
 Invoke-RestMethod http://localhost:28081/support/preview `
   -Method Post `
   -ContentType 'application/json' `
   -Body '{"body":"{{ 7 * 7 }}"}'
+
+Invoke-RestMethod http://localhost:28081/support/preview `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body '{"body":"{{ service.name }} / {{ support }}"}'
+
+Invoke-RestMethod http://localhost:28081/support/preview `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body '{"body":"{{ support.help() }}"}'
+
+Invoke-RestMethod http://localhost:28081/support/preview `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body '{"body":"{{ support.list_commands() | json }}"}'
 
 Invoke-RestMethod http://localhost:28081/support/preview `
   -Method Post `
@@ -67,7 +82,9 @@ Invoke-RestMethod http://localhost:28081/support/preview `
 
 - 초기 접근은 최종 목표가 아니라 내부 흐름으로 들어가기 위한 시작점입니다.
 - `{{ 7 * 7 }}`이 `49`로 렌더링되면 사용자의 입력이 서버 템플릿 엔진에서 평가되고 있다는 뜻입니다.
-- 이 lab은 임의 명령 실행을 허용하지 않고, 안전하게 제한된 명령만 허용합니다.
+- `{{ service.name }}`은 일반적인 SSTI cheat sheet가 아니라, preview 응답과 UI가 노출한 context 변수를 확인하는 단계입니다.
+- `support` helper는 바로 정답으로 주어지는 것이 아니라 render context, KB-187/KB-204 안내, `support.help()`를 통해 발견하도록 설계되어 있습니다.
+- 이 lab은 임의 명령 실행을 허용하지 않고, 안전하게 제한된 read-only diagnostic 명령만 허용합니다.
 
 ## Stage 2. Foothold Orientation
 

