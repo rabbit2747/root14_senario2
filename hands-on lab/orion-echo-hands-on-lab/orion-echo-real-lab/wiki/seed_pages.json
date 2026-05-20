@@ -1,0 +1,17 @@
+[
+  {
+    "slug": "index",
+    "title": "Orion Echo Internal Wiki",
+    "body": "Welcome, operator. See `orion-echo-brief` for the current incident brief."
+  },
+  {
+    "slug": "orion-echo-brief",
+    "title": "Operation Orion Echo - Internal Brief",
+    "body": "## Current Finding\n\nSupport portal was exposed in the DMZ and has access to the corporate knowledge plane.\n\n## Authorized Next Steps\n\n- Confirm the support foothold identity.\n- Preserve support portal audit logs.\n- Review DevOps onboarding references after corporate discovery.\n\n## Evidence Token\n\n`evidence:corp-wiki-accessed`"
+  },
+  {
+    "slug": "devops-onboarding",
+    "title": "DevOps Onboarding Notes",
+    "body": "Gitea and build runner integration will be enabled in Phase 2 of the real-isolated lab."
+  }
+]

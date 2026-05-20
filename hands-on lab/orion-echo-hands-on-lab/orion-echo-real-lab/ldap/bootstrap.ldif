@@ -1,0 +1,19 @@
+dn: ou=people,dc=orion,dc=echo
+objectClass: organizationalUnit
+ou: people
+
+dn: uid=operator,ou=people,dc=orion,dc=echo
+objectClass: inetOrgPerson
+uid: operator
+cn: Orion Operator
+sn: Operator
+mail: operator@orion.echo
+userPassword: operator-bootstrap-disabled
+
+dn: uid=watch,ou=people,dc=orion,dc=echo
+objectClass: inetOrgPerson
+uid: watch
+cn: Watch Officer
+sn: Officer
+mail: watch@orion.echo
+userPassword: watch-disabled

@@ -1,0 +1,146 @@
+name: orion-echo-real-lab
+
+x-hardening: &hardening
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  pids_limit: 200
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=64m
+  restart: unless-stopped
+
+networks:
+  edge_net:
+    driver: bridge
+  internal_net:
+    driver: bridge
+    internal: true
+  audit_net:
+    driver: bridge
+    internal: true
+
+services:
+  edge-proxy:
+    image: nginx:1.27-alpine
+    ports:
+      - "0.0.0.0:28181:8080"
+    volumes:
+      - ./edge-proxy/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      support-portal:
+        condition: service_healthy
+    networks:
+      - edge_net
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m
+      - /var/cache/nginx:rw,noexec,nosuid,nodev,size=16m
+      - /var/run:rw,noexec,nosuid,nodev,size=4m
+    <<: *hardening
+
+  support-portal:
+    build: ./support-portal
+    environment:
+      AUDIT_LOG: /var/log/portal/audit.log
+    expose:
+      - "5000"
+    networks:
+      - edge_net
+      - internal_net
+    volumes:
+      - ./volumes/portal-data:/var/lab:ro
+      - ./volumes/audit-logs/portal:/var/log/portal
+    user: "10001:10001"
+    depends_on:
+      seeder:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/healthz', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    <<: *hardening
+    mem_limit: 256m
+
+  ldap:
+    image: bitnami/openldap:2.6
+    environment:
+      LDAP_ROOT: dc=orion,dc=echo
+      LDAP_ADMIN_USERNAME: admin
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PW}
+      LDAP_CUSTOM_LDIF_DIR: /ldifs
+      LDAP_SKIP_DEFAULT_TREE: "yes"
+    expose:
+      - "1389"
+    networks:
+      - internal_net
+    volumes:
+      - ./ldap/bootstrap.ldif:/ldifs/01-bootstrap.ldif:ro
+      - ./volumes/ldap-data:/bitnami/openldap
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://127.0.0.1:1389", "-b", "dc=orion,dc=echo"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  wiki:
+    build: ./wiki
+    environment:
+      LDAP_URI: ldap://ldap:1389
+      LDAP_BASE: ou=people,dc=orion,dc=echo
+      WIKI_DB: /var/wiki/wiki.db
+      AUDIT_LOG: /var/log/wiki/audit.log
+    expose:
+      - "6000"
+    networks:
+      - internal_net
+    volumes:
+      - ./volumes/wiki-data:/var/wiki:ro
+      - ./volumes/audit-logs/wiki:/var/log/wiki
+    user: "10002:10002"
+    depends_on:
+      ldap:
+        condition: service_healthy
+      seeder:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:6000/healthz', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    <<: *hardening
+    mem_limit: 256m
+
+  seeder:
+    build: ./seeder
+    environment:
+      LDAP_ADMIN_PW: ${LDAP_ADMIN_PW}
+      OPERATOR_PW: ${OPERATOR_PW}
+    networks:
+      - internal_net
+    volumes:
+      - ./volumes/portal-data:/seed/portal
+      - ./volumes/wiki-data:/seed/wiki
+      - ./wiki/seed_pages.json:/seed/wiki/seed_pages.json:ro
+    depends_on:
+      ldap:
+        condition: service_healthy
+    restart: "no"
+
+  grader:
+    build: ./grader
+    ports:
+      - "127.0.0.1:29100:9000"
+    networks:
+      - audit_net
+    volumes:
+      - ./volumes/audit-logs:/logs:ro
+      - ./grader/rules.yaml:/app/rules.yaml:ro
+    user: "10003:10003"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9000/healthz', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    <<: *hardening

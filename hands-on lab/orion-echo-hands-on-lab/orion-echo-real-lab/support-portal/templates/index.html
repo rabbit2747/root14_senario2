@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Orion Echo Support Portal</h1>
+<p>Support engineers preview customer ticket responses before filing them in the internal case system.</p>
+<form method="post" action="/ticket/preview">
+  <label for="body">Draft body</label>
+  <textarea id="body" name="body" rows="10">Hello {{ customer }},
+
+Ticket {{ ticket_id }} is being reviewed by {{ agent }} for {{ product }}.</textarea>
+  <p><button type="submit">Preview</button></p>
+</form>
+<p><code>POST /ticket/preview body=&lt;template&gt;</code></p>
+{% endblock %}

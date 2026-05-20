@@ -1,0 +1,19 @@
+stage1_ssti:
+  any_of:
+    - log: portal/audit.log
+      event: preview
+      sample_regex: '\{\{.*(7\s*\*\s*7|__class__|config).*\}\}'
+stage2_evidence:
+  any_of:
+    - log: portal/audit.log
+      event: support_read
+      where:
+        key: ldap
+        hit: true
+stage3_wiki:
+  all_of:
+    - log: wiki/audit.log
+      event: wiki_ok
+      where:
+        user: operator
+        slug: orion-echo-brief
