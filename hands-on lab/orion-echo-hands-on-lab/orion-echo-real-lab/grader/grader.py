@@ -34,16 +34,40 @@ def rule_matches(rule: dict) -> bool:
     return False
 
 
+def stage_matches(spec: dict) -> bool:
+    if "any_of" in spec:
+        return any(rule_matches(rule) for rule in spec["any_of"])
+    if "all_of" in spec:
+        return all(rule_matches(rule) for rule in spec["all_of"])
+    return False
+
+
 def evaluate():
-    result = {}
+    result = {"stages": {}, "paths": {}, "bonuses": {}}
+    score = 0
+    max_score = 0
     for stage, spec in RULES.items():
-        if "any_of" in spec:
-            result[stage] = any(rule_matches(rule) for rule in spec["any_of"])
-        elif "all_of" in spec:
-            result[stage] = all(rule_matches(rule) for rule in spec["all_of"])
-        else:
-            result[stage] = False
-    result["score"] = sum(1 for key, value in result.items() if key != "score" and value)
+        matched = stage_matches(spec)
+        points = int(spec.get("points", 1))
+        max_score += points
+        if matched:
+            score += points
+
+        bucket = "bonuses" if stage.startswith("bonus_") else "stages"
+        result[bucket][stage] = {
+            "matched": matched,
+            "points": points if matched else 0,
+            "max_points": points,
+            "label": spec.get("label", stage),
+        }
+
+    result["paths"]["stage2_support_path"] = result["stages"].get("stage2a_support_evidence", {}).get("matched", False)
+    result["paths"]["stage2_rce_path"] = result["stages"].get("stage2b_rce_evidence", {}).get("matched", False)
+    result["stage1_ssti"] = result["stages"].get("stage1_ssti", {}).get("matched", False)
+    result["stage2_evidence"] = result["paths"]["stage2_support_path"] or result["paths"]["stage2_rce_path"]
+    result["stage3_wiki"] = result["stages"].get("stage3_wiki", {}).get("matched", False)
+    result["score"] = score
+    result["max_score"] = max_score
     return result
 
 

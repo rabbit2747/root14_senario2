@@ -1,19 +1,48 @@
 stage1_ssti:
+  points: 10
+  label: "Stage 1 - Jinja2 SSTI discovery"
   any_of:
     - log: portal/audit.log
       event: preview
       sample_regex: '\{\{.*(7\s*\*\s*7|__class__|config).*\}\}'
-stage2_evidence:
+stage2a_support_evidence:
+  points: 10
+  label: "Stage 2A - audited support evidence path"
   any_of:
     - log: portal/audit.log
       event: support_read
       where:
         key: ldap
         hit: true
+stage2b_rce_evidence:
+  points: 15
+  label: "Stage 2B - direct evidence discovery through SSTI/RCE"
+  any_of:
+    - log: portal/audit.log
+      event: preview
+      sample_regex: '(/var/lab|ldap_creds|LDAP_BIND_PW|portal\.conf|egress\.log)'
 stage3_wiki:
+  points: 20
+  label: "Stage 3 - LDAP-authenticated internal wiki access"
   all_of:
     - log: wiki/audit.log
       event: wiki_ok
       where:
         user: operator
         slug: orion-echo-brief
+bonus_audit_log:
+  points: 5
+  label: "Bonus - support portal audit log review"
+  any_of:
+    - log: portal/audit.log
+      event: preview
+      sample_regex: '(/var/log/portal/audit\.log|audit\.log)'
+bonus_devops_onboarding:
+  points: 5
+  label: "Bonus - DevOps onboarding reference review"
+  any_of:
+    - log: wiki/audit.log
+      event: wiki_ok
+      where:
+        user: operator
+        slug: devops-onboarding

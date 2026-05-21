@@ -37,6 +37,17 @@ Stage 2: read real support portal evidence files
 Stage 3: use discovered LDAP credential to access internal wiki
 ```
 
+Scoring accepts both the guided support path and the realistic RCE path:
+
+```text
+Stage 1 SSTI discovery: +10
+Stage 2A support/read evidence path: +10
+Stage 2B direct /var/lab evidence discovery through SSTI/RCE: +15
+Stage 3 LDAP-authenticated wiki access: +20
+Bonus audit log review: +5
+Bonus DevOps onboarding review: +5
+```
+
 ## Manual Writeup Path
 
 Stage 1:
