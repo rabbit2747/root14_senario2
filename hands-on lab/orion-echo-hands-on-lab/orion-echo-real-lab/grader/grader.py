@@ -60,6 +60,7 @@ def evaluate():
             "max_points": points,
             "label": spec.get("label", stage),
         }
+        result[stage] = matched
 
     result["paths"]["stage2_support_path"] = result["stages"].get("stage2a_support_evidence", {}).get("matched", False)
     result["paths"]["stage2_rce_path"] = result["stages"].get("stage2b_rce_evidence", {}).get("matched", False)

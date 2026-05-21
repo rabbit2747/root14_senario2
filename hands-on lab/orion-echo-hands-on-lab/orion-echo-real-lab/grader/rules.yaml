@@ -46,3 +46,87 @@ bonus_devops_onboarding:
       where:
         user: operator
         slug: devops-onboarding
+stage4_internal_discovery:
+  points: 10
+  label: "Stage 4 - Internal service discovery"
+  any_of:
+    - log: wiki/audit.log
+      event: wiki_ok
+      where:
+        user: operator
+        slug: devops-onboarding
+stage5_evidence_collection:
+  points: 20
+  label: "Stage 5 - Ticket and repo evidence collection"
+  all_of:
+    - log: ticket-service/audit.log
+      event: ticket_viewed
+      where:
+        ticket_id: OES-1287
+    - log: source-repo/audit.log
+      event: repo_file_viewed
+      where:
+        path: release-pipeline/release.json
+stage6_build_token_use:
+  points: 20
+  label: "Stage 6 - Valid build token use"
+  any_of:
+    - log: build-server/audit.log
+      event: build_job_created
+      where:
+        artifact_id: art-demo-001
+        channel: anrc
+stage7_artifact_build:
+  points: 15
+  label: "Stage 7 - Artifact metadata review"
+  any_of:
+    - log: build-server/audit.log
+      event: artifact_viewed
+      where:
+        artifact_id: art-demo-001
+        marker: LAB_BUILD_MARKER:orion-echo-real-lab
+stage8_sign_publish:
+  points: 25
+  label: "Stage 8 - Sign and publish to ANRC update channel"
+  all_of:
+    - log: signing-service/audit.log
+      event: manifest_signed
+      where:
+        channel: anrc
+        build_id: build-2026-0502-001
+    - log: update-server/audit.log
+      event: manifest_published
+      where:
+        channel: anrc
+        build_id: build-2026-0502-001
+stage9_customer_update:
+  points: 20
+  label: "Stage 9 - Customer trusted update applied"
+  any_of:
+    - log: customer-app/audit.log
+      event: customer_update_applied
+      where:
+        channel: anrc
+        build_id: build-2026-0502-001
+stage10_customer_export:
+  points: 20
+  label: "Stage 10 - Customer export and final object access"
+  all_of:
+    - log: customer-api/audit.log
+      event: customer_export_viewed
+      where:
+        export_id: exp-2026-Q2-007
+        object_key: anrc/exports/2026/Q2/facility-audit-final.txt
+    - log: object-store/audit.log
+      event: object_viewed
+      where:
+        object_key: anrc/exports/2026/Q2/facility-audit-final.txt
+        proof: proof:object-access-issued
+stage11_dark_web_drop:
+  points: 25
+  label: "Stage 11 - Controlled dark web drop"
+  any_of:
+    - log: dark-web-drop/audit.log
+      event: darkweb_drop_submitted
+      where:
+        accepted: true

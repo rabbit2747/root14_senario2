@@ -9,6 +9,7 @@ implementation uses real services and real evidence:
 - Real files seeded into the support portal container
 - Real OpenLDAP bind
 - Real SQLite-backed internal wiki
+- Real internal ticket, repo, build, signing, update, customer, object, and drop services
 - Real audit logs consumed by a grader
 
 ## Start
@@ -16,6 +17,7 @@ implementation uses real services and real evidence:
 ```powershell
 Copy-Item .env.example .env
 wsl -d Ubuntu-24.04 -u root -- bash -c "rm -rf /home/ubuntu/orion-echo-real-lab && mkdir -p /home/ubuntu/orion-echo-real-lab && rsync -a --exclude 'volumes/' '/mnt/c/Users/HS/OneDrive/Desktop/platform/hands-on lab/orion-echo-hands-on-lab/orion-echo-real-lab/' /home/ubuntu/orion-echo-real-lab/ && chown -R ubuntu:ubuntu /home/ubuntu/orion-echo-real-lab"
+wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && docker compose build support-portal"
 wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && cp -n .env.example .env && chmod +x verify/*.sh seeder/seed.sh && docker compose up --build -d"
 ```
 
@@ -35,6 +37,14 @@ wiki are reachable only inside Docker networks.
 Stage 1: support portal Jinja2 SSTI
 Stage 2: read real support portal evidence files
 Stage 3: use discovered LDAP credential to access internal wiki
+Stage 4: discover DevOps and release services from internal wiki
+Stage 5: collect ticket and source-repo release evidence
+Stage 6: use the valid build token to create a build job
+Stage 7: inspect benign artifact metadata
+Stage 8: sign and publish the manifest to the ANRC update channel
+Stage 9: confirm customer trusted update application
+Stage 10: retrieve the customer export final object
+Stage 11: submit the recovered object to the controlled dark-web-drop simulator
 ```
 
 Scoring accepts both the guided support path and the realistic RCE path:
@@ -44,6 +54,14 @@ Stage 1 SSTI discovery: +10
 Stage 2A support/read evidence path: +10
 Stage 2B direct /var/lab evidence discovery through SSTI/RCE: +15
 Stage 3 LDAP-authenticated wiki access: +20
+Stage 4 internal service discovery: +10
+Stage 5 ticket/repo evidence collection: +20
+Stage 6 build token use: +20
+Stage 7 artifact metadata review: +15
+Stage 8 sign and publish: +25
+Stage 9 customer trusted update: +20
+Stage 10 customer export and object access: +20
+Stage 11 controlled dark web drop: +25
 Bonus audit log review: +5
 Bonus DevOps onboarding review: +5
 ```
@@ -81,6 +99,7 @@ Automated verification:
 
 ```powershell
 wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && bash verify/stage1_ssti.sh && bash verify/stage2_evidence.sh && bash verify/stage3_ldap_wiki.sh"
+wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && bash verify/stage4_11_full_chain.sh"
 ```
 
 Check grader:

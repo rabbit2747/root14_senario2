@@ -12,6 +12,11 @@
   {
     "slug": "devops-onboarding",
     "title": "DevOps Onboarding Notes",
-    "body": "Gitea and build runner integration will be enabled in Phase 2 of the real-isolated lab."
+    "body": "## DevOps Service Map\n\nRelease Engineering uses these internal services from the corporate network:\n\n- Ticket context: `http://ticket-service:7001/tickets/OES-1287`\n- Release pipeline repo: `http://source-repo:7002/files/release-pipeline/release.json`\n- Build API: `http://build-server:7003/api/jobs`\n- Signing API: `http://signing-service:7005/api/sign`\n- Update channel: `http://update-server:7004/channels/anrc/manifest.json`\n\nSeparate real clues from decoys. Old tokens may still exist in repository history or ticket comments."
+  },
+  {
+    "slug": "release-runbook",
+    "title": "Release Runbook - ANRC Channel",
+    "body": "For ANRC release 2.6.4, collect evidence from ticket `OES-1287` and `release-pipeline/release.json`, trigger a build, sign the canonical manifest, and publish to channel `anrc`. Customer validation is performed by polling `http://customer-app:7007/api/poll-now`."
   }
 ]

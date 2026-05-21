@@ -5,6 +5,11 @@ python /app/seed_files.py
 python /app/seed_wiki.py
 
 mkdir -p /seed/audit/portal /seed/audit/wiki
+for svc in ticket-service source-repo build-server signing-service update-server customer-api customer-app object-store dark-web-drop; do
+  mkdir -p "/seed/audit/${svc}" "/seed/state/${svc}"
+  chown -R 10004:10004 "/seed/audit/${svc}" "/seed/state/${svc}"
+  chmod -R u+rwX,go+rX "/seed/audit/${svc}" "/seed/state/${svc}"
+done
 chown -R 10001:10001 /seed/audit/portal
 chown -R 10002:10002 /seed/audit/wiki
 chmod -R u+rwX,go+rX /seed/audit/portal /seed/audit/wiki

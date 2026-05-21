@@ -11,6 +11,23 @@ x-hardening: &hardening
     - /tmp:rw,noexec,nosuid,nodev,size=64m
   restart: unless-stopped
 
+x-ops-service: &ops-service
+  image: orion-echo-real-lab-ops-service:latest
+  build: ./ops-service
+  networks:
+    - internal_net
+  user: "10004:10004"
+  depends_on:
+    seeder:
+      condition: service_completed_successfully
+  healthcheck:
+    test: ["CMD", "python", "-c", "import os, urllib.request; urllib.request.urlopen(f'http://127.0.0.1:{os.environ[\"SERVICE_PORT\"]}/healthz', timeout=2)"]
+    interval: 10s
+    timeout: 3s
+    retries: 10
+  <<: *hardening
+  mem_limit: 256m
+
 networks:
   edge_net:
     driver: bridge
@@ -126,11 +143,131 @@ services:
       - ./volumes/portal-data:/seed/portal
       - ./volumes/wiki-data:/seed/wiki
       - ./volumes/audit-logs:/seed/audit
+      - ./volumes/service-state:/seed/state
       - ./wiki/seed_pages.json:/seed/wiki/seed_pages.json:ro
     depends_on:
       ldap:
         condition: service_healthy
     restart: "no"
+
+  ticket-service:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: ticket-service
+      SERVICE_PORT: "7001"
+      AUDIT_LOG: /var/log/ticket-service/audit.log
+    expose:
+      - "7001"
+    volumes:
+      - ./volumes/audit-logs/ticket-service:/var/log/ticket-service
+      - ./volumes/service-state/ticket-service:/state
+
+  source-repo:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: source-repo
+      SERVICE_PORT: "7002"
+      AUDIT_LOG: /var/log/source-repo/audit.log
+      BUILD_TRIGGER_TOKEN: build-trigger-demo-7f3a91
+    expose:
+      - "7002"
+    volumes:
+      - ./volumes/audit-logs/source-repo:/var/log/source-repo
+      - ./volumes/service-state/source-repo:/state
+
+  build-server:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: build-server
+      SERVICE_PORT: "7003"
+      AUDIT_LOG: /var/log/build-server/audit.log
+      BUILD_TRIGGER_TOKEN: build-trigger-demo-7f3a91
+    expose:
+      - "7003"
+    volumes:
+      - ./volumes/audit-logs/build-server:/var/log/build-server
+      - ./volumes/service-state/build-server:/state
+
+  signing-service:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: signing-service
+      SERVICE_PORT: "7005"
+      AUDIT_LOG: /var/log/signing-service/audit.log
+      SIGNING_SECRET: orion-real-lab-signing-secret
+    expose:
+      - "7005"
+    volumes:
+      - ./volumes/audit-logs/signing-service:/var/log/signing-service
+      - ./volumes/service-state/signing-service:/state
+
+  update-server:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: update-server
+      SERVICE_PORT: "7004"
+      AUDIT_LOG: /var/log/update-server/audit.log
+      SIGNING_SECRET: orion-real-lab-signing-secret
+    expose:
+      - "7004"
+    volumes:
+      - ./volumes/audit-logs/update-server:/var/log/update-server
+      - ./volumes/service-state/update-server:/state
+
+  customer-api:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: customer-api
+      SERVICE_PORT: "7006"
+      AUDIT_LOG: /var/log/customer-api/audit.log
+    expose:
+      - "7006"
+    volumes:
+      - ./volumes/audit-logs/customer-api:/var/log/customer-api
+      - ./volumes/service-state/customer-api:/state
+
+  customer-app:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: customer-app
+      SERVICE_PORT: "7007"
+      AUDIT_LOG: /var/log/customer-app/audit.log
+      UPDATE_SERVER: http://update-server:7004
+      CUSTOMER_API: http://customer-api:7006
+    expose:
+      - "7007"
+    volumes:
+      - ./volumes/audit-logs/customer-app:/var/log/customer-app
+      - ./volumes/service-state/customer-app:/state
+    depends_on:
+      customer-api:
+        condition: service_healthy
+      update-server:
+        condition: service_healthy
+
+  object-store:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: object-store
+      SERVICE_PORT: "7008"
+      AUDIT_LOG: /var/log/object-store/audit.log
+    expose:
+      - "7008"
+    volumes:
+      - ./volumes/audit-logs/object-store:/var/log/object-store
+      - ./volumes/service-state/object-store:/state
+
+  dark-web-drop:
+    <<: *ops-service
+    environment:
+      SERVICE_ROLE: dark-web-drop
+      SERVICE_PORT: "7009"
+      AUDIT_LOG: /var/log/dark-web-drop/audit.log
+    expose:
+      - "7009"
+    volumes:
+      - ./volumes/audit-logs/dark-web-drop:/var/log/dark-web-drop
+      - ./volumes/service-state/dark-web-drop:/state
 
   grader:
     build: ./grader
