@@ -19,7 +19,6 @@ networks:
     internal: true
   audit_net:
     driver: bridge
-    internal: true
 
 services:
   edge-proxy:
@@ -37,6 +36,10 @@ services:
       - /tmp:rw,noexec,nosuid,nodev,size=16m
       - /var/cache/nginx:rw,noexec,nosuid,nodev,size=16m
       - /var/run:rw,noexec,nosuid,nodev,size=4m
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
     <<: *hardening
 
   support-portal:
@@ -64,22 +67,22 @@ services:
     mem_limit: 256m
 
   ldap:
-    image: bitnami/openldap:2.6
+    image: osixia/openldap:1.5.0
     environment:
-      LDAP_ROOT: dc=orion,dc=echo
-      LDAP_ADMIN_USERNAME: admin
+      LDAP_ORGANISATION: Orion Echo Systems
+      LDAP_DOMAIN: orion.echo
       LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PW}
-      LDAP_CUSTOM_LDIF_DIR: /ldifs
-      LDAP_SKIP_DEFAULT_TREE: "yes"
     expose:
-      - "1389"
+      - "389"
     networks:
       - internal_net
     volumes:
-      - ./ldap/bootstrap.ldif:/ldifs/01-bootstrap.ldif:ro
-      - ./volumes/ldap-data:/bitnami/openldap
+      - ./ldap/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/01-bootstrap.ldif:ro
+      - ./volumes/ldap-data:/var/lib/ldap
+      - ./volumes/ldap-config:/etc/ldap/slapd.d
+    command: ["--copy-service"]
     healthcheck:
-      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://127.0.0.1:1389", "-b", "dc=orion,dc=echo"]
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://127.0.0.1:389", "-D", "cn=admin,dc=orion,dc=echo", "-w", "${LDAP_ADMIN_PW}", "-b", "dc=orion,dc=echo"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -87,7 +90,7 @@ services:
   wiki:
     build: ./wiki
     environment:
-      LDAP_URI: ldap://ldap:1389
+      LDAP_URI: ldap://ldap:389
       LDAP_BASE: ou=people,dc=orion,dc=echo
       WIKI_DB: /var/wiki/wiki.db
       AUDIT_LOG: /var/log/wiki/audit.log
@@ -122,6 +125,7 @@ services:
     volumes:
       - ./volumes/portal-data:/seed/portal
       - ./volumes/wiki-data:/seed/wiki
+      - ./volumes/audit-logs:/seed/audit
       - ./wiki/seed_pages.json:/seed/wiki/seed_pages.json:ro
     depends_on:
       ldap:

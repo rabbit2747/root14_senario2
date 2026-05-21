@@ -4,6 +4,11 @@ set -euo pipefail
 python /app/seed_files.py
 python /app/seed_wiki.py
 
+mkdir -p /seed/audit/portal /seed/audit/wiki
+chown -R 10001:10001 /seed/audit/portal
+chown -R 10002:10002 /seed/audit/wiki
+chmod -R u+rwX,go+rX /seed/audit/portal /seed/audit/wiki
+
 cat > /tmp/operator-password.ldif <<EOF
 dn: uid=operator,ou=people,dc=orion,dc=echo
 changetype: modify
@@ -11,5 +16,5 @@ replace: userPassword
 userPassword: ${OPERATOR_PW}
 EOF
 
-ldapmodify -x -H ldap://ldap:1389 -D "cn=admin,dc=orion,dc=echo" -w "${LDAP_ADMIN_PW}" -f /tmp/operator-password.ldif
+ldapmodify -x -H ldap://ldap:389 -D "cn=admin,dc=orion,dc=echo" -w "${LDAP_ADMIN_PW}" -f /tmp/operator-password.ldif
 echo "[seeder] complete"

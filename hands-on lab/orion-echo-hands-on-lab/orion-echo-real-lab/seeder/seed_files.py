@@ -15,7 +15,7 @@ portal = Path("/seed/portal")
             "version=0.4.2-real-lab",
             "workdir=/app",
             "dmz=true",
-            "corp_route=ldap://ldap:1389",
+            "corp_route=ldap://ldap:389",
             "wiki_url=http://wiki:6000/page/orion-echo-brief",
             "",
         ]
@@ -27,7 +27,7 @@ portal = Path("/seed/portal")
     "\n".join(
         [
             "# DO NOT COMMIT",
-            "LDAP_URI=ldap://ldap:1389",
+            "LDAP_URI=ldap://ldap:389",
             "LDAP_BIND_DN=uid=operator,ou=people,dc=orion,dc=echo",
             f"LDAP_BIND_PW={os.environ['OPERATOR_PW']}",
             "WIKI_URL=http://wiki:6000/page/orion-echo-brief",
@@ -56,7 +56,7 @@ portal = Path("/seed/portal")
             "2026-05-20T09:00:01Z support-portal boot",
             "runtime user: portal",
             "template renderer: jinja2",
-            "corporate route available: ldap://ldap:1389",
+            "corporate route available: ldap://ldap:389",
             "wiki target: http://wiki:6000/page/orion-echo-brief",
             "",
         ]
@@ -67,7 +67,7 @@ portal = Path("/seed/portal")
 (portal / "logs" / "egress.log").write_text(
     "\n".join(
         [
-            "2026-05-20T09:00:04Z allowed egress ldap:1389 reason=corp-directory",
+            "2026-05-20T09:00:04Z allowed egress ldap:389 reason=corp-directory",
             "2026-05-20T09:00:05Z allowed egress wiki:6000 reason=corp-knowledge",
             "2026-05-20T09:00:06Z denied egress internet:443 reason=external-network-blocked",
             "",

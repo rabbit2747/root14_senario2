@@ -15,7 +15,8 @@ implementation uses real services and real evidence:
 
 ```powershell
 Copy-Item .env.example .env
-wsl -d Ubuntu-24.04 -- bash -lc "cd '/mnt/c/Users/HS/OneDrive/Desktop/platform/hands-on lab/orion-echo-hands-on-lab/orion-echo-real-lab' && docker compose up --build -d"
+wsl -d Ubuntu-24.04 -u root -- bash -c "rm -rf /home/ubuntu/orion-echo-real-lab && mkdir -p /home/ubuntu/orion-echo-real-lab && rsync -a --exclude 'volumes/' '/mnt/c/Users/HS/OneDrive/Desktop/platform/hands-on lab/orion-echo-hands-on-lab/orion-echo-real-lab/' /home/ubuntu/orion-echo-real-lab/ && chown -R ubuntu:ubuntu /home/ubuntu/orion-echo-real-lab"
+wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && cp -n .env.example .env && chmod +x verify/*.sh seeder/seed.sh && docker compose up --build -d"
 ```
 
 Entrypoints:
@@ -62,7 +63,13 @@ Use the `LDAP_BIND_PW` from Stage 2 against the internal wiki from inside the
 Docker network:
 
 ```powershell
-wsl -d Ubuntu-24.04 -- bash -lc "cd '/mnt/c/Users/HS/OneDrive/Desktop/platform/hands-on lab/orion-echo-hands-on-lab/orion-echo-real-lab' && PW=\$(grep LDAP_BIND_PW volumes/portal-data/config/ldap_creds.conf | cut -d= -f2-) && docker run --rm --network orion-echo-real-lab_internal_net curlimages/curl:8.10.1 -s -u operator:\$PW http://wiki:6000/page/orion-echo-brief"
+wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && PW=\$(grep LDAP_BIND_PW volumes/portal-data/config/ldap_creds.conf | cut -d= -f2-) && docker run --rm --network orion-echo-real-lab_internal_net curlimages/curl:8.10.1 -s -u operator:\$PW http://wiki:6000/page/orion-echo-brief"
+```
+
+Automated verification:
+
+```powershell
+wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && bash verify/stage1_ssti.sh && bash verify/stage2_evidence.sh && bash verify/stage3_ldap_wiki.sh"
 ```
 
 Check grader:
