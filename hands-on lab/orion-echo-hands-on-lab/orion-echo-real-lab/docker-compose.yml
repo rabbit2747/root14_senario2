@@ -144,6 +144,7 @@ services:
       - ./volumes/wiki-data:/seed/wiki
       - ./volumes/audit-logs:/seed/audit
       - ./volumes/service-state:/seed/state
+      - ./volumes/signing-keys:/seed/signing
       - ./wiki/seed_pages.json:/seed/wiki/seed_pages.json:ro
     depends_on:
       ldap:
@@ -194,12 +195,13 @@ services:
       SERVICE_ROLE: signing-service
       SERVICE_PORT: "7005"
       AUDIT_LOG: /var/log/signing-service/audit.log
-      SIGNING_SECRET: orion-real-lab-signing-secret
+      SIGNING_SECRET_FILE: /run/signing/key.bin
     expose:
       - "7005"
     volumes:
       - ./volumes/audit-logs/signing-service:/var/log/signing-service
       - ./volumes/service-state/signing-service:/state
+      - ./volumes/signing-keys/key.bin:/run/signing/key.bin:ro
 
   update-server:
     <<: *ops-service
@@ -207,12 +209,13 @@ services:
       SERVICE_ROLE: update-server
       SERVICE_PORT: "7004"
       AUDIT_LOG: /var/log/update-server/audit.log
-      SIGNING_SECRET: orion-real-lab-signing-secret
+      SIGNING_SECRET_FILE: /run/signing/key.bin
     expose:
       - "7004"
     volumes:
       - ./volumes/audit-logs/update-server:/var/log/update-server
       - ./volumes/service-state/update-server:/state
+      - ./volumes/signing-keys/key.bin:/run/signing/key.bin:ro
 
   customer-api:
     <<: *ops-service

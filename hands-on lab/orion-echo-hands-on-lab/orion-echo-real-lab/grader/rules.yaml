@@ -19,8 +19,10 @@ stage2b_rce_evidence:
   label: "Stage 2B - direct evidence discovery through SSTI/RCE"
   any_of:
     - log: portal/audit.log
-      event: preview
-      sample_regex: '(/var/lab|ldap_creds|LDAP_BIND_PW|portal\.conf|egress\.log)'
+      event: evidence_read
+      where:
+        source: preview_render
+        evidence: support-portal-lab-files
 stage3_wiki:
   points: 20
   label: "Stage 3 - LDAP-authenticated internal wiki access"
@@ -78,13 +80,17 @@ stage6_build_token_use:
         channel: anrc
 stage7_artifact_build:
   points: 15
-  label: "Stage 7 - Artifact metadata review"
-  any_of:
+  label: "Stage 7 - Artifact metadata and file review"
+  all_of:
     - log: build-server/audit.log
       event: artifact_viewed
       where:
         artifact_id: art-demo-001
         marker: LAB_BUILD_MARKER:orion-echo-real-lab
+    - log: build-server/audit.log
+      event: artifact_downloaded
+      where:
+        name: echo-agent-2.6.4-anrc-lab.tar
 stage8_sign_publish:
   points: 25
   label: "Stage 8 - Sign and publish to ANRC update channel"

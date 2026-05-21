@@ -3,6 +3,7 @@ set -euo pipefail
 
 docker compose exec -T support-portal python - <<'PY'
 import base64
+import hashlib
 import json
 import urllib.error
 import urllib.request
@@ -46,6 +47,8 @@ job = request("POST", "http://build-server:7003/api/jobs", {
     "trigger_token": release["build_trigger_token"],
 })
 artifact = request("GET", "http://build-server:7003/api/artifacts/art-demo-001")
+artifact_bytes = urllib.request.urlopen(artifact["download_url"], timeout=5).read()
+assert hashlib.sha256(artifact_bytes).hexdigest() == artifact["sha256"]
 canonical = {
     "product": "EchoAgent",
     "channel": "anrc",
@@ -54,7 +57,7 @@ canonical = {
     "artifact": {
         "name": artifact["name"],
         "sha256": artifact["sha256"],
-        "url": "http://updates.release.local/artifacts/" + artifact["name"],
+        "url": artifact["download_url"],
         "size_bytes": artifact["size_bytes"],
     },
     "metadata": {"customer": "anrc", "lab_marker": artifact["marker"], "ticket": ticket["id"]},

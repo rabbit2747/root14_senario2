@@ -1,20 +1,23 @@
 import datetime as dt
 import hashlib
 import hmac
+import io
 import json
 import os
+import tarfile
 import uuid
 import urllib.error
 import urllib.request
 from pathlib import Path
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 
 
 ROLE = os.environ["SERVICE_ROLE"]
 PORT = int(os.environ.get("SERVICE_PORT", "7000"))
 AUDIT_LOG = Path(os.environ.get("AUDIT_LOG", f"/var/log/{ROLE}/audit.log"))
 STATE_DIR = Path(os.environ.get("STATE_DIR", "/tmp/state"))
+SIGNING_SECRET_FILE = os.environ.get("SIGNING_SECRET_FILE")
 SIGNING_SECRET = os.environ.get("SIGNING_SECRET", "orion-real-lab-signing-secret")
 BUILD_TOKEN = os.environ.get("BUILD_TRIGGER_TOKEN", "build-trigger-demo-7f3a91")
 UPDATE_SERVER = os.environ.get("UPDATE_SERVER", "http://update-server:7004")
@@ -53,7 +56,37 @@ def canonical_bytes(value: dict) -> bytes:
 
 
 def signature_for(value: dict) -> str:
-    return hmac.new(SIGNING_SECRET.encode(), canonical_bytes(value), hashlib.sha256).hexdigest()
+    secret = SIGNING_SECRET
+    if SIGNING_SECRET_FILE and Path(SIGNING_SECRET_FILE).exists():
+        secret = Path(SIGNING_SECRET_FILE).read_text(encoding="utf-8").strip()
+    return hmac.new(secret.encode(), canonical_bytes(value), hashlib.sha256).hexdigest()
+
+
+def create_artifact_file(artifact: dict) -> Path:
+    artifact_dir = STATE_DIR / "artifacts"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    path = artifact_dir / artifact["name"]
+    files = {
+        "README.txt": "\n".join(
+            [
+                "Orion Echo Agent lab artifact",
+                "This is a benign training artifact.",
+                f"build_id={artifact['build_id']}",
+                f"channel={artifact['channel']}",
+                f"marker={artifact['marker']}",
+                "",
+            ]
+        ),
+        "manifest.json": json.dumps(artifact, indent=2, sort_keys=True) + "\n",
+    }
+    with tarfile.open(path, "w") as tar:
+        for name, content in files.items():
+            data = content.encode()
+            info = tarfile.TarInfo(name)
+            info.size = len(data)
+            info.mtime = 1_778_000_000
+            tar.addfile(info, io.BytesIO(data))
+    return path
 
 
 def http_json(method: str, url: str, payload: dict | None = None):
@@ -137,9 +170,11 @@ def build_job():
         "ref": payload.get("ref", "refs/heads/release/2.6.4"),
         "channel": payload.get("channel", "anrc"),
         "marker": "LAB_BUILD_MARKER:orion-echo-real-lab",
-        "size_bytes": 6144,
     }
-    artifact["sha256"] = hashlib.sha256(canonical_bytes(artifact)).hexdigest()
+    artifact_path = create_artifact_file(artifact)
+    artifact["size_bytes"] = artifact_path.stat().st_size
+    artifact["sha256"] = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
+    artifact["download_url"] = f"http://build-server:7003/artifacts/{artifact['name']}"
     write_json("artifact-art-demo-001.json", artifact)
     audit("build_job_created", artifact_id=artifact["id"], channel=artifact["channel"], build_id=artifact["build_id"])
     return jsonify(accepted=True, build_request_proof="proof:build-job-created", artifact=artifact), 202
@@ -163,6 +198,17 @@ def artifact(artifact_id):
         }
     audit("artifact_viewed", artifact_id=artifact_id, marker=item.get("marker"))
     return jsonify(item)
+
+
+@app.get("/artifacts/<name>")
+def artifact_download(name):
+    path = STATE_DIR / "artifacts" / name
+    if not path.exists() or not path.is_file():
+        audit("artifact_download_not_found", name=name)
+        return jsonify(error="not_found"), 404
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    audit("artifact_downloaded", name=name, sha256=digest)
+    return send_file(path, mimetype="application/x-tar", as_attachment=True, download_name=name)
 
 
 @app.post("/api/sign")

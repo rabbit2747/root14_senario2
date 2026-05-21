@@ -10,6 +10,8 @@ implementation uses real services and real evidence:
 - Real OpenLDAP bind
 - Real SQLite-backed internal wiki
 - Real internal ticket, repo, build, signing, update, customer, object, and drop services
+- Real `.tar` artifact generation and SHA-256 verification
+- File-backed signing secret mounted only into signing/update services
 - Real audit logs consumed by a grader
 
 ## Start
@@ -57,7 +59,7 @@ Stage 3 LDAP-authenticated wiki access: +20
 Stage 4 internal service discovery: +10
 Stage 5 ticket/repo evidence collection: +20
 Stage 6 build token use: +20
-Stage 7 artifact metadata review: +15
+Stage 7 artifact metadata and file download review: +15
 Stage 8 sign and publish: +25
 Stage 9 customer trusted update: +20
 Stage 10 customer export and object access: +20

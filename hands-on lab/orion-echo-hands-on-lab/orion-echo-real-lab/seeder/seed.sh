@@ -10,6 +10,11 @@ for svc in ticket-service source-repo build-server signing-service update-server
   chown -R 10004:10004 "/seed/audit/${svc}" "/seed/state/${svc}"
   chmod -R u+rwX,go+rX "/seed/audit/${svc}" "/seed/state/${svc}"
 done
+mkdir -p /seed/signing
+printf '%s\n' 'orion-real-lab-signing-secret-v2-file-backed' > /seed/signing/key.bin
+chown -R 10004:10004 /seed/signing
+chmod 0500 /seed/signing
+chmod 0400 /seed/signing/key.bin
 chown -R 10001:10001 /seed/audit/portal
 chown -R 10002:10002 /seed/audit/wiki
 chmod -R u+rwX,go+rX /seed/audit/portal /seed/audit/wiki

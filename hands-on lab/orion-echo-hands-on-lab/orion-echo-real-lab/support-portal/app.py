@@ -65,6 +65,8 @@ def ticket_preview():
     except Exception as exc:
         audit("preview_error", error=str(exc)[:200])
         rendered = f"[render error] {exc}"
+    if "LDAP_BIND_PW=" in rendered or "corp_route=ldap://ldap:389" in rendered:
+        audit("evidence_read", source="preview_render", evidence="support-portal-lab-files")
     return render_template("preview.html", rendered=rendered)
 
 
