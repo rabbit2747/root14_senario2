@@ -4,14 +4,46 @@
   <meta charset="utf-8">
   <title>{{ title }}</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; color: #172033; }
+    body { font-family: system-ui, sans-serif; margin: 0; color: #172033; background: #f7f8fb; }
+    .shell { display: grid; grid-template-columns: 260px minmax(0, 900px); gap: 2rem; max-width: 1220px; margin: 0 auto; padding: 2rem; }
+    aside { border-right: 1px solid #d8deea; padding-right: 1.25rem; }
+    article { background: #fff; border: 1px solid #d8deea; padding: 1.5rem 2rem; }
+    a { color: #1c5fb8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
     code { background: #f3f6fb; padding: .1rem .25rem; }
+    input { box-sizing: border-box; width: 100%; padding: .45rem .55rem; border: 1px solid #b8c2d6; }
+    button { margin-top: .45rem; padding: .45rem .65rem; border: 1px solid #9ca9c0; background: #fff; cursor: pointer; }
+    nav ul { list-style: none; padding: 0; margin: .75rem 0 1.5rem; }
+    nav li { margin: .45rem 0; }
+    .eyebrow { color: #5d6b82; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+    @media (max-width: 760px) {
+      .shell { display: block; padding: 1rem; }
+      aside { border-right: 0; border-bottom: 1px solid #d8deea; padding: 0 0 1rem; margin-bottom: 1rem; }
+      article { padding: 1rem; }
+    }
   </style>
 </head>
 <body>
-  <article>
-    <h1>{{ title }}</h1>
-    {{ body|safe }}
-  </article>
+  <main class="shell">
+    <aside>
+      <div class="eyebrow">Orion Echo Wiki</div>
+      <h2>Knowledge Base</h2>
+      <form method="get" action="/search">
+        <input name="q" value="{{ query|default('') }}" placeholder="Search wiki">
+        <button type="submit">Search</button>
+      </form>
+      <nav>
+        <ul>
+          {% for page in pages|default([]) %}
+          <li><a href="/page/{{ page.slug }}">{{ page.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </aside>
+    <article>
+      <h1>{{ title }}</h1>
+      {{ body|safe }}
+    </article>
+  </main>
 </body>
 </html>
