@@ -9,7 +9,8 @@ implementation uses real services and real evidence:
 - Real files seeded into the support portal container
 - Real OpenLDAP bind
 - Real SQLite-backed internal wiki
-- Real internal ticket, build, signing, update, customer, object, and drop services
+- Real SQLite-backed internal ticket service with seeded case comments
+- Real internal build, signing, update, customer, object, and drop services
 - Real internal Gitea repository seeded with branch history and release metadata
 - Real `.tar` artifact generation and SHA-256 verification
 - File-backed signing secret mounted only into signing/update services
