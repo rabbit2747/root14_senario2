@@ -54,6 +54,60 @@ def write_json(name: str, value):
     (STATE_DIR / name).write_text(json.dumps(value, indent=2, sort_keys=True), encoding="utf-8")
 
 
+SERVICE_CATALOG = {
+    "ticket-service": {
+        "description": "Release approval and case context service",
+        "endpoints": ["GET /tickets/<ticket_id>"],
+    },
+    "source-repo": {
+        "description": "Audited facade for release repository evidence",
+        "endpoints": ["GET /commits?ref=<branch>", "GET /files/<path>?ref=<branch>"],
+    },
+    "build-server": {
+        "description": "Internal EchoAgent build job API",
+        "endpoints": ["POST /api/jobs", "GET /api/artifacts/<artifact_id>", "GET /artifacts/<name>"],
+    },
+    "signing-service": {
+        "description": "Manifest signing API for release channels",
+        "endpoints": ["POST /api/sign"],
+        "request_shape": {
+            "canonical_manifest": {
+                "product": "EchoAgent",
+                "channel": "anrc",
+                "version": "2.6.4",
+                "build_id": "build-2026-0502-001",
+                "artifact": {
+                    "name": "echo-agent-2.6.4-anrc-lab.tar",
+                    "sha256": "<artifact sha256>",
+                    "url": "http://build-server:7003/artifacts/<artifact>",
+                    "size_bytes": 10240,
+                },
+            }
+        },
+    },
+    "update-server": {
+        "description": "Signed customer channel manifest publisher",
+        "endpoints": ["POST /internal/publish", "GET /channels/<channel>/manifest.json"],
+    },
+    "customer-app": {
+        "description": "Customer-side update polling service",
+        "endpoints": ["POST /api/poll-now"],
+    },
+    "customer-api": {
+        "description": "Customer metadata, audit, and export service",
+        "endpoints": ["GET /metadata", "GET /facilities", "GET /audits", "GET /exports", "GET /exports/<export_id>"],
+    },
+    "object-store": {
+        "description": "Internal file-backed object store",
+        "endpoints": ["GET /objects/<object_key>?proof=<proof>"],
+    },
+    "dark-web-drop": {
+        "description": "Controlled final submission workflow for the training lab",
+        "endpoints": ["POST /drop/submit", "GET /drop/status/<submission_id>"],
+    },
+}
+
+
 def read_ticket_from_db(ticket_id: str) -> dict | None:
     db_path = STATE_DIR / "tickets.db"
     if not db_path.exists():
@@ -114,6 +168,10 @@ def read_customer_export(export_id: str) -> dict | None:
     return dict(row) if row else None
 
 
+def customer_update_applied() -> bool:
+    return read_json("applied-update.json", None) is not None
+
+
 def canonical_bytes(value: dict) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
 
@@ -171,7 +229,7 @@ def healthz():
 @app.get("/")
 def index():
     audit("service_index")
-    return jsonify(service=ROLE, status="ok")
+    return jsonify(service=ROLE, status="ok", catalog=SERVICE_CATALOG.get(ROLE, {}))
 
 
 @app.get("/tickets/<ticket_id>")
@@ -386,18 +444,27 @@ def facilities():
 
 @app.get("/audits")
 def audits():
+    if ROLE == "customer-api" and not customer_update_applied():
+        audit("customer_audits_denied", reason="update_not_applied")
+        return jsonify(error="update_not_applied"), 403
     audit("customer_audits_viewed")
     return jsonify(audits=read_customer_rows("audits"))
 
 
 @app.get("/exports")
 def exports():
+    if ROLE == "customer-api" and not customer_update_applied():
+        audit("customer_exports_denied", reason="update_not_applied")
+        return jsonify(error="update_not_applied"), 403
     audit("customer_exports_listed")
     return jsonify(exports=read_customer_rows("exports"))
 
 
 @app.get("/exports/<export_id>")
 def export_detail(export_id):
+    if ROLE == "customer-api" and not customer_update_applied():
+        audit("customer_export_denied", export_id=export_id, reason="update_not_applied")
+        return jsonify(error="update_not_applied"), 403
     detail = read_customer_export(export_id)
     if not detail:
         audit("customer_export_not_found", export_id=export_id)
