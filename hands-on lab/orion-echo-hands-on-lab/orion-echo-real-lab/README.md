@@ -9,7 +9,8 @@ implementation uses real services and real evidence:
 - Real files seeded into the support portal container
 - Real OpenLDAP bind
 - Real SQLite-backed internal wiki
-- Real internal ticket, repo, build, signing, update, customer, object, and drop services
+- Real internal ticket, build, signing, update, customer, object, and drop services
+- Real internal Gitea repository seeded with branch history and release metadata
 - Real `.tar` artifact generation and SHA-256 verification
 - File-backed signing secret mounted only into signing/update services
 - Real audit logs consumed by a grader
@@ -31,7 +32,7 @@ Grader status:  http://localhost:29100/status
 ```
 
 Only the edge proxy and local grader port are exposed to the host. LDAP and
-wiki are reachable only inside Docker networks.
+wiki/Gitea/release services are reachable only inside Docker networks.
 
 ## Stage Flow
 
@@ -57,7 +58,7 @@ Stage 2A support/read evidence path: +10
 Stage 2B direct /var/lab evidence discovery through SSTI/RCE: +15
 Stage 3 LDAP-authenticated wiki access: +20
 Stage 4 internal service discovery: +10
-Stage 5 ticket/repo evidence collection: +20
+Stage 5 ticket/Gitea-backed repo evidence collection: +20
 Stage 6 build token use: +20
 Stage 7 artifact metadata and file download review: +15
 Stage 8 sign and publish: +25
@@ -102,6 +103,12 @@ Automated verification:
 ```powershell
 wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && bash verify/stage1_ssti.sh && bash verify/stage2_evidence.sh && bash verify/stage3_ldap_wiki.sh"
 wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && bash verify/stage4_11_full_chain.sh"
+```
+
+Internal source repository check:
+
+```powershell
+wsl -d Ubuntu-24.04 -- bash -lc "docker run --rm --network orion-echo-real-lab_internal_net curlimages/curl:8.10.1 -sS http://gitea:3000/orion/echo-agent/raw/branch/release-2.6.4/release-pipeline/release.json"
 ```
 
 Check grader:

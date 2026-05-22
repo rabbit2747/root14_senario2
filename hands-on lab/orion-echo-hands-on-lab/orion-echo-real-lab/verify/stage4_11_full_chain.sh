@@ -37,7 +37,8 @@ headers = {"Authorization": f"Basic {auth}"}
 
 print(request("GET", "http://wiki:6000/page/devops-onboarding", headers=headers)[:160])
 ticket = request("GET", "http://ticket-service:7001/tickets/OES-1287")
-repo = request("GET", "http://source-repo:7002/files/release-pipeline/release.json")
+request("GET", "http://source-repo:7002/commits?ref=release-2.6.4")
+repo = request("GET", "http://source-repo:7002/files/release-pipeline/release.json?ref=release-2.6.4")
 release = repo["content"]
 
 job = request("POST", "http://build-server:7003/api/jobs", {

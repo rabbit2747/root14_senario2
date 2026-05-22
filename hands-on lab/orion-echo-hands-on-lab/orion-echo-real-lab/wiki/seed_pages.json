@@ -12,7 +12,7 @@
   {
     "slug": "devops-onboarding",
     "title": "DevOps Onboarding Notes",
-    "body": "## DevOps Service Map\n\nRelease Engineering uses these internal services from the corporate network:\n\n- Ticket context: `http://ticket-service:7001/tickets/OES-1287`\n- Release pipeline repo: `http://source-repo:7002/files/release-pipeline/release.json`\n- Build API: `http://build-server:7003/api/jobs`\n- Signing API: `http://signing-service:7005/api/sign`\n- Update channel: `http://update-server:7004/channels/anrc/manifest.json`\n\nSeparate real clues from decoys. Old tokens may still exist in repository history or ticket comments."
+    "body": "## DevOps Service Map\n\nRelease Engineering uses these internal services from the corporate network:\n\n- Ticket context: `http://ticket-service:7001/tickets/OES-1287`\n- Git service: `http://gitea:3000/orion/echo-agent`\n- Audited repo view: `http://source-repo:7002/files/release-pipeline/release.json?ref=release-2.6.4`\n- Build API: `http://build-server:7003/api/jobs`\n- Signing API: `http://signing-service:7005/api/sign`\n- Update channel: `http://update-server:7004/channels/anrc/manifest.json`\n\nSeparate real clues from decoys. Old tokens may still exist in repository history or ticket comments."
   },
   {
     "slug": "release-runbook",

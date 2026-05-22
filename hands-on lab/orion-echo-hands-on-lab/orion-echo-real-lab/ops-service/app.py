@@ -7,6 +7,7 @@ import os
 import tarfile
 import uuid
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -22,6 +23,7 @@ SIGNING_SECRET = os.environ.get("SIGNING_SECRET", "orion-real-lab-signing-secret
 BUILD_TOKEN = os.environ.get("BUILD_TRIGGER_TOKEN", "build-trigger-demo-7f3a91")
 UPDATE_SERVER = os.environ.get("UPDATE_SERVER", "http://update-server:7004")
 CUSTOMER_API = os.environ.get("CUSTOMER_API", "http://customer-api:7006")
+GITEA_URL = os.environ.get("GITEA_URL", "http://gitea:3000")
 
 AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
 STATE_DIR.mkdir(parents=True, exist_ok=True)
@@ -134,6 +136,28 @@ def ticket(ticket_id):
 
 @app.get("/files/<path:file_path>")
 def repo_file(file_path):
+    if ROLE == "source-repo":
+        ref = request.args.get("ref", "release-2.6.4")
+        encoded_ref = urllib.parse.quote(ref, safe="")
+        encoded_path = urllib.parse.quote(file_path, safe="/")
+        raw_url = f"{GITEA_URL}/orion/echo-agent/raw/branch/{encoded_ref}/{encoded_path}"
+        try:
+            req = urllib.request.Request(raw_url, method="GET")
+            with urllib.request.urlopen(req, timeout=5) as res:
+                body = res.read().decode()
+        except urllib.error.HTTPError as exc:
+            audit("repo_file_not_found", path=file_path, ref=ref, status=exc.code)
+            return jsonify(error="not_found", ref=ref), 404
+        except urllib.error.URLError as exc:
+            audit("repo_file_unavailable", path=file_path, ref=ref, reason=str(exc.reason))
+            return jsonify(error="gitea_unavailable"), 502
+        audit("repo_file_viewed", path=file_path, ref=ref, backend="gitea")
+        try:
+            content = json.loads(body)
+        except json.JSONDecodeError:
+            content = body
+        return jsonify(path=file_path, ref=ref, backend="gitea", content=content)
+
     files = {
         "release-pipeline/release.json": {
             "repo": "orionecho/echo-agent",
@@ -154,6 +178,27 @@ def repo_file(file_path):
     if not item:
         return jsonify(error="not_found"), 404
     return jsonify(path=file_path, content=item)
+
+
+@app.get("/commits")
+def repo_commits():
+    if ROLE != "source-repo":
+        return jsonify(error="unsupported"), 404
+    ref = request.args.get("ref", "release-2.6.4")
+    query = urllib.parse.urlencode({"sha": ref})
+    url = f"{GITEA_URL}/api/v1/repos/orion/echo-agent/commits?{query}"
+    try:
+        req = urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(req, timeout=5) as res:
+            commits = json.loads(res.read().decode())
+    except urllib.error.HTTPError as exc:
+        audit("repo_commits_failed", ref=ref, status=exc.code)
+        return jsonify(error="gitea_unavailable"), 502
+    except urllib.error.URLError as exc:
+        audit("repo_commits_failed", ref=ref, reason=str(exc.reason))
+        return jsonify(error="gitea_unavailable"), 502
+    audit("repo_commits_viewed", ref=ref, backend="gitea", count=len(commits))
+    return jsonify(ref=ref, backend="gitea", commits=commits)
 
 
 @app.post("/api/jobs")
