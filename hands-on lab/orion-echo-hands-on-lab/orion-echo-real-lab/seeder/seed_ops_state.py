@@ -86,3 +86,101 @@ with sqlite3.connect(db_path) as conn:
     conn.commit()
 
 print("[seeder] ticket database written")
+
+customer_state = state_root / "customer-api"
+customer_state.mkdir(parents=True, exist_ok=True)
+
+customer_db = customer_state / "customer.db"
+with sqlite3.connect(customer_db) as conn:
+    conn.executescript(
+        """
+        DROP TABLE IF EXISTS audits;
+        DROP TABLE IF EXISTS exports;
+        DROP TABLE IF EXISTS facilities;
+
+        CREATE TABLE facilities (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            region TEXT NOT NULL,
+            tier TEXT NOT NULL,
+            last_checkin TEXT NOT NULL
+        );
+
+        CREATE TABLE audits (
+            id TEXT PRIMARY KEY,
+            export_id TEXT NOT NULL,
+            dataset TEXT NOT NULL,
+            scope TEXT NOT NULL,
+            requested_by TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+
+        CREATE TABLE exports (
+            id TEXT PRIMARY KEY,
+            dataset TEXT NOT NULL,
+            object_key TEXT NOT NULL,
+            owner TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        """
+    )
+    conn.executemany(
+        """
+        INSERT INTO facilities (id, name, region, tier, last_checkin)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        [
+            ("anrc-north", "ANRC North Control Center", "NA", "production", "2026-05-02T10:11:00Z"),
+            ("anrc-q2-audit", "ANRC Q2 Audit Workspace", "NA", "audit", "2026-05-02T10:42:30Z"),
+            ("anrc-training", "ANRC Training Facility", "NA", "nonprod", "2026-05-01T18:04:17Z"),
+        ],
+    )
+    conn.execute(
+        """
+        INSERT INTO audits (id, export_id, dataset, scope, requested_by, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "audit-2026-Q2",
+            "exp-2026-Q2-007",
+            "ANRC_Q2_facility_audit",
+            "facility-control-metadata",
+            "compliance@anrc.example",
+            "2026-05-02T10:47:09Z",
+        ),
+    )
+    conn.execute(
+        """
+        INSERT INTO exports (id, dataset, object_key, owner, created_at)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            "exp-2026-Q2-007",
+            "ANRC_Q2_facility_audit",
+            "anrc/exports/2026/Q2/facility-audit-final.txt",
+            "compliance@anrc.example",
+            "2026-05-02T10:51:33Z",
+        ),
+    )
+    conn.commit()
+
+object_state = state_root / "object-store" / "objects" / "anrc" / "exports" / "2026" / "Q2"
+object_state.mkdir(parents=True, exist_ok=True)
+(object_state / "facility-audit-final.txt").write_text(
+    "\n".join(
+        [
+            "ORION_ECHO_FINAL_OBJECT",
+            "customer=ANRC",
+            "export_id=exp-2026-Q2-007",
+            "object_key=anrc/exports/2026/Q2/facility-audit-final.txt",
+            "dataset=ANRC_Q2_facility_audit",
+            "facility=anrc-q2-audit",
+            "classification=training-lab-controlled",
+            "object_access_proof=proof:object-access-issued",
+            "",
+        ]
+    ),
+    encoding="utf-8",
+)
+
+print("[seeder] customer database and object store files written")

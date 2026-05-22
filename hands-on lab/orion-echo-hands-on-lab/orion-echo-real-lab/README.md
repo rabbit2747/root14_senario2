@@ -12,6 +12,7 @@ implementation uses real services and real evidence:
 - Real SQLite-backed internal ticket service with seeded case comments
 - Real internal build, signing, update, customer, object, and drop services
 - Real internal Gitea repository seeded with branch history and release metadata
+- Real SQLite-backed customer data service and file-backed internal object store
 - Real `.tar` artifact generation and SHA-256 verification
 - File-backed signing secret mounted only into signing/update services
 - Real audit logs consumed by a grader
