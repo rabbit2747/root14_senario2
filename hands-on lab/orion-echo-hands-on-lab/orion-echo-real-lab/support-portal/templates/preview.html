@@ -1,6 +1,45 @@
 {% extends "base.html" %}
 {% block body %}
-<h1>Rendered Preview</h1>
-<pre>{{ rendered }}</pre>
-<p><a href="/">Back</a></p>
+<section class="page-head">
+  <div>
+    <div class="pill-row" style="margin-bottom:10px;">
+      <span class="pill"><span class="dot green"></span>Rendered</span>
+      <span class="pill">T-2026-0517</span>
+    </div>
+    <h1>Rendered customer response</h1>
+    <p class="muted">Review the generated text before returning to the case composer.</p>
+  </div>
+  <a class="button-link secondary" href="/">Back to case</a>
+</section>
+
+<section class="grid">
+  <div class="panel panel-pad">
+    <div class="notice">Preview output is captured in the support audit trail for quality review.</div>
+    <pre>{{ rendered }}</pre>
+    <div class="split-actions">
+      <span class="muted" style="font-size:13px;">Rendered by Orion Echo Support Preview Service</span>
+      <a class="button-link" href="/">Edit draft</a>
+    </div>
+  </div>
+
+  <aside class="activity">
+    <div class="panel panel-pad">
+      <h2>Review checklist</h2>
+      <div class="activity-item">
+        <span class="dot green" style="margin-top:6px;"></span>
+        <div>
+          <h3>Case variables resolved</h3>
+          <p class="muted">Ticket, customer, product, and owner context rendered.</p>
+        </div>
+      </div>
+      <div class="activity-item">
+        <span class="dot amber" style="margin-top:6px;"></span>
+        <div>
+          <h3>Manager review pending</h3>
+          <p class="muted">Escalated cases require approval before filing.</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+</section>
 {% endblock %}

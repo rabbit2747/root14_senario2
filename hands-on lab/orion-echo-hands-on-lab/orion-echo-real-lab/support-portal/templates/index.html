@@ -1,13 +1,106 @@
 {% extends "base.html" %}
 {% block body %}
-<h1>Orion Echo Support Portal</h1>
-<p>Support engineers preview customer ticket responses before filing them in the internal case system.</p>
-<form method="post" action="/ticket/preview">
-  <label for="body">Draft body</label>
-  <textarea id="body" name="body" rows="10">Hello {{ customer }},
+<section class="page-head">
+  <div>
+    <div class="pill-row" style="margin-bottom:10px;">
+      <span class="pill"><span class="dot red"></span>Priority escalation</span>
+      <span class="pill"><span class="dot blue"></span>ANRC</span>
+      <span class="pill">EchoAgent</span>
+    </div>
+    <h1>Case T-2026-0517 response preview</h1>
+    <p class="muted">Review and render customer-facing ticket replies before filing them in the internal case system.</p>
+  </div>
+  <a class="button-link secondary" href="/support/read/list">Diagnostics</a>
+</section>
 
-Ticket {{ ticket_id }} is being reviewed by {{ agent }} for {{ product }}.</textarea>
-  <p><button type="submit">Preview</button></p>
-</form>
-<p><code>POST /ticket/preview body=&lt;template&gt;</code></p>
+<section class="grid">
+  <div class="panel">
+    <div class="toolbar">
+      <div>
+        <h2 style="margin-bottom:2px;">Draft composer</h2>
+        <div class="muted" style="font-size:13px;">Template variables are populated from the current case context.</div>
+      </div>
+      <span class="pill"><span class="dot amber"></span>Preview required</span>
+    </div>
+
+    <div class="case-summary">
+      <div class="summary-cell">
+        <div class="label">Ticket</div>
+        <div class="value">T-2026-0517</div>
+      </div>
+      <div class="summary-cell">
+        <div class="label">Customer</div>
+        <div class="value">ANRC</div>
+      </div>
+      <div class="summary-cell">
+        <div class="label">Product</div>
+        <div class="value">EchoAgent</div>
+      </div>
+      <div class="summary-cell">
+        <div class="label">Owner</div>
+        <div class="value">orion-support</div>
+      </div>
+    </div>
+
+    <form method="post" action="/ticket/preview" class="panel-pad">
+      <label class="label" for="body">Response body</label>
+      <textarea id="body" name="body">{% raw %}Hello {{ customer }},
+
+We are reviewing ticket {{ ticket_id }} with the {{ product }} operations team.
+
+Current status:
+- Support owner: {{ agent }}
+- Customer impact review: in progress
+- Next update: after release engineering triage
+
+Regards,
+Orion Echo Support{% endraw %}</textarea>
+      <div class="split-actions">
+        <div class="muted" style="font-size:13px;">The rendered preview is recorded for quality review and audit correlation.</div>
+        <button type="submit">Render preview</button>
+      </div>
+    </form>
+  </div>
+
+  <aside class="activity">
+    <div class="panel panel-pad">
+      <h2>Case health</h2>
+      <div class="pill-row">
+        <span class="pill"><span class="dot green"></span>Portal online</span>
+        <span class="pill"><span class="dot amber"></span>SLA watch</span>
+      </div>
+      <p class="muted" style="margin-top:14px;margin-bottom:0;">Last synchronization from support intake completed at 09:00 UTC.</p>
+    </div>
+
+    <div class="panel panel-pad">
+      <h2>Recent activity</h2>
+      <div class="activity-item">
+        <span class="dot blue" style="margin-top:6px;"></span>
+        <div>
+          <h3>Customer escalation assigned</h3>
+          <p class="muted">ANRC update anomaly moved into Release Watch.</p>
+        </div>
+      </div>
+      <div class="activity-item">
+        <span class="dot amber" style="margin-top:6px;"></span>
+        <div>
+          <h3>Draft response requested</h3>
+          <p class="muted">Support response requires manager preview before filing.</p>
+        </div>
+      </div>
+      <div class="activity-item">
+        <span class="dot green" style="margin-top:6px;"></span>
+        <div>
+          <h3>Knowledge sync complete</h3>
+          <p class="muted">Internal references available for authorized support workflows.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-pad">
+      <h2>Operational notes</h2>
+      <p class="muted">Use the preview renderer for customer-safe drafts. Diagnostic references are available to authorized support staff.</p>
+    </div>
+  </aside>
+</section>
 {% endblock %}
