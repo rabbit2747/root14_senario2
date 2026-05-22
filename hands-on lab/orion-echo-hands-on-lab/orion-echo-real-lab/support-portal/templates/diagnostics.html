@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="page-head">
+  <div>
+    <div class="pill-row" style="margin-bottom:10px;">
+      <span class="pill"><span class="dot green"></span>Read-only</span>
+      <span class="pill">Audited</span>
+    </div>
+    <h1>Support diagnostics</h1>
+    <p class="muted">Run approved read-only checks for the current support workspace. Each diagnostic request is recorded in the support audit trail.</p>
+  </div>
+  <a class="button-link secondary" href="/">Back to case</a>
+</section>
+
+<section class="grid">
+  <div class="panel">
+    <div class="toolbar">
+      <div>
+        <h2 style="margin-bottom:2px;">Diagnostic catalog</h2>
+        <div class="muted" style="font-size:13px;">Select one approved reference to inspect its current value.</div>
+      </div>
+      <span class="pill"><span class="dot amber"></span>Policy scoped</span>
+    </div>
+    <div class="panel-pad" style="display:grid;gap:12px;">
+      {% for item in diagnostics %}
+      <div class="panel" style="box-shadow:none;">
+        <div class="panel-pad" style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;">
+          <div>
+            <div class="pill-row" style="margin-bottom:8px;">
+              <span class="pill">{{ item.sensitivity }}</span>
+              <span class="pill">{{ item.key }}</span>
+            </div>
+            <h2 style="margin-bottom:4px;">{{ item.title }}</h2>
+            <p class="muted" style="margin-bottom:8px;">{{ item.description }}</p>
+            <code style="display:inline-block;padding:.35rem .45rem;">{{ item.path }}</code>
+          </div>
+          <a class="button-link" href="/support/read?k={{ item.key }}">Open</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <aside class="activity">
+    <div class="panel panel-pad">
+      <h2>Policy</h2>
+      <p class="muted">Diagnostics are limited to support-approved files and cannot request arbitrary paths from the portal host.</p>
+    </div>
+    <div class="panel panel-pad">
+      <h2>Audit note</h2>
+      <p class="muted">Opening a diagnostic emits a support audit event with the selected key and result state.</p>
+    </div>
+  </aside>
+</section>
+{% endblock %}

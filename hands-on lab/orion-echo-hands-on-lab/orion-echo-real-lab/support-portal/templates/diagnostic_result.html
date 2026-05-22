@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="page-head">
+  <div>
+    <div class="pill-row" style="margin-bottom:10px;">
+      {% if error %}
+      <span class="pill"><span class="dot red"></span>Denied</span>
+      {% else %}
+      <span class="pill"><span class="dot green"></span>Complete</span>
+      {% endif %}
+      <span class="pill">{{ key or "unknown" }}</span>
+      {% if meta %}<span class="pill">{{ meta.sensitivity }}</span>{% endif %}
+    </div>
+    <h1>{{ meta.title if meta else "Diagnostic result" }}</h1>
+    <p class="muted">{{ meta.description if meta else "Support diagnostic result." }}</p>
+  </div>
+  <a class="button-link secondary" href="/support/read/list">Back to diagnostics</a>
+</section>
+
+<section class="grid">
+  <div class="panel panel-pad">
+    {% if error %}
+    <div class="notice" style="border-color:#efc5c5;background:#fff2f2;color:#7b2424;">{{ error }}</div>
+    {% else %}
+    <div class="notice">Diagnostic output is read-only and captured in the support audit trail.</div>
+    <pre>{{ content }}</pre>
+    {% endif %}
+  </div>
+
+  <aside class="activity">
+    <div class="panel panel-pad">
+      <h2>Request details</h2>
+      <div class="label">Diagnostic key</div>
+      <div class="value" style="margin-bottom:12px;">{{ key }}</div>
+      <div class="label">Access mode</div>
+      <div class="value">Read-only</div>
+    </div>
+  </aside>
+</section>
+{% endblock %}
