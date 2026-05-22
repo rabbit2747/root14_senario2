@@ -3,7 +3,7 @@
   "scenarioId": "operation-orion-echo",
   "labId": "orion-echo-hands-on-lab",
   "title": "Orion Echo Hands-on Lab",
-  "entrypoint": "http://localhost:28081",
+  "entrypoint": "http://localhost:28181",
   "estimatedMinutes": 180,
   "phases": [
     {
@@ -36,21 +36,21 @@
       "internalGradingId": "grading_1_initial_access",
       "phase": "attack-chain",
       "title": "Support Portal Initial Access",
-      "objective": "Confirm Jinja2 SSTI in the support draft preview service and use the guarded diagnostic helper to read the initial access marker.",
+      "objective": "Confirm Jinja2 SSTI in the support draft preview service and identify the support diagnostics workflow.",
       "systems": ["support-portal"],
-      "mitre": ["T1190", "T1059.004"],
-      "evidence": ["49 arithmetic render", "post exploit marker", "support preview audit event"],
+      "mitre": ["T1190"],
+      "evidence": ["49 arithmetic render", "support preview audit event", "diagnostics navigation clue"],
       "practical3dStage": "stage-1-initial-access"
     },
     {
       "id": "lab-stage-2-foothold",
       "internalGradingId": "grading_2_foothold_orientation",
       "phase": "attack-chain",
-      "title": "Foothold Orientation",
-      "objective": "Confirm current identity, host, and limited filesystem context before moving inward.",
+      "title": "Support Diagnostics Directory Profile",
+      "objective": "Use the support diagnostics catalog to review the directory bind profile and recover LDAP/wiki access context.",
       "systems": ["support-portal"],
-      "mitre": ["T1082", "T1083"],
-      "evidence": ["id output", "hostname output", "stage2 marker"],
+      "mitre": ["T1213", "T1552"],
+      "evidence": ["Directory bind profile", "LDAP URI", "LDAP bind DN", "LDAP bind password", "wiki URL"],
       "practical3dStage": "stage-2-foothold-c2"
     },
     {

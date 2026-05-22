@@ -7,7 +7,7 @@ stage1_ssti:
       sample_regex: '\{\{.*(7\s*\*\s*7|__class__|config).*\}\}'
 stage2a_support_evidence:
   points: 10
-  label: "Stage 2A - audited support evidence path"
+  label: "Stage 2A - Support diagnostics directory profile review"
   any_of:
     - log: portal/audit.log
       event: support_read

@@ -40,7 +40,7 @@ wiki/Gitea/release services are reachable only inside Docker networks.
 
 ```text
 Stage 1: support portal Jinja2 SSTI
-Stage 2: read real support portal evidence files
+Stage 2: review Support diagnostics and open the Directory bind profile
 Stage 3: use discovered LDAP credential to access internal wiki
 Stage 4: discover DevOps and release services from internal wiki
 Stage 5: collect ticket and source-repo release evidence
@@ -56,7 +56,7 @@ Scoring accepts both the guided support path and the realistic RCE path:
 
 ```text
 Stage 1 SSTI discovery: +10
-Stage 2A support/read evidence path: +10
+Stage 2A Support diagnostics directory profile review: +10
 Stage 2B direct /var/lab evidence discovery through SSTI/RCE: +15
 Stage 3 LDAP-authenticated wiki access: +20
 Stage 4 internal service discovery: +10
@@ -86,15 +86,19 @@ Invoke-WebRequest -UseBasicParsing http://localhost:28181/ticket/preview `
 Stage 2:
 
 ```powershell
-Invoke-WebRequest -UseBasicParsing 'http://localhost:28181/support/read/list'
-Invoke-WebRequest -UseBasicParsing 'http://localhost:28181/support/read?k=portal'
+# Browser path:
+# 1. Open http://localhost:28181/
+# 2. Click Diagnostics
+# 3. Open Directory bind profile
+
+# API equivalent for verification:
 Invoke-WebRequest -UseBasicParsing 'http://localhost:28181/support/read?k=ldap'
 ```
 
 Stage 3:
 
-Use the `LDAP_BIND_PW` from Stage 2 against the internal wiki from inside the
-Docker network:
+Use the `LDAP_BIND_PW` from the Stage 2 Directory bind profile against the
+internal wiki from inside the Docker network:
 
 ```powershell
 wsl -d Ubuntu-24.04 -- bash -lc "cd /home/ubuntu/orion-echo-real-lab && PW=\$(grep LDAP_BIND_PW volumes/portal-data/config/ldap_creds.conf | cut -d= -f2-) && docker run --rm --network orion-echo-real-lab_internal_net curlimages/curl:8.10.1 -s -u operator:\$PW http://wiki:6000/page/orion-echo-brief"
